@@ -23,6 +23,8 @@ git clone --recursive 'ssh://git@git.becksteins.de:2222/pascal/foam-extend.git' 
 ```
 ##### Git user data
 ```bash
+cd "$HOME/foam"
+#
 git config user.name 'Pascal Beckstein'
 git config user.email 'pascal@becksteins.de'
 ```
@@ -50,6 +52,13 @@ cd "$HOME/foam/foam-extend-3.1"
 #
 less 'doc/buildInstructions/Ubuntu/Ubuntu_14.04'
 ```
+##### Source environment
+```bash
+cd "$HOME/foam/foam-extend-3.1"
+#
+FOAM_INST_DIR="$HOME/foam"
+source 'etc/bashrc'
+```
 ##### Prepare ParaView compilation (qmake)
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
@@ -57,4 +66,8 @@ cd "$HOME/foam/foam-extend-3.1"
 export QT_BIN_DIR="$(dirname $(which qmake))"
 echo "export QT_BIN_DIR=$(dirname "$(which qmake)")" >> 'etc/prefs.sh'
 cd -
+```
+##### Installation
+```bash
+./Allwmake.firstInstall
 ```
