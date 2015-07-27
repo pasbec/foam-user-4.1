@@ -4,58 +4,97 @@
 ## Installation
 ------
 
-### Ubuntu 14.04
+### Pre-requirements
 
-#### Basic
+#### Debian
+##### Debian Wheezy ([Ubuntu 12.04](#ubuntu-12.04))
+##### Debian Sid ([Ubuntu 13.10](#ubuntu-13.10))
+##### Debian Jessie ([Ubuntu 13.04](#ubuntu-12.04))
 
-##### Pre-requirements
+#### Fedora
+##### Fedora 19
 ```bash
-sudo apt-get install git-core build-essential binutils-dev cmake flex bison \
-zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev libxt-dev \
-rpm mercurial graphviz openmpi-bin python-all mayavi2
+sudo yum groupinstall "Development Tools"
+sudo yum install gcc-c++ binutils-devel bison flex m4 zlib-devel \
+qt-devel qtwebkit-devel mercurial graphviz
 ```
-##### Download/Clone
+##### Fedora 19
+```bash
+sudo yum groupinstall "Development Tools"
+sudo yum install gcc-c++ binutils-devel cmake wget bison flex m4 zlib-devel \
+qt-devel qtwebkit-devel mercurial graphviz
+```
+
+#### openSUSE
+##### openSUSE 13.1
+```bash
+su -
+zypper install git openmpi-devel gnuplot -t pattern devel_qt4
+exit
+```
+
+#### Ubuntu
+##### Ubuntu 12.04
+```bash
+sudo apt-get update
+sudo apt-get install git-core build-essential binutils-dev flex \
+bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev \
+libxt-dev rpm mercurial graphviz
+sudo apt-get install openmpi-bin python-all mayavi2
+```
+##### Ubuntu 13.10 ([Ubuntu 12.04](#ubuntu-12.04))
+##### Ubuntu 14.04
+```bash
+sudo apt-get update
+sudo apt-get install git-core build-essential binutils-dev cmake flex \
+bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
+libxt-dev rpm mercurial graphviz
+sudo apt-get install openmpi-bin python-all mayavi2
+```
+
+### Download/Clone repository
+
 ```bash
 cd "$HOME"
 #
 git clone --recursive 'ssh://git@git.becksteins.de:2222/pascal/foam-extend.git' 'foam'
 ```
 
-#### Git settings (optional)
+### Git settings (optional)
 
-##### User data
+#### User data
 ```bash
 cd "$HOME/foam"
 #
 git config user.name 'Pascal Beckstein'
 git config user.email 'pascal@becksteins.de'
 ```
-##### Add remote for dotfiles-repository
+#### Add remote for dotfiles-repository
 ```bash
 cd "$HOME/foam"
 #
 git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git'
 ```
-##### Pull changes for bashrc.d subtree in user folder from dotfiles
+#### Pull changes for bashrc.d subtree in user folder from dotfiles
 ```bash
 cd "$HOME/foam"
 #
 git subtree pull -P 'pascal-3.1/etc/bashrc.d' 'dotfiles' 'subtree_dot-bashrc.d' --squash
 ```
-##### Update submodule foam-extend
+#### Update submodule foam-extend
 ```bash
 cd "$HOME/foam"
 #
 git submodule update --remote 'foam-extend-3.1'
 ```
-##### User data for submodule foam-extend (optional)
+#### User data for submodule foam-extend (optional)
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
 git config user.name 'Pascal Beckstein'
 git config user.email 'pascal@becksteins.de'
 ```
-##### Git repositories for submodule foam-extend (optional)
+#### Git repositories for submodule foam-extend (optional)
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
@@ -66,21 +105,21 @@ git remote add 'sf' 'ssh://p-be@git.code.sf.net/u/p-be/openfoam-extend'
 ```
 
 
-#### Project: OpenFOAM Extend
+### Project
 
-##### Official documentation
+#### Official documentation
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
 less 'doc/buildInstructions/Ubuntu/Ubuntu_14.04'
 ```
-##### Source environment
+#### Source environment
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
 source 'etc/bashrc'
 ```
-##### Prepare ParaView compilation (qmake)
+#### Prepare ParaView compilation (qmake)
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
@@ -88,7 +127,7 @@ export QT_BIN_DIR="$(dirname $(which qmake))"
 echo "export QT_BIN_DIR=$(dirname "$(which qmake)")" >> 'etc/prefs.sh'
 cd -
 ```
-##### Installation
+#### Installation
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
@@ -96,9 +135,9 @@ cd "$HOME/foam/foam-extend-3.1"
 ```
 
 
-#### User
+### User
 
-##### Source environment
+#### Source environment
 ```bash
 cd "$HOME/foam/pascal-3.1"
 #
