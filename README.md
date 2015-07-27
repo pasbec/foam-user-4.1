@@ -79,7 +79,6 @@ less 'doc/buildInstructions/Ubuntu/Ubuntu_14.04'
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
-FOAM_INST_DIR="$HOME/foam"
 source 'etc/bashrc'
 ```
 ##### Prepare ParaView compilation (qmake)
