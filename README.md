@@ -74,6 +74,12 @@ cd "$HOME/foam"
 git config user.name 'Pascal Beckstein'
 git config user.email 'pascal@becksteins.de'
 ```
+##### Update submodule foam-extend
+```bash
+cd "$HOME/foam"
+#
+git submodule update --remote 'foam-extend-3.1'
+```
 ##### Git repository for dotfiles
 ```bash
 cd "$HOME/foam"
