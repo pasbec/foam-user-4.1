@@ -127,7 +127,7 @@ export QT_BIN_DIR="$(dirname $(which qmake))"
 echo "export QT_BIN_DIR=$(dirname "$(which qmake)")" >> 'etc/prefs.sh'
 cd -
 ```
-#### Installation
+#### Compilation/Installation
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
@@ -144,3 +144,10 @@ cd "$HOME/foam/pascal-3.1"
 source 'etc/bashrc'
 fe31
 ```
+#### Compilation/Installation
+```bash
+cd "$HOME/foam/pascal-3.1"
+#
+./Allwmake
+```
+
