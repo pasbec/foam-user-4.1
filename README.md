@@ -61,6 +61,8 @@ cd -
 ```
 ##### Installation
 ```bash
+cd "$HOME/foam/foam-extend-3.1"
+#
 ./Allwmake.firstInstall
 ```
 
