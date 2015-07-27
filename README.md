@@ -12,8 +12,7 @@
 ```bash
 sudo apt-get install git-core build-essential binutils-dev cmake flex bison \
 zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev libxt-dev \
-rpm mercurial graphviz openmpi-bin python-all mayavi2 libcr-dev mpich2 \
-mpich2-doc
+rpm mercurial graphviz openmpi-bin python-all mayavi2
 ```
 ##### Download/Clone
 ```bash
