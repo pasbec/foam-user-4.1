@@ -1,0 +1,70 @@
+# git-ls-files --others --exclude-from=.git/info/exclude
+# Lines that start with '#' are comments.
+
+# editor and misc backup files - anywhere
+*~
+.*~
+*.bak
+*.bak[0-9][0-9]
+*.orig
+*.orig[0-9][0-9]
+\#*\#
+*.swp
+
+# file-browser settings - anywhere
+.directory
+
+# CVS recovered versions - anywhere
+.#*
+
+# objects and archives - anywhere
+*.[oa]
+*.la
+*.so
+*.jar
+*.dylib
+
+# derived files
+lex.yy.c
+
+# Corefiles
+core
+
+# dependency files - anywhere
+*.dep
+
+# lnInclude (symlink) folders - anywhere
+lnInclude
+
+# A hidden file created by the Mac OS X Finder.
+.DS_Store
+
+# build folders - anywhere
+linux*Gcc*/
+linux*Icc*/
+darwin*Gcc*/
+darwin*Intel*/
+linuxming*/
+SiCortex*Gcc*/
+solaris*Gcc*/
+SunOS*Gcc*/
+
+# reinstate wmake/rules that might look like build folders
+!wmake/rules/*/
+
+# patch residue
+*.orig
+*.rej
+
+# pyFoam-stuff
+PlyParser_FoamFileParser_parsetab.py
+
+# python-compile
+*.pyc
+
+# other stuff
+.build
+.hgignore
+.timeStamp
+
+# end-of-file

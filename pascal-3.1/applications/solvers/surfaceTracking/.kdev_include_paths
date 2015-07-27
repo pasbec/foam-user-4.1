@@ -1,0 +1,7 @@
+../../../.wm_project_dir/src/tetFiniteElement/lnInclude
+
+../../../.wm_project_dir/src/dynamicMesh/dynamicFvMesh/lnInclude
+../../../.wm_project_dir/src/dynamicMesh/dynamicMesh/lnInclude
+../../../.wm_project_dir/src/dynamicMesh/meshMotion/tetMotionSolver/lnInclude
+
+./include

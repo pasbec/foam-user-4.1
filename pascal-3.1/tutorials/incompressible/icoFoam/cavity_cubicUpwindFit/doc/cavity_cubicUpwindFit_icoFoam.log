@@ -1,0 +1,57 @@
+/*---------------------------------------------------------------------------*\                                                                                                          
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.1                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build    : 3.1-bfd58f87a002
+Exec     : icoFoam
+Date     : Mar 17 2015
+Time     : 16:22:49
+Host     : fwdh165
+PID      : 17912
+CtrlDict : /opt/foam.debug/foam-extend-3.1/etc/controlDict
+Case     : /data/beckst30/foam/beckst30-3.1/tutorials/incompressible/icoFoam/cavity_cubicUpwindFit
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Reading transportProperties
+
+Reading field p
+
+Reading field U
+
+Reading/calculating face flux field phi
+
+
+Starting time loop
+
+Time = 0.005
+
+Courant Number mean: 0 max: 0 velocity magnitude: 0
+DILUPBiCG:  Solving for Ux, Initial residual = 1, Final residual = 2.96338e-06, No Iterations 8
+DILUPBiCG:  Solving for Uy, Initial residual = 0, Final residual = 0, No Iterations 0
+DICPCG:  Solving for p, Initial residual = 1, Final residual = 7.55402e-07, No Iterations 35
+time step continuity errors : sum local = 5.03809e-09, global = 2.99109e-19, cumulative = 2.99109e-19
+DICPCG:  Solving for p, Initial residual = 0.52789, Final residual = 2.61481e-07, No Iterations 35
+time step continuity errors : sum local = 2.85667e-09, global = -2.18872e-19, cumulative = 8.02365e-20
+ExecutionTime = 0.15 s  ClockTime = 0 s
+
+Time = 0.01
+
+Courant Number mean: 0.0514836 max: 0.585998 velocity magnitude: 0.585998
+DILUPBiCG:  Solving for Ux, Initial residual = 0.148893, Final residual = 7.26934e-06, No Iterations 6
+DILUPBiCG:  Solving for Uy, Initial residual = 0.255464, Final residual = 8.78051e-06, No Iterations 6
+DICPCG:  Solving for p, Initial residual = 0.365186, Final residual = 3.25406e-07, No Iterations 34
+time step continuity errors : sum local = 2.92914e-09, global = -4.82577e-19, cumulative = -4.02341e-19
+DICPCG:  Solving for p, Initial residual = 0.2815, Final residual = 6.01221e-07, No Iterations 33
+time step continuity errors : sum local = 5.90096e-09, global = -3.62264e-19, cumulative = -7.64604e-19
+ExecutionTime = 0.16 s  ClockTime = 0 s
+
+... Log file is cut here as no errors occured ...

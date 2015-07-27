@@ -1,0 +1,77 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | foam-extend: Open Source CFD
+   \\    /   O peration     |
+    \\  /    A nd           | For copyright notice see file Copyright
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of foam-extend.
+
+    foam-extend is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation, either version 3 of the License, or (at your
+    option) any later version.
+
+    foam-extend is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "regionVolFields.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "regionGeometricField.C"
+#include "regionGeometricFieldMapping.C"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTemplateTypeNameAndDebug(regionVolScalarField, 0);
+defineTemplateTypeNameAndDebug(regionVolVectorField, 0);
+defineTemplateTypeNameAndDebug(regionVolSphericalTensorField, 0);
+defineTemplateTypeNameAndDebug(regionVolSymmTensorField, 0);
+defineTemplateTypeNameAndDebug(regionVolSymmTensor4thOrderField, 0);
+defineTemplateTypeNameAndDebug(regionVolDiagTensorField, 0);
+defineTemplateTypeNameAndDebug(regionVolTensorField, 0);
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * Template definitions  * * * * * * * * * * * * * * //
+
+template class regionGeometricField
+    <scalar, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
+template class regionGeometricField
+    <vector, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
+template class regionGeometricField
+    <sphericalTensor, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
+template class regionGeometricField
+    <symmTensor, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
+template class regionGeometricField
+    <symmTensor4thOrder, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
+template class regionGeometricField
+    <diagTensor, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
+template class regionGeometricField
+    <tensor, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// ************************************************************************* //

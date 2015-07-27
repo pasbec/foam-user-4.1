@@ -1,0 +1,467 @@
+%%% Spracheinstellung & Codierung
+  %% Pakete
+    % Sprache & Codierung
+      \usepackage[utf8x]{inputenc}      % utf8 Codierung der tex-Dateien
+      \usepackage{ucs}        % Unicode in Überschriften/Referenzen/Variablen
+      \usepackage[ngerman,english]{babel}   % Deutsche und englische Spracheinstellung
+      \usepackage{hyphsubst}        % Trennung an Wortfugen
+      \usepackage[T1]{fontenc}      % T1 Computer-Modern (bessere Trennung!)
+    % Zitate
+      \usepackage{cite}
+      \usepackage{bibgerm}
+%       \usepackage[square]{natbib}
+%       \usepackage[numbers,round]{natbib}
+%         \makeatletter
+%         \def\newblock{\beamer@newblock}
+%         \makeatother
+%           \bibliographystyle{abbrdinat}
+%           \bibliographystyle{abbrvnat}
+%           \bibliographystyle{unsrtnat}
+%           \bibliographystyle{plain}
+%           \bibliographystyle{alphadin}
+%           \bibliographystyle{apalike}
+  %% Einstellungen
+    \hyphenation{%
+      % Bei Wörtern mit Bindestrichen im Text "" hinter Bindestrich un dann \textminus mit \usepackage{textcomp}, etc.
+      Dif-fe-ren-ti-a-ti-ons-ma-t-ri-zen
+      Ge-schwin-dig-keits
+      Spek-tral
+      Ele-men-te
+      Pha-sen-feld
+      Kern-thema
+    }
+
+%%% Angaben zum Dokument, Autor, Datum, etc.
+  \newcommand{\MyDocTitleOne}{Documentation of the development for foam-3.1 user extensions}
+  \newcommand{\MyDocTitleTwo}{}
+  \newcommand{\MyDocTitleTrd}{}
+  \newcommand{\MyDocType}{Report}
+  \newcommand{\MyDocYear}{2015}
+  \newcommand{\MyDocStart}{17.3.2015}
+  \newcommand{\MyDocEnd}{?}
+  \newcommand{\MyDocLastchange}{\today}
+
+  \newcommand{\MyKeyWords}{}
+
+  \newcommand{\MyFirstName}{Pascal}
+  \newcommand{\MyLastName}{Beckstein}
+  \newcommand{\MyName}{\MyFirstName \ \MyLastName}
+  \newcommand{\MyBirthdayShort}{08.10.1984}
+  \newcommand{\MyBirthdayLong}{08. Oktober 1984}
+  \newcommand{\MyBirthplace}{Nürnberg}
+
+  \newcommand{\MySupervisor}{Dr. V. Galindo}
+  \newcommand{\MyProfessorOne}{?}
+  \newcommand{\MyProfessorTwo}{?}
+
+  \newcommand{\MyReviewerOne}{?}
+  \newcommand{\MyReviewerTwo}{?}
+
+  \title{\Mytitle}
+  \author{\MyName}
+  \date{\MyLastchange}
+
+%%% KOMA Optionen (Satzspiegel wird später neu berechnet)
+  \KOMAoptions{draft=true}        % Entwurfsstadium (false)
+  \KOMAoptions{paper=a4}          % Papierformat (a4)
+  \KOMAoptions{pagesize=auto}       % Ausgabetreiber/Korrekte Ausgabe der Papiergröße
+  \KOMAoptions{twoside=true}        % Zweiseitiges Layout (false)
+  \KOMAoptions{open=any}          % Kapitelanfänge bei zweiseitigem Druck (any)
+                % \KOMAoptions{open=left,cleardoublepage=plain}% Kapitelanfänge bei zweiseitigem Druck (any)
+  \KOMAoptions{BCOR=15mm}         % Bindungskorrektur (0pmm)
+  \KOMAoptions{DIV=15}          % Seitenteilung
+  \KOMAoptions{fontsize=11pt}       % Schriftgröße
+%   \KOMAoptions{abstract=false}        % Überschrift der Zusammenfassung (false): NICHT BEI scrbook
+  \KOMAoptions{parskip=half-}       % Absatzauszeichnung (false)
+  \KOMAoptions{headinclude=true}        % Kopfzeile zum Textkörper? (false)
+  \KOMAoptions{footinclude=true}        % Fußzeile zum Textkörper? (false)
+%   \KOMAoptions{headings=normal}       % Größe der Überschriften
+  \KOMAoptions{headlines=2.1}       % Größe der Kopfzeile (1.25)
+  \KOMAoptions{listof=totoc}        % Abbildungsverzeichnisse - TOC & Nummerierung
+  \KOMAoptions{bibliography=totoc}      % Literaturverzeichnis - TOC & Nummerierung
+  \KOMAoptions{numbers=noenddot}        % Kein Punkt am Ende
+
+%%% Allgemeine Pakete
+  %% Pakete
+    \usepackage{scrhack}        % Remove warning for listings and float
+%     \usepackage{gnuplottex}       % Gnuplot in latex
+%     \usepackage{pgfplots}       % Diagramme und Plots mit tikzpicture
+%     \usepackage{filecontents}     % Dateiinhalte schreiben
+    \usepackage{listings}       % Quellcode
+    \usepackage{graphicx}       % Grafiken einbinden
+      \graphicspath{
+        {pictures/}%
+        {logos/}%
+      }
+    \usepackage{float}        % H option for floats and new floats
+    \usepackage[verbose]{placeins} % \FloatBarrier
+    \usepackage{subfig}       % Mehrere Figuren in einer Umgebung
+%     \usepackage{psfrag}       % Schlüsselwörter in Postscript Dateien ersetzen und andere Tools
+    \usepackage{paralist}       % Erweiterte Listenumgebung
+    \usepackage{color,framed}     % farbiger Text und Hintergrund
+    \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+    \usepackage{colortbl}       % farbige Einstellungen für Tabellen
+%     \usepackage{verbatim}       % Textumgebung
+    \usepackage{fancyvrb}       % Bessere Textumgebung
+%     \usepackage{rotating}         % Objekte drehen (\begin{sidewaystable}..., \begin{sidewaysfigure}...)
+    \usepackage[scaled=1]{helvet}     % Helvetica Schrift (setzt \sfdefault neu!)
+    \usepackage{scrpage2}       % Kopf und Fußzeilen
+%     \usepackage{caption}        % Bessere Abbildungsbeschriftungen, wird bereits von float geladen
+    \usepackage{afterpage}        % \afterpage{\clearpage}
+    \usepackage[warn]{textcomp}     % besondere Symbole
+    \usepackage{nameref}        % Referenzen zu Namen
+  %% Einstellungen
+    % Worttrennung und Satz [ badness = [-10000 ... 10000] ! ]
+      \raggedbottom         % Text muss auf Seitenende NICHT abschließen (unsauber!)
+%       \flushbottom          % Text muss auf Seitenende abschließen
+      \pretolerance=100       % Zulässige 'badness' OHNE Worttrennung (100)
+      \tolerance=200          % Zulässige 'badness' MIT Worttrennung (200)
+      \hfuzz=0.1pt          % Grenze für horiz. 'overfull hbox'-Meldung (0.1pt)
+      \vfuzz=0.1pt          % Grenze für vert. 'overfull vbox'-Meldung (0.1pt)
+      \hbadness=1000          % Grenze für horiz. 'badbox'-Meldung (1000)
+      \vbadness=1242          % Grenze für vert. 'badbox'-Meldung (1000)
+      \emergencystretch=1pt       % Zusätzlicher Platz für Streckung (0pt)
+      \linepenalty=10         % Strafe: Zeilenanzahl (10)
+      \hyphenpenalty=50       % Strafe: Trennungen (50)
+      \exhyphenpenalty=50       % Strafe: Expl. Trennungen (50)
+      \binoppenalty=700       % Strafe: TEXTMATH-Trennung nach binärem Op. (700)
+      \relpenalty=500         % Strafe: TEXTMATH-Trennung nach Relation (500)
+      \clubpenalty=150        % Strafe: Erste Zeile eines Absatzes bleibt allein auf vorh. Seite (150)
+      \widowpenalty=150       % Strafe: Letzte Zeile v. Absatz wird alleine auf nächste Seite umgebr. (150)
+      \doublehyphendemerits=10000     % Strafe: Trennung in zwei hintereinander kommenden Zeilen (10000)
+      \finalhyphendemerits=5000     % Strafe: Trennung in der vorletzten Zeile eines Absatzes (5000)
+      \adjdemerits=10000        % Strafe: Zwei visuell inkompatible Zeilen hintereinander (10000)
+      \interdisplaylinepenalty=100      % Strafe: Umbruch von '\displaylines-Formelfolge' über Seiten (100)
+      \interfootnotelinepenalty=100     % Strafe: Umbruch einer Fußnote über Seitengrenzen hinweg (100)
+      \interlinepenalty=0       % Strafe: Umbruch eines Absatzes über Seite (0)
+      \predisplaypenalty=10000      % Strafe: Seitenumbruch vor Formel im display-style (10000)
+      \postdisplaypenalty=0       % Strafe: Seitenumbruch nach Formel im display-style (0)
+    % Gliederungstiefe im Text/TOC
+      \setcounter{secnumdepth}{3}
+      \setcounter{tocdepth}{3}      % Gliederungstiefe (2:subsection)
+    % Schriftarten
+      \renewcommand{\familydefault}{\sfdefault}       % Fontfamilie
+      \fontfamily{phv}\selectfont
+%       \setkomafont{pageheadfoot}{\sc\sffamily\normalcolor\normalsize} % Kopf-/Fußzeile
+%       \setkomafont{caption}{\sffamily\normalcolor\normalsize}   % Text zum Label einer Figure
+%       \setkomafont{captionlabel}{\bf\sffamily\normalcolor\normalsize} % Label einer Figure
+    % Kapitelanfänge
+      \renewcommand{\chapterheadstartvskip}{\vspace*{-3.0\topskip}}
+    % Kopf- und Fußzeilen
+      \pagestyle{scrheadings}         % Seitenaussehen
+      \ihead[]{}            % Eintrag oben innen
+      \chead[]{}            % Eintrag oben mitte
+      \ohead[]{}            % Eintrag oben außen
+      \ohead[]{\leftmark}         % Eintrag oben außen
+      \ohead[]{\headmark}         % Eintrag oben außen
+      \setheadsepline{0.5pt}          % Linie unterhalb der Kopfzeile
+      \ifoot[]{}            % Eintrag unten innen
+      \cfoot[]{}            % Eintrag unten mitte
+      \ofoot[\pagemark]{\pagemark}        % Eintrag unten außen
+      \setfootsepline{0.5pt}          % Linie oberhalb der Fußzeile
+    % Captions allgemein
+      \captionsetup{format=plain,singlelinecheck=true}  % Formatangaben der Beschriftungen
+    % Quellcodetype
+%       \lstset{language=C++}
+    % Floats
+      %   General parameters, for ALL pages:
+        \renewcommand{\topfraction}{0.9}  % max fraction of floats at top
+        \renewcommand{\bottomfraction}{0.8} % max fraction of floats at bottom
+      %   Parameters for TEXT pages (not float pages):
+        \setcounter{topnumber}{2}
+        \setcounter{bottomnumber}{2}
+        \setcounter{totalnumber}{4}     % 2 may work better
+        \setcounter{dbltopnumber}{2}    % for 2-column pages
+        \renewcommand{\dbltopfraction}{0.9} % fit big float above 2-col. text
+        \renewcommand{\textfraction}{0.07}  % allow minimal text w. figs
+      %   Parameters for FLOAT pages (not text pages):
+        \renewcommand{\floatpagefraction}{0.7}  % require fuller float pages
+        \renewcommand{\dblfloatpagefraction}{0.7} % require fuller float pages (MUST be less than topfraction)
+
+%%% Festlegen des Seitenlayouts
+  %% Satzspielgel von KOMA nach geänderten KOMAoptions neu berechnen (!!! Diesen Abschnitt NIEMALS vor die Formatierung packen!!!)
+%     \KOMAoptions{DIV=last}
+  %% Geometrie festlegen mit geometry-Paket - Überschreibt den KOMA Satzspielgel:
+    \usepackage[top=2.3cm,hcentering,textwidth=155mm,textheight=244mm]{geometry}
+    \setlength{\headheight}{1.5\baselineskip}
+  %% Zeilenabstand
+%     \usepackage[onehalfspacing]{setspace}   % Zeilenabstand in ECHTEM 1,5 Zeilenabstand
+    \usepackage{setspace}\setstretch{1.4}   % Zeilenabstand in WORD-1,5-Zeilenabstand
+
+%%% Hyperref & pdf (hyperref > \texorpdfstring{$...$}{ ... })
+  %% Paket und Optionen
+    \usepackage[%
+          author=\MyName,
+          icolor=Ivory
+          ]{pdfcomment}     % pdfcomments (\pdfcomment[icon=Comment,color=YellowGreen]{},
+                  %              \pdfcomment[icon=Note,color=Khaki]{},
+                  %              \pdfmargincomment[icon=Help,color=Tomato]{})
+    \usepackage{hypcap}         % Hyperlink captions
+    \hypersetup{%
+        % General
+          bookmarksdepth=4    % Bookmark Tiefe
+          plainpages=false,   % Arabische Bezeichener
+          hypertexnames=true,   % Sinnvolle Namen
+        % Extensions
+%           hyperfigures=true,    % Links für Figuren
+%           pagebackref=false,    % Referenz von Quellen zurück auf Seiten
+%           hyperfootnotes=true,    % Fußnoten verlinken
+        % Farben
+          colorlinks,     % Farbige Links
+          allcolors=black,    % Alle Linkfarben
+        % Bookmarks
+          bookmarksopen=true,   % Offene Baumstruktur in den Bookmarks
+          bookmarksnumbered=true,   % Nummerierte Bookmarks
+          bookmarksopenlevel={2},   % Bis zu welcher Tiefe sollen die Bookmarks geöffnet werden?
+        % PDF Optionen
+          pdftoolbar=true,    % PDF Toolbar
+          pdfmenubar=true,    % PDF Menubar
+          pdfpagelayout={TwoPageRight}, % PDF Layout
+        % Titel & Autor & Thema
+          pdfauthor={\MyName},
+          pdftitle={\MyDocTitleOne \ \MyDocTitleTwo \ \MyDocTitleTrd},
+          pdfsubject={\MyDocType},
+          pdfkeywords={\MyKeyWords}
+    }
+%%% Tabellen
+  %% Pakete
+    \usepackage{booktabs}   % Bessere Tabellen
+    \usepackage{hhline}   % Bessere horizontale Linien
+    \usepackage{tabularx}   % Tabellen mit fester Gesamtbreite, weitere Optionen
+    \usepackage{longtable}    % Mehrseitige Tabellen
+    \usepackage{multirow}   % Mehrere Reihen/Spalten zusammenfassen (multirow/multicolumn)
+  %% Einstellungen
+    % Zeilenabstand
+      \renewcommand{\arraystretch}{1.4}         % Array-Einträge horizontal weiter auseinander (1)
+    % Textausrichtung bei fester Spaltenbreite (braucht tabularx)
+      \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}   % Breitenangabe & linksbündig
+      \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}   % Breitenangabe & zentriert
+      \newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}    % Breitenangabe & rechtsbündig
+    % Andere Textausrichtung innerhalb einer Spalte mit vordefinierter Ausrichtung
+      \newcommand{\ltab}{\raggedright\arraybackslash}     % Tabellenabschnitt linksbündig
+      \newcommand{\ctab}{\centering\arraybackslash}       % Tabellenabschnitt zentriert
+      \newcommand{\rtab}{\raggedleft\arraybackslash}        % Tabellenabschnitt rechtsbündig
+    % Caption setup
+      \captionsetup[table]{   % Format Beschriftung von Tabellen
+        format=hang,
+        justification=justified,
+        singlelinecheck=true,
+        aboveskip=0pt,
+        belowskip=9pt
+      }
+      \captionsetup[longtable]{ % Format Beschriftung von langen Tabellen
+        format=hang,
+        justification=justified,
+        singlelinecheck=true,
+        aboveskip=0pt,
+        belowskip=9pt
+      }
+
+%%% Figuren, Abbildungen
+  %% Pakete
+    \usepackage{wrapfig}      % Umflossene floats
+  %% Einstellungen
+    % Caption setup
+      \captionsetup[figure]{    % Format der Beschriftung von Abbildungen
+        format=hang,
+        justification=justified,
+        singlelinecheck=true,
+        aboveskip=9pt,
+        belowskip=0pt
+      }
+
+%%% Mathematik
+  %% Pakete
+    \usepackage{amsmath,amssymb,amsthm,amsfonts} % Matheumgebunstools
+    \usepackage{mathtools}                       % multlined Umgebung
+    \usepackage{units}                           % Einheiten
+    \usepackage{cancel}                          % Terme durchstreichen
+    \usepackage{upgreek}                         % Upside greek letters
+    \usepackage{esint}                           % Weitere Integralzeichen
+    \usepackage{gensymb}                         % Weitere Symbole
+  %% Einstellungen
+
+%%% Farben
+  \definecolor{tublue}{rgb}{0.04,0.16,0.32}
+  \definecolor{greycust}{rgb}{0.50,0.50,0.50}
+  \definecolor{tubluelight}{rgb}{0.46,0.50,0.62}
+  \definecolor{darkgreen}{rgb}{0.00, 0.48, 0.28}
+  \definecolor{lightred}{rgb}{1.00, 0.90, 0.90}
+  \definecolor{darkred}{rgb}{0.80, 0.00, 0.00}
+  \definecolor{altcol}{rgb}{0.8,0.0,0.0}
+  \definecolor{gray}{rgb}{0.9,0.9,0.9}
+  \definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
+
+%%% Neue Kommandos für spezielle Symbole
+  %% Besondere Operatoren
+    % Signum
+      \newcommand{\sgn}{\operatorname{sgn}}
+      \newcommand{\sign}{\operatorname{sign}}
+    % Soll-Gleichheit
+      \newcommand{\forceeq}{\mathop{\stackrel{!}{=}}}
+    % Beschriftete Gleichheit
+      \newcommand{\texteq}[1]{\mathop{\stackrel{\text{#1}}{=}}}
+    % Def-Gleichheit
+      \newcommand{\defeql}{\mathop{:=}}
+      \newcommand{\defeqr}{\mathop{=:}}
+    % Betrag / Norm
+      \newcommand{\abs}[1]{\left| #1 \right|}
+      \newcommand{\norm}[1]{\lVert #1 \rVert}
+
+  %% Komplexe Zahlen
+      \newcommand{\re}[1]{\mathrm{Re}\left[ #1 \right]}
+      \newcommand{\im}[1]{\mathrm{Im}\left[ #1 \right]}
+      \newcommand{\ad}[1]{#1^{*}}
+
+  %% Vektoren und Matrizen
+    % Vektor
+%       \renewcommand{\vec}[1]{\boldsymbol{#1}}
+      \renewcommand{\vec}[1]{\bvec{#1}}
+    % Tensor
+      \newcommand{\ten}[1]{\vec{#1}}
+    % Gradient
+      \newcommand{\grad}[1]{\nabla #1}
+    % Vektorgradient
+      \newcommand{\vgrad}[1]{\grad{\vec{#1}}}
+    % Laplace
+      \newcommand{\laplace}[1]{\nabla^2 #1}
+    % Divergenz
+      \renewcommand{\div}[1]{\nabla \cdot #1}
+    % Vektordivergenz
+      \newcommand{\vdiv}[1]{\div{\vec{#1}}}
+    % Konvektion (konservativ)
+      \newcommand{\conv}[1]{\div{\vec{#1}\vec{#1}}}
+      \newcommand{\convcons}[1]{\conv{#1}}
+    % Konvektion (konvektiv)
+      \newcommand{\convconv}[1]{\left( \vec{#1} \cdot \nabla \right) \vec{#1} }
+    % Konvektion (rotational)
+      \newcommand{\convrot}[1]{\frac{1}{2} \grad{\vec{#1}^2} - \vec{#1} \times \left( \rot{\vec{#1}} \right)}
+    % Konvektion (schief-symmetrisch)
+      \newcommand{\convskew}[1]{\frac{1}{2}\left[ \convcons{#1} + \convconv{#1} \right]}
+    % Rotation
+      \newcommand{\rot}[1]{\nabla \times #1}
+    % Indexdarstellung
+      \newcommand{\vecindex}[3]{\left\lbrace #1 \right\rbrace_{#2 #3}}
+    % Transposition
+      \newcommand{\transpose}[1]{\left\lbrace #1 \right\rbrace^T}
+
+  %% Ableitungen
+    % 1. Ordnung
+      \newcommand{\fd}[2]{\frac{\mathrm{d} #1}{\mathrm{d} #2}}
+    % 2. Ordnung
+      \newcommand{\fdd}[2]{\frac{\mathrm{d}^2 #1}{\mathrm{d} #2^2}}
+    % 3. Ordnung
+      \newcommand{\fddd}[2]{\frac{\mathrm{d}^3 #1}{\mathrm{d} #2^3}}
+    % 4. Ordnung
+      \newcommand{\fdddd}[2]{\frac{\mathrm{d}^4 #1}{\mathrm{d} #2^4}}
+
+  %% Partielle Ableitungen
+    % 1. Ordnung
+      \newcommand{\fpd}[2]{\frac{\partial #1}{\partial #2}}
+      \newcommand{\spd}[2]{\partial_#2 #1}
+    % 2. Ordnung
+      \newcommand{\fpdd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+      \newcommand{\spdd}[2]{\partial_{#2 #2} #1}
+    % 3. Ordnung
+      \newcommand{\fpddd}[2]{\frac{\partial^3 #1}{\partial #2^3}}
+      \newcommand{\spddd}[2]{\partial_{#2 #2 #2} #1}
+    % 4. Ordnung
+      \newcommand{\fpdddd}[2]{\frac{\partial^4 #1}{\partial #2^4}}
+      \newcommand{\spdddd}[2]{\partial_{#2 #2 #2 #2} #1}
+
+  %% Materielle Ableitung
+    \newcommand{\fmd}[2]{\frac{\mathrm{D} #1}{\mathrm{D} #2}}
+
+  %% 1. Variationsableitung
+    \newcommand{\vard}[2]{\frac{\mathrm{\delta} #1}{\mathrm{\delta} #2}}
+
+  %% 1. Eulerableitung
+    \newcommand{\varde}[2]{\frac{\hat{\partial} #1}{\hat{\partial} #2}}
+
+  %% Integrale
+    % Integrationsvariable
+      \newcommand{\intvar}[1]{\; \mathrm{d}#1}
+      \newcommand{\vintvar}[1]{\cdot \mathrm{d}\vec{#1}}
+    % Linienintegral
+      \newcommand{\integral}[4]{\int_{#1}^{#2} #3 \intvar{#4}}
+      \newcommand{\vintegral}[4]{\int_{#1}^{#2} #3 \vintvar{#4}}
+    % Flächenintegrale
+      \newcommand{\iintegral}[4]{\iint_{#1}^{#2} #3 \intvar{#4}}
+      \newcommand{\viintegral}[4]{\iint_{#1}^{#2} #3 \vintvar{#4}}
+      \newcommand{\ointegral}[4]{\oint_{#1}^{#2} #3 \intvar{#4}}
+      \newcommand{\ovintegral}[4]{\iint_{#1}^{#2} #3 \vintvar{#4}}
+    % Volumenintegral
+      \newcommand{\iiintegral}[4]{\iiint_{#1}^{#2} #3 \intvar{#4}}
+
+  %% Mittelung
+      \newcommand{\avg}[2]{\left<#1\right>_{#2}}
+
+  %% Ränder- und Bedingungen
+      \newcommand{\bc}[2]{\left. #1 \right|_{#2}}
+
+  %% Fehlerordnung
+      \newcommand{\ord}[1]{\mathcal{O}\left(#1\right)}
+
+  %% Zeitdiskretisierung
+    % Markierung
+      \newcommand{\tdis}[2]{#1^{\, \langle #2 \rangle}}
+    % Zeitextrapolationen
+      \newcommand{\told}{\textcolor{DarkGreen}{\bigstar}}
+      \newcommand{\texp}{\textcolor{DarkBlue}{\bullet}}
+      \newcommand{\timp}{\textcolor{DarkRed}{\blacklozenge}}
+
+  %% Phasen
+    % Markierungen
+      \newcommand{\phaseone}[1]{#1_{\mbox{\tiny $I$}}}
+      \newcommand{\phasetwo}[1]{#1_{\mbox{\tiny $II$}}}
+      \newcommand{\phaseint}[1]{#1_{\mbox{\tiny $I/II$}}}
+
+  %% Expontielle Darstellungen
+    % bt
+      \newcommand{\bt}[1]{\times 10^{#1}}
+
+%%% Symbole aus anderen Schriftarten
+
+  %% Geboren/Gestorben
+    \let\born\textborn
+    \let\died\textdied
+    \renewcommand{\textborn}{{\fontfamily{lmr}\selectfont\born}}
+    \renewcommand{\textdied}{{\fontfamily{lmr}\selectfont\died}}
+
+%%% Theoreme
+  \theoremstyle{definition}
+  \newtheorem{definition}{Definition}[subsection]
+  \newtheorem{theorem}[definition]{Satz}
+  \newtheorem{lem}[definition]{Lemma}
+
+  \newtheoremstyle{myboxstyle}
+    {3pt}         % Space above
+    {3pt}         % Space below
+    {\itshape}        % Body font: original {\normalfont}
+    {}          % Indent amount (empty = no indent,\parindent = para indent)
+    {\normalfont\bfseries}      % Thm head font original {\normalfont\bfseries}
+    {:}         % Punctuation after thm head original :
+    { }         % Space after thm head: " " = normal interword
+    {}          % Theorem head spec (can be left empty, meaning ‘normal’)
+
+  \theoremstyle{myboxstyle}
+  \newtheorem*{remark}{Hinweis}%[chapter]
+  \newtheorem*{question}{Frage}%[chapter]
+  \newtheorem*{todo}{Aufgabe}%[chapter]
+
+%%% Umgebungen
+  \newenvironment{remarkbox}{\definecolor{shadecolor}{rgb}{0.85,1.0,0.85}\begin{shaded}\begin{remark}}{\end{remark}\end{shaded}}
+  \newenvironment{questionbox}{\definecolor{shadecolor}{rgb}{1.0,0.85,0.85}\begin{shaded}\begin{question}}{\end{question}\end{shaded}}
+  \newenvironment{todobox}{\definecolor{shadecolor}{rgb}{1.0,1.0,0.7}\begin{shaded}\begin{todo}}{\end{todo}\end{shaded}}
+
+%%% Neue floats
+  % Einfacher Quellcode
+%     \floatstyle{ruled}
+%     \newfloat{code}{thp}{lop1}
+%     \floatname{code}{Quellcode-Auszug}
+%     \captionsetup[code]{format=hang,justification=justified,singlelinecheck=true,aboveskip=9pt,belowskip=0pt}
+  % Beispiele
+    \floatstyle{ruled}
+    \newfloat{example}{thp}{lop2}
+    \floatname{example}{Beispiel}
+    \captionsetup[example]{format=hang,justification=justified,singlelinecheck=true}

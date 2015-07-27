@@ -1,0 +1,121 @@
+#!/bin/bash
+
+globalEtcDirDefault="$HOME/foam/foam-extend-3.1/etc"
+globalEtcDir="${1:-$globalEtcDirDefault}"
+
+globalEtcDirNextDefault="$HOME/foam.next/foam-extend-3.1/etc"
+globalEtcDirNext="${2:-$globalEtcDirNextDefault}"
+
+globalEtcDirDebugDefault="$HOME/foam.debug/foam-extend-3.1/etc"
+globalEtcDirDebug="${3:-$globalEtcDirDebugDefault}"
+
+localEtcDir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+##### helper functions and settings ###########################################
+
+# Check dependencies
+. "$localEtcDir/checkDependencies.sh" $@ || return $?
+
+# Load local environment and path functions
+. "$localEtcDir/envPathFunctions.sh" $@ || return $?
+
+# Load color functions
+. "$localEtcDir/colorFunctions.sh" $@ || return $?
+
+# Load local link functions
+. "$localEtcDir/linkFunctions.sh" $@ || return $?
+
+# Load limits config
+. "$localEtcDir/limits.sh" $@ || return $?
+
+##### foam-extend-3.1 #########################################################
+
+feClear ()
+{
+    # Clear foam environment
+    env_unset_regex WM_.*
+    env_unset_regex FOAM_.*
+    env_removeall 'foam-extend'
+}
+
+feLoadFct ()
+{
+    # Load user tool scripts
+    . "$localEtcDir/foamUserTools.sh" $@ || return $?
+
+    # Load user aliases
+    . "$localEtcDir/foamUserAliases.sh" $@ || return $?
+}
+
+fe31 ()
+{
+
+  if [[ -d "$globalEtcDir" ]]; then
+
+    feClear
+
+    # Load source input
+    FOAM_INST_DIR=$(readlink -m "$globalEtcDir/../..")
+    source "$globalEtcDir/bashrc" &> /dev/null
+
+    # Make sure compile option is set accordingly
+    env_set 'WM_COMPILE_OPTION' 'Opt'
+
+    # Force solver to stop if NaNs exist
+    env_set 'FOAM_SIGFPE' '1'
+
+    feLoadFct
+
+  fi
+
+}
+
+fe31next ()
+{
+   if [[ -d "$globalEtcDirNext" ]]; then
+
+    clearFe
+
+    # Load source input
+    FOAM_INST_DIR=$(readlink -m "$globalEtcDirNext/../..")
+    source "$globalEtcDirNext/bashrc"
+
+    # Make sure compile option is set accordingly
+    env_set 'WM_COMPILE_OPTION' 'Opt'
+
+    # Force solver to stop if NaNs exist
+    env_set 'FOAM_SIGFPE' '1'
+
+    feLoadFct
+
+  fi
+
+}
+
+fe31debug ()
+{
+
+  if [[ -d "$globalEtcDirDebug" ]]; then
+
+    clearFe
+
+    # Load source input
+    FOAM_INST_DIR=$(readlink -m "$globalEtcDirDebug/../..")
+    source "$globalEtcDirDebug/bashrc"
+
+    # Make sure compile option is set accordingly
+    env_set 'WM_COMPILE_OPTION' 'Debug'
+
+    # Force solver to stop if NaNs exist
+    env_set 'FOAM_SIGFPE' '1'
+
+    feLoadFct
+
+  fi
+
+}
+
+# Default config
+fe31
+
+###############################################################################

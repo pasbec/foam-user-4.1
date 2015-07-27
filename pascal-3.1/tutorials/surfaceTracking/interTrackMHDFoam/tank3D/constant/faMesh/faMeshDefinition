@@ -1,0 +1,50 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.1                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      faMeshDefinition;
+}
+// ************************************************************************** //
+
+polyMeshPatches  1( trackedSurface );
+
+boundary
+{
+    symm-1
+    {
+        type                symmetryPlane;
+        ownerPolyPatch      trackedSurface;
+        neighbourPolyPatch  symm-1;
+    }
+
+    symm-2
+    {
+        type                symmetryPlane;
+        ownerPolyPatch      trackedSurface;
+        neighbourPolyPatch  symm-2;
+    }
+
+    side-1
+    {
+        type                patch;
+        ownerPolyPatch      trackedSurface;
+        neighbourPolyPatch  side-1;
+    }
+
+    side-2
+    {
+        type                patch;
+        ownerPolyPatch      trackedSurface;
+        neighbourPolyPatch  side-2;
+    }
+}
+
+// ************************************************************************** //

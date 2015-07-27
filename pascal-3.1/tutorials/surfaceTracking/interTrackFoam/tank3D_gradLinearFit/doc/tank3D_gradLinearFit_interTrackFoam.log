@@ -1,0 +1,64 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.1                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build    : 3.1-bfd58f87a002
+Exec     : interTrackFoam
+Date     : Mar 17 2015
+Time     : 15:52:37
+Host     : fwdh165
+PID      : 16823
+CtrlDict : /opt/foam.debug/foam-extend-3.1/etc/controlDict
+Case     : /data/beckst30/foam/beckst30-3.1/tutorials/surfaceTracking/interTrackFoam/tank3D_gradLinearFit
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create dynamic mesh for time = 0
+
+Selecting dynamicFvMesh dynamicMotionSolverFvMesh
+Selecting motion solver: laplace
+Selecting motion diffusivity: quadratic
+
+Reading field p
+
+Reading field U
+
+Reading/calculating face flux field phi
+
+Found free surface patch. ID: 0
+
+Starting time loop
+
+Time = 0.001
+
+
+Max surface Courant Number = 1.7936e-07
+
+Free surface curvature: min = -3.33067e-12, max = 2.498e-12, average = -2.90679e-28
+Courant Number mean: 2.87618e-18 max: 0.289037 velocity magnitude: 0.25
+DILUPBiCG:  Solving for Ux, Initial residual = 1, Final residual = 1.46245e-08, No Iterations 4
+DILUPBiCG:  Solving for Uy, Initial residual = 1, Final residual = 1.46404e-08, No Iterations 4
+DILUPBiCG:  Solving for Uz, Initial residual = 1, Final residual = 1.23536e-08, No Iterations 4
+DICPCG:  Solving for p, Initial residual = 1, Final residual = 8.90854e-08, No Iterations 68
+DICPCG:  Solving for p, Initial residual = 2.85363e-08, Final residual = 2.85363e-08, No Iterations 0
+time step continuity errors : sum local = 1.69988e-09, global = -3.98533e-11, cumulative = -3.98533e-11
+DICPCG:  Solving for p, Initial residual = 0.0365139, Final residual = 9.53058e-08, No Iterations 60
+DICPCG:  Solving for p, Initial residual = 1.72195e-07, Final residual = 9.98039e-08, No Iterations 1
+time step continuity errors : sum local = 3.2301e-09, global = 1.65402e-10, cumulative = 1.25548e-10
+
+
+--> FOAM FATAL ERROR: 
+object is not allocated
+
+    From function const T& autoPtr<T>::operator()() const
+    in file /opt/foam.debug/foam-extend-3.1/src/foam/lnInclude/autoPtrI.H at line 132.
+
+FOAM aborting
+
+Aborted (core dumped)

@@ -1,0 +1,53 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.1                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build    : 3.1-bfd58f87a002
+Exec     : elicitBugFiniteAreaNgbPolyPatchNormals
+Date     : Mar 30 2015
+Time     : 18:20:09
+Host     : fwdh165
+PID      : 4249
+CtrlDict : /opt/foam/foam-extend-3.1/etc/controlDict
+Case     : /home/beckst30/foam/beckst30-3.1/tutorials/utilities/simpleBlock3D
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Information for neighbour polyPatch of finite area boundary edge patch fixedWallSide with ID 0: 
+- ID < aMesh.boundary()[patchI].ngbPolyPatchIndex() >: 1
+- Name < mesh.boundary()[ID].name() >: "fixedWallSide"
+- Type < mesh.boundary()[ID].type() >: "wall"
+- Normals < mesh.boundary()[ID].nf() >: 
+16
+(
+(1 0 0)
+(1 0 0)
+(1 0 0)
+(1 0 0)
+(0 -1 0)
+(0 -1 0)
+(0 -1 0)
+(0 -1 0)
+(0 1 0)
+(0 1 0)
+(0 1 0)
+(0 1 0)
+(-1 0 0)
+(-1 0 0)
+(-1 0 0)
+(-1 0 0)
+)
+
+- PointNormals < aMesh.boundary()[ID].ngbPolyPatchPointNormals() >: 8{(0 1 0)}
+- FaceNormals < aMesh.boundary()[ID].ngbPolyPatchFaceNormals() >: 8{(0 1 0)}
+
+End
+

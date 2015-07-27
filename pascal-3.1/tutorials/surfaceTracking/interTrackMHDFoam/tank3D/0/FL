@@ -1,0 +1,64 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.1                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+  version       2.0;
+  format        ascii;
+  class         volVectorField;
+  location      0.org;
+  object        FL;
+}
+// ************************************************************************* //
+
+dimensions      [0 1 -2 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    trackedSurface
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+    inlet
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+    outlet
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+    bottom
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+    side-1
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+    side-2
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+    symm-1
+    {
+        type            symmetryPlane;
+    }
+    symm-2
+    {
+        type            symmetryPlane;
+    }
+}
+
+// ************************************************************************* //
