@@ -19,17 +19,41 @@ cd "$HOME"
 git clone --recursive 'ssh://git@git.becksteins.de:2222/pascal/foam-extend.git' 'foam'
 ```
 
+#### Git settings (optional)
 
-#### Project: OpenFOAM Extend
-
-##### Git user data (optional)
+##### User data
+```bash
+cd "$HOME/foam"
+#
+git config user.name 'Pascal Beckstein'
+git config user.email 'pascal@becksteins.de'
+```
+##### Add remote for dotfiles-repository
+```bash
+cd "$HOME/foam"
+#
+git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git' --squash
+```
+##### Pull changes for bashrc.d subtree in user folder from dotfiles
+```bash
+cd "$HOME/foam"
+#
+git subtree pull -P 'pascal-3.1/etc/bashrc.d' 'dotfiles' 'subtree_dot-bashrc.d' --squash
+```
+##### Update submodule foam-extend
+```bash
+cd "$HOME/foam"
+#
+git submodule update --remote 'foam-extend-3.1'
+```
+##### User data for submodule foam-extend (optional)
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
 git config user.name 'Pascal Beckstein'
 git config user.email 'pascal@becksteins.de'
 ```
-##### Git repositories (optional)
+##### Git repositories for submodule foam-extend (optional)
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
@@ -38,6 +62,10 @@ git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-M
 git remote add 'sf' 'ssh://p-be@git.code.sf.net/u/p-be/openfoam-extend'
 #git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-3.1'
 ```
+
+
+#### Project: OpenFOAM Extend
+
 ##### Official documentation
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
@@ -69,28 +97,10 @@ cd "$HOME/foam/foam-extend-3.1"
 
 #### User
 
-##### Git user data
+##### Source environment
 ```bash
-cd "$HOME/foam"
+cd "$HOME/foam/pascal-3.1"
 #
-git config user.name 'Pascal Beckstein'
-git config user.email 'pascal@becksteins.de'
-```
-##### Update submodule foam-extend
-```bash
-cd "$HOME/foam"
-#
-git submodule update --remote 'foam-extend-3.1'
-```
-##### Git repository for dotfiles
-```bash
-cd "$HOME/foam"
-#
-git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git' --squash
-```
-##### Update bashrc.d subtree from dotfiles
-```bash
-cd "$HOME/foam"
-#
-git subtree pull -P 'pascal-3.1/etc/bashrc.d' 'dotfiles' 'subtree_dot-bashrc.d' --squash
+source 'etc/bashrc'
+fe31
 ```
