@@ -7,12 +7,9 @@
 ### Pre-requirements
 
 #### Debian
-##### Debian Wheezy
-[Ubuntu 12](#ubuntu-12.04)
-##### Debian Sid
-[Ubuntu 13](#ubuntu-13.10)
-##### Debian Jessie
-[Ubuntu 14](#ubuntu-14.04)
+##### Debian Wheezy ([Ubuntu 12.04](#ubuntu1204))
+##### Debian Sid ([Ubuntu 13.10](#ubuntu1310))
+##### Debian Jessie ([Ubuntu 14.04](#ubuntu1404))
 
 #### Fedora
 ##### Fedora 19
@@ -37,7 +34,7 @@ exit
 ```
 
 #### Ubuntu
-##### Ubuntu 12.04
+##### Ubuntu 12.04 <a name="ubuntu1204"></a>
 ```bash
 sudo apt-get update
 sudo apt-get install git-core build-essential binutils-dev flex \
@@ -45,9 +42,8 @@ bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin python-all mayavi2
 ```
-##### Ubuntu 13.10
-[Ubuntu 12.04](#ubuntu-12.04)
-##### Ubuntu 14.04
+##### Ubuntu 13.10 <a name="ubuntu1310"></a> ([Ubuntu 12.04](#ubuntu1204))
+##### Ubuntu 14.04 <a name="ubuntu1404"></a>
 ```bash
 sudo apt-get update
 sudo apt-get install git-core build-essential binutils-dev cmake flex \
