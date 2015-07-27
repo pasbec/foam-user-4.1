@@ -1,42 +1,34 @@
 # README
 ------
 
-
-
 ## Installation
 ------
 
 ### Ubuntu 14.04
 
+#### Basic
+
 ##### Pre-requirements
 ```bash
 sudo apt-get install git-core build-essential binutils-dev cmake flex bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev libxt-dev rpm mercurial graphviz openmpi-bin python-all mayavi2
 ```
-
-#### Basic
-
 ##### Download/Clone
 ```bash
 cd "$HOME"
 #
 git clone --recursive 'ssh://git@git.becksteins.de:2222/pascal/foam-extend.git' 'foam'
 ```
-##### Git user data
+
+
+#### Project: OpenFOAM Extend
+
+##### Git user data (optional)
 ```bash
-cd "$HOME/foam"
+cd "$HOME/foam/foam-extend-3.1"
 #
 git config user.name 'Pascal Beckstein'
 git config user.email 'pascal@becksteins.de'
 ```
-##### Git repository for dotfiles (optional)
-```bash
-cd "$HOME/foam"
-#
-git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git'
-```
-
-#### OpenFOAM Extend
-
 ##### Git repositories (optional)
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
@@ -70,4 +62,27 @@ cd -
 ##### Installation
 ```bash
 ./Allwmake.firstInstall
+```
+
+
+#### User
+
+##### Git user data
+```bash
+cd "$HOME/foam"
+#
+git config user.name 'Pascal Beckstein'
+git config user.email 'pascal@becksteins.de'
+```
+##### Git repository for dotfiles
+```bash
+cd "$HOME/foam"
+#
+git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git' --squash
+```
+##### Update bashrc.d subtree from dotfiles
+```bash
+cd "$HOME/foam"
+#
+git subtree pull -P 'pascal-3.1/etc/bashrc.d' 'dotfiles' 'subtree_dot-bashrc.d' --squash
 ```
