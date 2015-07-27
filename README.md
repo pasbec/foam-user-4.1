@@ -10,7 +10,10 @@
 
 ##### Pre-requirements
 ```bash
-sudo apt-get install git-core build-essential binutils-dev cmake flex bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev libxt-dev rpm mercurial graphviz openmpi-bin python-all mayavi2
+sudo apt-get install git-core build-essential binutils-dev cmake flex bison \
+zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev libxt-dev \
+rpm mercurial graphviz openmpi-bin python-all mayavi2 libcr-dev mpich2 \
+mpich2-doc
 ```
 ##### Download/Clone
 ```bash
@@ -32,7 +35,7 @@ git config user.email 'pascal@becksteins.de'
 ```bash
 cd "$HOME/foam"
 #
-git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git' --squash
+git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git'
 ```
 ##### Pull changes for bashrc.d subtree in user folder from dotfiles
 ```bash
