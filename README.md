@@ -7,9 +7,12 @@
 ### Pre-requirements
 
 #### Debian
-##### Debian Wheezy ([Ubuntu 12.04](#ubuntu-12.04))
-##### Debian Sid ([Ubuntu 13.10](#ubuntu-13.10))
-##### Debian Jessie ([Ubuntu 13.04](#ubuntu-12.04))
+##### Debian Wheezy
+[Ubuntu 12](#ubuntu-12.04)
+##### Debian Sid
+[Ubuntu 13](#ubuntu-13.10)
+##### Debian Jessie
+[Ubuntu 14](#ubuntu-14.04)
 
 #### Fedora
 ##### Fedora 19
@@ -42,7 +45,8 @@ bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin python-all mayavi2
 ```
-##### Ubuntu 13.10 ([Ubuntu 12.04](#ubuntu-12.04))
+##### Ubuntu 13.10
+[Ubuntu 12.04](#ubuntu-12.04)
 ##### Ubuntu 14.04
 ```bash
 sudo apt-get update
