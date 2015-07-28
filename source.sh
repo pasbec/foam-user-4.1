@@ -1,14 +1,15 @@
 #!/bin/bash
 
 ###############################################################################
-src () { [ ! -z "$1" ] && . "$1"; PSD="$(dirname "${BASH_SOURCE[0]}")"; }; src
+PSD="$(dirname "${BASH_SOURCE[0]}")";
+sourcePSD () { local psd="$PSD"; source "$1"; PSD="$psd"; }
 ###############################################################################
 
 for fct in $(ls -1 "$PSD/fct_"* 2>/dev/null); do
-    src "$fct"
+    sourcePSD "$fct"
 done
 
-src "$PSD/colors.sh"
-src "$PSD/alias.sh"
+sourcePSD "$PSD/colors.sh"
+sourcePSD "$PSD/alias.sh"
 
 ###############################################################################

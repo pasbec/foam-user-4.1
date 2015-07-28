@@ -3,11 +3,12 @@
 # TODO [High]: Check if flag exists!
 
 ###############################################################################
-src () { [ ! -z "$1" ] && . "$1"; PSD="$(dirname "${BASH_SOURCE[0]}")"; }; src
+PSD="$(dirname "${BASH_SOURCE[0]}")";
+sourcePSD () { local psd="$PSD"; source "$1"; PSD="$psd"; }
 ###############################################################################
 
-src "$PSD/fct_error.sh"
-src "$PSD/fct_bool.sh"
+sourcePSD "$PSD/fct_error.sh"
+sourcePSD "$PSD/fct_bool.sh"
 
 ###############################################################################
 
