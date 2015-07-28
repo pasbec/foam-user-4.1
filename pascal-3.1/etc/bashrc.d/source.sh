@@ -4,15 +4,11 @@
 DIR="$(dirname "${BASH_SOURCE[0]}")"
 ###############################################################################
 
-source "$DIR/fct_local.sh"
-source "$DIR/fct_error.sh"
-source "$DIR/fct_bool.sh"
-source "$DIR/fct_path.sh"
-source "$DIR/fct_link.sh"
-source "$DIR/fct_dep.sh"
-source "$DIR/fct_env.sh"
+for fct in $(ls -1 "$DIR/fct_"* 2>/dev/null); do
+    source "$fct"
+done
 
-source "$DIR/alias.sh"
 source "$DIR/colors.sh"
+source "$DIR/alias.sh"
 
 ###############################################################################
