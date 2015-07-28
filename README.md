@@ -18,7 +18,7 @@ sudo yum groupinstall "Development Tools"
 sudo yum install gcc-c++ binutils-devel bison flex m4 zlib-devel \
 qt-devel qtwebkit-devel mercurial graphviz
 ```
-##### Fedora 19
+##### Fedora 20
 ```bash
 sudo yum groupinstall "Development Tools"
 sudo yum install gcc-c++ binutils-devel cmake wget bison flex m4 zlib-devel \
@@ -150,4 +150,3 @@ cd "$HOME/foam/pascal-3.1"
 #
 ./Allwmake
 ```
-
