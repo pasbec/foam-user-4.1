@@ -1,82 +1,77 @@
 #!/bin/bash#!/bin/bash
 
 ###############################################################################
-DIR="$(dirname "${BASH_SOURCE[0]}")"
+PSD="$(dirname "${BASH_SOURCE[0]}")";
+sourcePSD () { local psd="$PSD"; source "$1"; PSD="$psd"; }
 ###############################################################################
 
-source "$DIR/bashrc.d/source.sh"
-
-###############################################################################
-DIR="$(dirname "${BASH_SOURCE[0]}")"
-###############################################################################
-
-# Check if basic tools are installed
-dep_listIsHashedVerb 'find grep awk sed python mayavi2'
+sourcePSD "$PSD/bashrc.d/source.sh"
 
 ###############################################################################
 
-env_set 'WM_PROJECT' 'foam'
-env_set 'WM_FORK' 'extend'
-env_set 'WM_PROJECT_VERSION' '3.1'
-env_set 'WM_PROJECT_BASEDIR' "$WM_PROJECT-$WM_FORK-$WM_PROJECT_VERSION"
+foamEtc=${FOAM_ETC:-"$1"}
 
-[ -z "$FOAM_INST_DIR" ] && env_set 'FOAM_INST_DIR' "$HOME/foam"
+error_fatalIfEmptyVar 'foamEtc' "bashrc"
 
-env_set 'FOAM_ETC' "$FOAM_INST_DIR/$WM_PROJECT_BASEDIR/etc"
+env_set 'FOAM_ETC' "$foamEtc"
+env_set 'FOAM_USER_ETC' "$PSD"
 
 ###############################################################################
 
 feClear ()
 {
-    env_removeAll 'foam-extend'
-
     env_unsetRegex WM_.*
     env_unsetRegex FOAM_.*
 
-    while [ $# -gt 0 ]; do
-        echo $1
-        env_unsetRegex $1
-        shift
-    done
+    env_removeAll 'foam-extend'
 }
 
-feUser ()
+feLoad ()
 {
-    source "$DIR/foamUserAliases.sh" || return $?
-    source "$DIR/foamUserTools.sh" || return $?
+    # Load project environment
+    source "$FOAM_ETC/bashrc" &> /dev/null
+
+    # Load user environment
+    sourcePSD "$FOAM_USER_ETC/user/source.sh"
+
+# TODO [High] Sort this mess in foamUserTools!!!!
+    sourcePSD "$FOAM_USER_ETC/foamUserTools.sh"
 }
 
 fe31 ()
 {
-    bashrc="$FOAM_ETC/bashrc"
+    foam_inst_dir="$FOAM_INST_DIR"
+    foam_etc="$FOAM_ETC"
+    foam_user_etc="$FOAM_USER_ETC"
 
-    if path_exists "$bashrc"; then
+    if path_exists "$foam_etc"; then
 
-        # Clear foam environment
+        # Clear environment
         feClear
 
-        # Load foam-extend environment
-        source "$bashrc" &> /dev/null
+        # Reset key directories
+        env_set 'FOAM_ETC' "$foam_etc"
+        env_set 'FOAM_USER_ETC' "$foam_user_etc"
 
-        # Make sure compile option is set accordingly
-        env_set 'WM_COMPILE_OPTION' 'Opt'
+        [ ! -z "$foam_inst_dir" ] && \
+            env_set 'FOAM_INST_DIR' "$foam_inst_dir"
 
-        # Force solver to stop if NaNs exist
-        env_set 'FOAM_SIGFPE' '1'
-
-        feUser
+        # Load environment
+        feLoad
 
     else
 
         local msg
-            msg="Could not find 'bashrc' of '$WM_PROJECT_BASEDIR'" \
-            msg="$msg in folder '$FOAM_ETC'." \
-            msg="$msgIs '$WM_PROJECT_BASEDIR' installed, correctly?"
+            msg="Could not find 'bashrc' of foam-extend in folder"
+            msg="$msg '$foam_etc'. Did you either pass the path to the"
+            msg="$msg foam-extend etc-directory as parameter \$1 to"
+            msg="$msg this 'bashrc' or set FOAM_ETC directly instead?"
+            msg="$msg Is foam-extend really installed, correctly?"
 
-        # Clear foam environment
+        # Clear environment
         feClear
 
-        error_warning "$msg" 'fe31' || return 1
+        error_fatal "$msg" 'fe31'
 
     fi
 
