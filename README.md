@@ -79,7 +79,7 @@ git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git'
 ```bash
 cd "$HOME/foam"
 #
-git subtree pull -P 'pascal-3.1/etc/bashrc.d' 'dotfiles' 'subtree_dot-bashrc.d' --squash
+git subtree pull -P 'pascal-3.1/etc/bashrc.d' 'dotfiles' 'subtree_dot/bashrc.d' --squash
 ```
 #### Update submodule foam-extend
 ```bash
