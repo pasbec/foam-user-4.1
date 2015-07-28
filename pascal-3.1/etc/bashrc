@@ -40,7 +40,7 @@ feLoad ()
     source "$FOAM_USER_ETC/foamUserTools.sh"
 }
 
-fe31 ()
+fe ()
 {
     foam_inst_dir="$FOAM_INST_DIR"
     foam_etc="$FOAM_ETC"
@@ -69,9 +69,6 @@ fe31 ()
             msg="$msg foam-extend etc-directory as parameter \$1 to"
             msg="$msg this 'bashrc' or set FOAM_ETC directly instead?"
             msg="$msg Is foam-extend really installed, correctly?"
-
-        # Clear environment
-        feClear
 
         error_fatal "$msg" 'fe31'
 
