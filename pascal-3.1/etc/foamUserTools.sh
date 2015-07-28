@@ -30,7 +30,7 @@ foamUserToolBinLinks() {
         return 1
       fi
       ln -s "$source" "$target"
-      lnAbsToRel "$target"
+      link_lnAbsToRel "$target"
       if [[ $? != 0 ]]; then
         echo >&2 'ERROR: Linking failed!'
         return 1

@@ -1,121 +1,89 @@
-#!/bin/bash
+#!/bin/bash#!/bin/bash
 
-globalEtcDirDefault="$HOME/foam/foam-extend-3.1/etc"
-globalEtcDir="${1:-$globalEtcDirDefault}"
+###############################################################################
+DIR="$(dirname "${BASH_SOURCE[0]}")"
+###############################################################################
 
-globalEtcDirNextDefault="$HOME/foam.next/foam-extend-3.1/etc"
-globalEtcDirNext="${2:-$globalEtcDirNextDefault}"
+source "$DIR/bashrc.d/source.sh"
 
-globalEtcDirDebugDefault="$HOME/foam.debug/foam-extend-3.1/etc"
-globalEtcDirDebug="${3:-$globalEtcDirDebugDefault}"
+###############################################################################
+DIR="$(dirname "${BASH_SOURCE[0]}")"
+###############################################################################
 
-localEtcDir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Check if basic tools are installed
+dep_listIsHashedVerb 'find grep awk sed python mayavi2'
 
-##### helper functions and settings ###########################################
+###############################################################################
 
-# Check dependencies
-. "$localEtcDir/checkDependencies.sh" $@ || return $?
+env_set 'WM_PROJECT' 'foam'
+env_set 'WM_FORK' 'extend'
+env_set 'WM_PROJECT_VERSION' '3.1'
+env_set 'WM_PROJECT_BASEDIR' "$WM_PROJECT-$WM_FORK-$WM_PROJECT_VERSION"
 
-# Load local environment and path functions
-. "$localEtcDir/envPathFunctions.sh" $@ || return $?
+[ -z "$FOAM_INST_DIR" ] && env_set 'FOAM_INST_DIR' "$HOME/foam"
 
-# Load color functions
-. "$localEtcDir/colorFunctions.sh" $@ || return $?
+env_set 'FOAM_ETC' "$FOAM_INST_DIR/$WM_PROJECT_BASEDIR/etc"
 
-# Load local link functions
-. "$localEtcDir/linkFunctions.sh" $@ || return $?
-
-# Load limits config
-. "$localEtcDir/limits.sh" $@ || return $?
-
-##### foam-extend-3.1 #########################################################
+###############################################################################
 
 feClear ()
 {
-    # Clear foam environment
-    env_unset_regex WM_.*
-    env_unset_regex FOAM_.*
-    env_removeall 'foam-extend'
+    env_removeAll 'foam-extend'
+
+    env_unsetRegex WM_.*
+    env_unsetRegex FOAM_.*
+
+    while [ $# -gt 0 ]; do
+        echo $1
+        env_unsetRegex $1
+        shift
+    done
 }
 
-feLoadFct ()
+feUser ()
 {
-    # Load user tool scripts
-    . "$localEtcDir/foamUserTools.sh" $@ || return $?
-
-    # Load user aliases
-    . "$localEtcDir/foamUserAliases.sh" $@ || return $?
+    source "$DIR/foamUserAliases.sh" || return $?
+    source "$DIR/foamUserTools.sh" || return $?
 }
 
 fe31 ()
 {
+    bashrc="$FOAM_ETC/bashrc"
 
-  if [[ -d "$globalEtcDir" ]]; then
+    if path_exists "$bashrc"; then
 
-    feClear
+        # Clear foam environment
+        feClear
 
-    # Load source input
-    FOAM_INST_DIR=$(readlink -m "$globalEtcDir/../..")
-    source "$globalEtcDir/bashrc" &> /dev/null
+        # Load foam-extend environment
+        source "$bashrc" &> /dev/null
 
-    # Make sure compile option is set accordingly
-    env_set 'WM_COMPILE_OPTION' 'Opt'
+        # Make sure compile option is set accordingly
+        env_set 'WM_COMPILE_OPTION' 'Opt'
 
-    # Force solver to stop if NaNs exist
-    env_set 'FOAM_SIGFPE' '1'
+        # Force solver to stop if NaNs exist
+        env_set 'FOAM_SIGFPE' '1'
 
-    feLoadFct
+        feUser
 
-  fi
+    else
 
-}
+        local msg
+            msg="Could not find 'bashrc' of '$WM_PROJECT_BASEDIR'" \
+            msg="$msg in folder '$FOAM_ETC'." \
+            msg="$msgIs '$WM_PROJECT_BASEDIR' installed, correctly?"
 
-fe31next ()
-{
-   if [[ -d "$globalEtcDirNext" ]]; then
+        # Clear foam environment
+        feClear
 
-    clearFe
+        error_warning "$msg" 'fe31' || return 1
 
-    # Load source input
-    FOAM_INST_DIR=$(readlink -m "$globalEtcDirNext/../..")
-    source "$globalEtcDirNext/bashrc"
-
-    # Make sure compile option is set accordingly
-    env_set 'WM_COMPILE_OPTION' 'Opt'
-
-    # Force solver to stop if NaNs exist
-    env_set 'FOAM_SIGFPE' '1'
-
-    feLoadFct
-
-  fi
+    fi
 
 }
 
-fe31debug ()
-{
+###############################################################################
 
-  if [[ -d "$globalEtcDirDebug" ]]; then
-
-    clearFe
-
-    # Load source input
-    FOAM_INST_DIR=$(readlink -m "$globalEtcDirDebug/../..")
-    source "$globalEtcDirDebug/bashrc"
-
-    # Make sure compile option is set accordingly
-    env_set 'WM_COMPILE_OPTION' 'Debug'
-
-    # Force solver to stop if NaNs exist
-    env_set 'FOAM_SIGFPE' '1'
-
-    feLoadFct
-
-  fi
-
-}
-
-# Default config
 fe31
 
 ###############################################################################
