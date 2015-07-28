@@ -56,8 +56,9 @@ dep_listIsHashed ()
 
     local err=0
 
-    for bin in $binList; do
-        dep_isHashed $bin
+    local b
+    for b in $binList; do
+        dep_isHashed $b
         [ $? -eq 0 ] || err=1
     done
 
@@ -73,8 +74,9 @@ dep_listIsHashedVerb ()
 
     local err=0
 
-    for bin in $binList; do
-        dep_isHashedVerb $bin
+    local b
+    for b in $binList; do
+        dep_isHashedVerb $b
         [ $? -eq 0 ] || err=1
     done
 
@@ -88,8 +90,9 @@ dep_listIsHashedOrExit ()
 
     error_fatalIfEmptyVar 'binList' "$FUNCNAME" || return 1
 
-    for bin in $binList; do
-        dep_isHashedOrExit $bin || return 1
+    local b
+    for b in $binList; do
+        dep_isHashedOrExit $b || return 1
     done
 
     return 0
