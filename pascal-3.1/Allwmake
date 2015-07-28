@@ -1,9 +1,5 @@
 #!/bin/bash
 cd ${0%/*} || exit 1    # run from this directory
 
-# Debug mode
-if [ "$1" == 'debug' ]; then WM_COMPILE_OPTION='Debug'; fi
-
-# Make
 if [ -e 'src/Allwmake' ]; then src/Allwmake || exit 1; fi
 if [ -e 'applications/Allwmake' ]; then applications/Allwmake || exit 1; fi

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# TODO [High] Sort this mess in foamUserTools.sh and put it in user/fct_tools.sh with prefix tools
+# TODO [High] Sort this mess in cleanFunctions.sh and put it in case/.
+# TODO [High] Sort this mess in helpFunctions.sh and put it in case/.
+
 ###############################################################################
 PSD="$(dirname "${BASH_SOURCE[0]}")";
 sourcePSD () { local psd="$PSD"; source "$1"; PSD="$psd"; }
@@ -34,7 +38,6 @@ feLoad ()
     # Load user environment
     source "$FOAM_USER_ETC/user/source.sh"
     source "$FOAM_USER_ETC/foamUserTools.sh"
-# TODO [High] Sort this mess in foamUserTools!!!!
 }
 
 fe31 ()
