@@ -121,6 +121,7 @@ link_rmFindDangling ()
         local linkList
             linkList="$(find "$dir" -type l)" || return 1
 
+        local l
         for l in $linkList; do
 
             local link

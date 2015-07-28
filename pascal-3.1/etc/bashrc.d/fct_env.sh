@@ -45,6 +45,7 @@ env_unsetRegex ()
             sed -n "/$key_regex=.*/p" | \
             sed 's/^\([^=]*\)=\(.*\)/\1/g' )" || return 1
 
+        local v
         for v in $key_expand; do
             unset "$v" || return 1
         done
@@ -107,9 +108,10 @@ env_removeAll ()
             varList="$(env | grep "$key" | sed 's/^\([^=]*\)=\(.*\)/\1/g')" \
             || return 1
 
-        for var in $varList; do
+        local v
+        for v in $varList; do
 
-            env_removeAny "$var" "$key" || return 1
+            env_removeAny "$v" "$key" || return 1
 
         done
 
@@ -117,9 +119,10 @@ env_removeAll ()
             varList="$(env | grep '=$' | sed 's/=//g')" \
             || return 1
 
-        for var in $varList; do
+        local v
+        for v in $varList; do
 
-            env_unset "$var" || return 1
+            env_unset "$v" || return 1
 
         done
 

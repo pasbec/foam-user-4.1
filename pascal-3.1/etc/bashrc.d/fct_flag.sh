@@ -37,9 +37,10 @@ flag_init ()
 
     eval "flag_flagList='$flags'" || return 1
 
-    for flag in $flags; do
-        flag_nameOkOrExit "$flag" || return 1
-        bool_false "$flag" 'flag_isSet' || return 1
+    local f
+    for f in $flags; do
+        flag_nameOkOrExit "$f" || return 1
+        bool_false "$f" 'flag_isSet' || return 1
     done
 
     return 0
@@ -53,11 +54,12 @@ flag_set ()
 
     error_fatalIfEmptyVar 'name value' "$FUNCNAME" || return 1
 
-    for flag in $flag_flagList; do
+    local f
+    for f in $flag_flagList; do
 
-        if [ "$flag" = "$name" ]; then
+        if [ "$f" = "$name" ]; then
 
-	    bool_set "$flag" "$value" 'flag_isSet' || return 1
+	    bool_set "$f" "$value" 'flag_isSet' || return 1
             return 0
         fi
     done
