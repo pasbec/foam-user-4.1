@@ -39,7 +39,7 @@ dep_isHashedOrExit ()
     error_fatalIfEmptyVar 'bin' "$FUNCNAME" || return 1
 
     local msg
-        msg="This is considered fatal."
+        msg="\nThis is considered fatal."
         msg="$msg Please make sure to install '$bin'."
 
     dep_isHashedVerb "$bin" || error_fatal "$msg" "$FUNCNAME" || return 1
