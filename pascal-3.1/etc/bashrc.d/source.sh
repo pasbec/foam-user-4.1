@@ -2,6 +2,7 @@
 DIR="$(dirname "${BASH_SOURCE[0]}")"
 ###############################################################################
 
+source "$DIR/fct_local.sh"
 source "$DIR/fct_error.sh"
 source "$DIR/fct_bool.sh"
 source "$DIR/fct_path.sh"
