@@ -2,6 +2,10 @@
 DIR="$(dirname "${BASH_SOURCE[0]}")"
 ###############################################################################
 
+source "$DIR/colors.sh"
+
+###############################################################################
+
 error_fatal ()
 {
     local message="$1"
@@ -10,7 +14,7 @@ error_fatal ()
     local functionStr=''
     [ ! -z "$function" ] && functionStr="[$function] "
 
-    echo >&2 "ERROR: $functionStr$message"
+    echo -e >&2 "ERROR: $functionStr$message"
 
     case $- in
         *i*)
@@ -53,7 +57,7 @@ error_warning ()
     local functionStr=''
     [ ! -z "$function" ] && functionStr="[$function] "
 
-    echo >&2 "WARNING: $functionStr$message"
+    echo -e >&2 "WARNING: $functionStr$message"
 
     return 1
 }
@@ -67,7 +71,7 @@ error_info ()
     local functionStr=''
     [ ! -z "$function" ] && functionStr="[$function] "
 
-    echo >&2 "INFO: $functionStr$message"
+    echo -e >&2 "INFO: $functionStr$message"
 
     return 0
 }
@@ -81,7 +85,7 @@ error_echo ()
     local functionStr=''
     [[ ! -z "$function" ]] && functionStr="[$function] "
 
-    echo >&2 "$functionStr$message"
+    echo -e >&2 "$functionStr$message"
 
     return 0
 }
