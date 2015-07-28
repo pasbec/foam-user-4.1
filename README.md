@@ -52,7 +52,7 @@ libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin python-all mayavi2
 ```
 
-### Download/Clone repository
+### Download/Clone root repository
 
 ```bash
 cd "$HOME"
@@ -105,7 +105,7 @@ git remote add 'sf' 'ssh://p-be@git.code.sf.net/u/p-be/openfoam-extend'
 ```
 
 
-### Project
+### Project part
 
 #### Official documentation
 ```bash
@@ -135,7 +135,7 @@ cd "$HOME/foam/foam-extend-3.1"
 ```
 
 
-### User
+### User part
 
 #### Source environment
 ```bash
