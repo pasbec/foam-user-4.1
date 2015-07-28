@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO [High]: Check if flag exists!
+
 ###############################################################################
 DIR="$(dirname "${BASH_SOURCE[0]}")"
 ###############################################################################
@@ -45,6 +47,23 @@ flag_init ()
     for f in $flags; do
         flag_nameOkOrExit "$f" || return 1
         bool_false "$f" 'flag_isSet' || return 1
+    done
+
+    return 0
+}
+
+flag_initRead ()
+{
+    local flags="$1"
+    shift
+
+    error_fatalIfEmptyVar 'flags' "$FUNCNAME" || return 1
+
+    flag_init "$flags"
+
+    while [ $# -gt 0 ]; do
+        flag_enable "$1"
+        shift
     done
 
     return 0
