@@ -78,6 +78,8 @@ env_remove ()
     else
         return 1
     fi
+
+    return 0
 }
 
 
@@ -97,6 +99,8 @@ env_removeAny ()
     else
         return 1
     fi
+
+    return 0
 }
 
 
@@ -133,6 +137,8 @@ env_removeAll ()
     else
         return 1
     fi
+
+    return 0
 }
 
 
@@ -151,6 +157,8 @@ env_append ()
     else
         eval "export $var=\"\$$var:$key\""
     fi
+
+    return 0
 }
 
 
@@ -169,4 +177,6 @@ env_prepend ()
     else
         eval "export $var=\"$key:\$$var\""
     fi
+
+    return 0
 }
