@@ -17,54 +17,6 @@ sourcePSD "$PSD/fct_error.sh"
 # --- Function definitions -------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-path_exists ()
-{
-    local path="$1"
-
-    error_fatalIfEmptyVar 'path' "$FUNCNAME" || return $?
-
-    [ -e "$path" ] || return $?
-
-    return 0
-}
-
-
-path_notExists ()
-{
-    local path="$1"
-
-    error_fatalIfEmptyVar 'path' "$FUNCNAME" || return $?
-
-    [ ! -e "$path" ] || return $?
-
-    return 0
-}
-
-
-path_isAbs ()
-{
-    local path="$1"
-
-    error_fatalIfEmptyVar 'path' "$FUNCNAME" || return $?
-
-    [ -z "${path##'/'*}" ] || return $?
-
-    return 0
-}
-
-
-path_isNotAbs ()
-{
-    local path="$1"
-
-    error_fatalIfEmptyVar 'path' "$FUNCNAME" || return $?
-
-    [ ! -z "${path##'/'*}" ] || return $?
-
-    return 0
-}
-
-
 path_normalDir ()
 {
     local dir="$1"
