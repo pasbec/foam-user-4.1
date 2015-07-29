@@ -93,7 +93,8 @@ flag_set ()
         fi
     done
 
-    error_fatal "Flag '$name' is unknown." "$FUNCNAME" || return $?
+    error_fatal "Flag '$name' is unknown. Defined flags: '$flag_flagList'." \
+    "$FUNCNAME" || return $?
 
     return -1
 }
