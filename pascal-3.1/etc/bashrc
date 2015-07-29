@@ -54,7 +54,7 @@ fe ()
     foam_etc="$FOAM_ETC"
     foam_user_etc="$FOAM_USER_ETC"
 
-    if path_exists "$foam_etc"; then
+    if [ -e "$foam_etc" ] && [ -d "$foam_etc" ]; then
 
         # Clear environment
         feClear
