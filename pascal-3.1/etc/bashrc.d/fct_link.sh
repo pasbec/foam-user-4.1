@@ -134,7 +134,7 @@ link_rmFindDangling ()
         done
 
     else
-        return 1
+        return $?
     fi
 
     return 0

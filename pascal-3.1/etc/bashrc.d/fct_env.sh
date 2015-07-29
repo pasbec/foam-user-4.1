@@ -62,7 +62,7 @@ env_unsetRegex ()
         done
 
     else
-        return 1
+        return $?
     fi
 
     return 0
@@ -93,7 +93,7 @@ env_remove ()
         fi
 
     else
-        return 1
+        return $?
     fi
 
     return 0
@@ -125,7 +125,7 @@ env_removeAny ()
         fi
 
     else
-        return 1
+        return $?
     fi
 
     return 0
@@ -159,7 +159,7 @@ env_removeAll ()
         done
 
     else
-        return 1
+        return $?
     fi
 
     return 0
