@@ -46,13 +46,10 @@ error_fatalIfEmptyVar ()
     local v
     for v in $variable; do
 
-        local value
-            value="$(eval "echo \$$v")" || return 1
+        local value="$(eval "echo \$$v")"
 
         [ ! -z "$value" ] || \
-            error_fatal "Variable '$v' is empty." "$function"
-
-        [ $? -eq 0 ] || return 1
+            error_fatal "Variable '$v' is empty." "$function" || return $?
 
     done
 

@@ -21,9 +21,9 @@ dep_isHashed ()
 {
     local bin="$1"
 
-    error_fatalIfEmptyVar 'bin' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'bin' "$FUNCNAME" || return $?
 
-    hash $bin 2>/dev/null || return 1
+    hash $bin 2>/dev/null || return $?
 
     return 0
 }
@@ -33,13 +33,16 @@ dep_isHashedVerb ()
 {
     local bin="$1"
 
-    error_fatalIfEmptyVar 'bin' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'bin' "$FUNCNAME" || return $?
 
-    dep_isHashed $bin || \
+    if dep_isHashed $bin; then
+        return 0
+    else
         error_warning "The binary/application '$bin' is not hashed." \
-        "$FUNCNAME" || return 1
+        "$FUNCNAME" || return $?
+    fi
 
-    return $?
+    return -1
 }
 
 
@@ -47,15 +50,19 @@ dep_isHashedOrExit ()
 {
     local bin="$1"
 
-    error_fatalIfEmptyVar 'bin' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'bin' "$FUNCNAME" || return $?
 
     local msg
         msg="This is considered fatal."
         msg="$msg Please make sure to install '$bin'."
 
-    dep_isHashedVerb "$bin" || error_fatal "$msg" "$FUNCNAME" || return 1
+    if dep_isHashedVerb $bin; then
+        return 0
+    else
+        error_fatal "$msg" "$FUNCNAME" || return $?
+    fi
 
-    return 0
+    return -1
 }
 
 
@@ -63,14 +70,14 @@ dep_listIsHashed ()
 {
     local binList="$1"
 
-    error_fatalIfEmptyVar 'binList' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'binList' "$FUNCNAME" || return $?
 
     local err=0
 
     local b
     for b in $binList; do
         dep_isHashed $b
-        [ $? -eq 0 ] || err=1
+        [ $? -eq 0 ] || err=$?
     done
 
     return $err
@@ -81,14 +88,14 @@ dep_listIsHashedVerb ()
 {
     local binList="$1"
 
-    error_fatalIfEmptyVar 'binList' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'binList' "$FUNCNAME" || return $?
 
     local err=0
 
     local b
     for b in $binList; do
         dep_isHashedVerb $b
-        [ $? -eq 0 ] || err=1
+        [ $? -eq 0 ] || err=$?
     done
 
     return $err
@@ -99,11 +106,11 @@ dep_listIsHashedOrExit ()
 {
     local binList="$1"
 
-    error_fatalIfEmptyVar 'binList' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'binList' "$FUNCNAME" || return $?
 
     local b
     for b in $binList; do
-        dep_isHashedOrExit $b || return 1
+        dep_isHashedOrExit $b || return $?
     done
 
     return 0
