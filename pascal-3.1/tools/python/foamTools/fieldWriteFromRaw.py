@@ -194,7 +194,7 @@ def fieldWriteFromRaw(time, fInfo, rInfo, pInfoList):
         def fw(cS): f.write(cS)
 
         # Write header
-        fw(objectHeader(time, fName, fClass))
+        fw(objectHeader(fName, fClass, time))
 
         # Write dimensions
         fw(fieldDimensions(fDimensions))

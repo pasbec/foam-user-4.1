@@ -1,9 +1,17 @@
 #!/usr/bin/python
+# July 2015
+# Pascal Beckstein (p.beckstein@hzdr.de)
+
+# --------------------------------------------------------------------------- #
+# --- Libraries ------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+from foamTools.blockMeshDict import *
 import math as m
 
-from blockMeshDictFunctions import *
-
-## * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ##
+# --------------------------------------------------------------------------- #
+# --- Parameters ------------------------------------------------------------ #
+# --------------------------------------------------------------------------- #
 
 geo_scale = 1e-3
 
@@ -18,50 +26,48 @@ geo_y2 = geo_y1 + geo_dy
 geo_z1 =  -60.0
 geo_z2 =  140.0
 
-## ************************************************************************* ##
+# --------------------------------------------------------------------------- #
+# --- blockMeshDict --------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
-pHeader()
+pHeader(geo_scale)
 
-pConvertToMeters(geo_scale)
+if pSubDict("vertices"):
 
-pSubDict("vertices")
+    # Front
+    pVert(  0, [geo_x1, geo_y1, geo_z1])
+    pVert(  1, [geo_x2, geo_y1, geo_z1])
+    pVert(  2, [geo_x1, geo_y1, geo_z2])
+    pVert(  3, [geo_x2, geo_y1, geo_z2])
 
-# Front
-pVert(  0, geo_x1, geo_y1, geo_z1)
-pVert(  1, geo_x2, geo_y1, geo_z1)
-pVert(  2, geo_x1, geo_y1, geo_z2)
-pVert(  3, geo_x2, geo_y1, geo_z2)
+    # Back
+    pVert(  4, [geo_x1, geo_y2, geo_z1])
+    pVert(  5, [geo_x2, geo_y2, geo_z1])
+    pVert(  6, [geo_x1, geo_y2, geo_z2])
+    pVert(  7, [geo_x2, geo_y2, geo_z2])
 
-# Back
-pVert(  4, geo_x1, geo_y2, geo_z1)
-pVert(  5, geo_x2, geo_y2, geo_z1)
-pVert(  6, geo_x1, geo_y2, geo_z2)
-pVert(  7, geo_x2, geo_y2, geo_z2)
+if pSubDict("blocks"):
 
-pSubDict("blocks")
-
-print "    hex (0 1 5 4 2 3 7 6) background (60 1 40) simpleGrading (1 1 1)"
+    pBlock( 0, [0, 1, 5, 4, 2, 3, 7, 6], [60, 1, 40], z="background")
 
 pSubDict("edges")
 
-###
+if pSubDict("boundary"):
 
-pSubDict("boundary")
+    if pBoundarySubDict("front", "empty"):
 
-pBoundarySubDict("front", "empty")
+        pFace([0, 1, 3, 2])
 
-print "            (0 1 3 2)"
+    if pBoundarySubDict("back", "empty"):
 
-pBoundarySubDict("back", "empty")
+        pFace([5, 4, 6, 7])
 
-print "            (5 4 6 7)"
+    if pBoundarySubDict("infinity", "patch"):
 
-pBoundarySubDict("infinity", "patch")
-
-print "            (4 0 2 6)"
-print "            (1 5 7 3)"
-print "            (4 5 1 0)"
-print "            (2 3 7 6)"
+        pFace([4, 0, 2, 6])
+        pFace([1, 5, 7, 3])
+        pFace([4, 5, 1, 0])
+        pFace([2, 3, 7, 6])
 
 pSubDict("mergePatchPairs")
 
@@ -69,4 +75,6 @@ pSubDict("mergePatchPairs")
 
 pFooter()
 
-## ************************************************************************* ##
+# --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #

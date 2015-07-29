@@ -36,7 +36,7 @@ def objectIndent(cString, iLevel=0, iChar=' ', iCount=4):
 
 
 
-def objectHeader(time, name, cl):
+def objectHeader(name, cl, time=""):
 
     # return : header string
     #
@@ -61,7 +61,7 @@ def objectHeader(time, name, cl):
     r += i(1, 'version     2.0;')
     r += i(1, 'format      ascii;')
     r += i(1, 'class       ' + cl + ';')
-    r += i(1, 'location    "' + time + '"' + ';')
+    if time: r += i(1, 'location    "' + time + '"' + ';')
     r += i(1, 'object      ' + name + ';')
     r += i(0, '}')
     r += i(0, '// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //')
