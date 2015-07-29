@@ -9,6 +9,9 @@
 PSD="$(dirname "${BASH_SOURCE[0]}")";
 sourcePSD () { local psd="$PSD"; source "$1"; PSD="$psd"; }
 
+sourcePSD "$FOAM_USER_ETC/bashrc.d/fct_env.sh"
+sourcePSD "$FOAM_USER_ETC/bashrc.d/fct_link.sh"
+
 # --------------------------------------------------------------------------- #
 # --- Function definitions -------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -60,7 +63,7 @@ foamUserToolBinLinks ()
 
                 if [ $makeLink -eq 1 ]; then
 
-                    echo "Linking '$f' to '$target'."
+                    echo "Linking '$link' to '$dest'."
                     link_lnRel "$dest" "$link" || return $?
 
                 fi
