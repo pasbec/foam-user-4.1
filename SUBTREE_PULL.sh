@@ -4,7 +4,7 @@
 
 remote='dotfiles'
 prefix='pascal-3.1/etc/bashrc.d'
-branch='subtree_dot/bashrc.d'
+branch='subtree/dot/bashrc.d'
 
 if [ -e "$prefix" ]; then
 
