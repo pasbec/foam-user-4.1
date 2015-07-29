@@ -148,5 +148,5 @@ fe31
 ```bash
 cd "$HOME/foam/pascal-3.1"
 #
-./Allwmake
+./Allwmake.firstInstall
 ```
