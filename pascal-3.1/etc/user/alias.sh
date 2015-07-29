@@ -1,18 +1,28 @@
 #!/bin/bash
+# July 2015
+# Pascal Beckstein (p.beckstein@hzdr.de)
 
-###############################################################################
+# --------------------------------------------------------------------------- #
+# --- Sourcing -------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
 PSD="$(dirname "${BASH_SOURCE[0]}")";
 sourcePSD () { local psd="$PSD"; source "$1"; PSD="$psd"; }
-###############################################################################
 
-alias foamCdUserApps="cd $WM_PROJECT_USER_DIR/applications"
-alias foamCdUserRun="cd $WM_PROJECT_USER_DIR/run"
-alias foamCdUserTut="cd $WM_PROJECT_USER_DIR/tutorials"
-alias foamCdUserSrc="cd $WM_PROJECT_USER_DIR/src"
+# --------------------------------------------------------------------------- #
+# --- Script ---------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
-alias foamCdApps="cd $WM_PROJECT_DIR/applications"
-alias foamCdRun="cd $WM_PROJECT_DIR/run"
-alias foamCdTut="cd $WM_PROJECT_DIR/tutorials"
-alias foamCdSrc="cd $WM_PROJECT_DIR/src"
+alias fe31="fe"
 
-###############################################################################
+alias usrc='cd $FOAM_USER_SRC'
+alias ulib='cd $FOAM_USER_LIB'
+alias urun='cd $FOAM_USER_RUN'
+alias uapp='cd $FOAM_USER_APP'
+alias usol='cd $FOAM_USER_SOLVERS'
+alias utut='cd $FOAM_USER_TUTORIALS'
+alias uutil='cd $FOAM_USER_UTILITIES'
+
+# --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
