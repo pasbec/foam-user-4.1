@@ -22,7 +22,7 @@ flag_nameOkOrExit ()
 {
     local name="$1"
 
-    error_fatalIfEmptyVar 'name' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'name' "$FUNCNAME" || return $?
 
     local nameStripped="$name"
 
@@ -31,12 +31,14 @@ flag_nameOkOrExit ()
     nameStripped=${name##*'_'}
     nameStripped=${name##'_'*}
 
-    [ "$name" = "$nameStripped" ] || \
-        error_fatal "Flag name $name contains 'underscore(s)'." "$FUNCNAME"
+    if [ "$name" = "$nameStripped" ]; then
+        return 0
+    else
+        error_fatal "Flag name $name contains 'underscore(s)'." "$FUNCNAME" \
+        || return $?
+    fi
 
-    [ $? -eq 0 ] || return 1
-
-    return 0
+    return -1
 }
 
 
@@ -44,14 +46,14 @@ flag_init ()
 {
     local flags="$1"
 
-    error_fatalIfEmptyVar 'flags' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'flags' "$FUNCNAME" || return $?
 
-    eval "flag_flagList='$flags'" || return 1
+    eval "flag_flagList='$flags'" || return $?
 
     local f
     for f in $flags; do
-        flag_nameOkOrExit "$f" || return 1
-        bool_false "$f" 'flag_isSet' || return 1
+        flag_nameOkOrExit "$f" || return $?
+        bool_false "$f" 'flag_isSet' || return $?
     done
 
     return 0
@@ -62,12 +64,12 @@ flag_initRead ()
     local flags="$1"
     shift
 
-    error_fatalIfEmptyVar 'flags' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'flags' "$FUNCNAME" || return $?
 
     flag_init "$flags"
 
     while [ $# -gt 0 ]; do
-        flag_enable "$1"
+        flag_enable "$1" || return $?
         shift
     done
 
@@ -80,19 +82,20 @@ flag_set ()
     local name="$1"
     local value="$2"
 
-    error_fatalIfEmptyVar 'name value' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'name value' "$FUNCNAME" || return $?
 
     local f
     for f in $flag_flagList; do
 
         if [ "$f" = "$name" ]; then
-
-	    bool_set "$f" "$value" 'flag_isSet' || return 1
+            bool_set "$f" "$value" 'flag_isSet' || return $?
             return 0
         fi
     done
 
-    error_fatal "Flag '$name' is unknown." "$FUNCNAME" || return 1
+    error_fatal "Flag '$name' is unknown." "$FUNCNAME" || return $?
+
+    return -1
 }
 
 
@@ -100,9 +103,9 @@ flag_enable ()
 {
     local name="$1"
 
-    error_fatalIfEmptyVar 'name' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'name' "$FUNCNAME" || return $?
 
-    flag_set "$name" 1 || return 1
+    flag_set "$name" 1 || return $?
 
     return 0
 }
@@ -112,9 +115,9 @@ flag_disable ()
 {
     local name="$1"
 
-    error_fatalIfEmptyVar 'name' "$FUNCNAME" || return 1
+    error_fatalIfEmptyVar 'name' "$FUNCNAME" || return $?
 
-    flag_set "$name" 0 || return 1
+    flag_set "$name" 0 || return $?
 
     return 0
 }
