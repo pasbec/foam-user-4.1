@@ -1,6 +1,6 @@
 #!/bin/bash
 cd ${0%/*} || exit 1    # run from this directory
 
-# TODO [High] Create links from tools to bin, Prepare kdevelop, ...
+foamUserToolBinLinks
 
 $(dirname $0)/Allwmake
