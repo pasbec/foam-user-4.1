@@ -45,7 +45,6 @@ feLoad ()
 
     # Load user environment
     source "$FOAM_USER_ETC/user/source.sh"
-    source "$FOAM_USER_ETC/foamUserTools.sh"
 }
 
 
