@@ -79,10 +79,10 @@ class vertices:
 
     def write(self):
 
-        for index, label in enumerate(self.labels):
+        for verticeIndex, verticeLabel in enumerate(self.labels):
 
             wstr  = "( "
-            for component in self.points[index]:
+            for component in self.points[verticeIndex]:
                 wstr += str(float(component)) + " "
             wstr += ")"
             self.stdout.write(wstr)
@@ -93,38 +93,93 @@ class blocks:
 
     class cBlockTopo:
 
-        faceVertices = {"x-": [0,3,7,4],
-                        "x+": [1,2,6,5],
-                        "y-": [0,1,5,4],
-                        "y+": [2,3,7,6],
-                        "z-": [0,1,2,3],
-                        "z+": [4,5,6,7]}
+        origin = [0]
+
+        base = [[0,1],[0,3],[0,4]]
+
+        edgeVertices = [[0,1],[3,2],[7,6],[4,5],
+                        [0,3],[1,2],[5,6],[4,7],
+                        [0,4],[1,5],[2,6],[3,7]]
+
+        faceVertices = [[0,3,7,4], [1,2,6,5],
+                        [0,1,5,4], [2,3,7,6],
+                        [0,1,2,3], [4,5,6,7]]
+
+        faceTags = {"x-": 0, "x+": 1,
+                    "y-": 2, "y+": 3,
+                    "z-": 4, "z+": 5}
 
     labels = list()
     labelIndex = resizeList()
 
     topo = cBlockTopo()
 
-    blockVertices = list()
+    blockVertices = list() #TODO Use indices and not labels
+    blockVerticeLabels = list() #TODO Use indices and not labels
     divider = list()
     gradings = list()
     zones = list()
+
+    neighbours = list()
+    neighbourFaces = list()
+    neighbourEdges = list()
 
     def __init__(self, stdoutRef, verticesRef):
 
         self.stdout = stdoutRef
         self.vertices = verticesRef
 
-    def set(self, label, blockVertices, divider=[1,1,1], grading=[1,1,1], zone=""):
+    def _getSharedVertices(self, vertices, otherVertices):
+
+        shared = list(set(vertices) & set(otherVertices))
+
+        return shared
+
+    def _getNeighbours(self, blockIndex, otherBlockIndex):
+
+        blockVertices = self.blockVertices[blockIndex]
+        otherBlockVertices = self.blockVertices[otherBlockIndex]
+
+        sharedVertices = self._getSharedVertices(blockVertices, otherBlockVertices)
+
+        if len(sharedVertices) == 4:
+
+            return True, "face", sharedVertices
+
+        if len(sharedVertices) == 2:
+
+            return True, "edge", sharedVertices
+
+        else:
+
+            return False, None, sharedVertices
+
+    def test(self):
+
+        for blockIndex, blockLabel in enumerate(self.labels):
+
+            print "neighbours: ", blockIndex, blockLabel, self.neighbours[blockIndex]
+            print "neighbourFaces: ", blockIndex, blockLabel, self.neighbourFaces[blockIndex]
+            print "neighbourEdges: ", blockIndex, blockLabel, self.neighbourEdges[blockIndex]
+            print
+
+    def set(self, label, blockVerticeLabels, divider=[1,1,1], grading=[1,1,1], zone=""):
+
+        # Convert blockVerticeLabels in blockVertices
+        blockVertices = [ self.vertices.labelIndex[l] for l in blockVerticeLabels ]
 
         try:
 
             blockIndex = self.labels.index(label)
 
             self.blockVertices[blockIndex] = blockVertices
+            self.blockVerticeLabels[blockIndex] = blockVerticeLabels
             self.divider[blockIndex] = divider
             self.gradings[blockIndex] = grading
             self.zones[blockIndex] = zone
+            self.neighbours[blockIndex] = []
+            self.neighbourFaces[blockIndex] = [None]*6
+            self.neighbourEdges[blockIndex] = [None]*12
 
         except:
 
@@ -133,49 +188,77 @@ class blocks:
             self.labelIndex[label] = blockIndex
 
             self.blockVertices.append(blockVertices)
+            self.blockVerticeLabels.append(blockVerticeLabels)
             self.divider.append(divider)
             self.gradings.append(grading)
             self.zones.append(zone)
+            self.neighbours.append([])
+            self.neighbourFaces.append([None]*6)
+            self.neighbourEdges.append([None]*12)
+
+        for otherBlockIndex, otherBlockLabel in enumerate(self.labels):
+
+            if not blockIndex == otherBlockIndex:
+
+                neighbours, neighbourType, sharedVertices = \
+                    self._getNeighbours(blockIndex, otherBlockIndex)
+
+                if neighbourType == "face":
+
+                    try:
+                        neighboursIndex = \
+                            self.neighbours[blockIndex].index(otherBlockIndex)
+                    except:
+                        self.neighbours[blockIndex].append(otherBlockIndex)
+
+                    try:
+                        otherNeighboursIndex = \
+                            self.neighbours[otherBlockIndex].index(blockIndex)
+                    except:
+                        self.neighbours[otherBlockIndex].append(blockIndex)
+
+        pass
+# TODO [High]: neighbours
 
     def write(self):
 
         def write(string): sys.stdout.write(string)
 
-        for index, label in enumerate(self.labels):
+        for blockIndex, blockLabel in enumerate(self.labels):
 
             self.stdout.write("hex", end="")
 
             write(" ")
 
             wstr  = "( "
-            for vertice in self.blockVertices[index]:
-                wstr += str(self.vertices.labelIndex[vertice]) + " "
+            for vertice in self.blockVertices[blockIndex]:
+                wstr += str(vertice) + " "
             wstr += ")"
             write(wstr)
 
             write(" ")
 
-            zone = self.zones[index]
+            zone = self.zones[blockIndex]
             if zone:
                 write(str(zone) + " ")
 
             wstr  = "( "
-            for divide in self.divider[index]:
+            for divide in self.divider[blockIndex]:
                 wstr += str(divide) + " "
             wstr += ")"
             write(wstr)
 
             write(" ")
 
-            if len(self.gradings[index]) == 3:
+            if len(self.gradings[blockIndex]) == 3:
                 write("simpleGrading")
-            elif len(self.gradings[index]) == 12:
+            elif len(self.gradings[blockIndex]) == 12:
                 write("edgeGrading")
 
             write(" ")
 
             wstr  = "( "
-            for grading in self.gradings[index]:
+            for grading in self.gradings[blockIndex]:
                 wstr += str(grading) + " "
             wstr += ")"
             self.stdout.write(wstr, ind=False)
@@ -189,6 +272,7 @@ class boundaryFaces:
     labelIndex = resizeList()
 
     faces = list()
+    faceLabels = list()
     boundary = list()
 
     def __init__(self, stdoutRef, verticesRef, blocksRef):
@@ -202,7 +286,9 @@ class boundaryFaces:
         if type(par1) == int and par2:
 
             blockLabel = par1
-            blockFaceIndex = par2
+            blockFaceTag = par2
+
+            blockFaceIndex = self.blocks.topo.faceTags[blockFaceTag]
 
             blockLocalFace = self.blocks.topo.faceVertices[blockFaceIndex]
             blockIndex = self.blocks.labelIndex[blockLabel]
@@ -214,7 +300,9 @@ class boundaryFaces:
         elif type(par1) == list and par2:
 
             blockLabelList = par1
-            blockFaceIndex = par2
+            blockFaceTag = par2
+
+            blockFaceIndex = self.blocks.topo.faceTags[blockFaceTag]
 
             blockGlobalFaceList = []
 
@@ -239,6 +327,9 @@ class boundaryFaces:
 
         for blockGlobalFace in blockGlobalFaceList:
 
+            # Convert blockGlobalFace in blockFaceLabels
+            blockFaceLabels = [ self.vertices.labelIndex[l] for l in blockGlobalFace ]
+
             #try: # TODO Label was removed from parameters
 
                 #faceIndex = self.labels.index(label)
@@ -248,7 +339,7 @@ class boundaryFaces:
 
             #except:
 
-            label = len(self.labels) # TODO
+            label = len(self.labels)
 
             faceIndex = len(self.labels)
             self.labels.append(label)
@@ -256,6 +347,7 @@ class boundaryFaces:
 
             self.boundary.append(boundary)
             self.faces.append(blockGlobalFace)
+            self.faceLabels.append(blockFaceLabels)
 
     def write(self):
 
@@ -263,13 +355,13 @@ class boundaryFaces:
         self.stdout.write("(")
         self.stdout.indentLevel += 1
 
-        for index, label in enumerate(self.labels):
+        for faceIndex, faceLabel in enumerate(self.labels):
 
-            if self.boundary[index] == self.stdout.subdict.boundary:
+            if self.boundary[faceIndex] == self.stdout.subdict.boundary:
 
                 wstr  = "( "
-                for vertice in self.faces[index]:
-                    wstr += str(self.vertices.labelIndex[vertice]) + " "
+                for vertice in self.faces[faceIndex]:
+                    wstr += str(vertice) + " "
                 wstr += ")"
                 self.stdout.write(wstr)
 
