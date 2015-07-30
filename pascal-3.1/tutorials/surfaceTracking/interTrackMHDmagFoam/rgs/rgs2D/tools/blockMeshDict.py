@@ -27,55 +27,70 @@ geo_z1 =  -60.0
 geo_z2 =  140.0
 
 # --------------------------------------------------------------------------- #
+# --- Data ------------------------------------------------------------------ #
+# --------------------------------------------------------------------------- #
+
+d = blockMeshDict()
+
+d.vertices.set(  0, [geo_x1, geo_y1, geo_z1])
+d.vertices.set(  1, [geo_x2, geo_y1, geo_z1])
+d.vertices.set(  2, [geo_x1, geo_y1, geo_z2])
+d.vertices.set(  3, [geo_x2, geo_y1, geo_z2])
+d.vertices.set(  4, [geo_x1, geo_y2, geo_z1])
+d.vertices.set(  5, [geo_x2, geo_y2, geo_z1])
+d.vertices.set(  6, [geo_x1, geo_y2, geo_z2])
+d.vertices.set(  7, [geo_x2, geo_y2, geo_z2])
+
+d.blocks.set( 0, [0, 1, 5, 4, 2, 3, 7, 6], [60, 1, 40], zone="background")
+
+d.boundaryFaces.set(   "front", 0, "y-")
+d.boundaryFaces.set(    "back", 0, "y+")
+d.boundaryFaces.set("infinity", 0, "x-")
+d.boundaryFaces.set("infinity", 0, "x+")
+d.boundaryFaces.set("infinity", 0, "z-")
+d.boundaryFaces.set("infinity", 0, "z+")
+
+# --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-pHeader(geo_scale)
+d.header(geo_scale)
 
 # --------------------------------------------------------------------------- #
 
-if pSubDict("vertices"):
+if d.subDict("vertices"):
 
-    # Front
-    pVert(  0, [geo_x1, geo_y1, geo_z1])
-    pVert(  1, [geo_x2, geo_y1, geo_z1])
-    pVert(  2, [geo_x1, geo_y1, geo_z2])
-    pVert(  3, [geo_x2, geo_y1, geo_z2])
+    d.vertices.write()
 
-    # Back
-    pVert(  4, [geo_x1, geo_y2, geo_z1])
-    pVert(  5, [geo_x2, geo_y2, geo_z1])
-    pVert(  6, [geo_x1, geo_y2, geo_z2])
-    pVert(  7, [geo_x2, geo_y2, geo_z2])
+if d.subDict("blocks"):
 
-if pSubDict("blocks"):
+    d.blocks.write()
 
-    pBlock( 0, [0, 1, 5, 4, 2, 3, 7, 6], [60, 1, 40], z="background")
+if d.subDict("edges"):
 
-pSubDict("edges")
+    pass
 
-if pSubDict("boundary"):
+if d.subDict("boundary"):
 
-    if pBoundarySubDict("front", "empty"):
+    if d.boundarySubDict("front", "empty"):
 
-        pFace([0, 1, 3, 2])
+        d.boundaryFaces.write()
 
-    if pBoundarySubDict("back", "empty"):
+    if d.boundarySubDict("back", "empty"):
 
-        pFace([5, 4, 6, 7])
+        d.boundaryFaces.write()
 
-    if pBoundarySubDict("infinity", "patch"):
+    if d.boundarySubDict("infinity", "patch"):
 
-        pFace([4, 0, 2, 6])
-        pFace([1, 5, 7, 3])
-        pFace([4, 5, 1, 0])
-        pFace([2, 3, 7, 6])
+        d.boundaryFaces.write()
 
-pSubDict("mergePatchPairs")
+if d.subDict("mergePatchPairs"):
+
+    pass
 
 # --------------------------------------------------------------------------- #
 
-pFooter()
+d.footer()
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

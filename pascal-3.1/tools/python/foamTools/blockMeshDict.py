@@ -15,21 +15,21 @@ from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
 # --- Class definitions ----------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-class cResizeList(list):
+class resizeList(list):
 
-  def __init__(self, default):
+  def __init__(self, default=None):
 
-    self._default = default
+    self.default = default
 
   def __setitem__(self, key, value):
 
     if key >= len(self):
-      self += [self._default] * (key - len(self) + 1)
-    super(cResizeList, self).__setitem__(key, value)
+      self += [self.default] * (key - len(self) + 1)
+    super(resizeList, self).__setitem__(key, value)
 
 
 
-class cStdoutBase:
+class stdoutBase:
 
     indentLevel = 0
 
@@ -50,35 +50,37 @@ class cStdoutBase:
 
 
 
-class cVertices:
+class vertices:
 
-    labels = []
-    labelIndex  = cResizeList(None)
+    labels = list()
+    labelIndex  = resizeList()
 
-    points = []
+    points = list()
 
     def __init__(self, stdoutRef):
 
         self.stdout = stdoutRef
 
     def set(self, label, point):
-    
-        if label >= len(self.labels):
-    
-            self.labelIndex[label] = len(self.labels)
+
+        try:
+
+            verticeIndex = self.labels.index(label)
+
+            self.points[verticeIndex] = point
+
+        except:
+
+            verticeIndex = len(self.labels)
             self.labels.append(label)
-    
+            self.labelIndex[label] = verticeIndex
+
             self.points.append(point)
-    
-        else:
-    
-            index = labelIndex[label]
-            points[index] = point
 
     def write(self):
-    
+
         for index, label in enumerate(self.labels):
-    
+
             wstr  = "( "
             for component in self.points[index]:
                 wstr += str(float(component)) + " "
@@ -87,98 +89,91 @@ class cVertices:
 
 
 
-class cBlocks:
+class blocks:
 
-    class cBlockInfo:
-    
-        faceVertices = {0: [0,3,7,4],
-                        1: [1,2,6,5],
-                        2: [0,1,5,4],
-                        3: [2,3,7,6],
-                        4: [0,1,2,3],
-                        5: [4,5,6,7]}
-    
-    
-        faceTags = {"x-": 0,
-                    "x+": 1,
-                    "y-": 2,
-                    "y+": 3,
-                    "z-": 4,
-                    "z+": 5}
+    class cBlockTopo:
 
+        faceVertices = {"x-": [0,3,7,4],
+                        "x+": [1,2,6,5],
+                        "y-": [0,1,5,4],
+                        "y+": [2,3,7,6],
+                        "z-": [0,1,2,3],
+                        "z+": [4,5,6,7]}
 
-    labels = []
-    labelIndex = cResizeList(None)
+    labels = list()
+    labelIndex = resizeList()
 
-    blockVertices = []
-    divider = []
-    gradings = []
-    zones = []
+    topo = cBlockTopo()
+
+    blockVertices = list()
+    divider = list()
+    gradings = list()
+    zones = list()
 
     def __init__(self, stdoutRef, verticesRef):
 
-        self.info = self.cBlockInfo()
         self.stdout = stdoutRef
         self.vertices = verticesRef
 
-    def set(self, label, blockVertices, divider, grading=[1,1,1], zone=""):
-    
-        if label >= len(self.labels):
-    
-            self.labelIndex[label] = len(self.labels)
+    def set(self, label, blockVertices, divider=[1,1,1], grading=[1,1,1], zone=""):
+
+        try:
+
+            blockIndex = self.labels.index(label)
+
+            self.blockVertices[blockIndex] = blockVertices
+            self.divider[blockIndex] = divider
+            self.gradings[blockIndex] = grading
+            self.zones[blockIndex] = zone
+
+        except:
+
+            blockIndex = len(self.labels)
             self.labels.append(label)
+            self.labelIndex[label] = blockIndex
 
             self.blockVertices.append(blockVertices)
             self.divider.append(divider)
             self.gradings.append(grading)
             self.zones.append(zone)
-    
-        else:
-
-            index = labelIndex[label]
-    
-            blockVertices[index] = blockVertices
-            divider[index] = divider
-            gradings[index] = grading
-            zones[index] = zone
 
     def write(self):
-    
+
         def write(string): sys.stdout.write(string)
-    
+
         for index, label in enumerate(self.labels):
-    
+
             self.stdout.write("hex", end="")
-    
+
             write(" ")
-    
+
             wstr  = "( "
             for vertice in self.blockVertices[index]:
                 wstr += str(self.vertices.labelIndex[vertice]) + " "
             wstr += ")"
             write(wstr)
-    
+
             write(" ")
-    
+
             zone = self.zones[index]
             if zone:
                 write(str(zone) + " ")
-    
+
             wstr  = "( "
             for divide in self.divider[index]:
                 wstr += str(divide) + " "
             wstr += ")"
             write(wstr)
-    
+
             write(" ")
-    
+
             if len(self.gradings[index]) == 3:
                 write("simpleGrading")
             elif len(self.gradings[index]) == 12:
                 write("edgeGrading")
-    
+
             write(" ")
-    
+
             wstr  = "( "
             for grading in self.gradings[index]:
                 wstr += str(grading) + " "
@@ -187,37 +182,126 @@ class cBlocks:
 
 
 
-class cBlockMeshDict:
+class boundaryFaces:
 
-    class cStdout(cStdoutBase):
 
-        class cSubDict:
+    labels = list()
+    labelIndex = resizeList()
+
+    faces = list()
+    boundary = list()
+
+    def __init__(self, stdoutRef, verticesRef, blocksRef):
+
+        self.stdout = stdoutRef
+        self.vertices = verticesRef
+        self.blocks = blocksRef
+
+    def set(self, boundary, par1, par2=None):
+
+        if type(par1) == int and par2:
+
+            blockLabel = par1
+            blockFaceIndex = par2
+
+            blockLocalFace = self.blocks.topo.faceVertices[blockFaceIndex]
+            blockIndex = self.blocks.labelIndex[blockLabel]
+            blockVertices = self.blocks.blockVertices[blockIndex]
+            blockGlobalFace = [ blockVertices[i] for i in blockLocalFace ]
+
+            blockGlobalFaceList = [ blockGlobalFace ]
+
+        elif type(par1) == list and par2:
+
+            blockLabelList = par1
+            blockFaceIndex = par2
+
+            blockGlobalFaceList = []
+
+            for blockLabel in blockLabelList:
+
+                blockLocalFace = self.blocks.topo.faceVertices[blockFaceIndex]
+                blockIndex = self.blocks.labelIndex[blockLabel]
+                blockVertices = self.blocks.blockVertices[blockIndex]
+                blockGlobalFace = [ blockVertices[i] for i in blockLocalFace ]
+
+                blockGlobalFaceList.append(blockGlobalFace)
+
+        elif type(par1) == list and len(par1) == 4 and not par2:
+
+            blockGlobalFace = par1
+
+            blockGlobalFaceList = [ blockGlobalFace ]
+
+        else:
+
+            raise KeyError()
+
+        for blockGlobalFace in blockGlobalFaceList:
+
+            #try: # TODO Label was removed from parameters
+
+                #faceIndex = self.labels.index(label)
+
+                #self.boundary[faceIndex] = boundary
+                #self.faces[faceIndex] = blockGlobalFace
+
+            #except:
+
+            label = len(self.labels) # TODO
+
+            faceIndex = len(self.labels)
+            self.labels.append(label)
+            self.labelIndex[label] = faceIndex
+
+            self.boundary.append(boundary)
+            self.faces.append(blockGlobalFace)
+
+    def write(self):
+
+        self.stdout.write("faces")
+        self.stdout.write("(")
+        self.stdout.indentLevel += 1
+
+        for index, label in enumerate(self.labels):
+
+            if self.boundary[index] == self.stdout.subdict.boundary:
+
+                wstr  = "( "
+                for vertice in self.faces[index]:
+                    wstr += str(self.vertices.labelIndex[vertice]) + " "
+                wstr += ")"
+                self.stdout.write(wstr)
+
+        self.stdout.indentLevel -= 1
+        self.stdout.write(");")
+
+
+
+class blockMeshDict:
+
+    class stdoutDict(stdoutBase):
+
+        class subDictData:
 
             opened = False
-            boundary = False
+            boundary = None
 
-        def __init__(self):
-
-            self.subdict = self.cSubDict()
+        subdict = subDictData()
 
         def boundarySubDictHeader(self, name, typename="empty"):
 
-            self.subdict.boundary = True
+            self.subdict.boundary = name
             self.write(str(name))
             self.write("{")
             self.indentLevel += 1
             self.write("type" + " " + str(typename) + ";")
-            self.write("faces")
-            self.write("(")
-            self.indentLevel += 1
 
         def boundarySubDictFooter(self, line = True):
 
             self.indentLevel -= 1
-            self.write(");")
-            self.indentLevel -= 1
             self.write("}")
-            self.subdict.boundary = False
+            self.subdict.boundary = None
             if line: self.line()
 
         def boundarySubDict(self, name, typename="empty"):
@@ -225,7 +309,7 @@ class cBlockMeshDict:
             if self.subdict.boundary: self.boundarySubDictFooter()
             self.boundarySubDictHeader(name, typename)
             return True
-                
+
         def subDictHeader(self, name):
 
             self.subdict.opened = True
@@ -254,7 +338,7 @@ class cBlockMeshDict:
             wstr = "convertToMeters" + " " + str(scale) + ";"
             self.write(wstr)
             self.line()
-        
+
         def footer(self):
 
             if self.subdict.opened: self.subDictFooter()
@@ -263,9 +347,10 @@ class cBlockMeshDict:
 
     def __init__(self):
 
-        self.stdout = self.cStdout()
-        self.vertices = cVertices(self.stdout)
-        self.blocks = cBlocks(self.stdout, self.vertices)
+        self.stdout = self.stdoutDict()
+        self.vertices = vertices(self.stdout)
+        self.blocks = blocks(self.stdout, self.vertices)
+        self.boundaryFaces = boundaryFaces(self.stdout, self.vertices, self.blocks)
 
     def boundarySubDict(self, name, typename):
 
@@ -284,29 +369,6 @@ class cBlockMeshDict:
     def footer(self):
 
         self.stdout.footer()
-
-# --------------------------------------------------------------------------- #
-# --- Function definitions -------------------------------------------------- #
-# --------------------------------------------------------------------------- #
-
-def printFace(d):
-
-    if len(d) == 2:
-
-        block = d[0]
-        plane = d[1]
-        
-    if len(d) == 4:
-
-        faceVertices = d
-
-        s  = "( "
-        for vertice in faceVertices:
-            s += str(verticeMap[vertice]) + " "
-        s += ")"
-        printi(s)
-
-
 
 # --------------------------------------------------------------------------- #
 # --- End of module --------------------------------------------------------- #

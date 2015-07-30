@@ -26,7 +26,66 @@ geo_lz1 = 140.0
 geo_fz0 =  10.0
 geo_fz1 =  30.0
 
-d = cBlockMeshDict()
+# --------------------------------------------------------------------------- #
+# --- Data ------------------------------------------------------------------ #
+# --------------------------------------------------------------------------- #
+
+d = blockMeshDict()
+
+d.vertices.set( 0, [-geo_lx1, -geo_ly0, -geo_lz0])
+d.vertices.set( 1, [-geo_lx0, -geo_ly0, -geo_lz0])
+d.vertices.set( 2, [ geo_lx0, -geo_ly0, -geo_lz0])
+d.vertices.set( 3, [ geo_lx1, -geo_ly0, -geo_lz0])
+d.vertices.set( 4, [-geo_lx1,  geo_ly0, -geo_lz0])
+d.vertices.set( 5, [-geo_lx0,  geo_ly0, -geo_lz0])
+d.vertices.set( 6, [ geo_lx0,  geo_ly0, -geo_lz0])
+d.vertices.set( 7, [ geo_lx1,  geo_ly0, -geo_lz0])
+
+d.vertices.set( 8, [-geo_lx1, -geo_ly0,      0.0])
+d.vertices.set( 9, [-geo_lx0, -geo_ly0,      0.0])
+d.vertices.set(10, [ geo_lx0, -geo_ly0,      0.0])
+d.vertices.set(11, [ geo_lx1, -geo_ly0,      0.0])
+d.vertices.set(12, [-geo_lx1,  geo_ly0,      0.0])
+d.vertices.set(13, [-geo_lx0,  geo_ly0,      0.0])
+d.vertices.set(14, [ geo_lx0,  geo_ly0,      0.0])
+d.vertices.set(15, [ geo_lx1,  geo_ly0,      0.0])
+
+d.blocks.set(0, [  0,  1,  5,  4,  8,  9, 13, 12], zone="region_dynamic")
+d.blocks.set(1, [  1,  2,  6,  5,  9, 10, 14, 13], zone="region_dynamic")
+d.blocks.set(2, [  2,  3,  7,  6, 10, 11, 15, 14], zone="region_dynamic")
+
+d.vertices.set(16, [-geo_lx1, -geo_ly0,  geo_fz0])
+d.vertices.set(17, [-geo_lx0, -geo_ly0,  geo_fz0])
+d.vertices.set(18, [ geo_lx0, -geo_ly0,  geo_fz1])
+d.vertices.set(19, [ geo_lx1, -geo_ly0,  geo_fz1])
+d.vertices.set(20, [-geo_lx1,  geo_ly0,  geo_fz0])
+d.vertices.set(21, [-geo_lx0,  geo_ly0,  geo_fz0])
+d.vertices.set(22, [ geo_lx0,  geo_ly0,  geo_fz1])
+d.vertices.set(23, [ geo_lx1,  geo_ly0,  geo_fz1])
+
+d.blocks.set(3, [  8,  9, 13, 12, 16, 17, 21, 20], zone="region_dynamic")
+d.blocks.set(4, [  9, 10, 14, 13, 17, 18, 22, 21], zone="region_fluid")
+d.blocks.set(5, [ 10, 11, 15, 14, 18, 19, 23, 22], zone="region_dynamic")
+
+d.vertices.set(24, [-geo_lx1, -geo_ly0,  geo_lz1])
+d.vertices.set(25, [-geo_lx0, -geo_ly0,  geo_lz1])
+d.vertices.set(26, [ geo_lx0, -geo_ly0,  geo_lz1])
+d.vertices.set(27, [ geo_lx1, -geo_ly0,  geo_lz1])
+d.vertices.set(28, [-geo_lx1,  geo_ly0,  geo_lz1])
+d.vertices.set(29, [-geo_lx0,  geo_ly0,  geo_lz1])
+d.vertices.set(30, [ geo_lx0,  geo_ly0,  geo_lz1])
+d.vertices.set(31, [ geo_lx1,  geo_ly0,  geo_lz1])
+
+d.blocks.set(6, [ 16, 17, 21, 20, 24, 25, 29, 28], zone="region_dynamic")
+d.blocks.set(7, [ 17, 18, 22, 21, 25, 26, 30, 29], zone="region_dynamic")
+d.blocks.set(8, [ 18, 19, 23, 22, 26, 27, 31, 30], zone="region_dynamic")
+
+d.boundaryFaces.set("front", [0, 1, 2, 3, 4, 5, 6, 7, 8], "y-")
+d.boundaryFaces.set("back", [0, 1, 2, 3, 4, 5, 6, 7, 8], "y+")
+d.boundaryFaces.set("infinity", [0, 1, 2], "z-")
+d.boundaryFaces.set("infinity", [6, 7, 8], "z+")
+d.boundaryFaces.set("infinity", [0, 3, 6], "x-")
+d.boundaryFaces.set("infinity", [2, 5, 8], "x+")
 
 # --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
@@ -38,43 +97,33 @@ d.header(geo_scale)
 
 if d.subDict("vertices"):
 
-    d.vertices.set( 9, [-geo_lx0,  geo_ly0,     0.0])
-    d.vertices.set(10, [ geo_lx0,  geo_ly0,     0.0])
-    d.vertices.set(13, [-geo_lx0, -geo_ly0,     0.0])
-    d.vertices.set(14, [ geo_lx0, -geo_ly0,     0.0])
-    d.vertices.set(17, [-geo_lx0,  geo_ly0, geo_fz0])
-    d.vertices.set(18, [ geo_lx0,  geo_ly0, geo_fz1])
-    d.vertices.set(21, [-geo_lx0, -geo_ly0, geo_fz0])
-    d.vertices.set(22, [ geo_lx0, -geo_ly0, geo_fz1])
-
     d.vertices.write()
 
 if d.subDict("blocks"):
 
-    d.blocks.set(0, [ 9, 10, 14, 13, 17, 18, 22, 21], [70, 1, 20], zone="fluid")
-
     d.blocks.write()
 
-d.subDict("edges")
+if d.subDict("edges"):
+
+    pass
 
 if d.subDict("boundary"):
 
-    if d.boundarySubDict("front", "empty") and False:
+    if d.boundarySubDict("front", "empty"):
 
-         printFace([0, 1, 3, 2])
+        d.boundaryFaces.write()
 
-    if d.boundarySubDict("back", "empty") and False:
+    if d.boundarySubDict("back", "empty"):
 
-         printFace([5, 4, 6, 7])
+        d.boundaryFaces.write()
 
-    if d.boundarySubDict("infinity", "patch") and False:
+    if d.boundarySubDict("infinity", "patch"):
 
-         printFace([4, 0, 2, 6])
-         printFace([1, 5, 7, 3])
-         printFace([4, 5, 1, 0])
-         printFace([2, 3, 7, 6])
+        d.boundaryFaces.write()
 
-d.subDict("mergePatchPairs")
+if d.subDict("mergePatchPairs"):
+
+    pass
 
 # --------------------------------------------------------------------------- #
 
