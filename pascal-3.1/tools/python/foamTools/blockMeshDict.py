@@ -114,8 +114,8 @@ class blocks:
 
     topo = cBlockTopo()
 
-    blockVertices = list() #TODO Use indices and not labels
-    blockVerticeLabels = list() #TODO Use indices and not labels
+    blockVertices = list()
+    blockVerticeLabels = list()
     divider = list()
     gradings = list()
     zones = list()
@@ -140,19 +140,20 @@ class blocks:
         blockVertices = self.blockVertices[blockIndex]
         otherBlockVertices = self.blockVertices[otherBlockIndex]
 
-        sharedVertices = self._getSharedVertices(blockVertices, otherBlockVertices)
+        neighbourVertices = \
+            self._getSharedVertices(blockVertices, otherBlockVertices)
 
-        if len(sharedVertices) == 4:
+        if len(neighbourVertices) == 4:
 
-            return True, "face", sharedVertices
+            return True, "face", neighbourVertices
 
-        if len(sharedVertices) == 2:
+        if len(neighbourVertices) == 2:
 
-            return True, "edge", sharedVertices
+            return True, "edge", neighbourVertices
 
         else:
 
-            return False, None, sharedVertices
+            return False, None, neighbourVertices
 
     def test(self):
 
@@ -177,9 +178,9 @@ class blocks:
             self.divider[blockIndex] = divider
             self.gradings[blockIndex] = grading
             self.zones[blockIndex] = zone
-            self.neighbours[blockIndex] = []
-            self.neighbourFaces[blockIndex] = [None]*6
-            self.neighbourEdges[blockIndex] = [None]*12
+            self.neighbours[blockIndex] = None
+            self.neighbourFaces[blockIndex] = [None for i in range(6)]
+            self.neighbourEdges[blockIndex] = [None for i in range(12)]
 
         except:
 
@@ -192,33 +193,86 @@ class blocks:
             self.divider.append(divider)
             self.gradings.append(grading)
             self.zones.append(zone)
-            self.neighbours.append([])
-            self.neighbourFaces.append([None]*6)
-            self.neighbourEdges.append([None]*12)
+            self.neighbours.append(None)
+            self.neighbourFaces.append([None for i in range(6)])
+            self.neighbourEdges.append([None for i in range(12)])
 
+        # Identify all neighbours of current block
         for otherBlockIndex, otherBlockLabel in enumerate(self.labels):
 
             if not blockIndex == otherBlockIndex:
 
-                neighbours, neighbourType, sharedVertices = \
+                neighbours, neighbourType, neighbourVertices = \
                     self._getNeighbours(blockIndex, otherBlockIndex)
 
                 if neighbourType == "face":
 
                     try:
-                        neighboursIndex = \
-                            self.neighbours[blockIndex].index(otherBlockIndex)
+                        self.neighbours[blockIndex].index(otherBlockIndex)
                     except:
+                        if self.neighbours[blockIndex] == None:
+                            self.neighbours[blockIndex] = []
                         self.neighbours[blockIndex].append(otherBlockIndex)
-
                     try:
-                        otherNeighboursIndex = \
-                            self.neighbours[otherBlockIndex].index(blockIndex)
+                        self.neighbours[otherBlockIndex].index(blockIndex)
                     except:
+                        if self.neighbours[otherBlockIndex] == None:
+                            self.neighbours[otherBlockIndex] = []
                         self.neighbours[otherBlockIndex].append(blockIndex)
 
-        pass
-# TODO [High]: neighbours
+                    # Identify all face neighbours
+                    blockVertices = self.blockVertices[blockIndex]
+                    otherBlockVertices = self.blockVertices[otherBlockIndex]
+
+                    for localFaceIndex, localFace in enumerate(self.topo.faceVertices):
+
+                        globalFace = \
+                            [ blockVertices[i] for i in localFace ]
+                        otherGlobalFace = \
+                            [ otherBlockVertices[i] for i in localFace ]
+
+                        sharedFaceVertices = \
+                            self._getSharedVertices(neighbourVertices, globalFace)
+                        otherSharedFaceVertices = \
+                            self._getSharedVertices(neighbourVertices, otherGlobalFace)
+
+                        if len(sharedFaceVertices) == 4:
+                            self.neighbourFaces[blockIndex][localFaceIndex] = otherBlockIndex
+                        if len(otherSharedFaceVertices) == 4:
+                            self.neighbourFaces[otherBlockIndex][localFaceIndex] = blockIndex
+
+                    # Identify all edge neighbours
+                    blockVertices = self.blockVertices[blockIndex]
+                    otherBlockVertices = self.blockVertices[otherBlockIndex]
+
+                    for localEdgeIndex, localEdge in enumerate(self.topo.edgeVertices):
+
+                        globalEdge = \
+                            [ blockVertices[i] for i in localEdge ]
+                        otherGlobalEdge = \
+                            [ otherBlockVertices[i] for i in localEdge ]
+                        
+                        sharedEdgeVertices = \
+                            self._getSharedVertices(neighbourVertices, globalEdge)
+                        otherSharedEdgeVertices = \
+                            self._getSharedVertices(neighbourVertices, otherGlobalEdge)
+
+                        if len(sharedEdgeVertices) == 2:
+                            try:
+                                self.neighbourEdges[blockIndex][localEdgeIndex].index(otherBlockIndex)
+                            except:
+                                if self.neighbourEdges[blockIndex][localEdgeIndex] == None:
+                                    self.neighbourEdges[blockIndex][localEdgeIndex] = []
+                                self.neighbourEdges[blockIndex][localEdgeIndex].append(otherBlockIndex)
+                        if len(otherSharedEdgeVertices) == 2:
+                            try:
+                                self.neighbourEdges[otherBlockIndex][localEdgeIndex].index(blockIndex)
+                            except:
+                                if self.neighbourEdges[otherBlockIndex][localEdgeIndex] == None:
+                                    self.neighbourEdges[otherBlockIndex][localEdgeIndex] = []
+                                self.neighbourEdges[otherBlockIndex][localEdgeIndex].append(blockIndex)
+
+# TODO [High]: References???
 
     def write(self):
 
