@@ -16,13 +16,13 @@ import math as m
 geo_scale = 1e-3
 
 geo_lx0 =  35.0
-geo_lx1 = 150.0
+geo_lx1 = 145.0
 
-geo_ly0 =  10.0
-#geo_ly0 =   0.5
+#geo_ly0 =  10.0
+geo_ly0 =   1.0
 
 geo_lz0 =  60.0
-geo_lz1 = 140.0
+geo_lz1 = 145.0
 
 geo_fz0 =  10.0
 geo_fz1 =  30.0
@@ -51,27 +51,14 @@ d.vertices.set(13, [-geo_lx0,  geo_ly0,      0.0])
 d.vertices.set(14, [ geo_lx0,  geo_ly0,      0.0])
 d.vertices.set(15, [ geo_lx1,  geo_ly0,      0.0])
 
-#d.blocks.set(0, [  0,  1,  5,  4,  8,  9, 13, 12], zone="region_dynamic")
-#d.blocks.set(1, [  1,  2,  6,  5,  9, 10, 14, 13], zone="region_dynamic")
-#d.blocks.set(2, [  2,  3,  7,  6, 10, 11, 15, 14], zone="region_dynamic")
-
-d.vertices.set(20, [-geo_lx1,  geo_ly0,  geo_fz0])
-d.vertices.set(21, [-geo_lx0,  geo_ly0,  geo_fz0])
-d.vertices.set(22, [ geo_lx0,  geo_ly0,  geo_fz1])
-d.vertices.set(23, [ geo_lx1,  geo_ly0,  geo_fz1])
-
 d.vertices.set(16, [-geo_lx1, -geo_ly0,  geo_fz0])
 d.vertices.set(17, [-geo_lx0, -geo_ly0,  geo_fz0])
 d.vertices.set(18, [ geo_lx0, -geo_ly0,  geo_fz1])
 d.vertices.set(19, [ geo_lx1, -geo_ly0,  geo_fz1])
-#d.vertices.set(20, [-geo_lx1,  geo_ly0,  geo_fz0])
-#d.vertices.set(21, [-geo_lx0,  geo_ly0,  geo_fz0])
-#d.vertices.set(22, [ geo_lx0,  geo_ly0,  geo_fz1])
-#d.vertices.set(23, [ geo_lx1,  geo_ly0,  geo_fz1])
-
-d.blocks.set(3, [  8,  9, 13, 12, 16, 17, 21, 20], zone="region_dynamic")
-d.blocks.set(4, [  9, 10, 14, 13, 17, 18, 22, 21], zone="region_fluid")
-d.blocks.set(5, [ 10, 11, 15, 14, 18, 19, 23, 22], zone="region_dynamic")
+d.vertices.set(20, [-geo_lx1,  geo_ly0,  geo_fz0])
+d.vertices.set(21, [-geo_lx0,  geo_ly0,  geo_fz0])
+d.vertices.set(22, [ geo_lx0,  geo_ly0,  geo_fz1])
+d.vertices.set(23, [ geo_lx1,  geo_ly0,  geo_fz1])
 
 d.vertices.set(24, [-geo_lx1, -geo_ly0,  geo_lz1])
 d.vertices.set(25, [-geo_lx0, -geo_ly0,  geo_lz1])
@@ -82,23 +69,34 @@ d.vertices.set(29, [-geo_lx0,  geo_ly0,  geo_lz1])
 d.vertices.set(30, [ geo_lx0,  geo_ly0,  geo_lz1])
 d.vertices.set(31, [ geo_lx1,  geo_ly0,  geo_lz1])
 
-d.blocks.set(6, [ 16, 17, 21, 20, 24, 25, 29, 28], zone="region_dynamic")
-d.blocks.set(7, [ 17, 18, 22, 21, 25, 26, 30, 29], zone="region_dynamic")
-d.blocks.set(8, [ 18, 19, 23, 22, 26, 27, 31, 30], zone="region_dynamic")
+# Blocks starting with 1 (but this is arbitrary)
+d.blocks.set(1, [  0,  1,  5,  4,  8,  9, 13, 12], zone="region_dynamic")
+d.blocks.set(2, [  1,  2,  6,  5,  9, 10, 14, 13], zone="region_dynamic")
+d.blocks.set(3, [  2,  3,  7,  6, 10, 11, 15, 14], zone="region_dynamic")
 
-d.blocks.set(0, [  0,  1,  5,  4,  8,  9, 13, 12], zone="region_dynamic")
-d.blocks.set(1, [  1,  2,  6,  5,  9, 10, 14, 13], zone="region_dynamic")
-d.blocks.set(2, [  2,  3,  7,  6, 10, 11, 15, 14], zone="region_dynamic")
+d.blocks.set(4, [  8,  9, 13, 12, 16, 17, 21, 20], zone="region_dynamic")
+d.blocks.set(5, [  9, 10, 14, 13, 17, 18, 22, 21], zone="region_fluid")
+d.blocks.set(6, [ 10, 11, 15, 14, 18, 19, 23, 22], zone="region_dynamic")
 
-d.boundaryFaces.set("front", [0, 1, 2, 3, 4, 5, 6, 7, 8], "y-")
-d.boundaryFaces.set("back", [0, 1, 2, 3, 4, 5, 6, 7, 8], "y+")
-d.boundaryFaces.set("infinity", [0, 1, 2], "z-")
-d.boundaryFaces.set("infinity", [6, 7, 8], "z+")
-d.boundaryFaces.set("infinity", [0, 3, 6], "x-")
-d.boundaryFaces.set("infinity", [2, 5, 8], "x+")
+d.blocks.set(7, [ 16, 17, 21, 20, 24, 25, 29, 28], zone="region_dynamic")
+d.blocks.set(8, [ 17, 18, 22, 21, 25, 26, 30, 29], zone="region_dynamic")
+d.blocks.set(9, [ 18, 19, 23, 22, 26, 27, 31, 30], zone="region_dynamic")
 
-d.blocks.test()
-quit()
+
+d.blocks.setDivider(4, "x", 65)
+d.blocks.setDivider(6, "x", 65)
+d.blocks.setDivider(2, "z", 30)
+d.blocks.setDivider(8, "z", 60)
+d.blocks.setDivider(5, [35, 1, 10])
+
+d.boundaryFaces.set("front", [1, 2, 3, 4, 5, 6, 7, 8, 9], "y-")
+d.boundaryFaces.set("back", [1, 2, 3, 4, 5, 6, 7, 8, 9], "y+")
+d.boundaryFaces.set("infinity", [1, 2, 3], "z-")
+d.boundaryFaces.set("infinity", [7, 8, 9], "z+")
+d.boundaryFaces.set("infinity", [1, 4, 7], "x-")
+d.boundaryFaces.set("infinity", [3, 6, 9], "x+")
+
+#quit()
 
 # --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
