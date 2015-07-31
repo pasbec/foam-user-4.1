@@ -350,7 +350,7 @@ class blocks:
 
         if not divider: divider = [1,1,1]
 
-        if not grading: grading = [1,1,1]
+        if not grading: grading = [1.0,1.0,1.0]
 
         # ------------------------------------------------------------------- #
 
@@ -387,6 +387,8 @@ class blocks:
         self._setNeighbourData(blockIndex)
 
     # ----------------------------------------------------------------------- #
+
+# TODO [High]: Split "setDivider" into smaller pieces
 
     def setDivider(self, blockLabels, par1, par2=None):
 
@@ -437,7 +439,7 @@ class blocks:
                 # Set divide for current block in given direction
                 self.divider[blockIndex][blockDivideBase] = blockDivide
 
-                # Get blockDiver from current block
+                # Get block divider from current block
                 blockDivider = self.divider[blockIndex]
 
         # ------------------------------------------------------------------- #
@@ -486,10 +488,10 @@ class blocks:
                         self.topo.faceOpposites[thisFaceIndex]
                     thisBlockIndex = nextBlockIndex
 
-             # Sync divider in all planes
-            for seedBlockIndix in seedBlockIndices:
+             # Sync divider in all planes (dircetions for all seed blocks)
+            for seedBlockIndex in seedBlockIndices:
 
-                seedBlockDivider = self.divider[seedBlockIndix]
+                seedBlockDivider = self.divider[seedBlockIndex]
 
                 # Sync divider in all directions
                 for faceIndex in self.topo.faces:
@@ -506,7 +508,7 @@ class blocks:
                     seedBlockDivideP1 = seedBlockDivider[faceBaseP1]
 
                     thisFaceIndex = faceIndex
-                    thisBlockIndex = seedBlockIndix
+                    thisBlockIndex = seedBlockIndex
 
                     # Hop in current direction given by faceBase
                     while True:
