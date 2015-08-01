@@ -145,15 +145,13 @@ class blocks:
 
         baseVertices = [[0,1],[0,3],[0,4]]
 
+        baseFaces = [[0,1],[2,3],[4,5]]
+
         baseTags = {"x": 0, "y": 1, "z": 2}
 
         baseGetTags = {0: "x", 1: "y", 2: "z"}
 
-        edges = [i for i in range(12)]
-
-        edgeVertices = [[0,1],[3,2],[7,6],[4,5],
-                        [0,3],[1,2],[5,6],[4,7],
-                        [0,4],[1,5],[2,6],[3,7]]
+        vertices = [i for i in range(8)]
 
         faces = [i for i in range(6)]
 
@@ -175,13 +173,15 @@ class blocks:
                            2: "y", 3: "y",
                            4: "z", 5: "z"}
 
-        faceOpposites = {0: 1, 1: 0,
-                         2: 3, 3: 2,
-                         4: 5, 5: 4}
+        faceOpposites = [1,0,3,2,5,4]
 
-        faceBase = {0: 0, 1: 0,
-                    2: 1, 3: 1,
-                    4: 2, 5: 2}
+        faceBase = [0,0,1,1,2,2]
+
+        edges = [i for i in range(12)]
+
+        edgeVertices = [[0,1],[3,2],[7,6],[4,5],
+                        [0,3],[1,2],[5,6],[4,7],
+                        [0,4],[1,5],[2,6],[3,7]]
 
     # ----------------------------------------------------------------------- #
 
@@ -392,6 +392,85 @@ class blocks:
 
     def setDivider(self, blockLabels, par1, par2=None):
 
+        processedBlocks = [False for i in self.labels]
+
+        def setProcessedBlock(blockIndex):
+
+            processedBlocks[blockIndex] = True
+
+        def getProcessedBlock(blockIndex):
+
+            return processedBlocks[blockIndex]
+
+        def syncBlocks(blockIndex, blockDivider, baseIndex):
+
+            print ">> CURRENT", blockIndex
+            print
+
+            faces = self.topo.faces
+            baseFaces = self.topo.baseFaces[baseIndex]
+            crossBaseFaces = \
+                [f for i, f in enumerate(faces) if i not in baseFaces]
+
+            print "   blockIndex =", blockIndex
+            print "   blockDivide =", blockDivide
+            print "   baseIndex =", baseIndex
+            print
+            print "   baseFaces =", baseFaces
+            print "   crossBaseFaces =", crossBaseFaces
+            print
+            print "   >> WRITE"
+            print
+
+            # Write divider
+            self.divider[blockIndex][baseIndex] = blockDivider[baseIndex]
+
+            setProcessedBlock(blockIndex)
+
+            for faceIndex in crossBaseFaces:
+
+                # Get next neighbour and exit if there is none
+                nextBlockIndex = \
+                    self.faceNeighbours[blockIndex][faceIndex]
+
+                print "   faceIndex =", faceIndex
+                print "   nextBlockIndex =", nextBlockIndex
+                if not nextBlockIndex == None: \
+                    print "   getProcessedBlock(nextBlockIndex) =", \
+                    getProcessedBlock(nextBlockIndex)
+                print
+
+                if nextBlockIndex == None or \
+                    getProcessedBlock(nextBlockIndex) == True:
+
+                    print "   >> CONTINUE"
+                    print
+                    continue
+
+                # Get neighbour face index
+                nextFaceIndex = \
+                    self.faceNeighbours[nextBlockIndex].index(blockIndex)
+
+
+                # Use this blockDivider for next block divider
+                nextBlockDivider = blockDivider
+
+                # Get neighbour divide bas index
+# TODO [High]: Currently we assume that next block has SAME orientation! Fix this
+                nextBaseIndex = baseIndex
+
+                print "   nextFaceIndex =", nextFaceIndex
+                print "   nextBaseIndex =", nextBaseIndex
+                print "   nextBlockDivider =", nextBlockDivider
+                print
+
+                print "   >> HOP"
+                print
+
+                syncBlocks(nextBlockIndex, nextBlockDivider, nextBaseIndex)
+
+        # ------------------------------------------------------------------- #
+
         if type(blockLabels) == int: blockLabels = [ blockLabels ]
 
         if not type(blockLabels) == list: raise KeyError()
@@ -409,6 +488,10 @@ class blocks:
 
                     # Set divider for current block
                     self.divider[blockIndex] = blockDivider
+
+                    # Sync blocks in all directions
+                    for i in self.topo.base:
+                        syncBlocks(blockIndex, self.divider[blockIndex], i)
 
                 else: raise KeyError()
 
@@ -439,97 +522,8 @@ class blocks:
                 # Set divide for current block in given direction
                 self.divider[blockIndex][blockDivideBase] = blockDivide
 
-                # Get block divider from current block
-                blockDivider = self.divider[blockIndex]
-
-        # ------------------------------------------------------------------- #
-
-            # Seed blocks
-            seedBlockIndices = []
-
-            # Sync divider in all directions
-            for faceIndex in self.topo.faces:
-
-                # Get current and perpendicular directions
-                faceBase = self.topo.faceBase[faceIndex]
-                faceBasePerpendicular = \
-                    [ i for i in self.topo.base if not i == faceBase ]
-                faceBaseP0 = faceBasePerpendicular[0]
-                faceBaseP1 = faceBasePerpendicular[1]
-
-                # Extract divider in othogonal directions
-                blockDivideP0 = blockDivider[faceBaseP0]
-                blockDivideP1 = blockDivider[faceBaseP1]
-
-                thisFaceIndex = faceIndex
-                thisBlockIndex = blockIndex
-
-                # Hop in current direction given by faceBase
-                while True:
-
-                    # Set divide for current block in perpendicular directions
-                    # of current direction
-                    self.divider[thisBlockIndex][faceBaseP0] = blockDivideP0
-                    self.divider[thisBlockIndex][faceBaseP1] = blockDivideP1
-
-                    # Get next neighbour and exit if there is none
-                    nextBlockIndex = \
-                        self.faceNeighbours[thisBlockIndex][thisFaceIndex]
-
-                    if nextBlockIndex == None: break
-
-                    # Record seed blocks
-                    seedBlockIndices.append(nextBlockIndex)
-
-                    # Update indices for next block to become current
-                    thisFaceIndex = \
-                        self.faceNeighbours[nextBlockIndex].index(thisBlockIndex)
-                    thisFaceIndex = \
-                        self.topo.faceOpposites[thisFaceIndex]
-                    thisBlockIndex = nextBlockIndex
-
-             # Sync divider in all planes (dircetions for all seed blocks)
-            for seedBlockIndex in seedBlockIndices:
-
-                seedBlockDivider = self.divider[seedBlockIndex]
-
-                # Sync divider in all directions
-                for faceIndex in self.topo.faces:
-
-                    # Get current and perpendicular directions
-                    faceBase = self.topo.faceBase[faceIndex]
-                    faceBasePerpendicular = \
-                        [ i for i in self.topo.base if not i == faceBase ]
-                    faceBaseP0 = faceBasePerpendicular[0]
-                    faceBaseP1 = faceBasePerpendicular[1]
-
-                    # Extract divider in othogonal directions
-                    seedBlockDivideP0 = seedBlockDivider[faceBaseP0]
-                    seedBlockDivideP1 = seedBlockDivider[faceBaseP1]
-
-                    thisFaceIndex = faceIndex
-                    thisBlockIndex = seedBlockIndex
-
-                    # Hop in current direction given by faceBase
-                    while True:
-
-                        # Set divide for current block in perpendicular directions
-                        # of current direction
-                        self.divider[thisBlockIndex][faceBaseP0] = seedBlockDivideP0
-                        self.divider[thisBlockIndex][faceBaseP1] = seedBlockDivideP1
-
-                        # Get next neighbour and exit if there is none
-                        nextBlockIndex = \
-                            self.faceNeighbours[thisBlockIndex][thisFaceIndex]
-
-                        if nextBlockIndex == None: break
-
-                        # Update indices for next block to become current
-                        thisFaceIndex = \
-                            self.faceNeighbours[nextBlockIndex].index(thisBlockIndex)
-                        thisFaceIndex = \
-                            self.topo.faceOpposites[thisFaceIndex]
-                        thisBlockIndex = nextBlockIndex
+                # Sync blocks in direction of blockDivideBase
+                syncBlocks(blockIndex, self.divider[blockIndex], blockDivideBase)
 
     # ----------------------------------------------------------------------- #
 
