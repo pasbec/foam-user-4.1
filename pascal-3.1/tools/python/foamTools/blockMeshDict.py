@@ -147,6 +147,8 @@ class blocks:
 
         baseFaces = [[0,1],[2,3],[4,5]]
 
+        baseEdges = [[0,1,2,3],[4,5,6,7],[8,9,10,11]]
+
         baseTags = {"x": 0, "y": 1, "z": 2}
 
         baseGetTags = {0: "x", 1: "y", 2: "z"}
@@ -155,9 +157,17 @@ class blocks:
 
         faces = [i for i in range(6)]
 
-        faceVertices = [[0,3,7,4], [1,2,6,5],
-                        [0,1,5,4], [2,3,7,6],
-                        [0,1,2,3], [4,5,6,7]]
+        faceBase = [0,0,1,1,2,2]
+
+        faceOpposites = [1,0,3,2,5,4]
+
+        faceVertices = [[0,3,7,4],[1,2,6,5],
+                        [0,1,5,4],[2,3,7,6],
+                        [0,1,2,3],[4,5,6,7]]
+
+        faceEdges = [[4,11,7,8],[5,10,6,9],
+                     [0,9,3,8],[1,10,2,11],
+                     [0,5,1,4],[3,6,2,7]]
 
         faceTags = {"x-": 0, "x+": 1,
                     "y-": 2, "y+": 3,
@@ -173,15 +183,17 @@ class blocks:
                            2: "y", 3: "y",
                            4: "z", 5: "z"}
 
-        faceOpposites = [1,0,3,2,5,4]
-
-        faceBase = [0,0,1,1,2,2]
-
         edges = [i for i in range(12)]
+
+        edgeBase = [0,0,0,0,1,1,1,1,2,2,2,2]
 
         edgeVertices = [[0,1],[3,2],[7,6],[4,5],
                         [0,3],[1,2],[5,6],[4,7],
                         [0,4],[1,5],[2,6],[3,7]]
+
+        edgeFaces = [[2,4],[3,4],[3,5],[2,5],
+                     [0,4],[1,4],[1,5],[0,5],
+                     [0,2],[1,2],[1,3],[0,3]]
 
     # ----------------------------------------------------------------------- #
 
@@ -220,16 +232,16 @@ class blocks:
 
     # ----------------------------------------------------------------------- #
 
-    def _getNeighbours(self, blockIndex, otherBlockIndex):
+    def _getNeighbours(self, block, otherBlock):
 
-        if not (type(blockIndex) == int \
-            and type(otherBlockIndex) == int):
+        if not (type(block) == int \
+            and type(otherBlock) == int):
 
             raise KeyError()
 
         # Get both sets of block vertices
-        blockVertices = self.blockVertices[blockIndex]
-        otherBlockVertices = self.blockVertices[otherBlockIndex]
+        blockVertices = self.blockVertices[block]
+        otherBlockVertices = self.blockVertices[otherBlock]
 
         # Find shared vertices
         neighbourVertices = \
@@ -254,33 +266,33 @@ class blocks:
 
 # TODO [High]: Split "_setNeighbourData" into smaller pieces
 
-    def _setNeighbourData(self, blockIndex):
+    def _setNeighbourData(self, block):
 
-        for otherBlockIndex, otherBlockLabel in enumerate(self.labels):
+        for otherBlock, otherBlockLabel in enumerate(self.labels):
 
-            if not blockIndex == otherBlockIndex:
+            if not block == otherBlock:
 
                 neighbours, neighbourType, neighbourVertices = \
-                    self._getNeighbours(blockIndex, otherBlockIndex)
+                    self._getNeighbours(block, otherBlock)
 
                 if neighbourType == "face":
 
                     try:
-                        self.neighbours[blockIndex].index(otherBlockIndex)
+                        self.neighbours[block].index(otherBlock)
                     except:
-                        if self.neighbours[blockIndex] == None:
-                            self.neighbours[blockIndex] = []
-                        self.neighbours[blockIndex].append(otherBlockIndex)
+                        if self.neighbours[block] == None:
+                            self.neighbours[block] = []
+                        self.neighbours[block].append(otherBlock)
                     try:
-                        self.neighbours[otherBlockIndex].index(blockIndex)
+                        self.neighbours[otherBlock].index(block)
                     except:
-                        if self.neighbours[otherBlockIndex] == None:
-                            self.neighbours[otherBlockIndex] = []
-                        self.neighbours[otherBlockIndex].append(blockIndex)
+                        if self.neighbours[otherBlock] == None:
+                            self.neighbours[otherBlock] = []
+                        self.neighbours[otherBlock].append(block)
 
                     # Identify all face neighbours
-                    blockVertices = self.blockVertices[blockIndex]
-                    otherBlockVertices = self.blockVertices[otherBlockIndex]
+                    blockVertices = self.blockVertices[block]
+                    otherBlockVertices = self.blockVertices[otherBlock]
 
                     for localFaceIndex, localFace in enumerate(self.topo.faceVertices):
 
@@ -295,13 +307,13 @@ class blocks:
                             self._getSharedVertices(neighbourVertices, otherGlobalFace)
 
                         if len(sharedFaceVertices) == 4:
-                            self.faceNeighbours[blockIndex][localFaceIndex] = otherBlockIndex
+                            self.faceNeighbours[block][localFaceIndex] = otherBlock
                         if len(otherSharedFaceVertices) == 4:
-                            self.faceNeighbours[otherBlockIndex][localFaceIndex] = blockIndex
+                            self.faceNeighbours[otherBlock][localFaceIndex] = block
 
                     # Identify all edge neighbours
-                    blockVertices = self.blockVertices[blockIndex]
-                    otherBlockVertices = self.blockVertices[otherBlockIndex]
+                    blockVertices = self.blockVertices[block]
+                    otherBlockVertices = self.blockVertices[otherBlock]
 
                     for localEdgeIndex, localEdge in enumerate(self.topo.edgeVertices):
 
@@ -317,18 +329,18 @@ class blocks:
 
                         if len(sharedEdgeVertices) == 2:
                             try:
-                                self.edgeNeighbours[blockIndex][localEdgeIndex].index(otherBlockIndex)
+                                self.edgeNeighbours[block][localEdgeIndex].index(otherBlock)
                             except:
-                                if self.edgeNeighbours[blockIndex][localEdgeIndex] == None:
-                                    self.edgeNeighbours[blockIndex][localEdgeIndex] = []
-                                self.edgeNeighbours[blockIndex][localEdgeIndex].append(otherBlockIndex)
+                                if self.edgeNeighbours[block][localEdgeIndex] == None:
+                                    self.edgeNeighbours[block][localEdgeIndex] = []
+                                self.edgeNeighbours[block][localEdgeIndex].append(otherBlock)
                         if len(otherSharedEdgeVertices) == 2:
                             try:
-                                self.edgeNeighbours[otherBlockIndex][localEdgeIndex].index(blockIndex)
+                                self.edgeNeighbours[otherBlock][localEdgeIndex].index(block)
                             except:
-                                if self.edgeNeighbours[otherBlockIndex][localEdgeIndex] == None:
-                                    self.edgeNeighbours[otherBlockIndex][localEdgeIndex] = []
-                                self.edgeNeighbours[otherBlockIndex][localEdgeIndex].append(blockIndex)
+                                if self.edgeNeighbours[otherBlock][localEdgeIndex] == None:
+                                    self.edgeNeighbours[otherBlock][localEdgeIndex] = []
+                                self.edgeNeighbours[otherBlock][localEdgeIndex].append(block)
 
     # ----------------------------------------------------------------------- #
 
@@ -357,23 +369,23 @@ class blocks:
         # Block already exists
         try:
 
-            blockIndex = self.labels.index(label)
+            block = self.labels.index(label)
 
-            self.blockVertices[blockIndex] = blockVertices
-            self.blockVerticeLabels[blockIndex] = verticeLabels
-            self.divider[blockIndex] = divider
-            self.gradings[blockIndex] = grading
-            self.zones[blockIndex] = zone
-            self.neighbours[blockIndex] = None
-            self.faceNeighbours[blockIndex] = [None for i in range(6)]
-            self.edgeNeighbours[blockIndex] = [None for i in range(12)]
+            self.blockVertices[block] = blockVertices
+            self.blockVerticeLabels[block] = verticeLabels
+            self.divider[block] = divider
+            self.gradings[block] = grading
+            self.zones[block] = zone
+            self.neighbours[block] = None
+            self.faceNeighbours[block] = [None for i in range(6)]
+            self.edgeNeighbours[block] = [None for i in range(12)]
 
         # New block
         except:
 
-            blockIndex = len(self.labels)
+            block = len(self.labels)
             self.labels.append(label)
-            self.labelIndex[label] = blockIndex
+            self.labelIndex[label] = block
 
             self.blockVertices.append(blockVertices)
             self.blockVerticeLabels.append(verticeLabels)
@@ -384,7 +396,7 @@ class blocks:
             self.faceNeighbours.append([None for i in range(6)])
             self.edgeNeighbours.append([None for i in range(12)])
 
-        self._setNeighbourData(blockIndex)
+        self._setNeighbourData(block)
 
     # ----------------------------------------------------------------------- #
 
@@ -394,80 +406,104 @@ class blocks:
 
         processedBlocks = [False for i in self.labels]
 
-        def setProcessedBlock(blockIndex):
+        def setProcessedBlock(block):
 
-            processedBlocks[blockIndex] = True
+            processedBlocks[block] = True
 
-        def getProcessedBlock(blockIndex):
+        def getProcessedBlock(block):
 
-            return processedBlocks[blockIndex]
+            return processedBlocks[block]
 
-        def syncBlocks(blockIndex, blockDivider, baseIndex):
+        def syncBlocks(block, blockDivider, base):
 
-            print ">> CURRENT", blockIndex
+            print ">> CURRENT", block
             print
 
             faces = self.topo.faces
-            baseFaces = self.topo.baseFaces[baseIndex]
+            baseFaces = self.topo.baseFaces[base]
             crossBaseFaces = \
                 [f for i, f in enumerate(faces) if i not in baseFaces]
 
-            print "   blockIndex =", blockIndex
+            print "   block =", block
             print "   blockDivide =", blockDivide
-            print "   baseIndex =", baseIndex
-            print
+            print "   base =", base
             print "   baseFaces =", baseFaces
             print "   crossBaseFaces =", crossBaseFaces
             print
             print "   >> WRITE"
             print
 
-            # Write divider
-            self.divider[blockIndex][baseIndex] = blockDivider[baseIndex]
+            # Write
+            self.divider[block][base] = blockDivider[base]
 
-            setProcessedBlock(blockIndex)
+            setProcessedBlock(block)
 
-            for faceIndex in crossBaseFaces:
+            # Sync
+            for face in crossBaseFaces:
+
+                # Get face vertices
+                faceVertices = self.topo.faceVertices[face]
+                faceVerticeLabels = \
+                    [ self.blockVertices[block][v] for v in faceVertices]
 
                 # Get next neighbour and exit if there is none
-                nextBlockIndex = \
-                    self.faceNeighbours[blockIndex][faceIndex]
+                nextBlock = self.faceNeighbours[block][face]
 
-                print "   faceIndex =", faceIndex
-                print "   nextBlockIndex =", nextBlockIndex
-                if not nextBlockIndex == None: \
-                    print "   getProcessedBlock(nextBlockIndex) =", \
-                    getProcessedBlock(nextBlockIndex)
+                print "   face =", face
+                print "   faceVertices =", faceVertices
+                print "   faceVerticeLabels =", faceVerticeLabels
+                print "   nextBlock =", nextBlock
+                if not nextBlock == None: print "   getProcessedBlock(nextBlock) =", getProcessedBlock(nextBlock)
                 print
 
-                if nextBlockIndex == None or \
-                    getProcessedBlock(nextBlockIndex) == True:
+                if nextBlock == None or \
+                    getProcessedBlock(nextBlock) == True:
 
                     print "   >> CONTINUE"
                     print
                     continue
 
-                # Get neighbour face index
-                nextFaceIndex = \
-                    self.faceNeighbours[nextBlockIndex].index(blockIndex)
+                print "   self.faceNeighbours[block] =", self.faceNeighbours[block]
+                print "   self.edgeNeighbours[block] =", self.edgeNeighbours[block]
+                print "   self.faceNeighbours[nextBlock] =", self.faceNeighbours[nextBlock]
+                print "   self.edgeNeighbours[nextBlock] =", self.edgeNeighbours[nextBlock]
+                print
 
+                # Get next face index
+                nextFace = self.faceNeighbours[nextBlock].index(block)
+
+                # Get next face vertices
+                nextFaceVertices = self.topo.faceVertices[nextFace]
+                nextFaceVerticeLabels = \
+                    [ self.blockVertices[nextBlock][v] for v in nextFaceVertices]
+
+                # Calculate base transformation map
+# TODO [High]: Currently we assume that next block has SAME orientation! Fix this
+                nextBaseTransform = [None for i in self.topo.faces]
+
+                nextBaseTransform[self.topo.faceOpposites[face]] = nextFace
+                nextBaseTransform[face] = self.topo.faceOpposites[nextFace]
 
                 # Use this blockDivider for next block divider
+# TODO [High]: Currently we assume that next block has SAME orientation! Fix this
                 nextBlockDivider = blockDivider
 
                 # Get neighbour divide bas index
 # TODO [High]: Currently we assume that next block has SAME orientation! Fix this
-                nextBaseIndex = baseIndex
+                nextBase = base
 
-                print "   nextFaceIndex =", nextFaceIndex
-                print "   nextBaseIndex =", nextBaseIndex
+                print "   nextFace =", nextFace
+                print "   nextFaceVertices =", nextFaceVertices
+                print "   nextFaceVerticeLabels =", nextFaceVerticeLabels
+                print "   nextBaseTransform =", nextBaseTransform
                 print "   nextBlockDivider =", nextBlockDivider
+                print "   nextBase =", nextBase
                 print
 
                 print "   >> HOP"
                 print
 
-                syncBlocks(nextBlockIndex, nextBlockDivider, nextBaseIndex)
+#                syncBlocks(nextBlock, nextBlockDivider, nextBase)
 
         # ------------------------------------------------------------------- #
 
@@ -475,9 +511,9 @@ class blocks:
 
         if not type(blockLabels) == list: raise KeyError()
 
-        blockIndices = [ self.labelIndex[l] for l in blockLabels ]
+        blocks = [ self.labelIndex[l] for l in blockLabels ]
 
-        for blockIndex in blockIndices:
+        for block in blocks:
 
             # Divider given
             if not par2:
@@ -487,11 +523,11 @@ class blocks:
                     blockDivider = par1
 
                     # Set divider for current block
-                    self.divider[blockIndex] = blockDivider
+                    self.divider[block] = blockDivider
 
                     # Sync blocks in all directions
-                    for i in self.topo.base:
-                        syncBlocks(blockIndex, self.divider[blockIndex], i)
+                    for b in self.topo.base:
+                        syncBlocks(block, self.divider[block], b)
 
                 else: raise KeyError()
 
@@ -520,10 +556,10 @@ class blocks:
                 else: raise KeyError()
 
                 # Set divide for current block in given direction
-                self.divider[blockIndex][blockDivideBase] = blockDivide
+                self.divider[block][blockDivideBase] = blockDivide
 
                 # Sync blocks in direction of blockDivideBase
-                syncBlocks(blockIndex, self.divider[blockIndex], blockDivideBase)
+                syncBlocks(block, self.divider[block], blockDivideBase)
 
     # ----------------------------------------------------------------------- #
 
@@ -531,7 +567,7 @@ class blocks:
 
         def write(string): sys.stdout.write(string)
 
-        for blockIndex, blockLabel in enumerate(self.labels):
+        for block, blockLabel in enumerate(self.labels):
 
             self.stdout.write("hex", end="")
 
@@ -540,7 +576,7 @@ class blocks:
         # ------------------------------------------------------------------- #
 
             wstr  = "( "
-            for vertice in self.blockVertices[blockIndex]:
+            for vertice in self.blockVertices[block]:
                 wstr += str(vertice) + " "
             wstr += ")"
             write(wstr)
@@ -549,14 +585,14 @@ class blocks:
 
         # ------------------------------------------------------------------- #
 
-            zone = self.zones[blockIndex]
+            zone = self.zones[block]
             if zone:
                 write(str(zone) + " ")
 
         # ------------------------------------------------------------------- #
 
             wstr  = "( "
-            for divide in self.divider[blockIndex]:
+            for divide in self.divider[block]:
                 wstr += str(divide) + " "
             wstr += ")"
             write(wstr)
@@ -565,9 +601,9 @@ class blocks:
 
         # ------------------------------------------------------------------- #
 
-            if len(self.gradings[blockIndex]) == 3:
+            if len(self.gradings[block]) == 3:
                 write("simpleGrading")
-            elif len(self.gradings[blockIndex]) == 12:
+            elif len(self.gradings[block]) == 12:
                 write("edgeGrading")
 
             write(" ")
@@ -575,7 +611,7 @@ class blocks:
         # ------------------------------------------------------------------- #
 
             wstr  = "( "
-            for grading in self.gradings[blockIndex]:
+            for grading in self.gradings[block]:
                 wstr += str(grading) + " "
             wstr += ")"
             self.stdout.write(wstr, ind=False)
@@ -591,29 +627,27 @@ class blocks:
 
             if not type(blockLabels) == list: raise KeyError()
 
-            blockIndices = [ self.labelIndex[l] for l in blockLabels ]
-
-            localBlockIndices = blockIndices
+            printBlocks = [ self.labelIndex[l] for l in blockLabels ]
 
         # Print all blocks
         else:
 
-            localBlockIndices = [ self.labelIndex[l] for l in self.labels ]
+            printBlocks = [ self.labelIndex[l] for l in self.labels ]
 
         # ------------------------------------------------------------------- #
 
-        for blockIndex in localBlockIndices:
+        for block in printBlocks:
 
-            print "index:", blockIndex
-            print "label:", self.labels[blockIndex]
-            print "vertices: ", self.blockVertices[blockIndex]
-            print "verticeLabels: ", self.blockVerticeLabels[blockIndex]
-            print "divider: ", self.divider[blockIndex]
-            print "gradings: ", self.gradings[blockIndex]
-            print "zone: ", self.zones[blockIndex]
-            print "neighbours: ", self.neighbours[blockIndex]
-            print "faceNeighbours: ", self.faceNeighbours[blockIndex]
-            print "edgeNeighbours: ", self.edgeNeighbours[blockIndex]
+            print "index:", block
+            print "label:", self.labels[block]
+            print "vertices: ", self.blockVertices[block]
+            print "verticeLabels: ", self.blockVerticeLabels[block]
+            print "divider: ", self.divider[block]
+            print "gradings: ", self.gradings[block]
+            print "zone: ", self.zones[block]
+            print "neighbours: ", self.neighbours[block]
+            print "faceNeighbours: ", self.faceNeighbours[block]
+            print "edgeNeighbours: ", self.edgeNeighbours[block]
             print
 
 
