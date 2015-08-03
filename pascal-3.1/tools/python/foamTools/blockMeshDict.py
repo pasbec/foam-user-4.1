@@ -155,6 +155,45 @@ class blocks:
 
         vertices = [i for i in range(8)]
 
+        verticeBaseBase = [[None,0,[0,1],1,2,[0,2],[0,1,2],[1,2]],
+                           [0,None,1,[0,1],[0,2],2,[1,2],[0,1,2]],
+                           [[0,1],1,None,0,[0,1,2],[1,2],2,[0,2]],
+                           [1,[0,1],0,None,[1,2],[0,1,2],[0,2],2],
+                           [2,[0,2],[0,1,2],[1,2],None,0,[0,1],1],
+                           [[0,2],2,[1,2],[0,1,2],0,None,1,[0,1]],
+                           [[0,1,2],[1,2],2,[0,2],[0,1],1,None,0],
+                           [[1,2],[0,1,2],[0,2],2,1,[0,1],0,None]]
+
+        verticeBaseSign = [[None,True,[True,True],True,True,[True,True],[True,True,True],[True,True]],
+                           [False,None,True,[False,True],[False,True],True,[True,True],[False,True,True]],
+                           [[False,False],False,None,False,[False,False,True],[False,True],True,[False,True]],
+                           [False,[True,False],True,None,[False,True],[True,False,True],[True,True],True],
+                           [False,[True,False],[True,True,False],[True,False],None,True,[True,True],True],
+                           [[False,False],False,[True,False],[False,True,False],False,None,True,[False,True]],
+                           [[False,False,False],[False,False],False,[False,False],[False,False],False,None,False],
+                           [[False,False],[True,False,False],[True,False],False,False,[True,False],True,None]]
+
+        def verticeBase(self,vertice): return verticeBaseBase, verticeBaseSign
+
+        def verticesBase(self,vertices):
+
+            bases = []
+            signs = []
+
+            for i in range(len(vertices)):
+
+                if i < (len(vertices)-1):
+
+                    bases.append(self.verticeBaseBase[vertices[i]][vertices[i+1]])
+                    signs.append(self.verticeBaseSign[vertices[i]][vertices[i+1]])
+
+                else:
+
+                    bases.append(self.verticeBaseBase[vertices[len(vertices)-1]][vertices[0]])
+                    signs.append(self.verticeBaseSign[vertices[len(vertices)-1]][vertices[0]])
+
+            return bases, signs
+
         faces = [i for i in range(6)]
 
         faceBase = [0,0,1,1,2,2]
@@ -443,6 +482,8 @@ class blocks:
 
                 # Get face vertices
                 faceVertices = self.topo.faceVertices[face]
+                faceVerticesBaseBase, faceVerticesBaseSign = \
+                    self.topo.verticesBase(faceVertices)
                 faceVerticeLabels = \
                     [ self.blockVertices[block][v] for v in faceVertices]
 
@@ -451,6 +492,8 @@ class blocks:
 
                 print "   face =", face
                 print "   faceVertices =", faceVertices
+                print "   faceVerticesBaseBase =", faceVerticesBaseBase
+                print "   faceVerticesBaseSign =", faceVerticesBaseSign
                 print "   faceVerticeLabels =", faceVerticeLabels
                 print "   nextBlock =", nextBlock
                 if not nextBlock == None: print "   getProcessedBlock(nextBlock) =", getProcessedBlock(nextBlock)
@@ -463,19 +506,17 @@ class blocks:
                     print
                     continue
 
-                print "   self.faceNeighbours[block] =", self.faceNeighbours[block]
-                print "   self.edgeNeighbours[block] =", self.edgeNeighbours[block]
-                print "   self.faceNeighbours[nextBlock] =", self.faceNeighbours[nextBlock]
-                print "   self.edgeNeighbours[nextBlock] =", self.edgeNeighbours[nextBlock]
-                print
-
                 # Get next face index
                 nextFace = self.faceNeighbours[nextBlock].index(block)
 
                 # Get next face vertices
                 nextFaceVertices = self.topo.faceVertices[nextFace]
+                nextFaceVerticesTransformed = \
+                    [self.blockVertices[nextBlock].index(l) for l in faceVerticeLabels]
                 nextFaceVerticeLabels = \
                     [ self.blockVertices[nextBlock][v] for v in nextFaceVertices]
+                nextFaceVerticesBaseBase, nextFaceVerticesBaseSign = \
+                    self.topo.verticesBase(nextFaceVerticesTransformed)
 
                 # Calculate base transformation map
 # TODO [High]: Currently we assume that next block has SAME orientation! Fix this
@@ -483,6 +524,7 @@ class blocks:
 
                 nextBaseTransform[self.topo.faceOpposites[face]] = nextFace
                 nextBaseTransform[face] = self.topo.faceOpposites[nextFace]
+
 
                 # Use this blockDivider for next block divider
 # TODO [High]: Currently we assume that next block has SAME orientation! Fix this
@@ -494,7 +536,10 @@ class blocks:
 
                 print "   nextFace =", nextFace
                 print "   nextFaceVertices =", nextFaceVertices
+                print "   nextFaceVerticesTransformed =", nextFaceVerticesTransformed
                 print "   nextFaceVerticeLabels =", nextFaceVerticeLabels
+                print "   nextFaceVerticesBaseBase =", nextFaceVerticesBaseBase
+                print "   nextFaceVerticesBaseSign =", nextFaceVerticesBaseSign
                 print "   nextBaseTransform =", nextBaseTransform
                 print "   nextBlockDivider =", nextBlockDivider
                 print "   nextBase =", nextBase

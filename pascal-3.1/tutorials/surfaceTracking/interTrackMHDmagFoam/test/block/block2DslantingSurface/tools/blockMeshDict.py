@@ -75,13 +75,16 @@ d.blocks.set(2, [  1,  2,  6,  5,  9, 10, 14, 13], zone="region_dynamic")
 d.blocks.set(3, [  2,  3,  7,  6, 10, 11, 15, 14], zone="region_dynamic")
 
 #d.blocks.set(4, [  8,  9, 13, 12, 16, 17, 21, 20], zone="region_dynamic")
-d.blocks.set(4, [  9, 13, 12,  8, 17, 21, 20, 16], zone="region_dynamic")
 d.blocks.set(5, [  9, 10, 14, 13, 17, 18, 22, 21], zone="region_fluid")
 #d.blocks.set(6, [ 10, 11, 15, 14, 18, 19, 23, 22], zone="region_dynamic")
 
 d.blocks.set(7, [ 16, 17, 21, 20, 24, 25, 29, 28], zone="region_dynamic")
 d.blocks.set(8, [ 17, 18, 22, 21, 25, 26, 30, 29], zone="region_dynamic")
 d.blocks.set(9, [ 18, 19, 23, 22, 26, 27, 31, 30], zone="region_dynamic")
+
+
+#d.blocks.set(4, [  9, 13, 12,  8, 17, 21, 20, 16], zone="region_dynamic")
+d.blocks.set(4, [ 17, 21, 13,  9, 16, 20, 12,  8], zone="region_dynamic")
 
 #d.blocks.setDivider(4, "x", 65)
 d.blocks.setDivider(4, "y", 65)
