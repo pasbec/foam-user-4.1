@@ -31,7 +31,7 @@ geo_fz1 =  30.0
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-d = blockMeshDict()
+d = blockMeshDict("blockMeshDict")
 
 d.vertices.set( 0, [-geo_lx1, -geo_ly0, -geo_lz0])
 d.vertices.set( 1, [-geo_lx0, -geo_ly0, -geo_lz0])
@@ -102,9 +102,6 @@ d.blocks.setDivider(4, "y", 65)
 #d.boundaryFaces.set("infinity", [1, 4, 7], "x-")
 #d.boundaryFaces.set("infinity", [3, 6, 9], "x+")
 
-d.blocks.write()
-quit()
-
 # --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -133,7 +130,7 @@ if d.subDict("boundary"):
 
     if d.boundarySubDict("back", "empty"):
 
-        d.stdout.write("// This is just to demonstrate the manual write")
+        d.manual("// This is just to demonstrate the manual write")
         d.boundaryFaces.write()
 
     if d.boundarySubDict("infinity", "patch"):

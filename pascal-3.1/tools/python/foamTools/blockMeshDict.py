@@ -39,14 +39,12 @@ class resizeList(list):
 
 class stdoutBase:
 
+    fileName = None
     indentLevel = 0
-
-    def line(self):
-        sys.stdout.write("\n")
 
     # ----------------------------------------------------------------------- #
 
-    def indent(self, level, string, end):
+    def _indent(self, level, string, end):
 
         if not (type(level) == int \
             and type(string) == str \
@@ -55,6 +53,29 @@ class stdoutBase:
             raise KeyError()
 
         return objectIndent(string + end, iLevel=level)
+
+    # ----------------------------------------------------------------------- #
+
+    def _write(self, string):
+
+        if not type(string) == str:
+
+            raise KeyError()
+
+        if self.fileName == None:
+
+            sys.stdout.write(string)
+
+        else:
+
+            with open(self.fileName,'a') as f:
+
+                f.write(string)
+
+    # ----------------------------------------------------------------------- #
+
+    def line(self):
+        self._write("\n")
 
     # ----------------------------------------------------------------------- #
 
@@ -69,8 +90,8 @@ class stdoutBase:
         level = self.indentLevel
         if not ind: level = 0
 
-        wstr = self.indent(level,str(string), end)
-        sys.stdout.write(wstr)
+        wstr = self._indent(level,str(string), end)
+        self._write(wstr)
 
 
 
@@ -620,13 +641,9 @@ class blocks:
 
     def write(self):
 
-        def write(string): sys.stdout.write(string)
-
         for block, blockLabel in enumerate(self.labels):
 
-            self.stdout.write("hex", end="")
-
-            write(" ")
+            self.stdout.write("hex", end=" ")
 
         # ------------------------------------------------------------------- #
 
@@ -634,15 +651,14 @@ class blocks:
             for vertice in self.blockVertices[block]:
                 wstr += str(vertice) + " "
             wstr += ")"
-            write(wstr)
 
-            write(" ")
+            self.stdout.write(wstr, ind=False, end=" ")
 
         # ------------------------------------------------------------------- #
 
-            zone = self.zones[block]
-            if zone:
-                write(str(zone) + " ")
+            if self.zones[block]:
+
+                self.stdout.write(str(self.zones[block]), ind=False, end=" ")
 
         # ------------------------------------------------------------------- #
 
@@ -650,18 +666,18 @@ class blocks:
             for divide in self.divider[block]:
                 wstr += str(divide) + " "
             wstr += ")"
-            write(wstr)
 
-            write(" ")
+            self.stdout.write(wstr, ind=False, end=" ")
 
         # ------------------------------------------------------------------- #
 
             if len(self.gradings[block]) == 3:
-                write("simpleGrading")
-            elif len(self.gradings[block]) == 12:
-                write("edgeGrading")
 
-            write(" ")
+                self.stdout.write("simpleGrading", ind=False, end=" ")
+
+            elif len(self.gradings[block]) == 12:
+
+                self.stdout.write("edgeGrading", ind=False, end=" ")
 
         # ------------------------------------------------------------------- #
 
@@ -669,6 +685,7 @@ class blocks:
             for grading in self.gradings[block]:
                 wstr += str(grading) + " "
             wstr += ")"
+
             self.stdout.write(wstr, ind=False)
 
     # ----------------------------------------------------------------------- #
@@ -840,6 +857,14 @@ class blockMeshDict:
 
         subdict = subDictData()
 
+        def __init__(self, fileName=None):
+
+            self.fileName = fileName
+
+            if not fileName == None:
+
+                with open(self.fileName,'w') as f: f.write("")
+
         def boundarySubDictHeader(self, name, typename="empty"):
 
             self.subdict.boundary = name
@@ -885,7 +910,7 @@ class blockMeshDict:
         def header(self, scale):
 
             wstr = objectHeader("blockMeshDict", "dictionary")
-            sys.stdout.write(wstr)
+            self.write(wstr)
             wstr = "convertToMeters" + " " + str(scale) + ";"
             self.write(wstr)
             self.line()
@@ -894,13 +919,13 @@ class blockMeshDict:
 
             if self.subdict.opened: self.subDictFooter()
             wstr = objectFooter()
-            sys.stdout.write(wstr)
+            self.write(wstr)
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self):
+    def __init__(self, fileName=None):
 
-        self.stdout = self.stdoutDict()
+        self.stdout = self.stdoutDict(fileName)
         self.vertices = vertices(self.stdout)
         self.blocks = blocks(self.stdout, self.vertices)
         self.boundaryFaces = boundaryFaces(self.stdout, self.vertices, self.blocks)
@@ -930,6 +955,12 @@ class blockMeshDict:
     def footer(self):
 
         self.stdout.footer()
+
+    # ----------------------------------------------------------------------- #
+
+    def manual(self, string, end="\n"):
+
+        self.stdout.write(string, end=end)
 
 # --------------------------------------------------------------------------- #
 # --- End of module --------------------------------------------------------- #
