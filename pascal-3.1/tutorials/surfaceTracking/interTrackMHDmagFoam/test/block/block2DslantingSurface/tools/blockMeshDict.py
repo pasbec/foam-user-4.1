@@ -31,7 +31,7 @@ geo_fz1 =  30.0
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-d = blockMeshDict("blockMeshDict")
+d = blockMeshDict("constant/polyMesh.org/blockMeshDict")
 
 d.vertices.set( 0, [-geo_lx1, -geo_ly0, -geo_lz0])
 d.vertices.set( 1, [-geo_lx0, -geo_ly0, -geo_lz0])
@@ -74,26 +74,26 @@ d.blocks.set(1, [  0,  1,  5,  4,  8,  9, 13, 12], zone="region_dynamic")
 d.blocks.set(2, [  1,  2,  6,  5,  9, 10, 14, 13], zone="region_dynamic")
 d.blocks.set(3, [  2,  3,  7,  6, 10, 11, 15, 14], zone="region_dynamic")
 
-d.blocks.set(4, [  9, 13, 12,  8, 17, 21, 20, 16], zone="region_dynamic")
-#d.blocks.set(4, [ 17, 21, 13,  9, 16, 20, 12,  8], zone="region_dynamic")
-
-#d.blocks.set(4, [  8,  9, 13, 12, 16, 17, 21, 20], zone="region_dynamic")
+d.blocks.set(4, [  8,  9, 13, 12, 16, 17, 21, 20], zone="region_dynamic")
 d.blocks.set(5, [  9, 10, 14, 13, 17, 18, 22, 21], zone="region_fluid")
-#d.blocks.set(6, [ 10, 11, 15, 14, 18, 19, 23, 22], zone="region_dynamic")
+d.blocks.set(6, [ 10, 11, 15, 14, 18, 19, 23, 22], zone="region_dynamic")
 
 d.blocks.set(7, [ 16, 17, 21, 20, 24, 25, 29, 28], zone="region_dynamic")
 d.blocks.set(8, [ 17, 18, 22, 21, 25, 26, 30, 29], zone="region_dynamic")
 d.blocks.set(9, [ 18, 19, 23, 22, 26, 27, 31, 30], zone="region_dynamic")
 
+#d.blocks.set(4, [  9, 13, 12,  8, 17, 21, 20, 16], zone="region_dynamic")
+#d.blocks.set(4, [ 17, 21, 13,  9, 16, 20, 12,  8], zone="region_dynamic")
+#d.blocks.distribution.set(4, "x", 10)
+#d.blocks.distribution.set(4, "y", 65)
 
-d.blocks.setDivider(4, "x", 10)
-d.blocks.setDivider(4, "y", 65)
-#d.blocks.setDivider(6, "x", 65)
-#d.blocks.setDivider(2, "z", 30)
-#d.blocks.setDivider(8, "z", 60)
-#d.blocks.setDivider(5, [35, 1, 10])
+d.blocks.distribution.set(5, [35, 1, 10])
+d.blocks.distribution.set(4, "x", 65)
+d.blocks.distribution.set(6, "x", 65)
+d.blocks.distribution.set(2, "z", 30)
+d.blocks.distribution.set(8, "z", 60)
 
-#d.blocks.setDivider(3, "y", 10)
+#d.blocks.distribution.set(3, "y", 10)
 
 #d.boundaryFaces.set("front", [1, 2, 3, 4, 5, 6, 7, 8, 9], "y-")
 #d.boundaryFaces.set("back", [1, 2, 3, 4, 5, 6, 7, 8, 9], "y+")

@@ -234,12 +234,39 @@ class blocks:
                      [0,4],[1,4],[1,5],[0,5],
                      [0,2],[1,2],[1,3],[0,3]]
 
+        # ------------------------------------------------------------------- #
+
+        def __init__(self, blocksRef): self.blocks = blocksRef
+
+    # ----------------------------------------------------------------------- #
+
+    class cDistribution:
+
+        def __init__(self, blocksRef): self.blocks = blocksRef
+
+        # ------------------------------------------------------------------- #
+
+        def set(self, blockLabels, par1, par2=None):
+
+# TODO [High]: Temporary solution
+            self.blocks.setDivider(blockLabels, par1, par2)
+
+    # ----------------------------------------------------------------------- #
+
+    class cGrading:
+
+        def __init__(self, blocksRef): self.blocks = blocksRef
+
+        # ------------------------------------------------------------------- #
+
+        def set(self):
+
+            pass
+
     # ----------------------------------------------------------------------- #
 
     labels = list()
     labelIndex = resizeList()
-
-    topo = cBlockTopo()
 
     blockVertices = list()
     blockVerticeLabels = list()
@@ -257,6 +284,10 @@ class blocks:
 
         self.stdout = stdoutRef
         self.vertices = verticesRef
+
+        self.topo = self.cBlockTopo(self)
+        self.distribution = self.cDistribution(self)
+        self.grading = self.cGrading(self)
 
     # ----------------------------------------------------------------------- #
 
@@ -475,6 +506,12 @@ class blocks:
 
             return processedBlocks[block]
 
+        def resetProcessedBlocks():
+
+            for block, blockLabel in enumerate(self.labels):
+
+                processedBlocks[block] = False
+
         def syncBlocks(block, blockDivider, base):
 
             print ">> CURRENT", block
@@ -486,7 +523,7 @@ class blocks:
                 [f for i, f in enumerate(faces) if i not in baseFaces]
 
             print "   block =", block
-            print "   blockDivide =", blockDivide
+            print "   blockDivider =", blockDivider
             print "   base =", base
             print "   baseFaces =", baseFaces
             print "   crossBaseFaces =", crossBaseFaces
@@ -521,8 +558,7 @@ class blocks:
                 if not nextBlock == None: print "   getProcessedBlock(nextBlock) =", getProcessedBlock(nextBlock)
                 print
 
-                if nextBlock == None or \
-                    getProcessedBlock(nextBlock) == True:
+                if nextBlock == None or getProcessedBlock(nextBlock) == True:
 
                     print "   >> CONTINUE"
                     print
@@ -531,13 +567,16 @@ class blocks:
                 # Get next face index
                 nextFace = self.faceNeighbours[nextBlock].index(block)
 
+                # Get next block vertices
+                nextBlockVertices = self.blockVertices[nextBlock]
+
                 # Get next face vertices
                 nextFaceVertices = \
                     self.topo.faceVertices[nextFace]
                 nextFaceVerticesTransformed = \
-                    [self.blockVertices[nextBlock].index(l) for l in faceVerticeLabels]
+                    [ nextBlockVertices.index(l) for l in faceVerticeLabels ]
                 nextFaceVerticeLabels = \
-                    [ self.blockVertices[nextBlock][v] for v in nextFaceVertices]
+                    [ nextBlockVertices[v] for v in nextFaceVertices]
                 nextFaceVerticesBaseBase, nextFaceVerticesBaseSign = \
                     self._getPathVerticeBase(nextFaceVerticesTransformed)
 
@@ -551,17 +590,15 @@ class blocks:
                 nextBaseOrientation[faceVerticesBaseBase[1]] = \
                     nextFaceVerticesBaseBase[1]
 
-                # Calculate face transformation map
-                nextFaceOrientation = [None for i in self.topo.faces]
-
-                nextFaceOrientation[self.topo.faceOpposites[face]] = nextFace
-                nextFaceOrientation[face] = self.topo.faceOpposites[nextFace]
-# TODO [High]: Currently we do no calculate nextFaceOrientation completely! Fix this
+                # Calculate reverse base transformation map
+                nextbaseOrientationReverse = \
+                    [ nextBaseOrientation.index(b) for b in self.topo.base]
 
                 # Assemble block divider for next block
-                nextBlockDivider = [blockDivider[b] for b in nextBaseOrientation]
+                nextBlockDivider = \
+                    [ blockDivider[b] for b in nextbaseOrientationReverse ]
 
-                # Extract neighbour divide
+                # Extract next divide
                 nextBase = nextBaseOrientation[base]
 
                 print "   nextFace =", nextFace
@@ -571,7 +608,7 @@ class blocks:
                 print "   nextFaceVerticesBaseBase =", nextFaceVerticesBaseBase
                 print "   nextFaceVerticesBaseSign =", nextFaceVerticesBaseSign
                 print "   nextBaseOrientation =", nextBaseOrientation
-                print "   nextFaceOrientation =", nextFaceOrientation
+                print "   nextbaseOrientationReverse =", nextbaseOrientationReverse
                 print "   nextBlockDivider =", nextBlockDivider
                 print "   nextBase =", nextBase
                 print
@@ -603,6 +640,7 @@ class blocks:
 
                     # Sync blocks in all directions
                     for b in self.topo.base:
+                        resetProcessedBlocks()
                         syncBlocks(block, self.divider[block], b)
 
                 else: raise KeyError()
@@ -635,6 +673,7 @@ class blocks:
                 self.divider[block][blockDivideBase] = blockDivide
 
                 # Sync blocks in direction of blockDivideBase
+                resetProcessedBlocks()
                 syncBlocks(block, self.divider[block], blockDivideBase)
 
     # ----------------------------------------------------------------------- #
