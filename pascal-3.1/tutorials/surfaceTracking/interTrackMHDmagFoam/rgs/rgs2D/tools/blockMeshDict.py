@@ -43,12 +43,12 @@ d.vertices.set(  7, [geo_x2, geo_y2, geo_z2])
 
 d.blocks.set( 0, [0, 1, 5, 4, 2, 3, 7, 6], [60, 1, 40], zone="background")
 
-d.boundaryFaces.set(   "front", 0, "y-")
-d.boundaryFaces.set(    "back", 0, "y+")
-d.boundaryFaces.set("infinity", 0, "x-")
-d.boundaryFaces.set("infinity", 0, "x+")
-d.boundaryFaces.set("infinity", 0, "z-")
-d.boundaryFaces.set("infinity", 0, "z+")
+d.boundaryFaces.set(1, "front", 0, "y-")
+d.boundaryFaces.set(2, "back", 0, "y+")
+d.boundaryFaces.set(3, "infinity", 0, "x-")
+d.boundaryFaces.set(4, "infinity", 0, "x+")
+d.boundaryFaces.set(5, "infinity", 0, "z-")
+d.boundaryFaces.set(6, "infinity", 0, "z+")
 
 # --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
