@@ -37,10 +37,44 @@ class resizeList(list):
 
 
 
-class stdoutBase:
+class ioBase(object):
 
     fileName = None
     indentLevel = 0
+
+    # ----------------------------------------------------------------------- #
+
+    def __init__(self, fileName):
+
+        self.fileName = fileName
+
+        if not fileName == None:
+
+            with open(self._getFilePath(),'w') as f: f.write("")
+
+    # ----------------------------------------------------------------------- #
+
+    def _getScriptPath(self):
+
+        return os.path.dirname(os.path.realpath(sys.argv[0]))
+
+    # ----------------------------------------------------------------------- #
+
+    def _getFilePath(self):
+
+        if not self.fileName == None:
+
+            if os.path.isabs(self.fileName):
+
+                return self.fileName
+
+            else:
+
+                return self._getScriptPath() + "/" + self.fileName
+
+        else:
+
+            return None
 
     # ----------------------------------------------------------------------- #
 
@@ -68,7 +102,9 @@ class stdoutBase:
 
         else:
 
-            with open(self.fileName,'a') as f:
+            fileName = self._getFilePath()
+
+            with open(fileName,'a') as f:
 
                 f.write(string)
 
@@ -99,7 +135,7 @@ class stdoutBase:
 
 
 
-class vertices:
+class vertices(object):
 
     labels = list()
     labelIndex  = resizeList()
@@ -108,9 +144,9 @@ class vertices:
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, stdoutRef):
+    def __init__(self, ioRef):
 
-        self.stdout = stdoutRef
+        self.io = ioRef
 
     # ----------------------------------------------------------------------- #
 
@@ -148,7 +184,7 @@ class vertices:
             for component in self.points[vertice]:
                 wstr += str(float(component)) + " "
             wstr += ")"
-            self.stdout.write(wstr)
+            self.io.write(wstr)
 
 
 
@@ -156,9 +192,9 @@ class vertices:
 
 
 
-class blocks:
+class blocks(object):
 
-    class cBlockTopo:
+    class cTopo(object):
 
         originVertice = 0
 
@@ -244,13 +280,23 @@ class blocks:
 
         # ------------------------------------------------------------------- #
 
-        def __init__(self, blocksRef): self.blocks = blocksRef
+        def __init__(self, blocksRef):
+
+            self.blocks = blocksRef
 
     # ----------------------------------------------------------------------- #
 
-    class cBlockSync:
+    class cSync(object):
 
         debug = False
+
+        # ------------------------------------------------------------------- #
+
+        def __init__(self, blocksRef):
+
+            self.blocks = blocksRef
+
+        # ------------------------------------------------------------------- #
 
         def _setProcessedBlock(self, block):
 
@@ -424,9 +470,11 @@ class blocks:
 
     # ----------------------------------------------------------------------- #
 
-    class cBlockDistribution(cBlockSync):
+    class cDistribution(cSync):
 
-        def __init__(self, blocksRef): self.blocks = blocksRef
+        def __init__(self, blocksRef):
+
+            super(blocksRef.cDistribution, self).__init__(blocksRef)
 
         # ------------------------------------------------------------------- #
 
@@ -502,9 +550,11 @@ class blocks:
 
     # ----------------------------------------------------------------------- #
 
-    class cBlockGrading(cBlockSync):
+    class cGrading(cSync):
 
-        def __init__(self, blocksRef): self.blocks = blocksRef
+        def __init__(self, blocksRef):
+
+            super(blocksRef.cGrading, self).__init__(blocksRef)
 
         # ------------------------------------------------------------------- #
 
@@ -607,14 +657,14 @@ class blocks:
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, stdoutRef, verticesRef):
+    def __init__(self, ioRef, verticesRef):
 
-        self.stdout = stdoutRef
+        self.io = ioRef
         self.vertices = verticesRef
 
-        self.topo = self.cBlockTopo(self)
-        self.distribution = self.cBlockDistribution(self)
-        self.grading = self.cBlockGrading(self)
+        self.topo = self.cTopo(self)
+        self.distribution = self.cDistribution(self)
+        self.grading = self.cGrading(self)
 
     # ----------------------------------------------------------------------- #
 
@@ -868,7 +918,7 @@ class blocks:
 
         for block, blockLabel in enumerate(self.labels):
 
-            self.stdout.write("hex", end=" ")
+            self.io.write("hex", end=" ")
 
         # ------------------------------------------------------------------- #
 
@@ -877,13 +927,13 @@ class blocks:
                 wstr += str(vertice) + " "
             wstr += ")"
 
-            self.stdout.write(wstr, ind=False, end=" ")
+            self.io.write(wstr, ind=False, end=" ")
 
         # ------------------------------------------------------------------- #
 
             if self.zones[block]:
 
-                self.stdout.write(str(self.zones[block]), ind=False, end=" ")
+                self.io.write(str(self.zones[block]), ind=False, end=" ")
 
         # ------------------------------------------------------------------- #
 
@@ -892,17 +942,17 @@ class blocks:
                 wstr += str(distribution) + " "
             wstr += ")"
 
-            self.stdout.write(wstr, ind=False, end=" ")
+            self.io.write(wstr, ind=False, end=" ")
 
         # ------------------------------------------------------------------- #
 
             if len(self.gradings[block]) == 3:
 
-                self.stdout.write("simpleGrading", ind=False, end=" ")
+                self.io.write("simpleGrading", ind=False, end=" ")
 
             elif len(self.gradings[block]) == 12:
 
-                self.stdout.write("edgeGrading", ind=False, end=" ")
+                self.io.write("edgeGrading", ind=False, end=" ")
 
         # ------------------------------------------------------------------- #
 
@@ -911,7 +961,7 @@ class blocks:
                 wstr += str(grading) + " "
             wstr += ")"
 
-            self.stdout.write(wstr, ind=False)
+            self.io.write(wstr, ind=False)
 
     # ----------------------------------------------------------------------- #
 
@@ -953,7 +1003,7 @@ class blocks:
 
 
 
-class boundaryFaces:
+class boundaryFaces(object):
 
 
     labels = list()
@@ -964,9 +1014,9 @@ class boundaryFaces:
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, stdoutRef, verticesRef, blocksRef):
+    def __init__(self, ioRef, verticesRef, blocksRef):
 
-        self.stdout = stdoutRef
+        self.io = ioRef
         self.vertices = verticesRef
         self.blocks = blocksRef
 
@@ -1033,15 +1083,15 @@ class boundaryFaces:
 
     def write(self):
 
-        self.stdout.write("faces")
-        self.stdout.write("(")
-        self.stdout.indentLevel += 1
+        self.io.write("faces")
+        self.io.write("(")
+        self.io.indentLevel += 1
 
         # ------------------------------------------------------------------- #
 
         for boundaryFace, boundaryFaceLabel in enumerate(self.labels):
 
-            if self.boundary[boundaryFace] == self.stdout.subdict.boundary:
+            if self.boundary[boundaryFace] == self.io.subdict.boundary:
 
                 for face in self.faces[boundaryFace]:
 
@@ -1049,12 +1099,12 @@ class boundaryFaces:
                     for vertice in face:
                         wstr += str(vertice) + " "
                     wstr += ")"
-                    self.stdout.write(wstr)
+                    self.io.write(wstr)
 
         # ------------------------------------------------------------------- #
 
-        self.stdout.indentLevel -= 1
-        self.stdout.write(");")
+        self.io.indentLevel -= 1
+        self.io.write(");")
 
     # ----------------------------------------------------------------------- #
 
@@ -1088,24 +1138,28 @@ class boundaryFaces:
 
 
 
-class blockMeshDict:
+class blockMeshDict(object):
 
-    class stdoutDict(stdoutBase):
+    class cIo(ioBase):
 
-        class subDictData:
+        class subDictData(object):
 
             opened = False
             boundary = None
 
+        # ------------------------------------------------------------------- #
+
         subdict = subDictData()
 
-        def __init__(self, fileName=None):
+        # ------------------------------------------------------------------- #
 
-            self.fileName = fileName
+        def __init__(self, blockMeshDictRef, fileName=None):
 
-            if not fileName == None:
+            self.blockMeshDict = blockMeshDictRef
 
-                with open(self.fileName,'w') as f: f.write("")
+            super(self.blockMeshDict.cIo, self).__init__(fileName)
+
+        # ------------------------------------------------------------------- #
 
         def boundarySubDictHeader(self, name, typename="empty"):
 
@@ -1115,6 +1169,8 @@ class blockMeshDict:
             self.indentLevel += 1
             self.write("type" + " " + str(typename) + ";")
 
+        # ------------------------------------------------------------------- #
+
         def boundarySubDictFooter(self, line = True):
 
             self.indentLevel -= 1
@@ -1122,11 +1178,15 @@ class blockMeshDict:
             self.subdict.boundary = None
             if line: self.line()
 
+        # ------------------------------------------------------------------- #
+
         def boundarySubDict(self, name, typename="empty"):
 
             if self.subdict.boundary: self.boundarySubDictFooter()
             self.boundarySubDictHeader(name, typename)
             return True
+
+        # ------------------------------------------------------------------- #
 
         def subDictHeader(self, name):
 
@@ -1135,12 +1195,16 @@ class blockMeshDict:
             self.write("(")
             self.indentLevel += 1
 
+        # ------------------------------------------------------------------- #
+
         def subDictFooter(self, line = True):
 
             self.indentLevel -= 1
             self.write(");")
             self.subdict.opened = False
             if line: self.line()
+
+        # ------------------------------------------------------------------- #
 
         def subDict(self, name):
 
@@ -1149,6 +1213,8 @@ class blockMeshDict:
             self.subDictHeader(name)
             return True
 
+        # ------------------------------------------------------------------- #
+
         def header(self, scale):
 
             wstr = objectHeader("blockMeshDict", "dictionary")
@@ -1156,6 +1222,8 @@ class blockMeshDict:
             wstr = "convertToMeters" + " " + str(scale) + ";"
             self.write(wstr)
             self.line()
+
+        # ------------------------------------------------------------------- #
 
         def footer(self):
 
@@ -1167,43 +1235,43 @@ class blockMeshDict:
 
     def __init__(self, fileName=None):
 
-        self.stdout = self.stdoutDict(fileName)
-        self.vertices = vertices(self.stdout)
-        self.blocks = blocks(self.stdout, self.vertices)
+        self.io = self.cIo(self, fileName)
+        self.vertices = vertices(self.io)
+        self.blocks = blocks(self.io, self.vertices)
         self.boundaryFaces = \
-            boundaryFaces(self.stdout, self.vertices, self.blocks)
+            boundaryFaces(self.io, self.vertices, self.blocks)
 
     # ----------------------------------------------------------------------- #
 
     def boundarySubDict(self, name, typename):
 
-        self.stdout.boundarySubDict(name, typename)
+        self.io.boundarySubDict(name, typename)
         return True
 
     # ----------------------------------------------------------------------- #
 
     def subDict(self, name):
 
-        self.stdout.subDict(name)
+        self.io.subDict(name)
         return True
 
     # ----------------------------------------------------------------------- #
 
     def header(self, scale):
 
-        self.stdout.header(scale)
+        self.io.header(scale)
 
     # ----------------------------------------------------------------------- #
 
     def footer(self):
 
-        self.stdout.footer()
+        self.io.footer()
 
     # ----------------------------------------------------------------------- #
 
     def manual(self, string, end="\n"):
 
-        self.stdout.write(string, end=end)
+        self.io.write(string, end=end)
 
 # --------------------------------------------------------------------------- #
 # --- End of module --------------------------------------------------------- #

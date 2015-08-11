@@ -77,20 +77,20 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]] || \
     runApplication blockMesh || exit 1
     polyMeshBoundaryFormatAscii
 
-    # Refine mesh
-    runApplication snappyHexMesh -overwrite || exit 1
-
-    # Remove leftovers from snappyHexMesh
-    rm -rf 'constant/cellLevel' \
-           'constant/polyMesh/cellLevel'* \
-           'constant/pointLevel' \
-           'constant/polyMesh/pointLevel'* \
-           'constant/polyMesh/refinementHistory'* \
-           'constant/polyMesh/surfaceIndex'* \
-           > /dev/null 2>&1
-
-    # Create 2D mesh
-    runApplication extrudeMesh || exit 1
+#     # Refine mesh
+#     runApplication snappyHexMesh -overwrite || exit 1
+#
+#     # Remove leftovers from snappyHexMesh
+#     rm -rf 'constant/cellLevel' \
+#            'constant/polyMesh/cellLevel'* \
+#            'constant/pointLevel' \
+#            'constant/polyMesh/pointLevel'* \
+#            'constant/polyMesh/refinementHistory'* \
+#            'constant/polyMesh/surfaceIndex'* \
+#            > /dev/null 2>&1
+#
+#     # Create 2D mesh
+#     runApplication extrudeMesh || exit 1
 
     # Remove all zones
     rm 'constant/polyMesh/cellZones' > /dev/null 2>&1

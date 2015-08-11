@@ -30,7 +30,7 @@ geo_z2 =  140.0
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-d = blockMeshDict()
+d = blockMeshDict("blockMeshDict")
 
 d.vertices.set(  0, [geo_x1, geo_y1, geo_z1])
 d.vertices.set(  1, [geo_x2, geo_y1, geo_z1])

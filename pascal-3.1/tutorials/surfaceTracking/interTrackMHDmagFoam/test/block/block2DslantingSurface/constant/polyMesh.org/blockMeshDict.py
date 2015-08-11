@@ -20,7 +20,7 @@ geo_lx1 = 145.0
 geo_lx2 =  45.0
 
 #geo_ly0 =  10.0
-geo_ly0 =   1.0
+geo_ly0 =   0.625
 
 geo_lz0 =  60.0
 geo_lz1 = 145.0
@@ -159,16 +159,16 @@ d.blocks.set(18, [ 54, 56, 57, 55, 25, 26, 30, 29], zone="region_static")
 d.blocks.set(19, [ 56, 48, 49, 57, 26, 50, 51, 30], zone="region_static")
 d.blocks.set(20, [ 48, 58, 59, 49, 50, 27, 31, 51], zone="region_static")
 
-d.blocks.distribution.set( 8, [35, 1, 10])
+d.blocks.distribution.set( 8, [70, 1, 20])
 
-d.blocks.distribution.set( 6, "x", 50)
-d.blocks.distribution.set( 7, "x",  5)
-d.blocks.distribution.set( 9, "x",  5)
-d.blocks.distribution.set(10, "x", 50)
+d.blocks.distribution.set( 6, "x",100)
+d.blocks.distribution.set( 7, "x", 10)
+d.blocks.distribution.set( 9, "x", 10)
+d.blocks.distribution.set(10, "x",100)
 
-d.blocks.distribution.set( 3, "z", 30)
-d.blocks.distribution.set(13, "z", 15)
-d.blocks.distribution.set(18, "z", 50)
+d.blocks.distribution.set( 3, "z", 60)
+d.blocks.distribution.set(13, "z", 30)
+d.blocks.distribution.set(18, "z",100)
 
 d.boundaryFaces.set(1, "front", [  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, \
                                11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "y-")
