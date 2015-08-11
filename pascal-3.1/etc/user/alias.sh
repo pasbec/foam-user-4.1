@@ -13,8 +13,6 @@ sourcePSD () { local psd="$PSD"; source "$1"; PSD="$psd"; }
 # --- Script ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-alias fe31="fe"
-
 alias usrc='cd $FOAM_USER_SRC'
 alias ulib='cd $FOAM_USER_LIB'
 alias urun='cd $FOAM_USER_RUN'

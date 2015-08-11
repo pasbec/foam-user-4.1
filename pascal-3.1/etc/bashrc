@@ -23,20 +23,19 @@ sourcePSD "$PSD/bashrc.d/source.sh"
 feClear ()
 {
     # Backup keys
-    fe31_foam_etc="$FE31_FOAM_ETC"
-    fe31_foam_user_etc="$FE31_FOAM_USER_ETC"
-    fe31_foam_inst_dir="$FE31_FOAM_INST_DIR"
+    local fe31_foam_inst_dir="$FE31_FOAM_INST_DIR"
+    local fe31_foam_etc="$FE31_FOAM_ETC"
+    local fe31_foam_user_etc="$FE31_FOAM_USER_ETC"
 
     env_unsetRegex WM_.*
     env_unsetRegex FOAM_.*
 
     env_removeAll 'foam-extend'
-    env_removeAll 'OpenFOAM'
 
     # Restore keys
+    env_set 'FE31_FOAM_INST_DIR' "$fe31_foam_inst_dir"
     env_set 'FE31_FOAM_ETC' "$fe31_foam_etc"
     env_set 'FE31_FOAM_USER_ETC' "$fe31_foam_user_etc"
-    env_set 'FE31_FOAM_INST_DIR' "$fe31_foam_inst_dir"
 }
 
 
@@ -58,10 +57,10 @@ fe31 ()
         feClear
 
         # Restore basic environment variables
-        env_set 'FOAM_ETC' "$FE31_FOAM_ETC"
-        env_set 'FOAM_USER_ETC' "$FE31_FOAM_USER_ETC"
         [ ! -z "$FE31_FOAM_INST_DIR" ] && \
             env_set 'FOAM_INST_DIR' "$FE31_FOAM_INST_DIR"
+        env_set 'FOAM_ETC' "$FE31_FOAM_ETC"
+        env_set 'FOAM_USER_ETC' "$FE31_FOAM_USER_ETC"
 
         # Load new environment
         feLoad
