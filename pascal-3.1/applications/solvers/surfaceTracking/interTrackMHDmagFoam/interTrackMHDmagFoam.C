@@ -287,6 +287,7 @@ int main(int argc, char *argv[])
         {
             // Create new point field for base region
             // with current points of patch trackedSurface in fluid region
+// TODO [High] : Something is wrong here
             pointField newPoints = mesh_.rmap(fluidRegionID,"trackedSurface");
 
             // Replace point positions of dynamic region in
