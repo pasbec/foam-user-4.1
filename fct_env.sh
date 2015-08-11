@@ -53,7 +53,7 @@ env_unsetRegex ()
 
         local keyExpand
             keyExpand="$( env | \
-                sed -n "/$keyRegex=.*/p" | \
+                sed -n "/^$keyRegex=.*/p" | \
                 sed 's/^\([^=]*\)=\(.*\)/\1/g' )" || return $?
 
         local v
