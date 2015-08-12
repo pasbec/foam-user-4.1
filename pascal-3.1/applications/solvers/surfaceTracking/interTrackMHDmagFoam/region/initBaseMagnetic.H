@@ -14,7 +14,7 @@
     );
 
     // Init runtime update switch
-    bool mfUpdate = true;
+    bool mfUpdate = false;
 
     // Init update counter
     int mfUpdateCounter =
