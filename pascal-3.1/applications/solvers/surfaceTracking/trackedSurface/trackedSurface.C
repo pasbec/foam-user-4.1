@@ -152,7 +152,7 @@ trackedSurface::trackedSurface
     ),
     cleanInterfaceSurfTension_
     (
-        this->lookup("surfaceTension")
+        transportModel.lookup("sigma")
     ),
     fixedTrackedSurfacePatches_
     (
