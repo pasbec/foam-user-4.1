@@ -141,9 +141,10 @@ cd "$HOME/foam/foam-extend-3.1"
 ```bash
 cd "$HOME/foam/pascal-3.1"
 #
-export FOAM_INST_DIR="$HOME/foam"
-export FOAM_ETC="$FOAM_INST_DIR/foam-extend-3.1/etc"
-source "$HOME/foam/pascal-3.1/etc/bashrc"
+export FE31_FOAM_INST_DIR="$HOME/foam"
+export FE31_FOAM_ETC="$FE31_FOAM_INST_DIR/foam-extend-3.1/etc"
+export FE31_FOAM_USER_ETC="$HOME/foam/$USER-3.1/etc"
+source "$FE31_FOAM_USER_ETC/bashrc"
 fe31
 ```
 #### Compilation/Installation
