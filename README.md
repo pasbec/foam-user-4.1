@@ -107,12 +107,6 @@ git remote add 'sf' 'ssh://p-be@git.code.sf.net/u/p-be/openfoam-extend'
 
 ### Project part
 
-#### Official documentation
-```bash
-cd "$HOME/foam/foam-extend-3.1"
-#
-less 'doc/buildInstructions/Ubuntu/Ubuntu_14.04'
-```
 #### Source environment
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
