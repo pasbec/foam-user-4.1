@@ -1,20 +1,4 @@
 
-// TODO [High]: Magnetic update does not work correctly and happens
-//              way to often, especially before first write
-
-    Info << "[DEBUG] runTime.value() = " << runTime.value() << endl;
-    Info << "[DEBUG] runTime.timeIndex() = " << runTime.timeIndex() << endl;
-    Info << "[DEBUG] runTime.outputTime() = " << runTime.outputTime() << endl;
-
-    Info << "[DEBUG] mfUpdateSwitch = " << mfUpdateSwitch << endl;
-    Info << "[DEBUG] mfUpdateOutputCycle = " << mfUpdateOutputCycle << endl;
-    Info << "[DEBUG] mfUpdateTimeStepCycle = " << mfUpdateTimeStepCycle << endl;
-    Info << "[DEBUG] mfUpdateTimeCycle = " << mfUpdateTimeCycle << endl;
-
-    Info << "[DEBUG] mfUpdateCounter = " << mfUpdateCounter << endl;
-    Info << "[DEBUG] mfUpdateLastUpdateTime = " << mfUpdateLastUpdateTime << endl;
-    Info << "[DEBUG] mfUpdateOutputTimeIndex = " << mfUpdateOutputTimeIndex << endl;
-
     if (mfUpdateSwitch)
     {
         // Increase output index if due and write to dictionary
@@ -27,12 +11,6 @@
                 mfUpdateOutputTimeIndex
             );
         }
-
-        Info << "[DEBUG] mfUpdateOutputTimeIndex = " << mfUpdateOutputTimeIndex << endl;
-        Info << "[DEBUG] mfUpdateCounter = " << mfUpdateCounter << endl;
-        Info << "[DEBUG] (mfUpdateOutputTimeIndex % mfUpdateOutputCycle) = " << (mfUpdateOutputTimeIndex % mfUpdateOutputCycle) << endl;
-        Info << "[DEBUG] (runTime.timeIndex() % mfUpdateTimeStepCycle) = " << (runTime.timeIndex() % mfUpdateTimeStepCycle) << endl;
-        Info << "[DEBUG] (runTime.value() - mfUpdateLastUpdateTime - mfUpdateTimeCycle = " << (runTime.value()-mfUpdateLastUpdateTime - mfUpdateTimeCycle) << endl;
 
         if
         (
@@ -92,5 +70,3 @@
             mfUpdate = false;
         }
     }
-
-    Info << "[DEBUG] mfUpdate = " << mfUpdate << endl;
