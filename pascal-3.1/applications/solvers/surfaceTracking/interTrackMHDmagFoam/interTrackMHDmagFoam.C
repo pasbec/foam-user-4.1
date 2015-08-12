@@ -63,8 +63,6 @@ Description
 //                Alberto-method dramatically?
 
 // TODO [High]: Structure/Implementation:
-//              - Fix lorentzForceUpdateSwitch conditions
-//              - Rename aplha1 back to fluidIndicator
 //              - Implement control class?
 //              - Get rid of warning: unused variable for mesh, FL and pB
 //              - Fix pressure relaxation for Alberto-method
@@ -186,6 +184,7 @@ int main(int argc, char *argv[])
         // ==================================================================//
 
         {
+            // If magnetic update is due, mfUpdate will be true
 #           include "updateBaseMagneticCheck.H"
         }
 
