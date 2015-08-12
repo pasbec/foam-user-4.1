@@ -73,12 +73,12 @@ PIMPLE
 {
     methodUp                     "default";
 
-    nOuterCorrectors             5;
+    nOuterCorrectors             10;
     nCorrectors                  2;
-    nNonOrthogonalCorrectors     3;
+    nNonOrthogonalCorrectors     1;
 
     nMinOuterCorr                2;
-    maxRelVolErr                 1e-03;
+    maxRelVolErr                 1e-20;
 
     maxConvectiveCo              0.3;
     maxInterfaceCo               1.0;

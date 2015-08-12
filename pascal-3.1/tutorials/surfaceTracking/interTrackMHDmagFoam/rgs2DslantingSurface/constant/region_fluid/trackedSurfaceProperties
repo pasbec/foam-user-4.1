@@ -26,7 +26,7 @@ motionDir                                    (0 0 1);
 
 fixedTrackedSurfacePatches                   0();
 
-pointNormalsCorrectionPatches                1(frontAndBack);
+pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
 
 nTrackedSurfaceCorrectors                    1;
 
