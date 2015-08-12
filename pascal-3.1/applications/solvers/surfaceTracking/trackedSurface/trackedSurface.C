@@ -93,7 +93,9 @@ trackedSurface::trackedSurface
     const volScalarField& rho,
     volVectorField& Ub,
     volScalarField& Pb,
-    const surfaceScalarField& sfPhi
+    const surfaceScalarField& sfPhi,
+    const uniformDimensionedVectorField g,
+    const twoPhaseMixture& transportModel
 )
 :
     IOdictionary
@@ -112,6 +114,8 @@ trackedSurface::trackedSurface
     U_(Ub),
     p_(Pb),
     phi_(sfPhi),
+    g_(g),
+    transport_(transportModel),
     curTimeIndex_(Ub.mesh().time().timeIndex()),
     twoFluids_
     (
@@ -130,21 +134,22 @@ trackedSurface::trackedSurface
     bPatchID_(-1),
     muFluidA_
     (
-        this->lookup("muFluidA")
+        transportModel.rho1()
+      * dimensionedScalar(transportModel.nuModel1().viscosityProperties().lookup("nu"))
     ),
     muFluidB_
     (
-        this->lookup("muFluidB")
+        transportModel.rho2()
+      * dimensionedScalar(transportModel.nuModel2().viscosityProperties().lookup("nu"))
     ),
     rhoFluidA_
     (
-        this->lookup("rhoFluidA")
+        transportModel.rho1()
     ),
     rhoFluidB_
     (
-        this->lookup("rhoFluidB")
+        transportModel.rho2()
     ),
-    g_(this->lookup("g")),
     cleanInterfaceSurfTension_
     (
         this->lookup("surfaceTension")
@@ -428,7 +433,7 @@ bool trackedSurface::predictPoints()
     {
         controlPoints() = aMesh().areaCentres().internalField();
         movePoints(scalarField(controlPoints().size(), 0));
-        movePoints(-fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]);
+        movePoints(-fvc::meshPhi(U())().boundaryField()[aPatchID()]);
     }
 
     for
@@ -467,13 +472,13 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 
     scalarField sweptVolCorr =
         interfacePhi
-      - fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
+      - fvc::meshPhi(U())().boundaryField()[aPatchID()];
 
     word ddtScheme
     (
         mesh().schemesDict().ddtScheme
         (
-            "ddt(" + rho().name() + ',' + U().name()+')'
+            "ddt(" + U().name() + ")"
         )
     );
 
@@ -877,13 +882,13 @@ bool trackedSurface::moveMeshPoints()
 {
         scalarField sweptVolCorr =
             phi_.boundaryField()[aPatchID()]
-          - fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
+          - fvc::meshPhi(U())().boundaryField()[aPatchID()];
 
         word ddtScheme
         (
             mesh().schemesDict().ddtScheme
             (
-                "ddt(" + rho().name() + ',' + U().name()+')'
+                "ddt(" + U().name() + ")"
             )
         );
 
@@ -1173,7 +1178,7 @@ void trackedSurface::updateVelocity()
 
         U().boundaryField()[bPatchID()] ==
             interpolatorAB().faceInterpolate(UtFs)
-          + nB*fvc::meshPhi(rho(),U())().boundaryField()[bPatchID()]/
+          + nB*fvc::meshPhi(U())().boundaryField()[bPatchID()]/
             mesh().boundary()[bPatchID()].magSf();
 
         if
@@ -1743,15 +1748,21 @@ scalar trackedSurface::maxCourantNumber()
 
 void trackedSurface::updateProperties()
 {
-    muFluidA_ = dimensionedScalar(this->lookup("muFluidA"));
+    muFluidA_ = transport().rho1()
+      * dimensionedScalar
+        (
+            transport().nuModel1().viscosityProperties().lookup("nu")
+        );
 
-    muFluidB_ = dimensionedScalar(this->lookup("muFluidB"));
+    muFluidB_ = transport().rho2()
+      * dimensionedScalar
+        (
+            transport().nuModel2().viscosityProperties().lookup("nu")
+        );
 
-    rhoFluidA_ = dimensionedScalar(this->lookup("rhoFluidA"));
+    rhoFluidA_ = transport().rho1();
 
-    rhoFluidB_ = dimensionedScalar(this->lookup("rhoFluidB"));
-
-    g_ = dimensionedVector(this->lookup("g"));
+    rhoFluidB_ = transport().rho2();
 
     cleanInterfaceSurfTension_ =
         dimensionedScalar(this->lookup("surfaceTension"));

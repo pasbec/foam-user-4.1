@@ -81,6 +81,12 @@ class trackedSurface
         //- Reference to fluid flux field
         const surfaceScalarField& phi_;
 
+        //- Reference to gravitational acceleration
+        const dimensionedVector g_;
+
+        //- Reference to the transportModel
+        const twoPhaseMixture& transport_;
+
         //- Current time index for surface
         label curTimeIndex_;
 
@@ -117,9 +123,6 @@ class trackedSurface
 
         //- Density of fluid B
         dimensionedScalar rhoFluidB_;
-
-        //- Reference to gravitational acceleration
-        dimensionedVector g_;
 
         //- Surface tension for the clean surface
         dimensionedScalar cleanInterfaceSurfTension_;
@@ -245,7 +248,9 @@ public:
         const volScalarField& rho,
         volVectorField& Ub,
         volScalarField& Pb,
-        const surfaceScalarField& phi
+        const surfaceScalarField& phi,
+        const uniformDimensionedVectorField g,
+        const twoPhaseMixture& transportModel
     );
 
 
@@ -305,6 +310,18 @@ public:
             return p_;
         }
 
+        //- Return reference to gravitational acceleration
+        const dimensionedVector& g() const
+        {
+            return g_;
+        }
+
+        //- Return reference to transport model
+        const twoPhaseMixture& transport() const
+        {
+            return transport_;
+        }
+
         //- Are there exist two fluid
         //  in the surface model
         bool twoFluids() const
@@ -360,12 +377,6 @@ public:
         const dimensionedScalar& rhoFluidB() const
         {
             return rhoFluidB_;
-        }
-
-        //- Gravity
-        const dimensionedVector& g() const
-        {
-            return g_;
         }
 
         //- Surface tension for clean interface
