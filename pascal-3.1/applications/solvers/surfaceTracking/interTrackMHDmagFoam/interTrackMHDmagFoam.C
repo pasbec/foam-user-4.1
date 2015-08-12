@@ -63,6 +63,8 @@ Description
 //                Alberto-method dramatically?
 
 // TODO [High]: Structure/Implementation:
+//              - Fix update of mesh points of base region (last main step).
+//                The inner points of the base region seem to get out of sync?
 //              - Implement control class?
 //              - Get rid of warning: unused variable for mesh, FL and pB
 //              - Fix pressure relaxation for Alberto-method
