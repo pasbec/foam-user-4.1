@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 
-#include "freeSurface.H"
+#include "trackedSurface.H"
 #include "primitivePatchInterpolation.H"
 #include "emptyFaPatch.H"
 #include "wedgeFaPatch.H"
@@ -41,7 +41,7 @@ namespace Foam
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 
-tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
+tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
 {
     const pointField& points = aMesh().patch().localPoints();
     const labelListList& pointFaces = aMesh().patch().pointFaces();
@@ -467,7 +467,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
 }
 
 
-tmp<vectorField> freeSurface::lsPlanePointAndNormal
+tmp<vectorField> trackedSurface::lsPlanePointAndNormal
 (
     const vectorField& points,
     const vector& origin,
@@ -539,7 +539,7 @@ tmp<vectorField> freeSurface::lsPlanePointAndNormal
 }
 
 
-// tmp<vectorField> freeSurface::pointDisplacementSM()
+// tmp<vectorField> trackedSurface::pointDisplacementSM()
 // {
 //     const pointField& points = aMesh().patch().localPoints();
 //     const labelListList& pointFaces = aMesh().patch().pointFaces();

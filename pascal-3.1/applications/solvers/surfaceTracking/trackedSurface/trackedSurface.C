@@ -25,7 +25,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "freeSurface.H"
+#include "trackedSurface.H"
 
 #include "volFields.H"
 #include "transformField.H"
@@ -62,12 +62,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(freeSurface, 0);
+defineTypeNameAndDebug(trackedSurface, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void freeSurface::clearOut()
+void trackedSurface::clearOut()
 {
     deleteDemandDrivenData(interpolatorABPtr_);
     deleteDemandDrivenData(interpolatorBAPtr_);
@@ -87,7 +87,7 @@ void freeSurface::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-freeSurface::freeSurface
+trackedSurface::trackedSurface
 (
     dynamicFvMesh& m,
     const volScalarField& rho,
@@ -100,7 +100,7 @@ freeSurface::freeSurface
     (
         IOobject
         (
-            "freeSurfaceProperties",
+            "trackedSurfaceProperties",
             Ub.mesh().time().constant(),
             Ub.mesh(),
             IOobject::MUST_READ,
@@ -149,17 +149,17 @@ freeSurface::freeSurface
     (
         this->lookup("surfaceTension")
     ),
-    fixedFreeSurfacePatches_
+    fixedTrackedSurfacePatches_
     (
-        this->lookup("fixedFreeSurfacePatches")
+        this->lookup("fixedTrackedSurfacePatches")
     ),
     pointNormalsCorrectionPatches_
     (
         this->lookup("pointNormalsCorrectionPatches")
     ),
-    nFreeSurfCorr_
+    nTrackedSurfCorr_
     (
-        readInt(this->lookup("nFreeSurfaceCorrectors"))
+        readInt(this->lookup("nTrackedSurfaceCorrectors"))
     ),
     smoothing_(false),
     interpolatorABPtr_(NULL),
@@ -197,7 +197,7 @@ freeSurface::freeSurface
         {
             FatalErrorIn
             (
-                "freeSurface::freeSurface(...)"
+                "trackedSurface::trackedSurface(...)"
             )   << "Patch name for point normals correction does not exist"
                 << abort(FatalError);
         }
@@ -209,53 +209,53 @@ freeSurface::freeSurface
     aMesh().movePoints();
 
 
-    // Detect the free surface patch
+    // Detect the surface patch
     forAll (mesh().boundary(), patchI)
     {
-        if(mesh().boundary()[patchI].name() == "freeSurface")
+        if(mesh().boundary()[patchI].name() == "trackedSurface")
         {
             aPatchID_ = patchI;
 
-            Info<< "Found free surface patch. ID: " << aPatchID_
+            Info<< "Found surface patch. ID: " << aPatchID_
                 << endl;
         }
     }
 
     if(aPatchID() == -1)
     {
-        FatalErrorIn("freeSurface::freeSurface(...)")
-            << "Free surface patch not defined.  Please make sure that "
-                << " the free surface patches is named as freeSurface"
+        FatalErrorIn("trackedSurface::trackedSurface(...)")
+            << "Surface patch not defined.  Please make sure that "
+                << " the surface patches is named as trackedSurface"
                 << abort(FatalError);
     }
 
 
-    // Detect the free surface shadow patch
+    // Detect the surface shadow patch
     if (twoFluids())
     {
         forAll (mesh().boundary(), patchI)
         {
-            if(mesh().boundary()[patchI].name() == "freeSurfaceShadow")
+            if(mesh().boundary()[patchI].name() == "trackedSurfaceShadow")
             {
                 bPatchID_ = patchI;
 
-                Info<< "Found free surface shadow patch. ID: "
+                Info<< "Found surface shadow patch. ID: "
                     << bPatchID_ << endl;
             }
         }
 
         if(bPatchID() == -1)
         {
-            FatalErrorIn("freeSurface::freeSurface(...)")
-                << "Free surface shadow patch not defined. "
-                    << "Please make sure that the free surface shadow patch "
-                    << "is named as freeSurfaceShadow."
+            FatalErrorIn("trackedSurface::trackedSurface(...)")
+                << "Surface shadow patch not defined. "
+                    << "Please make sure that the surface shadow patch "
+                    << "is named as trackedSurfaceShadow."
                     << abort(FatalError);
         }
     }
 
 
-    // Mark free surface boundary points
+    // Mark surface boundary points
     // which belonge to processor patches
     forAll(aMesh().boundary(), patchI)
     {
@@ -276,20 +276,20 @@ freeSurface::freeSurface
     }
 
 
-    // Mark fixed free surface boundary points
-    forAll(fixedFreeSurfacePatches_, patchI)
+    // Mark fixed surface boundary points
+    forAll(fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
             aMesh().boundary().findPatchID
             (
-                fixedFreeSurfacePatches_[patchI]
+                fixedTrackedSurfacePatches_[patchI]
             );
 
         if(fixedPatchID == -1)
         {
-            FatalErrorIn("freeSurface::freeSurface(...)")
-                << "Wrong faPatch name in the fixedFreeSurfacePatches list"
-                    << " defined in the freeSurfaceProperties dictionary"
+            FatalErrorIn("trackedSurface::trackedSurface(...)")
+                << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
+                    << " defined in the trackedSurfaceProperties dictionary"
                     << abort(FatalError);
         }
 
@@ -303,7 +303,7 @@ freeSurface::freeSurface
     }
 
 
-    // Mark free-surface boundary point
+    // Mark surface boundary point
     // at the axis of 2-D axisymmetic cases
     forAll(aMesh().boundary(), patchI)
     {
@@ -329,7 +329,7 @@ freeSurface::freeSurface
     }
 
 
-    // Read free-surface points total displacement if present
+    // Read surface points total displacement if present
     readTotalDisplacement();
 
 
@@ -347,7 +347,7 @@ freeSurface::freeSurface
 
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
-freeSurface::~freeSurface()
+trackedSurface::~trackedSurface()
 {
     clearOut();
 }
@@ -355,7 +355,7 @@ freeSurface::~freeSurface()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void freeSurface::updateDisplacementDirections()
+void trackedSurface::updateDisplacementDirections()
 {
     if(normalMotionDir())
     {
@@ -396,7 +396,7 @@ void freeSurface::updateDisplacementDirections()
                 else
                 {
                     Info << "Warning: centerline polyPatch does not exist. "
-                        << "Free surface points displacement directions "
+                        << "Surface points displacement directions "
                         << "will not be corrected at the axis (centerline)"
                         << endl;
                 }
@@ -420,7 +420,7 @@ void freeSurface::updateDisplacementDirections()
 }
 
 
-bool freeSurface::predictPoints()
+bool trackedSurface::predictPoints()
 {
     // Smooth interface
 
@@ -433,9 +433,9 @@ bool freeSurface::predictPoints()
 
     for
     (
-        int freeSurfCorr=0;
-        freeSurfCorr<nFreeSurfCorr_;
-        freeSurfCorr++
+        int trackedSurfCorr=0;
+        trackedSurfCorr<nTrackedSurfCorr_;
+        trackedSurfCorr++
     )
     {
         movePoints(phi_.boundaryField()[aPatchID()]);
@@ -445,13 +445,13 @@ bool freeSurface::predictPoints()
 }
 
 
-bool freeSurface::correctPoints()
+bool trackedSurface::correctPoints()
 {
     for
     (
-        int freeSurfCorr=0;
-        freeSurfCorr<nFreeSurfCorr_;
-        freeSurfCorr++
+        int trackedSurfCorr=0;
+        trackedSurfCorr<nTrackedSurfCorr_;
+        trackedSurfCorr++
     )
     {
         movePoints(phi_.boundaryField()[aPatchID()]);
@@ -461,7 +461,7 @@ bool freeSurface::correctPoints()
 }
 
 
-bool freeSurface::movePoints(const scalarField& interfacePhi)
+bool trackedSurface::movePoints(const scalarField& interfacePhi)
 {
     pointField newMeshPoints = mesh().points();
 
@@ -510,7 +510,7 @@ bool freeSurface::movePoints(const scalarField& interfacePhi)
     }
     else
     {
-        FatalErrorIn("freeSurface::movePoints()")
+        FatalErrorIn("trackedSurface::movePoints()")
             << "Unsupported temporal differencing scheme : "
                 << ddtScheme
                 << abort(FatalError);
@@ -525,7 +525,7 @@ bool freeSurface::movePoints(const scalarField& interfacePhi)
     pointField displacement = pointDisplacement(deltaH);
 
 
-    // Move only free-surface points
+    // Move only surface points
 
     const labelList& meshPointsA =
         mesh().boundaryMesh()[aPatchID()].meshPoints();
@@ -556,8 +556,8 @@ bool freeSurface::movePoints(const scalarField& interfacePhi)
 
     if(totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
     {
-        FatalErrorIn("freeSurface::movePoints()")
-            << "Total displacement of free surface points "
+        FatalErrorIn("trackedSurface::movePoints()")
+            << "Total displacement of surface points "
                 << "from previous time step is not absorbed by the mesh."
                 << abort(FatalError);
     }
@@ -649,7 +649,7 @@ bool freeSurface::movePoints(const scalarField& interfacePhi)
 }
 
 
-bool freeSurface::moveMeshPointsForOldFreeSurfDisplacement()
+bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
 {
     if(totalDisplacementPtr_)
     {
@@ -873,7 +873,7 @@ bool freeSurface::moveMeshPointsForOldFreeSurfDisplacement()
 }
 
 
-bool freeSurface::moveMeshPoints()
+bool trackedSurface::moveMeshPoints()
 {
         scalarField sweptVolCorr =
             phi_.boundaryField()[aPatchID()]
@@ -913,7 +913,7 @@ bool freeSurface::moveMeshPoints()
         }
         else
         {
-            FatalErrorIn("freeSurface::movePoints()")
+            FatalErrorIn("trackedSurface::movePoints()")
                 << "Unsupported temporal differencing scheme : "
                 << ddtScheme
                 << abort(FatalError);
@@ -1058,7 +1058,7 @@ bool freeSurface::moveMeshPoints()
 }
 
 
-void freeSurface::updateBoundaryConditions()
+void trackedSurface::updateBoundaryConditions()
 {
     updateVelocity();
     updateSurfactantConcentration();
@@ -1066,7 +1066,7 @@ void freeSurface::updateBoundaryConditions()
 }
 
 
-void freeSurface::updateVelocity()
+void trackedSurface::updateVelocity()
 {
     if(twoFluids())
     {
@@ -1237,9 +1237,9 @@ void freeSurface::updateVelocity()
         }
         else
         {
-            FatalErrorIn("freeSurface::updateVelocity()")
+            FatalErrorIn("trackedSurface::updateVelocity()")
                 << "Bounary condition on " << U().name()
-                    <<  " for freeSurface patch is "
+                    <<  " for trackedSurface patch is "
                     << U().boundaryField()[aPatchID()].type()
                     << ", instead "
                     << fixedGradientCorrectedFvPatchField<vector>::typeName
@@ -1256,7 +1256,7 @@ void freeSurface::updateVelocity()
             nA*phi_.boundaryField()[aPatchID()]
            /mesh().boundary()[aPatchID()].magSf();
 
-        // Correct normal component of free-surface velocity
+        // Correct normal component of surface velocity
         Us().internalField() += UnFs - nA*(nA&Us().internalField());
         correctUsBoundaryConditions();
 
@@ -1337,9 +1337,9 @@ void freeSurface::updateVelocity()
         }
         else
         {
-            FatalErrorIn("freeSurface::updateVelocity()")
+            FatalErrorIn("trackedSurface::updateVelocity()")
                 << "Bounary condition on " << U().name()
-                    <<  " for freeSurface patch is "
+                    <<  " for trackedSurface patch is "
                     << U().boundaryField()[aPatchID()].type()
                     << ", instead "
                     << fixedGradientCorrectedFvPatchField<vector>::typeName
@@ -1351,9 +1351,9 @@ void freeSurface::updateVelocity()
 }
 
 
-void freeSurface::updatePressure()
+void trackedSurface::updatePressure()
 {
-    // Correct pressure boundary condition at the free-surface
+    // Correct pressure boundary condition at the surface
 
     vectorField nA = mesh().boundary()[aPatchID()].nf();
 
@@ -1367,7 +1367,7 @@ void freeSurface::updatePressure()
 
         const scalarField& K = aMesh().faceCurvatures().internalField();
 
-        Info << "Free surface curvature: min = " << gMin(K)
+        Info << "Surface curvature: min = " << gMin(K)
             << ", max = " << gMax(K)
             << ", average = " << gAverage(K) << endl << flush;
 
@@ -1418,7 +1418,7 @@ void freeSurface::updatePressure()
 
         const scalarField& K = aMesh().faceCurvatures().internalField();
 
-        Info << "Free surface curvature: min = " << gMin(K)
+        Info << "Surface curvature: min = " << gMin(K)
             << ", max = " << gMax(K) << ", average = " << gAverage(K)
             << endl;
 
@@ -1466,13 +1466,13 @@ void freeSurface::updatePressure()
 }
 
 
-void freeSurface::updateSurfaceFlux()
+void trackedSurface::updateSurfaceFlux()
 {
     Phis() = fac::interpolate(Us()) & aMesh().Le();
 }
 
 
-void freeSurface::updateSurfactantConcentration()
+void trackedSurface::updateSurfactantConcentration()
 {
     if(!cleanInterface())
     {
@@ -1545,7 +1545,7 @@ void freeSurface::updateSurfactantConcentration()
         {
             FatalErrorIn
             (
-                "void freeSurface::correctSurfactantConcentration()"
+                "void trackedSurface::correctSurfactantConcentration()"
             )   << "Surface tension is negative"
                     << abort(FatalError);
         }
@@ -1553,7 +1553,7 @@ void freeSurface::updateSurfactantConcentration()
 }
 
 
-void freeSurface::correctUsBoundaryConditions()
+void trackedSurface::correctUsBoundaryConditions()
 {
     forAll(Us().boundaryField(), patchI)
     {
@@ -1602,7 +1602,7 @@ void freeSurface::correctUsBoundaryConditions()
 }
 
 
-vector freeSurface::totalPressureForce() const
+vector trackedSurface::totalPressureForce() const
 {
     const scalarField& S = aMesh().S();
 
@@ -1616,7 +1616,7 @@ vector freeSurface::totalPressureForce() const
 }
 
 
-vector freeSurface::totalViscousForce() const
+vector trackedSurface::totalViscousForce() const
 {
     const scalarField& S = aMesh().S();
     const vectorField& n = aMesh().faceAreaNormals().internalField();
@@ -1636,7 +1636,7 @@ vector freeSurface::totalViscousForce() const
 }
 
 
-vector freeSurface::totalSurfaceTensionForce() const
+vector trackedSurface::totalSurfaceTensionForce() const
 {
     const scalarField& S = aMesh().S();
 
@@ -1664,7 +1664,7 @@ vector freeSurface::totalSurfaceTensionForce() const
 }
 
 
-void freeSurface::initializeControlPointsPosition()
+void trackedSurface::initializeControlPointsPosition()
 {
     scalarField deltaH = scalarField(aMesh().nFaces(), 0.0);
 
@@ -1700,7 +1700,7 @@ void freeSurface::initializeControlPointsPosition()
 }
 
 
-scalar freeSurface::maxCourantNumber()
+scalar trackedSurface::maxCourantNumber()
 {
     scalar CoNum = 0;
 
@@ -1741,7 +1741,7 @@ scalar freeSurface::maxCourantNumber()
 }
 
 
-void freeSurface::updateProperties()
+void trackedSurface::updateProperties()
 {
     muFluidA_ = dimensionedScalar(this->lookup("muFluidA"));
 
@@ -1758,21 +1758,21 @@ void freeSurface::updateProperties()
 }
 
 
-void freeSurface::writeVTK() const
+void trackedSurface::writeVTK() const
 {
     aMesh().patch().writeVTK
     (
-        DB().timePath()/"freeSurface",
+        DB().timePath()/"trackedSurface",
         aMesh().patch(),
         aMesh().patch().points()
     );
 }
 
 
-void freeSurface::writeVTKControlPoints()
+void trackedSurface::writeVTKControlPoints()
 {
     // Write patch and points into VTK
-    fileName name(DB().timePath()/"freeSurfaceControlPoints");
+    fileName name(DB().timePath()/"trackedSurfaceControlPoints");
     OFstream mps(name + ".vtk");
 
     mps << "# vtk DataFile Version 2.0" << nl

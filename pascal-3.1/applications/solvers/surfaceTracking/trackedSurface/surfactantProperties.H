@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class freeSurface Declaration
+                  Class surfactantProperties Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfactantProperties
@@ -54,7 +54,7 @@ class surfactantProperties
         //- Surfactant concetration in the bulk of fluid
         dimensionedScalar surfactBulkConc_;
 
-        //- Saturated surfactant concentration on the free-surface
+        //- Saturated surfactant concentration on the surface
         dimensionedScalar surfactSaturatedConc_;
 
         //- Adsorption coefficient of surfactant
@@ -66,16 +66,16 @@ class surfactantProperties
         //- Diffusion coefficient of surfactant in the bulk of fluid
         dimensionedScalar surfactBulkDiffusion_;
 
-        //- Diffusion coefficient of surfactant at the free-surface
+        //- Diffusion coefficient of surfactant at the surface
         dimensionedScalar surfactDiffusion_;
 
-        //- Temperature of surfactant at the free-surface
+        //- Temperature of surfactant at the surface
         dimensionedScalar surfactT_;
 
         //- Universal gas constant
         dimensionedScalar surfactR_;
 
-        //- Equilibrium surfactant concentration at the free-surface
+        //- Equilibrium surfactant concentration at the surface
         dimensionedScalar surfactEquilibriumConc_;
 
         //- Is the surfactant soluble
@@ -115,7 +115,7 @@ public:
             return surfactBulkConc_;
         }
 
-        //- Return saturated surfactant concentration at the free-surface
+        //- Return saturated surfactant concentration at the surface
         const dimensionedScalar& surfactSaturatedConc() const
         {
             return surfactSaturatedConc_;
@@ -139,7 +139,7 @@ public:
             return surfactBulkDiffusion_;
         }
 
-        //- Return diffusion coefficient of the surfactant at the free-surface
+        //- Return diffusion coefficient of the surfactant at the surface
         const dimensionedScalar& surfactDiffusion() const
         {
             return surfactDiffusion_;
@@ -157,7 +157,7 @@ public:
             return surfactR_;
         }
 
-        //- Return equilibrium surfactant concentration at the free-surface
+        //- Return equilibrium surfactant concentration at the surface
         const dimensionedScalar& surfactEquilibriumConc() const
         {
             return surfactEquilibriumConc_;

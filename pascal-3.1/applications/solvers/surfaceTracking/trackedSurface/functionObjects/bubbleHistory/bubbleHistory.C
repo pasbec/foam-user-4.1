@@ -30,7 +30,7 @@ Author
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "boundBox.H"
-#include "freeSurface.H"
+#include "trackedSurface.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -144,16 +144,16 @@ Foam::bubbleHistory::bubbleHistory
 
     V0_ = gSum((1 - fluidIndicator.internalField())*mesh.V().field());
 
-    const freeSurface& fs =
-        mesh.lookupObject<freeSurface>("freeSurfaceProperties");
+    const trackedSurface& ts =
+        mesh.lookupObject<trackedSurface>("trackedSurfaceProperties");
 
-    if (!fs.twoFluids())
+    if (!ts.twoFluids())
     {
         V0_ =
           - gSum
             (
-                mesh.Cf().boundaryField()[fs.aPatchID()]
-              & mesh.Sf().boundaryField()[fs.aPatchID()]
+                mesh.Cf().boundaryField()[ts.aPatchID()]
+              & mesh.Sf().boundaryField()[ts.aPatchID()]
             )/3;
 
         if (mesh.nGeometricD() != 3)
@@ -178,18 +178,18 @@ bool Foam::bubbleHistory::start()
     const volScalarField& fluidIndicator =
         mesh.lookupObject<volScalarField>("fluidIndicator");
 
-    const freeSurface& fs =
-        mesh.lookupObject<freeSurface>("freeSurfaceProperties");
+    const trackedSurface& ts =
+        mesh.lookupObject<trackedSurface>("trackedSurfaceProperties");
 
     scalar V = gSum((1 - fluidIndicator.internalField())*mesh.V().field());
 
-    if (!fs.twoFluids())
+    if (!ts.twoFluids())
     {
         V =
           - gSum
             (
-                mesh.Cf().boundaryField()[fs.aPatchID()]
-                & mesh.Sf().boundaryField()[fs.aPatchID()]
+                mesh.Cf().boundaryField()[ts.aPatchID()]
+                & mesh.Sf().boundaryField()[ts.aPatchID()]
             )/3;
 
         if (mesh.nGeometricD() != 3)
@@ -208,7 +208,7 @@ bool Foam::bubbleHistory::start()
     dimensionedVector U(mrf.lookup("UF"));
     dimensionedVector a(mrf.lookup("aF"));
 
-    vector F = fs.totalViscousForce() + fs.totalPressureForce();
+    vector F = ts.totalViscousForce() + ts.totalPressureForce();
 
     vector dragDir;
 
@@ -218,7 +218,7 @@ bool Foam::bubbleHistory::start()
     }
     else
     {
-        dragDir = fs.g().value()/(mag(fs.g().value()) + SMALL);
+        dragDir = ts.g().value()/(mag(ts.g().value()) + SMALL);
     }
 
     scalar dragForce = (dragDir&F);
@@ -227,26 +227,26 @@ bool Foam::bubbleHistory::start()
 
     scalar Deq = 2*pow(3*V/(4*M_PI), 1.0/3.0);
 
-    scalar Ug = -(U.value()&(fs.g().value()/(mag(fs.g().value()) + SMALL)));
+    scalar Ug = -(U.value()&(ts.g().value()/(mag(ts.g().value()) + SMALL)));
 
     scalar CD =
-        (4.0/3.0)*(fs.rhoFluidA().value() - fs.rhoFluidB().value())
-       *mag(fs.g().value())*Deq
-       /(fs.rhoFluidA().value()*mag(U.value())*Ug + SMALL);
+        (4.0/3.0)*(ts.rhoFluidA().value() - ts.rhoFluidB().value())
+       *mag(ts.g().value())*Deq
+       /(ts.rhoFluidA().value()*mag(U.value())*Ug + SMALL);
 
-    scalar ag = -(a.value()&(fs.g().value()/(mag(fs.g().value()) + SMALL)));
+    scalar ag = -(a.value()&(ts.g().value()/(mag(ts.g().value()) + SMALL)));
 
     scalar CVM =
-        (fs.rhoFluidA().value() - fs.rhoFluidB().value())*mag(fs.g().value())
-       /(fs.rhoFluidA().value()*ag + SMALL)
-      - (fs.rhoFluidB().value()/(fs.rhoFluidA().value() + SMALL));
+        (ts.rhoFluidA().value() - ts.rhoFluidB().value())*mag(ts.g().value())
+       /(ts.rhoFluidA().value()*ag + SMALL)
+      - (ts.rhoFluidB().value()/(ts.rhoFluidA().value() + SMALL));
 
-    scalar RE = Ug*Deq*fs.rhoFluidA().value()/(fs.muFluidA().value() + SMALL);
+    scalar RE = Ug*Deq*ts.rhoFluidA().value()/(ts.muFluidA().value() + SMALL);
 
-    scalar WE = fs.rhoFluidA().value()*sqr(Ug)*Deq
-       /(fs.cleanInterfaceSurfTension().value() + SMALL);
+    scalar WE = ts.rhoFluidA().value()*sqr(Ug)*Deq
+       /(ts.cleanInterfaceSurfTension().value() + SMALL);
 
-    boundBox box(mesh.C().boundaryField()[fs.aPatchID()]);
+    boundBox box(mesh.C().boundaryField()[ts.aPatchID()]);
 
     if (Pstream::master())
     {
@@ -293,18 +293,18 @@ bool Foam::bubbleHistory::execute()
     const volScalarField& fluidIndicator =
         mesh.lookupObject<volScalarField>("fluidIndicator");
 
-    const freeSurface& fs =
-        mesh.lookupObject<freeSurface>("freeSurfaceProperties");
+    const trackedSurface& ts =
+        mesh.lookupObject<trackedSurface>("trackedSurfaceProperties");
 
     scalar V = gSum((1 - fluidIndicator.internalField())*mesh.V().field());
 
-    if (!fs.twoFluids())
+    if (!ts.twoFluids())
     {
         V =
           - gSum
             (
-                mesh.Cf().boundaryField()[fs.aPatchID()]
-                & mesh.Sf().boundaryField()[fs.aPatchID()]
+                mesh.Cf().boundaryField()[ts.aPatchID()]
+                & mesh.Sf().boundaryField()[ts.aPatchID()]
             )/3;
 
         if (mesh.nGeometricD() != 3)
@@ -324,7 +324,7 @@ bool Foam::bubbleHistory::execute()
     dimensionedVector a(mrf.lookup("aF"));
 
 
-    vector F = fs.totalViscousForce() + fs.totalPressureForce();
+    vector F = ts.totalViscousForce() + ts.totalPressureForce();
 
     vector dragDir;
 
@@ -334,7 +334,7 @@ bool Foam::bubbleHistory::execute()
     }
     else
     {
-        dragDir = fs.g().value()/(mag(fs.g().value()) + SMALL);
+        dragDir = ts.g().value()/(mag(ts.g().value()) + SMALL);
     }
 
     scalar dragForce = (dragDir&F);
@@ -343,26 +343,26 @@ bool Foam::bubbleHistory::execute()
 
     scalar Deq = pow(3*V/(4*M_PI), 1.0/3.0);
 
-    scalar Ug = -(U.value()&(fs.g().value()/(mag(fs.g().value()) + SMALL)));
+    scalar Ug = -(U.value()&(ts.g().value()/(mag(ts.g().value()) + SMALL)));
 
     scalar CD =
-        (4.0/3.0)*(fs.rhoFluidA().value() - fs.rhoFluidB().value())
-       *mag(fs.g().value())*Deq
-       /(fs.rhoFluidA().value()*mag(U.value())*Ug + SMALL);
+        (4.0/3.0)*(ts.rhoFluidA().value() - ts.rhoFluidB().value())
+       *mag(ts.g().value())*Deq
+       /(ts.rhoFluidA().value()*mag(U.value())*Ug + SMALL);
 
-    scalar ag = -(a.value()&(fs.g().value()/(mag(fs.g().value()) + SMALL)));
+    scalar ag = -(a.value()&(ts.g().value()/(mag(ts.g().value()) + SMALL)));
 
     scalar CVM =
-        (fs.rhoFluidA().value() - fs.rhoFluidB().value())*mag(fs.g().value())
-       /(fs.rhoFluidA().value()*ag + SMALL)
-      - (fs.rhoFluidB().value()/(fs.rhoFluidA().value() + SMALL));
+        (ts.rhoFluidA().value() - ts.rhoFluidB().value())*mag(ts.g().value())
+       /(ts.rhoFluidA().value()*ag + SMALL)
+      - (ts.rhoFluidB().value()/(ts.rhoFluidA().value() + SMALL));
 
-    scalar RE = Ug*Deq*fs.rhoFluidA().value()/(fs.muFluidA().value() + SMALL);
+    scalar RE = Ug*Deq*ts.rhoFluidA().value()/(ts.muFluidA().value() + SMALL);
 
-    scalar WE = fs.rhoFluidA().value()*sqr(Ug)*Deq
-       /(fs.cleanInterfaceSurfTension().value() + SMALL);
+    scalar WE = ts.rhoFluidA().value()*sqr(Ug)*Deq
+       /(ts.cleanInterfaceSurfTension().value() + SMALL);
 
-    boundBox box(mesh.C().boundaryField()[fs.aPatchID()]);
+    boundBox box(mesh.C().boundaryField()[ts.aPatchID()]);
 
     if (Pstream::master())
     {

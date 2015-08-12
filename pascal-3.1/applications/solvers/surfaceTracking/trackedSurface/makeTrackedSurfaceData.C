@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "freeSurface.H"
+#include "trackedSurface.H"
 #include "primitivePatchInterpolation.H"
 #include "wedgeFaPatch.H"
 #include "wallFvPatch.H"
@@ -37,12 +37,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void freeSurface::makeInterpolators()
+void trackedSurface::makeInterpolators()
 {
     if (debug)
     {
-        Info<< "freeSurface::makeInterpolators() : "
-            << "making pathc to patch interpolator"
+        Info<< "trackedSurface::makeInterpolators() : "
+            << "Making patch to patch interpolator"
             << endl;
     }
 
@@ -55,7 +55,7 @@ void freeSurface::makeInterpolators()
         interpolatorABPtr_
     )
     {
-        FatalErrorIn("freeSurface::makeInterpolators()")
+        FatalErrorIn("trackedSurface::makeInterpolators()")
             << "patch to patch interpolators already exists"
                 << abort(FatalError);
     }
@@ -63,16 +63,16 @@ void freeSurface::makeInterpolators()
 
     if(aPatchID() == -1)
     {
-        FatalErrorIn("freeSurface::makeInterpolators()")
-            << "Free surface patch A not defined."
+        FatalErrorIn("trackedSurface::makeInterpolators()")
+            << "Surface patch A not defined."
             << abort(FatalError);
     }
 
 
     if(bPatchID() == -1)
     {
-        FatalErrorIn("freeSurface::makeInterpolators()")
-            << "Free surface patch B not defined."
+        FatalErrorIn("trackedSurface::makeInterpolators()")
+            << "Surface patch B not defined."
             << abort(FatalError);
     }
 
@@ -102,7 +102,7 @@ void freeSurface::makeInterpolators()
     {
         if(mag(faceDistBA[faceI] - GREAT) < SMALL)
         {
-            FatalErrorIn("freeSurface::makeInterpolators()")
+            FatalErrorIn("trackedSurface::makeInterpolators()")
                 << "Error in B-to-A face patchToPatchInterpolation."
                 << abort(FatalError);
         }
@@ -115,7 +115,7 @@ void freeSurface::makeInterpolators()
     {
         if(mag(pointDistBA[pointI] - GREAT) < SMALL)
         {
-            FatalErrorIn("freeSurface::makeInterpolators()")
+            FatalErrorIn("trackedSurface::makeInterpolators()")
                 << "Error in B-to-A point patchToPatchInterpolation."
                 << abort(FatalError);
         }
@@ -146,7 +146,7 @@ void freeSurface::makeInterpolators()
     {
         if(mag(faceDistAB[faceI] - GREAT) < SMALL)
         {
-            FatalErrorIn("freeSurface::makeInterpolators()")
+            FatalErrorIn("trackedSurface::makeInterpolators()")
                 << "Error in A-to-B face patchToPatchInterpolation."
                 << abort(FatalError);
         }
@@ -157,9 +157,9 @@ void freeSurface::makeInterpolators()
 
     forAll(pointDistAB, pointI)
     {
-        if(mag(pointDistAB[pointI] - GREAT)<SMALL)
+        if(mag(pointDistAB[pointI] - GREAT) < SMALL)
         {
-            FatalErrorIn("freeSurface::makeInterpolators()")
+            FatalErrorIn("trackedSurface::makeInterpolators()")
                 << "Error in A-to-B point patchToPatchInterpolation."
                 << abort(FatalError);
         }
@@ -233,12 +233,12 @@ void freeSurface::makeInterpolators()
 }
 
 
-void freeSurface::makeControlPoints()
+void trackedSurface::makeControlPoints()
 {
     if (debug)
     {
-        Info<< "freeSurface::makeControlPoints() : "
-            << "making control points"
+        Info<< "trackedSurface::makeControlPoints() : "
+            << "Making control points"
             << endl;
     }
 
@@ -247,7 +247,7 @@ void freeSurface::makeControlPoints()
     // if the pointer is already set
     if (controlPointsPtr_)
     {
-        FatalErrorIn("freeSurface::makeInterpolators()")
+        FatalErrorIn("trackedSurface::makeInterpolators()")
             << "patch to patch interpolators already exists"
             << abort(FatalError);
     }
@@ -296,12 +296,12 @@ void freeSurface::makeControlPoints()
 }
 
 
-void freeSurface::makeMotionPointsMask()
+void trackedSurface::makeMotionPointsMask()
 {
     if (debug)
     {
-        Info<< "freeSurface::makeMotionPointsMask() : "
-            << "making motion points mask"
+        Info<< "trackedSurface::makeMotionPointsMask() : "
+            << "Making motion points mask"
             << endl;
     }
 
@@ -310,7 +310,7 @@ void freeSurface::makeMotionPointsMask()
     // if the pointer is already set
     if (motionPointsMaskPtr_)
     {
-        FatalErrorIn("freeSurface::motionPointsMask()")
+        FatalErrorIn("trackedSurface::motionPointsMask()")
             << "motion points mask already exists"
             << abort(FatalError);
     }
@@ -318,8 +318,8 @@ void freeSurface::makeMotionPointsMask()
 
     if(aPatchID() == -1)
     {
-        FatalErrorIn("freeSurface::makeMotionPointsMask()")
-            << "Free surface patch A not defined."
+        FatalErrorIn("trackedSurface::makeMotionPointsMask()")
+            << "Surface patch A not defined."
             << abort(FatalError);
     }
 
@@ -332,12 +332,12 @@ void freeSurface::makeMotionPointsMask()
 }
 
 
-void freeSurface::makeDirections()
+void trackedSurface::makeDirections()
 {
     if (debug)
     {
-        Info<< "freeSurface::makeDirections() : "
-            << "making displacement directions for points and "
+        Info<< "trackedSurface::makeDirections() : "
+            << "Making displacement directions for points and "
             << "control points"
             << endl;
     }
@@ -351,7 +351,7 @@ void freeSurface::makeDirections()
         facesDisplacementDirPtr_
     )
     {
-        FatalErrorIn("freeSurface::makeDirections()")
+        FatalErrorIn("trackedSurface::makeDirections()")
             << "points and control points displacement directions "
             << "already exists"
             << abort(FatalError);
@@ -360,8 +360,8 @@ void freeSurface::makeDirections()
 
     if(aPatchID() == -1)
     {
-        FatalErrorIn("freeSurface::makeDirections()")
-            << "Free surface patch A not defined."
+        FatalErrorIn("trackedSurface::makeDirections()")
+            << "Surface patch A not defined."
             << abort(FatalError);
     }
 
@@ -384,7 +384,7 @@ void freeSurface::makeDirections()
     {
         if(mag(motionDir_) < SMALL)
         {
-            FatalErrorIn("freeSurface::makeDirections()")
+            FatalErrorIn("trackedSurface::makeDirections()")
                 << "Zero motion direction"
                     << abort(FatalError);
         }
@@ -397,12 +397,12 @@ void freeSurface::makeDirections()
 }
 
 
-void freeSurface::makeTotalDisplacement()
+void trackedSurface::makeTotalDisplacement()
 {
     if (debug)
     {
-        Info<< "freeSurface::makeTotalDisplacement() : "
-            << "making zero total points displacement"
+        Info<< "trackedSurface::makeTotalDisplacement() : "
+            << "Making zero total points displacement"
             << endl;
     }
 
@@ -411,7 +411,7 @@ void freeSurface::makeTotalDisplacement()
     // if the pointer is already set
     if (totalDisplacementPtr_)
     {
-        FatalErrorIn("freeSurface::makeTotalDisplacement()")
+        FatalErrorIn("trackedSurface::makeTotalDisplacement()")
             << "total points displacement already exists"
             << abort(FatalError);
     }
@@ -436,11 +436,11 @@ void freeSurface::makeTotalDisplacement()
 }
 
 
-void freeSurface::readTotalDisplacement()
+void trackedSurface::readTotalDisplacement()
 {
     if (debug)
     {
-        Info<< "freeSurface::readTotalDisplacement() : "
+        Info<< "trackedSurface::readTotalDisplacement() : "
             << "reading total points displacement if present"
             << endl;
     }
@@ -450,7 +450,7 @@ void freeSurface::readTotalDisplacement()
     // if the pointer is already set
     if (totalDisplacementPtr_)
     {
-        FatalErrorIn("freeSurface::makeTotalDisplacement()")
+        FatalErrorIn("trackedSurface::makeTotalDisplacement()")
             << "total points displacement already exists"
             << abort(FatalError);
     }
@@ -483,12 +483,12 @@ void freeSurface::readTotalDisplacement()
 }
 
 
-void freeSurface::makeFaMesh() const
+void trackedSurface::makeFaMesh() const
 {
     if (debug)
     {
-        Info<< "freeSurface::makeFaMesh() : "
-            << "making finite area mesh"
+        Info<< "trackedSurface::makeFaMesh() : "
+            << "Making finite area mesh"
             << endl;
     }
 
@@ -496,7 +496,7 @@ void freeSurface::makeFaMesh() const
     // if the pointer is already set
     if (aMeshPtr_)
     {
-        FatalErrorIn("freeSurface::makeFaMesh()")
+        FatalErrorIn("trackedSurface::makeFaMesh()")
             << "finite area mesh already exists"
             << abort(FatalError);
     }
@@ -504,12 +504,12 @@ void freeSurface::makeFaMesh() const
     aMeshPtr_ = new faMesh(mesh());
 }
 
-void freeSurface::makeUs() const
+void trackedSurface::makeUs() const
 {
     if (debug)
     {
-        Info<< "freeSurface::makeUs() : "
-            << "making free-surface velocity field"
+        Info<< "trackedSurface::makeUs() : "
+            << "Making surface velocity field"
             << endl;
     }
 
@@ -518,8 +518,8 @@ void freeSurface::makeUs() const
     // if the pointer is already set
     if (UsPtr_)
     {
-        FatalErrorIn("freeSurface::makeUs()")
-            << "free-surface velocity field already exists"
+        FatalErrorIn("trackedSurface::makeUs()")
+            << "Surface velocity field already exists"
             << abort(FatalError);
     }
 
@@ -579,12 +579,12 @@ void freeSurface::makeUs() const
 }
 
 
-void freeSurface::makePhis()
+void trackedSurface::makePhis()
 {
     if (debug)
     {
-        Info<< "freeSurface::makePhis() : "
-            << "making free-surface fluid flux"
+        Info<< "trackedSurface::makePhis() : "
+            << "Making surface fluid flux"
             << endl;
     }
 
@@ -593,8 +593,8 @@ void freeSurface::makePhis()
     // if the pointer is already set
     if (phisPtr_)
     {
-        FatalErrorIn("freeSurface::makePhis()")
-            << "free-surface fluid flux already exists"
+        FatalErrorIn("trackedSurface::makePhis()")
+            << "Surface fluid flux already exists"
             << abort(FatalError);
     }
 
@@ -614,12 +614,12 @@ void freeSurface::makePhis()
 }
 
 
-void freeSurface::makeSurfactConc() const
+void trackedSurface::makeSurfactConc() const
 {
     if (debug)
     {
-        Info<< "freeSurface::makeSurfactConc() : "
-            << "making free-surface surfactant concentration field"
+        Info<< "trackedSurface::makeSurfactConc() : "
+            << "Making surface surfactant concentration field"
             << endl;
     }
 
@@ -628,8 +628,8 @@ void freeSurface::makeSurfactConc() const
     // if the pointer is already set
     if (surfactConcPtr_)
     {
-        FatalErrorIn("freeSurface::makeSurfaceConc()")
-            << "free-surface surfactant concentratio field already exists"
+        FatalErrorIn("trackedSurface::makeSurfaceConc()")
+            << "Surface surfactant concentratio field already exists"
             << abort(FatalError);
     }
 
@@ -648,12 +648,12 @@ void freeSurface::makeSurfactConc() const
 }
 
 
-void freeSurface::makeSurfaceTension() const
+void trackedSurface::makeSurfaceTension() const
 {
     if (debug)
     {
-        Info<< "freeSurface::makeSurfaceTension() : "
-            << "making surface tension field"
+        Info<< "trackedSurface::makeSurfaceTension() : "
+            << "Making surface tension field"
             << endl;
     }
 
@@ -662,8 +662,8 @@ void freeSurface::makeSurfaceTension() const
     // if the pointer is already set
     if (surfaceTensionPtr_)
     {
-        FatalErrorIn("freeSurface::makeSurfaceTension()")
-            << "surface tension field already exists"
+        FatalErrorIn("trackedSurface::makeSurfaceTension()")
+            << "Surface tension field already exists"
             << abort(FatalError);
     }
 
@@ -688,12 +688,12 @@ void freeSurface::makeSurfaceTension() const
 }
 
 
-void freeSurface::makeSurfactant() const
+void trackedSurface::makeSurfactant() const
 {
     if (debug)
     {
-        Info<< "freeSurface::makeSurfactant() : "
-            << "making surfactant properties"
+        Info<< "trackedSurface::makeSurfactant() : "
+            << "Making surfactant properties"
             << endl;
     }
 
@@ -702,7 +702,7 @@ void freeSurface::makeSurfactant() const
     // if the pointer is already set
     if (surfactantPtr_)
     {
-        FatalErrorIn("freeSurface::makeSurfactant()")
+        FatalErrorIn("trackedSurface::makeSurfactant()")
             << "surfactant properties already exists"
             << abort(FatalError);
     }
@@ -715,12 +715,12 @@ void freeSurface::makeSurfactant() const
 }
 
 
-void freeSurface::makeFluidIndicator()
+void trackedSurface::makeFluidIndicator()
 {
     if (debug)
     {
-        Info<< "freeSurface::makeFluidIndicator() : "
-            << "making fluid indicator"
+        Info<< "trackedSurface::makeFluidIndicator() : "
+            << "Making fluid indicator"
             << endl;
     }
 
@@ -729,7 +729,7 @@ void freeSurface::makeFluidIndicator()
     // if the pointer is already set
     if (fluidIndicatorPtr_)
     {
-        FatalErrorIn("freeSurface::makeFluidIndicator()")
+        FatalErrorIn("trackedSurface::makeFluidIndicator()")
             << "fluid indicator already exists"
             << abort(FatalError);
     }
@@ -787,7 +787,7 @@ void freeSurface::makeFluidIndicator()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const IOpatchToPatchInterpolation& freeSurface::interpolatorAB()
+const IOpatchToPatchInterpolation& trackedSurface::interpolatorAB()
 {
     if (!interpolatorABPtr_)
     {
@@ -798,7 +798,7 @@ const IOpatchToPatchInterpolation& freeSurface::interpolatorAB()
 }
 
 
-const IOpatchToPatchInterpolation& freeSurface::interpolatorBA()
+const IOpatchToPatchInterpolation& trackedSurface::interpolatorBA()
 {
     if (!interpolatorBAPtr_)
     {
@@ -809,7 +809,7 @@ const IOpatchToPatchInterpolation& freeSurface::interpolatorBA()
 }
 
 
-vectorField& freeSurface::controlPoints()
+vectorField& trackedSurface::controlPoints()
 {
     if (!controlPointsPtr_)
     {
@@ -820,7 +820,7 @@ vectorField& freeSurface::controlPoints()
 }
 
 
-labelList& freeSurface::motionPointsMask()
+labelList& trackedSurface::motionPointsMask()
 {
     if (!motionPointsMaskPtr_)
     {
@@ -831,7 +831,7 @@ labelList& freeSurface::motionPointsMask()
 }
 
 
-vectorField& freeSurface::pointsDisplacementDir()
+vectorField& trackedSurface::pointsDisplacementDir()
 {
     if (!pointsDisplacementDirPtr_)
     {
@@ -842,7 +842,7 @@ vectorField& freeSurface::pointsDisplacementDir()
 }
 
 
-vectorField& freeSurface::facesDisplacementDir()
+vectorField& trackedSurface::facesDisplacementDir()
 {
     if (!facesDisplacementDirPtr_)
     {
@@ -853,7 +853,7 @@ vectorField& freeSurface::facesDisplacementDir()
 }
 
 
-vectorField& freeSurface::totalDisplacement()
+vectorField& trackedSurface::totalDisplacement()
 {
     if (!totalDisplacementPtr_)
     {
@@ -864,7 +864,7 @@ vectorField& freeSurface::totalDisplacement()
 }
 
 
-faMesh& freeSurface::aMesh()
+faMesh& trackedSurface::aMesh()
 {
     if (!aMeshPtr_)
     {
@@ -874,7 +874,7 @@ faMesh& freeSurface::aMesh()
     return *aMeshPtr_;
 }
 
-const faMesh& freeSurface::aMesh() const
+const faMesh& trackedSurface::aMesh() const
 {
     if (!aMeshPtr_)
     {
@@ -884,7 +884,7 @@ const faMesh& freeSurface::aMesh() const
     return *aMeshPtr_;
 }
 
-areaVectorField& freeSurface::Us()
+areaVectorField& trackedSurface::Us()
 {
     if (!UsPtr_)
     {
@@ -894,7 +894,7 @@ areaVectorField& freeSurface::Us()
     return *UsPtr_;
 }
 
-const areaVectorField& freeSurface::Us() const
+const areaVectorField& trackedSurface::Us() const
 {
     if (!UsPtr_)
     {
@@ -904,7 +904,7 @@ const areaVectorField& freeSurface::Us() const
     return *UsPtr_;
 }
 
-edgeScalarField& freeSurface::Phis()
+edgeScalarField& trackedSurface::Phis()
 {
     if (!phisPtr_)
     {
@@ -914,7 +914,7 @@ edgeScalarField& freeSurface::Phis()
     return *phisPtr_;
 }
 
-areaScalarField& freeSurface::surfactantConcentration()
+areaScalarField& trackedSurface::surfactantConcentration()
 {
     if (!surfactConcPtr_)
     {
@@ -924,7 +924,7 @@ areaScalarField& freeSurface::surfactantConcentration()
     return *surfactConcPtr_;
 }
 
-const areaScalarField& freeSurface::surfactantConcentration() const
+const areaScalarField& trackedSurface::surfactantConcentration() const
 {
     if (!surfactConcPtr_)
     {
@@ -934,7 +934,7 @@ const areaScalarField& freeSurface::surfactantConcentration() const
     return *surfactConcPtr_;
 }
 
-areaScalarField& freeSurface::surfaceTension()
+areaScalarField& trackedSurface::surfaceTension()
 {
     if (!surfaceTensionPtr_)
     {
@@ -944,7 +944,7 @@ areaScalarField& freeSurface::surfaceTension()
     return *surfaceTensionPtr_;
 }
 
-const areaScalarField& freeSurface::surfaceTension() const
+const areaScalarField& trackedSurface::surfaceTension() const
 {
     if (!surfaceTensionPtr_)
     {
@@ -954,7 +954,7 @@ const areaScalarField& freeSurface::surfaceTension() const
     return *surfaceTensionPtr_;
 }
 
-const surfactantProperties& freeSurface::surfactant() const
+const surfactantProperties& trackedSurface::surfactant() const
 {
     if (!surfactantPtr_)
     {
@@ -965,7 +965,7 @@ const surfactantProperties& freeSurface::surfactant() const
 }
 
 
-const volScalarField& freeSurface::fluidIndicator()
+const volScalarField& trackedSurface::fluidIndicator()
 {
     if (!fluidIndicatorPtr_)
     {
@@ -976,7 +976,7 @@ const volScalarField& freeSurface::fluidIndicator()
 }
 
 
-tmp<areaVectorField> freeSurface::surfaceTensionGrad()
+tmp<areaVectorField> trackedSurface::surfaceTensionGrad()
 {
     tmp<areaVectorField> tgrad
     (
