@@ -1,6 +1,6 @@
-freeSurface.C
-makeFreeSurfaceData.C
-freeSurfacePointDisplacement.C
+trackedSurface.C
+makeTrackedSurfaceData.C
+trackedSurfacePointDisplacement.C
 
 correctedFvPatchFields/correctedFvPatchField/correctedFvPatchFields.C
 
@@ -16,4 +16,4 @@ patchCorrectedSnGrad/patchCorrectedSnGrads.C
 functionObjects/bubbleHistory/bubbleHistory.C
 functionObjects/sloshingHistory/sloshingHistory.C
 
-LIB = $(FOAM_USER_LIBBIN)/libfreeSurface
+LIB = $(FOAM_USER_LIBBIN)/libtrackedSurface
