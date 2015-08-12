@@ -17,10 +17,15 @@
     bool mfUpdate = true;
 
     // Init update counter
-    int mfUpdateCounter = mfTimeDict.lookupOrAddDefault<int>("updateCounter", 0);
+    int mfUpdateCounter =
+        mfTimeDict.lookupOrAddDefault<int>("updateCounter", 0);
 
     // Init output index for magnetic update
-    int mfUpdateOutputTimeIndex = mfTimeDict.lookupOrAddDefault<int>("outputTimeIndex", 0);
+    // We need this as there is currently no access function to
+    // private variable outputTimeIndex_ of TimeState
+    int mfUpdateOutputTimeIndex =
+        mfTimeDict.lookupOrAddDefault<int>("outputTimeIndex", 0);
 
     // Init last time of magnetic update time cycle
-    scalar mfUpdateLastUpdateTime = mfTimeDict.lookupOrAddDefault<scalar>("lastUpdateTime", runTime.value());
+    scalar mfUpdateLastUpdateTime =
+        mfTimeDict.lookupOrAddDefault<scalar>("lastUpdateTime", -VGREAT);

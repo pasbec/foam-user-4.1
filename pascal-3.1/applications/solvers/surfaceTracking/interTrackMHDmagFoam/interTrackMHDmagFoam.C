@@ -142,8 +142,6 @@ int main(int argc, char *argv[])
         {
 #           include "setBaseFields.H"
 
-#           include "updateBaseMagneticCheck.H"
-
 #           include "updateMultiRegionCourantNo.H"
         }
 
@@ -181,6 +179,14 @@ int main(int argc, char *argv[])
 
             // Prediction step for interface points
             interface.predictPoints();
+        }
+
+        // ==================================================================//
+        // Check whether magnetic update is due
+        // ==================================================================//
+
+        {
+#           include "updateBaseMagneticCheck.H"
         }
 
         // ==================================================================//
