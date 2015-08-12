@@ -46,6 +46,8 @@ SourceFiles
 #include "faCFD.H"
 #include "IOpatchToPatchInterpolation.H"
 #include "dynamicFvMesh.H"
+#include "twoPhaseMixture.H"
+#include "turbulenceModel.H"
 
 #include "surfactantProperties.H"
 
