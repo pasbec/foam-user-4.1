@@ -175,6 +175,23 @@
 
 
     // Tracked surface
+// TODO [Temp]
+//     Info << "Create tracked surface for"
+//         << " region " << mesh_[fluidRegionID].name()
+//         << endl;
+//     trackedSurface interface
+//     (
+//         mesh_[fluidRegionID],
+//         rho,
+//         U,
+//         p,
+//         pB_[fluidRegionID],
+//         phi,
+//         g,
+//         twoPhaseProperties,
+//         turbulence
+//     );
+//     Info << nl;
     Info << "Create tracked surface for"
         << " region " << mesh_[fluidRegionID].name()
         << endl;
@@ -184,11 +201,9 @@
         rho,
         U,
         p,
-        pB_[fluidRegionID],
         phi,
         g,
-        twoPhaseProperties,
-        turbulence
+        twoPhaseProperties
     );
     Info << nl;
 

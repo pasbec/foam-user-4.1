@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
 
         {
             // Move and update mesh of fluid region
-            interface.moveMeshPointsForOldFreeSurfDisplacement();
+            interface.moveMeshPointsForOldTrackedSurfDisplacement();
             interface.updateDisplacementDirections();
 
             // Prediction step for interface points
@@ -312,13 +312,13 @@ int main(int argc, char *argv[])
         // Finish time step and write
         // ==================================================================//
 
-        if (debug)
-        {
-            if (runTime.outputTime())
-            {
-                interface.writeVolA();
-            }
-        }
+//         if (debug)
+//         {
+//             if (runTime.outputTime())
+//             {
+//                 interface.writeVolA();
+//             }
+//         }
 
         runTime.write();
 
