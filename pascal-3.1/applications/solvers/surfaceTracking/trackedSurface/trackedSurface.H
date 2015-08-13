@@ -78,6 +78,9 @@ class trackedSurface
         //- Reference to pressure field
         volScalarField& p_;
 
+        // Reference to external pressure field
+        const volScalarField& pExt_;
+
         //- Reference to fluid flux field
         const surfaceScalarField& phi_;
 
@@ -248,6 +251,7 @@ public:
         const volScalarField& rho,
         volVectorField& Ub,
         volScalarField& Pb,
+        const volScalarField& PbExt,
         const surfaceScalarField& phi,
         const uniformDimensionedVectorField g,
         const twoPhaseMixture& transportModel
@@ -308,6 +312,12 @@ public:
         const volScalarField& p() const
         {
             return p_;
+        }
+
+        //- Return reference to external pressure field
+        const volScalarField& pExt() const
+        {
+            return pExt_;
         }
 
         //- Return reference to gravitational acceleration

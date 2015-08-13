@@ -201,6 +201,7 @@
         rho,
         U,
         p,
+        pB_[fluidRegionID],
         phi,
         g,
         twoPhaseProperties

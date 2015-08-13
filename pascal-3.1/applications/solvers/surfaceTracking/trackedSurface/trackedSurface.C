@@ -93,6 +93,7 @@ trackedSurface::trackedSurface
     const volScalarField& rho,
     volVectorField& Ub,
     volScalarField& Pb,
+    const volScalarField& PbExt,
     const surfaceScalarField& sfPhi,
     const uniformDimensionedVectorField g,
     const twoPhaseMixture& transportModel
@@ -113,6 +114,7 @@ trackedSurface::trackedSurface
     rho_(rho),
     U_(Ub),
     p_(Pb),
+    pExt_(PbExt),
     phi_(sfPhi),
     g_(g),
     transport_(transportModel),
@@ -1392,6 +1394,8 @@ void trackedSurface::updatePressure()
         pA -= 2.0*(muFluidA().value() - muFluidB().value())
             *fac::div(Us())().internalField();
 
+        pA += pExt().boundaryField()[aPatchID()];
+
 //         vector R0 = gAverage(mesh().C().boundaryField()[aPatchID()]);
         vector R0 = vector::zero;
 
@@ -1442,6 +1446,8 @@ void trackedSurface::updatePressure()
 
         pA -= 2.0*muFluidA().value()*fac::div(Us())().internalField();
 
+        pA += pExt().boundaryField()[aPatchID()];
+
         p().boundaryField()[aPatchID()] == pA;
     }
 
@@ -1463,6 +1469,7 @@ void trackedSurface::updatePressure()
             if (patchI != aPatchID())
             {
                 p().boundaryField()[patchI] ==
+                    pExt().boundaryField()[patchI];
                   - rho().boundaryField()[patchI]
                    *(g_.value()&(mesh().C().boundaryField()[patchI] - R0));
             }
