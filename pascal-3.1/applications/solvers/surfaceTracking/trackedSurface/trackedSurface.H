@@ -90,6 +90,9 @@ class trackedSurface
         //- Reference to the transportModel
         const twoPhaseMixture& transport_;
 
+        // Reference to auoPtr of turbulence model
+        const autoPtr<incompressible::turbulenceModel>& turbulence_;
+
         //- Current time index for surface
         label curTimeIndex_;
 
@@ -195,6 +198,12 @@ class trackedSurface
         //- Fluid indicator
         mutable volScalarField* fluidIndicatorPtr_;
 
+        //- Effiective viscosity value field of fluid A
+        mutable scalarField* muEffFluidAvalPtr_;
+
+        //- Effiective viscosity value field of fluid B
+        mutable scalarField* muEffFluidBvalPtr_;
+
     // Private Member Functions
 
         // Make demand-driven data
@@ -214,6 +223,8 @@ class trackedSurface
             void makeSurfaceTension() const;
             void makeSurfactant() const;
             void makeFluidIndicator();
+            void makeMuEffFluidAval() const;
+            void makeMuEffFluidBval() const;
 
         //- Clear all demand-driven data
         void clearOut();
@@ -254,7 +265,8 @@ public:
         const volScalarField& PbExt,
         const surfaceScalarField& phi,
         const uniformDimensionedVectorField g,
-        const twoPhaseMixture& transportModel
+        const twoPhaseMixture& transportModel,
+        const autoPtr<incompressible::turbulenceModel>& turbulenceModelPtr
     );
 
 
@@ -330,6 +342,12 @@ public:
         const twoPhaseMixture& transport() const
         {
             return transport_;
+        }
+
+        //- Return reference to turbulence model auto pointer
+        const autoPtr<incompressible::turbulenceModel>& turbulence() const
+        {
+            return turbulence_;
         }
 
         //- Are there exist two fluid
@@ -454,6 +472,18 @@ public:
         //- Return referenct to fluid indicator
         const volScalarField& fluidIndicator();
 
+        //- Return effiective viscosity value field of fluid A
+        scalarField& muEffFluidAval();
+
+        //- Return effiective viscosity value field of fluid A
+        const scalarField& muEffFluidAval() const;
+
+        //- Return effiective viscosity value field of fluid B
+        scalarField& muEffFluidBval();
+
+        //- Return effiective viscosity value field of fluid B
+        const scalarField& muEffFluidBval() const;
+
         //- Update control points end displacement directions
         void updateDisplacementDirections();
 
@@ -474,6 +504,9 @@ public:
 
         //- Update surface boundary conditions
         void updateBoundaryConditions();
+
+        //- Correct effective kinematic viscosity on surface
+        void updateMuEff();
 
         //- Correct surface pressure
         void updatePressure();

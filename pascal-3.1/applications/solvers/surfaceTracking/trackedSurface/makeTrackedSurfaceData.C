@@ -785,6 +785,58 @@ void trackedSurface::makeFluidIndicator()
 }
 
 
+void trackedSurface::makeMuEffFluidAval() const
+{
+    if (debug)
+    {
+        Info<< "trackedSurface::makeMuEffFluidAval() : "
+            << "Making makeMuEffFluidAval"
+            << endl;
+    }
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (muEffFluidAvalPtr_)
+    {
+        FatalErrorIn("trackedSurface::makeMuEffFluidAval()")
+            << "makeMuEffFluidAval already exists"
+            << abort(FatalError);
+    }
+
+    muEffFluidAvalPtr_ = new scalarField
+    (
+        aMesh().nFaces(),
+        muFluidA().value()
+    );
+}
+
+
+void trackedSurface::makeMuEffFluidBval() const
+{
+    if (debug)
+    {
+        Info<< "trackedSurface::makeMuEffFluidBval() : "
+            << "Making makeMuEffFluidBval"
+            << endl;
+    }
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (muEffFluidBvalPtr_)
+    {
+        FatalErrorIn("trackedSurface::makeMuEffFluidBval()")
+            << "makeMuEffFluidBval already exists"
+            << abort(FatalError);
+    }
+
+    muEffFluidBvalPtr_ = new scalarField
+    (
+        aMesh().nFaces(),
+        muFluidB().value()
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const IOpatchToPatchInterpolation& trackedSurface::interpolatorAB()
@@ -973,6 +1025,50 @@ const volScalarField& trackedSurface::fluidIndicator()
     }
 
     return *fluidIndicatorPtr_;
+}
+
+
+scalarField& trackedSurface::muEffFluidAval()
+{
+    if (!muEffFluidAvalPtr_)
+    {
+        makeMuEffFluidAval();
+    }
+
+    return *muEffFluidAvalPtr_;
+}
+
+
+const scalarField& trackedSurface::muEffFluidAval() const
+{
+    if (!muEffFluidAvalPtr_)
+    {
+        makeMuEffFluidAval();
+    }
+
+    return *muEffFluidAvalPtr_;
+}
+
+
+scalarField& trackedSurface::muEffFluidBval()
+{
+    if (!muEffFluidBvalPtr_)
+    {
+        makeMuEffFluidBval();
+    }
+
+    return *muEffFluidBvalPtr_;
+}
+
+
+const scalarField& trackedSurface::muEffFluidBval() const
+{
+    if (!muEffFluidBvalPtr_)
+    {
+        makeMuEffFluidBval();
+    }
+
+    return *muEffFluidBvalPtr_;
 }
 
 
