@@ -61,7 +61,7 @@ Magnetic
 {
     update
     {
-        active           on;
+        active           off;
         outputCycle      2147483647;
         timeStepCycle    10;
         timeCycle        1e+100;
