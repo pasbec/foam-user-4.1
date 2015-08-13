@@ -56,14 +56,14 @@ cellSet cellSet_region_static                     add setToCell cellSet_geometry
 
 ### Outer face sets
 
-faceSet faceSet_front                             new boxToFace (-0.14500 -0.00063 -0.06000) ( 0.14500 -0.00062  0.14500)
-faceSet faceSet_back                              new boxToFace (-0.14500  0.00062 -0.06000) ( 0.14500  0.00063  0.14500)
+faceSet faceSet_front                             new boxToFace (-0.14500 -0.00063 -0.06000) ( 0.14500 -0.00062  0.14000)
+faceSet faceSet_back                              new boxToFace (-0.14500  0.00062 -0.06000) ( 0.14500  0.00063  0.14000)
 faceSet faceSet_frontAndBack                      new setToFace faceSet_front
 faceSet faceSet_frontAndBack                      add setToFace faceSet_back
 
-faceSet faceSet_infinity                          new boxToFace (-0.14501 -1.00000 -0.06000) (-0.14499  1.00000  0.14500)
-faceSet faceSet_infinity                          add boxToFace ( 0.14499 -1.00000 -0.06000) ( 0.14501  1.00000  0.14500)
-faceSet faceSet_infinity                          add boxToFace (-0.14500 -1.00000  0.14499) ( 0.14500  1.00000  0.14501)
+faceSet faceSet_infinity                          new boxToFace (-0.14501 -1.00000 -0.06000) (-0.14499  1.00000  0.14000)
+faceSet faceSet_infinity                          add boxToFace ( 0.14499 -1.00000 -0.06000) ( 0.14501  1.00000  0.14000)
+faceSet faceSet_infinity                          add boxToFace (-0.14500 -1.00000  0.13999) ( 0.14500  1.00000  0.14001)
 faceSet faceSet_infinity                          add boxToFace (-0.14500 -1.00000 -0.06001) ( 0.14500  1.00000 -0.05999)
 
 ### Inner face sets

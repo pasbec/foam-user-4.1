@@ -23,7 +23,7 @@ geo_lx2 =  45.0
 geo_ly0 =   0.625
 
 geo_lz0 =  60.0
-geo_lz1 = 145.0
+geo_lz1 = 140.0
 geo_lz2 =  50.0
 
 geo_fz0 =  10.0
@@ -168,7 +168,7 @@ d.blocks.distribution.set(10, "x",100)
 
 d.blocks.distribution.set( 3, "z", 60)
 d.blocks.distribution.set(13, "z", 30)
-d.blocks.distribution.set(18, "z",100)
+d.blocks.distribution.set(18, "z", 90)
 
 d.boundaryFaces.set(1, "front", [  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, \
                                11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "y-")
@@ -178,16 +178,6 @@ d.boundaryFaces.set(3, "infinity", [  1,  2,  3,  4,  5], "z-")
 d.boundaryFaces.set(4, "infinity", [ 16, 17, 18, 19, 20], "z+")
 d.boundaryFaces.set(5, "infinity", [  1,  6, 11, 16], "x-")
 d.boundaryFaces.set(6, "infinity", [  5, 10, 15, 20], "x+")
-
-
-
-#d.blocks.set(4, [  9, 13, 12,  8, 17, 21, 20, 16], zone="region_dynamic")
-#d.blocks.set(4, [ 17, 21, 13,  9, 16, 20, 12,  8], zone="region_dynamic")
-#d.blocks.distribution.set(4, "x", 10)
-#d.blocks.distribution.set(4, "y", 65)
-
-#d.blocks.grading.set(5, [1, 1, 0.1])
-#d.blocks.grading.set(5, "x", 0.1)
 
 # --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
