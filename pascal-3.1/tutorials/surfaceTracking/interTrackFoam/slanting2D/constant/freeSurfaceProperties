@@ -36,8 +36,8 @@ g g [ 0 1 -2 0 0 0 0 ] (0 0 0);
 
 fixedFreeSurfacePatches 0( );
 
-// pointNormalsCorrectionPatches 2(side frontAndBack);
-pointNormalsCorrectionPatches 1(frontAndBack);
+pointNormalsCorrectionPatches 2(side frontAndBack);
+// pointNormalsCorrectionPatches 1(frontAndBack);
 
 nFreeSurfaceCorrectors 1;
 
