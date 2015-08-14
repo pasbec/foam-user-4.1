@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
         Info << "Time = " << runTime.timeName() << nl << endl;
 
-        interface.moveMeshPointsForOldFreeSurfDisplacement();
+        interface.moveMeshPointsForOldTrackedSurfDisplacement();
 
         interface.updateDisplacementDirections();
 

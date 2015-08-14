@@ -2,8 +2,6 @@
 #   include "volContinuity.H"
 
     // Surface continuity error
-// TODO [Temp]
-//     scalarField netPhiA = interface.continuityErrorA();
     scalarField netPhiA =
         phi.boundaryField()[interface.aPatchID()]
       - fvc::meshPhi(U)().boundaryField()[interface.aPatchID()];
