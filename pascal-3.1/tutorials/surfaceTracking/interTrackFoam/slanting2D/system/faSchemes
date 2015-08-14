@@ -10,27 +10,41 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      trackedSurfaceProperties;
+    location    "system";
+    object      faSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+ddtSchemes
+{
+}
 
-cleanInterface                               yes;
+gradSchemes
+{
+    default none;
+    grad(Us) Gauss linear;
+}
 
-noCleanTangentialSurfaceTensionCorrection    yes;
+divSchemes
+{
+    default none;
+    div(Us) Gauss linear;
+}
 
-normalMotionDir                              no;
+laplacianSchemes
+{
+}
 
-motionDir                                    (0 0 1);
+interpolationSchemes
+{
+}
 
-fixedTrackedSurfacePatches                   0();
+snGradSchemes
+{
+}
 
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
-
-nTrackedSurfaceCorrectors                    1;
-
-smoothing                                    yes;
+fluxRequired
+{
+}
 
 // ************************************************************************* //

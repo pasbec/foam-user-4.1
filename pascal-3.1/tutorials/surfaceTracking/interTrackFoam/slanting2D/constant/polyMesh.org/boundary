@@ -9,28 +9,46 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      trackedSurfaceProperties;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
 
-cleanInterface                               yes;
+4
+(
+frontAndBack
+{
+    type            empty;
+    nFaces          2800;
+    startFace       2710;
+}
 
-noCleanTangentialSurfaceTensionCorrection    yes;
+freeSurface
+{
+    type            patch;
+    nFaces          70;
+    startFace       5510;
+    offset          ( 0 0 0 );
+}
 
-normalMotionDir                              no;
+bottom
+{
+    type            wall;
+    nFaces          70;
+    startFace       5580;
+}
 
-motionDir                                    (0 0 1);
+side
+{
+    type            wall;
+    nFaces          40;
+    startFace       5650;
+    offset          ( 0 0 0 );
+}
 
-fixedTrackedSurfacePatches                   0();
+)
 
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
-
-nTrackedSurfaceCorrectors                    1;
-
-smoothing                                    yes;
 
 // ************************************************************************* //

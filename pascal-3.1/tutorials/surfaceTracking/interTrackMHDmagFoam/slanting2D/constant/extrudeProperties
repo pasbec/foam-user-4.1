@@ -10,27 +10,31 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      trackedSurfaceProperties;
+    object      extrudeProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+geo_dy 0.00125;
 
-cleanInterface                               yes;
+// ************************************************************************* //
 
-noCleanTangentialSurfaceTensionCorrection    yes;
+extrudeModel    linearNormal;
 
-normalMotionDir                              no;
+linearNormalCoeffs
+{
+    thickness   $geo_dy;
+}
 
-motionDir                                    (0 0 1);
+nLayers         1;
 
-fixedTrackedSurfacePatches                   0();
+constructFrom   patch;
 
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
+sourceCase      ".";
 
-nTrackedSurfaceCorrectors                    1;
+sourcePatch     "front";
 
-smoothing                                    yes;
+flipNormals     off;
+
+mergeFaces      off;
 
 // ************************************************************************* //

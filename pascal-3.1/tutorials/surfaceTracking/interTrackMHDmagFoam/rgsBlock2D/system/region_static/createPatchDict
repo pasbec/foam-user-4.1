@@ -10,27 +10,37 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      trackedSurfaceProperties;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+matchTolerance           1e-6;
 
-cleanInterface                               yes;
+pointSync                true;
 
-noCleanTangentialSurfaceTensionCorrection    yes;
+patchInfo
+(
+    {
+        name             movingWall;
+        constructFrom    set;
+        set              faceSet_movingWall;
 
-normalMotionDir                              no;
+        dictionary
+        {
+            type         wall;
+        }
+    }
 
-motionDir                                    (0 0 1);
+    {
+        name             fixedMesh;
+        constructFrom    set;
+        set              faceSet_fixedMesh;
 
-fixedTrackedSurfacePatches                   0();
-
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
-
-nTrackedSurfaceCorrectors                    1;
-
-smoothing                                    yes;
+        dictionary
+        {
+            type         patch;
+        }
+    }
+);
 
 // ************************************************************************* //

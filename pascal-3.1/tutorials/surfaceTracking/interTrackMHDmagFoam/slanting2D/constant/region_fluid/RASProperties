@@ -10,27 +10,17 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      trackedSurfaceProperties;
+    object      RASProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+// RASModel         laminar;
+RASModel        kOmegaSST;
+// RASModel        kOmega;
+// RASModel        kEpsilon;
 
-cleanInterface                               yes;
+turbulence      on;
 
-noCleanTangentialSurfaceTensionCorrection    yes;
-
-normalMotionDir                              no;
-
-motionDir                                    (0 0 1);
-
-fixedTrackedSurfacePatches                   0();
-
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
-
-nTrackedSurfaceCorrectors                    1;
-
-smoothing                                    yes;
+printCoeffs     true;
 
 // ************************************************************************* //

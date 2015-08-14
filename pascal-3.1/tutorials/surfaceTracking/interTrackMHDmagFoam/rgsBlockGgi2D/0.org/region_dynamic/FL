@@ -9,28 +9,42 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      trackedSurfaceProperties;
+    class       volVectorField;
+    object      FL;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+dimensions      [1 -2 -2 0 0 0 0];
 
-cleanInterface                               yes;
+internalField   uniform (0 0 0);
 
-noCleanTangentialSurfaceTensionCorrection    yes;
+boundaryField
+{
+    trackedSurface
+    {
+        type            calculated;
+        value           $internalField;
+    }
+    fixedWall
+    {
+        type            calculated;
+        value           $internalField;
+    }
+    fixedMesh
+    {
+        type            calculated;
+        value           $internalField;
+    }
+    frontAndback
+    {
+        type            empty;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           uniform (0 0 0);
+    }
+}
 
-normalMotionDir                              no;
-
-motionDir                                    (0 0 1);
-
-fixedTrackedSurfacePatches                   0();
-
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
-
-nTrackedSurfaceCorrectors                    1;
-
-smoothing                                    yes;
 
 // ************************************************************************* //

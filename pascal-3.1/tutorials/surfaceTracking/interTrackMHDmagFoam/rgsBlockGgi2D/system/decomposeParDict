@@ -10,27 +10,42 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      trackedSurfaceProperties;
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+globalFaceZones ( ggiLeftStatic ggiLeftDynamic ggiRightStatic ggiRightDynamic );
 
-cleanInterface                               yes;
+numberOfSubdomains    2;
 
-noCleanTangentialSurfaceTensionCorrection    yes;
+method               simple;
 
-normalMotionDir                              no;
+simpleCoeffs
+{
+    n                (2 1 1);
+    delta            0.001;
+}
 
-motionDir                                    (0 0 1);
+hierarchicalCoeffs
+{
+}
 
-fixedTrackedSurfacePatches                   0();
+metisCoeffs
+{
+}
 
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
+scotchCoeffs
+{
+}
 
-nTrackedSurfaceCorrectors                    1;
+manualCoeffs
+{
+}
 
-smoothing                                    yes;
+distributed     no;
+
+roots
+(
+);
 
 // ************************************************************************* //

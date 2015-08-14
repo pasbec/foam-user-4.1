@@ -10,27 +10,9 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      trackedSurfaceProperties;
+    location    "system";
+    object      faSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-twoFluids                                    no;
-
-cleanInterface                               yes;
-
-noCleanTangentialSurfaceTensionCorrection    yes;
-
-normalMotionDir                              no;
-
-motionDir                                    (0 0 1);
-
-fixedTrackedSurfacePatches                   0();
-
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
-
-nTrackedSurfaceCorrectors                    1;
-
-smoothing                                    yes;
 
 // ************************************************************************* //

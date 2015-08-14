@@ -10,27 +10,38 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      trackedSurfaceProperties;
+    location    "system";
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+application         interTrackFoam;
 
-cleanInterface                               yes;
+startFrom           latestTime;
 
-noCleanTangentialSurfaceTensionCorrection    yes;
+startTime           0;
 
-normalMotionDir                              no;
+stopAt              endTime;
 
-motionDir                                    (0 0 1);
+endTime             10;
 
-fixedTrackedSurfacePatches                   0();
+deltaT              0.0001;
 
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
+writeControl        runTime;
 
-nTrackedSurfaceCorrectors                    1;
+writeInterval       0.01;
 
-smoothing                                    yes;
+cycleWrite          0;
+
+writeFormat         ascii;
+
+writeCompression    compressed;
+
+timeFormat          general;
+
+timePrecision       6;
+
+runTimeModifiable   yes;
 
 // ************************************************************************* //
+

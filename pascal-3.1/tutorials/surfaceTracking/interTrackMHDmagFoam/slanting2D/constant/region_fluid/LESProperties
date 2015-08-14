@@ -10,27 +10,35 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      trackedSurfaceProperties;
+    object      LESProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+LESModel              oneEqEddy;    // Smagorinsky, dynSmagorinsky, oneEqEddy, SpalartAllmarasDDES, SpalartAllmarasIDDES
 
-cleanInterface                               yes;
+delta                 smooth;
 
-noCleanTangentialSurfaceTensionCorrection    yes;
+printCoeffs           on;
 
-normalMotionDir                              no;
+cubeRootVolCoeffs
+{
+    deltaCoeff        1;
+}
 
-motionDir                                    (0 0 1);
+dynSmagorinskyCoeffs
+{
+    filter            simple;    // laplace, anisotropic
+}
 
-fixedTrackedSurfacePatches                   0();
+smoothCoeffs
+{
+    delta             cubeRootVol;
+    maxDeltaRatio     1.1;
 
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
-
-nTrackedSurfaceCorrectors                    1;
-
-smoothing                                    yes;
+    cubeRootVolCoeffs
+    {
+        deltaCoeff    1;
+    }
+}
 
 // ************************************************************************* //

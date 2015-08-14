@@ -9,28 +9,44 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      trackedSurfaceProperties;
+    class       tetPointVectorField;
+    object      motionU;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+dimensions          [0 1 -1 0 0 0 0];
 
-cleanInterface                               yes;
+internalField       uniform (0 0 0);
 
-noCleanTangentialSurfaceTensionCorrection    yes;
-
-normalMotionDir                              no;
-
-motionDir                                    (0 0 1);
-
-fixedTrackedSurfacePatches                   0();
-
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
-
-nTrackedSurfaceCorrectors                    1;
-
-smoothing                                    yes;
+boundaryField
+{
+    trackedSurface
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+    fixedWall
+    {
+        type            slip;
+    }
+    fixedMesh
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+    frontAndback
+    {
+        type            empty;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           uniform (0 0 0);
+    }
+    global
+    {
+        type            global;
+    }
+}
 
 // ************************************************************************* //

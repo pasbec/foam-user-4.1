@@ -10,27 +10,34 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      trackedSurfaceProperties;
+    object      dynamicMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                                    no;
+dynamicFvMesh dynamicMotionSolverFvMesh;
 
-cleanInterface                               yes;
+twoDMotion yes;
 
-noCleanTangentialSurfaceTensionCorrection    yes;
+// tetFemMotionSolver laplace (axis points drift along axis towards its center)
+solver laplace;
+diffusivity quadratic;
+distancePatches 1 ( freeSurface );
 
-normalMotionDir                              no;
+// tetFemMotionSolver pseudoSolid (axis drift)
+// solver pseudoSolid;
+// pseudoSolid
+// {
+//     poissonsRatio           0.3;
+//     nCorrectors             3;
+//     convergenceTolerance    1e-9;
+// };
+// diffusivity quadratic;
+// distancePatches 1 ( freeSurface );
 
-motionDir                                    (0 0 1);
+// // fvMotionSolver (looks good)
+// solver velocityLaplacian;
+// diffusivity quadratic inverseDistance 1 ( freeSurface );
 
-fixedTrackedSurfacePatches                   0();
-
-pointNormalsCorrectionPatches                2(fixedWall frontAndBack);
-// pointNormalsCorrectionPatches                1(frontAndBack);
-
-nTrackedSurfaceCorrectors                    1;
-
-smoothing                                    yes;
+frozenDiffusion no;
 
 // ************************************************************************* //
