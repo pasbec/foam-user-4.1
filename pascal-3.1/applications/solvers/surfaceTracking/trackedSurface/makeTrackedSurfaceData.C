@@ -1087,8 +1087,7 @@ tmp<areaVectorField> trackedSurface::surfaceTensionGrad() const
                 IOobject::NO_WRITE
             ),
             aMesh(),
-            dimensioned<vector>("zero", dimMass/pow(dimTime,2)/dimLength, vector::zero),
-            calculatedFaPatchVectorField::typeName
+            dimensioned<vector>("zero", dimMass/pow(dimTime,2)/dimLength, vector::zero)
         )
     );
 
