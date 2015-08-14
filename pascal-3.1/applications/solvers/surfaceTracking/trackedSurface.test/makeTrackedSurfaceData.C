@@ -42,7 +42,7 @@ void trackedSurface::makeInterpolators()
     if (debug)
     {
         Info<< "trackedSurface::makeInterpolators() : "
-            << "Making patch to patch interpolator"
+            << "Making pathc to patch interpolator"
             << endl;
     }
 
@@ -709,13 +709,13 @@ void trackedSurface::makeSurfactant() const
 
 
     const dictionary& surfactProp =
-        this->subDict("surfactantProperties");
+        transport().subDict("surfactantProperties");
 
     surfactantPtr_ = new surfactantProperties(surfactProp);
 }
 
 
-void trackedSurface::makeFluidIndicator()
+void trackedSurface::makeFluidIndicator() const
 {
     if (debug)
     {
@@ -1087,13 +1087,14 @@ tmp<areaVectorField> trackedSurface::surfaceTensionGrad() const
                 IOobject::NO_WRITE
             ),
             aMesh(),
-            dimensioned<vector>("zero", dimMass/pow(dimTime,2)/dimLength, vector::zero)
+            dimensioned<vector>("zero", dimMass/pow(dimTime,2)/dimLength, vector::zero),
+            calculatedFaPatchVectorField::typeName
         )
     );
 
     areaVectorField& stGrad = tstGrad();
 
-    if (!cleanInterface())
+    if(!cleanInterface())
     {
         stGrad =
             (-fac::grad(surfactantConcentration())*
@@ -1103,7 +1104,11 @@ tmp<areaVectorField> trackedSurface::surfaceTensionGrad() const
     }
     else
     {
-        if (!noCleanTangentialSurfaceTensionCorrection_)
+        if
+        (
+            !noCleanTangentialSurfaceTensionCorrection()
+         && gMax(muEffFluidAval()) >= SMALL
+        )
         {
             stGrad =
                 cleanInterfaceSurfTension() *
@@ -1114,11 +1119,6 @@ tmp<areaVectorField> trackedSurface::surfaceTensionGrad() const
                     )
                   - aMesh().faceCurvatures() * aMesh().faceAreaNormals()
                 );
-        }
-
-        if (!twoFluids() && gMax(muEffFluidAval()) < SMALL)
-        {
-            stGrad = vector::zero;
         }
     }
 

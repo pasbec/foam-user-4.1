@@ -1,7 +1,6 @@
 trackedSurface.C
 makeTrackedSurfaceData.C
 trackedSurfacePointDisplacement.C
-trackedSurfaceWrite.C
 
 correctedFvPatchFields/correctedFvPatchField/correctedFvPatchFields.C
 
@@ -10,11 +9,6 @@ $(basicCorrectedFvPatchFields)/fixedGradient/fixedGradientCorrectedFvPatchFields
 $(basicCorrectedFvPatchFields)/fixedValue/fixedValueCorrectedFvPatchFields.C
 $(basicCorrectedFvPatchFields)/zeroGradient/zeroGradientCorrectedFvPatchFields.C
 
-
-
 patchCorrectedSnGrad/patchCorrectedSnGrads.C
-
-functionObjects/bubbleHistory/bubbleHistory.C
-functionObjects/sloshingHistory/sloshingHistory.C
 
 LIB = $(FOAM_USER_LIBBIN)/libtrackedSurface

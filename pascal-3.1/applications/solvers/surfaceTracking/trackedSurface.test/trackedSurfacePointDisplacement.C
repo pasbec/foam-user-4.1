@@ -40,8 +40,20 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
 tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
+{
+    if(motionByPointDisplacementSM())
+    {
+        return pointDisplacementSM(deltaH);
+    }
+    else
+    {
+        return pointDisplacementLSF(deltaH);
+    }
+}
+
+
+tmp<vectorField> trackedSurface::pointDisplacementLSF(const scalarField& deltaH)
 {
     const pointField& points = aMesh().patch().localPoints();
     const labelListList& pointFaces = aMesh().patch().pointFaces();
@@ -481,7 +493,7 @@ tmp<vectorField> trackedSurface::lsPlanePointAndNormal
     coordinateSystem cs("cs", origin, axis, dir);
 
     vectorField localPoints = cs.localPosition(points);
-    scalarField W = 1.0/(mag(points - origin) + SMALL);
+    scalarField W = 1.0/(mag(points - origin) + VSMALL);
 
     scalarRectangularMatrix M
     (
@@ -539,58 +551,62 @@ tmp<vectorField> trackedSurface::lsPlanePointAndNormal
 }
 
 
-// tmp<vectorField> trackedSurface::pointDisplacementSM()
-// {
-//     const pointField& points = aMesh().patch().localPoints();
-//     const labelListList& pointFaces = aMesh().patch().pointFaces();
+tmp<vectorField> trackedSurface::pointDisplacementSM(const scalarField& deltaH)
+{
+    const pointField& points = aMesh().patch().localPoints();
+    const labelListList& pointFaces = aMesh().patch().pointFaces();
+
+    const vectorField& dir = pointsDisplacementDir();
+
+    controlPoints() += facesDisplacementDir()*deltaH;
+
+    tmp<vectorField> tdisplacement
+    (
+        new vectorField
+        (
+            points.size(),
+            vector::zero
+        )
+    );
+
+    vectorField& displacement = tdisplacement();
 
 
-//     tmp<vectorField> tdisplacement
-//     (
-//         new vectorField
-//         (
-//             points.size(),
-//             vector::zero
-//         )
-//     );
+    forAll (pointFaces, pointI)
+    {
+        scalar weightsSum = 0.0;
 
-//     vectorField& displacement = tdisplacement();
+        const labelList& curPointFaces = pointFaces[pointI];
 
+        forAll (curPointFaces, faceI)
+        {
+            label curFace = curPointFaces[faceI];
 
-//     forAll (pointFaces, pointI)
+            scalar weight = 1.0/mag
+            (
+                points[pointI]
+              - controlPoints()[curFace]
+            );
+
+            displacement[pointI] += weight*controlPoints()[curFace];
+
+            weightsSum += weight;
+        }
+
+        displacement[pointI] /= weightsSum;
+
+        displacement[pointI] -= points[pointI];
+    }
+
+    displacement = (dir&displacement)*dir;
+
+//     forAll(displacement, pointI)
 //     {
-//         scalar weightsSum = 0.0;
-
-//         const labelList& curPointFaces = pointFaces[pointI];
-
-//         forAll (curPointFaces, faceI)
-//         {
-//             label curFace = curPointFaces[faceI];
-
-//             scalar weight = 1.0/mag
-//             (
-//                 points[pointI]
-//               - controlPoints()[curFace]
-//             );
-
-//             displacement[pointI] += weight*controlPoints()[curFace];
-
-//             weightsSum += weight;
-//         }
-
-//         displacement[pointI] /= weightsSum;
-
-//         displacement[pointI] -= points[pointI];
+//         displacement[pointI] *= motionPointsMask()[pointI];
 //     }
 
-
-//     displacement = motionPointsMask()*
-//         (pointsDisplacementDir()&displacement)*
-//         pointsDisplacementDir();
-
-
-//     return tdisplacement;
-// }
+    return tdisplacement;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

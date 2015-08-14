@@ -2,7 +2,9 @@
 #   include "volContinuity.H"
 
     // Surface continuity error
-    scalarField netPhiA = interface.continuityErrorA();
+    scalarField netPhiA =
+        phi.boundaryField()[interface.aPatchID()]
+      - fvc::meshPhi(U)().boundaryField()[interface.aPatchID()];
 
     Info << "Surface continuity error: " << gSum(netPhiA) << endl;
 

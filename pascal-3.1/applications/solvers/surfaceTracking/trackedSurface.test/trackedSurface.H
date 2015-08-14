@@ -78,7 +78,7 @@ class trackedSurface
         //- Reference to pressure field
         volScalarField& p_;
 
-        // Reference to external pressure field
+        // Reference to optional external pressure field (ine fluid only)
         const volScalarField& pExt_;
 
         //- Reference to fluid flux field
@@ -103,7 +103,7 @@ class trackedSurface
         //  parallel with surface point normals
         Switch normalMotionDir_;
 
-        //- Surface points displacement direction
+        //- Free-surface points displacement direction
         //  if not normal motion direction
         vector motionDir_;
 
@@ -118,37 +118,39 @@ class trackedSurface
         //  B side of the surface
         label bPatchID_;
 
-        //- Viscosity of fluid A
-        dimensionedScalar muFluidA_;
-
-        //- Viscosity of fluid B
-        dimensionedScalar muFluidB_;
-
         //- Density of fluid A
         dimensionedScalar rhoFluidA_;
 
         //- Density of fluid B
         dimensionedScalar rhoFluidB_;
 
+        //- Viscosity of fluid A
+        dimensionedScalar muFluidA_;
+
+        //- Viscosity of fluid B
+        dimensionedScalar muFluidB_;
+
         //- Surface tension for the clean surface
         dimensionedScalar cleanInterfaceSurfTension_;
 
-        //- Surface patches which do not move
+        //- surface patches which do not move
         wordList fixedTrackedSurfacePatches_;
 
-        //- Surface patches for witch point normals
+        //- surface patches for witch point normals
         //  must be corrected
         wordList pointNormalsCorrectionPatches_;
 
          //- Number of surface correctors
-        label nTrackedSurfCorr_;
+        label nFreeSurfCorr_;
 
         //- Interface smoothing at the begining of time step
         Switch smoothing_;
 
-        //- No tangential surface tension correction for
-        //  clean interface
+        //- Are we using clean tangential surface tension correction
         Switch noCleanTangentialSurfaceTensionCorrection_;
+
+        //- Are we using pointDisplacementSM instead of least squares fit
+        Switch motionByPointDisplacementSM_;
 
     // Demand-driven data
 
@@ -184,13 +186,13 @@ class trackedSurface
         //  surface side A faces
         mutable faMesh* aMeshPtr_;
 
-        //- Surface velocity field
+        //- Free-surface velocity field
         mutable areaVectorField* UsPtr_;
 
-        //- Surface fluid flux
+        //- Free-surface fluid flux
         mutable edgeScalarField* phisPtr_;
 
-        //- Surface surfactant concetration
+        //- Free-surface surfactant concetration
         mutable areaScalarField* surfactConcPtr_;
 
         //- Surface tension field
@@ -226,7 +228,7 @@ class trackedSurface
             void makeSurfactConc() const;
             void makeSurfaceTension() const;
             void makeSurfactant() const;
-            void makeFluidIndicator();
+            void makeFluidIndicator() const;
             void makeMuEffFluidAval() const;
             void makeMuEffFluidBval() const;
 
@@ -244,6 +246,9 @@ class trackedSurface
         //  for given new control points position
         tmp<vectorField> pointDisplacement(const scalarField& deltaH);
 
+        //-
+        tmp<vectorField> pointDisplacementLSF(const scalarField& deltaH);
+
         // Calc least sqare plane point and normal
         tmp<vectorField> lsPlanePointAndNormal
         (
@@ -251,6 +256,9 @@ class trackedSurface
             const vector& origin,
             const vector& axis
         ) const;
+
+        //-
+        tmp<vectorField> pointDisplacementSM(const scalarField& deltaH);
 
 public:
 
@@ -262,15 +270,15 @@ public:
 
     trackedSurface
     (
-        dynamicFvMesh& m,
-        const volScalarField& rho,
-        volVectorField& Ub,
-        volScalarField& Pb,
-        const volScalarField& PbExt,
-        const surfaceScalarField& phi,
-        const uniformDimensionedVectorField g,
+        dynamicFvMesh& fvMesh,
+        const volScalarField& volrho,
+        volVectorField& volU,
+        volScalarField& volp,
+        const volScalarField& volpExt,
+        const surfaceScalarField& sfphi,
+        const uniformDimensionedVectorField unig,
         const twoPhaseMixture& transportModel,
-        const autoPtr<incompressible::turbulenceModel>& turbulenceModelPtr
+        const autoPtr<incompressible::turbulenceModel>& pTurbulenceModel
     );
 
 
@@ -297,7 +305,7 @@ public:
         //- Return reference to DB
         const Time& DB() const
         {
-            return U_.mesh().time();
+            return mesh_.time();
         }
 
         //- Return reference to velocity field
@@ -330,13 +338,13 @@ public:
             return p_;
         }
 
-        //- Return reference to external pressure field
+        //- Return reference to optional external pressure field
         const volScalarField& pExt() const
         {
             return pExt_;
         }
 
-        //- Return reference to gravitational acceleration
+        //- Return refernece to gravity value
         const dimensionedVector& g() const
         {
             return g_;
@@ -348,7 +356,7 @@ public:
             return transport_;
         }
 
-        //- Return reference to turbulence model auto pointer
+        //- Return reference to turbulence model
         const autoPtr<incompressible::turbulenceModel>& turbulence() const
         {
             return turbulence_;
@@ -387,18 +395,6 @@ public:
             return bPatchID_;
         }
 
-        //- Viscosity of fluid A
-        const dimensionedScalar& muFluidA() const
-        {
-            return muFluidA_;
-        }
-
-        //- Viscosity of fluid B
-        const dimensionedScalar& muFluidB() const
-        {
-            return muFluidB_;
-        }
-
         //- Density of fluid A
         const dimensionedScalar& rhoFluidA() const
         {
@@ -411,10 +407,34 @@ public:
             return rhoFluidB_;
         }
 
+        //- Viscosity of fluid A
+        const dimensionedScalar& muFluidA() const
+        {
+            return muFluidA_;
+        }
+
+        //- Viscosity of fluid B
+        const dimensionedScalar& muFluidB() const
+        {
+            return muFluidB_;
+        }
+
         //- Surface tension for clean interface
         const dimensionedScalar& cleanInterfaceSurfTension() const
         {
             return cleanInterfaceSurfTension_;
+        }
+
+        //- Are we using clean tangential surface tension correction
+        bool noCleanTangentialSurfaceTensionCorrection() const
+        {
+            return noCleanTangentialSurfaceTensionCorrection_;
+        }
+
+        //- Are we using pointDisplacementSM instead of least squares fit
+        bool motionByPointDisplacementSM() const
+        {
+            return motionByPointDisplacementSM_;
         }
 
         //- Return reference to interpolator from surface side A to
@@ -473,7 +493,7 @@ public:
         //- Return surfactant properties
         const surfactantProperties& surfactant() const;
 
-        //- Return referenct to fluid indicator
+        //- Return reference to fluid indicator
         const volScalarField& fluidIndicator();
 
         //- Return effiective viscosity value field of fluid A
@@ -492,19 +512,32 @@ public:
         void updateDisplacementDirections();
 
         //- Predict interface points position
-        bool predictPoints();
+        bool predictPoints
+        (
+            const scalar relax = 1.0
+        );
 
         //- Correct interface points position
-        bool correctPoints();
+        bool correctPoints
+        (
+            const scalar relax = 1.0
+        );
 
         //- Move only surface points
-        bool movePoints(const scalarField& interfacePHi);
+        bool movePoints
+        (
+            const scalarField& interfacePHi,
+            const scalar relax = 1.0
+        );
 
         //- Move mesh points for old time surface points displacement
-        bool moveMeshPointsForOldTrackedSurfDisplacement();
+        bool moveMeshPointsForOldFreeSurfDisplacement();
 
         //- Move mesh points
-        bool moveMeshPoints();
+        bool moveMeshPoints
+        (
+            const scalar relax = 1.0
+        );
 
         //- Update surface boundary conditions
         void updateBoundaryConditions();
@@ -551,19 +584,16 @@ public:
         //- Maximal surface tension based Courant number
         scalar maxCourantNumber();
 
-        //- Update properties
-        void updateProperties();
+        //- Global continuity error of tracked surface side A
+        scalarField continuityErrorA() const;
 
-        //- Write VTK trackedSurface mesh
-        void writeVTK() const;
+        //- Global continuity error of tracked surface side B
+        scalarField continuityErrorB() const;
 
-        //- Write VTK trackedSurface control points
-        void writeVTKControlPoints();
-
-        //- Write area fields as boundary of corresponding volume fields
+        //
         template<class Type>
         void
-        writeVol
+        writeVolFromArea
         (
             const label aPatchID,
             const fvMesh& vMesh,
@@ -572,6 +602,12 @@ public:
 
         //- Write selected fields as volFields of tracked surface side A
         void writeVolA();
+
+        //- Write VTK trackedSurface mesh
+        void writeVTK() const;
+
+        //- Write VTK trackedSurface control points
+        void writeVTKControlPoints();
 };
 
 

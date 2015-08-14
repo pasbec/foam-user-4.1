@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 
         {
             // Move and update mesh of fluid region
-            interface.moveMeshPointsForOldFreeSurfDisplacement();
+            interface.moveMeshPointsForOldTrackedSurfDisplacement();
             interface.updateDisplacementDirections();
 
             // Prediction step for interface points

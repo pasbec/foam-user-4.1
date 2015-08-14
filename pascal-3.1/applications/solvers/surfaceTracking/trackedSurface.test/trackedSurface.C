@@ -32,6 +32,7 @@ Description
 
 #include "emptyFaPatch.H"
 #include "wedgeFaPatch.H"
+
 #include "wallFvPatch.H"
 
 #include "EulerDdtScheme.H"
@@ -46,14 +47,19 @@ Description
 #include "fixedValuePointPatchFields.H"
 #include "twoDPointCorrector.H"
 
+#include "fixedValueFaPatchFields.H"
+
 #include "slipFvPatchFields.H"
 #include "symmetryFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
+
 #include "zeroGradientCorrectedFvPatchFields.H"
 #include "fixedGradientCorrectedFvPatchFields.H"
 #include "fixedValueCorrectedFvPatchFields.H"
 
 #include "primitivePatchInterpolation.H"
+
+#include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,15 +97,15 @@ void trackedSurface::clearOut()
 
 trackedSurface::trackedSurface
 (
-    dynamicFvMesh& m,
-    const volScalarField& rho,
-    volVectorField& Ub,
-    volScalarField& Pb,
-    const volScalarField& PbExt,
-    const surfaceScalarField& sfPhi,
-    const uniformDimensionedVectorField g,
+    dynamicFvMesh& fvMesh,
+    const volScalarField& volrho,
+    volVectorField& volU,
+    volScalarField& volp,
+    const volScalarField& volpExt,
+    const surfaceScalarField& sfphi,
+    const uniformDimensionedVectorField unig,
     const twoPhaseMixture& transportModel,
-    const autoPtr<incompressible::turbulenceModel>& turbulenceModelPtr
+    const autoPtr<incompressible::turbulenceModel>& pTurbulenceModel
 )
 :
     IOdictionary
@@ -107,22 +113,22 @@ trackedSurface::trackedSurface
         IOobject
         (
             "trackedSurfaceProperties",
-            Ub.mesh().time().constant(),
-            Ub.mesh(),
+            fvMesh.time().constant(),
+            fvMesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
-    mesh_(m),
-    rho_(rho),
-    U_(Ub),
-    p_(Pb),
-    pExt_(PbExt),
-    phi_(sfPhi),
-    g_(g),
+    mesh_(fvMesh),
+    rho_(volrho),
+    U_(volU),
+    p_(volp),
+    pExt_(volpExt),
+    phi_(sfphi),
+    g_(unig),
     transport_(transportModel),
-    turbulence_(turbulenceModelPtr),
-    curTimeIndex_(Ub.mesh().time().timeIndex()),
+    turbulence_(pTurbulenceModel),
+    curTimeIndex_(fvMesh.time().timeIndex()),
     twoFluids_
     (
         this->lookup("twoFluids")
@@ -138,16 +144,6 @@ trackedSurface::trackedSurface
     ),
     aPatchID_(-1),
     bPatchID_(-1),
-    muFluidA_
-    (
-        transportModel.rho1()
-      * dimensionedScalar(transportModel.nuModel1().viscosityProperties().lookup("nu"))
-    ),
-    muFluidB_
-    (
-        transportModel.rho2()
-      * dimensionedScalar(transportModel.nuModel2().viscosityProperties().lookup("nu"))
-    ),
     rhoFluidA_
     (
         transportModel.rho1()
@@ -156,9 +152,19 @@ trackedSurface::trackedSurface
     (
         transportModel.rho2()
     ),
+    muFluidA_
+    (
+        rhoFluidA_
+      * dimensionedScalar(transportModel.nuModel1().viscosityProperties().lookup("nu"))
+    ),
+    muFluidB_
+    (
+        rhoFluidB_
+      * dimensionedScalar(transportModel.nuModel2().viscosityProperties().lookup("nu"))
+    ),
     cleanInterfaceSurfTension_
     (
-        dimensionedScalar(transportModel.lookup("sigma"))
+        transportModel.lookup("sigma")
     ),
     fixedTrackedSurfacePatches_
     (
@@ -168,7 +174,7 @@ trackedSurface::trackedSurface
     (
         this->lookup("pointNormalsCorrectionPatches")
     ),
-    nTrackedSurfCorr_
+    nFreeSurfCorr_
     (
         readInt(this->lookup("nTrackedSurfaceCorrectors"))
     ),
@@ -176,6 +182,10 @@ trackedSurface::trackedSurface
     noCleanTangentialSurfaceTensionCorrection_
     (
         this->lookupOrDefault<Switch>("noCleanTangentialSurfaceTensionCorrection", false)
+    ),
+    motionByPointDisplacementSM_
+    (
+        this->lookupOrDefault<Switch>("motionByPointDisplacementSM", false)
     ),
     interpolatorABPtr_(NULL),
     interpolatorBAPtr_(NULL),
@@ -198,7 +208,7 @@ trackedSurface::trackedSurface
     if (!normalMotionDir_)
     {
         motionDir_ = vector(this->lookup("motionDir"));
-        motionDir_ /= mag(motionDir_) + SMALL;
+        motionDir_ /= mag(motionDir_) + VSMALL;
     }
 
     // Set point normal correction patches
@@ -359,6 +369,9 @@ trackedSurface::trackedSurface
     {
         smoothing_ = Switch(this->lookup("smoothing"));
     }
+
+    // Update surface flux for initialization
+    updateSurfaceFlux();
 }
 
 
@@ -437,7 +450,10 @@ void trackedSurface::updateDisplacementDirections()
 }
 
 
-bool trackedSurface::predictPoints()
+bool trackedSurface::predictPoints
+(
+    const scalar relax
+)
 {
     // Smooth interface
 
@@ -450,35 +466,42 @@ bool trackedSurface::predictPoints()
 
     for
     (
-        int trackedSurfCorr=0;
-        trackedSurfCorr<nTrackedSurfCorr_;
-        trackedSurfCorr++
+        int freeSurfCorr=0;
+        freeSurfCorr<nFreeSurfCorr_;
+        freeSurfCorr++
     )
     {
-        movePoints(phi_.boundaryField()[aPatchID()]);
+        movePoints(phi_.boundaryField()[aPatchID()], relax);
     }
 
     return true;
 }
 
 
-bool trackedSurface::correctPoints()
+bool trackedSurface::correctPoints
+(
+    const scalar relax
+)
 {
     for
     (
-        int trackedSurfCorr=0;
-        trackedSurfCorr<nTrackedSurfCorr_;
-        trackedSurfCorr++
+        int freeSurfCorr=0;
+        freeSurfCorr<nFreeSurfCorr_;
+        freeSurfCorr++
     )
     {
-        movePoints(phi_.boundaryField()[aPatchID()]);
+        movePoints(phi_.boundaryField()[aPatchID()], relax);
     }
 
     return true;
 }
 
 
-bool trackedSurface::movePoints(const scalarField& interfacePhi)
+bool trackedSurface::movePoints
+(
+    const scalarField& interfacePhi,
+    const scalar relax
+)
 {
     pointField newMeshPoints = mesh().points();
 
@@ -533,11 +556,13 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
                 << abort(FatalError);
     }
 
+//     Info << "[DEBUG]: gSum(mag(sweptVolCorr)) = " << gSum(mag(sweptVolCorr)) << endl;
+
     const scalarField& Sf = aMesh().S();
     const vectorField& Nf = aMesh().faceAreaNormals().internalField();
 
     scalarField deltaH =
-        sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
+        relax*sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
 
     pointField displacement = pointDisplacement(deltaH);
 
@@ -666,7 +691,7 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 }
 
 
-bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
+bool trackedSurface::moveMeshPointsForOldFreeSurfDisplacement()
 {
     if(totalDisplacementPtr_)
     {
@@ -890,7 +915,10 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
 }
 
 
-bool trackedSurface::moveMeshPoints()
+bool trackedSurface::moveMeshPoints
+(
+    const scalar relax
+)
 {
         scalarField sweptVolCorr =
             phi_.boundaryField()[aPatchID()]
@@ -941,7 +969,7 @@ bool trackedSurface::moveMeshPoints()
         const vectorField& Nf = aMesh().faceAreaNormals().internalField();
 
         scalarField deltaH =
-            sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
+            relax*sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
 
 
         pointField displacement = pointDisplacement(deltaH);
@@ -1079,6 +1107,7 @@ void trackedSurface::updateBoundaryConditions()
 {
     updateMuEff();
     updateVelocity();
+    updateSurfaceFlux();
     updateSurfactantConcentration();
     updatePressure();
 }
@@ -1086,16 +1115,14 @@ void trackedSurface::updateBoundaryConditions()
 
 void trackedSurface::updateMuEff()
 {
-    const volScalarField& nuEff = turbulence()->nuEff();
+  const volScalarField nuEff = turbulence()->nuEff();
 
-    muEffFluidAval() =
-        nuEff.boundaryField()[aPatchID()] * rhoFluidA().value();
+  muEffFluidAval() = nuEff.boundaryField()[aPatchID()] * rhoFluidA().value();
 
-    if(twoFluids())
-    {
-        muEffFluidBval() =
-            nuEff.boundaryField()[bPatchID()] * rhoFluidB().value();
-    }
+  if(twoFluids())
+  {
+      muEffFluidBval() = nuEff.boundaryField()[bPatchID()] * rhoFluidB().value();
+  }
 }
 
 
@@ -1107,12 +1134,12 @@ void trackedSurface::updateVelocity()
 
         vectorField nB = mesh().boundary()[bPatchID()].nf();
 
+        scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
+
         scalarField DnB = interpolatorBA().faceInterpolate
         (
             mesh().boundary()[bPatchID()].deltaCoeffs()
         );
-
-        scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
 
 
         vectorField UtPA =
@@ -1266,40 +1293,101 @@ void trackedSurface::updateVelocity()
     }
     else
     {
-        vectorField nA = aMesh().faceAreaNormals().internalField();
+        vectorField nA = mesh().boundary()[aPatchID()].nf();
+
+        scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
 
         vectorField UnFs =
             nA*phi_.boundaryField()[aPatchID()]
-           /mesh().boundary()[aPatchID()].magSf();
+            /mesh().boundary()[aPatchID()].magSf();
 
         // Correct normal component of surface velocity
         Us().internalField() += UnFs - nA*(nA&Us().internalField());
         correctUsBoundaryConditions();
 
-        vectorField tangentialSurfaceTensionForce(nA.size(), vector::zero);
-
-        tangentialSurfaceTensionForce =
-            surfaceTensionGrad()().internalField();
-
-        vectorField tnGradU =
-            tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
-          - (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
-
         vectorField UtPA =
             U().boundaryField()[aPatchID()].patchInternalField();
+
+        if
+        (
+            U().boundaryField()[aPatchID()].type()
+        == fixedGradientCorrectedFvPatchField<vector>::typeName
+        )
+        {
+            fixedGradientCorrectedFvPatchField<vector>& aU =
+                refCast<fixedGradientCorrectedFvPatchField<vector> >
+                (
+                    U().boundaryField()[aPatchID()]
+                );
+
+            UtPA += aU.corrVecGrad();
+        }
+
         UtPA -= nA*(nA & UtPA);
 
-        scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
+        vectorField tangentialSurfaceTensionGradU =
+            surfaceTensionGrad()().internalField()
+            /(muEffFluidAval() + VSMALL);
+
+//        tangentialSurfaceTensionGradU -= nA*(nA & tangentialSurfaceTensionGradU);
+
+//         vectorField tnGradU =
+//              tangentialSurfaceTensionGradU
+//            - (fac::grad(Us()&aMesh().faceAreaNormals(),"grad(Us)"))().internalField();
+
+       vectorField tnGradU =
+           tangentialSurfaceTensionGradU
+         - (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
+
+//         tnGradU -= nA*(nA & tnGradU);
 
         vectorField UtFs = UtPA + tnGradU/DnA;
 
-        Us().internalField() = UtFs + UnFs;
+        Us().internalField() = UnFs + UtFs;
         correctUsBoundaryConditions();
 
-        vectorField nGradU =
-            tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
-          - nA*fac::div(Us())().internalField()
-          - (fac::grad(Us())().internalField()&nA);
+        vectorField nnGradU = - nA*fac::div(Us())().internalField();
+//        vectorField nnGradU = - nA*fac::div(nUs)().internalField();
+//        vectorField nnGradU = (UnFs - (U().boundaryField()[aPatchID()].patchInternalField()&nA)*nA)*DnA;
+
+//        tnGradU =
+//            tangentialSurfaceTensionGradU
+//          - (fac::grad(Us()&aMesh().faceAreaNormals(),"grad(Us)"))().internalField();
+
+//        tnGradU =
+//            tangentialSurfaceTensionGradU
+//          - (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
+
+//        tnGradU =
+//            tangentialSurfaceTensionGradU
+//          - (fac::grad(Us())().internalField()&nA);
+
+//        tnGradU -= nA*(nA & tnGradU);
+
+        vectorField nGradU = nnGradU + tnGradU;
+
+//         Info << "[DEBUG]: gMax(mag(nnGradU)) = " << gMax(mag(nnGradU)) << endl;
+//         Info << "[DEBUG]: gMax(mag(tnGradU)) = " << gMax(mag(tnGradU)) << endl;
+
+//        vectorField nGradU =
+//            tangentialSurfaceTensionGradU
+//          - nA*fac::div(Us())().internalField()
+//          - (fac::grad(Us())().internalField()&nA);
+
+//        vectorField nGradU =
+//            tangentialSurfaceTensionGradU
+//          - (fac::grad(Us()&aMesh().faceAreaNormals(),"grad(Us)"))().internalField();
+//          - nA*fac::div(Us())().internalField();
+
+//        vectorField nGradU =
+//            tangentialSurfaceTensionGradU
+//          - nA*fac::div(Us())().internalField()
+//          - (fac::grad(Us()&aMesh().faceAreaNormals(),"grad(Us)"))().internalField();
+
+//        vectorField nGradU =
+//            tangentialSurfaceTensionGradU
+//          - ((Us()&aMesh().faceAreaNormals())().internalField()*nA - (U().boundaryField()[aPatchID()].patchInternalField()&nA)*nA)*DnA
+//          - (fac::grad(Us()&aMesh().faceAreaNormals(),"grad(Us)"))().internalField();
 
         if
         (
@@ -1439,7 +1527,7 @@ void trackedSurface::updatePressure()
     }
 
 
-    // Set modified pressure at patches with fixed apsolute
+    // Set modified pressure at patches with fixed absolute
     // pressure
 
 //     vector R0 = gAverage(mesh().C().boundaryField()[aPatchID()]);
@@ -1456,9 +1544,9 @@ void trackedSurface::updatePressure()
             if (patchI != aPatchID())
             {
                 p().boundaryField()[patchI] ==
-                    pExt().boundaryField()[patchI];
                   - rho().boundaryField()[patchI]
-                   *(g_.value()&(mesh().C().boundaryField()[patchI] - R0));
+                   *(g_.value()&(mesh().C().boundaryField()[patchI] - R0))
+                  + pExt().boundaryField()[patchI];
             }
         }
     }
@@ -1476,8 +1564,6 @@ void trackedSurface::updateSurfactantConcentration()
     if(!cleanInterface())
     {
         Info << "Correct surfactant concentration" << endl << flush;
-
-        updateSurfaceFlux();
 
         // Crate and solve the surfactanta transport equation
         faScalarMatrix CsEqn
@@ -1645,19 +1731,34 @@ vector trackedSurface::totalSurfaceTensionForce() const
 
     vectorField surfTensionForces(n.size(), vector::zero);
 
+    surfTensionForces = n*K;
+
     if(cleanInterface())
     {
-        surfTensionForces =
-            S*cleanInterfaceSurfTension().value()
-           *fac::edgeIntegrate
-            (
-                aMesh().Le()*aMesh().edgeLengthCorrection()
-            )().internalField();
+        surfTensionForces *= cleanInterfaceSurfTension().value();
     }
     else
     {
-        surfTensionForces *= surfaceTension().internalField()*K;
+        surfTensionForces *= surfaceTension().internalField();
     }
+
+    surfTensionForces += surfaceTensionGrad()().internalField();
+
+    surfTensionForces *= S;
+
+//     if(cleanInterface())
+//     {
+//         surfTensionForces =
+//             S*cleanInterfaceSurfTension().value()
+//            *fac::edgeIntegrate
+//             (
+//                 aMesh().Le()*aMesh().edgeLengthCorrection()
+//             )().internalField();
+//     }
+//     else
+//     {
+//         surfTensionForces *= surfaceTension().internalField()*K;
+//     }
 
     return gSum(surfTensionForces);
 }
@@ -1713,7 +1814,7 @@ scalar trackedSurface::maxCourantNumber()
             sqrt
             (
                 rhoFluidA().value()*dE*dE*dE/
-                2.0/M_PI/(cleanInterfaceSurfTension().value() + SMALL)
+                2.0/M_PI/(cleanInterfaceSurfTension().value() + VSMALL)
             )
         );
     }
@@ -1721,9 +1822,9 @@ scalar trackedSurface::maxCourantNumber()
     {
         scalarField sigmaE =
             linearEdgeInterpolate(surfaceTension())().internalField()
-          + SMALL;
+          + VSMALL;
 
-        const scalarField& dE =aMesh().lPN();
+        const scalarField& dE = aMesh().lPN();
 
         CoNum = gMax
         (
@@ -1740,26 +1841,201 @@ scalar trackedSurface::maxCourantNumber()
 }
 
 
-void trackedSurface::updateProperties()
+scalarField trackedSurface::continuityErrorA() const
 {
-    muFluidA_ = transport().rho1()
-      * dimensionedScalar
+    return phi_.boundaryField()[aPatchID()]
+         - fvc::meshPhi(U())().boundaryField()[aPatchID()];
+}
+
+scalarField trackedSurface::continuityErrorB() const
+{
+    if (twoFluids())
+    {
+        return phi_.boundaryField()[bPatchID()]
+             - fvc::meshPhi(U())().boundaryField()[bPatchID()];
+    }
+    else
+    {
+        return continuityErrorA();
+    }
+}
+
+
+template<class Type>
+void
+trackedSurface::writeVolFromArea
+(
+    const label aPatchID,
+    const fvMesh& vMesh,
+    const GeometricField<Type, faPatchField, areaMesh>& af
+)
+{
+    tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
+    (
+        new GeometricField<Type, fvPatchField, volMesh>
         (
-            transport().nuModel1().viscosityProperties().lookup("nu")
-        );
+            IOobject
+            (
+                "vol" + af.name(),
+                af.instance(),
+                af.db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            vMesh,
+            dimensioned<Type>
+            (
+                "0",
+                af.dimensions(),
+                pTraits<Type>::zero
+            ),
+            fixedValueFvPatchField<Type>::typeName
+        )
+    );
+    GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
 
-    muFluidB_ = transport().rho2()
-      * dimensionedScalar
+    forAll(vMesh.boundaryMesh(), patchI)
+    {
+        vf.boundaryField()[patchI] == pTraits<Type>::zero;
+    }
+
+    vf.boundaryField()[aPatchID] == af;
+
+    vf.write();
+
+    tvf.clear();
+}
+
+
+void trackedSurface::writeVolA()
+{
+    Us().write();
+
+    (fac::div(Us()))().write();
+
+    (fac::grad(Us()))().write();
+
+    aMesh().Le().write();
+
+    (fac::average(aMesh().Le()))().write();
+
+    aMesh().edgeAreaNormals().write();
+
+    aMesh().faceAreaNormals().write();
+
+    aMesh().faceCurvatures().write();
+
+    surfaceTensionGrad()().write();
+
+
+
+    // Us
+    writeVolFromArea(aPatchID(), mesh(), Us());
+
+    // fac::div(Us())
+    writeVolFromArea(aPatchID(), mesh(), (fac::div(Us()))());
+
+    // fac::grad(Us())
+    writeVolFromArea(aPatchID(), mesh(), (fac::grad(Us()))());
+
+    // volLeAverage
+     writeVolFromArea(aPatchID(), mesh(), (fac::average(aMesh().Le()))());
+
+    // faceAreaNormals
+    writeVolFromArea(aPatchID(), mesh(), aMesh().faceAreaNormals());
+
+    // faceCurvatures
+    writeVolFromArea(aPatchID(), mesh(), aMesh().faceCurvatures());
+
+    // faceCurvaturesDivNormals
+    writeVolFromArea
+    (
+        aPatchID(),
+        mesh(),
+        areaScalarField
         (
-            transport().nuModel2().viscosityProperties().lookup("nu")
-        );
+            "faceCurvaturesDivNormals",
+            -fac::div(aMesh().faceAreaNormals())
+        )
+    );
 
-    rhoFluidA_ = transport().rho1();
+    // surfaceTensionGrad
+    writeVolFromArea(aPatchID(), mesh(), surfaceTensionGrad()());
 
-    rhoFluidB_ = transport().rho2();
+//     // volTest*
+//     {
+//         edgeScalarField testField
+//         (
+//             IOobject("test",DB().timeName(),mesh()),
+//             aMesh(),
+//             dimensioned<scalar>("zero", dimensionSet(0,0,0,0,0,0,0), 1.0)
+//         );
+//
+//         // volTestAverage
+//         areaScalarField testAverageField (IOobject("TestAverage",DB().timeName(),mesh()), fac::average(testField));
+//         writeVolFromArea(aPatchID(), mesh(), testAverageField);
+//
+//         // FIXME [High]: Is here some bug hiding at walls!??? There is some non-symmetric effect when using fac::edgeSum...
+//         // volTestEdgeSum
+//         areaScalarField testEdgeSumField (IOobject("TestEdgeSum",DB().timeName(),mesh()), fac::edgeSum(testField));
+//         writeVolFromArea(aPatchID(), mesh(), testEdgeSumField);
+//
+//         // volTestEdgeSumByFaceArea
+//         areaScalarField testEdgeSumByFaceAreaField (IOobject("TestEdgeSumByFaceArea",DB().timeName(),mesh()), fac::edgeSum(testField));
+//         testEdgeSumByFaceAreaField.internalField() /= aMesh().S();
+//         writeVolFromArea(aPatchID(), mesh(), testEdgeSumByFaceAreaField);
+//
+//         // volTestEdgeSumByFaceAreaBcCorrected
+//         areaScalarField testEdgeSumByFaceAreaBcCorrectedField (IOobject("TestEdgeSumByFaceAreaBcCorrected",DB().timeName(),mesh()), fac::edgeSum(testField));
+//         testEdgeSumByFaceAreaBcCorrectedField.internalField() /= aMesh().S();
+//         testEdgeSumByFaceAreaBcCorrectedField.correctBoundaryConditions();
+//         writeVolFromArea(aPatchID(), mesh(), testEdgeSumByFaceAreaBcCorrectedField);
+//         // volTestEdgeIntegrate
+//         areaScalarField testEdgeIntegrateField (IOobject("TestEdgeIntegrate",DB().timeName(),mesh()), fac::edgeIntegrate(testField));
+//         writeVolFromArea(aPatchID(), mesh(), testEdgeIntegrateField);
+//     }
+}
 
-    cleanInterfaceSurfTension_ =
-        dimensionedScalar(transport().lookup("sigma"));
+
+void trackedSurface::writeVTK() const
+{
+    aMesh().patch().writeVTK
+    (
+        DB().timePath()/"trackedSurface",
+        aMesh().patch(),
+        aMesh().patch().points()
+    );
+}
+
+
+void trackedSurface::writeVTKControlPoints()
+{
+    // Write patch and points into VTK
+    fileName name(DB().timePath()/"trackedSurfaceControlPoints");
+    OFstream mps(name + ".vtk");
+
+    mps << "# vtk DataFile Version 2.0" << nl
+        << name << ".vtk" << nl
+        << "ASCII" << nl
+        << "DATASET POLYDATA" << nl
+        << "POINTS " << controlPoints().size() << " float" << nl;
+
+    forAll(controlPoints(), pointI)
+    {
+        mps << controlPoints()[pointI].x() << ' '
+            << controlPoints()[pointI].y() << ' '
+            << controlPoints()[pointI].z() << nl;
+    }
+
+    // Write vertices
+    mps << "VERTICES " << controlPoints().size() << ' '
+        << controlPoints().size()*2 << nl;
+
+    forAll(controlPoints(), pointI)
+    {
+        mps << 1 << ' ' << pointI << nl;
+    }
 }
 
 
