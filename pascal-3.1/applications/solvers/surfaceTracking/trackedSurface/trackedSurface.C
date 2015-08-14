@@ -1759,7 +1759,7 @@ void trackedSurface::updateProperties()
     rhoFluidB_ = transport().rho2();
 
     cleanInterfaceSurfTension_ =
-        dimensionedScalar(this->lookup("surfaceTension"));
+        dimensionedScalar(transport().lookup("sigma"));
 }
 
 
