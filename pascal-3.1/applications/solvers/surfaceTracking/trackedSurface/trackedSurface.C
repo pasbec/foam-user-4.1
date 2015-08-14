@@ -158,7 +158,7 @@ trackedSurface::trackedSurface
     ),
     cleanInterfaceSurfTension_
     (
-        transportModel.lookup("sigma")
+        dimensionedScalar(transportModel.lookup("sigma"))
     ),
     fixedTrackedSurfacePatches_
     (
