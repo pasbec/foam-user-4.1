@@ -1072,9 +1072,9 @@ const scalarField& trackedSurface::muEffFluidBval() const
 }
 
 
-tmp<areaVectorField> trackedSurface::surfaceTensionGrad()
+tmp<areaVectorField> trackedSurface::surfaceTensionGrad() const
 {
-    tmp<areaVectorField> tgrad
+    tmp<areaVectorField> tstGrad
     (
         new areaVectorField
         (
@@ -1086,14 +1086,44 @@ tmp<areaVectorField> trackedSurface::surfaceTensionGrad()
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            (-fac::grad(surfactantConcentration())*
-            surfactant().surfactR()*surfactant().surfactT()/
-            (1.0 - surfactantConcentration()/
-            surfactant().surfactSaturatedConc()))()
+            aMesh(),
+            dimensioned<vector>("zero", dimMass/pow(dimTime,2)/dimLength, vector::zero),
+            calculatedFaPatchVectorField::typeName
         )
     );
 
-    return tgrad;
+    areaVectorField& stGrad = tstGrad();
+
+    if (!cleanInterface())
+    {
+        stGrad =
+            (-fac::grad(surfactantConcentration())*
+            surfactant().surfactR()*surfactant().surfactT()/
+            (1.0 - surfactantConcentration()/
+            surfactant().surfactSaturatedConc()))();
+    }
+    else
+    {
+        if (!noCleanTangentialSurfaceTensionCorrection_)
+        {
+            stGrad =
+                cleanInterfaceSurfTension() *
+                (
+                    fac::edgeIntegrate
+                    (
+                        aMesh().Le() * aMesh().edgeLengthCorrection()
+                    )
+                  - aMesh().faceCurvatures() * aMesh().faceAreaNormals()
+                );
+        }
+
+        if (!twoFluids() && gMax(muEffFluidAval()) < SMALL)
+        {
+            stGrad = vector::zero;
+        }
+    }
+
+    return tstGrad;
 }
 
 

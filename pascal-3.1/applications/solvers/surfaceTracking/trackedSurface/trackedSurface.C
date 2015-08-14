@@ -173,6 +173,10 @@ trackedSurface::trackedSurface
         readInt(this->lookup("nTrackedSurfaceCorrectors"))
     ),
     smoothing_(false),
+    noCleanTangentialSurfaceTensionCorrection_
+    (
+        this->lookupOrDefault<Switch>("noCleanTangentialSurfaceTensionCorrection", false)
+    ),
     interpolatorABPtr_(NULL),
     interpolatorBAPtr_(NULL),
     controlPointsPtr_(NULL),
@@ -1170,25 +1174,8 @@ void trackedSurface::updateVelocity()
 
         vectorField tangentialSurfaceTensionForce(nA.size(), vector::zero);
 
-        if(!cleanInterface())
-        {
-            tangentialSurfaceTensionForce =
-                surfaceTensionGrad()().internalField();
-        }
-        else
-        {
-            vectorField surfaceTensionForce =
-                cleanInterfaceSurfTension().value()
-               *fac::edgeIntegrate
-                (
-                    aMesh().Le()*aMesh().edgeLengthCorrection()
-                )().internalField();
-
-            tangentialSurfaceTensionForce =
-                surfaceTensionForce
-              - cleanInterfaceSurfTension().value()
-               *aMesh().faceCurvatures().internalField()*nA;
-        }
+        tangentialSurfaceTensionForce =
+            surfaceTensionGrad()().internalField();
 
         UtFs += tangentialSurfaceTensionForce;
 
@@ -1291,30 +1278,8 @@ void trackedSurface::updateVelocity()
 
         vectorField tangentialSurfaceTensionForce(nA.size(), vector::zero);
 
-        if(!cleanInterface())
-        {
-            tangentialSurfaceTensionForce =
-                surfaceTensionGrad()().internalField();
-        }
-        else
-        {
-            vectorField surfaceTensionForce =
-                cleanInterfaceSurfTension().value()
-               *fac::edgeIntegrate
-                (
-                    aMesh().Le()*aMesh().edgeLengthCorrection()
-                )().internalField();
-
-            tangentialSurfaceTensionForce =
-                surfaceTensionForce
-              - cleanInterfaceSurfTension().value()
-               *aMesh().faceCurvatures().internalField()*nA;
-
-            if (gMax(muEffFluidAval()) < SMALL)
-            {
-                tangentialSurfaceTensionForce = vector::zero;
-            }
-        }
+        tangentialSurfaceTensionForce =
+            surfaceTensionGrad()().internalField();
 
         vectorField tnGradU =
             tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)

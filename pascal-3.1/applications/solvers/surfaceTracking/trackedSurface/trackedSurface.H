@@ -146,6 +146,10 @@ class trackedSurface
         //- Interface smoothing at the begining of time step
         Switch smoothing_;
 
+        //- No tangential surface tension correction for
+        //  clean interface
+        Switch noCleanTangentialSurfaceTensionCorrection_;
+
     // Demand-driven data
 
         //- Patch to patch interpolation object which deals with
@@ -464,7 +468,7 @@ public:
         const areaScalarField& surfaceTension() const;
 
         //- Return surface tension gradient
-        tmp<areaVectorField> surfaceTensionGrad();
+        tmp<areaVectorField> surfaceTensionGrad() const;
 
         //- Return surfactant properties
         const surfactantProperties& surfactant() const;
