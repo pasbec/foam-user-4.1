@@ -1763,47 +1763,6 @@ void trackedSurface::updateProperties()
 }
 
 
-void trackedSurface::writeVTK() const
-{
-    aMesh().patch().writeVTK
-    (
-        DB().timePath()/"trackedSurface",
-        aMesh().patch(),
-        aMesh().patch().points()
-    );
-}
-
-
-void trackedSurface::writeVTKControlPoints()
-{
-    // Write patch and points into VTK
-    fileName name(DB().timePath()/"trackedSurfaceControlPoints");
-    OFstream mps(name + ".vtk");
-
-    mps << "# vtk DataFile Version 2.0" << nl
-        << name << ".vtk" << nl
-        << "ASCII" << nl
-        << "DATASET POLYDATA" << nl
-        << "POINTS " << controlPoints().size() << " float" << nl;
-
-    forAll(controlPoints(), pointI)
-    {
-        mps << controlPoints()[pointI].x() << ' '
-            << controlPoints()[pointI].y() << ' '
-            << controlPoints()[pointI].z() << nl;
-    }
-
-    // Write vertices
-    mps << "VERTICES " << controlPoints().size() << ' '
-        << controlPoints().size()*2 << nl;
-
-    forAll(controlPoints(), pointI)
-    {
-        mps << 1 << ' ' << pointI << nl;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

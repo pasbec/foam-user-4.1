@@ -316,13 +316,13 @@ int main(int argc, char *argv[])
         // Finish time step and write
         // ==================================================================//
 
-//         if (debug)
-//         {
-//             if (runTime.outputTime())
-//             {
-//                 interface.writeVolA();
-//             }
-//         }
+        if (debug)
+        {
+            if (runTime.outputTime())
+            {
+                interface.writeVolA();
+            }
+        }
 
         runTime.write();
 
