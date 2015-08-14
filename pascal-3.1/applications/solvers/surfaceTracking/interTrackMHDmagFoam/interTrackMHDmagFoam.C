@@ -64,7 +64,8 @@ Description
 
 // TODO [High]: Structure/Implementation:
 //              - Fix update of mesh points of base region (last main step).
-//                The inner points of the base region seem to get out of sync?
+//                The inner points of the base region get out of sync if
+//                the fluid volume is corrected in the curent time step!
 //              - Implement control class?
 //              - Get rid of warning: unused variable for mesh, FL and pB
 //              - Fix pressure relaxation for Alberto-method
@@ -294,8 +295,11 @@ int main(int argc, char *argv[])
         {
             // Create new point field for base region
             // with current points of patch trackedSurface in fluid region
-// TODO [High] : Something is wrong here
-            pointField newPoints = mesh_.rmap(fluidRegionID,"trackedSurface");
+// TODO [High] : If the fluid volume is being corrected in the current time step
+//               we may not only use interface points, but all fluid points instead!
+//               Do we really get loose much performance with this?
+//             pointField newPoints = mesh_.rmap(fluidRegionID,"trackedSurface");
+            pointField newPoints = mesh_.rmap(fluidRegionID);
 
             // Replace point positions of dynamic region in
             // new point field for base region

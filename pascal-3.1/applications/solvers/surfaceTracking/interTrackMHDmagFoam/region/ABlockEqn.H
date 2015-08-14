@@ -47,21 +47,6 @@
     // Boundary conditions
     // ==================================================================//
 
-    forAll(mesh.boundary(), patchI)
-    {
-        if (!mesh.boundary()[patchI].coupled())
-        {
-            vector6Field& patch = A.boundaryField()[patchI];
-
-            patch.component(0) = ARe.boundaryField()[patchI].component(0);
-            patch.component(1) = ARe.boundaryField()[patchI].component(1);
-            patch.component(2) = ARe.boundaryField()[patchI].component(2);
-            patch.component(3) = AIm.boundaryField()[patchI].component(0);
-            patch.component(4) = AIm.boundaryField()[patchI].component(1);
-            patch.component(5) = AIm.boundaryField()[patchI].component(2);
-        }
-    }
-
     // Transfer the coupled interface list for processor/cyclic/etc. boundaries
     AEqn.interfaces() = A.boundaryField().blockInterfaces();
 
