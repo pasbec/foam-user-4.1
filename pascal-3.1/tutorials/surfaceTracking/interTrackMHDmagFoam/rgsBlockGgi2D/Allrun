@@ -147,7 +147,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]] || \
 
         # Create zones for restored topoSets
         runParallel $np \
-            setsToZones || exit 1
+            setsToZones -noFlipMap || exit 1
 
         # Remove topoSet prefixes from topoZones
         for p in $(ls -1d 'processor'*); do
