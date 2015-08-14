@@ -1086,7 +1086,7 @@ void trackedSurface::updateBoundaryConditions()
 
 void trackedSurface::updateMuEff()
 {
-    const volScalarField nuEff = turbulence()->nuEff();
+    const volScalarField& nuEff = turbulence()->nuEff();
 
     muEffFluidAval() =
         nuEff.boundaryField()[aPatchID()] * rhoFluidA().value();
