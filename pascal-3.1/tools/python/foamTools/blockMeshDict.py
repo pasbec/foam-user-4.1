@@ -288,13 +288,11 @@ class blocks(object):
 
     class cSync(object):
 
-        debug = False
-
-        # ------------------------------------------------------------------- #
-
         def __init__(self, blocksRef):
 
             self.blocks = blocksRef
+
+            self.debug = False
 
         # ------------------------------------------------------------------- #
 
@@ -320,11 +318,17 @@ class blocks(object):
 
         # ------------------------------------------------------------------- #
 
+        def verbose(self):
+
+            self.debug = True;
+
+        # ------------------------------------------------------------------- #
+
         def sync(self, block, blockSyncData, blockSync, base):
 
             if self.debug:
-                print ">> CURRENT", block
-                print
+
+                debugMsg = "[blocks::_setNeighbourData]"
 
             faces = self.blocks.topo.faces
             baseFaces = self.blocks.topo.baseFaces[base]
@@ -332,13 +336,12 @@ class blocks(object):
                 [f for i, f in enumerate(faces) if i not in baseFaces]
 
             if self.debug:
-                print "   block =", block
-                print "   blockSyncData =", blockSyncData
-                print "   base =", base
-                print "   baseFaces =", baseFaces
-                print "   crossBaseFaces =", crossBaseFaces
-                print
-                print "   >> WRITE"
+
+                print debugMsg, "block =", block
+                print debugMsg, "blockSyncData =", blockSyncData
+                print debugMsg, "base =", base
+                print debugMsg, "baseFaces =", baseFaces
+                print debugMsg, "crossBaseFaces =", crossBaseFaces
                 print
 
 
@@ -372,23 +375,23 @@ class blocks(object):
                 nextBlock = self.blocks.faceNeighbours[block][face]
 
                 if self.debug:
-                    print "   face =", face
-                    print "   faceVertices =", faceVertices
-                    print "   faceVerticesBaseBase =", faceVerticesBaseBase
-                    print "   faceVerticesBaseSign =", faceVerticesBaseSign
-                    print "   faceVerticeLabels =", faceVerticeLabels
-                    print "   nextBlock =", nextBlock
+
+                    print debugMsg, "face =", face
+                    print debugMsg, "faceVertices =", faceVertices
+                    print debugMsg, "faceVerticesBaseBase =", \
+                        faceVerticesBaseBase
+                    print debugMsg, "faceVerticesBaseSign =", \
+                        faceVerticesBaseSign
+                    print debugMsg, "faceVerticeLabels =", \
+                        faceVerticeLabels
+                    print debugMsg, "nextBlock =", nextBlock
                     if not nextBlock == None:
-                        print "   getProcessedBlock(nextBlock) =", \
+                        print debugMsg, "getProcessedBlock(nextBlock) =", \
                             self._getProcessedBlock(nextBlock)
                     print
 
                 if nextBlock == None or \
                     self._getProcessedBlock(nextBlock) == True:
-
-                    if self.debug:
-                        print "   >> CONTINUE"
-                        print
 
                     continue
 
@@ -443,26 +446,24 @@ class blocks(object):
                 nextBase = nextBaseOrientation[base]
 
                 if self.debug:
-                    print "   nextFace =", nextFace
-                    print "   nextFaceVertices =", \
-                        nextFaceVertices
-                    print "   nextFaceVerticesTransformed =", \
-                        nextFaceVerticesShifted
-                    print "   nextFaceVerticeLabels =", \
-                        nextFaceVerticeLabels
-                    print "   nextFaceVerticesBaseBase =", \
-                        nextFaceVerticesBaseBase
-                    print "   nextFaceVerticesBaseSign =", \
-                        nextFaceVerticesBaseSign
-                    print "   nextBaseOrientation =", \
-                        nextBaseOrientation
-                    print "   nextbaseOrientationReverse =", \
-                        nextbaseOrientationReverse
-                    print "   nextBlockSync =", nextBlockSync
-                    print "   nextBase =", nextBase
-                    print
 
-                    print "   >> HOP"
+                    print debugMsg, "nextFace =", nextFace
+                    print debugMsg, "nextFaceVertices =", \
+                        nextFaceVertices
+                    print debugMsg, "nextFaceVerticesTransformed =", \
+                        nextFaceVerticesShifted
+                    print debugMsg, "nextFaceVerticeLabels =", \
+                        nextFaceVerticeLabels
+                    print debugMsg, "nextFaceVerticesBaseBase =", \
+                        nextFaceVerticesBaseBase
+                    print debugMsg, "nextFaceVerticesBaseSign =", \
+                        nextFaceVerticesBaseSign
+                    print debugMsg, "nextBaseOrientation =", \
+                        nextBaseOrientation
+                    print debugMsg, "nextbaseOrientationReverse =", \
+                        nextbaseOrientationReverse
+                    print debugMsg, "nextBlockSync =", nextBlockSync
+                    print debugMsg, "nextBase =", nextBase
                     print
 
                 # Recursion
@@ -666,6 +667,8 @@ class blocks(object):
         self.distribution = self.cDistribution(self)
         self.grading = self.cGrading(self)
 
+        self.debug = False
+
     # ----------------------------------------------------------------------- #
 
     def _getPathVerticeBase(self,vertices):
@@ -719,6 +722,13 @@ class blocks(object):
 
     def _getNeighbours(self, block, otherBlock):
 
+        if self.debug:
+
+            debugMsg = "[blocks::_getNeighbours]"
+            print debugMsg, "block =", block
+            print debugMsg, "otherBlock =", otherBlock
+            print
+
         if not (type(block) == int \
             and type(otherBlock) == int):
 
@@ -732,10 +742,19 @@ class blocks(object):
         neighbourVertices = \
             self._getSharedVertices(blockVertices, otherBlockVertices)
 
+        if self.debug:
+
+            print debugMsg, "neighbourVertices =", neighbourVertices
+
         # Face neighbours
         if len(neighbourVertices) == 4:
 
             return True, "face", neighbourVertices
+
+        # Wedge axis face neighbours
+        if len(neighbourVertices) == 3:
+
+            return True, "axis", neighbourVertices
 
         # Edge neighbours
         if len(neighbourVertices) == 2:
@@ -770,9 +789,11 @@ class blocks(object):
                 otherFaceVerticesLabels
             )
 
-            if len(sharedFaceVertices) == 4:
+            if len(sharedFaceVertices) == 4 \
+                or len(sharedFaceVertices) == 3:
                 self.faceNeighbours[block][face] = otherBlock
-            if len(otherSharedFaceVertices) == 4:
+            if len(otherSharedFaceVertices) == 4 \
+                or len(otherSharedFaceVertices) == 3:
                 self.faceNeighbours[otherBlock][face] = block
 
     # ----------------------------------------------------------------------- #
@@ -817,6 +838,13 @@ class blocks(object):
 
     def _setNeighbourData(self, block):
 
+        if self.debug:
+
+            debugMsg = "[blocks::_setNeighbourData]"
+
+            print debugMsg, "block =", block
+            print
+
         for otherBlock, otherBlockLabel in enumerate(self.labels):
 
             if not block == otherBlock:
@@ -824,7 +852,18 @@ class blocks(object):
                 neighbours, neighbourType, neighbourVertices = \
                     self._getNeighbours(block, otherBlock)
 
-                if neighbourType == "face":
+                if self.debug:
+
+                    print debugMsg, "otherBlock =", otherBlock
+                    print
+
+                    print debugMsg, "neighbours =", neighbours
+                    print debugMsg, "neighbourType =", neighbourType
+                    print debugMsg, "neighbourVertices =", neighbourVertices
+                    print
+
+                if neighbourType == "face" \
+                    or neighbourType == "axis":
 
                     try:
                         self.neighbours[block].index(otherBlock)
@@ -852,6 +891,12 @@ class blocks(object):
                         otherBlock,
                         neighbourVertices
                     )
+
+    # ----------------------------------------------------------------------- #
+
+    def verbose(self):
+
+        self.debug = True;
 
     # ----------------------------------------------------------------------- #
 
