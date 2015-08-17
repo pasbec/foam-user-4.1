@@ -30,8 +30,8 @@ gradSchemes
     snGradCorr(k)                         Gauss linear;
     grad(omega)                           Gauss linear;
     snGradCorr(omega)                     Gauss linear;
-    grad(epislon)                         Gauss linear;
-    snGradCorr(epislon)                   Gauss linear;
+    grad(epsilon)                         Gauss linear;
+    snGradCorr(epsilon)                   Gauss linear;
     grad(nuTilda)                         Gauss linear;
     snGradCorr(nuTilda)                   Gauss linear;
     grad(pB)                              Gauss linear;
