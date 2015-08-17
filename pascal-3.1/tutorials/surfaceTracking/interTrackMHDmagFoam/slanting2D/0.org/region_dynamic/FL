@@ -35,7 +35,7 @@ boundaryField
         type            calculated;
         value           $internalField;
     }
-    frontAndback
+    frontAndBack
     {
         type            empty;
     }
