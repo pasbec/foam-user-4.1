@@ -148,6 +148,17 @@ castellatedMeshControls
     // The second level is the maximum level.
     refinementSurfaces
     {
+        region_fluid
+        {
+            level (2 2);
+
+            cellZone region_fluid;
+            cellZoneInside inside;
+
+            faceZone fluid;
+            faceType internal;
+        }
+
         region_fluid_trackedSurface
         {
             level (2 2);
@@ -176,7 +187,7 @@ castellatedMeshControls
         {
             level (2 2);
 
-            cellZone coil0;
+            cellZone region_coil0;
             cellZoneInside inside;
 
             faceZone coil0;
@@ -187,7 +198,7 @@ castellatedMeshControls
         {
             level (2 2);
 
-            cellZone coil1;
+            cellZone region_coil1;
             cellZoneInside inside;
 
             faceZone coil1;
@@ -198,7 +209,7 @@ castellatedMeshControls
         {
             level (2 2);
 
-            cellZone coil2;
+            cellZone region_coil2;
             cellZoneInside inside;
 
             faceZone coil2;
@@ -248,12 +259,12 @@ castellatedMeshControls
     // - outside. Same but cells outside.
     refinementRegions
     {
-        region_fluid
-        {
-            mode inside;
-            levels ((1e-15 1));
-        }
-
+//         region_fluid
+//         {
+//             mode inside;
+//             levels ((1e-15 1));
+//         }
+//
 //         region_coil0
 //         {
 //             mode inside;

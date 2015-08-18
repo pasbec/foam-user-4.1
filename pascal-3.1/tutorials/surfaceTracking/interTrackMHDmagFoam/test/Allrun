@@ -67,17 +67,17 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]] || \
    [[ $flagPrepare -eq 1 && ! -e 'constant/region_static/polyMesh' ]] || \
    [[ $flagPrepare -eq 1 && ! -e 'constant/region_fluid/faMesh' ]]; then
 
-#     # Write blockMeshDict
-#     ./constant/polyMesh.org/blockMeshDict.py
-
-#  TODO   of23x; blockMesh; surfaceFeatureExtract; snappyHexMesh -overwrite; fe31
+    # Write blockMeshDict
+    ./constant/polyMesh.org/blockMeshDict.py
 
     # Restore polymesh from org backup
     restorePolyMeshOrg
 
-#     # Create coarse background mesh
-#     runApplication blockMesh || exit 1
-#     polyMeshBoundaryFormatAscii
+    # Create coarse background mesh
+    runApplication blockMesh || exit 1
+    polyMeshBoundaryFormatAscii
+
+    # TODO: fe31; ./Allrun clean prepare; of23x; snappyHexMesh -overwrite; fe31
 
 #     # Refine mesh
 #     runApplication snappyHexMesh -overwrite || exit 1
