@@ -11,7 +11,7 @@ FoamFile
     format      ascii;
     class       featureEdgeMesh;
     location    "constant/triSurface";
-    object      region_fluid_fixedWall.eMesh;
+    object      geometry_fluid.eMesh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

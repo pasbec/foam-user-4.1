@@ -19,8 +19,8 @@ geo_scale = 1e-3
 geo_x1 = -150.0
 geo_x2 =  150.0
 
-geo_y1 = -300.0
-geo_y2 =  300.0
+geo_y1 = -200.0
+geo_y2 =  200.0
 
 geo_z1 =  -60.0
 geo_z2 =  140.0
@@ -46,7 +46,8 @@ d.vertices.set(  5, [geo_x2, geo_y2, geo_z1])
 d.vertices.set(  6, [geo_x1, geo_y2, geo_z2])
 d.vertices.set(  7, [geo_x2, geo_y2, geo_z2])
 
-d.blocks.set( 0, [0, 1, 5, 4, 2, 3, 7, 6], [n_x, n_y, n_z], zone="background")
+d.blocks.set( 0, [0, 1, 5, 4, 2, 3, 7, 6], [n_x, n_y, n_z])
+#d.blocks.set( 0, [0, 1, 5, 4, 2, 3, 7, 6], [n_x, n_y, n_z], zone="background")
 
 d.boundaryFaces.set(1, "infinity", 0, "y-")
 d.boundaryFaces.set(2, "infinity", 0, "y+")

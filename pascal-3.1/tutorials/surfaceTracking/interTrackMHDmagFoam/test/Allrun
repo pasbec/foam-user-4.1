@@ -67,29 +67,33 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]] || \
    [[ $flagPrepare -eq 1 && ! -e 'constant/region_static/polyMesh' ]] || \
    [[ $flagPrepare -eq 1 && ! -e 'constant/region_fluid/faMesh' ]]; then
 
-    # Write blockMeshDict
-    ./constant/polyMesh.org/blockMeshDict.py
+#     # Write blockMeshDict
+#     ./constant/polyMesh.org/blockMeshDict.py
 
     # Restore polymesh from org backup
     restorePolyMeshOrg
 
-    # Create coarse background mesh
-    runApplication blockMesh || exit 1
-    polyMeshBoundaryFormatAscii
-
-    # TODO: fe31; ./Allrun clean prepare; of23x; snappyHexMesh -overwrite; fe31
+#     # Create coarse background mesh
+#     runApplication blockMesh || exit 1
+#     polyMeshBoundaryFormatAscii
 
 #     # Refine mesh
 #     runApplication snappyHexMesh -overwrite || exit 1
-exit 1
-    # Remove leftovers from snappyHexMesh
-    rm -rf 'constant/cellLevel' \
-           'constant/polyMesh/cellLevel'* \
-           'constant/pointLevel' \
-           'constant/polyMesh/pointLevel'* \
-           'constant/polyMesh/refinementHistory'* \
-           'constant/polyMesh/surfaceIndex'* \
-           > /dev/null 2>&1
+
+# NOTE: snappyHexMesh edge snapping does not work with foam-extend!
+# It is possible to do with OpenFOAM 2.2.x or higher:
+# $ fe31; ./Allrun clean; of23x; ./constant/polyMesh.org/blockMeshDict.py; cp -r constant/polyMesh.org constant/polyMesh; blockMesh; snappyHexMesh -overwrite; fe31; createPatch -overwrite
+# Then copy the resulting mesh to constant/polyMesh.org and run:
+# $ ./Allrun clean prepare
+
+#     # Remove leftovers from snappyHexMesh
+#     rm -rf 'constant/cellLevel' \
+#            'constant/polyMesh/cellLevel'* \
+#            'constant/pointLevel' \
+#            'constant/polyMesh/pointLevel'* \
+#            'constant/polyMesh/refinementHistory'* \
+#            'constant/polyMesh/surfaceIndex'* \
+#            > /dev/null 2>&1
 
 #     # Create 2D mesh
 #     runApplication extrudeMesh || exit 1
@@ -249,7 +253,7 @@ exit 1
         # Create new topoSets
         runApplication \
             setSet -noVTK -batch 'system/setSetBatch' || exit 1
-
+exit 1
         # Create backup of topoSets
         rm "constant/polyMesh/sets/"*"_old"
         mkdir 'constant/polyMesh/sets/bak'

@@ -27,69 +27,45 @@ mergeTolerance 1e-6;
 
 // Meshing steps
 castellatedMesh true;
-snap            false;
+snap            true;
 addLayers       false;
 
 geometry
 {
-    region_fluid.stl
+    geometry_fluid.stl
     {
         type triSurfaceMesh;
-        name region_fluid;
+        name geometry_fluid;
     }
 
-    region_fluid_trackedSurface.stl
+    geometry_frame.stl
     {
         type triSurfaceMesh;
-        name region_fluid_trackedSurface;
+        name geometry_frame;
     }
 
-    region_fluid_fixedWall.stl
+    geometry_free.stl
     {
         type triSurfaceMesh;
-        name region_fluid_fixedWall;
+        name geometry_free;
     }
 
-    region_fluid_movingWall.stl
+    geometry_coil0.stl
     {
         type triSurfaceMesh;
-        name region_fluid_movingWall;
+        name geometry_coil0;
     }
 
-    region_coil0.stl
+    geometry_coil1.stl
     {
         type triSurfaceMesh;
-        name region_coil0;
+        name geometry_coil1;
     }
 
-    region_coil1.stl
+    geometry_coil2.stl
     {
         type triSurfaceMesh;
-        name region_coil1;
-    }
-
-    region_coil2.stl
-    {
-        type triSurfaceMesh;
-        name region_coil2;
-    }
-
-    region_coil0_port.stl
-    {
-        type triSurfaceMesh;
-        name region_coil0_port;
-    }
-
-    region_coil1_port.stl
-    {
-        type triSurfaceMesh;
-        name region_coil1_port;
-    }
-
-    region_coil2_port.stl
-    {
-        type triSurfaceMesh;
-        name region_coil2_port;
+        name geometry_coil2;
     }
 };
 
@@ -127,19 +103,13 @@ castellatedMeshControls
     features
     (
         // Can be done implicitely with "implicitFeatureSnap" in snapControls{}
-        // for OpenFOAM 2.2.0 +
-        // with
-        // resolveFeatureAngle 90;
-        {file "region_fluid.eMesh"; level 0;}
-        {file "region_fluid_trackedSurface.eMesh"; level 0;}
-        {file "region_fluid_fixedWall.eMesh"; level 0;}
-        {file "region_fluid_movingWall.eMesh"; level 0;}
-        {file "region_coil0.eMesh"; level 0;}
-        {file "region_coil1.eMesh"; level 0;}
-        {file "region_coil2.eMesh"; level 0;}
-        {file "region_coil0_port.eMesh"; level 0;}
-        {file "region_coil1_port.eMesh"; level 0;}
-        {file "region_coil2_port.eMesh"; level 0;}
+        // for OpenFOAM 2.2.0 or higher
+        {file "geometry_fluid.eMesh"; level 2;}
+        {file "geometry_frame.eMesh"; level 2;}
+//         {file "geometry_free.eMesh"; level 2;}
+        {file "geometry_coil0.eMesh"; level 2;}
+        {file "geometry_coil1.eMesh"; level 2;}
+        {file "geometry_coil2.eMesh"; level 2;}
 
     );
 
@@ -148,95 +118,69 @@ castellatedMeshControls
     // The second level is the maximum level.
     refinementSurfaces
     {
-        region_fluid
+        geometry_fluid
         {
             level (2 2);
 
-            cellZone region_fluid;
+            cellZone geometry_fluid;
             cellZoneInside inside;
 
             faceZone fluid;
             faceType internal;
         }
 
-        region_fluid_trackedSurface
+        geometry_frame
         {
             level (2 2);
 
-            faceZone trackedSurface;
+            cellZone geometry_frame;
+            cellZoneInside inside;
+
+            faceZone frame;
             faceType internal;
         }
 
-        region_fluid_fixedWall
+        geometry_free
         {
-            level (2 2);
+            level (1 1);
 
-            faceZone fixedWall;
+            cellZone geometry_free;
+            cellZoneInside inside;
+
+            faceZone free;
             faceType internal;
         }
 
-        region_fluid_movingWall
+        geometry_coil0
         {
             level (2 2);
 
-            faceZone movingWall;
-            faceType internal;
-        }
-
-        region_coil0
-        {
-            level (2 2);
-
-            cellZone region_coil0;
+            cellZone geometry_coil0;
             cellZoneInside inside;
 
             faceZone coil0;
             faceType internal;
         }
 
-        region_coil1
+        geometry_coil1
         {
             level (2 2);
 
-            cellZone region_coil1;
+            cellZone geometry_coil1;
             cellZoneInside inside;
 
             faceZone coil1;
             faceType internal;
         }
 
-        region_coil2
+        geometry_coil2
         {
             level (2 2);
 
-            cellZone region_coil2;
+            cellZone geometry_coil2;
             cellZoneInside inside;
 
             faceZone coil2;
-            faceType internal;
-        }
-
-        region_coil0_port
-        {
-            level (2 2);
-
-            faceZone coil0_port;
-            faceType internal;
-        }
-
-        region_coil1_port
-        {
-            level (2 2);
-
-            faceZone coil1_port;
-            faceType internal;
-        }
-
-        region_coil2_port
-        {
-            level (2 2);
-
-            faceZone coil2_port;
             faceType internal;
         }
     }
@@ -259,29 +203,50 @@ castellatedMeshControls
     // - outside. Same but cells outside.
     refinementRegions
     {
-//         region_fluid
+        geometry_fluid
+        {
+            mode inside;
+            levels ((1e-15 2));
+        }
+
+        geometry_frame
+        {
+            mode inside;
+            levels ((1e-15 2));
+        }
+
+//         geometry_free
 //         {
 //             mode inside;
 //             levels ((1e-15 1));
 //         }
-//
-//         region_coil0
-//         {
+
+        geometry_coil0
+        {
 //             mode inside;
-//             levels ((1e-15 2));
-//         }
-//
-//         region_coil1
-//         {
+//             levels ((1e-15 1));
+
+            mode distance;
+            levels ((0.01 2) (0.02 1));
+        }
+
+        geometry_coil1
+        {
 //             mode inside;
-//             levels ((1e-15 2));
-//         }
-//
-//         region_coil2
-//         {
+//             levels ((1e-15 1));
+
+            mode distance;
+            levels ((0.01 2) (0.02 1));
+        }
+
+        geometry_coil2
+        {
 //             mode inside;
-//             levels ((1e-15 2));
-//         }
+//             levels ((1e-15 1));
+
+            mode distance;
+            levels ((0.01 2) (0.02 1));
+        }
     }
 
     // Mesh selection
@@ -291,7 +256,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (0.0 0.0 0.0);
+    locationInMesh (0.0 0.0 0.1);
 
     allowFreeStandingZoneFaces no;
 }
@@ -312,7 +277,7 @@ meshQualityControls
 
     //- Minimum pyramid volume. Is absolute volume of cell pyramid.
     //  Set to very negative number (e.g. -1E30) to disable.
-    minVol 0;
+    minVol 1e-13;
 
     //- Minimum quality of the tet formed by the face-centre
     //  and variable base point minimum decomposition triangles and
@@ -321,7 +286,8 @@ meshQualityControls
     //     <0 = inside out tet,
     //      0 = flat tet
     //      1 = regular tet
-    minTetQuality 1e-30;
+//     minTetQuality 1e-15;
+    minTetQuality 1e-4;
 
     //- Minimum face area. Set to <0 to disable.
     minArea -1;
@@ -332,7 +298,8 @@ meshQualityControls
 
     //- minimum normalised cell determinant
     //- 1 = hex, <= 0 = folded or flattened illegal cell
-    minDeterminant 0.001;
+//     minDeterminant 0.001;
+    minDeterminant 0.1;
 
     //- minFaceWeight (0 -> 0.5)
     minFaceWeight 0.02;
@@ -343,6 +310,12 @@ meshQualityControls
     //must be >0 for Fluent compatibility
     minTriangleTwist -1;
 
+
+    //- if >0 : preserve cells with all points on the surface if the
+    //  resulting volume after snapping (by approximation) is larger than
+    //  minVolCollapseRatio times old volume (i.e. not collapsed to flat cell).
+    //  If <0 : delete always.
+//     minVolCollapseRatio 0.1;
 
     // Advanced
 
@@ -357,15 +330,19 @@ snapControls
 {
     //- Number of patch smoothing iterations before finding correspondence
     //  to surface
-    nSmoothPatch 8;
+//     nSmoothPatch 8;
+    nSmoothPatch 3;
 
     //- Relative distance for points to be attracted by surface feature point
     //  or edge. True distance is this factor times local
     //  maximum edge length.
-    tolerance 1.0;
+//     tolerance 1.0;
+    tolerance 4.0;
 
     //- Number of mesh displacement relaxation iterations.
     nSolveIter 30;
+//     nSolveIter 100;
+//     nSolveIter 200;
 
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
@@ -375,15 +352,16 @@ snapControls
     //  iterations. Leave out altogether to disable.
     nFeatureSnapIter 10;
 
-    //- Detect (geometric only) features by sampling the surface
-    //  (default=false).
-//     implicitFeatureSnap true;
+        //- Detect (geometric only) features by sampling the surface
+        //  (default=false).
+        implicitFeatureSnap false;
 
-    //- Use castellatedMeshControls::features (default = true)
-//     explicitFeatureSnap false;
+        //- Use castellatedMeshControls::features (default = true)
+        explicitFeatureSnap true;
 
-    //- Detect points on multiple surfaces (only for explicitFeatureSnap)
-//     multiRegionFeatureSnap false;
+        //- Detect points on multiple surfaces (only for explicitFeatureSnap)
+//         multiRegionFeatureSnap true;
+        multiRegionFeatureSnap false;
 }
 
 addLayersControls

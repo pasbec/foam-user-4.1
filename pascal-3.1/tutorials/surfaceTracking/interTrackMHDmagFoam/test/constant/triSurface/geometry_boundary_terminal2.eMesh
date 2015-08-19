@@ -11,13 +11,13 @@ FoamFile
     format      ascii;
     class       featureEdgeMesh;
     location    "constant/triSurface";
-    object      region_coil1_port.eMesh;
+    object      geometry_boundary_terminal2.eMesh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // points:
-4((0.0625 0 0.02) (0.067500003 0 0.02) (0.067500003 0 0.025) (0.0625 0 0.025))
+4((0.0625 0 0.032499999) (0.067500003 0 0.032499999) (0.067500003 0 0.037500001) (0.0625 0 0.037500001))
 
 // edges:
 4((0 1) (1 2) (3 0) (2 3))

@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-region_fluid.stl
+geometry_fluid.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;
@@ -33,7 +33,7 @@ region_fluid.stl
     writeObj yes;
 }
 
-region_fluid_trackedSurface.stl
+geometry_frame.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;
@@ -52,7 +52,7 @@ region_fluid_trackedSurface.stl
     writeObj yes;
 }
 
-region_fluid_fixedWall.stl
+geometry_frame_dynamic.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;
@@ -71,7 +71,7 @@ region_fluid_fixedWall.stl
     writeObj yes;
 }
 
-region_fluid_movingWall.stl
+geometry_frame_static.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;
@@ -90,7 +90,7 @@ region_fluid_movingWall.stl
     writeObj yes;
 }
 
-region_coil0.stl
+geometry_free.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;
@@ -109,7 +109,7 @@ region_coil0.stl
     writeObj yes;
 }
 
-region_coil1.stl
+geometry_free_dynamic.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;
@@ -128,7 +128,7 @@ region_coil1.stl
     writeObj yes;
 }
 
-region_coil2.stl
+geometry_free_static.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;
@@ -147,7 +147,7 @@ region_coil2.stl
     writeObj yes;
 }
 
-region_coil0_port.stl
+geometry_coil0.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;
@@ -166,7 +166,7 @@ region_coil0_port.stl
     writeObj yes;
 }
 
-region_coil1_port.stl
+geometry_coil1.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;
@@ -185,7 +185,159 @@ region_coil1_port.stl
     writeObj yes;
 }
 
-region_coil2_port.stl
+geometry_coil2.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0 : selects no edges
+        // - 180: selects all edges
+        includedAngle 90;
+    }
+
+    // Write options
+    // Write features to obj format for postprocessing
+    writeObj yes;
+}
+
+geometry_boundary_terminal0.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0 : selects no edges
+        // - 180: selects all edges
+        includedAngle 90;
+    }
+
+    // Write options
+    // Write features to obj format for postprocessing
+    writeObj yes;
+}
+
+geometry_boundary_terminal1.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0 : selects no edges
+        // - 180: selects all edges
+        includedAngle 90;
+    }
+
+    // Write options
+    // Write features to obj format for postprocessing
+    writeObj yes;
+}
+
+geometry_boundary_terminal2.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0 : selects no edges
+        // - 180: selects all edges
+        includedAngle 90;
+    }
+
+    // Write options
+    // Write features to obj format for postprocessing
+    writeObj yes;
+}
+
+geometry_background.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0 : selects no edges
+        // - 180: selects all edges
+        includedAngle 90;
+    }
+
+    // Write options
+    // Write features to obj format for postprocessing
+    writeObj yes;
+}
+
+geometry_boundary_trackedSurface.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0 : selects no edges
+        // - 180: selects all edges
+        includedAngle 90;
+    }
+
+    // Write options
+    // Write features to obj format for postprocessing
+    writeObj yes;
+}
+
+geometry_boundary_fixedWall.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0 : selects no edges
+        // - 180: selects all edges
+        includedAngle 90;
+    }
+
+    // Write options
+    // Write features to obj format for postprocessing
+    writeObj yes;
+}
+
+geometry_boundary_movingWall.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0 : selects no edges
+        // - 180: selects all edges
+        includedAngle 90;
+    }
+
+    // Write options
+    // Write features to obj format for postprocessing
+    writeObj yes;
+}
+
+geometry_boundary_fixedMesh.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod extractFromSurface;

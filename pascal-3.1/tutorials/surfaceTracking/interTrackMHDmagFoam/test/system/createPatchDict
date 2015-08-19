@@ -10,49 +10,16 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      blockMeshDict;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+matchTolerance 1e-12;
 
-convertToMeters 0.001;
+pointSync true;
 
-vertices
-(
-    ( -150.0 -200.0 -60.0 )
-    ( 150.0 -200.0 -60.0 )
-    ( -150.0 -200.0 140.0 )
-    ( 150.0 -200.0 140.0 )
-    ( -150.0 200.0 -60.0 )
-    ( 150.0 200.0 -60.0 )
-    ( -150.0 200.0 140.0 )
-    ( 150.0 200.0 140.0 )
-);
-
-blocks
-(
-    hex ( 0 1 5 4 2 3 7 6 ) ( 60 80 40 ) simpleGrading ( 1.0 1.0 1.0 )
-);
-
-edges
-(
-);
-
-boundary
-(
-    infinity
-    {
-        type patch;
-        faces
-        (
-        );
-    }
-);
-
-mergePatchPairs
+patchInfo
 (
 );
 
 // ************************************************************************* //
-
-
