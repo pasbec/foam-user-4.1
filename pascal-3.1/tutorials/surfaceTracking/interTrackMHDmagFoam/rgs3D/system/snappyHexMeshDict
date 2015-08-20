@@ -32,10 +32,22 @@ addLayers       false;
 
 geometry
 {
-    geometry_fluid.stl
+    geometry_fluid_dynamic.stl
     {
         type triSurfaceMesh;
-        name geometry_fluid;
+        name geometry_fluid_dynamic;
+    }
+
+    geometry_fluid_static.stl
+    {
+        type triSurfaceMesh;
+        name geometry_fluid_static;
+    }
+
+    geometry_wafer.stl
+    {
+        type triSurfaceMesh;
+        name geometry_wafer;
     }
 
     geometry_substrate.stl
@@ -80,14 +92,14 @@ castellatedMeshControls
     // While refining maximum number of cells per processor. This is basically
     // the number of cells that fit on a processor. If you choose this too small
     // it will do just more refinement iterations to obtain a similar mesh.
-    maxLocalCells 100000;
+    maxLocalCells 1000000;
 
     // Overall cell limit (approximately). Refinement will stop immediately
     // upon reaching this number so a refinement level might not complete.
     // Note that this is the number of cells before removing the part which
     // is not 'visible' from the keepPoint. The final number of cells might
     // actually be a lot less.
-    maxGlobalCells 2000000;
+    maxGlobalCells 6000000;
 
     // The surface refinement loop might spend lots of iterations refining just a
     // few cells. This setting will cause refinement to stop if <= minimumRefine
@@ -110,7 +122,10 @@ castellatedMeshControls
     (
         // Can be done implicitely with "implicitFeatureSnap" in snapControls{}
         // for OpenFOAM 2.2.0 or higher
-        {file "geometry_fluid.eMesh"; level 3;}
+//         {file "geometry_fluid.eMesh"; level 3;}
+        {file "geometry_fluid_dynamic.eMesh"; level 3;}
+        {file "geometry_fluid_static.eMesh"; level 5;}
+        {file "geometry_wafer.eMesh"; level 5;}
         {file "geometry_substrate.eMesh"; level 3;}
         {file "geometry_frame.eMesh"; level 3;}
 //         {file "geometry_free.eMesh"; level 3;}
@@ -125,14 +140,36 @@ castellatedMeshControls
     // The second level is the maximum level.
     refinementSurfaces
     {
-        geometry_fluid
+        geometry_fluid_dynamic
         {
             level (3 3);
 
-            cellZone geometry_fluid;
+            cellZone geometry_fluid_dynamic;
             cellZoneInside inside;
 
-            faceZone fluid;
+            faceZone fluid_dynamic;
+            faceType internal;
+        }
+
+        geometry_fluid_static
+        {
+            level (3 5);
+
+            cellZone geometry_fluid_static;
+            cellZoneInside inside;
+
+            faceZone fluid_static;
+            faceType internal;
+        }
+
+        geometry_wafer
+        {
+            level (3 5);
+
+            cellZone geometry_wafer;
+            cellZoneInside inside;
+
+            faceZone wafer;
             faceType internal;
         }
 
@@ -221,7 +258,20 @@ castellatedMeshControls
     // - outside. Same but cells outside.
     refinementRegions
     {
-        geometry_fluid
+
+        geometry_fluid_dynamic
+        {
+            mode inside;
+            levels ((1e-15 3));
+        }
+
+        geometry_fluid_static
+        {
+            mode inside;
+            levels ((1e-15 3));
+        }
+
+        geometry_wafer
         {
             mode inside;
             levels ((1e-15 3));

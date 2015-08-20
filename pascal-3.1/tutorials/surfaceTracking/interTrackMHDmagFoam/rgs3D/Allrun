@@ -82,7 +82,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]] || \
 
 # NOTE: snappyHexMesh edge snapping does not work with foam-extend!
 # It is possible to do with OpenFOAM 2.2.x or higher:
-# $ fe31; ./Allrun clean; of23x; ./constant/polyMesh.org/blockMeshDict.py; cp -r constant/polyMesh.org constant/polyMesh; blockMesh; snappyHexMesh -overwrite; fe31; createPatch -overwrite
+# $ fe31; ./Allrun clean; ./constant/polyMesh.org/blockMeshDict.py; cp -r constant/polyMesh.org constant/polyMesh; blockMesh; of23x; snappyHexMesh -overwrite; fe31; createPatch -overwrite
 # Then copy the resulting mesh to constant/polyMesh.org and run:
 # $ ./Allrun clean prepare
 

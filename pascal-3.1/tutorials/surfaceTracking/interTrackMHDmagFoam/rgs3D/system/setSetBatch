@@ -1,15 +1,27 @@
-
-
 ### Geometry
-
 
 # Fluid
 
-pointSet pointSet_geometry_fluid          new    surfaceToPoint "constant/triSurface/geometry_fluid.stl" 2e-4 true false
+pointSet pointSet_geometry_fluid_dynamic  new    surfaceToPoint "constant/triSurface/geometry_fluid_dynamic.stl" 2e-4 true false
+pointSet pointSet_geometry_fluid_static   new    surfaceToPoint "constant/triSurface/geometry_fluid_static.stl" 2e-4 true false
 
-cellSet  cellSet_geometry_fluid           new    pointToCell    pointSet_geometry_fluid all
+cellSet  cellSet_geometry_fluid_dynamic   new    pointToCell    pointSet_geometry_fluid_dynamic all
+cellSet  cellSet_geometry_fluid_static    new    pointToCell    pointSet_geometry_fluid_static all
 
-pointSet pointSet_geometry_fluid          remove
+cellSet  cellSet_geometry_fluid           new    setToCell      cellSet_geometry_fluid_dynamic
+cellSet  cellSet_geometry_fluid           add    setToCell      cellSet_geometry_fluid_static
+cellSet  cellSet_geometry_fluid_old       remove
+
+pointSet pointSet_geometry_fluid_dynamic  remove
+pointSet pointSet_geometry_fluid_static   remove
+
+# Wafer
+
+pointSet pointSet_geometry_wafer          new    surfaceToPoint "constant/triSurface/geometry_wafer.stl" 2e-4 true false
+
+cellSet  cellSet_geometry_wafer           new    pointToCell    pointSet_geometry_wafer all
+
+pointSet pointSet_geometry_wafer          remove
 
 # Substrate
 
@@ -81,7 +93,9 @@ cellSet  cellSet_geometry_background_old  remove
 
 pointSet pointSet_geometry_background     remove
 
-### Inner boundaries
+
+
+### Outer/Inner boundaries
 
 pointSet pointSet_geometry_trackedSurface new    surfaceToPoint "constant/triSurface/geometry_boundary_trackedSurface.stl" 2e-4 false false
 pointSet pointSet_geometry_fixedWall      new    surfaceToPoint "constant/triSurface/geometry_boundary_fixedWall.stl" 2e-4 false false
@@ -118,26 +132,26 @@ pointSet pointSet_geometry_terminal1      remove
 pointSet pointSet_geometry_terminal2      remove
 
 
+
 ### Materials
 
+cellSet cellSet_material_silicon_liquid   new    setToCell      cellSet_geometry_fluid
 
-cellSet cellSet_material_liquidSilicon    new    setToCell      cellSet_geometry_fluid
+cellSet cellSet_material_silicon_solid    new    setToCell      cellSet_geometry_wafer
 
 cellSet cellSet_material_graphite         new    setToCell      cellSet_geometry_frame
 cellSet cellSet_material_graphite         add    setToCell      cellSet_geometry_substrate
 cellSet cellSet_material_graphite_old     remove
-
-#cellSet cellSet_material_solidSilicon     new    setToCell      cellSet_geometry_wafer
 
 cellSet cellSet_material_air              new    setToCell      cellSet_geometry_background
 cellSet cellSet_material_air              add    setToCell      cellSet_geometry_coil
 cellSet cellSet_material_air_old          remove
 
 
+
 ### Regions
 
-
-cellSet cellSet_region_fluid              new    setToCell      cellSet_geometry_fluid
+cellSet cellSet_region_fluid              new    setToCell      cellSet_geometry_fluid_dynamic
 
 cellSet cellSet_region_dynamic            new    setToCell      cellSet_geometry_frame_dynamic
 cellSet cellSet_region_dynamic            add    setToCell      cellSet_geometry_free_dynamic
@@ -148,5 +162,9 @@ cellSet cellSet_region_static             add    setToCell      cellSet_geometry
 cellSet cellSet_region_static             add    setToCell      cellSet_geometry_frame_static
 cellSet cellSet_region_static             delete setToCell      cellSet_geometry_free_dynamic
 cellSet cellSet_region_static_old         remove
+
+
+
+### End
 
 quit
