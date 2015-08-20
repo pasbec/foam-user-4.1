@@ -160,7 +160,7 @@ expressions
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().x>=coil_rx0          \
-                   && pos().y<=-coil_ry0          ";
+                   && pos().y<=-coil_ry0         ";
     expression    "vector (                                                                                                              \
                        1.0/(sqrt(pow((pos().y+coil_ry0)/(pos().x-coil_rx0),2)+1)) * ((pos().y+coil_ry0)/(pos().x-coil_rx0)) * -coil_den, \
                        1.0/(sqrt(pow((pos().y+coil_ry0)/(pos().x-coil_rx0),2)+1))                                           *  coil_den, \
@@ -175,7 +175,7 @@ expressions
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().x<=-coil_rx0         \
-                   && pos().y<=-coil_ry0          ";
+                   && pos().y<=-coil_ry0         ";
     expression    "vector (                                                                                                              \
                        1.0/(sqrt(pow((pos().y+coil_ry0)/(pos().x+coil_rx0),2)+1)) * ((pos().y+coil_ry0)/(pos().x+coil_rx0)) *  coil_den, \
                        1.0/(sqrt(pow((pos().y+coil_ry0)/(pos().x+coil_rx0),2)+1))                                           * -coil_den, \
