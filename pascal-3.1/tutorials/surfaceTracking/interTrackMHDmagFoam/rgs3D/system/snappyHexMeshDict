@@ -38,6 +38,12 @@ geometry
         name geometry_fluid;
     }
 
+    geometry_substrate.stl
+    {
+        type triSurfaceMesh;
+        name geometry_substrate;
+    }
+
     geometry_frame.stl
     {
         type triSurfaceMesh;
@@ -104,12 +110,13 @@ castellatedMeshControls
     (
         // Can be done implicitely with "implicitFeatureSnap" in snapControls{}
         // for OpenFOAM 2.2.0 or higher
-        {file "geometry_fluid.eMesh"; level 2;}
-        {file "geometry_frame.eMesh"; level 2;}
-//         {file "geometry_free.eMesh"; level 2;}
-        {file "geometry_coil0.eMesh"; level 2;}
-        {file "geometry_coil1.eMesh"; level 2;}
-        {file "geometry_coil2.eMesh"; level 2;}
+        {file "geometry_fluid.eMesh"; level 3;}
+        {file "geometry_substrate.eMesh"; level 3;}
+        {file "geometry_frame.eMesh"; level 3;}
+//         {file "geometry_free.eMesh"; level 3;}
+        {file "geometry_coil0.eMesh"; level 3;}
+        {file "geometry_coil1.eMesh"; level 3;}
+        {file "geometry_coil2.eMesh"; level 3;}
 
     );
 
@@ -120,7 +127,7 @@ castellatedMeshControls
     {
         geometry_fluid
         {
-            level (2 2);
+            level (3 3);
 
             cellZone geometry_fluid;
             cellZoneInside inside;
@@ -129,9 +136,20 @@ castellatedMeshControls
             faceType internal;
         }
 
+        geometry_substrate
+        {
+            level (3 3);
+
+            cellZone geometry_substrate;
+            cellZoneInside inside;
+
+            faceZone substrate;
+            faceType internal;
+        }
+
         geometry_frame
         {
-            level (2 2);
+            level (3 3);
 
             cellZone geometry_frame;
             cellZoneInside inside;
@@ -142,7 +160,7 @@ castellatedMeshControls
 
         geometry_free
         {
-            level (1 1);
+            level (2 2);
 
             cellZone geometry_free;
             cellZoneInside inside;
@@ -153,7 +171,7 @@ castellatedMeshControls
 
         geometry_coil0
         {
-            level (2 2);
+            level (3 3);
 
             cellZone geometry_coil0;
             cellZoneInside inside;
@@ -164,7 +182,7 @@ castellatedMeshControls
 
         geometry_coil1
         {
-            level (2 2);
+            level (3 3);
 
             cellZone geometry_coil1;
             cellZoneInside inside;
@@ -175,7 +193,7 @@ castellatedMeshControls
 
         geometry_coil2
         {
-            level (2 2);
+            level (3 3);
 
             cellZone geometry_coil2;
             cellZoneInside inside;
@@ -206,13 +224,19 @@ castellatedMeshControls
         geometry_fluid
         {
             mode inside;
-            levels ((1e-15 2));
+            levels ((1e-15 3));
+        }
+
+        geometry_substrate
+        {
+            mode inside;
+            levels ((1e-15 3));
         }
 
         geometry_frame
         {
             mode inside;
-            levels ((1e-15 2));
+            levels ((1e-15 3));
         }
 
 //         geometry_free
@@ -227,7 +251,7 @@ castellatedMeshControls
 //             levels ((1e-15 1));
 
             mode distance;
-            levels ((0.01 2) (0.02 1));
+            levels ((0.01 3) (0.02 2));
         }
 
         geometry_coil1
@@ -236,7 +260,7 @@ castellatedMeshControls
 //             levels ((1e-15 1));
 
             mode distance;
-            levels ((0.01 2) (0.02 1));
+            levels ((0.01 3) (0.02 2));
         }
 
         geometry_coil2
@@ -245,7 +269,7 @@ castellatedMeshControls
 //             levels ((1e-15 1));
 
             mode distance;
-            levels ((0.01 2) (0.02 1));
+            levels ((0.01 3) (0.02 2));
         }
     }
 

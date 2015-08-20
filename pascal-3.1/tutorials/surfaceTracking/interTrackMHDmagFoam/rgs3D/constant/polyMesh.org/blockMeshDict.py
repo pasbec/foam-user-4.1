@@ -25,7 +25,7 @@ geo_y2 =  200.0
 geo_z1 =  -60.0
 geo_z2 =  140.0
 
-n_scale = 0.2
+n_scale = 0.1
 
 n_x = int(m.ceil(n_scale*(geo_x2-geo_x1)))
 n_y = int(m.ceil(n_scale*(geo_y2-geo_y1)))
