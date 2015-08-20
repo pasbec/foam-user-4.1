@@ -350,9 +350,8 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]] || \
             funkySetFields -time '0' || exit 1
 
         # Init turbulence values for fluid region
-        [[ -e 'constant/region_fluid/turbulenceProperties' ]] && \
-            runApplication \
-                initTurbulenceValues -region 'region_fluid' || exit 1
+        runApplication \
+            initTurbulenceValues -region 'region_fluid' || exit 1
 
         # Create finite area mesh for fluid region
         restoreFaMeshOrg 'region_fluid'
