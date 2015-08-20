@@ -250,9 +250,9 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]] || \
         # Create new topoSets
         runApplication \
             setSet -noVTK -batch 'system/setSetBatch' || exit 1
-exit 1
+
         # Create backup of topoSets
-        rm "constant/polyMesh/sets/"*"_old"
+        rm "constant/polyMesh/sets/"*"_old" > /dev/null 2>&1
         mkdir 'constant/polyMesh/sets/bak'
         cp 'constant/polyMesh/sets/'* \
            'constant/polyMesh/sets/bak/' \

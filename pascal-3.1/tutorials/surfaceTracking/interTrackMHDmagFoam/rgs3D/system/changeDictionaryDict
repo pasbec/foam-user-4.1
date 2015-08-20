@@ -10,31 +10,12 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      createPatchDict;
+    object      changeDictionaryDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-matchTolerance 1e-12;
-
-pointSync true;
-
-patchInfo
-(
-    {
-        name             infinity;
-        constructFrom    set;
-        set              faceSet_geometry_infinity;
-
-        dictionary
-        {
-            type         patch;
-        }
-    }
-);
-
-// OpenFOAM syntax
-patches
-(
-);
+dictionaryReplacement
+{
+}
 
 // ************************************************************************* //
