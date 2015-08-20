@@ -82,17 +82,13 @@ pointSet pointSet_geometry_coil2          remove
 
 # Background
 
-pointSet pointSet_geometry_background     new    surfaceToPoint "constant/triSurface/geometry_background.stl" 2e-4 true false
-
-cellSet  cellSet_geometry_background      new    pointToCell    pointSet_geometry_background all
+cellSet  cellSet_geometry_background      new    boxToCell      (-1 -1 -1) ( 1  1  1)
 cellSet  cellSet_geometry_background      delete setToCell      cellSet_geometry_fluid
 cellSet  cellSet_geometry_background      delete setToCell      cellSet_geometry_wafer
 cellSet  cellSet_geometry_background      delete setToCell      cellSet_geometry_substrate
 cellSet  cellSet_geometry_background      delete setToCell      cellSet_geometry_frame
 cellSet  cellSet_geometry_background      delete setToCell      cellSet_geometry_coil
 cellSet  cellSet_geometry_background_old  remove
-
-pointSet pointSet_geometry_background     remove
 
 
 
