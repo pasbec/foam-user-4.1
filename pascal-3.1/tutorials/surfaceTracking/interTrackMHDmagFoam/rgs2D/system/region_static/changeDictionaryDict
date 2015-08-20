@@ -18,23 +18,23 @@ dictionaryReplacement
 {
     boundary
     {
-        movingWall
-        {
-            type            directMappedWall;
-            sampleMode      nearestPatchFace;
-            sampleRegion    region_fluid;
-            samplePatch     movingWall;
-            offset          (0 0 0);
-        }
+//         movingWall
+//         {
+//             type            directMappedWall;
+//             sampleMode      nearestPatchFace;
+//             sampleRegion    region_fluid;
+//             samplePatch     movingWall;
+//             offset          (0 0 0);
+//         }
 
-        fixedMesh
-        {
-            type            directMappedPatch;
-            sampleMode      nearestPatchFace;
-            sampleRegion    region_dynamic;
-            samplePatch     fixedMesh;
-            offset          (0 0 0);
-        }
+//         fixedMesh
+//         {
+//             type            directMappedPatch;
+//             sampleMode      nearestPatchFace;
+//             sampleRegion    region_dynamic;
+//             samplePatch     fixedMesh;
+//             offset          (0 0 0);
+//         }
     }
 }
 
