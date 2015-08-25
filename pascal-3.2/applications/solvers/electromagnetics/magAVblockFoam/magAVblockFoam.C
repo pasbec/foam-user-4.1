@@ -29,12 +29,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "fieldTypes.H"
-#include "foamTime.H"
-#include "fvMesh.H"
 #include "fvBlockMatrix.H"
-
-#include "blockMatrixTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,46 +40,38 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-#   include "createFields.H"
-
     using namespace Foam;
 
+#   include "createFields.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+        
+    // Constants, Frequency and Alpha
+
+    dimensionedScalar mu0
+    (
+        "mu0",
+        dimensionSet(1, 1, -2, 0, 0, -2, 0),
+        4.0 * mathematicalConstant::pi * 1e-07
+    );
+
+    dimensionedScalar rMu0 = 1.0/mu0;
+
+    dimensionedScalar omega
+    (
+        "omega",
+        2.0 * mathematicalConstant::pi * frequency
+    );
     
+    dimensionedScalar rOmega = 1.0/omega;
+
+    volScalarField alpha = omega * sigma;
+        
     while (runTime.run())
     {
         runTime++;
 
         Info << "Time = " << runTime.value() << nl << endl;
-        
-        // ==================================================================//
-        // Constants
-        // ==================================================================//
-
-        scalar pi = mathematicalConstant::pi;
-
-        dimensionedScalar mu0
-        (
-            "mu0",
-            dimensionSet(1, 1, -2, 0, 0, -2, 0),
-            4.0 * pi * 1e-07
-        );
-
-        dimensionedScalar rMu0 = 1.0/mu0;
-
-        // ==================================================================//
-        // Omega and alpha
-        // ==================================================================//
-
-        dimensionedScalar omega
-        (
-            "omega",
-            2.0 * pi * frequency
-        );
-        
-        dimensionedScalar rOmega = 1.0/omega;
-
-        volScalarField alpha = omega * sigma;
 
         // ==================================================================//
         // Solve quasi-static Maxwell-Equations for low Rm

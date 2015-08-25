@@ -1,8 +1,5 @@
 
-    // ==================================================================//
-    // Real part
-    // ==================================================================//
-
+    // Real part of magnetic scalar potential
     fvScalarMatrix VReEqn
     (
         fvm::laplacian(sigma, VRe)
@@ -11,10 +8,7 @@
 
     VReEqn.solve();
 
-    // ==================================================================//
-    // Imaginary part
-    // ==================================================================//
-
+    // Imaginary part of magnetic scalar potential
     fvScalarMatrix VImEqn
     (
       - fvm::laplacian(sigma, VIm)
@@ -22,10 +16,7 @@
     );
 
     VImEqn.solve();
-
-    // ==================================================================//
+    
     // Correct magnetic vector potential
-    // ==================================================================//
-
     ARe += rOmega * fvc::grad(VIm);
     AIm -= rOmega * fvc::grad(VRe);

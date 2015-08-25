@@ -1,32 +1,5 @@
 
-    // ==================================================================//
-    // Block matrix preparations
-    // ==================================================================//
-
-    // Prepare block system
-    BlockLduMatrix<vector6> AEqn(mesh);
-
-    // Reference block diagonal and set it to zero
-    Field<tensor6>& AEqnD = AEqn.diag().asSquare(); AEqnD = tensor6::zero;
-
-    // Reference linear off-diagonal and set it to zero
-    Field<vector6>& AEqnU = AEqn.upper().asLinear(); AEqnU = vector6::zero;
-    Field<vector6>& AEqnL = AEqn.lower().asLinear(); AEqnL = vector6::zero;
-
-    // Set up source
-    vector6Field AEqnS (mesh.nCells(), vector6::zero);
-
-    // ==================================================================//
-    // Boundary conditions
-    // ==================================================================//
-
-    // Transfer the coupled interface list for processor/cyclic/etc. boundaries
-    AEqn.interfaces() = A.boundaryField().blockInterfaces();
-
-    // ==================================================================//
-    // Real part
-    // ==================================================================//
-
+    // Real part of magnetic vector potential
     fvVectorMatrix AReEqn
     (
         - rMu0 * fvm::laplacian(ARe)
@@ -35,10 +8,7 @@
         - jsRe
     );
 
-    // ==================================================================//
-    // Imaginary part
-    // ==================================================================//
-
+    // Imaginary part of magnetic vector potential
     fvVectorMatrix AImEqn
     (
         - rMu0 * fvm::laplacian(AIm)
@@ -46,52 +16,33 @@
 //         + sigma * fvc::grad(VIm)
         - jsIm
     );
+    
+    // Prepare block system
+    fvBlockMatrix<vector6> blockM(A);
 
-    // ==================================================================//
-    // Assemble segregated equations in block structure
-    // ==================================================================//
+    // Insert equations into block Matrix
+    blockM.insertEquation(0, AReEqn);
+    blockM.insertEquation(3, AImEqn);
 
-    // Inset equations into block Matrix
-    blockMatrixTools::insertEquation(0, AReEqn, AEqn, A.internalField(), AEqnS);
-    blockMatrixTools::insertEquation(3, AImEqn, AEqn, A.internalField(), AEqnS);
+    // Add off-diagonal coupling terms
+    scalarField& coupling = alpha.internalField();
 
-    // ==================================================================//
-    // Assemble point-implicit coupled equation part in block structure
-    // ==================================================================//
+    blockM.insertEquationCoupling(0, 3, -coupling);
+    blockM.insertEquationCoupling(3, 0,  coupling);
+    blockM.insertEquationCoupling(1, 4, -coupling);
+    blockM.insertEquationCoupling(4, 1,  coupling);
+    blockM.insertEquationCoupling(2, 5, -coupling);
+    blockM.insertEquationCoupling(5, 2,  coupling);
 
-    // Add off-diagonal terms
-    forAll(AEqnD, i)
-    {
-        dimensionedScalar alphai = alpha[i];
+//     // Update source coupling: coupling terms eliminated from source
+//     blockM.updateSourceCoupling();
 
-        AEqnD[i](0,3) = -alphai.value() * mesh.V()[i];
-        AEqnD[i](3,0) = +alphai.value() * mesh.V()[i];
-        AEqnD[i](1,4) = -alphai.value() * mesh.V()[i];
-        AEqnD[i](4,1) = +alphai.value() * mesh.V()[i];
-        AEqnD[i](2,5) = -alphai.value() * mesh.V()[i];
-        AEqnD[i](5,2) = +alphai.value() * mesh.V()[i];
-    }
+    //- Block coupled solver call
+    blockM.solve();
 
-    // ==================================================================//
-    // Solve the block matrix
-    // ==================================================================//
-
-    BlockSolverPerformance<vector6> solverPerf =
-        BlockLduSolver<vector6>::New
-        (
-            A.name(),
-            AEqn,
-            mesh.solutionDict().solver(A.name())
-        )->solve(A,AEqnS);
-
-    solverPerf.print();
-
-    // ==================================================================//
-    // Retrieve the solution and update for next iteration
-    // ==================================================================//
-
-    blockMatrixTools::retrieveSolution(0, ARe.internalField(), A);
-    blockMatrixTools::retrieveSolution(3, AIm.internalField(), A);
+    // Retrieve solution
+    blockM.retrieveSolution(0, ARe.internalField());
+    blockM.retrieveSolution(3, AIm.internalField());
 
     ARe.correctBoundaryConditions();
     AIm.correctBoundaryConditions();
