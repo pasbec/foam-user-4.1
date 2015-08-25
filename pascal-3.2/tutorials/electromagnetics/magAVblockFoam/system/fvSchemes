@@ -1,0 +1,77 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.1                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default                           none;
+}
+
+gradSchemes
+{
+    default                           none;
+//     snGradCorr(ARe)                   leastSquares;
+//     snGradCorr(AIm)                   leastSquares;
+//     snGradCorr(VRe)                   leastSquares;
+//     snGradCorr(VIm)                   leastSquares;
+//     grad(VRe)                         leastSquares;
+//     grad(VIm)                         leastSquares;
+//     curl(ARe)                         leastSquares;
+//     curl(AIm)                         leastSquares;
+//     curl((ARe-((1|omega)*grad(VIm)))) leastSquares;
+//     curl((AIm-((1|omega)*grad(VRe)))) leastSquares;
+//     curl(AReCorr)                     leastSquares;
+//     curl(AImCorr)                     leastSquares;
+    snGradCorr(ARe)                   Gauss linear;
+    snGradCorr(AIm)                   Gauss linear;
+    snGradCorr(VRe)                   Gauss linear;
+    snGradCorr(VIm)                   Gauss linear;
+    grad(VRe)                         Gauss linear;
+    grad(VIm)                         Gauss linear;
+    curl(ARe)                         Gauss linear;
+    curl(AIm)                         Gauss linear;
+    curl((ARe-((1|omega)*grad(VIm)))) Gauss linear;
+    curl((AIm-((1|omega)*grad(VRe)))) Gauss linear;
+    curl(AReCorr)                     Gauss linear;
+    curl(AImCorr)                     Gauss linear;
+}
+
+divSchemes
+{
+    default                           none;
+    div(((omega*sigma)*ARe))          Gauss linear;
+    div(((omega*sigma)*AIm))          Gauss linear;
+}
+
+laplacianSchemes
+{
+    default                           none;
+    laplacian(ARe)                    Gauss linear corrected;
+    laplacian(AIm)                    Gauss linear corrected;
+    laplacian(sigma,VRe)              Gauss linear corrected;
+    laplacian(sigma,VIm)              Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default                           none;
+}
+
+snGradSchemes
+{
+    default                           none;
+}
+
+// ************************************************************************* //
