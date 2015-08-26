@@ -77,11 +77,13 @@ int main(int argc, char *argv[])
 //         // Harmonic interpolation schemes
 //         harmonic<scalar> harmonicScalarScheme(mesh);
 //         harmonic<vector> harmonicVectorScheme(mesh);
-        
     
         // Interpolate sigma to face centers
-        surfaceScalarField sigmaf("sigmaf", fvc::interpolate(sigma));
-
+        surfaceScalarField sigmaf("sigmaf", fvc::interpolate(sigma,"interpolate(sigma)"));
+    
+        // Get alpha on the face centers
+        surfaceScalarField alphaf("alphaf", fvc::interpolate(omega*sigma,"interpolate(alpha)"));
+        
         // ==================================================================//
         // Solve quasi-static Maxwell-Equations for low Rm
         // ==================================================================//
@@ -92,14 +94,13 @@ int main(int argc, char *argv[])
         // Assemble equations for A
 #       include "AEqn.H"
 
-        // Insert A-equations into block Matrix
-        AVEqn.insertEquation(0, AReEqn);
-        AVEqn.insertEquation(4, AImEqn);
-
         // Assemble and insert pressure equation
 #       include "VEqn.H"
 
-        // Insert V-equations into block Matrix
+        // Insert equations into block Matrix
+        AVEqn.insertEquation(0, AReEqn);
+        AVEqn.insertEquation(4, AImEqn);
+        
         AVEqn.insertEquation(3, VReEqn);
         AVEqn.insertEquation(7, VImEqn);
 
@@ -135,7 +136,7 @@ int main(int argc, char *argv[])
         FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
 
         pB == 0.5 * rMu0
-        * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
+            * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
 
         // ==================================================================//
         // Debug fields

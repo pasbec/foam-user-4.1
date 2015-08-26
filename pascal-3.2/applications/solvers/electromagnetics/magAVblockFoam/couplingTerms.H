@@ -13,16 +13,22 @@
     AVEqn.insertEquationCoupling(6, 2,  alphai);
     
     // 
-    BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe)); VReInARe *= sigmai;
-    BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(sigmaf,ARe));
+    BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe));
+    VReInARe *= sigmai;
+    
+    //
+    BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(alphaf,ARe));
 
     // 
     AVEqn.insertBlockCoupling(0, 3, VReInARe, true);
     AVEqn.insertBlockCoupling(7, 0, AReInVIm, false);
     
     //
-    BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm)); VImInAIm *= sigmai;
-    BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(sigmaf,AIm));
+    BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm));
+    VImInAIm *= sigmai;
+    
+    //
+    BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(-alphaf,AIm));
 
     // 
     AVEqn.insertBlockCoupling(4, 7, VImInAIm, true);
