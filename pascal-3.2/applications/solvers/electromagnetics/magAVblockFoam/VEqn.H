@@ -1,22 +1,43 @@
 
-    // Real part of magnetic scalar potential
+    // Real part
+    surfaceScalarField rAReAf
+    (
+        "rAReAf",
+        fvc::interpolate(1.0/AReEqn.A())
+    );
+
+    surfaceScalarField VReSource
+    (
+        "VReSource",
+        rAReAf*(harmonicVectorScheme.interpolate(sigma*fvc::grad(VRe, "grad(VReSource)")) & mesh.Sf())
+    );
+    
     fvScalarMatrix VReEqn
     (
-        fvm::laplacian(sigma, VRe)
-     == fvc::div(alpha*AIm)
+      - fvm::laplacian(sigma, VRe)
+     ==
+//       - fvc::div(alpha*AIm)
+        - fvc::div(VReSource)
+    );
+    
+    
+    // Imaginary part
+    surfaceScalarField rAImAf
+    (
+        "rAImAf",
+        fvc::interpolate(1.0/AImEqn.A())
     );
 
-    VReEqn.solve();
-
-    // Imaginary part of magnetic scalar potential
+    surfaceScalarField VImSource
+    (
+        "VImSource",
+        rAImAf*(harmonicVectorScheme.interpolate(sigma*fvc::grad(VIm, "grad(VImSource)")) & mesh.Sf())
+    );
+    
     fvScalarMatrix VImEqn
     (
-      - fvm::laplacian(sigma, VIm)
-     == fvc::div(alpha*ARe)
+        - fvm::laplacian(sigma, VIm)
+     ==
+//       - fvc::div(alpha*ARe)
+        - fvc::div(VImSource)
     );
-
-    VImEqn.solve();
-    
-    // Correct magnetic vector potential
-    ARe += rOmega * fvc::grad(VIm);
-    AIm -= rOmega * fvc::grad(VRe);

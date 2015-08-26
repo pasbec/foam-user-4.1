@@ -92,23 +92,6 @@
         mesh
     );
 
-    // Megnetic vector potential (complex)
-    Info << "Create field A" << nl << endl;
-    volVector6Field A
-    (
-        IOobject
-        (
-            "A",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionedVector6(word(),dimless,vector6::zero)
-    );
-
-
     // Magnetic scalar potential (real part)
     Info << "Create field VRe" << endl;
     volScalarField VRe
@@ -138,8 +121,25 @@
         ),
         mesh
     );
+    
 
+    // Megnetic vector potential (complex)
+    Info << "Create field AV" << nl << endl;
+    volVector8Field AV
+    (
+        IOobject
+        (
+            "AV",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector8(word(),dimless,vector8::zero)
+    );
 
+    
     // Magnetic field density (real part)
     Info << "Create field BRe" << endl;
     volVectorField BRe

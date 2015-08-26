@@ -30,6 +30,7 @@ Description
 
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
+#include "harmonic.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,13 +73,50 @@ int main(int argc, char *argv[])
         runTime++;
 
         Info << "Time = " << runTime.value() << nl << endl;
+        
+        // Harmonic interpolation schemes
+        harmonic<scalar> harmonicScalarScheme(mesh);
+        harmonic<vector> harmonicVectorScheme(mesh);
 
         // ==================================================================//
         // Solve quasi-static Maxwell-Equations for low Rm
         // ==================================================================//
+        
+        // Prepare block system
+        fvBlockMatrix<vector8> AVEqn(AV);
+        
+        // Assemble equations for A
+#       include "AEqn.H"
 
-#       include "ABlockEqn.H"
-// #       include "VEqn.H"
+        // Insert A-equations into block Matrix
+        AVEqn.insertEquation(0, AReEqn);
+        AVEqn.insertEquation(4, AImEqn);
+
+        // Assemble and insert pressure equation
+#       include "VEqn.H"
+
+        // Insert V-equations into block Matrix
+        AVEqn.insertEquation(3, VReEqn);
+        AVEqn.insertEquation(7, VImEqn);
+
+        // Assemble and insert coupling terms
+#       include "couplingTerms.H"
+
+        //- Block coupled solver call
+        AVEqn.solve();
+
+        // Retrieve solution
+        AVEqn.retrieveSolution(0, ARe.internalField());
+        AVEqn.retrieveSolution(4, AIm.internalField());
+
+        ARe.correctBoundaryConditions();
+        AIm.correctBoundaryConditions();
+        
+        AVEqn.retrieveSolution(3, VRe.internalField());
+        AVEqn.retrieveSolution(7, VIm.internalField());
+
+        VRe.correctBoundaryConditions();
+        VIm.correctBoundaryConditions();
 
         // ==================================================================//
         // Calculate derived fields
@@ -94,6 +132,29 @@ int main(int argc, char *argv[])
 
         pB == 0.5 * rMu0
         * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
+
+        // ==================================================================//
+        // Debug fields
+        // ==================================================================//
+        
+        volScalarField AReMag ("AReMag", mag(ARe)); AReMag.write();
+        volScalarField AImMag ("AImMag", mag(AIm)); AImMag.write();
+        
+        volScalarField BReMag ("BReMag", mag(BRe)); BReMag.write();
+        volScalarField BImMag ("BImMag", mag(BIm)); BImMag.write();
+        
+        volScalarField jReMag ("jReMag", mag(jRe)); jReMag.write();
+        volScalarField jImMag ("jImMag", mag(jIm)); jImMag.write();
+        
+        volScalarField jReDiv ("jReDiv", fvc::div(jRe)); jReDiv.write();
+        volScalarField jImDiv ("jImDiv", fvc::div(jIm)); jImDiv.write();
+        
+        volScalarField jsReMag ("jsReMag", mag(jsRe)); jsReMag.write();
+        volScalarField jsImMag ("jsImMag", mag(jsIm)); jsImMag.write();
+
+        // ==================================================================//
+        // Write
+        // ==================================================================//
 
         runTime.write();
 
