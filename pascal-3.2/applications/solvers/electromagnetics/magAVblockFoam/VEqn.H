@@ -14,10 +14,10 @@
     
     fvScalarMatrix VReEqn
     (
-      - fvm::laplacian(rAReAf, VRe)
+      - fvm::laplacian(sigmaf*rAReAf, VRe)
 //      ==
 //         - fvc::div(alpha*AIm)
-//         - fvc::div(VReSource)
+        - fvc::div(VReSource)
     );
     
     
@@ -36,8 +36,8 @@
     
     fvScalarMatrix VImEqn
     (
-        - fvm::laplacian(rAImAf, VIm)
+        - fvm::laplacian(sigmaf*rAImAf, VIm)
 //      ==
 //         - fvc::div(alpha*ARe)
-//         - fvc::div(VImSource)
+        - fvc::div(VImSource)
     );
