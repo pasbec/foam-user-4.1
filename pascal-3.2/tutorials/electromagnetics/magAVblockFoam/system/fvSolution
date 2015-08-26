@@ -16,7 +16,7 @@ FoamFile
 
 solvers
 {
-    A
+    AV
 //     {
 //         solver            GMRES;
 //         tolerance         1e-09;
@@ -35,7 +35,7 @@ solvers
         relTol            1e-06;
 //         relTol            0;
         minIter           1;
-        maxIter           1000;
+        maxIter           10;
         preconditioner    Cholesky;
     }
 //     {
@@ -74,17 +74,6 @@ solvers
         agglomerator             faceAreaPair;
         nCellsInCoarsestLevel    500;
         mergeLevels              1;
-    }
-}
-
-Magnetic
-{
-    update
-    {
-        active           on;
-        outputCycle      2147483647;
-        timeStepCycle    10;
-        timeCycle        1e+100;
     }
 }
 
