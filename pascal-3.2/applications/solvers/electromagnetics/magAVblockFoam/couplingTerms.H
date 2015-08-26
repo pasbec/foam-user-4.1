@@ -4,9 +4,6 @@
     const scalarField& sigmai = sigma.internalField();
     const scalarField& alphai = alpha.internalField();
     
-    // Interpolate sigma to face centers by using harmonic interpolation
-    surfaceScalarField sigmaf("sigmaf", harmonicScalarScheme.interpolate(sigma));
-    
     // Add coupling terms for ARe-AIm coupling
     AVEqn.insertEquationCoupling(0, 4, -alphai);
     AVEqn.insertEquationCoupling(4, 0,  alphai);

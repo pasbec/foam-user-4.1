@@ -9,15 +9,15 @@
     surfaceScalarField VReSource
     (
         "VReSource",
-        rAReAf*(harmonicVectorScheme.interpolate(sigma*fvc::grad(VRe, "grad(VReSource)")) & mesh.Sf())
+        rAReAf*(fvc::interpolate(sigma*fvc::grad(VRe, "grad(VReSource)")) & mesh.Sf())
     );
     
     fvScalarMatrix VReEqn
     (
-      - fvm::laplacian(sigma, VRe)
-     ==
-//       - fvc::div(alpha*AIm)
-        - fvc::div(VReSource)
+      - fvm::laplacian(rAReAf, VRe)
+//      ==
+//         - fvc::div(alpha*AIm)
+//         - fvc::div(VReSource)
     );
     
     
@@ -31,13 +31,13 @@
     surfaceScalarField VImSource
     (
         "VImSource",
-        rAImAf*(harmonicVectorScheme.interpolate(sigma*fvc::grad(VIm, "grad(VImSource)")) & mesh.Sf())
+        rAImAf*(fvc::interpolate(sigma*fvc::grad(VIm, "grad(VImSource)")) & mesh.Sf())
     );
     
     fvScalarMatrix VImEqn
     (
-        - fvm::laplacian(sigma, VIm)
-     ==
-//       - fvc::div(alpha*ARe)
-        - fvc::div(VImSource)
+        - fvm::laplacian(rAImAf, VIm)
+//      ==
+//         - fvc::div(alpha*ARe)
+//         - fvc::div(VImSource)
     );

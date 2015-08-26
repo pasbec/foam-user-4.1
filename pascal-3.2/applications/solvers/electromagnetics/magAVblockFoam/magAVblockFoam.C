@@ -74,9 +74,13 @@ int main(int argc, char *argv[])
 
         Info << "Time = " << runTime.value() << nl << endl;
         
-        // Harmonic interpolation schemes
-        harmonic<scalar> harmonicScalarScheme(mesh);
-        harmonic<vector> harmonicVectorScheme(mesh);
+//         // Harmonic interpolation schemes
+//         harmonic<scalar> harmonicScalarScheme(mesh);
+//         harmonic<vector> harmonicVectorScheme(mesh);
+        
+    
+        // Interpolate sigma to face centers
+        surfaceScalarField sigmaf("sigmaf", fvc::interpolate(sigma));
 
         // ==================================================================//
         // Solve quasi-static Maxwell-Equations for low Rm
