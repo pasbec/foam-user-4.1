@@ -30,7 +30,7 @@ Description
 
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
-#include "harmonic.H"
+#include "faceSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,35 +74,30 @@ int main(int argc, char *argv[])
 
         Info << "Time = " << runTime.value() << nl << endl;
         
-//         // Harmonic interpolation schemes
-//         harmonic<scalar> harmonicScalarScheme(mesh);
-//         harmonic<vector> harmonicVectorScheme(mesh);
-    
-        // Interpolate sigma to face centers
-        surfaceScalarField sigmaf("sigmaf", fvc::interpolate(sigma,"interpolate(sigma)"));
-    
-        // Get alpha on the face centers
-        surfaceScalarField alphaf("alphaf", fvc::interpolate(omega*sigma,"interpolate(alpha)"));
-        
         // ==================================================================//
         // Solve quasi-static Maxwell-Equations for low Rm
         // ==================================================================//
         
         // Prepare block system
-        fvBlockMatrix<vector8> AVEqn(AV);
+        fvBlockMatrix<vector10> AVEqn(AV);
         
-        // Assemble equations for A
+        // Assembleand insert equations for A
 #       include "AEqn.H"
-
-        // Assemble and insert pressure equation
-#       include "VEqn.H"
-
-        // Insert equations into block Matrix
-        AVEqn.insertEquation(0, AReEqn);
-        AVEqn.insertEquation(4, AImEqn);
         
-        AVEqn.insertEquation(3, VReEqn);
-        AVEqn.insertEquation(7, VImEqn);
+        AVEqn.insertEquation(0, AReEqn);
+        AVEqn.insertEquation(5, AImEqn);
+        
+        // Assembleand insert equations for divA
+#       include "divAEqn.H"
+        
+        AVEqn.insertEquation(3, divAReEqn);
+        AVEqn.insertEquation(8, divAImEqn);
+
+        // Assemble and insert equations for V
+#       include "VEqn.H"
+        
+        AVEqn.insertEquation(4, VReEqn);
+        AVEqn.insertEquation(9, VImEqn);
 
         // Assemble and insert coupling terms
 #       include "couplingTerms.H"
@@ -112,13 +107,19 @@ int main(int argc, char *argv[])
 
         // Retrieve solution
         AVEqn.retrieveSolution(0, ARe.internalField());
-        AVEqn.retrieveSolution(4, AIm.internalField());
+        AVEqn.retrieveSolution(5, AIm.internalField());
 
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
         
-        AVEqn.retrieveSolution(3, VRe.internalField());
-        AVEqn.retrieveSolution(7, VIm.internalField());
+        AVEqn.retrieveSolution(3, divARe.internalField());
+        AVEqn.retrieveSolution(8, divAIm.internalField());
+
+        ARe.correctBoundaryConditions();
+        AIm.correctBoundaryConditions();
+        
+        AVEqn.retrieveSolution(4, VRe.internalField());
+        AVEqn.retrieveSolution(9, VIm.internalField());
 
         VRe.correctBoundaryConditions();
         VIm.correctBoundaryConditions();
@@ -139,14 +140,20 @@ int main(int argc, char *argv[])
             * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
 
         // ==================================================================//
-        // Debug fields
+        // Debug stuff
         // ==================================================================//
+        
+        surfaceScalarField AReFlux ("AReFlux", fvc::interpolate(ARe) & mesh.Sf());
+        surfaceScalarField AImFlux ("AImFlux", fvc::interpolate(AIm) & mesh.Sf());
         
         volScalarField AReMag ("AReMag", mag(ARe)); AReMag.write();
         volScalarField AImMag ("AImMag", mag(AIm)); AImMag.write();
         
         volScalarField BReMag ("BReMag", mag(BRe)); BReMag.write();
         volScalarField BImMag ("BImMag", mag(BIm)); BImMag.write();
+        
+        surfaceScalarField jReFlux ("AReFlux", fvc::interpolate(jRe) & mesh.Sf());
+        surfaceScalarField jImFlux ("AImFlux", fvc::interpolate(jIm) & mesh.Sf());
         
         volScalarField jReMag ("jReMag", mag(jRe)); jReMag.write();
         volScalarField jImMag ("jImMag", mag(jIm)); jImMag.write();
@@ -156,7 +163,41 @@ int main(int argc, char *argv[])
         
         volScalarField jsReMag ("jsReMag", mag(jsRe)); jsReMag.write();
         volScalarField jsImMag ("jsImMag", mag(jsIm)); jsImMag.write();
+        
+        faceSet conductorFaces(mesh, "faceSet_geometry_conductor");
+        
+        scalarField conductorSigmaf(conductorFaces.size(),0.0);
+        scalarField conductorAlphaAReFlux(conductorFaces.size(),0.0);
+        scalarField conductorAlphaAImFlux(conductorFaces.size(),0.0);
+        scalarField conductorJReFlux(conductorFaces.size(),0.0);
+        scalarField conductorJImFlux(conductorFaces.size(),0.0);
+        
+        forAll(conductorFaces, faceI)
+        {
+            label faceLabel = conductorFaces[faceI];
+            
+            conductorSigmaf[faceI] = sigmaf[faceLabel];
+            
+            conductorAlphaAReFlux[faceI] = omega.value() * sigmaf[faceI] * AReFlux[faceI];
+            conductorAlphaAImFlux[faceI] = omega.value() * sigmaf[faceI] * AImFlux[faceI];
+            
+            conductorJReFlux[faceI] = jReFlux[faceLabel];
+            conductorJImFlux[faceI] = jImFlux[faceLabel];
+        }
 
+        // ==================================================================//
+        // Debug output
+        // ==================================================================//
+        
+        Info << "max(mag(jReDiv)) = " << max(mag(jReDiv)) << endl;
+        Info << "max(mag(jImDiv)) = " << max(mag(jImDiv)) << endl;
+        
+        Info << "gMax(conductorSigmaf) = " << gMax(conductorSigmaf) << endl;
+        Info << "gMax(mag(conductorAlphaAReFlux)) = " << gMax(mag(conductorAlphaAReFlux)) << endl;
+        Info << "gMax(mag(conductorAlphaAImFlux)) = " << gMax(mag(conductorAlphaAImFlux)) << endl;
+        Info << "gMax(mag(conductorJReFlux)) = " << gMax(mag(conductorJReFlux)) << endl;
+        Info << "gMax(mag(conductorJImFlux)) = " << gMax(mag(conductorJImFlux)) << endl;
+        
         // ==================================================================//
         // Write
         // ==================================================================//

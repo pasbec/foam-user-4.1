@@ -62,8 +62,8 @@
     );
 
 
-    // Megnetic vector potential (real part)
-    Info << "Create field ARe" << endl;
+    // Magnetic vector potential (real part)
+    Info << "Create field ARe" << nl << endl;
     volVectorField ARe
     (
         IOobject
@@ -77,13 +77,44 @@
         mesh
     );
 
-    // Megnetic vector potential (imaginary part)
-    Info << "Create field AIm" << endl;
+    // Magnetic vector potential (imaginary part)
+    Info << "Create field AIm" << nl << endl;
     volVectorField AIm
     (
         IOobject
         (
             "AIm",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+
+    // Divergence of magnetic vector potential (real part)
+    Info << "Create field divARe" << endl;
+    volScalarField divARe
+    (
+        IOobject
+        (
+            "divARe",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    // Divergence of magnetic vector potential (imaginary part)
+    Info << "Create field divAIm" << nl << endl;
+    volScalarField divAIm
+    (
+        IOobject
+        (
+            "divAIm",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -123,9 +154,9 @@
     );
     
 
-    // Megnetic vector potential (complex)
+    // Magnetic vector potential (complex)
     Info << "Create field AV" << nl << endl;
-    volVector8Field AV
+    volVector10Field AV
     (
         IOobject
         (
@@ -136,7 +167,7 @@
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector8(word(),dimless,vector8::zero)
+        dimensionedVector10(word(),dimless,vector10::zero)
     );
 
     

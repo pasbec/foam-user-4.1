@@ -1,4 +1,7 @@
 
+    // Interpolate sigma to face centers
+    surfaceScalarField sigmaf("sigmaf",fvc::interpolate(sigma));
+        
 //     // Real part
 //     surfaceScalarField rAReAf
 //     (
@@ -37,7 +40,7 @@
 //     fvScalarMatrix VImEqn
 //     (
 //       - fvm::laplacian(rAImAf, VIm)
-// //      ==
+//      ==
 // //       + fvc::div(alpha*ARe)
 //       - fvc::div(VImSource)
 //     );

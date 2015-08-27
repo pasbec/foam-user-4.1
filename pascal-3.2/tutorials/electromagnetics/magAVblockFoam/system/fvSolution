@@ -24,7 +24,7 @@ solvers
 //         relTol            1e-06;
 // //         relTol            0;
 //         minIter           1;
-//         maxIter           1000;
+//         maxIter           10;
 //         preconditioner    Cholesky;
 //         nDirections       6;
 //     }
@@ -37,44 +37,31 @@ solvers
         minIter           1;
         maxIter           10;
         preconditioner    Cholesky;
+//         preconditioner    GaussSeidel;
     }
 //     {
-//         solver            AMG;
-//         tolerance         1e-09;
-//         relTol            0;
-//         minIter           1;
-//         maxIter           1000;
-//         smoother          GaussSeidel;    // GaussSeidel, ILU
-//         cycle             V-cycle;        // V-cycle, F-cycle, W-cycle
-//         nPreSweeps        0;
-//         nPostSweeps       2;
-//         nMaxLevels        5;
-//         scale             5;
-//         coarseningType    AAMG;           // AAMG
-//         groupSize         6;
-//         minCoarseEqns     5;
-//         norm              twoNorm;        // componentNorm, maxNorm, twoNorm
+//         solver          AMG;
+//         cycle           V-cycle;
+//         coarseningType  AAMG;
+//         norm            componentNorm;
+//         normComponent   0;
+// 
+//         nPreSweeps      2;
+//         nPostSweeps     2;
+//         groupSize       2;
+//         minCoarseEqns   4;
+//         nMaxLevels      100;
+//         scale           on;
+// //         smoother        ILU;
+//         smoother        GaussSeidel;
+// 
+//         minIter         0;
+//         maxIter         10;
+//         tolerance       1e-09;
+// //         relTol          1e-03;
+//         relTol          1e-06;
+// //         relTol          0;
 //     }
-
-    "(VRe|VIm)"
-//     {
-//         solver            PCG;
-//         tolerance         1e-08;
-//         relTol            0;
-//         preconditioner    DIC;
-//     }
-    {
-        solver                   GAMG;
-        tolerance                1e-08;
-        relTol                   0.0;
-        smoother                 DICGaussSeidel;
-        nPreSweeps               0;
-        nPostSweeps              2;
-        cacheAgglomeration       on;
-        agglomerator             faceAreaPair;
-        nCellsInCoarsestLevel    500;
-        mergeLevels              1;
-    }
 }
 
 // ************************************************************************* //

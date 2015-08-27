@@ -9,6 +9,7 @@ cellSet  cellSet_geometry_all             new    boxToCell      (-1 -1 -1) ( 1  
 pointSet pointSet_geometry_conductor      new    surfaceToPoint "constant/triSurface/geometry_conductor.stl" 2e-4 true false
 
 cellSet  cellSet_geometry_conductor       new    pointToCell    pointSet_geometry_conductor all
+faceSet  faceSet_geometry_conductor       new    pointToFace    pointSet_geometry_conductor all
 
 pointSet pointSet_geometry_conductor      remove
 

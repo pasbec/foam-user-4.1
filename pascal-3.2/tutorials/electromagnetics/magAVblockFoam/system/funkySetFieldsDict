@@ -44,7 +44,7 @@ expressions
   {
     field         sigma;
 //     expression    "0";
-    expression    "1";
+    expression    "1e-6";
     keepPatches   true;
   }
 
