@@ -31,15 +31,15 @@ gradSchemes
     grad(divARe)                      Gauss linear;
     grad(divAIm)                      Gauss linear;
 
-//     grad(VRe)                         Gauss linear;
-//     grad(VIm)                         Gauss linear;
-//     snGradCorr(VRe)                   Gauss linear;
-//     snGradCorr(VIm)                   Gauss linear;
+//     grad(VRe)                         Gauss linear; // TODO
+//     grad(VIm)                         Gauss linear; // TODO
+//     snGradCorr(VRe)                   Gauss linear; // TODO
+//     snGradCorr(VIm)                   Gauss linear; // TODO
 
-    grad(VRe)                         Gauss harmonic;
-    grad(VIm)                         Gauss harmonic;
-    snGradCorr(VRe)                   Gauss harmonic;
-    snGradCorr(VIm)                   Gauss harmonic;
+    grad(VRe)                         Gauss harmonic; // TODO
+    grad(VIm)                         Gauss harmonic; // TODO
+    snGradCorr(VRe)                   Gauss harmonic; // TODO
+    snGradCorr(VIm)                   Gauss harmonic; // TODO
 
     grad(VReSource)                   Gauss linear; // RC?
     grad(VImSource)                   Gauss linear; // RC?
@@ -52,15 +52,15 @@ gradSchemes
 //     grad(divARe)                      cellLimited Gauss linear 1.0;
 //     grad(divAIm)                      cellLimited Gauss linear 1.0;
 //
-//     grad(VRe)                         cellLimited Gauss linear 1.0;
-//     grad(VIm)                         cellLimited Gauss linear 1.0;
-//     snGradCorr(VRe)                   cellLimited Gauss linear 1.0;
-//     snGradCorr(VIm)                   cellLimited Gauss linear 1.0;
+//     grad(VRe)                         cellLimited Gauss linear 1.0; // TODO
+//     grad(VIm)                         cellLimited Gauss linear 1.0; // TODO
+//     snGradCorr(VRe)                   cellLimited Gauss linear 1.0; // TODO
+//     snGradCorr(VIm)                   cellLimited Gauss linear 1.0; // TODO
 //
-// //     grad(VRe)                         cellLimited Gauss harmonic 1.0;
-// //     grad(VIm)                         cellLimited Gauss harmonic 1.0;
-// //     snGradCorr(VRe)                   cellLimited Gauss harmonic 1.0;
-// //     snGradCorr(VIm)                   cellLimited Gauss harmonic 1.0;
+// //     grad(VRe)                         cellLimited Gauss harmonic 1.0; // TODO
+// //     grad(VIm)                         cellLimited Gauss harmonic 1.0; // TODO
+// //     snGradCorr(VRe)                   cellLimited Gauss harmonic 1.0; // TODO
+// //     snGradCorr(VIm)                   cellLimited Gauss harmonic 1.0; // TODO
 //
 //     grad(VReSource)                   cellLimited Gauss linear 1.0; // RC?
 //     grad(VImSource)                   cellLimited Gauss linear 1.0; // RC?
@@ -70,21 +70,24 @@ divSchemes
 {
     default                           none;
 
-    div(ARe)                          Gauss linear;
-    div(AIm)                          Gauss linear;
+    div(ARe)                          Gauss linear; // TODO
+    div(AIm)                          Gauss linear; // TODO
 
-    div(jRe)                          Gauss linear;
-    div(jIm)                          Gauss linear;
+    div(alphaf,ARe)                   Gauss linear; // TODO
+    div(alphaf,AIm)                   Gauss linear; // TODO
+
+    div(jRe)                          Gauss linear; // TODO
+    div(jIm)                          Gauss linear; // TODO
 }
 
 laplacianSchemes
 {
     default                           none;
 
-//     laplacian(ARe)                    Gauss linear corrected;
-//     laplacian(AIm)                    Gauss linear corrected;
-    laplacian(ARe)                    Gauss harmonic corrected;
-    laplacian(AIm)                    Gauss harmonic corrected;
+//     laplacian(ARe)                    Gauss linear corrected; // TODO
+//     laplacian(AIm)                    Gauss linear corrected; // TODO
+    laplacian(ARe)                    Gauss harmonic corrected; // TODO
+    laplacian(AIm)                    Gauss harmonic corrected; // TODO
     laplacian(rSigma,ARe)             Gauss harmonic corrected;
     laplacian(rSigma,AIm)             Gauss harmonic corrected;
     laplacian(rSigmaf,ARe)            Gauss harmonic corrected; // harmonic is not used here
@@ -95,10 +98,10 @@ laplacianSchemes
     laplacian(sigmaf,VRe)             Gauss harmonic corrected; // harmonic is not used here
     laplacian(sigmaf,VIm)             Gauss harmonic corrected; // harmonic is not used here
 
-// //     laplacian(ARe)                    Gauss linear limited 0.5;
-// //     laplacian(AIm)                    Gauss linear limited 0.5;
-//     laplacian(ARe)                    Gauss harmonic limited 0.5;
-//     laplacian(AIm)                    Gauss harmonic limited 0.5;
+// //     laplacian(ARe)                    Gauss linear limited 0.5; // TODO
+// //     laplacian(AIm)                    Gauss linear limited 0.5; // TODO
+//     laplacian(ARe)                    Gauss harmonic limited 0.5; // TODO
+//     laplacian(AIm)                    Gauss harmonic limited 0.5; // TODO
 //     laplacian(rSigma,ARe)             Gauss harmonic limited 0.5;
 //     laplacian(rSigma,AIm)             Gauss harmonic limited 0.5;
 //     laplacian(rSigmaf,ARe)            Gauss harmonic limited 0.5; // harmonic is not used here
@@ -116,11 +119,11 @@ interpolationSchemes
 
     interpolate(sigma)                harmonic;
 
-    interpolate(ARe)                  linear;
-    interpolate(AIm)                  linear;
+    interpolate(ARe)                  linear; // debug
+    interpolate(AIm)                  linear; // debug
 
-    interpolate(jRe)                  linear;
-    interpolate(jIm)                  linear;
+    interpolate(jRe)                  linear; // debug
+    interpolate(jIm)                  linear; // debug
 
     interpolate(grad(VRe))            linear; // RC?
     interpolate(grad(VIm))            linear; // RC?

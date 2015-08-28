@@ -13,7 +13,7 @@
 
     //
     BlockLduSystem<vector, vector> divAReInARe(fvm::grad(divARe)); divAReInARe *= rMu0.value()/divAfac;
-    BlockLduSystem<vector, scalar> AReInDivARe(fvm::UDiv(ARe)); AReInDivARe *= -divAfac;
+    BlockLduSystem<vector, scalar> AReInDivARe(fvm::UDiv(ARe,"div(ARe)")); AReInDivARe *= -divAfac;
 
     //
     AVEqn.insertBlockCoupling(0, 3, divAReInARe, true);
@@ -21,7 +21,7 @@
 
     //
     BlockLduSystem<vector, vector> divAImInAIm(fvm::grad(divAIm)); divAImInAIm *= rMu0.value()/divAfac;
-    BlockLduSystem<vector, scalar> AImInDivAIm(fvm::UDiv(AIm)); AImInDivAIm *= -divAfac;
+    BlockLduSystem<vector, scalar> AImInDivAIm(fvm::UDiv(AIm,"div(AIm)")); AImInDivAIm *= -divAfac;
 
     //
     AVEqn.insertBlockCoupling(5, 8, divAImInAIm, true);
@@ -29,7 +29,7 @@
 
     //
     BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe)); VReInARe *= sigmai;
-    BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(alphaf,ARe));
+    BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(alphaf,ARe,"div(alphaf,ARe)"));
 
     //
     AVEqn.insertBlockCoupling(0, 4, VReInARe, true);
@@ -37,7 +37,7 @@
 
     //
     BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm)); VImInAIm *= sigmai;
-    BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(alphaf,AIm)); AImInVRe *= -1.0;
+    BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(alphaf,AIm,"div(alphaf,AIm)")); AImInVRe *= -1.0;
 
     //
     AVEqn.insertBlockCoupling(5, 9, VImInAIm, true);
