@@ -1,8 +1,5 @@
 
-//         scalarField one(mesh.size(), 1.0);
-//         AVEqn.insertEquationCoupling(3, 3, -one);
-//         AVEqn.insertEquationCoupling(8, 8, -one);
-
+    // Source coefficient
     dimensionedScalar one
     (
         "one",
@@ -13,13 +10,25 @@
     // Real part
     fvScalarMatrix divAReEqn
     (
-      - fvm::Sp(one,divARe)
-//       + fvc::div(ARe)
+        fvm::Sp(one,divARe)
+//       - fvc::div(ARe)
     );
+
+    // Currently only work-around
+    // since diagonal insertion
+    // in block-matrix does not
+    // work correctly
+    divAReEqn.upper() = 0.0;
 
     // Imaginary part
     fvScalarMatrix divAImEqn
     (
-      - fvm::Sp(one,divAIm)
-//       + fvc::div(AIm)
+        fvm::Sp(one,divAIm)
+//       - fvc::div(AIm)
     );
+
+    // Currently only work-around
+    // since diagonal insertion
+    // in block-matrix does not
+    // work correctly
+    divAImEqn.upper() = 0.0;

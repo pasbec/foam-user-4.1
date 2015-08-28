@@ -22,29 +22,41 @@ ddtSchemes
 gradSchemes
 {
     default                           none;
-    curl(ARe)                         Gauss linear;
-    curl(AIm)                         Gauss linear;
-    snGradCorr(ARe)                   Gauss linear;
-    snGradCorr(AIm)                   Gauss linear;
-    
+
+//     curl(ARe)                         Gauss linear;
+//     curl(AIm)                         Gauss linear;
+//     snGradCorr(ARe)                   Gauss linear;
+//     snGradCorr(AIm)                   Gauss linear;
+//
 //     grad(divARe)                      Gauss linear;
 //     grad(divAIm)                      Gauss linear;
-    grad(divARe)                      leastSquares;
-    grad(divAIm)                      leastSquares;
-    
-    grad(VRe)                         Gauss linear;
-    grad(VIm)                         Gauss linear;
-    snGradCorr(VRe)                   Gauss linear;
-    snGradCorr(VIm)                   Gauss linear;
+//
+//     grad(VRe)                         Gauss linear;
+//     grad(VIm)                         Gauss linear;
+//     snGradCorr(VRe)                   Gauss linear;
+//     snGradCorr(VIm)                   Gauss linear;
+
+    curl(ARe)                         cellLimited Gauss linear 1.0;
+    curl(AIm)                         cellLimited Gauss linear 1.0;
+    snGradCorr(ARe)                   cellLimited Gauss linear 1.0;
+    snGradCorr(AIm)                   cellLimited Gauss linear 1.0;
+
+    grad(divARe)                      cellLimited Gauss linear 1.0;
+    grad(divAIm)                      cellLimited Gauss linear 1.0;
+
+    grad(VRe)                         cellLimited Gauss linear 1.0;
+    grad(VIm)                         cellLimited Gauss linear 1.0;
+    snGradCorr(VRe)                   cellLimited Gauss linear 1.0;
+    snGradCorr(VIm)                   cellLimited Gauss linear 1.0;
 }
 
 divSchemes
 {
     default                           none;
-    
+
     div(ARe)                          Gauss linear;
     div(AIm)                          Gauss linear;
-    
+
     div(jRe)                          Gauss linear;
     div(jIm)                          Gauss linear;
 }
@@ -52,30 +64,46 @@ divSchemes
 laplacianSchemes
 {
     default                           none;
-    
-    laplacian(ARe)                    Gauss linear corrected;
-    laplacian(AIm)                    Gauss linear corrected;
-    laplacian(rSigma,ARe)             Gauss harmonic corrected;
-    laplacian(rSigma,AIm)             Gauss harmonic corrected;
-    laplacian(rSigmaf,ARe)            Gauss harmonic corrected; // harmonic is not used here
-    laplacian(rSigmaf,AIm)            Gauss harmonic corrected; // harmonic is not used here
-    
-    laplacian(sigma,VRe)              Gauss harmonic corrected;
-    laplacian(sigma,VIm)              Gauss harmonic corrected;
-    laplacian(sigmaf,VRe)             Gauss harmonic corrected; // harmonic is not used here
-    laplacian(sigmaf,VIm)             Gauss harmonic corrected; // harmonic is not used here
+
+//     laplacian(ARe)                    Gauss linear corrected;
+//     laplacian(AIm)                    Gauss linear corrected;
+// //     laplacian(ARe)                    Gauss harmonic corrected;
+// //     laplacian(AIm)                    Gauss harmonic corrected;
+//     laplacian(rSigma,ARe)             Gauss harmonic corrected;
+//     laplacian(rSigma,AIm)             Gauss harmonic corrected;
+//     laplacian(rSigmaf,ARe)            Gauss harmonic corrected; // harmonic is not used here
+//     laplacian(rSigmaf,AIm)            Gauss harmonic corrected; // harmonic is not used here
+//
+//     laplacian(sigma,VRe)              Gauss harmonic corrected;
+//     laplacian(sigma,VIm)              Gauss harmonic corrected;
+//     laplacian(sigmaf,VRe)             Gauss harmonic corrected; // harmonic is not used here
+//     laplacian(sigmaf,VIm)             Gauss harmonic corrected; // harmonic is not used here
+
+    laplacian(ARe)                    Gauss linear limited 0.5;
+    laplacian(AIm)                    Gauss linear limited 0.5;
+//     laplacian(ARe)                    Gauss harmonic limited 0.5;
+//     laplacian(AIm)                    Gauss harmonic limited 0.5;
+    laplacian(rSigma,ARe)             Gauss harmonic limited 0.5;
+    laplacian(rSigma,AIm)             Gauss harmonic limited 0.5;
+    laplacian(rSigmaf,ARe)            Gauss harmonic limited 0.5; // harmonic is not used here
+    laplacian(rSigmaf,AIm)            Gauss harmonic limited 0.5; // harmonic is not used here
+
+    laplacian(sigma,VRe)              Gauss harmonic limited 0.5;
+    laplacian(sigma,VIm)              Gauss harmonic limited 0.5;
+    laplacian(sigmaf,VRe)             Gauss harmonic limited 0.5; // harmonic is not used here
+    laplacian(sigmaf,VIm)             Gauss harmonic limited 0.5; // harmonic is not used here
 }
 
 interpolationSchemes
 {
     default                           none;
-    
+
     interpolate(sigma)                harmonic;
-    
-    interpolate(ARe)                  linear;    
+
+    interpolate(ARe)                  linear;
     interpolate(AIm)                  linear;
-    
-    interpolate(jRe)                  linear;    
+
+    interpolate(jRe)                  linear;
     interpolate(jIm)                  linear;
 
     interpolate(grad(VRe))            linear;

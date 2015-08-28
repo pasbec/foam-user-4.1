@@ -23,18 +23,26 @@ materialProperties
 
 conductorData
 (
-  "coil_rms=1000.0;"                // Inductor current rms value in [A]
-  "coil_ldx=0.005;"                 // Inductor loop cross section x width in [m]
-  "coil_ldz=0.005;"                 // Inductor loop cross section z width in [m]
-  "coil_area=coil_ldx*coil_ldz;"    // Inductor cross section area in [m^2]
-  "coil_amp=sqrt(2)*coil_rms;"      // Inductor current amplitude in [A]
-  "coil_denRe=coil_amp/coil_area;"  // Inductor current density in [A/m^2]
-  "coil_denIm=0;"                   // Inductor current density in [A/m^2]
-  "coil_r=0.008;"                   // Inductor center radius [m]
-  "coil_x0=0.065;"                  // Inductor center x size in [m]
-  "coil_y0=0.120;"                  // Inductor center y size in [m]
-  "coil_rx0=coil_x0-coil_r;"        // Inductor inner x size in [m]
-  "coil_ry0=coil_y0-coil_r;"        // Inductor inner y size in [m]
+  "coil_rms=1000.0;"                      // Inductor current rms value in [A]
+  "coil_ldx=0.005;"                       // Inductor loop cross section x width in [m]
+  "coil_ldz=0.005;"                       // Inductor loop cross section z width in [m]
+  "coil_area=coil_ldx*coil_ldz;"          // Inductor cross section area in [m^2]
+  "coil_amp=sqrt(2)*coil_rms;"            // Inductor current amplitude in [A]
+  
+//   "coil_denRe=sqrt(coil_amp/coil_area);"  // Inductor current density in [A/m^2]
+//   "coil_denIm=sqrt(coil_amp/coil_area);"  // Inductor current density in [A/m^2]
+
+//   "coil_denRe=coil_amp/coil_area;"        // Inductor current density in [A/m^2]
+//   "coil_denIm=0;"                         // Inductor current density in [A/m^2]
+
+  "coil_denRe=0;"                         // Inductor current density in [A/m^2]
+  "coil_denIm=coil_amp/coil_area;"        // Inductor current density in [A/m^2]
+
+  "coil_r=0.008;"                         // Inductor center radius [m]
+  "coil_x0=0.065;"                        // Inductor center x size in [m]
+  "coil_y0=0.120;"                        // Inductor center y size in [m]
+  "coil_rx0=coil_x0-coil_r;"              // Inductor inner x size in [m]
+  "coil_ry0=coil_y0-coil_r;"              // Inductor inner y size in [m]
 );
 
 expressions
