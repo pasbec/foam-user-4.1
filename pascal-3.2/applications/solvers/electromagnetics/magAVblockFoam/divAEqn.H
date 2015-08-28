@@ -1,17 +1,17 @@
 
     // Source coefficient
-    dimensionedScalar one
+    dimensionedScalar divAfacDim
     (
         "one",
         dimensionSet(0, 0, 0, 0, 0, 0, 0),
-        1.0
+        divAfac
     );
 
     // Real part
     fvScalarMatrix divAReEqn
     (
-        fvm::Sp(one,divARe)
-//       - fvc::div(ARe)
+        fvm::Sp(divAfacDim,divARe)
+//       - divFac * fvc::div(ARe)
     );
 
     // Currently only work-around
@@ -23,8 +23,8 @@
     // Imaginary part
     fvScalarMatrix divAImEqn
     (
-        fvm::Sp(one,divAIm)
-//       - fvc::div(AIm)
+        fvm::Sp(divAfacDim,divAIm)
+//       - divFac * fvc::div(AIm)
     );
 
     // Currently only work-around

@@ -1,8 +1,4 @@
 {
-
-    // Get alpha on the face centers
-    surfaceScalarField alphaf("alphaf", omega*sigmaf);
-
     // References to interal fields
     const scalarField& sigmai = sigma.internalField();
     const scalarField& alphai = alpha.internalField();
@@ -16,16 +12,16 @@
     AVEqn.insertEquationCoupling(7, 2,  alphai);
 
     //
-    BlockLduSystem<vector, vector> divAReInARe(fvm::grad(divARe)); divAReInARe *= rMu0.value();
-    BlockLduSystem<vector, scalar> AReInDivARe(fvm::UDiv(ARe)); AReInDivARe *= -1.0;
+    BlockLduSystem<vector, vector> divAReInARe(fvm::grad(divARe)); divAReInARe *= rMu0.value()/divAfac;
+    BlockLduSystem<vector, scalar> AReInDivARe(fvm::UDiv(ARe)); AReInDivARe *= -divAfac;
 
     //
     AVEqn.insertBlockCoupling(0, 3, divAReInARe, true);
     AVEqn.insertBlockCoupling(3, 0, AReInDivARe, false);
 
     //
-    BlockLduSystem<vector, vector> divAImInAIm(fvm::grad(divAIm)); divAImInAIm *= rMu0.value();
-    BlockLduSystem<vector, scalar> AImInDivAIm(fvm::UDiv(AIm)); AImInDivAIm *= -1.0;
+    BlockLduSystem<vector, vector> divAImInAIm(fvm::grad(divAIm)); divAImInAIm *= rMu0.value()/divAfac;
+    BlockLduSystem<vector, scalar> AImInDivAIm(fvm::UDiv(AIm)); AImInDivAIm *= -divAfac;
 
     //
     AVEqn.insertBlockCoupling(5, 8, divAImInAIm, true);

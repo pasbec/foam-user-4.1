@@ -78,6 +78,15 @@ int main(int argc, char *argv[])
         // Solve quasi-static Maxwell-Equations for low Rm
         // ==================================================================//
 
+        // Coupling factor for divARe/divAIm
+        scalar divAfac = 4.0;
+
+        // Interpolate sigma to face centers
+        surfaceScalarField sigmaf("sigmaf",fvc::interpolate(sigma));
+
+        // Get alpha on the face centers
+        surfaceScalarField alphaf("alphaf", omega*sigmaf);
+
         // Prepare block system
         fvBlockMatrix<vector10> AVEqn(AV);
 
