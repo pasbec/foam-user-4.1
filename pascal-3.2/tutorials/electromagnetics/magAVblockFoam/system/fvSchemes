@@ -81,10 +81,10 @@ laplacianSchemes
 {
     default                           none;
 
-    laplacian(ARe)                    Gauss linear corrected;
-    laplacian(AIm)                    Gauss linear corrected;
-//     laplacian(ARe)                    Gauss harmonic corrected;
-//     laplacian(AIm)                    Gauss harmonic corrected;
+//     laplacian(ARe)                    Gauss linear corrected;
+//     laplacian(AIm)                    Gauss linear corrected;
+    laplacian(ARe)                    Gauss harmonic corrected;
+    laplacian(AIm)                    Gauss harmonic corrected;
     laplacian(rSigma,ARe)             Gauss harmonic corrected;
     laplacian(rSigma,AIm)             Gauss harmonic corrected;
     laplacian(rSigmaf,ARe)            Gauss harmonic corrected; // harmonic is not used here
@@ -95,10 +95,10 @@ laplacianSchemes
     laplacian(sigmaf,VRe)             Gauss harmonic corrected; // harmonic is not used here
     laplacian(sigmaf,VIm)             Gauss harmonic corrected; // harmonic is not used here
 
-//     laplacian(ARe)                    Gauss linear limited 0.5;
-//     laplacian(AIm)                    Gauss linear limited 0.5;
-// //     laplacian(ARe)                    Gauss harmonic limited 0.5;
-// //     laplacian(AIm)                    Gauss harmonic limited 0.5;
+// //     laplacian(ARe)                    Gauss linear limited 0.5;
+// //     laplacian(AIm)                    Gauss linear limited 0.5;
+//     laplacian(ARe)                    Gauss harmonic limited 0.5;
+//     laplacian(AIm)                    Gauss harmonic limited 0.5;
 //     laplacian(rSigma,ARe)             Gauss harmonic limited 0.5;
 //     laplacian(rSigma,AIm)             Gauss harmonic limited 0.5;
 //     laplacian(rSigmaf,ARe)            Gauss harmonic limited 0.5; // harmonic is not used here
