@@ -37,7 +37,7 @@ geometry
         type triSurfaceMesh;
         name geometry_conductor;
     }
-    
+
     geometry_coil0.stl
     {
         type triSurfaceMesh;
@@ -92,7 +92,7 @@ castellatedMeshControls
     (
         // Can be done implicitely with "implicitFeatureSnap" in snapControls{}
         // for OpenFOAM 2.2.0 or higher
-        {file "geometry_conductor.eMesh"; level 2;}
+        {file "geometry_conductor.eMesh"; level 3;}
         {file "geometry_coil0.eMesh"; level 2;}
         {file "geometry_coil1.eMesh"; level 2;}
         {file "geometry_coil2.eMesh"; level 2;}
@@ -106,7 +106,7 @@ castellatedMeshControls
     {
         geometry_conductor
         {
-            level (2 2);
+            level (3 3);
 
             cellZone geometry_conductor;
             cellZoneInside inside;
@@ -114,7 +114,7 @@ castellatedMeshControls
             faceZone conductor;
             faceType internal;
         }
-        
+
         geometry_coil0
         {
             level (2 3);
@@ -171,16 +171,16 @@ castellatedMeshControls
         geometry_conductor
         {
             mode inside;
-            levels ((1e-15 2));
+            levels ((1e-15 3));
         }
-        
+
         geometry_coil0
         {
 //             mode inside;
 //             levels ((1e-15 3));
 
             mode distance;
-            levels ((0.01 2) (0.03 1));
+            levels ((0.01 2) (0.035 1));
         }
 
         geometry_coil1
