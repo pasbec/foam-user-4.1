@@ -160,6 +160,7 @@ public:
                 scalar fNei = wwfi[neighbour[facei]];
 
                 w[facei] = fOwn*SfdNei/(fNei*SfdOwn + fOwn*SfdNei);
+//                 w[facei] = SfdNei/fNei / (SfdOwn/fOwn + SfdNei/fNei);
             }
 
             return tWeightingFactors;

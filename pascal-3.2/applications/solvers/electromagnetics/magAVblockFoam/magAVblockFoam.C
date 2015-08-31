@@ -56,7 +56,10 @@ int main(int argc, char *argv[])
         4.0 * mathematicalConstant::pi * 1e-07
     );
 
-    dimensionedScalar rMu0 = 1.0/mu0;
+    dimensionedScalar rMu0(
+        "rMu0",
+        1.0/mu0
+    );
 
     dimensionedScalar omega
     (
@@ -64,9 +67,15 @@ int main(int argc, char *argv[])
         2.0 * mathematicalConstant::pi * frequency
     );
 
-    dimensionedScalar rOmega = 1.0/omega;
+    dimensionedScalar rOmega(
+        "rOmega",
+        1.0/omega
+    );
 
-    volScalarField alpha = omega * sigma;
+    volScalarField alpha(
+        "alpha",
+        omega * sigma
+    );
 
     while (runTime.run())
     {
@@ -79,10 +88,17 @@ int main(int argc, char *argv[])
         // ==================================================================//
 
         // Interpolate sigma to face centers
-        surfaceScalarField sigmaf("sigmaf",fvc::interpolate(sigma));
+        surfaceScalarField sigmaf(
+            "sigmaf",
+            fvc::interpolate(sigma,"interpolate(sigma)")
+        );
 
         // Get alpha on the face centers
-        surfaceScalarField alphaf("alphaf", omega*sigmaf);
+        surfaceScalarField alphaf(
+            "alphaf",
+            omega*fvc::interpolate(sigma,"interpolate(alpha)")
+
+            );
 
         // Prepare block system
         fvBlockMatrix<vector10> AVEqn(AV);

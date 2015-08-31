@@ -19,7 +19,7 @@ solvers
     AV
 //     {
 //         solver            GMRES;
-//         tolerance         1e-09;
+//         tolerance         1e-07;
 // //         relTol            1e-03;
 //         relTol            1e-06;
 // //         relTol            0;
@@ -30,12 +30,12 @@ solvers
 //     }
     {
         solver            BiCGStab;
-        tolerance         1e-09;
+        tolerance         1e-07;
 //         relTol            1e-03;
         relTol            1e-06;
 //         relTol            0;
         minIter           1;
-        maxIter           1000;
+        maxIter           100;
         preconditioner    Cholesky;
     }
 //     {
@@ -55,7 +55,7 @@ solvers
 //
 //         minIter         0;
 //         maxIter         100;
-//         tolerance         1e-09;
+//         tolerance         1e-07;
 // //         relTol            1e-03;
 //         relTol            1e-06;
 // //         relTol            0;

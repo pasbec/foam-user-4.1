@@ -52,7 +52,8 @@ expressions
   {
     field         sigma;
     variables     $materialProperties;
-    expression    "1e-6";
+//     expression    "1e-6";
+    expression    "1";
 //     expression    "sigma_silicon_liquid";
     keepPatches   true;
   }
