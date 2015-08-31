@@ -1,10 +1,10 @@
 
     // Real part
-    surfaceScalarField VReSource
-    (
-        "VReSource",
-        sigmaf*fvc::interpolate(fvc::grad(VRe, "grad(VReSource)")) & mesh.Sf()
-    );
+//     surfaceScalarField VReSource
+//     (
+//         "VReSource",
+//         sigmaf*fvc::interpolate(fvc::grad(VRe, "grad(VReSource)")) & mesh.Sf()
+//     );
 
     fvScalarMatrix VReEqn
     (
@@ -15,11 +15,11 @@
     );
 
     // Imaginary part
-    surfaceScalarField VImSource
-    (
-        "VImSource",
-        sigmaf*fvc::interpolate(fvc::grad(VIm, "grad(VImSource)")) & mesh.Sf()
-    );
+//     surfaceScalarField VImSource
+//     (
+//         "VImSource",
+//         sigmaf*fvc::interpolate(fvc::grad(VIm, "grad(VImSource)")) & mesh.Sf()
+//     );
 
     fvScalarMatrix VImEqn
     (

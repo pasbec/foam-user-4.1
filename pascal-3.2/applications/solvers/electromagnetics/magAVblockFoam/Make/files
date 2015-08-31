@@ -1,3 +1,5 @@
+interpolation/linearWeighted/linearWeighted.C
+
 magAVblockFoam.C
 
 EXE = $(FOAM_USER_APPBIN)/magAVblockFoam

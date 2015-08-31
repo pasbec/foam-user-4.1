@@ -78,9 +78,6 @@ int main(int argc, char *argv[])
         // Solve quasi-static Maxwell-Equations for low Rm
         // ==================================================================//
 
-        // Coupling factor for divARe/divAIm
-        scalar divAfac = 4.0;
-
         // Interpolate sigma to face centers
         surfaceScalarField sigmaf("sigmaf",fvc::interpolate(sigma));
 
@@ -137,8 +134,8 @@ int main(int argc, char *argv[])
         // Calculate derived fields
         // ==================================================================//
 
-        jRe ==  alpha * AIm;
-        jIm == -alpha * ARe;
+        jRe ==   alpha * AIm - sigma * fvc::grad(VRe);
+        jIm == - alpha * ARe - sigma * fvc::grad(VIm);
 
         BRe == fvc::curl(ARe);
         BIm == fvc::curl(AIm);

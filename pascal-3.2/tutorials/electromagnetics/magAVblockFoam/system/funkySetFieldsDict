@@ -28,15 +28,15 @@ conductorData
   "coil_ldz=0.005;"                       // Inductor loop cross section z width in [m]
   "coil_area=coil_ldx*coil_ldz;"          // Inductor cross section area in [m^2]
   "coil_amp=sqrt(2)*coil_rms;"            // Inductor current amplitude in [A]
-  
+
 //   "coil_denRe=sqrt(coil_amp/coil_area);"  // Inductor current density in [A/m^2]
 //   "coil_denIm=sqrt(coil_amp/coil_area);"  // Inductor current density in [A/m^2]
 
-//   "coil_denRe=coil_amp/coil_area;"        // Inductor current density in [A/m^2]
-//   "coil_denIm=0;"                         // Inductor current density in [A/m^2]
+  "coil_denRe=coil_amp/coil_area;"        // Inductor current density in [A/m^2]
+  "coil_denIm=0;"                         // Inductor current density in [A/m^2]
 
-  "coil_denRe=0;"                         // Inductor current density in [A/m^2]
-  "coil_denIm=coil_amp/coil_area;"        // Inductor current density in [A/m^2]
+//   "coil_denRe=0;"                         // Inductor current density in [A/m^2]
+//   "coil_denIm=coil_amp/coil_area;"        // Inductor current density in [A/m^2]
 
   "coil_r=0.008;"                         // Inductor center radius [m]
   "coil_x0=0.065;"                        // Inductor center x size in [m]
@@ -51,8 +51,9 @@ expressions
   sigma_reset
   {
     field         sigma;
-//     expression    "0";
+    variables     $materialProperties;
     expression    "1e-6";
+//     expression    "sigma_silicon_liquid";
     keepPatches   true;
   }
 
