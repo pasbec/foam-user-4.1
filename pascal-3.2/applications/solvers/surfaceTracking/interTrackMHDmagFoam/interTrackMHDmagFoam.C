@@ -29,6 +29,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "fvBlockMatrix.H"
+#include "blockMatrixTools.H"
 
 #include "fixedGradientFvPatchFields.H"
 
@@ -39,12 +41,6 @@ Description
 #include "regionControl.H"
 
 #include "fvcExtrapolate.H"
-
-#include "VectorNFieldTypes.H"
-#include "volVectorNFields.H"
-#include "blockVectorNMatrices.H"
-#include "blockLduSolvers.H"
-#include "blockMatrixTools.H"
 
 #include "transportModel.H"
 #include "twoPhaseMixture.H"

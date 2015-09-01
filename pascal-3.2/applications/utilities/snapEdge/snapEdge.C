@@ -34,7 +34,7 @@ Usage
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "Time.H"
+#include "foamTime.H"
 #include "dbse.H"
 
 
@@ -58,11 +58,11 @@ int main(int argc, char *argv[])
 
     model.snapEdges();
 
-    if(!overwrite) 
+    if(!overwrite)
     {
         runTime++;
-    } 
-    else 
+    }
+    else
     {
         mesh.setInstance(oldInstance);
     }

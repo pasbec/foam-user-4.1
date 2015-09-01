@@ -16,7 +16,6 @@ EXE_INC = \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -I$(LIB_SRC)/VectorN/lnInclude \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel/lnInclude \
@@ -32,7 +31,6 @@ EXE_LIBS = \
     -ltetFiniteElement \
     -llduSolvers \
     -L$(MESQUITE_LIB_DIR) -lmesquite \
-    -lVectorN \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModel \
     -lincompressibleRASModels \

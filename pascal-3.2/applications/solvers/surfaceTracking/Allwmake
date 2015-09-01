@@ -4,7 +4,6 @@ set -x
 
 wmake all freeSurface || exit 1
 wmake interTrackFoam || exit 1
-wmake interTrackFoamFiniteAreaUser || exit 1
 
 wmake all trackedSurface || exit 1
 wmake interTrackMHDFoam || exit 1

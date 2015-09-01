@@ -47,6 +47,7 @@ TODO [Low]: Add a description
 #include <limits>
 
 #include "fvCFD.H"
+#include "fvBlockMatrix.H"
 #include "dynamicFvMesh.H"
 #include "transportModel.H"
 #include "twoPhaseMixture.H"
@@ -54,13 +55,6 @@ TODO [Low]: Add a description
 #include "trackedSurface.H"
 
 #include "fixedGradientFvPatchFields.H"
-
-#include "blockLduSolvers.H"
-#include "VectorNFieldTypes.H"
-#include "volVectorNFields.H"
-#include "blockVectorNMatrices.H"
-
-#include "blockMatrixTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,9 +104,6 @@ int main(int argc, char *argv[])
         // --- PIMPLE loop
         for (int outerCorr=0; outerCorr<max(nOuterCorr,nMinOuterCorr); outerCorr++)
         {
-            // Initialize block matrix and set ldu to "zero"
-#           include "initBlockMatrix.H"
-
             // Correct fixedGradient boundary conditions
 #           include "updateLorentzForcePressureCorr.H"
 
@@ -123,10 +114,6 @@ int main(int argc, char *argv[])
             fvc::makeRelative(phi,U);
 
 #           include "updateCourantNumber.H"
-
-#           include "UBlockEqn.H"
-
-#           include "pBlockEqn.H"
 
 #           include "UpBlockEqn.H"
 

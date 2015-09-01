@@ -1,29 +1,13 @@
 
-    volVector4Field& Up = *UpPtr;
-
     // ==================================================================//
     // Block matrix preparations
     // ==================================================================//
 
-    // Create block matrix
-    BlockLduMatrix<vector4> UpEqn(mesh);
+    // Ref to pointer
+    volVector4Field& Up = *UpPtr;
 
-    // Reference block diagonal and set it to zero
-    Field<tensor4>& UpEqnD = UpEqn.diag().asSquare(); UpEqnD = tensor4::zero;
-
-    // Reference linear off-diagonal and set it to zero
-    Field<vector4>& UpEqnU = UpEqn.upper().asLinear(); UpEqnU = vector4::zero;
-    Field<vector4>& UpEqnL = UpEqn.lower().asLinear(); UpEqnL = vector4::zero;
-
-    // Set up source
-    vector4Field UpEqnS (mesh.nCells(), vector4::zero);
-
-    // ==================================================================//
-    // Boundary conditions
-    // ==================================================================//
-
-    // Set block interfaces properly
-    UpEqn.interfaces() = Up.boundaryField().blockInterfaces();
+    // Initialize the Up block system (matrix, source and reference to Up)
+    fvBlockMatrix<vector4> UpEqn(Up);
 
     // ==================================================================//
     // U Equation
@@ -38,6 +22,8 @@
       - F
     );
 
+    UEqn.relax();
+
     if (outerCorr != nOuterCorr - 1)
     {
         Info << "Relaxing UEqn with factor: "
@@ -45,78 +31,72 @@
         UEqn.relax(mesh.solutionDict().relaxationFactor("U"));
     }
 
+    UpEqn.insertEquation(0, UEqn);
+
     // ==================================================================//
     // p Equation
     // ==================================================================//
 
-    volScalarField rAU ("rAU", 1.0/UEqn.A());
-
     // Pressure parts of the continuity equation
-    surfaceScalarField rAUf
+    surfaceScalarField rUAf
     (
-        "rAUf",
-        fvc::interpolate(rAU)
+        "rUAf",
+        fvc::interpolate(1.0/UEqn.A())
     );
 
     surfaceScalarField presSource
     (
         "presSource",
-        rAUf * (fvc::interpolate(fvc::grad(p)) & mesh.Sf())
+        rUAf*(fvc::interpolate(fvc::grad(p, "grad(pSource)")) & mesh.Sf())
     );
 
     fvScalarMatrix pEqn
     (
-      - fvm::laplacian(rAUf, p)
-        ==
+      - fvm::laplacian(rUAf, p)
+     ==
       - fvc::div(presSource)
     );
 
 // FIXME [Low]: Parallel mode: Reference setting not yet implemented (only for twoFluids)
     // # include "setReference.H"
 
-    // ==================================================================//
-    // Assemble segregated equations in block structure
-    // ==================================================================//
-
-    blockMatrixTools::insertEquation(0, UEqn, UpEqn, Up.internalField(), UpEqnS);
-    blockMatrixTools::insertEquation(3, pEqn, UpEqn, Up.internalField(), UpEqnS);
+    UpEqn.insertEquation(3, pEqn);
 
     // ==================================================================//
-    // Assemble point-implicit coupled equation part in block structure
+    // Assemble coupling
     // ==================================================================//
 
     // WARNING: It seems to be important that UInp and pInU reside inside
     //          a seperate scope to work correctly? Not sure, though!
     {
-        blockVectorMatrix UInp(fvm::div(U,"blockDiv(U)"));
-        blockVectorMatrix pInU(fvm::grad(p,"blockGrad(p)"));
+        // Calculate grad p coupling matrix. Needs to be here if one uses
+        // gradient schemes with limiters.  VV, 9/June/2014
+        BlockLduSystem<vector, vector> pInU(fvm::grad(p));
 
-        blockMatrixTools::insertBlockCoupling(3, 0, UInp, U, UpEqn, UpEqnS, false);
-        blockMatrixTools::insertBlockCoupling(0, 3, pInU, p, UpEqn, UpEqnS, true);
+        // Calculate div U coupling.  Could be calculated only once since
+        // it is only geometry dependent.  VV, 9/June/2014
+        BlockLduSystem<vector, scalar> UInp(fvm::UDiv(U));
+
+        // Last argument in insertBlockCoupling says if the column direction
+        // should be incremented. This is needed for arbitrary positioning
+        // of U and p in the system. This could be better. VV, 30/April/2014
+        UpEqn.insertBlockCoupling(0, 3, pInU, true);
+        UpEqn.insertBlockCoupling(3, 0, UInp, false);
     }
 
     // ==================================================================//
     // Solve the block matrix
     // ==================================================================//
 
-    // Solve the block matrix
-    BlockSolverPerformance<vector4> solverPerf =
-        BlockLduSolver<vector4>::New
-        (
-            Up.name(),
-            UpEqn,
-            mesh.solutionDict().solver(Up.name())
-        )->solve(Up, UpEqnS);
-
-    solverPerf.print();
+    UpEqn.solve();
 
     // ==================================================================//
     // Retrieve the solution and update boundary conditions
     // ==================================================================//
 
     // Retrieve solution
-    blockMatrixTools::retrieveSolution(0, U.internalField(), Up);
-    blockMatrixTools::retrieveSolution(3, p.internalField(), Up);
+    UpEqn.retrieveSolution(0, U.internalField());
+    UpEqn.retrieveSolution(3, p.internalField());
 
     U.correctBoundaryConditions();
     p.correctBoundaryConditions();

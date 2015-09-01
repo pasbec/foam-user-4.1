@@ -39,7 +39,7 @@ SourceFiles
 
 #include "objectRegistry.H"
 #include "polyMesh.H"
-#include "Time.H"
+#include "foamTime.H"
 #include "wordList.H"
 
 // TODO [High]: Check if all region names are unique
