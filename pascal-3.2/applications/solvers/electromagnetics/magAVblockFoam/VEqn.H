@@ -45,7 +45,7 @@
 
     fvScalarMatrix VReEqn
     (
-      - fvm::laplacian(AVscale*sigmaf, VRe, "laplacian(sigmaf,VRe)")
+      - fvm::laplacian(sigmaf, VRe, "laplacian(sigmaf,VRe)")
 //       + fvc::div(alpha*AIm)
     );
 
@@ -58,7 +58,7 @@
     // Imaginary part
     fvScalarMatrix VImEqn
     (
-      - fvm::laplacian(AVscale*sigmaf, VIm, "laplacian(sigmaf,VIm)")
+      - fvm::laplacian(sigmaf, VIm, "laplacian(sigmaf,VIm)")
 //       - fvc::div(alpha*ARe)
     );
 

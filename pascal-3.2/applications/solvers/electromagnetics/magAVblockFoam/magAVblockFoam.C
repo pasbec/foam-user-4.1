@@ -104,8 +104,6 @@ int main(int argc, char *argv[])
             omega*fvc::interpolate(sigma,"interpolate(alpha)")
         );
 
-        scalar AVscale = 1e-03;
-
         // Assemble matrix for A
 #       include "AEqn.H"
 

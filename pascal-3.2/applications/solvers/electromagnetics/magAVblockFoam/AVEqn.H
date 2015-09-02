@@ -44,14 +44,14 @@
 
         // Coupling of real part of scalar potential equation
         BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe, "grad(VRe)")); VReInARe *= sigmai;
-        BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(alphaf, AIm, "div(alphaf,AIm)")); AImInVRe *= AVscale;
+        BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(alphaf, AIm, "div(alphaf,AIm)")); AImInVRe *= 1.0;
 
         AVEqn.insertBlockCoupling(0, 4, VReInARe, true);
         AVEqn.insertBlockCoupling(4, 5, AImInVRe, false);
 
         // Coupling of imaginary part of scalar potential equation
         BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm, "grad(VIm)")); VImInAIm *= sigmai;
-        BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(alphaf, ARe, "div(alphaf,ARe)")); AReInVIm *= -AVscale;
+        BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(alphaf, ARe, "div(alphaf,ARe)")); AReInVIm *= -1.0;
 
         AVEqn.insertBlockCoupling(5, 9, VImInAIm, true);
         AVEqn.insertBlockCoupling(9, 0, AReInVIm, false);
