@@ -106,51 +106,17 @@ int main(int argc, char *argv[])
 
         scalar AVscale = 1e-03;
 
-        // Prepare block system
-        fvBlockMatrix<vector10> AVEqn(AV);
-
-        // Assembleand insert equations for A
+        // Assemble matrix for A
 #       include "AEqn.H"
 
-        AVEqn.insertEquation(0, AReEqn);
-        AVEqn.insertEquation(5, AImEqn);
-
-        // Assemble and insert equations for divA
+        // Assemble matrix for divA
 #       include "divAEqn.H"
 
-        AVEqn.insertEquation(3, divAReEqn);
-        AVEqn.insertEquation(8, divAImEqn);
-
-        // Assemble and insert equations for V
+        // Assemble matrix for V
 #       include "VEqn.H"
 
-        AVEqn.insertEquation(4, VReEqn);
-        AVEqn.insertEquation(9, VImEqn);
-
-        // Assemble and insert coupling terms
-#       include "couplingTerms.H"
-
-        //- Block coupled solver call
-        AVEqn.solve();
-
-        // Retrieve solution
-        AVEqn.retrieveSolution(0, ARe.internalField());
-        AVEqn.retrieveSolution(5, AIm.internalField());
-
-        ARe.correctBoundaryConditions();
-        AIm.correctBoundaryConditions();
-
-        AVEqn.retrieveSolution(3, divARe.internalField());
-        AVEqn.retrieveSolution(8, divAIm.internalField());
-
-        ARe.correctBoundaryConditions();
-        AIm.correctBoundaryConditions();
-
-        AVEqn.retrieveSolution(4, VRe.internalField());
-        AVEqn.retrieveSolution(9, VIm.internalField());
-
-        VRe.correctBoundaryConditions();
-        VIm.correctBoundaryConditions();
+        // Assemble and solve AV block-matrix
+#       include "AVEqn.H"
 
         // ==================================================================//
         // Calculate derived fields
