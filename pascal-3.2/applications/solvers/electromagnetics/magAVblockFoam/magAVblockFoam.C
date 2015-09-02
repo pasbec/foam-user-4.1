@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
         AVEqn.insertEquation(0, AReEqn);
         AVEqn.insertEquation(5, AImEqn);
 
-        // Assembleand insert equations for divA
+        // Assemble and insert equations for divA
 #       include "divAEqn.H"
 
         AVEqn.insertEquation(3, divAReEqn);

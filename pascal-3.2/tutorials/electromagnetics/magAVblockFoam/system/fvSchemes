@@ -30,11 +30,11 @@ gradSchemes
 
     grad(divARe)                      Gauss linear; // TODO
     grad(divAIm)                      Gauss linear; // TODO
+//     grad(divARe)                      Gauss linearWeighted sigma; // TODO
+//     grad(divAIm)                      Gauss linearWeighted sigma; // TODO
 
-//     grad(VRe)                         Gauss linearWeighted sigma; // TODO
-//     grad(VIm)                         Gauss linearWeighted sigma; // TODO
-    grad(VRe)                         Gauss linear; // TODO
-    grad(VIm)                         Gauss linear; // TODO
+    grad(VRe)                         Gauss linear;
+    grad(VIm)                         Gauss linear;
     snGradCorr(VRe)                   Gauss linear;
     snGradCorr(VIm)                   Gauss linear;
 
@@ -46,10 +46,8 @@ gradSchemes
 //     grad(divARe)                      cellLimited Gauss linear 1.0;
 //     grad(divAIm)                      cellLimited Gauss linear 1.0;
 //
-// //     grad(VRe)                         cellLimited Gauss linearWeighted sigma 1.0; // TODO
-// //     grad(VIm)                         cellLimited Gauss linearWeighted sigma 1.0; // TODO
-//     grad(VRe)                         cellLimited Gauss linear 1.0; // TODO
-//     grad(VIm)                         cellLimited Gauss linear 1.0; // TODO
+//     grad(VRe)                         cellLimited Gauss linear 1.0;
+//     grad(VIm)                         cellLimited Gauss linear 1.0;
 //     snGradCorr(VRe)                   cellLimited Gauss linear 1.0;
 //     snGradCorr(VIm)                   cellLimited Gauss linear 1.0;
 }
@@ -60,6 +58,8 @@ divSchemes
 
     div(ARe)                          Gauss linear; // TODO
     div(AIm)                          Gauss linear; // TODO
+//     div(ARe)                          Gauss linearWeighted sigma; // TODO
+//     div(AIm)                          Gauss linearWeighted sigma; // TODO
 
     div(alphaf,ARe)                   Gauss linear; // TODO
     div(alphaf,AIm)                   Gauss linear; // TODO
