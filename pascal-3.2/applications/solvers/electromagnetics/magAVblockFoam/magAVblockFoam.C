@@ -56,7 +56,8 @@ int main(int argc, char *argv[])
         4.0 * mathematicalConstant::pi * 1e-07
     );
 
-    dimensionedScalar rMu0(
+    dimensionedScalar rMu0
+    (
         "rMu0",
         1.0/mu0
     );
@@ -67,12 +68,14 @@ int main(int argc, char *argv[])
         2.0 * mathematicalConstant::pi * frequency
     );
 
-    dimensionedScalar rOmega(
+    dimensionedScalar rOmega
+    (
         "rOmega",
         1.0/omega
     );
 
-    volScalarField alpha(
+    volScalarField alpha
+    (
         "alpha",
         omega * sigma
     );
@@ -88,17 +91,18 @@ int main(int argc, char *argv[])
         // ==================================================================//
 
         // Interpolate sigma to face centers
-        surfaceScalarField sigmaf(
+        surfaceScalarField sigmaf
+        (
             "sigmaf",
             fvc::interpolate(sigma,"interpolate(sigma)")
         );
 
         // Get alpha on the face centers
-        surfaceScalarField alphaf(
+        surfaceScalarField alphaf
+        (
             "alphaf",
             omega*fvc::interpolate(sigma,"interpolate(alpha)")
-
-            );
+        );
 
         // Prepare block system
         fvBlockMatrix<vector10> AVEqn(AV);
@@ -171,6 +175,40 @@ int main(int argc, char *argv[])
         volScalarField AReMag ("AReMag", mag(ARe)); AReMag.write();
         volScalarField AImMag ("AImMag", mag(AIm)); AImMag.write();
 
+        volVectorField AReRes
+        (
+            "AReRes",
+            - rMu0 * fvc::laplacian(ARe)
+            + rMu0 * fvc::grad(divARe)
+            - alpha * AIm
+            + sigma * fvc::grad(VRe)
+            - jsRe
+        ); AReRes.write();
+
+        volVectorField AImRes
+        (
+            "AImRes",
+            - rMu0 * fvc::laplacian(AIm)
+            + rMu0 * fvc::grad(divAIm)
+            + alpha * ARe
+            + sigma * fvc::grad(VIm)
+            - jsIm
+        ); AImRes.write();
+
+        volScalarField VReRes
+        (
+            "VReRes",
+            - fvc::laplacian(sigmaf, VRe)
+            + fvc::div(alpha*AIm,"div(alphaf,AIm)")
+        ); VReRes.write();
+
+        volScalarField VImRes
+        (
+            "VImRes",
+            - fvc::laplacian(sigmaf, VIm)
+            - fvc::div(alpha*ARe,"div(alphaf,ARe)")
+        ); VImRes.write();
+
         volScalarField BReMag ("BReMag", mag(BRe)); BReMag.write();
         volScalarField BImMag ("BImMag", mag(BIm)); BImMag.write();
 
@@ -189,6 +227,7 @@ int main(int argc, char *argv[])
         faceSet conductorFaces(mesh, "faceSet_geometry_conductor");
 
         scalarField conductorSigmaf(conductorFaces.size(),0.0);
+        scalarField conductorAlphaf(conductorFaces.size(),0.0);
         scalarField conductorAlphaAReFlux(conductorFaces.size(),0.0);
         scalarField conductorAlphaAImFlux(conductorFaces.size(),0.0);
         scalarField conductorJReFlux(conductorFaces.size(),0.0);
@@ -199,9 +238,10 @@ int main(int argc, char *argv[])
             label faceLabel = conductorFaces[faceI];
 
             conductorSigmaf[faceI] = sigmaf[faceLabel];
+            conductorAlphaf[faceI] = alphaf[faceLabel];
 
-            conductorAlphaAReFlux[faceI] = omega.value() * sigmaf[faceI] * AReFlux[faceI];
-            conductorAlphaAImFlux[faceI] = omega.value() * sigmaf[faceI] * AImFlux[faceI];
+            conductorAlphaAReFlux[faceI] = alphaf[faceI] * AReFlux[faceI];
+            conductorAlphaAImFlux[faceI] = alphaf[faceI] * AImFlux[faceI];
 
             conductorJReFlux[faceI] = jReFlux[faceLabel];
             conductorJImFlux[faceI] = jImFlux[faceLabel];
@@ -224,7 +264,8 @@ int main(int argc, char *argv[])
         Info << "max(mag(jReDiv)) = " << max(mag(jReDiv)) << endl;
         Info << "max(mag(jImDiv)) = " << max(mag(jImDiv)) << endl;
 
-        Info << "gMax(conductorSigmaf) = " << gMax(conductorSigmaf) << endl;
+        Info << "gMax(mag(conductorSigmaf)) = " << gMax(mag(conductorSigmaf)) << endl;
+        Info << "gMax(mag(conductorAlphaf)) = " << gMax(mag(conductorAlphaf)) << endl;
         Info << "gMax(mag(conductorAlphaAReFlux)) = " << gMax(mag(conductorAlphaAReFlux)) << endl;
         Info << "gMax(mag(conductorAlphaAImFlux)) = " << gMax(mag(conductorAlphaAImFlux)) << endl;
         Info << "gMax(mag(conductorJReFlux)) = " << gMax(mag(conductorJReFlux)) << endl;

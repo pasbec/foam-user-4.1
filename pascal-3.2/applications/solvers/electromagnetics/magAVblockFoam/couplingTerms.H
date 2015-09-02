@@ -12,18 +12,18 @@
     AVEqn.insertEquationCoupling(7, 2,  alphai);
 
     // Gauge-coupling for real part of A
-    BlockLduSystem<vector, vector> divAReInARe(fvm::grad(divARe)); divAReInARe *= rMu0.value();
-    BlockLduSystem<vector, scalar> AReInDivARe(fvm::UDiv(ARe,"div(ARe)")); AReInDivARe *= -1.0;
+//     BlockLduSystem<vector, vector> divAReInARe(fvm::grad(divARe)); divAReInARe *= rMu0.value();
+//     BlockLduSystem<vector, scalar> AReInDivARe(fvm::UDiv(ARe,"div(ARe)")); AReInDivARe *= -1.0;
 
-    AVEqn.insertBlockCoupling(0, 3, divAReInARe, true);
-    AVEqn.insertBlockCoupling(3, 0, AReInDivARe, false);
+//     AVEqn.insertBlockCoupling(0, 3, divAReInARe, true);
+//     AVEqn.insertBlockCoupling(3, 0, AReInDivARe, false);
 
     // Gauge-coupling for imaginary part of A
-    BlockLduSystem<vector, vector> divAImInAIm(fvm::grad(divAIm)); divAImInAIm *= rMu0.value();
-    BlockLduSystem<vector, scalar> AImInDivAIm(fvm::UDiv(AIm,"div(AIm)")); AImInDivAIm *= -1.0;
+//     BlockLduSystem<vector, vector> divAImInAIm(fvm::grad(divAIm)); divAImInAIm *= rMu0.value();
+//     BlockLduSystem<vector, scalar> AImInDivAIm(fvm::UDiv(AIm,"div(AIm)")); AImInDivAIm *= -1.0;
 
-    AVEqn.insertBlockCoupling(5, 8, divAImInAIm, true);
-    AVEqn.insertBlockCoupling(8, 5, AImInDivAIm, false);
+//     AVEqn.insertBlockCoupling(5, 8, divAImInAIm, true);
+//     AVEqn.insertBlockCoupling(8, 5, AImInDivAIm, false);
 
     // Coupling of real part of scalar potential equation
     BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe)); VReInARe *= sigmai;

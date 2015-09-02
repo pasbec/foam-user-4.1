@@ -29,11 +29,11 @@ conductorData
   "coil_area=coil_ldx*coil_ldz;"          // Inductor cross section area in [m^2]
   "coil_amp=sqrt(2)*coil_rms;"            // Inductor current amplitude in [A]
 
-  "coil_denRe=sqrt(coil_amp/coil_area);"  // Inductor current density in [A/m^2]
-  "coil_denIm=sqrt(coil_amp/coil_area);"  // Inductor current density in [A/m^2]
+//   "coil_denRe=sqrt(coil_amp/coil_area);"  // Inductor current density in [A/m^2]
+//   "coil_denIm=sqrt(coil_amp/coil_area);"  // Inductor current density in [A/m^2]
 
-//   "coil_denRe=coil_amp/coil_area;"        // Inductor current density in [A/m^2]
-//   "coil_denIm=0;"                         // Inductor current density in [A/m^2]
+  "coil_denRe=coil_amp/coil_area;"        // Inductor current density in [A/m^2]
+  "coil_denIm=0;"                         // Inductor current density in [A/m^2]
 
 //   "coil_denRe=0;"                         // Inductor current density in [A/m^2]
 //   "coil_denIm=coil_amp/coil_area;"        // Inductor current density in [A/m^2]
@@ -52,8 +52,9 @@ expressions
   {
     field         sigma;
     variables     $materialProperties;
+    expression    "0";
 //     expression    "1e-6";
-    expression    "1";
+//     expression    "1";
     keepPatches   true;
   }
 

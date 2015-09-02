@@ -156,9 +156,10 @@ public:
                 scalar SfdOwn = mag(Sf[facei] & (Cf[facei] - C[owner[facei]]));
                 scalar SfdNei = mag(Sf[facei] & (C[neighbour[facei]] - Cf[facei]));
 
-                scalar fOwn = wwfi[owner[facei]];
-                scalar fNei = wwfi[neighbour[facei]];
+                scalar fOwn = wwfi[owner[facei]] + VSMALL;
+                scalar fNei = wwfi[neighbour[facei]] + VSMALL;
 
+//                 w[facei] = fNei*SfdNei/(fOwn*SfdOwn + fNei*SfdNei);
                 w[facei] = fOwn*SfdNei/(fNei*SfdOwn + fOwn*SfdNei);
 //                 w[facei] = SfdNei/fNei / (SfdOwn/fOwn + SfdNei/fNei);
             }

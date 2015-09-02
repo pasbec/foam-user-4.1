@@ -12,6 +12,8 @@
     // work correctly
     divAReEqn.upper() = 0.0;
 
+
+    
     // Imaginary part
     fvScalarMatrix divAImEqn
     (
