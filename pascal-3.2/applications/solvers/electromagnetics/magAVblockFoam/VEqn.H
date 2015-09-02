@@ -28,14 +28,14 @@
 //         }
 //     }
 
-    // Make sure sigma does not get zero
-    scalar sigmaNonConducting = 1e-6;
+    // Make sure sigmaf does not get zero
+    scalar sigmafNonConducting = 1e-6;
     forAll(sigmaf.internalField(), faceI)
     {
         if
         (sigmaf.internalField()[faceI] < VSMALL)
         {
-            sigmaf.internalField()[faceI] = sigmaNonConducting;
+            sigmaf.internalField()[faceI] = sigmafNonConducting;
         }
     }
 
@@ -45,21 +45,23 @@
 
     fvScalarMatrix VReEqn
     (
-      - fvm::laplacian(sigmaf, VRe)
+      - fvm::laplacian(AVscale*sigmaf, VRe, "laplacian(sigmaf,VRe)")
 //       + fvc::div(alpha*AIm)
     );
 
 //     VReEqn.setReference(0, 0.0);
-    VReEqn.relax(0.9999);
+
+//     VReEqn.relax(0.9999);
 
 
 
     // Imaginary part
     fvScalarMatrix VImEqn
     (
-      - fvm::laplacian(sigmaf, VIm)
+      - fvm::laplacian(AVscale*sigmaf, VIm, "laplacian(sigmaf,VIm)")
 //       - fvc::div(alpha*ARe)
     );
 
 //     VImEqn.setReference(0, 0.0);
-    VImEqn.relax(0.9999);
+
+//     VImEqn.relax(0.9999);

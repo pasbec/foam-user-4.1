@@ -104,6 +104,8 @@ int main(int argc, char *argv[])
             omega*fvc::interpolate(sigma,"interpolate(alpha)")
         );
 
+        scalar AVscale = 1e-03;
+
         // Prepare block system
         fvBlockMatrix<vector10> AVEqn(AV);
 
@@ -199,14 +201,14 @@ int main(int argc, char *argv[])
         (
             "VReRes",
             - fvc::laplacian(sigmaf, VRe)
-            + fvc::div(alpha*AIm,"div(alphaf,AIm)")
+            + fvc::div(alpha*AIm, "div(alphaf,AIm)")
         ); VReRes.write();
 
         volScalarField VImRes
         (
             "VImRes",
             - fvc::laplacian(sigmaf, VIm)
-            - fvc::div(alpha*ARe,"div(alphaf,ARe)")
+            - fvc::div(alpha*ARe, "div(alphaf,ARe)")
         ); VImRes.write();
 
         volScalarField BReMag ("BReMag", mag(BRe)); BReMag.write();
@@ -250,19 +252,6 @@ int main(int argc, char *argv[])
         // ==================================================================//
         // Debug output
         // ==================================================================//
-
-        Info << "divAReEqn.hasDiag()" << " = " << divAReEqn.hasDiag() << endl;
-        Info << "divAReEqn.hasLower()" << " = " << divAReEqn.hasLower() << endl;
-        Info << "divAReEqn.hasUpper()" << " = " << divAReEqn.hasUpper() << endl;
-        Info << "divAReEqn.diagonal()" << " = " << divAReEqn.diagonal() << endl;
-
-        Info << "divAImEqn.hasDiag()" << " = " << divAImEqn.hasDiag() << endl;
-        Info << "divAImEqn.hasLower()" << " = " << divAImEqn.hasLower() << endl;
-        Info << "divAImEqn.hasUpper()" << " = " << divAImEqn.hasUpper() << endl;
-        Info << "divAImEqn.diagonal()" << " = " << divAImEqn.diagonal() << endl;
-
-        Info << "max(mag(jReDiv)) = " << max(mag(jReDiv)) << endl;
-        Info << "max(mag(jImDiv)) = " << max(mag(jImDiv)) << endl;
 
         Info << "gMax(mag(conductorSigmaf)) = " << gMax(mag(conductorSigmaf)) << endl;
         Info << "gMax(mag(conductorAlphaf)) = " << gMax(mag(conductorAlphaf)) << endl;
