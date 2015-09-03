@@ -28,11 +28,6 @@ gradSchemes
     snGradCorr(ARe)                   Gauss linear;
     snGradCorr(AIm)                   Gauss linear;
 
-    grad(divARe)                      Gauss linear; // TODO
-    grad(divAIm)                      Gauss linear; // TODO
-//     grad(divARe)                      Gauss linearWeighted sigma; // TODO
-//     grad(divAIm)                      Gauss linearWeighted sigma; // TODO
-
     grad(VRe)                         Gauss linear;
     grad(VIm)                         Gauss linear;
     snGradCorr(VRe)                   Gauss linear;

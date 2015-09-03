@@ -29,7 +29,9 @@
 //     }
 
     // Make sure sigmaf does not get zero
-    scalar sigmafNonConducting = 1e-6;
+//     scalar sigmafNonConducting = 1;
+//     scalar sigmafNonConducting = 1e-6;
+    scalar sigmafNonConducting = VSMALL;
     forAll(sigmaf.internalField(), faceI)
     {
         if
@@ -45,23 +47,15 @@
 
     fvScalarMatrix VReEqn
     (
-      - fvm::laplacian(sigmaf, VRe, "laplacian(sigmaf,VRe)")
+      - fvm::laplacian(sigmaf/Vscale, VRe, "laplacian(sigmaf,VRe)")
 //       + fvc::div(alpha*AIm)
     );
-
-//     VReEqn.setReference(0, 0.0);
-
-//     VReEqn.relax(0.9999);
 
 
 
     // Imaginary part
     fvScalarMatrix VImEqn
     (
-      - fvm::laplacian(sigmaf, VIm, "laplacian(sigmaf,VIm)")
+      - fvm::laplacian(sigmaf/Vscale, VIm, "laplacian(sigmaf,VIm)")
 //       - fvc::div(alpha*ARe)
     );
-
-//     VImEqn.setReference(0, 0.0);
-
-//     VImEqn.relax(0.9999);

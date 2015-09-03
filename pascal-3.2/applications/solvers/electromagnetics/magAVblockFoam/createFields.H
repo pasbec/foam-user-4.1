@@ -93,37 +93,8 @@
     );
 
 
-    // Divergence of magnetic vector potential (real part)
-    Info << "Create field divARe" << endl;
-    volScalarField divARe
-    (
-        IOobject
-        (
-            "divARe",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
 
-    // Divergence of magnetic vector potential (imaginary part)
-    Info << "Create field divAIm" << nl << endl;
-    volScalarField divAIm
-    (
-        IOobject
-        (
-            "divAIm",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    // Magnetic scalar potential (real part)
+    // Electric scalar potential (real part)
     Info << "Create field VRe" << endl;
     volScalarField VRe
     (
@@ -138,7 +109,7 @@
         mesh
     );
 
-    // Magnetic scalar potential (imaginary part)
+    // Electric scalar potential (imaginary part)
     Info << "Create field VIm " << nl << endl;
     volScalarField VIm
     (
@@ -152,11 +123,11 @@
         ),
         mesh
     );
-    
+
 
     // Magnetic vector potential (complex)
     Info << "Create field AV" << nl << endl;
-    volVector10Field AV
+    volVector8Field AV
     (
         IOobject
         (
@@ -167,10 +138,10 @@
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector10(word(),dimless,vector10::zero)
+        dimensionedVector8(word(),dimless,vector8::zero)
     );
 
-    
+
     // Magnetic field density (real part)
     Info << "Create field BRe" << endl;
     volVectorField BRe
@@ -233,8 +204,8 @@
         mesh,
         dimensionedVector(word(),dimensionSet(0,-2,0,0,0,1,0),vector::zero)
     );
-    
-    
+
+
     // Lorentz force
     Info << "Create field FL" << endl;
     volVectorField FL

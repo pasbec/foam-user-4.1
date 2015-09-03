@@ -48,7 +48,7 @@ solvers
 // //         relTol            1e-06;
 //         relTol            0;
 //         minIter           1;
-//         maxIter           10;
+//         maxIter           100;
 // //         maxIter           100;
 // //         maxIter           500;
 //         preconditioner    Cholesky;
@@ -56,8 +56,8 @@ solvers
     {
         solver          AMG;
         cycle           V-cycle;
-        coarseningType  AAMG;
-        norm            componentNorm;
+        coarseningType  AAMG; // AAMG
+        norm            twoNorm; // componentNorm, maxNorm, twoNorm
         normComponent   0;
 
         nPreSweeps      2;
@@ -65,12 +65,11 @@ solvers
         groupSize       2;
         minCoarseEqns   4;
         nMaxLevels      100;
-//         scale           on;
-        scale           off;
-        smoother        GaussSeidel;
+        scale           on; // on, off
+        smoother        GaussSeidel; // ILU, GaussSeidel
 
         minIter         0;
-        maxIter         10;
+        maxIter         100;
 //         maxIter         100;
 //         maxIter         500;
         tolerance       1e-07;

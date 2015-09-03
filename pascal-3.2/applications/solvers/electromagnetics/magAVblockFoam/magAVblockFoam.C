@@ -68,12 +68,6 @@ int main(int argc, char *argv[])
         2.0 * mathematicalConstant::pi * frequency
     );
 
-    dimensionedScalar rOmega
-    (
-        "rOmega",
-        1.0/omega
-    );
-
     volScalarField alpha
     (
         "alpha",
@@ -104,11 +98,10 @@ int main(int argc, char *argv[])
             omega*fvc::interpolate(sigma,"interpolate(alpha)")
         );
 
+        scalar Vscale = omega.value();
+
         // Assemble matrix for A
 #       include "AEqn.H"
-
-        // Assemble matrix for divA
-#       include "divAEqn.H"
 
         // Assemble matrix for V
 #       include "VEqn.H"
@@ -145,7 +138,6 @@ int main(int argc, char *argv[])
         (
             "AReRes",
             - rMu0 * fvc::laplacian(ARe)
-            + rMu0 * fvc::grad(divARe)
             - alpha * AIm
             + sigma * fvc::grad(VRe)
             - jsRe
@@ -155,7 +147,6 @@ int main(int argc, char *argv[])
         (
             "AImRes",
             - rMu0 * fvc::laplacian(AIm)
-            + rMu0 * fvc::grad(divAIm)
             + alpha * ARe
             + sigma * fvc::grad(VIm)
             - jsIm
