@@ -98,10 +98,11 @@ int main(int argc, char *argv[])
             omega*fvc::interpolate(sigma,"interpolate(alpha)")
         );
 
-        scalar Vscale = omega.value();
-
         // Assemble matrix for A
 #       include "AEqn.H"
+
+        // Assemble matrix for G
+#       include "GEqn.H"
 
         // Assemble matrix for V
 #       include "VEqn.H"
@@ -113,8 +114,8 @@ int main(int argc, char *argv[])
         // Calculate derived fields
         // ==================================================================//
 
-        jRe ==   alpha * AIm - sigma * fvc::grad(VRe);
-        jIm == - alpha * ARe - sigma * fvc::grad(VIm);
+        jRe ==   alpha * AIm - sigma * fvc::grad(VRe) + alpha * fvc::grad(GIm);
+        jIm == - alpha * ARe - sigma * fvc::grad(VIm) - alpha * fvc::grad(GRe);
 
         BRe == fvc::curl(ARe);
         BIm == fvc::curl(AIm);
@@ -134,37 +135,39 @@ int main(int argc, char *argv[])
         volScalarField AReMag ("AReMag", mag(ARe)); AReMag.write();
         volScalarField AImMag ("AImMag", mag(AIm)); AImMag.write();
 
-        volVectorField AReRes
-        (
-            "AReRes",
-            - rMu0 * fvc::laplacian(ARe)
-            - alpha * AIm
-            + sigma * fvc::grad(VRe)
-            - jsRe
-        ); AReRes.write();
-
-        volVectorField AImRes
-        (
-            "AImRes",
-            - rMu0 * fvc::laplacian(AIm)
-            + alpha * ARe
-            + sigma * fvc::grad(VIm)
-            - jsIm
-        ); AImRes.write();
-
-        volScalarField VReRes
-        (
-            "VReRes",
-            - fvc::laplacian(sigmaf, VRe)
-            + fvc::div(alpha*AIm, "div(alphaf,AIm)")
-        ); VReRes.write();
-
-        volScalarField VImRes
-        (
-            "VImRes",
-            - fvc::laplacian(sigmaf, VIm)
-            - fvc::div(alpha*ARe, "div(alphaf,ARe)")
-        ); VImRes.write();
+//         volVectorField AReRes
+//         (
+//             "AReRes",
+//             - rMu0 * fvc::laplacian(ARe)
+//             + rMu0 * fvc::grad(divARe)
+//             - alpha * AIm
+//             + sigma * fvc::grad(VRe)
+//             - jsRe
+//         ); AReRes.write();
+//
+//         volVectorField AImRes
+//         (
+//             "AImRes",
+//             - rMu0 * fvc::laplacian(AIm)
+//             + rMu0 * fvc::grad(divAIm)
+//             + alpha * ARe
+//             + sigma * fvc::grad(VIm)
+//             - jsIm
+//         ); AImRes.write();
+//
+//         volScalarField VReRes
+//         (
+//             "VReRes",
+//             - fvc::laplacian(sigmaf, VRe)
+//             + fvc::div(alpha*AIm, "div(alphaf,AIm)")
+//         ); VReRes.write();
+//
+//         volScalarField VImRes
+//         (
+//             "VImRes",
+//             - fvc::laplacian(sigmaf, VIm)
+//             - fvc::div(alpha*ARe, "div(alphaf,ARe)")
+//         ); VImRes.write();
 
         volScalarField BReMag ("BReMag", mag(BRe)); BReMag.write();
         volScalarField BImMag ("BImMag", mag(BIm)); BImMag.write();
