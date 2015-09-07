@@ -16,6 +16,9 @@ cd ${0%/*} || exit 1
 
 foamUserToolBinLinks
 
+foamUserToolKdevelopCreateWmProjectDirLink
+foamUserToolKdevelopCreateWmProjectDirIncludePathsFile
+
 ./Allwmake
 
 # --------------------------------------------------------------------------- #
