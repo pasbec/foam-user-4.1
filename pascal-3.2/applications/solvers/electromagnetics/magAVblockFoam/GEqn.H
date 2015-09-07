@@ -2,8 +2,8 @@
     // Real part
     fvScalarMatrix GReEqn
     (
-      - fvm::laplacian(GRe, "laplacian(GRe)")
-//       - fvc::div(ARe)
+        Gscale * fvm::laplacian(GRe, "laplacian(GRe)")
+//         Gscale * fvc::div(ARe)
     );
 
 
@@ -11,6 +11,6 @@
     // Imaginary part
     fvScalarMatrix GImEqn
     (
-      - fvm::laplacian(GIm, "laplacian(GIm)")
-//       - fvc::div(AIm)
+        Gscale * fvm::laplacian(GIm, "laplacian(GIm)")
+//         Gscale * fvc::div(AIm)
     );

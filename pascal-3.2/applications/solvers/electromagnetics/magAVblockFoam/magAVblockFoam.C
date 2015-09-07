@@ -101,8 +101,14 @@ int main(int argc, char *argv[])
         // Assemble matrix for A
 #       include "AEqn.H"
 
+        // Scale factor for G-equation
+        scalar Gscale = 1.0;
+
         // Assemble matrix for G
 #       include "GEqn.H"
+
+        // Scale factor for V-equation
+        scalar Vscale = 1.0/(omega.value() + SMALL);
 
         // Assemble matrix for V
 #       include "VEqn.H"
@@ -114,8 +120,8 @@ int main(int argc, char *argv[])
         // Calculate derived fields
         // ==================================================================//
 
-        jRe ==   alpha * AIm - sigma * fvc::grad(VRe) + alpha * fvc::grad(GIm);
-        jIm == - alpha * ARe - sigma * fvc::grad(VIm) - alpha * fvc::grad(GRe);
+        jRe ==   alpha * AIm + alpha * fvc::grad(GIm) - sigma * fvc::grad(VRe);
+        jIm == - alpha * ARe - alpha * fvc::grad(GRe) - sigma * fvc::grad(VIm);
 
         BRe == fvc::curl(ARe);
         BIm == fvc::curl(AIm);

@@ -25,7 +25,7 @@ solvers
 // //         relTol            1e-06;
 //         relTol            0;
 //         minIter           1;
-//         maxIter           500;
+//         maxIter           100;
 //         preconditioner    none;
 //     }
 //     {
@@ -48,16 +48,16 @@ solvers
 // //         relTol            1e-06;
 //         relTol            0;
 //         minIter           1;
+// //         maxIter           10;
 //         maxIter           100;
-// //         maxIter           100;
 // //         maxIter           500;
 //         preconditioner    Cholesky;
 //     }
     {
         solver          AMG;
         cycle           V-cycle;
-        coarseningType  AAMG; // AAMG
-        norm            twoNorm; // componentNorm, maxNorm, twoNorm
+        coarseningType  AAMG;
+        norm            componentNorm;
         normComponent   0;
 
         nPreSweeps      2;
@@ -65,11 +65,12 @@ solvers
         groupSize       2;
         minCoarseEqns   4;
         nMaxLevels      100;
-        scale           on; // on, off
-        smoother        GaussSeidel; // ILU, GaussSeidel
+        scale           on;
+        smoother        GaussSeidel;
 
         minIter         0;
-        maxIter         100;
+//         maxIter         10;
+        maxIter         20;
 //         maxIter         100;
 //         maxIter         500;
         tolerance       1e-07;
