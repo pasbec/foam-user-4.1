@@ -98,7 +98,7 @@ git config user.email 'pascal@becksteins.de'
 ```bash
 cd "$HOME/foam/foam-extend-3.1"
 #
-git remote add 'upstream' 'https://git.code.sf.net/p/openfoam-extend/foam-extend-3.1'
+git remote add 'upstream' 'git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1'
 git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-Mirror/openfoam-extend-foam-extend-3.1.git'
 git remote add 'sf' 'ssh://p-be@git.code.sf.net/u/p-be/openfoam-extend'
 #git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-3.1'
