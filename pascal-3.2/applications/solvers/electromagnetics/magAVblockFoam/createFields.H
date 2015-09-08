@@ -63,7 +63,7 @@
 
 
     // Magnetic vector potential (real part)
-    Info << "Create field ARe" << nl << endl;
+    Info << "Create field ARe" << endl;
     volVectorField ARe
     (
         IOobject
@@ -84,37 +84,6 @@
         IOobject
         (
             "AIm",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-
-    // Gauge potential (real part)
-    Info << "Create field GRe" << endl;
-    volScalarField GRe
-    (
-        IOobject
-        (
-            "GRe",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    // Gauge potential (imaginary part)
-    Info << "Create field GIm" << nl << endl;
-    volScalarField GIm
-    (
-        IOobject
-        (
-            "GIm",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -156,7 +125,7 @@
 
     // Magnetic vector potential (complex)
     Info << "Create field AV" << nl << endl;
-    volVector10Field AV
+    volVector8Field AV
     (
         IOobject
         (
@@ -167,7 +136,7 @@
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector10(word(),dimless,vector10::zero)
+        dimensionedVector8(word(),dimless,vector8::zero)
     );
 
 

@@ -23,11 +23,12 @@ gradSchemes
 {
     default                           none;
 
-    curl(ARe)                         Gauss linear;
-    curl(AIm)                         Gauss linear;
+    grad(sigma)                       Gauss linear;
 
-    grad(GRe)                         Gauss linear;
-    grad(GIm)                         Gauss linear;
+//     curl(ARe)                         Gauss linear;
+//     curl(AIm)                         Gauss linear;
+    curl(ARe)                         leastSquares;
+    curl(AIm)                         leastSquares;
 
     grad(VRe)                         Gauss linear;
     grad(VIm)                         Gauss linear;
@@ -36,15 +37,6 @@ gradSchemes
 divSchemes
 {
     default                           none;
-
-    div(ARe)                          Gauss linear;
-    div(AIm)                          Gauss linear;
-
-    div(alphaf,ARe)                   Gauss linear;
-    div(alphaf,AIm)                   Gauss linear;
-
-    div(jRe)                          Gauss linear;
-    div(jIm)                          Gauss linear;
 }
 
 laplacianSchemes
@@ -53,11 +45,6 @@ laplacianSchemes
 
     laplacian(ARe)                    Gauss linear uncorrected; // linear is not used here
     laplacian(AIm)                    Gauss linear uncorrected; // linear is not used here
-
-    laplacian(GRe)                    Gauss linear uncorrected; // linear is not used here
-    laplacian(GIm)                    Gauss linear uncorrected; // linear is not used here
-    laplacian(alphaf,GRe)             Gauss linear uncorrected; // linear is not used here
-    laplacian(alphaf,GIm)             Gauss linear uncorrected; // linear is not used here
 
     laplacian(sigma,VRe)              Gauss linear uncorrected;
     laplacian(sigma,VIm)              Gauss linear uncorrected;

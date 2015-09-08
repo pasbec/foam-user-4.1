@@ -1,33 +1,4 @@
 
-//     // Reference to mesh data
-//     const labelList& owner = mesh.owner();
-//     const labelList& neighbour = mesh.neighbour();
-//
-//     // - Set an arbitrarily (high) value for sigmaf
-//     //   for all faces which are in contact with
-//     //   cells of zero (or very small) conductivity
-//     //
-//     // - Set alpha for all conductor faces to zero
-//     //   in order to remove fluxes in VRe/VIm-equations
-//     //   and achieve a zero-gradient boundary-condition
-//     //   Set alpha for all faces between non-conducting
-//     //   regions to zero
-//     //
-//     scalar sigmaNonConducting = max(mag(sigma)).value();
-// //     scalar sigmaNonConducting = 1;
-//     forAll(owner, faceI)
-//     {
-//         if
-//         (
-//             (sigma.internalField()[owner[faceI]] < VSMALL)
-//          || (sigma.internalField()[neighbour[faceI]] < VSMALL)
-//         )
-//         {
-//             sigmaf.internalField()[faceI] = sigmaNonConducting;
-//             alphaf.internalField()[faceI] = 0;
-//         }
-//     }
-
     // Make sure sigmaf does not get zero
     scalar sigmafNonConducting = SMALL;
     forAll(sigmaf.internalField(), faceI)
@@ -39,16 +10,19 @@
         }
     }
 
-
+    // Reference settings
+    label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+    scalar refValue = 0.0;
 
     // Real part
 
     fvScalarMatrix VReEqn
     (
         Vscale * fvm::laplacian(sigmaf, VRe, "laplacian(sigmaf,VRe)")
-//       - Vscale * fvc::div(alpha*AIm)
-//       - Vscale * fvc::laplacian(alphaf,GIm)
+//       - Vscale * (gradAlpha&AIm)
     );
+
+//     VReEqn.setReference(refCell, refValue);
 
 
 
@@ -56,6 +30,7 @@
     fvScalarMatrix VImEqn
     (
         Vscale * fvm::laplacian(sigmaf, VIm, "laplacian(sigmaf,VIm)")
-//       + Vscale * fvc::div(alpha*ARe)
-//       + Vscale * fvc::laplacian(alphaf,GRe)
+//       + Vscale * (gradAlpha&ARe)
     );
+
+//     VImEqn.setReference(refCell, refValue);

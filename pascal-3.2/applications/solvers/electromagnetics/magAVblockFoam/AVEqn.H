@@ -1,64 +1,49 @@
 
 
     // Prepare block system
-    fvBlockMatrix<vector10> AVEqn(AV);
+    fvBlockMatrix<vector8> AVEqn(AV);
 
     // Insert equations for A
     AVEqn.insertEquation(0, AReEqn);
-    AVEqn.insertEquation(5, AImEqn);
-
-    // Insert equations for G
-    AVEqn.insertEquation(3, GReEqn);
-    AVEqn.insertEquation(8, GImEqn);
+    AVEqn.insertEquation(4, AImEqn);
 
     // Insert equations for V
-    AVEqn.insertEquation(4, VReEqn);
-    AVEqn.insertEquation(9, VImEqn);
+    AVEqn.insertEquation(3, VReEqn);
+    AVEqn.insertEquation(7, VImEqn);
 
     {
         // References to interal fields
-        const scalarField& sigmai = sigma.internalField();
-        const scalarField& alphai = alpha.internalField();
+        const scalarField& sigmaIn = sigma.internalField();
+        const scalarField& alphaIn = alpha.internalField();
+        const vectorField& gradAlphaIn = gradAlpha.internalField();
 
         // Add coupling terms for ARe-AIm coupling
-        AVEqn.insertEquationCoupling(0, 5,  alphai);
-        AVEqn.insertEquationCoupling(5, 0, -alphai);
-        AVEqn.insertEquationCoupling(1, 6,  alphai);
-        AVEqn.insertEquationCoupling(6, 1, -alphai);
-        AVEqn.insertEquationCoupling(2, 7,  alphai);
-        AVEqn.insertEquationCoupling(7, 2, -alphai);
-
-        // Coupling of real part of gauge potential equation
-        BlockLduSystem<vector, vector> GReInAIm(fvm::grad(GRe, "grad(GRe)")); GReInAIm *= -alphai;
-        BlockLduSystem<vector, scalar> AReInGRe(fvm::UDiv(ARe, "div(ARe)")); AReInGRe *= Gscale;
-        fvScalarMatrix GReInVIm(fvm::laplacian(alphaf, GRe, "laplacian(alphaf,GRe)")); GReInVIm *= Vscale;
-
-        AVEqn.insertBlockCoupling(5, 3, GReInAIm, true);
-        AVEqn.insertBlockCoupling(3, 0, AReInGRe, false);
-        AVEqn.insertEquationCoupling(9, 3, GReInVIm);
-
-        // Coupling of imaginary part of gauge potential equation
-        BlockLduSystem<vector, vector> GImInARe(fvm::grad(GIm, "grad(GIm)")); GImInARe *= alphai;
-        BlockLduSystem<vector, scalar> AImInGIm(fvm::UDiv(AIm, "div(AIm)")); AImInGIm *= Gscale;
-        fvScalarMatrix GImInVRe(fvm::laplacian(alphaf, GIm, "laplacian(alphaf,GIm)")); GImInVRe *= -Vscale;
-
-        AVEqn.insertBlockCoupling(0, 8, GImInARe, true);
-        AVEqn.insertBlockCoupling(8, 5, AImInGIm, false);
-        AVEqn.insertEquationCoupling(4, 8, GImInVRe);
+        AVEqn.insertEquationCoupling(0, 4,  Ascale*alphaIn);
+        AVEqn.insertEquationCoupling(4, 0, -Ascale*alphaIn);
+        AVEqn.insertEquationCoupling(1, 5,  Ascale*alphaIn);
+        AVEqn.insertEquationCoupling(5, 1, -Ascale*alphaIn);
+        AVEqn.insertEquationCoupling(2, 6,  Ascale*alphaIn);
+        AVEqn.insertEquationCoupling(6, 2, -Ascale*alphaIn);
 
         // Coupling of real part of electric scalar potential equation
-        BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe, "grad(VRe)")); VReInARe *= -sigmai;
-        BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(alphaf, AIm, "div(alphaf,AIm)")); AImInVRe *= -Vscale;
+        BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe, "grad(VRe)")); VReInARe *= -Ascale*sigmaIn;
+//         BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(alphaf, AIm, "div(alphaf,AIm)")); AImInVRe *= -Vscale;
 
-        AVEqn.insertBlockCoupling(0, 4, VReInARe, true);
-        AVEqn.insertBlockCoupling(4, 5, AImInVRe, false);
+        AVEqn.insertBlockCoupling(0, 3, VReInARe, true);
+//         AVEqn.insertBlockCoupling(3, 4, AImInVRe, false);
+        AVEqn.insertEquationCoupling(3, 4, -Vscale*gradAlphaIn.component(0));
+        AVEqn.insertEquationCoupling(3, 5, -Vscale*gradAlphaIn.component(1));
+        AVEqn.insertEquationCoupling(3, 6, -Vscale*gradAlphaIn.component(2));
 
         // Coupling of imaginary part of electric scalar potential equation
-        BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm, "grad(VIm)")); VImInAIm *= -sigmai;
-        BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(alphaf, ARe, "div(alphaf,ARe)")); AReInVIm *= Vscale;
+        BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm, "grad(VIm)")); VImInAIm *= -Ascale*sigmaIn;
+//         BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(alphaf, ARe, "div(alphaf,ARe)")); AReInVIm *= Vscale;
 
-        AVEqn.insertBlockCoupling(5, 9, VImInAIm, true);
-        AVEqn.insertBlockCoupling(9, 0, AReInVIm, false);
+        AVEqn.insertBlockCoupling(4, 7, VImInAIm, true);
+//         AVEqn.insertBlockCoupling(7, 0, AReInVIm, false);
+        AVEqn.insertEquationCoupling(7, 0,  Vscale*gradAlphaIn.component(0));
+        AVEqn.insertEquationCoupling(7, 1,  Vscale*gradAlphaIn.component(1));
+        AVEqn.insertEquationCoupling(7, 2,  Vscale*gradAlphaIn.component(2));
     }
 
 //     // Relax block-equation
@@ -71,19 +56,13 @@
 
     // Retrieve solution
     AVEqn.retrieveSolution(0, ARe.internalField());
-    AVEqn.retrieveSolution(5, AIm.internalField());
+    AVEqn.retrieveSolution(4, AIm.internalField());
 
     ARe.correctBoundaryConditions();
     AIm.correctBoundaryConditions();
 
-    AVEqn.retrieveSolution(3, GRe.internalField());
-    AVEqn.retrieveSolution(8, GIm.internalField());
-
-    GRe.correctBoundaryConditions();
-    GIm.correctBoundaryConditions();
-
-    AVEqn.retrieveSolution(4, VRe.internalField());
-    AVEqn.retrieveSolution(9, VIm.internalField());
+    AVEqn.retrieveSolution(3, VRe.internalField());
+    AVEqn.retrieveSolution(7, VIm.internalField());
 
     VRe.correctBoundaryConditions();
     VIm.correctBoundaryConditions();
