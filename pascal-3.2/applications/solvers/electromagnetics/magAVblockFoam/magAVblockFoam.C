@@ -31,6 +31,7 @@ Description
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
 #include "faceSet.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

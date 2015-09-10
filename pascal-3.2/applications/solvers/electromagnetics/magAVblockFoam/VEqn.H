@@ -69,8 +69,10 @@
         }
 
 //         // Manipulate boundary faces
-//         sigmaf.boundaryField() = sigmafDummy;
+//         sigmaf.boundaryField() == sigmafDummy;
     }
+
+
 
     // Reference settings
     label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
@@ -93,3 +95,35 @@
     );
 
     VImEqn.setReference(refCell, refValue);
+
+    // Remove air cells from solution of V
+    label nVzeroCells = 0;
+    forAll(mesh.cells(), cellI)
+    {
+        if
+        (
+            (mag(gradAlpha.internalField()[cellI]) < SMALL)
+         && (sigma.internalField()[cellI] < SMALL)
+        )
+        {
+            nVzeroCells++;
+        }
+    }
+    labelList VzeroCells(nVzeroCells, -1);
+    nVzeroCells = 0;
+    forAll(mesh.cells(), cellI)
+    {
+        if
+        (
+            (mag(gradAlpha.internalField()[cellI]) < SMALL)
+         && (sigma.internalField()[cellI] < SMALL)
+        )
+        {
+            VzeroCells[nVzeroCells] = cellI;
+            nVzeroCells++;
+        }
+    }
+    scalarField VzeroCellValues(VzeroCells.size(), 0.0);
+    VReEqn.setValues(VzeroCells, VzeroCellValues);
+    VImEqn.setValues(VzeroCells, VzeroCellValues);
+    
