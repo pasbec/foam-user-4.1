@@ -1,8 +1,8 @@
 
     {
         // Add explicit parts of V (segregated coupling)
-        fvVectorMatrix AReEqnPre = AReEqn - scaleA * sigma * fvc::grad(VRe);
-        fvVectorMatrix AImEqnPre = AImEqn - scaleA * sigma * fvc::grad(VIm);
+        fvVectorMatrix AReEqnPre = AReEqn - sigma * fvc::grad(VRe);
+        fvVectorMatrix AImEqnPre = AImEqn - sigma * fvc::grad(VIm);
 
         // Prepare block system
         fvBlockMatrix<vector6> AEqn(A);
@@ -15,12 +15,12 @@
         const scalarField& alphaIn = alpha.internalField();
 
         // Add coupling terms for ARe-AIm coupling
-        AEqn.insertEquationCoupling(0, 3,  scaleA*alphaIn);
-        AEqn.insertEquationCoupling(3, 0, -scaleA*alphaIn);
-        AEqn.insertEquationCoupling(1, 4,  scaleA*alphaIn);
-        AEqn.insertEquationCoupling(4, 1, -scaleA*alphaIn);
-        AEqn.insertEquationCoupling(2, 5,  scaleA*alphaIn);
-        AEqn.insertEquationCoupling(5, 2, -scaleA*alphaIn);
+        AEqn.insertEquationCoupling(0, 3,  alphaIn);
+        AEqn.insertEquationCoupling(3, 0, -alphaIn);
+        AEqn.insertEquationCoupling(1, 4,  alphaIn);
+        AEqn.insertEquationCoupling(4, 1, -alphaIn);
+        AEqn.insertEquationCoupling(2, 5,  alphaIn);
+        AEqn.insertEquationCoupling(5, 2, -alphaIn);
 
         // Block coupled solver call to solve A
         AEqn.solve();
@@ -33,8 +33,8 @@
         AIm.correctBoundaryConditions();
 
         // Add explicit parts of A (segregated coupling)
-        fvScalarMatrix VReEqnPre = VReEqn - scaleV * (gradAlpha&AIm);
-        fvScalarMatrix VImEqnPre = VImEqn + scaleV * (gradAlpha&ARe);
+        fvScalarMatrix VReEqnPre = VReEqn - (gradAlpha&AIm);
+        fvScalarMatrix VImEqnPre = VImEqn + (gradAlpha&ARe);
 
         // Solve V
         VReEqnPre.solve();

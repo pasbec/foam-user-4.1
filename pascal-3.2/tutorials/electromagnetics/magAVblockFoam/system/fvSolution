@@ -16,35 +16,24 @@ FoamFile
 
 AV
 {
-       method                       "coupled";
-//     method                       "segregated";
+//        method                       "coupled";
+    method                       "segregated";
 //     method                       "coupledSegregated";
 
     coupled
     {
-        scaleA                   1.0e-04;
-        scaleV                   1.0e-06;
-
-        coupledCorr              3;
+        coupledCorr              1;
     }
 
     segregated
     {
-        scaleA                   1.0e-04;
-        scaleV                   1.0e-06;
-
-        segregatedCorr           10;
+        segregatedCorr           1;
     }
 
     coupledSegregated
     {
-        scaleA                   1.0e-04;
-        scaleV                   1.0e-06;
-
-//         coupledCorr              1;
-//         segregatedCorr           5;
-        coupledCorr              3;
-        segregatedCorr           2;
+        coupledCorr              1;
+        segregatedCorr           3;
     }
 }
 
@@ -124,8 +113,8 @@ solvers
         relTol                   1e-05;
 //         relTol                   0;
         minIter                  1;
-        maxIter                  10;
-//         maxIter                  20;
+//         maxIter                  10;
+        maxIter                  20;
 //         maxIter                  50;
 //         maxIter                  500;
 

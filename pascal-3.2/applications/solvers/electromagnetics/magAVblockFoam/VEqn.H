@@ -79,8 +79,8 @@
     // Real part
     fvScalarMatrix VReEqn
     (
-        scaleV * fvm::laplacian(sigmaf, VRe)
-//       - scaleV * (gradAlpha&AIm)
+        fvm::laplacian(sigmaf, VRe)
+//       - (gradAlpha&AIm)
     );
 
     VReEqn.setReference(refCell, refValue);
@@ -88,8 +88,8 @@
     // Imaginary part
     fvScalarMatrix VImEqn
     (
-        scaleV * fvm::laplacian(sigmaf, VIm)
-//       + scaleV * (gradAlpha&ARe)
+        fvm::laplacian(sigmaf, VIm)
+//       + (gradAlpha&ARe)
     );
 
     VImEqn.setReference(refCell, refValue);
