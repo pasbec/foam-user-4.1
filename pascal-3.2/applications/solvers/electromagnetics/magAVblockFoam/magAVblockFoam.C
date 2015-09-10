@@ -30,8 +30,6 @@ Description
 
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
-#include "faceSet.H"
-#include "cellSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -153,40 +151,6 @@ int main(int argc, char *argv[])
 
         volScalarField jsReMag ("jsReMag", mag(jsRe)); jsReMag.write();
         volScalarField jsImMag ("jsImMag", mag(jsIm)); jsImMag.write();
-
-        faceSet conductorFaces(mesh, "faceSet_geometry_conductor");
-
-        scalarField conductorSigmaf(conductorFaces.size(),0.0);
-        scalarField conductorAlphaf(conductorFaces.size(),0.0);
-        scalarField conductorAlphaAReFlux(conductorFaces.size(),0.0);
-        scalarField conductorAlphaAImFlux(conductorFaces.size(),0.0);
-        scalarField conductorJReFlux(conductorFaces.size(),0.0);
-        scalarField conductorJImFlux(conductorFaces.size(),0.0);
-
-        forAll(conductorFaces, faceI)
-        {
-            label faceLabel = conductorFaces[faceI];
-
-            conductorSigmaf[faceI] = sigmaf[faceLabel];
-            conductorAlphaf[faceI] = omega.value() * sigmaf[faceLabel];
-
-            conductorAlphaAReFlux[faceI] = omega.value() * sigmaf[faceI] * AReFlux[faceI];
-            conductorAlphaAImFlux[faceI] = omega.value() * sigmaf[faceI] * AImFlux[faceI];
-
-            conductorJReFlux[faceI] = jReFlux[faceLabel];
-            conductorJImFlux[faceI] = jImFlux[faceLabel];
-        }
-
-        // ==================================================================//
-        // Debug output
-        // ==================================================================//
-
-        Info << "gMax(mag(conductorSigmaf)) = " << gMax(mag(conductorSigmaf)) << endl;
-        Info << "gMax(mag(conductorAlphaf)) = " << gMax(mag(conductorAlphaf)) << endl;
-        Info << "gMax(mag(conductorAlphaAReFlux)) = " << gMax(mag(conductorAlphaAReFlux)) << endl;
-        Info << "gMax(mag(conductorAlphaAImFlux)) = " << gMax(mag(conductorAlphaAImFlux)) << endl;
-        Info << "gMax(mag(conductorJReFlux)) = " << gMax(mag(conductorJReFlux)) << endl;
-        Info << "gMax(mag(conductorJImFlux)) = " << gMax(mag(conductorJImFlux)) << endl;
 
         // ==================================================================//
         // Write
