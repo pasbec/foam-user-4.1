@@ -1,13 +1,75 @@
 
-    // Make sure sigmaf does not get zero
-    scalar sigmafNonConducting = SMALL;
-    forAll(sigmaf.internalField(), faceI)
+    // Interpolate sigma to face centers
+    surfaceScalarField sigmaf
+    (
+        "sigmaf",
+        fvc::interpolate(sigma)
+    );
+
+    // Calculate gradient of alpha
+    volVectorField gradAlpha
+    (
+        IOobject
+        (
+            "gradAlpha",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        omega * fvc::grad(sigma),
+        fixedValueFvPatchVectorField::typeName
+    );
+    gradAlpha.boundaryField() == vector::zero;
+
+    // Manipulate face interpolated sigma:
+    //
+    //  First, we will replace zero values with very small
+    //  values at all faces in order to avoid a singular
+    //  solution
+    //
+    //  For all faces connecting cells with zero sigma
+    //  (conductivity) and all boundary faces at infinity
+    //  we now set the face interpolated data to some
+    //  artificial (high) value. This will give an arbitrary
+    //  solution for VRe/VIm in the region where sigma is
+    //  actually zero and VRe/VIm. We need this in order to
+    //  set some boundary conditions for VRe/VIm.
     {
-        if
-        (sigmaf.internalField()[faceI] < SMALL)
+        // Reference to mesh data
+//         const unallocLabelList& own = mesh.owner();
+//         const unallocLabelList& nei = mesh.neighbour();
+
+        // Parameters
+        scalar sigmafNonConducting = SMALL;
+//         scalar sigmafDummy = max(sigmaf).value();
+
+        // Manipulate internal faces
+        forAll(sigmaf.internalField(), faceI)
         {
-            sigmaf.internalField()[faceI] = sigmafNonConducting;
+            if
+            (sigmaf.internalField()[faceI] < SMALL)
+            {
+                sigmaf.internalField()[faceI] = sigmafNonConducting;
+
+//                 label fOwn = own[faceI];
+//                 label fNei = nei[faceI];
+//
+//                 if
+//                 (
+//                    (sigma.internalField()[fOwn] < SMALL)
+//                 && (sigma.internalField()[fNei] < SMALL)
+//                 && (mag(gradAlpha.internalField()[fOwn]) < SMALL)
+//                 && (mag(gradAlpha.internalField()[fNei]) < SMALL)
+//                 )
+//                 {
+//                     sigmaf.internalField()[faceI] = sigmafDummy;
+//                 }
+            }
         }
+
+//         // Manipulate boundary faces
+//         sigmaf.boundaryField() = sigmafDummy;
     }
 
     // Reference settings
@@ -15,22 +77,19 @@
     scalar refValue = 0.0;
 
     // Real part
-
     fvScalarMatrix VReEqn
     (
-        Vscale * fvm::laplacian(sigmaf, VRe, "laplacian(sigmaf,VRe)")
-//       - Vscale * (gradAlpha&AIm)
+        scaleV * fvm::laplacian(sigmaf, VRe)
+//       - scaleV * (gradAlpha&AIm)
     );
 
-//     VReEqn.setReference(refCell, refValue);
-
-
+    VReEqn.setReference(refCell, refValue);
 
     // Imaginary part
     fvScalarMatrix VImEqn
     (
-        Vscale * fvm::laplacian(sigmaf, VIm, "laplacian(sigmaf,VIm)")
-//       + Vscale * (gradAlpha&ARe)
+        scaleV * fvm::laplacian(sigmaf, VIm)
+//       + scaleV * (gradAlpha&ARe)
     );
 
-//     VImEqn.setReference(refCell, refValue);
+    VImEqn.setReference(refCell, refValue);

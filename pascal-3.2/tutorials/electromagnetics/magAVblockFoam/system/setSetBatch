@@ -43,7 +43,7 @@ cellSet  cellSet_geometry_background_old  remove
 
 ### Materials
 
-cellSet cellSet_material_conductuctor     new    setToCell      cellSet_geometry_conductor
+cellSet cellSet_material_conductor        new    setToCell      cellSet_geometry_conductor
 
 cellSet cellSet_material_air              new    setToCell      cellSet_geometry_background
 cellSet cellSet_material_air              add    setToCell      cellSet_geometry_coil

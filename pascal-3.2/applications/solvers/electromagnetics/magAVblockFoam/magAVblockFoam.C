@@ -80,49 +80,11 @@ int main(int argc, char *argv[])
 
         Info << "Time = " << runTime.value() << nl << endl;
 
-        // ==================================================================//
-        // Solve quasi-static Maxwell-Equations for low Rm
-        // ==================================================================//
+        // Re-read controls
+#       include "readAVControls.H"
 
-        // Interpolate sigma to face centers
-        surfaceScalarField sigmaf
-        (
-            "sigmaf",
-            fvc::interpolate(sigma,"interpolate(sigma)")
-        );
-
-        // Interpolate alpha to face centers
-        surfaceScalarField alphaf
-        (
-            "alphaf",
-            omega * fvc::interpolate(sigma,"interpolate(alpha)")
-        );
-
-        // Calculate gradient of alpha
-        volVectorField gradAlpha
-        (
-            "gradSigma",
-            omega * fvc::grad(sigma)
-        );
-
-        // Scale factor for A-equation
-        scalar Ascale = mu0.value();
-
-        // Assemble matrix for A
-#       include "AEqn.H"
-
-        // Scale factor for V-equation
-        scalar Vscale = mu0.value()/max(sigma).value();
-
-        // Assemble matrix for V
-#       include "VEqn.H"
-
-        // Assemble and solve AV block-matrix
-#       include "AVEqn.H"
-
-        // ==================================================================//
-        // Calculate derived fields
-        // ==================================================================//
+        // Solve AV-system
+#       include "solveAV.H"
 
         jRe ==   alpha * AIm - sigma * fvc::grad(VRe);
         jIm == - alpha * ARe - sigma * fvc::grad(VIm);
@@ -150,33 +112,33 @@ int main(int argc, char *argv[])
         volVectorField AReRes
         (
             "AReRes",
-            Ascale * rMu0 * fvc::laplacian(ARe, "laplacian(ARe)")
-          + Ascale * alpha * AIm
-          - Ascale * sigma * fvc::grad(VRe)
-          + Ascale * jsRe
+            rMu0 * fvc::laplacian(ARe)
+          + alpha * AIm
+          - sigma * fvc::grad(VRe)
+          + jsRe
         ); AReRes.write();
 
         volVectorField AImRes
         (
             "AImRes",
-            Ascale * rMu0 * fvc::laplacian(AIm, "laplacian(AIm)")
-          - Ascale * alpha * ARe
-          - Ascale * sigma * fvc::grad(VIm)
-          + Ascale * jsIm
+            rMu0 * fvc::laplacian(AIm)
+          - alpha * ARe
+          - sigma * fvc::grad(VIm)
+          + jsIm
         ); AImRes.write();
 
         volScalarField VReRes
         (
             "VReRes",
-            Vscale * fvc::laplacian(sigmaf, VRe, "laplacian(sigmaf,VRe)")
-          - Vscale * (gradAlpha&AIm)
+            fvc::laplacian(sigmaf, VRe)
+          - (gradAlpha&AIm)
         ); VReRes.write();
 
         volScalarField VImRes
         (
             "VImRes",
-            Vscale * fvc::laplacian(sigmaf, VIm, "laplacian(sigmaf,VIm)")
-          + Vscale * (gradAlpha&ARe)
+            fvc::laplacian(sigmaf, VIm)
+          + (gradAlpha&ARe)
         ); VImRes.write();
 
         volScalarField BReMag ("BReMag", mag(BRe)); BReMag.write();
@@ -205,10 +167,10 @@ int main(int argc, char *argv[])
             label faceLabel = conductorFaces[faceI];
 
             conductorSigmaf[faceI] = sigmaf[faceLabel];
-            conductorAlphaf[faceI] = alphaf[faceLabel];
+            conductorAlphaf[faceI] = omega.value() * sigmaf[faceLabel];
 
-            conductorAlphaAReFlux[faceI] = alphaf[faceI] * AReFlux[faceI];
-            conductorAlphaAImFlux[faceI] = alphaf[faceI] * AImFlux[faceI];
+            conductorAlphaAReFlux[faceI] = omega.value() * sigmaf[faceI] * AReFlux[faceI];
+            conductorAlphaAImFlux[faceI] = omega.value() * sigmaf[faceI] * AImFlux[faceI];
 
             conductorJReFlux[faceI] = jReFlux[faceLabel];
             conductorJImFlux[faceI] = jImFlux[faceLabel];

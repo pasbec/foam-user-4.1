@@ -20,16 +20,6 @@ pointSync true;
 
 patchInfo
 (
-    {
-        name             infinity;
-        constructFrom    set;
-        set              faceSet_geometry_infinity;
-
-        dictionary
-        {
-            type         patch;
-        }
-    }
 );
 
 // OpenFOAM syntax

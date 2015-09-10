@@ -22,6 +22,7 @@ boundaryField
 {
     infinity
     {
+//         type            normalizedZeroGradient;
         type            zeroGradient;
 //         type            fixedValue;
 //         value           uniform 0;

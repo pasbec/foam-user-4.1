@@ -14,56 +14,91 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+AV
+{
+       method                       "coupled";
+//     method                       "segregated";
+//     method                       "coupledSegregated";
+
+    coupled
+    {
+        scaleA                   1.0e-04;
+        scaleV                   1.0e-06;
+
+        coupledCorr              3;
+    }
+
+    segregated
+    {
+        scaleA                   1.0e-04;
+        scaleV                   1.0e-06;
+
+        segregatedCorr           10;
+    }
+
+    coupledSegregated
+    {
+        scaleA                   1.0e-04;
+        scaleV                   1.0e-06;
+
+//         coupledCorr              1;
+//         segregatedCorr           5;
+        coupledCorr              3;
+        segregatedCorr           2;
+    }
+}
+
 solvers
 {
-    AV
+    "(AV)"
 //     {
-//         solver            GaussSeidel;
-//         nSweeps           1;
-//         tolerance         1e-07;
-// //         relTol            1e-03;
-// //         relTol            1e-06;
-//         relTol            0;
-//         minIter           1;
-//         maxIter           100;
-//         preconditioner    none;
+//         solver                   GaussSeidel;
+//         nSweeps                  1;
+//         tolerance                1e-07;
+// //         relTol                   1e-03;
+// //         relTol                   1e-06;
+//         relTol                   0;
+//         minIter                  1;
+//         maxIter                  100;
+//         preconditioner           none;
 //     }
 //     {
-//         solver            GMRES;
-//         nDirections       5;
-//         tolerance         1e-07;
-// //         relTol            1e-03;
-// //         relTol            1e-06;
-//         relTol            0;
-//         minIter           1;
-// //         maxIter           10;
-//         maxIter           20;
-// //         maxIter           500;
-//         preconditioner    Cholesky;
+//         solver                   GMRES;
+//         nDirections              5;
+//         tolerance                1e-07;
+// //         relTol                   1e-03;
+// //         relTol                   1e-06;
+//         relTol                   0;
+//         minIter                  1;
+// //         maxIter                  10;
+//         maxIter                  20;
+// //         maxIter                  500;
+//         preconditioner           Cholesky;
 //     }
     {
-        solver            BiCGStab;
-        tolerance         1e-07;
-//         relTol            1e-03;
-//         relTol            1e-06;
-        relTol            0;
-        minIter           1;
-//         maxIter           10;
-//         maxIter           20;
-        maxIter           50;
-//         maxIter           500;
-        preconditioner    Cholesky;
+        solver                   BiCGStab;
+        tolerance                1e-06;
+//         relTol                   1e-03;
+        relTol                   1e-05;
+//         relTol                   1e-06;
+//         relTol                   0;
+        minIter                  1;
+//         maxIter                  10;
+//         maxIter                  20;
+        maxIter                  50;
+//         maxIter                  500;
+        preconditioner           Cholesky;
     }
 //     {
 //         solver          AMG;
 //         cycle           V-cycle;
 //         coarseningType  AAMG;
 //         norm            maxNorm; // componentNorm, maxNorm, twoNorm
-//         normComponent   0; // for norm=componentNorm
+// //         normComponent   0; // for norm=componentNorm
 //
-//         nPreSweeps      2;
+//         nPreSweeps      0;
 //         nPostSweeps     2;
-//         groupSize       2;
+//         groupSize       10;
 //         minCoarseEqns   4;
 //         nMaxLevels      100;
 //         scale           on;
@@ -79,6 +114,42 @@ solvers
 // //         relTol          1e-06;
 //         relTol          0;
 //     }
+
+
+    "(A)"
+    {
+        solver                   BiCGStab;
+
+        tolerance                1e-06;
+        relTol                   1e-05;
+//         relTol                   0;
+        minIter                  1;
+        maxIter                  10;
+//         maxIter                  20;
+//         maxIter                  50;
+//         maxIter                  500;
+
+        preconditioner           Cholesky;
+    }
+
+    "(VRe|VIm)"
+    {
+        solver                   GAMG;
+
+        tolerance                1e-06;
+        relTol                   1e-05;
+//         relTol                   0;
+        minIter                  1;
+        maxIter                  100;
+
+        smoother                 DICGaussSeidel;
+        nPreSweeps               2;
+        nPostSweeps              2;
+        cacheAgglomeration       on;
+        agglomerator             faceAreaPair;
+        nCellsInCoarsestLevel    200;
+        mergeLevels              1;
+    }
 }
 
 // ************************************************************************* //

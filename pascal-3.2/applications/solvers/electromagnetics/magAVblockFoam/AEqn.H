@@ -2,21 +2,17 @@
     // Real part
     fvVectorMatrix AReEqn
     (
-        Ascale * rMu0 * fvm::laplacian(ARe, "laplacian(ARe)")
-//       + Ascale * alpha * AIm
-//       - Ascale * sigma * fvc::grad(VRe)
-     ==
-      - Ascale * jsRe
+        scaleA * rMu0 * fvm::laplacian(ARe)
+//       + scaleA * alpha * AIm
+//       - scaleA * sigma * fvc::grad(VRe)
+      + scaleA * jsRe
     );
-
-
 
     // Imaginary part
     fvVectorMatrix AImEqn
     (
-        Ascale * rMu0 * fvm::laplacian(AIm, "laplacian(AIm)")
-//       - Ascale * alpha * ARe
-//       - Ascale * sigma * fvc::grad(VIm)
-     ==
-      - Ascale * jsIm
+        scaleA * rMu0 * fvm::laplacian(AIm)
+//       - scaleA * alpha * ARe
+//       - scaleA * sigma * fvc::grad(VIm)
+      + scaleA * jsIm
     );

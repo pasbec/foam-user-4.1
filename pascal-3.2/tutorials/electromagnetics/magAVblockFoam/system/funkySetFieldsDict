@@ -58,11 +58,11 @@ expressions
     keepPatches   true;
   }
 
-  cellSet_material_conductuctor
+  sigma_conductor
   {
     field         sigma;
     variables     $materialProperties;
-    condition     "set(cellSet_material_conductuctor)";
+    condition     "set(cellSet_material_conductor)";
     expression    "sigma_silicon_liquid";
     keepPatches   true;
   }

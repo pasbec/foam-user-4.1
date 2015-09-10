@@ -92,6 +92,23 @@
         mesh
     );
 
+
+    // Magnetic vector potential (complex)
+    Info << "Create field A" << nl << endl;
+    volVector6Field A
+    (
+        IOobject
+        (
+            "A",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector6(word(),dimless,vector6::zero)
+    );
+
     // Electric scalar potential (real part)
     Info << "Create field VRe" << endl;
     volScalarField VRe
