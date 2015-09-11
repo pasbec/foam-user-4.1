@@ -30,6 +30,7 @@ Description
 
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
+#include "faceSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -102,9 +103,6 @@ int main(int argc, char *argv[])
 
         gradAlpha.write();
 
-        surfaceScalarField AReFlux ("AReFlux", fvc::interpolate(ARe) & mesh.Sf());
-        surfaceScalarField AImFlux ("AImFlux", fvc::interpolate(AIm) & mesh.Sf());
-
         volScalarField AReMag ("AReMag", mag(ARe)); AReMag.write();
         volScalarField AImMag ("AImMag", mag(AIm)); AImMag.write();
 
@@ -142,9 +140,6 @@ int main(int argc, char *argv[])
 
         volScalarField BReMag ("BReMag", mag(BRe)); BReMag.write();
         volScalarField BImMag ("BImMag", mag(BIm)); BImMag.write();
-
-        surfaceScalarField jReFlux ("jReFlux", fvc::interpolate(jRe) & mesh.Sf());
-        surfaceScalarField jImFlux ("jImFlux", fvc::interpolate(jIm) & mesh.Sf());
 
         volScalarField jReMag ("jReMag", mag(jRe)); jReMag.write();
         volScalarField jImMag ("jImMag", mag(jIm)); jImMag.write();

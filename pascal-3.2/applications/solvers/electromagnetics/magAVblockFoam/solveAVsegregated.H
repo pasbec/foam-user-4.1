@@ -7,11 +7,24 @@
         // Prepare block system
         fvBlockMatrix<vector6> AEqn(A);
 
+        // Lookup solver type for AEqn
+        word solverType =
+            mesh.solutionDict().subDict("solvers").
+            subDict(AEqn.psi().name()).lookup("solver");
+
+        // Force diag/upper/lower square for AMG (matrix is asymmetric)
+        if (solverType == "AMG")
+        {
+            Field<tensor6>& AEqnD = AEqn.diag().asSquare(); AEqnD = tensor6::zero;
+            Field<tensor6>& AEqnU = AEqn.upper().asSquare(); AEqnU = tensor6::zero;
+            Field<tensor6>& AEqnL = AEqn.lower().asSquare(); AEqnL = tensor6::zero;
+        }
+
         // Insert equations for A
         AEqn.insertEquation(0, AReEqnPre);
         AEqn.insertEquation(3, AImEqnPre);
 
-        // References to interal alpha field
+        // References to internal alpha field
         const scalarField& alphaIn = alpha.internalField();
 
         // Add coupling terms for ARe-AIm coupling

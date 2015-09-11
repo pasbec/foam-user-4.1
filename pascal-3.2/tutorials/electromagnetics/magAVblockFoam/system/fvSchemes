@@ -25,8 +25,6 @@ gradSchemes
 
     grad(sigma)                       Gauss linear;
 
-//     curl(ARe)                         Gauss linear;
-//     curl(AIm)                         Gauss linear;
     curl(ARe)                         leastSquares;
     curl(AIm)                         leastSquares;
 
@@ -46,8 +44,6 @@ laplacianSchemes
     laplacian(ARe)                    Gauss linear uncorrected; // linear is not used here
     laplacian(AIm)                    Gauss linear uncorrected; // linear is not used here
 
-    laplacian(sigma,VRe)              Gauss linear uncorrected;
-    laplacian(sigma,VIm)              Gauss linear uncorrected;
     laplacian(sigmaf,VRe)             Gauss linear uncorrected; // linear is not used here
     laplacian(sigmaf,VIm)             Gauss linear uncorrected; // linear is not used here
 }
@@ -58,12 +54,6 @@ interpolationSchemes
 
     interpolate(sigma)                linear;
     interpolate(alpha)                linear;
-
-    interpolate(ARe)                  linear; // debug
-    interpolate(AIm)                  linear; // debug
-
-    interpolate(jRe)                  linear; // debug
-    interpolate(jIm)                  linear; // debug
 }
 
 snGradSchemes

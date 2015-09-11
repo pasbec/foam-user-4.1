@@ -11,7 +11,7 @@
         AVEqn.insertEquation(3, VReEqn);
         AVEqn.insertEquation(7, VImEqn);
 
-        // References to interal fields
+        // References to internal fields
         const scalarField& sigmaIn = sigma.internalField();
         const scalarField& alphaIn = alpha.internalField();
         const vectorField& gradAlphaIn = gradAlpha.internalField();

@@ -1,5 +1,4 @@
 
-
     // Assemble matrix for A
 #   include "AEqn.H"
 

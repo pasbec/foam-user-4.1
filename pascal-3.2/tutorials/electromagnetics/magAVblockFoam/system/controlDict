@@ -48,7 +48,8 @@ cycleWrite          0;
 
 writeFormat         ascii;
 
-writePrecision      8;
+// writePrecision      8;
+writePrecision      12;
 
 writeCompression    uncompressed;
 

@@ -16,8 +16,8 @@ FoamFile
 
 AV
 {
-//        method                       "coupled";
-    method                       "segregated";
+    method                       "coupled";
+//     method                       "segregated";
 //     method                       "coupledSegregated";
 
     coupled
@@ -120,6 +120,31 @@ solvers
 
         preconditioner           Cholesky;
     }
+//     {
+//         solver          AMG;
+//         cycle           V-cycle;
+//         coarseningType  AAMG;
+//         norm            twoNorm; // componentNorm, maxNorm, twoNorm
+// //         normComponent   0; // for norm=componentNorm
+//
+//         nPreSweeps      0;
+//         nPostSweeps     2;
+//         groupSize       3;
+//         minCoarseEqns   4;
+//         nMaxLevels      100;
+//         scale           on;
+//         smoother        ILU; // ILU, GaussSeidel
+//
+//         minIter         0;
+// //         maxIter         10;
+//         maxIter         20;
+// //         maxIter         100;
+// //         maxIter         500;
+//         tolerance       1e-07;
+// //         relTol          1e-03;
+// //         relTol          1e-06;
+//         relTol          0;
+//     }
 
     "(VRe|VIm)"
     {
