@@ -16,8 +16,8 @@ FoamFile
 
 AV
 {
-    method                       "coupled";
-//     method                       "segregated";
+//     method                       "coupled";
+    method                       "segregated";
 //     method                       "coupledSegregated";
 
     coupled
