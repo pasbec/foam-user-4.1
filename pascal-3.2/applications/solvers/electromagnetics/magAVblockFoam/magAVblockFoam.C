@@ -36,10 +36,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+#   include "addRegionOption.H"
 
 #   include "setRootCase.H"
 #   include "createTime.H"
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
 
     using namespace Foam;
 
@@ -105,6 +106,9 @@ int main(int argc, char *argv[])
 
         volScalarField AReMag ("AReMag", mag(ARe)); AReMag.write();
         volScalarField AImMag ("AImMag", mag(AIm)); AImMag.write();
+
+        volScalarField AReCheck ("AReCheck", mag(alpha*ARe)/(max(mag(alpha*ARe)).value() + VSMALL)); AReCheck.write();
+        volScalarField AImCheck ("AImCheck", mag(alpha*AIm)/(max(mag(alpha*AIm)).value() + VSMALL)); AImCheck.write();
 
         volVectorField AReRes
         (

@@ -1,8 +1,8 @@
 
     {
-        // Add explicit parts of V (segregated coupling)
-        fvVectorMatrix AReEqnPre = AReEqn - sigma * fvc::grad(VRe);
-        fvVectorMatrix AImEqnPre = AImEqn - sigma * fvc::grad(VIm);
+        // Add explicit parts of V (segregated A-V coupling)
+        fvVectorMatrix AReEqnSegregated = AReEqn - sigma * fvc::grad(VRe);
+        fvVectorMatrix AImEqnSegregated = AImEqn - sigma * fvc::grad(VIm);
 
         // Prepare block system
         fvBlockMatrix<vector6> AEqn(A);
@@ -12,7 +12,7 @@
             mesh.solutionDict().subDict("solvers").
             subDict(AEqn.psi().name()).lookup("solver");
 
-        // Force diag/upper/lower square for AMG (matrix is asymmetric)
+        // Force diag/upper/lower square for AMG (matrix for A is asymmetric)
         if (solverType == "AMG")
         {
             Field<tensor6>& AEqnD = AEqn.diag().asSquare(); AEqnD = tensor6::zero;
@@ -21,8 +21,8 @@
         }
 
         // Insert equations for A
-        AEqn.insertEquation(0, AReEqnPre);
-        AEqn.insertEquation(3, AImEqnPre);
+        AEqn.insertEquation(0, AReEqnSegregated);
+        AEqn.insertEquation(3, AImEqnSegregated);
 
         // References to internal alpha field
         const scalarField& alphaIn = alpha.internalField();
@@ -45,13 +45,29 @@
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 
-        // Add explicit parts of A (segregated coupling)
-        fvScalarMatrix VReEqnPre = VReEqn - (gradAlpha&AIm);
-        fvScalarMatrix VImEqnPre = VImEqn + (gradAlpha&ARe);
+        // Add explicit parts of A (segregated A-V coupling)
+        fvScalarMatrix VReEqnSegregated = VReEqn;
+        fvScalarMatrix VImEqnSegregated = VImEqn;
+
+        bool useGradAlpha = true;
+
+        if (useGradAlpha)
+        {
+            VReEqnSegregated -= gradAlpha&AIm;
+            VImEqnSegregated += gradAlpha&ARe;
+        }
+        else
+        {
+            VReEqnSegregated -= fvc::div(alpha*AIm);
+            VImEqnSegregated += fvc::div(alpha*ARe);
+
+            VReEqnSegregated += alpha * fvc::div(AIm);
+            VImEqnSegregated -= alpha * fvc::div(ARe);
+        }
 
         // Solve V
-        VReEqnPre.solve();
-        VImEqnPre.solve();
+        VReEqnSegregated.solve();
+        VImEqnSegregated.solve();
 
         VRe.correctBoundaryConditions();
         VIm.correctBoundaryConditions();

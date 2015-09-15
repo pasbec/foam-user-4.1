@@ -16,38 +16,52 @@ FoamFile
 
 ddtSchemes
 {
-    default            none;
+    default                           none;
 }
 
 gradSchemes
 {
-    default            none;
-    snGradCorr(ARe)    leastSquares;
-    snGradCorr(AIm)    leastSquares;
-    curl(ARe)          leastSquares;
-    curl(AIm)          leastSquares;
+    default                           none;
+
+    curl(ARe)                         leastSquares;
+    curl(AIm)                         leastSquares;
+    snGradCorr(ARe)                   leastSquares;
+    snGradCorr(AIm)                   leastSquares;
+
+    grad(VRe)                         leastSquares;
+    grad(VIm)                         leastSquares;
+    snGradCorr(VRe)                   leastSquares;
+    snGradCorr(VIm)                   leastSquares;
+
+    grad(sigma)                       leastSquares;
 }
 
 divSchemes
 {
-    default            none;
+    default                           none;
 }
 
 laplacianSchemes
 {
-    default            none;
-    laplacian(ARe)     Gauss linear corrected;
-    laplacian(AIm)     Gauss linear corrected;
+    default                           none;
+
+    laplacian(ARe)                    Gauss linear corrected; // linear is not used here
+    laplacian(AIm)                    Gauss linear corrected; // linear is not used here
+
+    laplacian(sigmaf,VRe)             Gauss linear corrected; // linear is not used here
+    laplacian(sigmaf,VIm)             Gauss linear corrected; // linear is not used here
 }
 
 interpolationSchemes
 {
-    default            none;
+    default                           none;
+
+    interpolate(sigma)                linear;
 }
 
 snGradSchemes
 {
-    default            none;
+    default                           none;
 }
 
 // ************************************************************************* //

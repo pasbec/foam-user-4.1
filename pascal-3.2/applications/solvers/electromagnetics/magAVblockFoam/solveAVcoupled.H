@@ -24,25 +24,46 @@
         AVEqn.insertEquationCoupling(2, 6,  alphaIn);
         AVEqn.insertEquationCoupling(6, 2, -alphaIn);
 
-        // Coupling of real part of electric scalar potential equation
+        // Coupling part of electric scalar potential equation in A
         BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe)); VReInARe *= -sigmaIn;
-//         BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(sigmaf, AIm, "div(sigmaf,AIm)")); AImInVRe *= -omega.value();
+        BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm)); VImInAIm *= -sigmaIn;
 
         AVEqn.insertBlockCoupling(0, 3, VReInARe, true);
-//         AVEqn.insertBlockCoupling(3, 4, AImInVRe, false);
-        AVEqn.insertEquationCoupling(3, 4, -gradAlphaIn.component(0));
-        AVEqn.insertEquationCoupling(3, 5, -gradAlphaIn.component(1));
-        AVEqn.insertEquationCoupling(3, 6, -gradAlphaIn.component(2));
-
-        // Coupling of imaginary part of electric scalar potential equation
-        BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm)); VImInAIm *= -sigmaIn;
-//         BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(sigmaf, ARe, "div(sigmaf,ARe)")); AReInVIm *= omega.value();
-
         AVEqn.insertBlockCoupling(4, 7, VImInAIm, true);
-//         AVEqn.insertBlockCoupling(7, 0, AReInVIm, false);
-        AVEqn.insertEquationCoupling(7, 0,  gradAlphaIn.component(0));
-        AVEqn.insertEquationCoupling(7, 1,  gradAlphaIn.component(1));
-        AVEqn.insertEquationCoupling(7, 2,  gradAlphaIn.component(2));
+
+        // Coupling part of electric scalar potential equation from A
+        bool useGradAlpha = true;
+
+        if (useGradAlpha)
+        {
+            AVEqn.insertEquationCoupling(3, 4, -gradAlphaIn.component(0));
+            AVEqn.insertEquationCoupling(3, 5, -gradAlphaIn.component(1));
+            AVEqn.insertEquationCoupling(3, 6, -gradAlphaIn.component(2));
+
+            AVEqn.insertEquationCoupling(7, 0,  gradAlphaIn.component(0));
+            AVEqn.insertEquationCoupling(7, 1,  gradAlphaIn.component(1));
+            AVEqn.insertEquationCoupling(7, 2,  gradAlphaIn.component(2));
+        }
+        else
+        {
+            BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(sigmaf, AIm, "div(sigmaf,AIm)"));
+            BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(sigmaf, ARe, "div(sigmaf,ARe)"));
+
+            AImInVRe *= -omega.value();
+            AReInVIm *=  omega.value();
+
+            BlockLduSystem<vector, scalar> AImInVReDiv(fvm::UDiv(AIm));
+            BlockLduSystem<vector, scalar> AReInVImDiv(fvm::UDiv(ARe));
+
+            AImInVReDiv *= alphaIn;
+            AReInVImDiv *= alphaIn;
+
+            AImInVRe += AImInVReDiv;
+            AReInVIm -= AReInVImDiv;
+
+            AVEqn.insertBlockCoupling(3, 4, AImInVRe, false);
+            AVEqn.insertBlockCoupling(7, 0, AReInVIm, false);
+        }
 
         // Block coupled solver call
         AVEqn.solve();
