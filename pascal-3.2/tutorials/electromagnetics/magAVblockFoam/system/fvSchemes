@@ -28,6 +28,11 @@ gradSchemes
     snGradCorr(ARe)                   Gauss linear;
     snGradCorr(AIm)                   Gauss linear;
 
+    grad(GRe)                         Gauss linear;
+    grad(GIm)                         Gauss linear;
+    snGradCorr(GRe)                   Gauss linear;
+    snGradCorr(GIm)                   Gauss linear;
+
     grad(VRe)                         Gauss linear;
     grad(VIm)                         Gauss linear;
     snGradCorr(VRe)                   Gauss linear;
@@ -40,15 +45,8 @@ divSchemes
 {
     default                           none;
 
-    div(sigmaf,ARe)                   Gauss linear;
-    div(sigmaf,AIm)                   Gauss linear;
-//     div(alphaf,ARe)                   Gauss linear;
-//     div(alphaf,AIm)                   Gauss linear;
-
     div(ARe)                          Gauss linear;
     div(AIm)                          Gauss linear;
-    div((alpha*ARe))                  Gauss linear;
-    div((alpha*AIm))                  Gauss linear;
 }
 
 laplacianSchemes
@@ -58,8 +56,11 @@ laplacianSchemes
     laplacian(ARe)                    Gauss linear corrected; // linear is not used here
     laplacian(AIm)                    Gauss linear corrected; // linear is not used here
 
-    laplacian(sigmaf,VRe)             Gauss linear corrected; // linear is not used here
-    laplacian(sigmaf,VIm)             Gauss linear corrected; // linear is not used here
+    laplacian(GRe)                    Gauss linear corrected; // linear is not used here
+    laplacian(GIm)                    Gauss linear corrected; // linear is not used here
+
+    laplacian(VRe)                    Gauss linear corrected; // linear is not used here
+    laplacian(VIm)                    Gauss linear corrected; // linear is not used here
 }
 
 interpolationSchemes
@@ -67,7 +68,12 @@ interpolationSchemes
     default                           none;
 
     interpolate(sigma)                linear;
-//     interpolate(alpha)                linear;
+
+    interpolate(ARe)                  linear;
+    interpolate(AIm)                  linear;
+
+    interpolate(grad(GRe))            linear;
+    interpolate(grad(GIm))            linear;
 }
 
 snGradSchemes

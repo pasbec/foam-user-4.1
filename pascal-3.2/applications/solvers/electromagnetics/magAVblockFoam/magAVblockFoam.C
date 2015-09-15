@@ -31,6 +31,8 @@ Description
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
 #include "faceSet.H"
+#include "fvMeshSubset.H"
+#include "fixedGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,8 +89,8 @@ int main(int argc, char *argv[])
         // Solve AV-system
 #       include "solveAV.H"
 
-        jRe ==   alpha * AIm - sigma * fvc::grad(VRe);
-        jIm == - alpha * ARe - sigma * fvc::grad(VIm);
+        jRe ==   alpha * AIm + alpha * fvc::grad(GIm) - sigma * fvc::grad(VRe);
+        jIm == - alpha * ARe - alpha * fvc::grad(GRe) - sigma * fvc::grad(VIm);
 
         BRe == fvc::curl(ARe);
         BIm == fvc::curl(AIm);
@@ -97,63 +99,6 @@ int main(int argc, char *argv[])
 
         pB == 0.5 * rMu0
             * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
-
-        // ==================================================================//
-        // Debug stuff
-        // ==================================================================//
-
-        gradAlpha.write();
-
-        volScalarField AReMag ("AReMag", mag(ARe)); AReMag.write();
-        volScalarField AImMag ("AImMag", mag(AIm)); AImMag.write();
-
-        volScalarField AReCheck ("AReCheck", mag(alpha*ARe)/(max(mag(alpha*ARe)).value() + VSMALL)); AReCheck.write();
-        volScalarField AImCheck ("AImCheck", mag(alpha*AIm)/(max(mag(alpha*AIm)).value() + VSMALL)); AImCheck.write();
-
-        volVectorField AReRes
-        (
-            "AReRes",
-            rMu0 * fvc::laplacian(ARe)
-          + alpha * AIm
-          - sigma * fvc::grad(VRe)
-          + jsRe
-        ); AReRes.write();
-
-        volVectorField AImRes
-        (
-            "AImRes",
-            rMu0 * fvc::laplacian(AIm)
-          - alpha * ARe
-          - sigma * fvc::grad(VIm)
-          + jsIm
-        ); AImRes.write();
-
-        volScalarField VReRes
-        (
-            "VReRes",
-            fvc::laplacian(sigmaf, VRe)
-          - (gradAlpha&AIm)
-        ); VReRes.write();
-
-        volScalarField VImRes
-        (
-            "VImRes",
-            fvc::laplacian(sigmaf, VIm)
-          + (gradAlpha&ARe)
-        ); VImRes.write();
-
-        volScalarField BReMag ("BReMag", mag(BRe)); BReMag.write();
-        volScalarField BImMag ("BImMag", mag(BIm)); BImMag.write();
-
-        volScalarField jReMag ("jReMag", mag(jRe)); jReMag.write();
-        volScalarField jImMag ("jImMag", mag(jIm)); jImMag.write();
-
-        volScalarField jsReMag ("jsReMag", mag(jsRe)); jsReMag.write();
-        volScalarField jsImMag ("jsImMag", mag(jsIm)); jsImMag.write();
-
-        // ==================================================================//
-        // Write
-        // ==================================================================//
 
         runTime.write();
 

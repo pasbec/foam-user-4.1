@@ -6,23 +6,23 @@
 #   include "VEqn.H"
 
     // Solve AV-system
-    if (AVmethod == "coupled")
+    if (AVmethod == "subset")
     {
-        int nCoupledCorr = AVmethodDict.lookupOrDefault<int>("coupledCorr",4);
+        int nSubsetCorr = AVmethodDict.lookupOrDefault<int>("corr",10);
 
         for
         (
-            int coupledCorr=0;
-            coupledCorr<nCoupledCorr;
-            coupledCorr++
+            int subsetCorr=0;
+            subsetCorr<nSubsetCorr;
+            subsetCorr++
         )
         {
-#           include "solveAVcoupled.H"
+#           include "solveAVsubset.H"
         }
     }
     else if (AVmethod == "segregated")
     {
-        int nSegregatedCorr = AVmethodDict.lookupOrDefault<int>("segregatedCorr",10);
+        int nSegregatedCorr = AVmethodDict.lookupOrDefault<int>("corr",10);
 
         for
         (
@@ -32,6 +32,20 @@
         )
         {
 #           include "solveAVsegregated.H"
+        }
+    }
+    else if (AVmethod == "coupled")
+    {
+        int nCoupledCorr = AVmethodDict.lookupOrDefault<int>("corr",4);
+
+        for
+        (
+            int coupledCorr=0;
+            coupledCorr<nCoupledCorr;
+            coupledCorr++
+        )
+        {
+#           include "solveAVcoupled.H"
         }
     }
     else if (AVmethod == "coupledSegregated")

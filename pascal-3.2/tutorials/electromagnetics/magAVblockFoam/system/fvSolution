@@ -16,18 +16,24 @@ FoamFile
 
 AV
 {
+    method                       "subset";
+//     method                       "segregated";
 //     method                       "coupled";
-    method                       "segregated";
 //     method                       "coupledSegregated";
 
-    coupled
+    subset
     {
-        coupledCorr              1;
+        corr                     1;
     }
 
     segregated
     {
-        segregatedCorr           1;
+        corr                     1;
+    }
+
+    coupled
+    {
+        corr                     1;
     }
 
     coupledSegregated
@@ -114,8 +120,8 @@ solvers
 //         relTol                   0;
         minIter                  1;
 //         maxIter                  10;
-        maxIter                  20;
-//         maxIter                  50;
+//         maxIter                  20;
+        maxIter                  50;
 //         maxIter                  500;
 
         preconditioner           Cholesky;
@@ -145,6 +151,36 @@ solvers
 // //         relTol          1e-06;
 //         relTol          0;
 //     }
+
+    "(GRe|GIm)"
+//     {
+//         solver                   PCG;
+//
+//         tolerance                1e-06;
+//         relTol                   1e-05;
+// //         relTol                   0;
+//         minIter                  1;
+//         maxIter                  1000;
+//
+//         preconditioner           DIC;
+//     }
+    {
+        solver                   GAMG;
+
+        tolerance                1e-06;
+        relTol                   1e-05;
+//         relTol                   0;
+        minIter                  1;
+        maxIter                  100;
+
+        smoother                 DICGaussSeidel;
+        nPreSweeps               2;
+        nPostSweeps              2;
+        cacheAgglomeration       on;
+        agglomerator             faceAreaPair;
+        nCellsInCoarsestLevel    200;
+        mergeLevels              1;
+    }
 
     "(VRe|VIm)"
 //     {

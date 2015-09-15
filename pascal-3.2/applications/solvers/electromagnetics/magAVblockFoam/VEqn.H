@@ -59,7 +59,7 @@
     // Real part
     fvScalarMatrix VReEqn
     (
-        fvm::laplacian(sigmaf, VRe)
+        fvm::laplacian(sigmaf, VRe, "laplacian(VRe)")
 //       - fvc::div(alpha*AIm)
     );
 
@@ -87,7 +87,7 @@
     // Imaginary part
     fvScalarMatrix VImEqn
     (
-        fvm::laplacian(sigmaf, VIm)
+        fvm::laplacian(sigmaf, VIm, "laplacian(VIm)")
 //       + fvc::div(alpha*ARe)
     );
 
