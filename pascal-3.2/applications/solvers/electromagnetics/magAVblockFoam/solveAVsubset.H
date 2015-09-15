@@ -316,7 +316,8 @@
                     );
 
                 // Set correct gradient
-                cVReP.gradient() = omega.value() * cSnAIm.boundaryField()[patchI];
+                cVReP.gradient() =   omega.value() * cSnAIm.boundaryField()[patchI]
+                                   + omega.value() * cSgradGIm.boundaryField()[patchI] / cMesh.magSf().boundaryField()[patchI];
             }
         }
         forAll(cVIm.boundaryField(), patchI)
@@ -334,7 +335,8 @@
                     );
 
                 // Set correct gradient
-                cVImP.gradient() = - omega.value() * cSnARe.boundaryField()[patchI];
+                cVImP.gradient() = - omega.value() * cSnARe.boundaryField()[patchI]
+                                   - omega.value() * cSgradGRe.boundaryField()[patchI] / cMesh.magSf().boundaryField()[patchI];
             }
         }
 
