@@ -30,9 +30,15 @@ Description
 
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
+
 #include "faceSet.H"
+
 #include "fvMeshSubset.H"
+
+#include "zeroGradientFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
+#include "slipFvPatchFields.H"
+#include "newDirectionMixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,17 +89,17 @@ int main(int argc, char *argv[])
 
         Info << "Time = " << runTime.value() << nl << endl;
 
-        // Re-read controls
-#       include "readAVControls.H"
+//         // Re-read controls
+// #       include "readAVControls.H"
 
-        // Solve AV-system
-#       include "solveAV.H"
+//         // Solve AV-system
+// #       include "solveAV.H"
 
-        jRe ==   alpha * AIm + alpha * fvc::grad(GIm) - sigma * fvc::grad(VRe);
-        jIm == - alpha * ARe - alpha * fvc::grad(GRe) - sigma * fvc::grad(VIm);
+//         // Solve B-system
+// #       include "solveB.H"
 
-        BRe == fvc::curl(ARe);
-        BIm == fvc::curl(AIm);
+        // Solve T-S-system
+#       include "solveTS.H"
 
         FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
 

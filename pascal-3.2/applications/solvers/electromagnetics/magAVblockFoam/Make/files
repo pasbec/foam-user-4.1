@@ -1,4 +1,5 @@
 interpolation/linearWeighted/linearWeighted.C
+newDirectionMixed/newDirectionMixedFvPatchFields.C
 
 magAVblockFoam.C
 

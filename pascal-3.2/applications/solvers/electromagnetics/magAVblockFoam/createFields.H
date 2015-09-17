@@ -197,10 +197,10 @@
             "BRe",
             runTime.timeName(),
             mesh,
-            IOobject::READ_IF_PRESENT,
+            IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        fvc::curl(ARe)
+        mesh
     );
 
     // Magnetic field density (imaginary part)
@@ -212,10 +212,134 @@
             "BIm",
             runTime.timeName(),
             mesh,
-            IOobject::READ_IF_PRESENT,
+            IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        fvc::curl(AIm)
+        mesh
+    );
+
+    // Magnetic field density (complex)
+    Info << "Create field B" << nl << endl;
+    volVector6Field B
+    (
+        IOobject
+        (
+            "B",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector6(word(),dimless,vector6::zero)
+    );
+
+
+    // Magnetic scalar potential (real part)
+    Info << "Create field SRe" << endl;
+    volScalarField SRe
+    (
+        IOobject
+        (
+            "SRe",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    // Magnetic scalar potential (imaginary part)
+    Info << "Create field SIm " << nl << endl;
+    volScalarField SIm
+    (
+        IOobject
+        (
+            "SIm",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+
+    // Current vector potential (real part)
+    Info << "Create field TRe" << endl;
+    volVectorField TRe
+    (
+        IOobject
+        (
+            "TRe",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    // Current vector potential (imaginary part)
+    Info << "Create field TIm" << nl << endl;
+    volVectorField TIm
+    (
+        IOobject
+        (
+            "TIm",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    volVectorField TsRe
+    (
+        IOobject
+        (
+            "TsRe",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensioned<vector>(word(),TRe.dimensions(),pTraits<vector>::zero),
+        slipFvPatchField<vector>::typeName
+    );
+
+    volVectorField TsIm
+    (
+        IOobject
+        (
+            "TsIm",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensioned<vector>(word(),TIm.dimensions(),pTraits<vector>::zero),
+        slipFvPatchField<vector>::typeName
+    );
+
+    // Current vector potential (complex)
+    Info << "Create field T" << nl << endl;
+    volVector6Field T
+    (
+        IOobject
+        (
+            "T",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector6(word(),dimless,vector6::zero)
     );
 
 

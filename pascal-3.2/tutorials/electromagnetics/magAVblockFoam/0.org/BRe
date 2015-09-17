@@ -22,8 +22,9 @@ boundaryField
 {
     infinity
     {
-        type            calculated;
-        value           $internalField;
+        type            slip;
+//         type            calculated;
+//         value           $internalField;
     }
     "procBoundary.*"
     {

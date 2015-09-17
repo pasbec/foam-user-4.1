@@ -16,8 +16,8 @@ FoamFile
 
 AV
 {
-    method                       "subset";
-//     method                       "segregated";
+//     method                       "subset"; // BUG???
+    method                       "segregated";
 //     method                       "coupled";
 //     method                       "coupledSegregated";
 
@@ -111,13 +111,15 @@ solvers
 //     }
 
 
-    "(A)"
+    "(A|B|T)"
     {
         solver                   BiCGStab;
 
-        tolerance                1e-06;
-        relTol                   1e-05;
-//         relTol                   0;
+        tolerance                1e-07;
+//         tolerance                1e-06;
+//         relTol                   1e-03;
+//         relTol                   1e-05;
+        relTol                   0;
         minIter                  1;
 //         maxIter                  10;
 //         maxIter                  20;
@@ -152,7 +154,7 @@ solvers
 //         relTol          0;
 //     }
 
-    "(GRe|GIm)"
+    "(TsRe|TsIm|SRe|SIm|ARe|AIm|GRe|GIm|VRe|VIm)"
 //     {
 //         solver                   PCG;
 //
@@ -167,39 +169,9 @@ solvers
     {
         solver                   GAMG;
 
-        tolerance                1e-06;
-        relTol                   1e-05;
-//         relTol                   0;
-        minIter                  1;
-        maxIter                  100;
-
-        smoother                 DICGaussSeidel;
-        nPreSweeps               2;
-        nPostSweeps              2;
-        cacheAgglomeration       on;
-        agglomerator             faceAreaPair;
-        nCellsInCoarsestLevel    200;
-        mergeLevels              1;
-    }
-
-    "(VRe|VIm)"
-//     {
-//         solver                   PCG;
-//
-//         tolerance                1e-06;
+        tolerance                1e-07;
 //         relTol                   1e-05;
-// //         relTol                   0;
-//         minIter                  1;
-//         maxIter                  1000;
-//
-//         preconditioner           DIC;
-//     }
-    {
-        solver                   GAMG;
-
-        tolerance                1e-06;
-        relTol                   1e-05;
-//         relTol                   0;
+        relTol                   0;
         minIter                  1;
         maxIter                  100;
 

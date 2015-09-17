@@ -23,44 +23,57 @@ gradSchemes
 {
     default                           none;
 
-    curl(ARe)                         Gauss linear;
-    curl(AIm)                         Gauss linear;
-    snGradCorr(ARe)                   Gauss linear;
-    snGradCorr(AIm)                   Gauss linear;
+    grad(mgamma)                      Gauss linear;
+
+    grad(SRe)                         Gauss linear;
+    grad(SIm)                         Gauss linear;
+    snGradCorr(SRe)                   Gauss linear;
+    snGradCorr(SIm)                   Gauss linear;
+
+    curl(TRe)                         Gauss linear;
+    curl(TIm)                         Gauss linear;
+    grad((gammaf*div(TRe)))           Gauss linear;
+    grad((gammaf*div(TIm)))           Gauss linear;
+    snGradCorr(TRe)                   Gauss linear;
+    snGradCorr(TIm)                   Gauss linear;
+
+    curl(jsRe)                        Gauss linear;
+    curl(jsIm)                        Gauss linear;
+    snGradCorr(TsRe)                  Gauss linear;
+    snGradCorr(TsIm)                  Gauss linear;
 
     grad(GRe)                         Gauss linear;
     grad(GIm)                         Gauss linear;
     snGradCorr(GRe)                   Gauss linear;
     snGradCorr(GIm)                   Gauss linear;
-
-    grad(VRe)                         Gauss linear;
-    grad(VIm)                         Gauss linear;
-    snGradCorr(VRe)                   Gauss linear;
-    snGradCorr(VIm)                   Gauss linear;
-
-    grad(sigma)                       Gauss linear;
 }
 
 divSchemes
 {
     default                           none;
 
-    div(ARe)                          Gauss linear;
-    div(AIm)                          Gauss linear;
+    div(TRe)                          Gauss linear;
+    div(TIm)                          Gauss linear;
+
+    div(TsRe)                         Gauss linear;
+    div(TsIm)                         Gauss linear;
 }
 
 laplacianSchemes
 {
     default                           none;
 
-    laplacian(ARe)                    Gauss linear corrected; // linear is not used here
-    laplacian(AIm)                    Gauss linear corrected; // linear is not used here
+    laplacian(SRe)                    Gauss linear corrected; // linear is not used here
+    laplacian(SIm)                    Gauss linear corrected; // linear is not used here
+
+    laplacian(TRe)                    Gauss linear corrected; // linear is not used here
+    laplacian(TIm)                    Gauss linear corrected; // linear is not used here
+
+    laplacian(TsRe)                   Gauss linear corrected; // linear is not used here
+    laplacian(TsIm)                   Gauss linear corrected; // linear is not used here
 
     laplacian(GRe)                    Gauss linear corrected; // linear is not used here
     laplacian(GIm)                    Gauss linear corrected; // linear is not used here
-
-    laplacian(VRe)                    Gauss linear corrected; // linear is not used here
-    laplacian(VIm)                    Gauss linear corrected; // linear is not used here
 }
 
 interpolationSchemes
@@ -68,17 +81,6 @@ interpolationSchemes
     default                           none;
 
     interpolate(sigma)                linear;
-
-    interpolate(ARe)                  linear;
-    interpolate(AIm)                  linear;
-
-    interpolate(grad(GRe))            linear;
-    interpolate(grad(GIm))            linear;
-}
-
-snGradSchemes
-{
-    default                           none;
 }
 
 // ************************************************************************* //
