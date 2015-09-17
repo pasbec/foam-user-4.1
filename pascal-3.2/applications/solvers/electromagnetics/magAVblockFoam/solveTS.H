@@ -275,20 +275,22 @@ Info << "DEBUG: Boundary conditions" << endl;
                         cTRe.boundaryField()[patchI]
                     );
 
-                // Set ref value/gradient
+                // Set ref value/gradient to zero
                 cTReP.refValue() = vector::zero;
                 cTReP.refGrad() = vector::zero;
 
                 // Set normal to patch normal
                 cTReP.nHat() = cMesh.boundary()[patchI].nf();
 
+                // Set tangential value fraction to 1
+                // to get zero tangential values
+                // in order to get TRe^n=0
+                cTReP.tangentialValueFraction() = 1.0;
+
                 // Set normal value fraction to 0
                 // to get zero normal derivative
+                // which gives div(TRe)=0 with TRe^n=0
                 cTReP.normalValueFraction() = 0.0;
-
-                // and tangential value fraction to 1
-                // to get zero tangential values
-                cTReP.tangentialValueFraction() = 0.0;
             }
 
             if
@@ -303,20 +305,22 @@ Info << "DEBUG: Boundary conditions" << endl;
                         cTIm.boundaryField()[patchI]
                     );
 
-                // Set ref value/gradient
+                // Set ref value/gradient to zero
                 cTImP.refValue() = vector::zero;
                 cTImP.refGrad() = vector::zero;
 
                 // Set normal to patch normal
                 cTImP.nHat() = cMesh.boundary()[patchI].nf();
 
+                // Set tangential value fraction to 1
+                // to get zero tangential values
+                // in order to get TIm^n=0
+                cTImP.tangentialValueFraction() = 1.0;
+
                 // Set normal value fraction to 0
                 // to get zero normal derivative
+                // which gives div(TIm)=0 with TIm^n=0
                 cTImP.normalValueFraction() = 0.0;
-
-                // and tangential value fraction to 1
-                // to get zero tangential values
-                cTImP.tangentialValueFraction() = 0.0;
             }
         }
 
