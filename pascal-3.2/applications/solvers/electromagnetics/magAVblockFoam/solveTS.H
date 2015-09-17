@@ -265,6 +265,44 @@ Info << "DEBUG: Boundary conditions" << endl;
         {
             if
             (
+                cSRe.boundaryField()[patchI].type()
+             == fixedGradientFvPatchField<scalar>::typeName
+            )
+            {
+                fixedGradientFvPatchField<scalar>& cSReP =
+                    refCast<fixedGradientFvPatchField<scalar> >
+                    (
+                        cSRe.boundaryField()[patchI]
+                    );
+
+                // Set gradient
+                cSReP.gradient() =
+                    cTRe.boundaryField()[patchI]
+                  & cMesh.boundary()[patchI].nf();
+                  // TODO: Missing gradient from non-conducting region
+            }
+
+            if
+            (
+                cSIm.boundaryField()[patchI].type()
+             == fixedGradientFvPatchField<scalar>::typeName
+            )
+            {
+                fixedGradientFvPatchField<scalar>& cSImP =
+                    refCast<fixedGradientFvPatchField<scalar> >
+                    (
+                        cSIm.boundaryField()[patchI]
+                    );
+
+                // Set gradient
+                cSImP.gradient() =
+                    cTIm.boundaryField()[patchI]
+                  & cMesh.boundary()[patchI].nf();
+                  // TODO: Missing gradient from non-conducting region
+            }
+
+            if
+            (
                 cTRe.boundaryField()[patchI].type()
              == newDirectionMixedFvPatchField<vector>::typeName
             )
@@ -324,9 +362,6 @@ Info << "DEBUG: Boundary conditions" << endl;
             }
         }
 
-        cTRe.write();
-        cTIm.write();
-
 Info << "DEBUG: Mapping" << endl;
 
         // Map volume fields
@@ -356,25 +391,56 @@ Info << "DEBUG: Mapping" << endl;
             cSigma.boundaryField()[patchI] = cSigma.boundaryField()[patchI].patchInternalField();
         }
 
-Info << "DEBUG: Marices" << endl;
+Info << "DEBUG: Matrices S" << endl;
+
+        fvScalarMatrix cSReEqn
+        (
+            fvm::laplacian(cSRe)
+          - fvc::div(cTRe)
+          - fvc::div(cTsRe)
+        );
+
+        fvScalarMatrix cSImEqn
+        (
+            fvm::laplacian(cSIm)
+          - fvc::div(cTIm)
+          - fvc::div(cTsIm)
+        );
+
+        // Set references
+        label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+        scalar refValue = 0.0;
+
+        cSReEqn.setReference(refCell, refValue);
+        cSImEqn.setReference(refCell, refValue);
+
+        cSReEqn.solve();
+        cSImEqn.solve();
+
+        cSRe.correctBoundaryConditions();
+        cSIm.correctBoundaryConditions();
+
+Info << "DEBUG: Matrices T" << endl;
 
         fvVectorMatrix cTReEqn
         (
             rMu0/cSigma * fvm::laplacian(cTRe)
+            // TODO: Terms missing for variable sigma
 //           + omega * cTIm
           + omega * cTsIm
-//           - omega * fvc::grad(cSIm)
+          - omega * fvc::grad(cSIm)
         );
 
         fvVectorMatrix cTImEqn
         (
             rMu0/cSigma * fvm::laplacian(cTIm)
+            // TODO: Terms missing for variable sigma
 //           - omega * cTRe
           - omega * cTsRe
-//           + omega * fvc::grad(cSRe)
+          + omega * fvc::grad(cSRe)
         );
 
-Info << "DEBUG: Blockmatrix" << endl;
+Info << "DEBUG: Blockmatrix assembly T" << endl;
 
         // Prepare block system
         fvBlockMatrix<vector6> cTEqn(cT);
@@ -397,21 +463,25 @@ Info << "DEBUG: Blockmatrix" << endl;
         // Block coupled solver call to solve T
         cTEqn.solve();
 
-        // Retrieve solution
+        // Retrieve solution for T
         cTEqn.retrieveSolution(0, cTRe.internalField());
         cTEqn.retrieveSolution(3, cTIm.internalField());
 
         cTRe.correctBoundaryConditions();
         cTIm.correctBoundaryConditions();
 
+        // Calculate induced current
         cjRe == fvc::curl(cTRe);
         cjIm == fvc::curl(cTIm);
 
 Info << "DEBUG Reverse mapping" << endl;
 
-        // Reverse map T
+        // Reverse map fields
         forAll (cMesh.C(), cellI)
         {
+            SRe[cMeshSubSet.cellMap()[cellI]] = cSRe[cellI];
+            SIm[cMeshSubSet.cellMap()[cellI]] = cSIm[cellI];
+
             TRe[cMeshSubSet.cellMap()[cellI]] = cTRe[cellI];
             TIm[cMeshSubSet.cellMap()[cellI]] = cTIm[cellI];
 
@@ -433,38 +503,39 @@ Info << "DEBUG Reverse mapping" << endl;
         cjIm.write();
     }
 
-//     {
-//         fvScalarMatrix SReEqn
-//         (
-//             fvm::laplacian(SRe)
-//           - fvc::div(TRe)
-//           - fvc::div(TsRe)
-//         );
-//
-//         fvScalarMatrix SImEqn
-//         (
-//             fvm::laplacian(SIm)
-//           - fvc::div(TIm)
-//           - fvc::div(TsIm)
-//         );
-//
-// //         // Set values for non-conducting cells
-// //         scalarField nonConductingCellSValues(nonConductingCells.size(), 0.0);
-// //         SReEqn.setValues(nonConductingCells, nonConductingCellSValues);
-// //         SImEqn.setValues(nonConductingCells, nonConductingCellSValues);
-//
+    {
+        fvScalarMatrix SReEqn
+        (
+            fvm::laplacian(SRe)
+          - fvc::div(TsRe)
+        );
+
+        fvScalarMatrix SImEqn
+        (
+            fvm::laplacian(SIm)
+          - fvc::div(TsIm)
+        );
+
+        // Set values for non-conducting cells
+        scalarField conductingCellSReValues(nonConductingCells.size(), 0.0); // TODO subfield
+        scalarField conductingCellSImValues(nonConductingCells.size(), 0.0); // TODO subfield
+        SReEqn.setValues(nonConductingCells, conductingCellSReValues);
+        SImEqn.setValues(nonConductingCells, conductingCellSImValues);
+
 //         // Set references
 //         label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
 //         scalar refValue = 0.0;
 //
 //         SReEqn.setReference(refCell, refValue);
 //         SImEqn.setReference(refCell, refValue);
-//
-//         SReEqn.solve();
-//         SImEqn.solve();
-//
-//         SRe.correctBoundaryConditions();
-//         SIm.correctBoundaryConditions();
+
+        SReEqn.solve();
+        SImEqn.solve();
+
+        SRe.correctBoundaryConditions();
+        SIm.correctBoundaryConditions();
+    }
+
 //
 //
 //
