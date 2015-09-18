@@ -23,7 +23,7 @@ gradSchemes
 {
     default                           none;
 
-    grad(mgamma)                      Gauss linear;
+    grad((rMu0|sigma))                Gauss linear;
 
     grad(SRe)                         Gauss linear;
     grad(SIm)                         Gauss linear;

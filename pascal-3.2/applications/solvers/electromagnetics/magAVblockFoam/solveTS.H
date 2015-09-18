@@ -1,4 +1,6 @@
 
+Info << "DEBUG: Preparations" << endl;
+
     // Calculate msigma
     volScalarField msigma
     (
@@ -50,27 +52,7 @@
         rMu0/msigmaf
     );
 
-    // Create set for non-conducting cells
-    labelHashSet nonConductingCellsHashSet;
-    forAll(mesh.cells(), cellI)
-    {
-        if (sigma.internalField()[cellI] < SMALL)
-        {
-            nonConductingCellsHashSet.insert(cellI);
-        }
-    }
-    labelList nonConductingCells = nonConductingCellsHashSet.toc();
-
-    // Create set for conducting cells
-    labelHashSet conductingCellsHashSet;
-    forAll(mesh.cells(), cellI)
-    {
-        if (sigma.internalField()[cellI] > SMALL)
-        {
-            conductingCellsHashSet.insert(cellI);
-        }
-    }
-    labelList conductingCells = conductingCellsHashSet.toc();
+Info << "DEBUG: Calculate Ts" << endl;
 
     // Calculate Ts from source current
     {
@@ -96,6 +78,32 @@
         TsIm.write();
     }
 
+Info << "DEBUG: Define c/n regions" << endl;
+
+    // Create set for conducting cells
+    labelHashSet cCellsHashSet;
+    forAll(mesh.cells(), cellI)
+    {
+        if (sigma.internalField()[cellI] > SMALL)
+        {
+            cCellsHashSet.insert(cellI);
+        }
+    }
+    labelList cCells = cCellsHashSet.toc();
+
+    // Create set for non-conducting cells
+    labelHashSet nCellsHashSet;
+    forAll(mesh.cells(), cellI)
+    {
+        if (sigma.internalField()[cellI] < SMALL)
+        {
+            nCellsHashSet.insert(cellI);
+        }
+    }
+    labelList nCells = nCellsHashSet.toc();
+
+Info << "DEBUG: Start in conducting region" << endl;
+
     {
         // Create submesh
         fvMeshSubset cMeshSubSet
@@ -111,12 +119,15 @@
         );
 
         // Initialize large cell subset
-        cMeshSubSet.setLargeCellSubset(conductingCellsHashSet);
+        cMeshSubSet.setLargeCellSubset(cCellsHashSet);
 
         // Create sub-mesh
         fvMesh& cMesh = cMeshSubSet.subMesh();
 
-Info << "DEBUG: Fields" << endl;
+        // References for maps
+        const labelList& cCellMap = cMeshSubSet.cellMap();
+
+Info << "DEBUG (c): Field creation" << endl;
 
         volScalarField cSigma
         (
@@ -129,8 +140,36 @@ Info << "DEBUG: Fields" << endl;
             ),
             cMesh,
             dimensionedScalar(word(), sigma.dimensions(), pTraits<scalar>::zero),
-            calculatedFvPatchField<scalar>::typeName
+            zeroGradientFvPatchField<scalar>::typeName
         );
+
+//         volScalarField cSRe
+//         (
+//             IOobject
+//             (
+//                 "SRe",
+//                 cMesh.time().timeName(),
+//                 cMesh,
+//                 IOobject::NO_READ
+//             ),
+//             cMesh,
+//             dimensionedScalar(word(), SRe.dimensions(), pTraits<scalar>::zero),
+//             fixedGradientFvPatchField<scalar>::typeName
+//         );
+//
+//         volScalarField cSIm
+//         (
+//             IOobject
+//             (
+//                 "SIm",
+//                 cMesh.time().timeName(),
+//                 cMesh,
+//                 IOobject::NO_READ
+//             ),
+//             cMesh,
+//             dimensionedScalar(word(), SIm.dimensions(), pTraits<scalar>::zero),
+//             fixedGradientFvPatchField<scalar>::typeName
+//         );
 
         volScalarField cSRe
         (
@@ -143,7 +182,7 @@ Info << "DEBUG: Fields" << endl;
             ),
             cMesh,
             dimensionedScalar(word(), SRe.dimensions(), pTraits<scalar>::zero),
-            fixedGradientFvPatchField<scalar>::typeName
+            zeroGradientFvPatchField<scalar>::typeName
         );
 
         volScalarField cSIm
@@ -157,7 +196,7 @@ Info << "DEBUG: Fields" << endl;
             ),
             cMesh,
             dimensionedScalar(word(), SIm.dimensions(), pTraits<scalar>::zero),
-            fixedGradientFvPatchField<scalar>::typeName
+            zeroGradientFvPatchField<scalar>::typeName
         );
 
         volVectorField cTRe
@@ -213,7 +252,7 @@ Info << "DEBUG: Fields" << endl;
             ),
             cMesh,
             dimensioned<vector>(word(), TsRe.dimensions(), pTraits<vector>::zero),
-            calculatedFvPatchField<vector>::typeName
+            zeroGradientFvPatchField<vector>::typeName
         );
 
         volVectorField cTsIm
@@ -227,7 +266,7 @@ Info << "DEBUG: Fields" << endl;
             ),
             cMesh,
             dimensionedVector(word(), TsIm.dimensions(), pTraits<vector>::zero),
-            calculatedFvPatchField<vector>::typeName
+            zeroGradientFvPatchField<vector>::typeName
         );
 
         volVectorField cjRe
@@ -258,48 +297,48 @@ Info << "DEBUG: Fields" << endl;
             calculatedFvPatchField<vector>::typeName
         );
 
-Info << "DEBUG: Boundary conditions" << endl;
+Info << "DEBUG (c): Boundary conditions" << endl;
 
         // Boundary conditions
         forAll(cMesh.boundary(), patchI)
         {
-            if
-            (
-                cSRe.boundaryField()[patchI].type()
-             == fixedGradientFvPatchField<scalar>::typeName
-            )
-            {
-                fixedGradientFvPatchField<scalar>& cSReP =
-                    refCast<fixedGradientFvPatchField<scalar> >
-                    (
-                        cSRe.boundaryField()[patchI]
-                    );
-
-                // Set gradient
-                cSReP.gradient() =
-                    cTRe.boundaryField()[patchI]
-                  & cMesh.boundary()[patchI].nf();
-                  // TODO: Missing gradient from non-conducting region
-            }
-
-            if
-            (
-                cSIm.boundaryField()[patchI].type()
-             == fixedGradientFvPatchField<scalar>::typeName
-            )
-            {
-                fixedGradientFvPatchField<scalar>& cSImP =
-                    refCast<fixedGradientFvPatchField<scalar> >
-                    (
-                        cSIm.boundaryField()[patchI]
-                    );
-
-                // Set gradient
-                cSImP.gradient() =
-                    cTIm.boundaryField()[patchI]
-                  & cMesh.boundary()[patchI].nf();
-                  // TODO: Missing gradient from non-conducting region
-            }
+//             if
+//             (
+//                 cSRe.boundaryField()[patchI].type()
+//              == fixedGradientFvPatchField<scalar>::typeName
+//             )
+//             {
+//                 fixedGradientFvPatchField<scalar>& cSReP =
+//                     refCast<fixedGradientFvPatchField<scalar> >
+//                     (
+//                         cSRe.boundaryField()[patchI]
+//                     );
+//
+//                 // Set gradient
+//                 cSReP.gradient() =
+//                     cTRe.boundaryField()[patchI]
+//                   & cMesh.boundary()[patchI].nf();
+//                   // TODO: Missing gradient from non-conducting region
+//             }
+//
+//             if
+//             (
+//                 cSIm.boundaryField()[patchI].type()
+//              == fixedGradientFvPatchField<scalar>::typeName
+//             )
+//             {
+//                 fixedGradientFvPatchField<scalar>& cSImP =
+//                     refCast<fixedGradientFvPatchField<scalar> >
+//                     (
+//                         cSIm.boundaryField()[patchI]
+//                     );
+//
+//                 // Set gradient
+//                 cSImP.gradient() =
+//                     cTIm.boundaryField()[patchI]
+//                   & cMesh.boundary()[patchI].nf();
+//                   // TODO: Missing gradient from non-conducting region
+//             }
 
             if
             (
@@ -362,70 +401,99 @@ Info << "DEBUG: Boundary conditions" << endl;
             }
         }
 
-Info << "DEBUG: Mapping" << endl;
+Info << "DEBUG (c): Mapping" << endl;
 
-        // Map volume fields
+        // Map volume fields internal
         forAll (cMesh.C(), cellI)
         {
-            cSigma.internalField()[cellI] = sigma.internalField()[cMeshSubSet.cellMap()[cellI]];
+            cSigma.internalField()[cellI] = sigma.internalField()[cCellMap[cellI]];
 
-            cSRe.internalField()[cellI] = SRe.internalField()[cMeshSubSet.cellMap()[cellI]];
-            cSIm.internalField()[cellI] = SIm.internalField()[cMeshSubSet.cellMap()[cellI]];
+            cSRe.internalField()[cellI] = SRe.internalField()[cCellMap[cellI]];
+            cSIm.internalField()[cellI] = SIm.internalField()[cCellMap[cellI]];
 
-            cTRe.internalField()[cellI] = TRe.internalField()[cMeshSubSet.cellMap()[cellI]];
-            cTIm.internalField()[cellI] = TIm.internalField()[cMeshSubSet.cellMap()[cellI]];
+            cTRe.internalField()[cellI] = TRe.internalField()[cCellMap[cellI]];
+            cTIm.internalField()[cellI] = TIm.internalField()[cCellMap[cellI]];
 
-            cTsRe.internalField()[cellI] = TsRe.internalField()[cMeshSubSet.cellMap()[cellI]];
-            cTsIm.internalField()[cellI] = TsIm.internalField()[cMeshSubSet.cellMap()[cellI]];
-        }
-        forAll(cMesh.boundaryMesh(), patchI)
-        {
-            polyPatch patch = cMesh.boundaryMesh()[patchI];
-
-            forAll(patch, facei)
-            {
-                label faceI = patch.start() + facei;
-            }
-
-            // Use internalField for boundary field for sigma
-            cSigma.boundaryField()[patchI] = cSigma.boundaryField()[patchI].patchInternalField();
+            cTsRe.internalField()[cellI] = TsRe.internalField()[cCellMap[cellI]];
+            cTsIm.internalField()[cellI] = TsIm.internalField()[cCellMap[cellI]];
         }
 
-Info << "DEBUG: Matrices S" << endl;
-
-        fvScalarMatrix cSReEqn
-        (
-            fvm::laplacian(cSRe)
-          - fvc::div(cTRe)
-          - fvc::div(cTsRe)
-        );
-
-        fvScalarMatrix cSImEqn
-        (
-            fvm::laplacian(cSIm)
-          - fvc::div(cTIm)
-          - fvc::div(cTsIm)
-        );
-
-        // Set references
-        label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
-        scalar refValue = 0.0;
-
-        cSReEqn.setReference(refCell, refValue);
-        cSImEqn.setReference(refCell, refValue);
-
-        cSReEqn.solve();
-        cSImEqn.solve();
+        // Correct boundary conditions
+        cSigma.correctBoundaryConditions();
 
         cSRe.correctBoundaryConditions();
         cSIm.correctBoundaryConditions();
 
-Info << "DEBUG: Matrices T" << endl;
+        cTRe.correctBoundaryConditions();
+        cTIm.correctBoundaryConditions();
+
+        cTsRe.correctBoundaryConditions();
+        cTsIm.correctBoundaryConditions();
+
+        // Update calculated boundary conditions
+//         forAll(cMesh.boundaryMesh(), patchI)
+//         {
+// //             polyPatch patch = cMesh.boundaryMesh()[patchI];
+// //
+// //             forAll(patch, facei)
+// //             {
+// //                 label faceI = patch.start() + facei;
+// //             }
+//
+//             // Use internalField for boundary field for sigma
+//             cSigma.boundaryField()[patchI] = cSigma.boundaryField()[patchI].patchInternalField();
+//         }
+
+// Info << "DEBUG (c): Solve S" << endl;
+//
+//         volScalarField cTReDiv("TReDiv", fvc::div(cTRe)); cTReDiv.write();
+//         volScalarField cTImDiv("TImDiv", fvc::div(cTIm)); cTImDiv.write();
+//
+//         volScalarField cTsReDiv("TsReDiv", fvc::div(cTsRe)); cTsReDiv.write();
+//         volScalarField cTsImDiv("TsImDiv", fvc::div(cTsIm)); cTsImDiv.write();
+//
+//         fvScalarMatrix cSReEqn
+//         (
+//             fvm::laplacian(cSRe)
+//           - fvc::div(cTRe)
+//           - fvc::div(cTsRe)
+//         );
+//
+//         fvScalarMatrix cSImEqn
+//         (
+//             fvm::laplacian(cSIm)
+//           - fvc::div(cTIm)
+//           - fvc::div(cTsIm)
+//         );
+//
+//         // Set references
+//         label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+//         scalar refValue = 0.0;
+//
+//         cSReEqn.setReference(refCell, refValue);
+//         cSImEqn.setReference(refCell, refValue);
+//
+//         cSReEqn.solve();
+//         cSImEqn.solve();
+//
+//         cSRe.correctBoundaryConditions();
+//         cSIm.correctBoundaryConditions();
+
+Info << "DEBUG (c): Prepare matrices for T" << endl;
+
+        volScalarField crMu0Sigma("rMu0Sigma", rMu0/cSigma); crMu0Sigma.write();
+        volVectorField crMu0SigmaGrad("rMu0SigmaGrad", fvc::grad(rMu0/cSigma)); crMu0SigmaGrad.write();
+
+        volVectorField cTReCurl("TReCurl", fvc::curl(cTRe)); cTReCurl.write();
+        volVectorField cTImCurl("TImCurl", fvc::curl(cTIm)); cTImCurl.write();
+
+        volVectorField cSReGrad("SReGrad", fvc::grad(cSRe)); cSReGrad.write();
+        volVectorField cSImGrad("SImGrad", fvc::grad(cSIm)); cSImGrad.write();
 
         fvVectorMatrix cTReEqn
         (
             rMu0/cSigma * fvm::laplacian(cTRe)
-            // TODO: Terms missing for variable sigma
+          - (fvc::grad(rMu0/cSigma) ^ fvc::curl(cTRe))
 //           + omega * cTIm
           + omega * cTsIm
           - omega * fvc::grad(cSIm)
@@ -434,13 +502,13 @@ Info << "DEBUG: Matrices T" << endl;
         fvVectorMatrix cTImEqn
         (
             rMu0/cSigma * fvm::laplacian(cTIm)
-            // TODO: Terms missing for variable sigma
+          - (fvc::grad(rMu0/cSigma) ^ fvc::curl(cTIm))
 //           - omega * cTRe
           - omega * cTsRe
           + omega * fvc::grad(cSRe)
         );
 
-Info << "DEBUG: Blockmatrix assembly T" << endl;
+Info << "DEBUG (c): Assembly block-matrix for T" << endl;
 
         // Prepare block system
         fvBlockMatrix<vector6> cTEqn(cT);
@@ -474,19 +542,19 @@ Info << "DEBUG: Blockmatrix assembly T" << endl;
         cjRe == fvc::curl(cTRe);
         cjIm == fvc::curl(cTIm);
 
-Info << "DEBUG Reverse mapping" << endl;
+Info << "DEBUG (c): Reverse mapping" << endl;
 
         // Reverse map fields
         forAll (cMesh.C(), cellI)
         {
-            SRe[cMeshSubSet.cellMap()[cellI]] = cSRe[cellI];
-            SIm[cMeshSubSet.cellMap()[cellI]] = cSIm[cellI];
+            SRe[cCellMap[cellI]] = cSRe[cellI];
+            SIm[cCellMap[cellI]] = cSIm[cellI];
 
-            TRe[cMeshSubSet.cellMap()[cellI]] = cTRe[cellI];
-            TIm[cMeshSubSet.cellMap()[cellI]] = cTIm[cellI];
+            TRe[cCellMap[cellI]] = cTRe[cellI];
+            TIm[cCellMap[cellI]] = cTIm[cellI];
 
-            jRe[cMeshSubSet.cellMap()[cellI]] = cjRe[cellI];
-            jIm[cMeshSubSet.cellMap()[cellI]] = cjIm[cellI];
+            jRe[cCellMap[cellI]] = cjRe[cellI];
+            jIm[cCellMap[cellI]] = cjIm[cellI];
         }
 
         // debug
@@ -503,31 +571,73 @@ Info << "DEBUG Reverse mapping" << endl;
         cjIm.write();
     }
 
+//     {
+//         fvScalarMatrix SReEqn
+//         (
+//             fvm::laplacian(SRe)
+//           - fvc::div(TsRe)
+//         );
+//
+//         fvScalarMatrix SImEqn
+//         (
+//             fvm::laplacian(SIm)
+//           - fvc::div(TsIm)
+//         );
+//
+//         // Set values for non-c cells
+//         scalarField cCellSReValues(nCells.size(), 0.0); // TODO subfield
+//         scalarField cCellSImValues(nCells.size(), 0.0); // TODO subfield
+//         SReEqn.setValues(nCells, cCellSReValues);
+//         SImEqn.setValues(nCells, cCellSImValues);
+//
+// //         // Set references
+// //         label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+// //         scalar refValue = 0.0;
+// //
+// //         SReEqn.setReference(refCell, refValue);
+// //         SImEqn.setReference(refCell, refValue);
+//
+//         SReEqn.solve();
+//         SImEqn.solve();
+//
+//         SRe.correctBoundaryConditions();
+//         SIm.correctBoundaryConditions();
+//     }
+
+Info << "DEBUG: Solve S" << endl;
+
     {
         fvScalarMatrix SReEqn
         (
             fvm::laplacian(SRe)
+          - fvc::div(TRe)
           - fvc::div(TsRe)
         );
 
         fvScalarMatrix SImEqn
         (
             fvm::laplacian(SIm)
+          - fvc::div(TIm)
           - fvc::div(TsIm)
         );
 
-        // Set values for non-conducting cells
-        scalarField conductingCellSReValues(nonConductingCells.size(), 0.0); // TODO subfield
-        scalarField conductingCellSImValues(nonConductingCells.size(), 0.0); // TODO subfield
-        SReEqn.setValues(nonConductingCells, conductingCellSReValues);
-        SImEqn.setValues(nonConductingCells, conductingCellSImValues);
+//         // Set values for conducting cells
+//         scalarField cCellSReValues(cCells.size(), 0.0);
+//         scalarField cCellSImValues(cCells.size(), 0.0);
+//         forAll (cCells, cellI)
+//         {
+//             cCellSReValues[cellI] = SRe.internalField()[cCells[cellI]];
+//             cCellSImValues[cellI] = SIm.internalField()[cCells[cellI]];
+//         }
+//         SReEqn.setValues(cCells, cCellSReValues);
+//         SImEqn.setValues(cCells, cCellSImValues);
 
-//         // Set references
-//         label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
-//         scalar refValue = 0.0;
-//
-//         SReEqn.setReference(refCell, refValue);
-//         SImEqn.setReference(refCell, refValue);
+        // Set references
+        label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+        scalar refValue = 0.0;
+
+        SReEqn.setReference(refCell, refValue);
+        SImEqn.setReference(refCell, refValue);
 
         SReEqn.solve();
         SImEqn.solve();
@@ -559,10 +669,10 @@ Info << "DEBUG Reverse mapping" << endl;
 //           + omega * fvc::grad(SRe)
 //         );
 //
-//         // Set values for non-conducting cells
-//         vectorField nonConductingCellTValues(nonConductingCells.size(), vector::zero);
-//         TReEqn.setValues(nonConductingCells, nonConductingCellTValues);
-//         TImEqn.setValues(nonConductingCells, nonConductingCellTValues);
+//         // Set values for non-c cells
+//         vectorField nCellTValues(nCells.size(), vector::zero);
+//         TReEqn.setValues(nCells, nCellTValues);
+//         TImEqn.setValues(nCells, nCellTValues);
 //
 //         // Prepare block system
 //         fvBlockMatrix<vector6> TEqn(T);
@@ -606,10 +716,10 @@ Info << "DEBUG Reverse mapping" << endl;
 // //           - fvc::div(TIm)
 // //         );
 // //
-// //         // Set values for non-conducting cells
-// //         scalarField nonConductingCellGValues(nonConductingCells.size(), 0.0);
-// //         GReEqn.setValues(nonConductingCells, nonConductingCellGValues);
-// //         GImEqn.setValues(nonConductingCells, nonConductingCellGValues);
+// //         // Set values for non-c cells
+// //         scalarField nCellGValues(nCells.size(), 0.0);
+// //         GReEqn.setValues(nCells, nCellGValues);
+// //         GImEqn.setValues(nCells, nCellGValues);
 // //
 // //         GReEqn.solve();
 // //         GImEqn.solve();
