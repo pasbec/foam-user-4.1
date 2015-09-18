@@ -1,82 +1,82 @@
 
-Info << "DEBUG: Preparations" << endl;
+Info << "DEBUG: Solve Ts" << endl;
 
-    // Calculate msigma
-    volScalarField msigma
-    (
-        "msigma",
-        sigma
-    );
-
-    // Manipulate msigma:
+    // Calculate source current vector potential (Ts)
+    // from source given external source current
+    // density (js). Ts is only depending on the mesh and
+    // the current density distribution in the inductor
+    // coils. As boundary conditions for Ts at "infinity"
+    // we will use "slip" (normal magnetic)
     //
-    //  We will replace "zero"-values with very small
-    //  values at all faces in order to avoid a singular
-    //  solution
+    // Note: Alternatively, the same could be realized by
+    //       using the Biot-Savart-Law
     {
-        // Parameters
-        scalar msigmaMin = 1.0;
-
-        // Manipulate internal faces
-        forAll(msigma.internalField(), cellI)
-        {
-            if
-            (msigma.internalField()[cellI] < msigmaMin)
-            {
-                msigma.internalField()[cellI] = msigmaMin;
-            }
-        }
-
-        // Manipulate boundary faces
-        msigma.boundaryField() == msigmaMin;
-    }
-
-    // Create field for magnetic diffusivity
-    volScalarField mgamma
-    (
-        "mgamma",
-        rMu0/msigma
-    );
-
-    // Interpolate sigma to face centers
-    surfaceScalarField msigmaf
-    (
-        "msigmaf",
-        fvc::interpolate(msigma, "interpolate(sigma)")
-    );
-
-    // Create surface field for magnetic diffusivity
-    surfaceScalarField mgammaf
-    (
-        "mgammaf",
-        rMu0/msigmaf
-    );
-
-Info << "DEBUG: Calculate Ts" << endl;
-
-    // Calculate Ts from source current
-    {
+        // Real part
         fvVectorMatrix TsReEqn
         (
             fvm::laplacian(TsRe)
           + fvc::curl(jsRe)
         );
 
+        // Imaginary part
         fvVectorMatrix TsImEqn
         (
             fvm::laplacian(TsIm)
           + fvc::curl(jsIm)
         );
 
+        // Solve Ts equations
         TsReEqn.solve();
         TsImEqn.solve();
 
         TsRe.correctBoundaryConditions();
         TsIm.correctBoundaryConditions();
-
-        TsRe.write();
-        TsIm.write();
     }
+
+Info << "DEBUG: Solve S" << endl;
+
+    // Calculate magnetic scalar potential (S)
+    // from source current vector potential and
+    // current vector potential in the conducting region
+    // from the last time step. As boundary conditions
+    // at "infinity" we will use "zeroGradient" which is
+    // consistent with "slip" for Ts.
+    {
+        // Real part
+        fvScalarMatrix SReEqn
+        (
+            fvm::laplacian(SRe)
+          - fvc::div(TRe)
+          - fvc::div(TsRe)
+        );
+
+        // Imaginary part
+        fvScalarMatrix SImEqn
+        (
+            fvm::laplacian(SIm)
+          - fvc::div(TIm)
+          - fvc::div(TsIm)
+        );
+
+        // Set references
+        label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+        scalar refValue = 0.0;
+
+        SReEqn.setReference(refCell, refValue);
+        SImEqn.setReference(refCell, refValue);
+
+        // Solve S equations
+        SReEqn.solve();
+        SImEqn.solve();
+
+        SRe.correctBoundaryConditions();
+        SIm.correctBoundaryConditions();
+    }
+
+    // Calculate and store the gradient of
+    // the magnetic scalar potential (S)
+    volVectorField SReGrad("SReGrad", fvc::grad(SRe));
+    volVectorField SImGrad("SImGrad", fvc::grad(SIm));
 
 Info << "DEBUG: Define c/n regions" << endl;
 
@@ -102,7 +102,7 @@ Info << "DEBUG: Define c/n regions" << endl;
     }
     labelList nCells = nCellsHashSet.toc();
 
-Info << "DEBUG: Start in conducting region" << endl;
+Info << "DEBUG: Create subMesh for conducting region" << endl;
 
     {
         // Create submesh
@@ -127,7 +127,7 @@ Info << "DEBUG: Start in conducting region" << endl;
         // References for maps
         const labelList& cCellMap = cMeshSubSet.cellMap();
 
-Info << "DEBUG (c): Field creation" << endl;
+Info << "DEBUG (c): Field creation for subMesh" << endl;
 
         volScalarField cSigma
         (
@@ -171,32 +171,60 @@ Info << "DEBUG (c): Field creation" << endl;
 //             fixedGradientFvPatchField<scalar>::typeName
 //         );
 
-        volScalarField cSRe
+//         volScalarField cSRe
+//         (
+//             IOobject
+//             (
+//                 "SRe",
+//                 cMesh.time().timeName(),
+//                 cMesh,
+//                 IOobject::NO_READ
+//             ),
+//             cMesh,
+//             dimensionedScalar(word(), SRe.dimensions(), pTraits<scalar>::zero),
+//             zeroGradientFvPatchField<scalar>::typeName
+//         );
+//
+//         volScalarField cSIm
+//         (
+//             IOobject
+//             (
+//                 "SIm",
+//                 cMesh.time().timeName(),
+//                 cMesh,
+//                 IOobject::NO_READ
+//             ),
+//             cMesh,
+//             dimensionedScalar(word(), SIm.dimensions(), pTraits<scalar>::zero),
+//             zeroGradientFvPatchField<scalar>::typeName
+//         );
+
+        volVectorField cSReGrad
         (
             IOobject
             (
-                "SRe",
+                "SReGrad",
                 cMesh.time().timeName(),
                 cMesh,
                 IOobject::NO_READ
             ),
             cMesh,
-            dimensionedScalar(word(), SRe.dimensions(), pTraits<scalar>::zero),
-            zeroGradientFvPatchField<scalar>::typeName
+            dimensioned<vector>(word(), SReGrad.dimensions(), pTraits<vector>::zero),
+            zeroGradientFvPatchField<vector>::typeName
         );
 
-        volScalarField cSIm
+        volVectorField cSImGrad
         (
             IOobject
             (
-                "SIm",
+                "SImGrad",
                 cMesh.time().timeName(),
                 cMesh,
                 IOobject::NO_READ
             ),
             cMesh,
-            dimensionedScalar(word(), SIm.dimensions(), pTraits<scalar>::zero),
-            zeroGradientFvPatchField<scalar>::typeName
+            dimensioned<vector>(word(), SImGrad.dimensions(), pTraits<vector>::zero),
+            zeroGradientFvPatchField<vector>::typeName
         );
 
         volVectorField cTRe
@@ -252,7 +280,7 @@ Info << "DEBUG (c): Field creation" << endl;
             ),
             cMesh,
             dimensioned<vector>(word(), TsRe.dimensions(), pTraits<vector>::zero),
-            zeroGradientFvPatchField<vector>::typeName
+            calculatedFvPatchField<vector>::typeName
         );
 
         volVectorField cTsIm
@@ -266,7 +294,7 @@ Info << "DEBUG (c): Field creation" << endl;
             ),
             cMesh,
             dimensionedVector(word(), TsIm.dimensions(), pTraits<vector>::zero),
-            zeroGradientFvPatchField<vector>::typeName
+            calculatedFvPatchField<vector>::typeName
         );
 
         volVectorField cjRe
@@ -297,7 +325,7 @@ Info << "DEBUG (c): Field creation" << endl;
             calculatedFvPatchField<vector>::typeName
         );
 
-Info << "DEBUG (c): Boundary conditions" << endl;
+Info << "DEBUG (c): Boundary conditions for subMesh fields" << endl;
 
         // Boundary conditions
         forAll(cMesh.boundary(), patchI)
@@ -401,15 +429,15 @@ Info << "DEBUG (c): Boundary conditions" << endl;
             }
         }
 
-Info << "DEBUG (c): Mapping" << endl;
+Info << "DEBUG (c): Mapping to subMesh" << endl;
 
         // Map volume fields internal
         forAll (cMesh.C(), cellI)
         {
             cSigma.internalField()[cellI] = sigma.internalField()[cCellMap[cellI]];
 
-            cSRe.internalField()[cellI] = SRe.internalField()[cCellMap[cellI]];
-            cSIm.internalField()[cellI] = SIm.internalField()[cCellMap[cellI]];
+            cSReGrad.internalField()[cellI] = SReGrad.internalField()[cCellMap[cellI]];
+            cSImGrad.internalField()[cellI] = SImGrad.internalField()[cCellMap[cellI]];
 
             cTRe.internalField()[cellI] = TRe.internalField()[cCellMap[cellI]];
             cTIm.internalField()[cellI] = TIm.internalField()[cCellMap[cellI]];
@@ -421,14 +449,8 @@ Info << "DEBUG (c): Mapping" << endl;
         // Correct boundary conditions
         cSigma.correctBoundaryConditions();
 
-        cSRe.correctBoundaryConditions();
-        cSIm.correctBoundaryConditions();
-
-        cTRe.correctBoundaryConditions();
-        cTIm.correctBoundaryConditions();
-
-        cTsRe.correctBoundaryConditions();
-        cTsIm.correctBoundaryConditions();
+        cSReGrad.correctBoundaryConditions();
+        cSImGrad.correctBoundaryConditions();
 
         // Update calculated boundary conditions
 //         forAll(cMesh.boundaryMesh(), patchI)
@@ -479,33 +501,36 @@ Info << "DEBUG (c): Mapping" << endl;
 //         cSRe.correctBoundaryConditions();
 //         cSIm.correctBoundaryConditions();
 
+Info << "DEBUG (c): Write subMesh fields with explicit influence to T equation" << endl;
+
+        cMesh.write();
+
+        cSigma.write();
+
+        cTsRe.write();
+        cTsIm.write();
+
+        cSReGrad.write();
+        cSImGrad.write();
+
 Info << "DEBUG (c): Prepare matrices for T" << endl;
-
-        volScalarField crMu0Sigma("rMu0Sigma", rMu0/cSigma); crMu0Sigma.write();
-        volVectorField crMu0SigmaGrad("rMu0SigmaGrad", fvc::grad(rMu0/cSigma)); crMu0SigmaGrad.write();
-
-        volVectorField cTReCurl("TReCurl", fvc::curl(cTRe)); cTReCurl.write();
-        volVectorField cTImCurl("TImCurl", fvc::curl(cTIm)); cTImCurl.write();
-
-        volVectorField cSReGrad("SReGrad", fvc::grad(cSRe)); cSReGrad.write();
-        volVectorField cSImGrad("SImGrad", fvc::grad(cSIm)); cSImGrad.write();
 
         fvVectorMatrix cTReEqn
         (
             rMu0/cSigma * fvm::laplacian(cTRe)
-          - (fvc::grad(rMu0/cSigma) ^ fvc::curl(cTRe))
+          - (fvc::grad(rMu0/cSigma) ^ fvc::curl(cTRe)) // TODO: Testing!
 //           + omega * cTIm
           + omega * cTsIm
-          - omega * fvc::grad(cSIm)
+          - omega * cSImGrad
         );
 
         fvVectorMatrix cTImEqn
         (
             rMu0/cSigma * fvm::laplacian(cTIm)
-          - (fvc::grad(rMu0/cSigma) ^ fvc::curl(cTIm))
+          - (fvc::grad(rMu0/cSigma) ^ fvc::curl(cTIm)) // TODO: Testing!
 //           - omega * cTRe
           - omega * cTsRe
-          + omega * fvc::grad(cSRe)
+          + omega * cSReGrad
         );
 
 Info << "DEBUG (c): Assembly block-matrix for T" << endl;
@@ -542,14 +567,11 @@ Info << "DEBUG (c): Assembly block-matrix for T" << endl;
         cjRe == fvc::curl(cTRe);
         cjIm == fvc::curl(cTIm);
 
-Info << "DEBUG (c): Reverse mapping" << endl;
+Info << "DEBUG (c): Reverse mapping from subMesh" << endl;
 
         // Reverse map fields
         forAll (cMesh.C(), cellI)
         {
-            SRe[cCellMap[cellI]] = cSRe[cellI];
-            SIm[cCellMap[cellI]] = cSIm[cellI];
-
             TRe[cCellMap[cellI]] = cTRe[cellI];
             TIm[cCellMap[cellI]] = cTIm[cellI];
 
@@ -557,184 +579,15 @@ Info << "DEBUG (c): Reverse mapping" << endl;
             jIm[cCellMap[cellI]] = cjIm[cellI];
         }
 
-        // debug
-        cMesh.write();
+Info << "DEBUG (c): Write subMesh fields T and dependencies" << endl;
 
-        cSigma.write();
-        cSRe.write();
-        cSIm.write();
         cTRe.write();
         cTIm.write();
-        cTsRe.write();
-        cTsIm.write();
         cjRe.write();
         cjIm.write();
     }
 
-//     {
-//         fvScalarMatrix SReEqn
-//         (
-//             fvm::laplacian(SRe)
-//           - fvc::div(TsRe)
-//         );
-//
-//         fvScalarMatrix SImEqn
-//         (
-//             fvm::laplacian(SIm)
-//           - fvc::div(TsIm)
-//         );
-//
-//         // Set values for non-c cells
-//         scalarField cCellSReValues(nCells.size(), 0.0); // TODO subfield
-//         scalarField cCellSImValues(nCells.size(), 0.0); // TODO subfield
-//         SReEqn.setValues(nCells, cCellSReValues);
-//         SImEqn.setValues(nCells, cCellSImValues);
-//
-// //         // Set references
-// //         label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
-// //         scalar refValue = 0.0;
-// //
-// //         SReEqn.setReference(refCell, refValue);
-// //         SImEqn.setReference(refCell, refValue);
-//
-//         SReEqn.solve();
-//         SImEqn.solve();
-//
-//         SRe.correctBoundaryConditions();
-//         SIm.correctBoundaryConditions();
-//     }
-
-Info << "DEBUG: Solve S" << endl;
-
-    {
-        fvScalarMatrix SReEqn
-        (
-            fvm::laplacian(SRe)
-          - fvc::div(TRe)
-          - fvc::div(TsRe)
-        );
-
-        fvScalarMatrix SImEqn
-        (
-            fvm::laplacian(SIm)
-          - fvc::div(TIm)
-          - fvc::div(TsIm)
-        );
-
-//         // Set values for conducting cells
-//         scalarField cCellSReValues(cCells.size(), 0.0);
-//         scalarField cCellSImValues(cCells.size(), 0.0);
-//         forAll (cCells, cellI)
-//         {
-//             cCellSReValues[cellI] = SRe.internalField()[cCells[cellI]];
-//             cCellSImValues[cellI] = SIm.internalField()[cCells[cellI]];
-//         }
-//         SReEqn.setValues(cCells, cCellSReValues);
-//         SImEqn.setValues(cCells, cCellSImValues);
-
-        // Set references
-        label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
-        scalar refValue = 0.0;
-
-        SReEqn.setReference(refCell, refValue);
-        SImEqn.setReference(refCell, refValue);
-
-        SReEqn.solve();
-        SImEqn.solve();
-
-        SRe.correctBoundaryConditions();
-        SIm.correctBoundaryConditions();
-    }
-
-//
-//
-//
-//         fvVectorMatrix TReEqn
-//         (
-//             mgamma * fvm::laplacian(TRe)
-// //           - (fvc::grad(mgamma) ^ fvc::curl(TRe))
-// //           - mgamma * fvc::grad(fvc::div(TRe))
-// //           + omega * TIm
-//           + omega * TsIm
-//           - omega * fvc::grad(SIm)
-//         );
-//
-//         fvVectorMatrix TImEqn
-//         (
-//             mgamma * fvm::laplacian(TIm)
-// //           - (fvc::grad(mgamma) ^ fvc::curl(TIm))
-// //           - mgamma * fvc::grad(fvc::div(TIm))
-// //           - omega * TRe
-//           - omega * TsRe
-//           + omega * fvc::grad(SRe)
-//         );
-//
-//         // Set values for non-c cells
-//         vectorField nCellTValues(nCells.size(), vector::zero);
-//         TReEqn.setValues(nCells, nCellTValues);
-//         TImEqn.setValues(nCells, nCellTValues);
-//
-//         // Prepare block system
-//         fvBlockMatrix<vector6> TEqn(T);
-//
-//         // Insert equations for T
-//         TEqn.insertEquation(0, TReEqn);
-//         TEqn.insertEquation(3, TImEqn);
-//
-//         // Coupling coeffs
-//         scalarField omegasf(mesh.nCells(), omega.value());
-//
-//         // Add coupling terms for TRe-TIm coupling
-//         TEqn.insertEquationCoupling(0, 3,  omegasf);
-//         TEqn.insertEquationCoupling(3, 0, -omegasf);
-//         TEqn.insertEquationCoupling(1, 4,  omegasf);
-//         TEqn.insertEquationCoupling(4, 1, -omegasf);
-//         TEqn.insertEquationCoupling(2, 5,  omegasf);
-//         TEqn.insertEquationCoupling(5, 2, -omegasf);
-//
-//         // Block coupled solver call to solve T
-//         TEqn.solve();
-//
-//         // Retrieve solution
-//         TEqn.retrieveSolution(0, TRe.internalField());
-//         TEqn.retrieveSolution(3, TIm.internalField());
-//
-//         TRe.correctBoundaryConditions();
-//         TIm.correctBoundaryConditions();
-//
-//
-//
-// //         fvScalarMatrix GReEqn
-// //         (
-// //             fvm::laplacian(GRe)
-// //           - fvc::div(TRe)
-// //         );
-// //
-// //         fvScalarMatrix GImEqn
-// //         (
-// //             fvm::laplacian(GIm)
-// //           - fvc::div(TIm)
-// //         );
-// //
-// //         // Set values for non-c cells
-// //         scalarField nCellGValues(nCells.size(), 0.0);
-// //         GReEqn.setValues(nCells, nCellGValues);
-// //         GImEqn.setValues(nCells, nCellGValues);
-// //
-// //         GReEqn.solve();
-// //         GImEqn.solve();
-// //
-// //         GRe.correctBoundaryConditions();
-// //         GIm.correctBoundaryConditions();
-// //
-// //         TRe -= fvc::grad(GRe);
-// //         TIm -= fvc::grad(GIm);
-// //
-// //         TRe.correctBoundaryConditions();
-// //         TIm.correctBoundaryConditions();
-//     }
-
-    BRe == mu0 * (TRe + TsRe - fvc::grad(SRe));
-    BIm == mu0 * (TIm + TsIm - fvc::grad(SIm));
+    BRe == mu0 * (TRe + TsRe - SReGrad);
+    BIm == mu0 * (TIm + TsIm - SImGrad);
 
 

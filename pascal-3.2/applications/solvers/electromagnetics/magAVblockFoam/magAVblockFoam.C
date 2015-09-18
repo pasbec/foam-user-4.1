@@ -31,7 +31,7 @@ Description
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
 
-#include "faceSet.H"
+#include "cellSet.H"
 
 #include "fvMeshSubset.H"
 
@@ -39,6 +39,7 @@ Description
 #include "fixedGradientFvPatchFields.H"
 #include "slipFvPatchFields.H"
 #include "newDirectionMixedFvPatchFields.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
