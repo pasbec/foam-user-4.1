@@ -200,14 +200,14 @@ Info << "DEBUG: Corrected gradient of S" << endl;
         scalarField& sSImIn = sSIm.internalField();
 
         // References to internal fields of sS
-        vectorField& TReIn = TRe.internalField();
-        vectorField& TImIn = TIm.internalField();
+        const vectorField& TReIn = TRe.internalField();
+        const vectorField& TImIn = TIm.internalField();
 
         // Owner: conducting
         // Neighbour: non-conducting
-        forAll (cnPNfaces, facei)
+        forAll (cnPNfaces.toc(), facei)
         {
-            label faceI = cnPNfaces[facei];
+            label faceI = cnPNfaces.toc()[facei];
 
             // Note: Copy from surfaceInterpolation.C
             // Calculate Pf (SfdOwn) and fN (SfdNei)
@@ -221,29 +221,38 @@ Info << "DEBUG: Corrected gradient of S" << endl;
             scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TReIn[own[faceI]];
             scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TImIn[own[faceI]];
 
-Info << "PN: wT = " << wT << endl;
-Info << "PN: TReIn[own[faceI]] = " << TReIn[own[faceI]] << endl;
-Info << "PN: TImIn[own[faceI]] = " << TImIn[own[faceI]] << endl;
-Info << "PN: TReIn[own[faceI]] = " << TReIn[nei[faceI]] << endl;
-Info << "PN: TImIn[own[faceI]] = " << TImIn[nei[faceI]] << endl;
-Info << "PN: SfTRe = " << SfTRe << endl;
-Info << "PN: SfTIm = " << SfTIm << endl;
-Info << "PN: sSReIn[faceI] = " << sSReIn[faceI] << endl;
-Info << "PN: sSImIn[faceI] = " << sSImIn[faceI] << endl;
+            // TODO Naming PN/NP should be cn/nc
+// Info << "PN: facei = " << facei << endl;
+// Info << "PN: faceI = " << faceI << endl;
+// Info << "PN: own[faceI] = " << own[faceI] << endl;
+// Info << "PN: nei[faceI] = " << nei[faceI] << endl;
+// Info << "PN: wT = " << wT << endl;
+// Info << "PN: gMax(TReIn) = " << gMax(TReIn) << endl;
+// Info << "PN: gMax(TImIn) = " << gMax(TImIn) << endl;
+// Info << "PN: gMin(TReIn) = " << gMin(TReIn) << endl;
+// Info << "PN: gMin(TImIn) = " << gMin(TImIn) << endl;
+// Info << "PN: TReIn[own[faceI]] = " << TReIn[own[faceI]] << endl;
+// Info << "PN: TImIn[own[faceI]] = " << TImIn[own[faceI]] << endl;
+// Info << "PN: TReIn[own[faceI]] = " << TReIn[nei[faceI]] << endl;
+// Info << "PN: TImIn[own[faceI]] = " << TImIn[nei[faceI]] << endl;
+// Info << "PN: SfTRe = " << SfTRe << endl;
+// Info << "PN: SfTIm = " << SfTIm << endl;
+// Info << "PN: sSReIn[faceI] = " << sSReIn[faceI] << endl;
+// Info << "PN: sSImIn[faceI] = " << sSImIn[faceI] << endl;
 
             // Correct face values of sS (plus!)
             sSReIn[faceI] += wT * SfTRe;
             sSImIn[faceI] += wT * SfTIm;
 
-Info << "PN: sSReInCorr[faceI] = " << sSReIn[faceI] << endl;
-Info << "PN: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
+// Info << "PN: sSReInCorr[faceI] = " << sSReIn[faceI] << endl;
+// Info << "PN: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
         }
 
         // Owner: non-conducting
         // Neighbour: conducting
-        forAll (cnNPfaces, facei)
+        forAll (cnNPfaces.toc(), facei)
         {
-            label faceI = cnNPfaces[facei];
+            label faceI = cnNPfaces.toc()[facei];
 
             // Copy from surfaceInterpolation.C
             // Calculate Pf (SfdOwn) and fN (SfdNei)
@@ -257,22 +266,31 @@ Info << "PN: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
             scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TReIn[nei[faceI]];
             scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TImIn[nei[faceI]];
 
-Info << "NP: wT = " << wT << endl;
-Info << "PN: TReIn[own[faceI]] = " << TReIn[own[faceI]] << endl;
-Info << "PN: TImIn[own[faceI]] = " << TImIn[own[faceI]] << endl;
-Info << "PN: TReIn[own[faceI]] = " << TReIn[nei[faceI]] << endl;
-Info << "PN: TImIn[own[faceI]] = " << TImIn[nei[faceI]] << endl;
-Info << "NP: SfTRe = " << SfTRe << endl;
-Info << "NP: SfTIm = " << SfTIm << endl;
-Info << "NP: sSReIn[faceI] = " << sSReIn[faceI] << endl;
-Info << "NP: sSImIn[faceI] = " << sSImIn[faceI] << endl;
+            // TODO Naming PN/NP should be cn/nc
+// Info << "NP: facei = " << facei << endl;
+// Info << "NP: faceI = " << faceI << endl;
+// Info << "NP: own[faceI] = " << own[faceI] << endl;
+// Info << "NP: nei[faceI] = " << nei[faceI] << endl;
+// Info << "NP: wT = " << wT << endl;
+// Info << "NP: gMax(TReIn) = " << gMax(TReIn) << endl;
+// Info << "NP: gMax(TImIn) = " << gMax(TImIn) << endl;
+// Info << "NP: gMin(TReIn) = " << gMin(TReIn) << endl;
+// Info << "NP: gMin(TImIn) = " << gMin(TImIn) << endl;
+// Info << "NP: TReIn[own[faceI]] = " << TReIn[own[faceI]] << endl;
+// Info << "NP: TImIn[own[faceI]] = " << TImIn[own[faceI]] << endl;
+// Info << "NP: TReIn[own[faceI]] = " << TReIn[nei[faceI]] << endl;
+// Info << "NP: TImIn[own[faceI]] = " << TImIn[nei[faceI]] << endl;
+// Info << "NP: SfTRe = " << SfTRe << endl;
+// Info << "NP: SfTIm = " << SfTIm << endl;
+// Info << "NP: sSReIn[faceI] = " << sSReIn[faceI] << endl;
+// Info << "NP: sSImIn[faceI] = " << sSImIn[faceI] << endl;
 
             // Correct face values of sS (minus!)
             sSReIn[faceI] -= wT * SfTRe;
             sSImIn[faceI] -= wT * SfTIm;
 
-Info << "NP: sSReInCorr[faceI] = " << sSReIn[faceI] << endl;
-Info << "NP: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
+// Info << "NP: sSReInCorr[faceI] = " << sSReIn[faceI] << endl;
+// Info << "NP: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
         }
     }
 
