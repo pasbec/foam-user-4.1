@@ -184,10 +184,6 @@ Info << "DEBUG: Corrected gradient of S" << endl;
     // Correction of the face values of sS at the
     // c/n-interface
     {
-        // References to internal fields of sS
-        scalarField& sSReIn = sSRe.internalField();
-        scalarField& sSImIn = sSIm.internalField();
-
         // Mesh references
         const unallocLabelList& own = mesh.owner();
         const unallocLabelList& nei = mesh.neighbour();
@@ -199,10 +195,20 @@ Info << "DEBUG: Corrected gradient of S" << endl;
         const vectorField& Sf = mesh.Sf();
         const scalarField& magSf = mesh.magSf();
 
+        // References to internal fields of sS
+        scalarField& sSReIn = sSRe.internalField();
+        scalarField& sSImIn = sSIm.internalField();
+
+        // References to internal fields of sS
+        vectorField& TReIn = TRe.internalField();
+        vectorField& TImIn = TIm.internalField();
+
         // Owner: conducting
         // Neighbour: non-conducting
-        forAll (cnPNfaces, faceI)
+        forAll (cnPNfaces, facei)
         {
+            label faceI = cnPNfaces[facei];
+
             // Note: Copy from surfaceInterpolation.C
             // Calculate Pf (SfdOwn) and fN (SfdNei)
             scalar SfdOwn = mag(Sf[faceI] & (Cf[faceI] - C[own[faceI]]));
@@ -212,10 +218,14 @@ Info << "DEBUG: Corrected gradient of S" << endl;
             scalar wT = SfdOwn*SfdNei/(SfdOwn+SfdNei);
 
             // Grab normal part of T from owner (conducting region)
-            scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TRe[own[faceI]];
-            scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TIm[own[faceI]];
+            scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TReIn[own[faceI]];
+            scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TImIn[own[faceI]];
 
 Info << "PN: wT = " << wT << endl;
+Info << "PN: TReIn[own[faceI]] = " << TReIn[own[faceI]] << endl;
+Info << "PN: TImIn[own[faceI]] = " << TImIn[own[faceI]] << endl;
+Info << "PN: TReIn[own[faceI]] = " << TReIn[nei[faceI]] << endl;
+Info << "PN: TImIn[own[faceI]] = " << TImIn[nei[faceI]] << endl;
 Info << "PN: SfTRe = " << SfTRe << endl;
 Info << "PN: SfTIm = " << SfTIm << endl;
 Info << "PN: sSReIn[faceI] = " << sSReIn[faceI] << endl;
@@ -231,8 +241,10 @@ Info << "PN: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
 
         // Owner: non-conducting
         // Neighbour: conducting
-        forAll (cnPNfaces, faceI)
+        forAll (cnNPfaces, facei)
         {
+            label faceI = cnNPfaces[facei];
+
             // Copy from surfaceInterpolation.C
             // Calculate Pf (SfdOwn) and fN (SfdNei)
             scalar SfdOwn = mag(Sf[faceI] & (Cf[faceI] - C[own[faceI]]));
@@ -242,10 +254,14 @@ Info << "PN: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
             scalar wT = SfdOwn*SfdNei/(SfdOwn+SfdNei);
 
             // Grab normal part of T from neighbour (conducting region)
-            scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TRe[nei[faceI]];
-            scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TIm[nei[faceI]];
+            scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TReIn[nei[faceI]];
+            scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TImIn[nei[faceI]];
 
 Info << "NP: wT = " << wT << endl;
+Info << "PN: TReIn[own[faceI]] = " << TReIn[own[faceI]] << endl;
+Info << "PN: TImIn[own[faceI]] = " << TImIn[own[faceI]] << endl;
+Info << "PN: TReIn[own[faceI]] = " << TReIn[nei[faceI]] << endl;
+Info << "PN: TImIn[own[faceI]] = " << TImIn[nei[faceI]] << endl;
 Info << "NP: SfTRe = " << SfTRe << endl;
 Info << "NP: SfTIm = " << SfTIm << endl;
 Info << "NP: sSReIn[faceI] = " << sSReIn[faceI] << endl;
