@@ -1,6 +1,4 @@
 
-Info << "DEBUG: Define c/n cellSets and faceSets" << endl;
-
     // Create set for conducting cells
     labelHashSet cCellsHashSet;
 
@@ -97,7 +95,7 @@ Info << "DEBUG: Define c/n cellSets and faceSets" << endl;
         cnNPfacesHashSet
     ); cnNPfaces.write();
 
-Info << "DEBUG: Solve Ts" << endl;
+
 
     // Calculate source current vector potential (Ts)
     // from source given external source current
@@ -131,7 +129,7 @@ Info << "DEBUG: Solve Ts" << endl;
         TsIm.correctBoundaryConditions();
     }
 
-Info << "DEBUG: Solve S" << endl;
+
 
     // Calculate magnetic scalar potential (S)
     // from source current vector potential (Ts) and
@@ -172,34 +170,35 @@ Info << "DEBUG: Solve S" << endl;
         SIm.correctBoundaryConditions();
     }
 
-Info << "DEBUG: Corrected gradient of S" << endl;
+
 
     // Linear interpolate the magnetic scalar potential
-    // tho the faces (sS). We know that sS is completely
+    // to the faces (sS). We know that sS is obviously
     // wrong at the c/n-interface as the gradient of S
     // depends on the current vector potential (Ts) there.
     surfaceScalarField sSRe("sSRe", linearInterpolate(SRe));
     surfaceScalarField sSIm("sSIm", linearInterpolate(SIm));
 
-    // Correction of the face values of sS at the
-    // c/n-interface
+    // This scope contains the correction procedure
+    // of the face values of the interpolated magnetic
+    // scalar sS at the c/n-interface. The whole code is
+    // only valid for (wrongly applied) LINEAR interpolation.
     {
-        // Mesh references
+        // Mesh cell-face addressing
         const unallocLabelList& own = mesh.owner();
         const unallocLabelList& nei = mesh.neighbour();
 
-        // Mesh geometry references
-        // (Sf always points from owner to neighbour)
+        // Mesh geometry
+        // (Sf/nf always points from owner to neighbour)
         const vectorField& Cf = mesh.Cf();
         const vectorField& C = mesh.C();
-        const vectorField& Sf = mesh.Sf();
-        const scalarField& magSf = mesh.magSf();
+        const vectorField nf = mesh.Sf()/mesh.magSf();
 
         // References to internal fields of sS
         scalarField& sSReIn = sSRe.internalField();
         scalarField& sSImIn = sSIm.internalField();
 
-        // References to internal fields of sS
+        // Constant references to internal fields of T
         const vectorField& TReIn = TRe.internalField();
         const vectorField& TImIn = TIm.internalField();
 
@@ -209,43 +208,17 @@ Info << "DEBUG: Corrected gradient of S" << endl;
         {
             label faceI = cnPNfaces.toc()[facei];
 
-            // Note: Copy from surfaceInterpolation.C
-            // Calculate Pf (SfdOwn) and fN (SfdNei)
-            scalar SfdOwn = mag(Sf[faceI] & (Cf[faceI] - C[own[faceI]]));
-            scalar SfdNei = mag(Sf[faceI] & (C[nei[faceI]] - Cf[faceI]));
+            // Calculate Pf and fN
+            scalar Pf = mag(nf[faceI] & (Cf[faceI] - C[own[faceI]]));
+            scalar fN = mag(nf[faceI] & (C[nei[faceI]] - Cf[faceI]));
 
             // Calculate weight for T
-            scalar wT = SfdOwn*SfdNei/(SfdOwn+SfdNei);
-
-            // Grab normal part of T from owner (conducting region)
-            scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TReIn[own[faceI]];
-            scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TImIn[own[faceI]];
-
-            // TODO Naming PN/NP should be cn/nc
-// Info << "PN: facei = " << facei << endl;
-// Info << "PN: faceI = " << faceI << endl;
-// Info << "PN: own[faceI] = " << own[faceI] << endl;
-// Info << "PN: nei[faceI] = " << nei[faceI] << endl;
-// Info << "PN: wT = " << wT << endl;
-// Info << "PN: gMax(TReIn) = " << gMax(TReIn) << endl;
-// Info << "PN: gMax(TImIn) = " << gMax(TImIn) << endl;
-// Info << "PN: gMin(TReIn) = " << gMin(TReIn) << endl;
-// Info << "PN: gMin(TImIn) = " << gMin(TImIn) << endl;
-// Info << "PN: TReIn[own[faceI]] = " << TReIn[own[faceI]] << endl;
-// Info << "PN: TImIn[own[faceI]] = " << TImIn[own[faceI]] << endl;
-// Info << "PN: TReIn[own[faceI]] = " << TReIn[nei[faceI]] << endl;
-// Info << "PN: TImIn[own[faceI]] = " << TImIn[nei[faceI]] << endl;
-// Info << "PN: SfTRe = " << SfTRe << endl;
-// Info << "PN: SfTIm = " << SfTIm << endl;
-// Info << "PN: sSReIn[faceI] = " << sSReIn[faceI] << endl;
-// Info << "PN: sSImIn[faceI] = " << sSImIn[faceI] << endl;
+            scalar wT = Pf*fN/(Pf+fN);
 
             // Correct face values of sS (plus!)
-            sSReIn[faceI] += wT * SfTRe;
-            sSImIn[faceI] += wT * SfTIm;
-
-// Info << "PN: sSReInCorr[faceI] = " << sSReIn[faceI] << endl;
-// Info << "PN: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
+            // Note: Owner is in conducting region
+            sSReIn[faceI] += wT * (nf[faceI] & TReIn[own[faceI]]);
+            sSImIn[faceI] += wT * (nf[faceI] & TImIn[own[faceI]]);
         }
 
         // Owner: non-conducting
@@ -254,58 +227,41 @@ Info << "DEBUG: Corrected gradient of S" << endl;
         {
             label faceI = cnNPfaces.toc()[facei];
 
-            // Copy from surfaceInterpolation.C
-            // Calculate Pf (SfdOwn) and fN (SfdNei)
-            scalar SfdOwn = mag(Sf[faceI] & (Cf[faceI] - C[own[faceI]]));
-            scalar SfdNei = mag(Sf[faceI] & (C[nei[faceI]] - Cf[faceI]));
+            // Calculate Pf and fN
+            scalar Pf = mag(nf[faceI] & (Cf[faceI] - C[own[faceI]]));
+            scalar fN = mag(nf[faceI] & (C[nei[faceI]] - Cf[faceI]));
 
             // Calculate weight for T
-            scalar wT = SfdOwn*SfdNei/(SfdOwn+SfdNei);
-
-            // Grab normal part of T from neighbour (conducting region)
-            scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TReIn[nei[faceI]];
-            scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TImIn[nei[faceI]];
-
-            // TODO Naming PN/NP should be cn/nc
-// Info << "NP: facei = " << facei << endl;
-// Info << "NP: faceI = " << faceI << endl;
-// Info << "NP: own[faceI] = " << own[faceI] << endl;
-// Info << "NP: nei[faceI] = " << nei[faceI] << endl;
-// Info << "NP: wT = " << wT << endl;
-// Info << "NP: gMax(TReIn) = " << gMax(TReIn) << endl;
-// Info << "NP: gMax(TImIn) = " << gMax(TImIn) << endl;
-// Info << "NP: gMin(TReIn) = " << gMin(TReIn) << endl;
-// Info << "NP: gMin(TImIn) = " << gMin(TImIn) << endl;
-// Info << "NP: TReIn[own[faceI]] = " << TReIn[own[faceI]] << endl;
-// Info << "NP: TImIn[own[faceI]] = " << TImIn[own[faceI]] << endl;
-// Info << "NP: TReIn[own[faceI]] = " << TReIn[nei[faceI]] << endl;
-// Info << "NP: TImIn[own[faceI]] = " << TImIn[nei[faceI]] << endl;
-// Info << "NP: SfTRe = " << SfTRe << endl;
-// Info << "NP: SfTIm = " << SfTIm << endl;
-// Info << "NP: sSReIn[faceI] = " << sSReIn[faceI] << endl;
-// Info << "NP: sSImIn[faceI] = " << sSImIn[faceI] << endl;
+            scalar wT = Pf*fN/(Pf+fN);
 
             // Correct face values of sS (minus!)
-            sSReIn[faceI] -= wT * SfTRe;
-            sSImIn[faceI] -= wT * SfTIm;
-
-// Info << "NP: sSReInCorr[faceI] = " << sSReIn[faceI] << endl;
-// Info << "NP: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
+            // Note: Neighbour is in conducting region
+            sSReIn[faceI] -= wT * (nf[faceI] & TReIn[nei[faceI]]);
+            sSImIn[faceI] -= wT * (nf[faceI] & TImIn[nei[faceI]]);
         }
     }
 
-    // Calculate and store the gradient of
-    // the corrected magnetic scalar potential (sS)
+    // Calculate and store the gradient of the
+    // corrected magnetic scalar potential (sS) on
+    // the faces
     volVectorField SReGrad("SReGrad", fvc::grad(sSRe));
     volVectorField SImGrad("SImGrad", fvc::grad(sSIm));
 
-Info << "DEBUG: Write gradient of sS" << endl;
-
+    // TODO: To be removed after debug
     SReGrad.write();
     SImGrad.write();
 
-Info << "DEBUG: Create subMesh for conducting region" << endl;
 
+
+    // This scope is to solve the current vector
+    // potential (T) in the conducting region. Therefore
+    // we will create a submesh and map all necessary
+    // fields to this submesh. The boundary conditions
+    // for T are very unusual but they can be realized
+    // by means of the "newDirectionMixedFvPatchFields"
+    // from foam-extend. To be more specific we need to set
+    // the tangential components of T to "zero" (Txn = 0) and
+    // apply a zero-gradient in normal direction (dT/dn = 0).
     {
         // Create submesh
         fvMeshSubset cMeshSubSet
@@ -329,8 +285,9 @@ Info << "DEBUG: Create subMesh for conducting region" << endl;
         // References for maps
         const labelList& cCellMap = cMeshSubSet.cellMap();
 
-Info << "DEBUG (c): Field creation for subMesh" << endl;
 
+
+        // Create fields
         volScalarField cSigma
         (
             IOobject
@@ -344,62 +301,6 @@ Info << "DEBUG (c): Field creation for subMesh" << endl;
             dimensionedScalar(word(), sigma.dimensions(), pTraits<scalar>::zero),
             zeroGradientFvPatchField<scalar>::typeName
         );
-
-//         volScalarField cSRe
-//         (
-//             IOobject
-//             (
-//                 "SRe",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensionedScalar(word(), SRe.dimensions(), pTraits<scalar>::zero),
-//             fixedGradientFvPatchField<scalar>::typeName
-//         );
-//
-//         volScalarField cSIm
-//         (
-//             IOobject
-//             (
-//                 "SIm",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensionedScalar(word(), SIm.dimensions(), pTraits<scalar>::zero),
-//             fixedGradientFvPatchField<scalar>::typeName
-//         );
-
-//         volScalarField cSRe
-//         (
-//             IOobject
-//             (
-//                 "SRe",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensionedScalar(word(), SRe.dimensions(), pTraits<scalar>::zero),
-//             zeroGradientFvPatchField<scalar>::typeName
-//         );
-//
-//         volScalarField cSIm
-//         (
-//             IOobject
-//             (
-//                 "SIm",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensionedScalar(word(), SIm.dimensions(), pTraits<scalar>::zero),
-//             zeroGradientFvPatchField<scalar>::typeName
-//         );
 
         volVectorField cSReGrad
         (
@@ -482,7 +383,7 @@ Info << "DEBUG (c): Field creation for subMesh" << endl;
             ),
             cMesh,
             dimensioned<vector>(word(), TsRe.dimensions(), pTraits<vector>::zero),
-            calculatedFvPatchField<vector>::typeName
+            zeroGradientFvPatchField<vector>::typeName
         );
 
         volVectorField cTsIm
@@ -496,7 +397,7 @@ Info << "DEBUG (c): Field creation for subMesh" << endl;
             ),
             cMesh,
             dimensionedVector(word(), TsIm.dimensions(), pTraits<vector>::zero),
-            calculatedFvPatchField<vector>::typeName
+            zeroGradientFvPatchField<vector>::typeName
         );
 
         volVectorField cjRe
@@ -527,49 +428,11 @@ Info << "DEBUG (c): Field creation for subMesh" << endl;
             calculatedFvPatchField<vector>::typeName
         );
 
-Info << "DEBUG (c): Boundary conditions for subMesh fields" << endl;
+
 
         // Boundary conditions
         forAll(cMesh.boundary(), patchI)
         {
-//             if
-//             (
-//                 cSRe.boundaryField()[patchI].type()
-//              == fixedGradientFvPatchField<scalar>::typeName
-//             )
-//             {
-//                 fixedGradientFvPatchField<scalar>& cSReP =
-//                     refCast<fixedGradientFvPatchField<scalar> >
-//                     (
-//                         cSRe.boundaryField()[patchI]
-//                     );
-//
-//                 // Set gradient
-//                 cSReP.gradient() =
-//                     cTRe.boundaryField()[patchI]
-//                   & cMesh.boundary()[patchI].nf();
-//                   // TODO: Missing gradient from non-conducting region
-//             }
-//
-//             if
-//             (
-//                 cSIm.boundaryField()[patchI].type()
-//              == fixedGradientFvPatchField<scalar>::typeName
-//             )
-//             {
-//                 fixedGradientFvPatchField<scalar>& cSImP =
-//                     refCast<fixedGradientFvPatchField<scalar> >
-//                     (
-//                         cSIm.boundaryField()[patchI]
-//                     );
-//
-//                 // Set gradient
-//                 cSImP.gradient() =
-//                     cTIm.boundaryField()[patchI]
-//                   & cMesh.boundary()[patchI].nf();
-//                   // TODO: Missing gradient from non-conducting region
-//             }
-
             if
             (
                 cTRe.boundaryField()[patchI].type()
@@ -590,13 +453,13 @@ Info << "DEBUG (c): Boundary conditions for subMesh fields" << endl;
                 cTReP.nHat() = cMesh.boundary()[patchI].nf();
 
                 // Set tangential value fraction to 1
-                // to get zero tangential values
-                // in order to get TRe^n=0
+                // in order to get zero tangential values
+                // at the boundaries (T^n=0)
                 cTReP.tangentialValueFraction() = 1.0;
 
                 // Set normal value fraction to 0
                 // to get zero normal derivative
-                // which gives div(TRe)=0 with TRe^n=0
+                // which gives div(T)=0 with T^n=0
                 cTReP.normalValueFraction() = 0.0;
             }
 
@@ -620,20 +483,20 @@ Info << "DEBUG (c): Boundary conditions for subMesh fields" << endl;
                 cTImP.nHat() = cMesh.boundary()[patchI].nf();
 
                 // Set tangential value fraction to 1
-                // to get zero tangential values
-                // in order to get TIm^n=0
+                // in order to get zero tangential values
+                // at the boundaries (T^n=0)
                 cTImP.tangentialValueFraction() = 1.0;
 
                 // Set normal value fraction to 0
                 // to get zero normal derivative
-                // which gives div(TIm)=0 with TIm^n=0
+                // which gives div(T)=0 with T^n=0
                 cTImP.normalValueFraction() = 0.0;
             }
         }
 
-Info << "DEBUG (c): Mapping to subMesh" << endl;
 
-        // Map volume fields internal
+
+        // Map internal values of volume fields
         forAll (cMesh.C(), cellI)
         {
             cSigma.internalField()[cellI] = sigma.internalField()[cCellMap[cellI]];
@@ -648,94 +511,38 @@ Info << "DEBUG (c): Mapping to subMesh" << endl;
             cTsIm.internalField()[cellI] = TsIm.internalField()[cCellMap[cellI]];
         }
 
-        // Correct boundary conditions
+        // Correct boundary values of volume fields
         cSigma.correctBoundaryConditions();
 
         cSReGrad.correctBoundaryConditions();
         cSImGrad.correctBoundaryConditions();
 
-        // Update calculated boundary conditions
-//         forAll(cMesh.boundaryMesh(), patchI)
-//         {
-// //             polyPatch patch = cMesh.boundaryMesh()[patchI];
-// //
-// //             forAll(patch, facei)
-// //             {
-// //                 label faceI = patch.start() + facei;
-// //             }
-//
-//             // Use internalField for boundary field for sigma
-//             cSigma.boundaryField()[patchI] = cSigma.boundaryField()[patchI].patchInternalField();
-//         }
+        cTRe.correctBoundaryConditions();
+        cTIm.correctBoundaryConditions();
 
-// Info << "DEBUG (c): Solve S" << endl;
-//
-//         volScalarField cTReDiv("TReDiv", fvc::div(cTRe)); cTReDiv.write();
-//         volScalarField cTImDiv("TImDiv", fvc::div(cTIm)); cTImDiv.write();
-//
-//         volScalarField cTsReDiv("TsReDiv", fvc::div(cTsRe)); cTsReDiv.write();
-//         volScalarField cTsImDiv("TsImDiv", fvc::div(cTsIm)); cTsImDiv.write();
-//
-//         fvScalarMatrix cSReEqn
-//         (
-//             fvm::laplacian(cSRe)
-//           - fvc::div(cTRe)
-//           - fvc::div(cTsRe)
-//         );
-//
-//         fvScalarMatrix cSImEqn
-//         (
-//             fvm::laplacian(cSIm)
-//           - fvc::div(cTIm)
-//           - fvc::div(cTsIm)
-//         );
-//
-//         // Set references
-//         label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
-//         scalar refValue = 0.0;
-//
-//         cSReEqn.setReference(refCell, refValue);
-//         cSImEqn.setReference(refCell, refValue);
-//
-//         cSReEqn.solve();
-//         cSImEqn.solve();
-//
-//         cSRe.correctBoundaryConditions();
-//         cSIm.correctBoundaryConditions();
+        cTsRe.correctBoundaryConditions();
+        cTsIm.correctBoundaryConditions();
 
-Info << "DEBUG (c): Write subMesh fields with explicit influence to T equation" << endl;
 
-        cMesh.write();
-
-        cSigma.write();
-
-        cTsRe.write();
-        cTsIm.write();
-
-        cSReGrad.write();
-        cSImGrad.write();
-
-Info << "DEBUG (c): Prepare matrices for T" << endl;
-
+        // Real part
         fvVectorMatrix cTReEqn
         (
             rMu0/cSigma * fvm::laplacian(cTRe)
           - (fvc::grad(rMu0/cSigma) ^ fvc::curl(cTRe)) // TODO: Testing!
-//           + omega * cTIm
+//           + omega * cTIm                            // Block-coupling
           + omega * cTsIm
           - omega * cSImGrad
         );
 
+        // Imaginary part
         fvVectorMatrix cTImEqn
         (
             rMu0/cSigma * fvm::laplacian(cTIm)
           - (fvc::grad(rMu0/cSigma) ^ fvc::curl(cTIm)) // TODO: Testing!
-//           - omega * cTRe
+//           - omega * cTRe                            // Block-coupling
           - omega * cTsRe
           + omega * cSReGrad
         );
-
-Info << "DEBUG (c): Assembly block-matrix for T" << endl;
 
         // Prepare block system
         fvBlockMatrix<vector6> cTEqn(cT);
@@ -765,11 +572,13 @@ Info << "DEBUG (c): Assembly block-matrix for T" << endl;
         cTRe.correctBoundaryConditions();
         cTIm.correctBoundaryConditions();
 
+
+
         // Calculate induced current
         cjRe == fvc::curl(cTRe);
         cjIm == fvc::curl(cTIm);
 
-Info << "DEBUG (c): Reverse mapping from subMesh" << endl;
+
 
         // Reverse map fields
         forAll (cMesh.C(), cellI)
@@ -781,14 +590,22 @@ Info << "DEBUG (c): Reverse mapping from subMesh" << endl;
             jIm[cCellMap[cellI]] = cjIm[cellI];
         }
 
-Info << "DEBUG (c): Write subMesh fields T and dependencies" << endl;
-
+        // TODO: Remove after debug!
+        cMesh.write();
+        cSigma.write();
+        cSReGrad.write();
+        cSImGrad.write();
         cTRe.write();
         cTIm.write();
+        cTsRe.write();
+        cTsIm.write();
         cjRe.write();
         cjIm.write();
     }
 
+
+
+    // Calculate/update magnetic field density
     BRe == mu0 * (TRe + TsRe - SReGrad);
     BIm == mu0 * (TIm + TsIm - SImGrad);
 

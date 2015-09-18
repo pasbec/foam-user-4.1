@@ -1,5 +1,4 @@
 EXE_INC = \
-    -Iinterpolation/linearWeighted \
     -InewDirectionMixed \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
