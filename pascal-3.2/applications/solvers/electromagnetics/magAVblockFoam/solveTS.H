@@ -1,4 +1,102 @@
 
+Info << "DEBUG: Define c/n cellSets and faceSets" << endl;
+
+    // Create set for conducting cells
+    labelHashSet cCellsHashSet;
+
+    forAll(mesh.cells(), cellI)
+    {
+        if (sigma.internalField()[cellI] > SMALL)
+        {
+            cCellsHashSet.insert(cellI);
+        }
+    }
+
+    cellSet cCells
+    (
+        mesh,
+        "cellSet_solver_c",
+        cCellsHashSet
+    ); cCells.write();
+
+    // Create set for non-conducting cells
+    labelHashSet nCellsHashSet;
+
+    forAll(mesh.cells(), cellI)
+    {
+        if (sigma.internalField()[cellI] < SMALL)
+        {
+            nCellsHashSet.insert(cellI);
+        }
+    }
+
+    cellSet nCells
+    (
+        mesh,
+        "cellSet_solver_n",
+        nCellsHashSet
+    ); nCells.write();
+
+    // Create sets for conducting/non-conducting faces (cn):
+    // cnPN) Owner is in conducting region and neighbour
+    //       lies in non-conducting region
+    // cnNP) Owner is in non-conducting region and
+    //       neighbour lies in conducting region
+    labelHashSet cnFacesHashSet;
+    labelHashSet cnPNfacesHashSet;
+    labelHashSet cnNPfacesHashSet;
+
+    {
+        // Mesh references
+        const unallocLabelList& own = mesh.owner();
+        const unallocLabelList& nei = mesh.neighbour();
+
+        // Find and insert faces
+        forAll (own, faceI)
+        {
+            if
+            (
+                (sigma.internalField()[own[faceI]] > SMALL)
+             && (sigma.internalField()[nei[faceI]] < SMALL)
+            )
+            {
+                cnFacesHashSet.insert(faceI);
+                cnPNfacesHashSet.insert(faceI);
+            }
+
+            if
+            (
+                (sigma.internalField()[own[faceI]] < SMALL)
+             && (sigma.internalField()[nei[faceI]] > SMALL)
+            )
+            {
+                cnFacesHashSet.insert(faceI);
+                cnNPfacesHashSet.insert(faceI);
+            }
+        }
+    }
+
+    faceSet cnFaces
+    (
+        mesh,
+        "cellSet_solver_cn",
+        cnFacesHashSet
+    ); cnFaces.write();
+
+    faceSet cnPNfaces
+    (
+        mesh,
+        "cellSet_solver_cn_PN",
+        cnPNfacesHashSet
+    ); cnPNfaces.write();
+
+    faceSet cnNPfaces
+    (
+        mesh,
+        "cellSet_solver_cn_NP",
+        cnNPfacesHashSet
+    ); cnNPfaces.write();
+
 Info << "DEBUG: Solve Ts" << endl;
 
     // Calculate source current vector potential (Ts)
@@ -36,11 +134,12 @@ Info << "DEBUG: Solve Ts" << endl;
 Info << "DEBUG: Solve S" << endl;
 
     // Calculate magnetic scalar potential (S)
-    // from source current vector potential and
-    // current vector potential in the conducting region
+    // from source current vector potential (Ts) and
+    // current vector potential (T) in the conducting region
     // from the last time step. As boundary conditions
     // at "infinity" we will use "zeroGradient" which is
-    // consistent with "slip" for Ts.
+    // consistent with "slip" for Ts as H = Ts - grad(S)
+    // in order to get H=0 there.
     {
         // Real part
         fvScalarMatrix SReEqn
@@ -73,34 +172,103 @@ Info << "DEBUG: Solve S" << endl;
         SIm.correctBoundaryConditions();
     }
 
+Info << "DEBUG: Corrected gradient of S" << endl;
+
+    // Linear interpolate the magnetic scalar potential
+    // tho the faces (sS). We know that sS is completely
+    // wrong at the c/n-interface as the gradient of S
+    // depends on the current vector potential (Ts) there.
+    surfaceScalarField sSRe("sSRe", linearInterpolate(SRe));
+    surfaceScalarField sSIm("sSIm", linearInterpolate(SIm));
+
+    // Correction of the face values of sS at the
+    // c/n-interface
+    {
+        // References to internal fields of sS
+        scalarField& sSReIn = sSRe.internalField();
+        scalarField& sSImIn = sSIm.internalField();
+
+        // Mesh references
+        const unallocLabelList& own = mesh.owner();
+        const unallocLabelList& nei = mesh.neighbour();
+
+        // Mesh geometry references
+        // (Sf always points from owner to neighbour)
+        const vectorField& Cf = mesh.Cf();
+        const vectorField& C = mesh.C();
+        const vectorField& Sf = mesh.Sf();
+        const scalarField& magSf = mesh.magSf();
+
+        // Owner: conducting
+        // Neighbour: non-conducting
+        forAll (cnPNfaces, faceI)
+        {
+            // Note: Copy from surfaceInterpolation.C
+            // Calculate Pf (SfdOwn) and fN (SfdNei)
+            scalar SfdOwn = mag(Sf[faceI] & (Cf[faceI] - C[own[faceI]]));
+            scalar SfdNei = mag(Sf[faceI] & (C[nei[faceI]] - Cf[faceI]));
+
+            // Calculate weight for T
+            scalar wT = SfdOwn*SfdNei/(SfdOwn+SfdNei);
+
+            // Grab normal part of T from owner (conducting region)
+            scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TRe[own[faceI]];
+            scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TIm[own[faceI]];
+
+Info << "PN: wT = " << wT << endl;
+Info << "PN: SfTRe = " << SfTRe << endl;
+Info << "PN: SfTIm = " << SfTIm << endl;
+Info << "PN: sSReIn[faceI] = " << sSReIn[faceI] << endl;
+Info << "PN: sSImIn[faceI] = " << sSImIn[faceI] << endl;
+
+            // Correct face values of sS (plus!)
+            sSReIn[faceI] += wT * SfTRe;
+            sSImIn[faceI] += wT * SfTIm;
+
+Info << "PN: sSReInCorr[faceI] = " << sSReIn[faceI] << endl;
+Info << "PN: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
+        }
+
+        // Owner: non-conducting
+        // Neighbour: conducting
+        forAll (cnPNfaces, faceI)
+        {
+            // Copy from surfaceInterpolation.C
+            // Calculate Pf (SfdOwn) and fN (SfdNei)
+            scalar SfdOwn = mag(Sf[faceI] & (Cf[faceI] - C[own[faceI]]));
+            scalar SfdNei = mag(Sf[faceI] & (C[nei[faceI]] - Cf[faceI]));
+
+            // Calculate weight for T
+            scalar wT = SfdOwn*SfdNei/(SfdOwn+SfdNei);
+
+            // Grab normal part of T from neighbour (conducting region)
+            scalar SfTRe = (Sf[faceI]/magSf[faceI]) & TRe[nei[faceI]];
+            scalar SfTIm = (Sf[faceI]/magSf[faceI]) & TIm[nei[faceI]];
+
+Info << "NP: wT = " << wT << endl;
+Info << "NP: SfTRe = " << SfTRe << endl;
+Info << "NP: SfTIm = " << SfTIm << endl;
+Info << "NP: sSReIn[faceI] = " << sSReIn[faceI] << endl;
+Info << "NP: sSImIn[faceI] = " << sSImIn[faceI] << endl;
+
+            // Correct face values of sS (minus!)
+            sSReIn[faceI] -= wT * SfTRe;
+            sSImIn[faceI] -= wT * SfTIm;
+
+Info << "NP: sSReInCorr[faceI] = " << sSReIn[faceI] << endl;
+Info << "NP: sSImInCorr[faceI] = " << sSImIn[faceI] << endl;
+        }
+    }
+
     // Calculate and store the gradient of
-    // the magnetic scalar potential (S)
-    volVectorField SReGrad("SReGrad", fvc::grad(SRe));
-    volVectorField SImGrad("SImGrad", fvc::grad(SIm));
+    // the corrected magnetic scalar potential (sS)
+    volVectorField SReGrad("SReGrad", fvc::grad(sSRe));
+    volVectorField SImGrad("SImGrad", fvc::grad(sSIm));
 
-Info << "DEBUG: Define c/n regions" << endl;
+Info << "DEBUG: Write gradient of sS" << endl;
 
-    // Create set for conducting cells
-    labelHashSet cCellsHashSet;
-    forAll(mesh.cells(), cellI)
-    {
-        if (sigma.internalField()[cellI] > SMALL)
-        {
-            cCellsHashSet.insert(cellI);
-        }
-    }
-    labelList cCells = cCellsHashSet.toc();
-
-    // Create set for non-conducting cells
-    labelHashSet nCellsHashSet;
-    forAll(mesh.cells(), cellI)
-    {
-        if (sigma.internalField()[cellI] < SMALL)
-        {
-            nCellsHashSet.insert(cellI);
-        }
-    }
-    labelList nCells = nCellsHashSet.toc();
+    SReGrad.write();
+    SImGrad.write();
 
 Info << "DEBUG: Create subMesh for conducting region" << endl;
 

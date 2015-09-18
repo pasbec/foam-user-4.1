@@ -32,6 +32,7 @@ Description
 #include "fvBlockMatrix.H"
 
 #include "cellSet.H"
+#include "faceSet.H"
 
 #include "fvMeshSubset.H"
 
