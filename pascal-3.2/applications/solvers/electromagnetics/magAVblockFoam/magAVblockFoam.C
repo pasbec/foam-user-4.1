@@ -91,17 +91,17 @@ int main(int argc, char *argv[])
 
         Info << "Time = " << runTime.value() << nl << endl;
 
-//         // Re-read controls
-// #       include "readAVControls.H"
+#       include "solveAVmatrix.H"
 
-//         // Solve AV-system
+        // Solve AV-system
+// #       include "readAVControls.H"
 // #       include "solveAV.H"
 
 //         // Solve B-system
 // #       include "solveB.H"
 
-        // Solve T-S-system
-#       include "solveTS.H"
+//         // Solve T-S-system
+// #       include "solveTS.H"
 
         FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
 

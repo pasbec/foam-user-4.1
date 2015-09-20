@@ -81,3 +81,9 @@
         VRe.correctBoundaryConditions();
         VIm.correctBoundaryConditions();
     }
+
+    jRe ==   alpha * AIm - sigma * fvc::grad(VRe);
+    jIm == - alpha * ARe - sigma * fvc::grad(VIm);
+
+    BRe == fvc::curl(ARe);
+    BIm == fvc::curl(AIm);

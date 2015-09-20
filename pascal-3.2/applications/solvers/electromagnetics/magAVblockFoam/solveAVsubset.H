@@ -393,3 +393,9 @@
         cSnARe.write();
         cSnAIm.write();
     }
+
+    jRe ==   alpha * AIm + alpha * fvc::grad(GIm) - sigma * fvc::grad(VRe);
+    jIm == - alpha * ARe - alpha * fvc::grad(GRe) - sigma * fvc::grad(VIm);
+
+    BRe == fvc::curl(ARe);
+    BIm == fvc::curl(AIm);

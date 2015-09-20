@@ -45,30 +45,36 @@
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 
-        // Add explicit parts of A (segregated A-V coupling)
-        fvScalarMatrix VReEqnSegregated = VReEqn;
-        fvScalarMatrix VImEqnSegregated = VImEqn;
-
-        bool useGradAlpha = true;
-
-        if (useGradAlpha)
-        {
-            VReEqnSegregated -= gradAlpha&AIm;
-            VImEqnSegregated += gradAlpha&ARe;
-        }
-        else
-        {
-            VReEqnSegregated -= fvc::div(alpha*AIm);
-            VImEqnSegregated += fvc::div(alpha*ARe);
-
-            VReEqnSegregated += alpha * fvc::div(AIm);
-            VImEqnSegregated -= alpha * fvc::div(ARe);
-        }
-
-        // Solve V
-        VReEqnSegregated.solve();
-        VImEqnSegregated.solve();
-
-        VRe.correctBoundaryConditions();
-        VIm.correctBoundaryConditions();
+//         // Add explicit parts of A (segregated A-V coupling)
+//         fvScalarMatrix VReEqnSegregated = VReEqn;
+//         fvScalarMatrix VImEqnSegregated = VImEqn;
+//
+//         bool useGradAlpha = true;
+//
+//         if (useGradAlpha)
+//         {
+//             VReEqnSegregated -= gradAlpha&AIm;
+//             VImEqnSegregated += gradAlpha&ARe;
+//         }
+//         else
+//         {
+//             VReEqnSegregated -= fvc::div(alpha*AIm);
+//             VImEqnSegregated += fvc::div(alpha*ARe);
+//
+//             VReEqnSegregated += alpha * fvc::div(AIm);
+//             VImEqnSegregated -= alpha * fvc::div(ARe);
+//         }
+//
+//         // Solve V
+//         VReEqnSegregated.solve();
+//         VImEqnSegregated.solve();
+//
+//         VRe.correctBoundaryConditions();
+//         VIm.correctBoundaryConditions();
     }
+
+    jRe ==   alpha * AIm - sigma * fvc::grad(VRe);
+    jIm == - alpha * ARe - sigma * fvc::grad(VIm);
+
+    BRe == fvc::curl(ARe);
+    BIm == fvc::curl(AIm);
