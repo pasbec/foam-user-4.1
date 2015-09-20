@@ -92,9 +92,25 @@
         mesh
     );
 
-    // Magnetic vector potential (complex)
+//     // Magnetic vector potential (complex)
+//     Info << "Create field A" << nl << endl;
+//     volVector6Field A
+//     (
+//         IOobject
+//         (
+//             "A",
+//             runTime.timeName(),
+//             mesh,
+//             IOobject::NO_READ,
+//             IOobject::NO_WRITE
+//         ),
+//         mesh,
+//         dimensionedVector6(word(),dimless,vector6::zero)
+//     );
+
+    // Magnetic vector potential and its divergence (complex)
     Info << "Create field A" << nl << endl;
-    volVector6Field A
+    volVector8Field A
     (
         IOobject
         (
@@ -105,7 +121,7 @@
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector6(word(),dimless,vector6::zero)
+        dimensionedVector8(word(),dimless,vector8::zero)
     );
 
 

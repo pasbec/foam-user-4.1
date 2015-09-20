@@ -236,16 +236,16 @@
 
 
 
-    // Add explicit terms which are necessary if div(A) is NOT zero
-    volVectorField AReDivGrad("AReDivGrad", fvc::grad(fvc::div(ARe)));
-    volVectorField AImDivGrad("AImDivGrad", fvc::grad(fvc::div(AIm)));
-
-    ARexEqn -= rMu0 * AReDivGrad.component(0);
-    AReyEqn -= rMu0 * AReDivGrad.component(1);
-    ARezEqn -= rMu0 * AReDivGrad.component(2);
-    AImxEqn -= rMu0 * AImDivGrad.component(0);
-    AImyEqn -= rMu0 * AImDivGrad.component(1);
-    AImzEqn -= rMu0 * AImDivGrad.component(2);
+//     // Add explicit terms which are necessary if div(A) is NOT zero
+//     volVectorField AReDivGrad("AReDivGrad", fvc::grad(fvc::div(ARe)));
+//     volVectorField AImDivGrad("AImDivGrad", fvc::grad(fvc::div(AIm)));
+//
+//     ARexEqn -= rMu0 * AReDivGrad.component(0);
+//     AReyEqn -= rMu0 * AReDivGrad.component(1);
+//     ARezEqn -= rMu0 * AReDivGrad.component(2);
+//     AImxEqn -= rMu0 * AImDivGrad.component(0);
+//     AImyEqn -= rMu0 * AImDivGrad.component(1);
+//     AImzEqn -= rMu0 * AImDivGrad.component(2);
 
 
 
@@ -277,9 +277,10 @@
 
         // Derived mesh geometry
         const vectorField Sn = Sf/magSf;
-        scalarField SnxMag = mag(Sn.component(0));
-        scalarField SnyMag = mag(Sn.component(1));
-        scalarField SnzMag = mag(Sn.component(2));
+        const vectorField SnCmptMag = cmptMag(Sn);
+        const scalarField SnxMag = mag(Sn.component(0));
+        const scalarField SnyMag = mag(Sn.component(1));
+        const scalarField SnzMag = mag(Sn.component(2));
 
         forAll (cnFaces.toc(), facei)
         {
@@ -303,6 +304,7 @@
             // Version 1: Eliminate upper/neighbour coeffs
             // Note: This will keep a SYMMETRIC matrix and
             //       it will also improve diagonal dominance
+            // TODO: Optimize
             ARexEqn.diag()[own[faceI]] -= wSnx * wOwn * c;
             ARexEqn.diag()[nei[faceI]] -= wSnx * wNei * c;
             ARexEqn.upper()[faceI] -= wSnx * c;
@@ -357,40 +359,195 @@
     }
 
     {
-        // Prepare block system
-        fvBlockMatrix<vector6> AEqn(A);
-
-        // Lookup solver type for AEqn
-        word solverType =
-            mesh.solutionDict().subDict("solvers").
-            subDict(AEqn.psi().name()).lookup("solver");
-
-        // Force diag/upper/lower square for AMG (A is ASYMMETRIC)
-        if (solverType == "AMG")
-        {
-            Field<tensor6>& AEqnD = AEqn.diag().asSquare(); AEqnD = tensor6::zero;
-            Field<tensor6>& AEqnU = AEqn.upper().asSquare(); AEqnU = tensor6::zero;
-            Field<tensor6>& AEqnL = AEqn.lower().asSquare(); AEqnL = tensor6::zero;
-        }
-
-        // Insert equations for A
-        AEqn.insertEquation(0, ARexEqn);
-        AEqn.insertEquation(1, AReyEqn);
-        AEqn.insertEquation(2, ARezEqn);
-        AEqn.insertEquation(3, AImxEqn);
-        AEqn.insertEquation(4, AImyEqn);
-        AEqn.insertEquation(5, AImzEqn);
 
         // References to internal alpha field
         const scalarField& alphaIn = alpha.internalField();
 
-        // Add coupling terms for ARe-AIm coupling
-        AEqn.insertEquationCoupling(0, 3,  alphaIn);
-        AEqn.insertEquationCoupling(3, 0, -alphaIn);
-        AEqn.insertEquationCoupling(1, 4,  alphaIn);
-        AEqn.insertEquationCoupling(4, 1, -alphaIn);
-        AEqn.insertEquationCoupling(2, 5,  alphaIn);
-        AEqn.insertEquationCoupling(5, 2, -alphaIn);
+//         // Prepare block system
+//         fvBlockMatrix<vector6> AEqn(A);
+//
+//         // Lookup solver type for AEqn
+//         word solverType =
+//             mesh.solutionDict().subDict("solvers").
+//             subDict(AEqn.psi().name()).lookup("solver");
+//
+//         // Force diag/upper/lower square for AMG (A is ASYMMETRIC)
+//         if (solverType == "AMG")
+//         {
+//             Field<tensor6>& AEqnD = AEqn.diag().asSquare(); AEqnD = tensor6::zero;
+//             Field<tensor6>& AEqnU = AEqn.upper().asSquare(); AEqnU = tensor6::zero;
+//             Field<tensor6>& AEqnL = AEqn.lower().asSquare(); AEqnL = tensor6::zero;
+//         }
+
+        // Prepare block system for A/divA
+        fvBlockMatrix<vector8> AEqn(A);
+
+        {
+            // Insert equations for A
+            AEqn.insertEquation(0, ARexEqn);
+            AEqn.insertEquation(1, AReyEqn);
+            AEqn.insertEquation(2, ARezEqn);
+            AEqn.insertEquation(3, AImxEqn);
+            AEqn.insertEquation(4, AImyEqn);
+            AEqn.insertEquation(5, AImzEqn);
+
+            // Add coupling terms for ARe-AIm coupling
+            AEqn.insertEquationCoupling(0, 3,  alphaIn);
+            AEqn.insertEquationCoupling(3, 0, -alphaIn);
+            AEqn.insertEquationCoupling(1, 4,  alphaIn);
+            AEqn.insertEquationCoupling(4, 1, -alphaIn);
+            AEqn.insertEquationCoupling(2, 5,  alphaIn);
+            AEqn.insertEquationCoupling(5, 2, -alphaIn);
+        }
+
+        volScalarField AReDiv
+        (
+            IOobject
+            (
+                "AReDiv",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            fvc::div(ARe),
+            fixedValueFvPatchField<scalar>::typeName
+        );
+
+        volScalarField AImDiv
+        (
+            IOobject
+            (
+                "AImDiv",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            fvc::div(AIm),
+            fixedValueFvPatchField<scalar>::typeName
+        );
+
+        {
+            fvScalarMatrix AReDivEqn
+            (
+                fvm::Sp(scalar(1.0),AReDiv)
+//               - fvc::div(ARe)
+            );
+
+            // Currently only work-around
+            // since diagonal insertion
+            // in block-matrix does not
+            // work correctly
+            AReDivEqn.upper() = 0.0;
+
+            fvScalarMatrix AImDivEqn
+            (
+                fvm::Sp(scalar(1.0),AImDiv)
+//               - fvc::div(AIm)
+            );
+
+            // Currently only work-around
+            // since diagonal insertion
+            // in block-matrix does not
+            // work correctly
+            AImDivEqn.upper() = 0.0;
+
+            // Insert equations for divA
+            AEqn.insertEquation(6, AReDivEqn);
+            AEqn.insertEquation(7, AImDivEqn);
+
+            // Coupling part of divA in A
+            BlockLduSystem<vector, vector> AReDivInARe(fvm::grad(AReDiv)); AReDivInARe *= -rMu0.value();
+            BlockLduSystem<vector, vector> AImDivInAIm(fvm::grad(AImDiv)); AImDivInAIm *= -rMu0.value();
+
+            // TODO: Manipulate grad
+            {
+                // Mesh cell-face addressing
+                const unallocLabelList& own = mesh.owner();
+                const unallocLabelList& nei = mesh.neighbour();
+
+                // Mesh geometry
+                // (Sf/Sn always points from owner to neighbour)
+                const vectorField& Sf = mesh.Sf();
+                const scalarField& magSf = mesh.magSf();
+
+                // Derived mesh geometry
+                const vectorField Sn = Sf/magSf;
+                const vectorField SnCmptMag = cmptMag(Sn);
+                const scalarField SnxMag = mag(Sn.component(0));
+                const scalarField SnyMag = mag(Sn.component(1));
+                const scalarField SnzMag = mag(Sn.component(2));
+
+                forAll (cnFaces.toc(), facei)
+                {
+                    label faceI = cnFaces.toc()[facei];
+
+                    // Calculate zero weights
+                    scalar wSnx = SnxMag[faceI];
+                    scalar wSny = SnyMag[faceI];
+                    scalar wSnz = SnzMag[faceI];
+
+//                     CoeffField<vector>::linearTypeField& d = bs.diag().asLinear();
+//                     CoeffField<vector>::linearTypeField& u = bs.upper().asLinear();
+//                     CoeffField<vector>::linearTypeField& l = bs.lower().asLinear();
+
+                    // Eliminate all coeffs
+                    // TODO: Optimize
+                    AReDivInARe.diag().asLinear()[own[faceI]] += AReDivInARe.upper().asLinear()[faceI];
+                    AReDivInARe.diag().asLinear()[nei[faceI]] += AReDivInARe.lower().asLinear()[faceI];
+                    AReDivInARe.upper().asLinear()[faceI] = vector::zero;
+                    AReDivInARe.lower().asLinear()[faceI] = vector::zero;
+                    AImDivInAIm.diag().asLinear()[own[faceI]] += AImDivInAIm.upper().asLinear()[faceI];
+                    AImDivInAIm.diag().asLinear()[nei[faceI]] += AImDivInAIm.lower().asLinear()[faceI];
+                    AImDivInAIm.upper().asLinear()[faceI] = vector::zero;
+                    AImDivInAIm.lower().asLinear()[faceI] = vector::zero;
+
+                    // TODO: Direction?
+                    vector AReDivInAReUpper = AReDivInARe.upper().asLinear()[faceI];
+                    vector AReDivInAReLower = AReDivInARe.lower().asLinear()[faceI];
+//                     AReDivInARe.diag().asLinear()[own[faceI]].component(0) += wSnx * vector(1, 0, 0) & AReDivInARe.upper().asLinear()[faceI];
+//                     AReDivInARe.diag().asLinear()[own[faceI]].component(1) += wSny * vector(0, 1, 0) & AReDivInARe.upper().asLinear()[faceI];
+//                     AReDivInARe.diag().asLinear()[own[faceI]].component(2) += wSnz * vector(0, 0, 1) & AReDivInARe.upper().asLinear()[faceI];
+//                     AReDivInARe.diag().asLinear()[nei[faceI]].component(0) += wSnx * vector(1, 0, 0) & AReDivInARe.lower().asLinear()[faceI];
+//                     AReDivInARe.diag().asLinear()[nei[faceI]].component(1) += wSny * vector(0, 1, 0) & AReDivInARe.lower().asLinear()[faceI];
+//                     AReDivInARe.diag().asLinear()[nei[faceI]].component(2) += wSnz * vector(0, 0, 1) & AReDivInARe.lower().asLinear()[faceI];
+//                     AReDivInARe.upper().asLinear()[faceI].component(0) -= wSnx * vector(1, 0, 0) & AReDivInARe.upper().asLinear()[faceI];
+//                     AReDivInARe.upper().asLinear()[faceI].component(1) -= wSny * vector(0, 1, 0) & AReDivInARe.upper().asLinear()[faceI];
+//                     AReDivInARe.upper().asLinear()[faceI].component(2) -= wSnz * vector(0, 0, 1) & AReDivInARe.upper().asLinear()[faceI];
+//                     AReDivInARe.lower().asLinear()[faceI].component(0) -= wSnx * vector(1, 0, 0) & AReDivInARe.lower().asLinear()[faceI];
+//                     AReDivInARe.lower().asLinear()[faceI].component(1) -= wSny * vector(0, 1, 0) & AReDivInARe.lower().asLinear()[faceI];
+//                     AReDivInARe.lower().asLinear()[faceI].component(2) -= wSnz * vector(0, 0, 1) & AReDivInARe.lower().asLinear()[faceI];
+//
+//                     AImDivInAIm.diag().asLinear()[own[faceI]].component(0) += wSnx * vector(1, 0, 0) & AImDivInAIm.upper().asLinear()[faceI];
+//                     AImDivInAIm.diag().asLinear()[own[faceI]].component(1) += wSny * vector(0, 1, 0) & AImDivInAIm.upper().asLinear()[faceI];
+//                     AImDivInAIm.diag().asLinear()[own[faceI]].component(2) += wSnz * vector(0, 0, 1) & AImDivInAIm.upper().asLinear()[faceI];
+//                     AImDivInAIm.diag().asLinear()[nei[faceI]].component(0) += wSnx * vector(1, 0, 0) & AImDivInAIm.lower().asLinear()[faceI];
+//                     AImDivInAIm.diag().asLinear()[nei[faceI]].component(1) += wSny * vector(0, 1, 0) & AImDivInAIm.lower().asLinear()[faceI];
+//                     AImDivInAIm.diag().asLinear()[nei[faceI]].component(2) += wSnz * vector(0, 0, 1) & AImDivInAIm.lower().asLinear()[faceI];
+//                     AImDivInAIm.upper().asLinear()[faceI].component(0) -= wSnx * vector(1, 0, 0) & AImDivInAIm.upper().asLinear()[faceI];
+//                     AImDivInAIm.upper().asLinear()[faceI].component(1) -= wSny * vector(0, 1, 0) & AImDivInAIm.upper().asLinear()[faceI];
+//                     AImDivInAIm.upper().asLinear()[faceI].component(2) -= wSnz * vector(0, 0, 1) & AImDivInAIm.upper().asLinear()[faceI];
+//                     AImDivInAIm.lower().asLinear()[faceI].component(0) -= wSnx * vector(1, 0, 0) & AImDivInAIm.lower().asLinear()[faceI];
+//                     AImDivInAIm.lower().asLinear()[faceI].component(1) -= wSny * vector(0, 1, 0) & AImDivInAIm.lower().asLinear()[faceI];
+//                     AImDivInAIm.lower().asLinear()[faceI].component(2) -= wSnz * vector(0, 0, 1) & AImDivInAIm.lower().asLinear()[faceI];
+                }
+            }
+
+            AEqn.insertBlockCoupling(0, 6, AReDivInARe, true);
+            AEqn.insertBlockCoupling(3, 7, AImDivInAIm, true);
+
+            // Coupling part of A in divA
+            BlockLduSystem<vector, scalar> AReInAReDiv(fvm::UDiv(ARe)); AReInAReDiv *= -1.0;
+            BlockLduSystem<vector, scalar> AImInAImDiv(fvm::UDiv(AIm)); AImInAImDiv *= -1.0;
+
+            // TODO: Manipulate UDiv
+            {
+            }
+
+            AEqn.insertBlockCoupling(6, 0, AReInAReDiv, false);
+            AEqn.insertBlockCoupling(7, 3, AImInAImDiv, false);
+        }
 
         // Block coupled solver call to solve A
         AEqn.solve();
@@ -402,6 +559,12 @@
         AEqn.retrieveSolution(3, AImx.internalField());
         AEqn.retrieveSolution(4, AImy.internalField());
         AEqn.retrieveSolution(5, AImz.internalField());
+
+        // TODO: Remove after debug
+        AEqn.retrieveSolution(6, AReDiv.internalField());
+        AEqn.retrieveSolution(7, AImDiv.internalField());
+        AReDiv.write();
+        AImDiv.write();
 
         ARex.correctBoundaryConditions();
         ARey.correctBoundaryConditions();
@@ -448,9 +611,3 @@
 
     BRe == fvc::curl(ARe);
     BIm == fvc::curl(AIm);
-
-    // TODO: Remove after debug
-    volScalarField AReDiv("AReDiv", fvc::div(ARe));
-    volScalarField AImDiv("AImDiv", fvc::div(AIm));
-    AReDiv.write();
-    AImDiv.write();
