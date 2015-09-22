@@ -112,6 +112,19 @@ solvers
 
 
     "(A|B|T)"
+//     {
+//         solver                   GMRES;
+//         nDirections              3;
+//         tolerance                1e-07;
+// //         relTol                   1e-03;
+// //         relTol                   1e-06;
+//         relTol                   0;
+//         minIter                  1;
+// //         maxIter                  10;
+//         maxIter                  20;
+// //         maxIter                  500;
+//         preconditioner           Cholesky;
+//     }
     {
         solver                   BiCGStab;
 
@@ -145,20 +158,20 @@ solvers
 //
 //         minIter         0;
 // //         maxIter         10;
-//         maxIter         20;
+// //         maxIter         20;
 // //         maxIter         100;
-// //         maxIter         500;
+//         maxIter         500;
 //         tolerance       1e-07;
 // //         relTol          1e-03;
 // //         relTol          1e-06;
 //         relTol          0;
 //     }
 
-    "(TsRe|TsIm|SRe|SIm|ARe|AIm|GRe|GIm|VRe|VIm)"
+    "(TRe|TIm|TsRe|TsIm|SRe|SIm|ARe|AIm|GRe|GIm|VRe|VIm)"
 //     {
 //         solver                   PCG;
 //
-//         tolerance                1e-06;
+//         tolerance                1e-07;
 //         relTol                   1e-05;
 // //         relTol                   0;
 //         minIter                  1;
@@ -170,8 +183,8 @@ solvers
         solver                   GAMG;
 
         tolerance                1e-07;
-//         relTol                   1e-05;
-        relTol                   0;
+        relTol                   1e-05;
+//         relTol                   0;
         minIter                  1;
         maxIter                  100;
 

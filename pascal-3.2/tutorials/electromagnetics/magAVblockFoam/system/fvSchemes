@@ -23,64 +23,65 @@ gradSchemes
 {
     default                           none;
 
-    grad((rMu0|sigma))                Gauss linear;
+    curl(ARe)                         Gauss linear;
+    curl(AIm)                         Gauss linear;
 
-    grad(SRe)                         Gauss linear;
-    grad(SIm)                         Gauss linear;
-    snGradCorr(SRe)                   Gauss linear;
-    snGradCorr(SIm)                   Gauss linear;
+    grad(div(ARe))                    Gauss linear;
+    grad(div(AIm))                    Gauss linear;
 
-    curl(TRe)                         Gauss linear;
-    curl(TIm)                         Gauss linear;
-    grad((gammaf*div(TRe)))           Gauss linear;
-    grad((gammaf*div(TIm)))           Gauss linear;
-    snGradCorr(TRe)                   Gauss linear;
-    snGradCorr(TIm)                   Gauss linear;
+    grad(div((ARe+GReGrad)))          Gauss linear;
+    grad(div((AIm+GImGrad)))          Gauss linear;
 
-    curl(jsRe)                        Gauss linear;
-    curl(jsIm)                        Gauss linear;
-    snGradCorr(TsRe)                  Gauss linear;
-    snGradCorr(TsIm)                  Gauss linear;
+    grad(AReDiv)                      Gauss linear;
+    grad(AImDiv)                      Gauss linear;
+
+    grad(VRe)                         Gauss linear;
+    grad(VIm)                         Gauss linear;
 
     grad(GRe)                         Gauss linear;
     grad(GIm)                         Gauss linear;
-    snGradCorr(GRe)                   Gauss linear;
-    snGradCorr(GIm)                   Gauss linear;
 }
 
 divSchemes
 {
     default                           none;
 
-    div(TRe)                          Gauss linear;
-    div(TIm)                          Gauss linear;
+    div(ARe)                          Gauss linear;
+    div(AIm)                          Gauss linear;
 
-    div(TsRe)                         Gauss linear;
-    div(TsIm)                         Gauss linear;
+    div(jRe)                          Gauss linear;
+    div(jIm)                          Gauss linear;
 }
 
 laplacianSchemes
 {
     default                           none;
 
-    laplacian(SRe)                    Gauss linear corrected; // linear is not used here
-    laplacian(SIm)                    Gauss linear corrected; // linear is not used here
+    laplacian(ARex)                   Gauss linear uncorrected; // linear is not used here
+    laplacian(ARey)                   Gauss linear uncorrected; // linear is not used here
+    laplacian(ARez)                   Gauss linear uncorrected; // linear is not used here
+    laplacian(AImx)                   Gauss linear uncorrected; // linear is not used here
+    laplacian(AImy)                   Gauss linear uncorrected; // linear is not used here
+    laplacian(AImz)                   Gauss linear uncorrected; // linear is not used here
 
-    laplacian(TRe)                    Gauss linear corrected; // linear is not used here
-    laplacian(TIm)                    Gauss linear corrected; // linear is not used here
+    laplacian(VRe)                    Gauss linear uncorrected; // linear is not used here
+    laplacian(VIm)                    Gauss linear uncorrected; // linear is not used here
 
-    laplacian(TsRe)                   Gauss linear corrected; // linear is not used here
-    laplacian(TsIm)                   Gauss linear corrected; // linear is not used here
-
-    laplacian(GRe)                    Gauss linear corrected; // linear is not used here
-    laplacian(GIm)                    Gauss linear corrected; // linear is not used here
+    laplacian(GRe)                    Gauss linear uncorrected; // linear is not used here
+    laplacian(GIm)                    Gauss linear uncorrected; // linear is not used here
 }
 
 interpolationSchemes
 {
     default                           none;
 
-    interpolate(sigma)                linear;
+    interpolate(ARe)                  linear;
+    interpolate(AIm)                  linear;
+}
+
+snGradSchemes
+{
+    default                           none;
 }
 
 // ************************************************************************* //

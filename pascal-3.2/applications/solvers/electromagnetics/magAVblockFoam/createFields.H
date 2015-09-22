@@ -92,9 +92,22 @@
         mesh
     );
 
-//     // Magnetic vector potential (complex)
-//     Info << "Create field A" << nl << endl;
-//     volVector6Field A
+    // Magnetic vector potential (complex)
+    Info << "Create field A" << nl << endl;
+    volVector6Field A
+    (
+        IOobject
+        (
+            "A",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector6(word(),dimless,vector6::zero)
+    );
+//     volVector8Field A
 //     (
 //         IOobject
 //         (
@@ -105,16 +118,83 @@
 //             IOobject::NO_WRITE
 //         ),
 //         mesh,
-//         dimensionedVector6(word(),dimless,vector6::zero)
+//         dimensionedVector8(word(),dimless,vector8::zero)
 //     );
 
-    // Magnetic vector potential and its divergence (complex)
-    Info << "Create field A" << nl << endl;
-    volVector8Field A
+
+    // Electric scalar potential (real part)
+    Info << "Create field VRe" << endl;
+    volScalarField VRe
     (
         IOobject
         (
-            "A",
+            "VRe",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    // Electric scalar potential (imaginary part)
+    Info << "Create field VIm " << nl << endl;
+    volScalarField VIm
+    (
+        IOobject
+        (
+            "VIm",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+
+    // Electric scalar potential gradient (real part)
+    Info << "Create field VReGrad" << endl;
+    volVectorField VReGrad
+    (
+        IOobject
+        (
+            "VReGrad",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedVector(word(), VRe.dimensions()/dimLength, pTraits<vector>::zero),
+        calculatedFvPatchField<vector>::typeName
+    );
+
+    // Electric scalar potential gradient (imaginary part)
+    Info << "Create field VImGrad " << nl << endl;
+    volVectorField VImGrad
+    (
+        IOobject
+        (
+            "VImGrad",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedVector(word(), VIm.dimensions()/dimLength, pTraits<vector>::zero),
+        calculatedFvPatchField<vector>::typeName
+    );
+
+
+    // Magnetic vector potential (complex)
+    Info << "Create field AV" << nl << endl;
+    volVector8Field AV
+    (
+        IOobject
+        (
+            "AV",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
@@ -156,51 +236,38 @@
     );
 
 
-    // Electric scalar potential (real part)
-    Info << "Create field VRe" << endl;
-    volScalarField VRe
+    // Gauge potential gradient (real part)
+    Info << "Create field GReGrad" << endl;
+    volVectorField GReGrad
     (
         IOobject
         (
-            "VRe",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    // Electric scalar potential (imaginary part)
-    Info << "Create field VIm " << nl << endl;
-    volScalarField VIm
-    (
-        IOobject
-        (
-            "VIm",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-
-    // Magnetic vector potential (complex)
-    Info << "Create field AV" << nl << endl;
-    volVector8Field AV
-    (
-        IOobject
-        (
-            "AV",
+            "GReGrad",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedVector8(word(),dimless,vector8::zero)
+        dimensionedVector(word(), GRe.dimensions()/dimLength, pTraits<vector>::zero),
+        calculatedFvPatchField<vector>::typeName
+    );
+
+    // Gauge potential gradient (imaginary part)
+    Info << "Create field GImGrad " << nl << endl;
+    volVectorField GImGrad
+    (
+        IOobject
+        (
+            "GImGrad",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedVector(word(), GIm.dimensions()/dimLength, pTraits<vector>::zero),
+        calculatedFvPatchField<vector>::typeName
     );
 
 

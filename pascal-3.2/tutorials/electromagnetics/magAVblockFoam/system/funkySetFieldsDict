@@ -64,6 +64,7 @@ expressions
     variables     $materialProperties;
     condition     "set(cellSet_material_conductor)";
     expression    "sigma_silicon_liquid";
+//     expression    "mag(pos().x)/0.035*sigma_silicon_liquid";
     keepPatches   true;
   }
 
