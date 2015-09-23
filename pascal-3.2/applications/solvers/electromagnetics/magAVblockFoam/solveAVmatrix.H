@@ -1,102 +1,4 @@
 
-    // Create set for conducting cells
-    labelHashSet cCellsHashSet;
-
-    forAll(mesh.cells(), cellI)
-    {
-        if (sigma.internalField()[cellI] > SMALL)
-        {
-            cCellsHashSet.insert(cellI);
-        }
-    }
-
-    cellSet cCells
-    (
-        mesh,
-        "cellSet_solver_c",
-        cCellsHashSet
-    ); cCells.write();
-
-    // Create set for non-conducting cells
-    labelHashSet nCellsHashSet;
-
-    forAll(mesh.cells(), cellI)
-    {
-        if (sigma.internalField()[cellI] < SMALL)
-        {
-            nCellsHashSet.insert(cellI);
-        }
-    }
-
-    cellSet nCells
-    (
-        mesh,
-        "cellSet_solver_n",
-        nCellsHashSet
-    ); nCells.write();
-
-    // Create sets for conducting/non-conducting faces (cn):
-    // cnPN) Owner is in conducting region and neighbour
-    //       lies in non-conducting region
-    // cnNP) Owner is in non-conducting region and
-    //       neighbour lies in conducting region
-    labelHashSet cnFacesHashSet;
-    labelHashSet cnPNfacesHashSet;
-    labelHashSet cnNPfacesHashSet;
-
-    {
-        // Mesh references
-        const unallocLabelList& own = mesh.owner();
-        const unallocLabelList& nei = mesh.neighbour();
-
-        // Find and insert faces
-        forAll (own, faceI)
-        {
-            if
-            (
-                (sigma.internalField()[own[faceI]] > SMALL)
-             && (sigma.internalField()[nei[faceI]] < SMALL)
-            )
-            {
-                cnFacesHashSet.insert(faceI);
-                cnPNfacesHashSet.insert(faceI);
-            }
-
-            if
-            (
-                (sigma.internalField()[own[faceI]] < SMALL)
-             && (sigma.internalField()[nei[faceI]] > SMALL)
-            )
-            {
-                cnFacesHashSet.insert(faceI);
-                cnNPfacesHashSet.insert(faceI);
-            }
-        }
-    }
-
-    faceSet cnFaces
-    (
-        mesh,
-        "cellSet_solver_cn",
-        cnFacesHashSet
-    ); cnFaces.write();
-
-    faceSet cnPNfaces
-    (
-        mesh,
-        "cellSet_solver_cn_PN",
-        cnPNfacesHashSet
-    ); cnPNfaces.write();
-
-    faceSet cnNPfaces
-    (
-        mesh,
-        "cellSet_solver_cn_NP",
-        cnNPfacesHashSet
-    ); cnNPfaces.write();
-
-
-
     // Create component fields for A
     volScalarField ARex
     (
@@ -236,74 +138,9 @@
 
 
 
-    // TODO: Remove after debug
-    volScalarField AReDiv("AReDiv", fvc::div(ARe));
-    volScalarField AImDiv("AImDiv", fvc::div(AIm));
-    AReDiv.write();
-    AImDiv.write();
-
-    // Add explicit terms which are necessary if div(A) is NOT zero
-    volVectorField AReDivGrad("AReDivGrad", fvc::grad(fvc::div(ARe)));
-    volVectorField AImDivGrad("AImDivGrad", fvc::grad(fvc::div(AIm)));
-
-    ARexEqn -= rMu0 * AReDivGrad.component(0);
-    AReyEqn -= rMu0 * AReDivGrad.component(1);
-    ARezEqn -= rMu0 * AReDivGrad.component(2);
-    AImxEqn -= rMu0 * AImDivGrad.component(0);
-    AImyEqn -= rMu0 * AImDivGrad.component(1);
-    AImzEqn -= rMu0 * AImDivGrad.component(2);
-
-    // TODO: Remove after debug
-    AReDivGrad.write();
-    AImDivGrad.write();
-
-
-
-//     // Add explicit parts of electric scalar potential V
-//     ARexEqn -= sigma * VReGrad.component(0);
-//     AReyEqn -= sigma * VReGrad.component(1);
-//     ARezEqn -= sigma * VReGrad.component(2);
-//     AImxEqn -= sigma * VImGrad.component(0);
-//     AImyEqn -= sigma * VImGrad.component(1);
-//     AImzEqn -= sigma * VImGrad.component(2);
-
-
-
-//     // Add explicit parts of gauge fixing potential G
-//     ARexEqn += alpha * GImGrad.component(0);
-//     AReyEqn += alpha * GImGrad.component(1);
-//     ARezEqn += alpha * GImGrad.component(2);
-//     AImxEqn -= alpha * GReGrad.component(0);
-//     AImyEqn -= alpha * GReGrad.component(1);
-//     AImzEqn -= alpha * GReGrad.component(2);
-//
-//     ARexEqn += rMu0 * fvc::laplacian(GReGrad.component(0), "laplacian(ARex)");
-//     AReyEqn += rMu0 * fvc::laplacian(GReGrad.component(1), "laplacian(ARey)");
-//     ARezEqn += rMu0 * fvc::laplacian(GReGrad.component(2), "laplacian(ARez)");
-//     AImxEqn += rMu0 * fvc::laplacian(GImGrad.component(0), "laplacian(AImx)");
-//     AImyEqn += rMu0 * fvc::laplacian(GImGrad.component(1), "laplacian(AImy)");
-//     AImzEqn += rMu0 * fvc::laplacian(GImGrad.component(2), "laplacian(AImz)");
-//
-// // //     ARexEqn -= rMu0 * fvc::grad(fvc::laplacian(GRe))().component(0);
-// // //     AReyEqn -= rMu0 * fvc::grad(fvc::laplacian(GRe))().component(1);
-// // //     ARezEqn -= rMu0 * fvc::grad(fvc::laplacian(GRe))().component(2);
-// // //     AImxEqn -= rMu0 * fvc::grad(fvc::laplacian(GIm))().component(0);
-// // //     AImyEqn -= rMu0 * fvc::grad(fvc::laplacian(GIm))().component(1);
-// // //     AImzEqn -= rMu0 * fvc::grad(fvc::laplacian(GIm))().component(2);
-// //
-// //     ARexEqn -= rMu0 * fvc::grad(fvc::div(ARe + GReGrad, "div(ARe)"))().component(0);
-// //     AReyEqn -= rMu0 * fvc::grad(fvc::div(ARe + GReGrad, "div(ARe)"))().component(1);
-// //     ARezEqn -= rMu0 * fvc::grad(fvc::div(ARe + GReGrad, "div(ARe)"))().component(2);
-// //     AImxEqn -= rMu0 * fvc::grad(fvc::div(AIm + GImGrad, "div(AIm)"))().component(0);
-// //     AImyEqn -= rMu0 * fvc::grad(fvc::div(AIm + GImGrad, "div(AIm)"))().component(1);
-// //     AImzEqn -= rMu0 * fvc::grad(fvc::div(AIm + GImGrad, "div(AIm)"))().component(2);
-//
-//     ARe -= GReGrad;
-//     AIm -= GImGrad;
-
-
-
-    // Modify fvm::laplacian() for A*n=0 at c/n-interface
+    // Modify fvm::laplacian() for all components of ARe and AIm to
+    // enforce zero normal components (ARe*n=0) and (AIm*n=0) at the
+    // conductor interface as a inner constraint
     {
         // Mesh cell-face addressing
         const unallocLabelList& own = mesh.owner();
@@ -323,26 +160,27 @@
         const scalarField SnzMag = mag(Sn.component(2));
 
         // Loop over all faces of c/n-interface
-        forAll (cnFaces.toc(), facei)
+        forAll (cnFaces, facei)
         {
-            label faceI = cnFaces.toc()[facei];
+            label faceI = cnFaces[facei];
 
-            // Calculate Pf and fN
+            // Calculate face centre/cell centre distances Pf and fN
             scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
             scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
 
-            // Calculate zero weights
+            // Calculate coefficient constraint weights
             scalar w = fN / (Pf+fN);
             scalar wOwn = w/(1-w);
             scalar wNei = (1-w)/w;
+
+            // Calculate coefficient direction weights
             scalar wSnx = SnxMag[faceI];
             scalar wSny = SnyMag[faceI];
             scalar wSnz = SnzMag[faceI];
 
-            // Eliminate upper/neighbour coeffs
-            // Note: This will keep a SYMMETRIC matrix and
-            //       it will also improve diagonal dominance
-            // TODO: Optimize
+            // Eliminate upper/neighbour coeffs based on constraint
+            // Note: This will keep a SYMMETRIC matrices and it will
+            //       also sligthly improve their diagonal dominance
             scalar wSnARexEqnUf = wSnx * ARexEqn.upper()[faceI];
             ARexEqn.diag()[own[faceI]] -= wSnARexEqnUf * wOwn;
             ARexEqn.diag()[nei[faceI]] -= wSnARexEqnUf * wNei;
@@ -369,9 +207,38 @@
             AImzEqn.upper()[faceI] -= wSnAImzEqnUf;
 
             // TODO: What about gradient correction?
-            // We have to modifiy the source term, too.
+            // We have to modifiy the source term, too. But
+            // this depends on the type of correction. Hmm...
         }
     }
+
+
+
+    // Add explicit terms which are necessary if div(A) is NOT zero
+    volVectorField AReDivGrad("AReDivGrad", fvc::grad(fvc::div(ARe)));
+    volVectorField AImDivGrad("AImDivGrad", fvc::grad(fvc::div(AIm)));
+
+    ARexEqn -= rMu0 * AReDivGrad.component(0);
+    AReyEqn -= rMu0 * AReDivGrad.component(1);
+    ARezEqn -= rMu0 * AReDivGrad.component(2);
+    AImxEqn -= rMu0 * AImDivGrad.component(0);
+    AImyEqn -= rMu0 * AImDivGrad.component(1);
+    AImzEqn -= rMu0 * AImDivGrad.component(2);
+
+
+
+    // Add explicit parts of electric scalar potential V
+    volVectorField VReGrad("VReGrad", fvc::grad(VRe));
+    volVectorField VImGrad("VImGrad", fvc::grad(VIm));
+
+    ARexEqn -= sigma * VReGrad.component(0);
+    AReyEqn -= sigma * VReGrad.component(1);
+    ARezEqn -= sigma * VReGrad.component(2);
+    AImxEqn -= sigma * VImGrad.component(0);
+    AImyEqn -= sigma * VImGrad.component(1);
+    AImzEqn -= sigma * VImGrad.component(2);
+
+
 
     // Solve A
     {
@@ -486,9 +353,9 @@
 //                 CoeffField<vector>::linearTypeField& AImDivInAImL = AImDivInAIm.lower().asLinear();
 //
 //                 // Loop over all faces of c/n-interface
-//                 forAll (cnFaces.toc(), facei)
+//                 forAll (cnFaces, facei)
 //                 {
-//                     label faceI = cnFaces.toc()[facei];
+//                     label faceI = cnFaces[facei];
 //
 //                     // Eliminate all coeffs
 //                     // TODO: Optimize
@@ -547,9 +414,9 @@
 //                 CoeffField<vector>::linearTypeField& AImInAImDivL = AImInAImDiv.lower().asLinear();
 //
 //                 // Loop over all faces of c/n-interface
-//                 forAll (cnFaces.toc(), facei)
+//                 forAll (cnFaces, facei)
 //                 {
-//                     label faceI = cnFaces.toc()[facei];
+//                     label faceI = cnFaces[facei];
 //
 //                     // Eliminate all coeffs
 //                     // TODO: Optimize
@@ -591,12 +458,6 @@
         AEqn.retrieveSolution(3, AImx.internalField());
         AEqn.retrieveSolution(4, AImy.internalField());
         AEqn.retrieveSolution(5, AImz.internalField());
-
-//         // TODO: Remove after debug
-//         AEqn.retrieveSolution(6, AReDiv.internalField());
-//         AEqn.retrieveSolution(7, AImDiv.internalField());
-//         AReDiv.write();
-//         AImDiv.write();
 
         ARex.correctBoundaryConditions();
         ARey.correctBoundaryConditions();
@@ -640,19 +501,15 @@
 
         GRe.correctBoundaryConditions();
         GIm.correctBoundaryConditions();
+    }
 
-        GReGrad = fvc::grad(GRe);
-        GImGrad = fvc::grad(GIm);
 
-        // Correct A with gradient of gauge potential G
-//         ARe += GReGrad;
-//         AIm += GImGrad;
 
-        // TODO: Remove after debug
-        volVectorField AReCoulomb("AReCoulomb", ARe + GReGrad);
-        volVectorField AImCoulomb("AImCoulomb", AIm + GImGrad);
-        AReCoulomb.write();
-        AImCoulomb.write();
+    // Solve V
+    if (requireV)
+    {
+        // Get reference to sigmaV pointer
+        volScalarField& sigmaV = *sigmaVPtr;
     }
 
 //     // Solve V in conducting subregion
@@ -841,8 +698,28 @@
 //         }
 //     }
 
-    jRe ==   alpha * AIm;
-    jIm == - alpha * ARe;
+    // TODO: Remove after debug
+    {
+        VReGrad.write();
+        VImGrad.write();
+
+        volScalarField AReDiv("AReDiv", fvc::div(ARe));
+        volScalarField AImDiv("AImDiv", fvc::div(AIm));
+        AReDiv.write();
+        AImDiv.write();
+
+        AReDivGrad.write();
+        AImDivGrad.write();
+
+        volVectorField AReCoulomb("AReCoulomb", ARe + fvc::grad(GRe));
+        volVectorField AImCoulomb("AImCoulomb", AIm + fvc::grad(GIm));
+        AReCoulomb.write();
+        AImCoulomb.write();
+    }
 
     BRe == fvc::curl(ARe);
     BIm == fvc::curl(AIm);
+
+    // TODO: Influence of G or V
+    jRe ==   alpha * AIm;
+    jIm == - alpha * ARe;

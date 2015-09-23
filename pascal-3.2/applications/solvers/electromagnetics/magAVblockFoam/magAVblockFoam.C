@@ -55,6 +55,8 @@ int main(int argc, char *argv[])
     using namespace Foam;
 
 #   include "createFields.H"
+#   include "createTopo.H"
+#   include "createSigmaV.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
