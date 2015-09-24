@@ -1,492 +1,201 @@
 
-    // Create component fields for A
-    volScalarField ARex
-    (
-        IOobject
-        (
-            "ARex",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ
-        ),
-        mesh,
-        dimensioned<scalar>(word(), ARe.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
-    );
-    volScalarField ARey
-    (
-        IOobject
-        (
-            "ARey",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ
-        ),
-        mesh,
-        dimensioned<scalar>(word(), ARe.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
-    );
-    volScalarField ARez
-    (
-        IOobject
-        (
-            "ARez",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ
-        ),
-        mesh,
-        dimensioned<scalar>(word(), ARe.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
-    );
-    volScalarField AImx
-    (
-        IOobject
-        (
-            "AImx",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ
-        ),
-        mesh,
-        dimensioned<scalar>(word(), AIm.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
-    );
-    volScalarField AImy
-    (
-        IOobject
-        (
-            "AImy",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ
-        ),
-        mesh,
-        dimensioned<scalar>(word(), AIm.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
-    );
-    volScalarField AImz
-    (
-        IOobject
-        (
-            "AImz",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ
-        ),
-        mesh,
-        dimensioned<scalar>(word(), AIm.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
-    );
-
-
-
-    // Copy component data
-    ARex == ARe.component(0);
-    ARey == ARe.component(1);
-    ARez == ARe.component(2);
-    AImx == AIm.component(0);
-    AImy == AIm.component(1);
-    AImz == AIm.component(2);
-
-    ARex.correctBoundaryConditions();
-    ARey.correctBoundaryConditions();
-    ARez.correctBoundaryConditions();
-    AImx.correctBoundaryConditions();
-    AImy.correctBoundaryConditions();
-    AImz.correctBoundaryConditions();
-
-
-
-    // Assemble A-equations
-    fvScalarMatrix ARexEqn
-    (
-        rMu0 * fvm::laplacian(ARex)
-//       + alpha * AImx
-      + jsRe.component(0)
-    );
-    fvScalarMatrix AReyEqn
-    (
-        rMu0 * fvm::laplacian(ARey)
-//       + alpha * AImy
-      + jsRe.component(1)
-    );
-    fvScalarMatrix ARezEqn
-    (
-        rMu0 * fvm::laplacian(ARez)
-//       + alpha * AImz
-      + jsRe.component(2)
-    );
-    fvScalarMatrix AImxEqn
-    (
-        rMu0 * fvm::laplacian(AImx)
-//       - alpha * ARex
-      + jsIm.component(0)
-    );
-    fvScalarMatrix AImyEqn
-    (
-        rMu0 * fvm::laplacian(AImy)
-//       - alpha * ARey
-      + jsIm.component(1)
-    );
-    fvScalarMatrix AImzEqn
-    (
-        rMu0 * fvm::laplacian(AImz)
-//       - alpha * ARez
-      + jsIm.component(2)
-    );
-
-
-
-    // Modify fvm::laplacian() for all components of ARe and AIm to
-    // enforce zero normal components (ARe*n=0) and (AIm*n=0) at the
-    // conductor interface as a inner constraint
+    // Solve Div(A) in A
     {
-        // Mesh cell-face addressing
-        const unallocLabelList& own = mesh.owner();
-        const unallocLabelList& nei = mesh.neighbour();
+        volScalarField AReDiv
+        (
+            IOobject
+            (
+                "AReDiv",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            fvc::div(ARe),
+            fixedValueFvPatchField<scalar>::typeName
+        );
 
-        // Mesh geometry
-        const vectorField& Cf = mesh.Cf();
-        const vectorField& C = mesh.C();
-        const vectorField& Sf = mesh.Sf();
-        const scalarField& magSf = mesh.magSf();
+        volScalarField AImDiv
+        (
+            IOobject
+            (
+                "AImDiv",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            fvc::div(AIm),
+            fixedValueFvPatchField<scalar>::typeName
+        );
 
-        // Derived mesh geometry
-        const vectorField Sn = Sf/magSf;
-        const vectorField SnCmptMag = cmptMag(Sn);
-        const scalarField SnxMag = mag(Sn.component(0));
-        const scalarField SnyMag = mag(Sn.component(1));
-        const scalarField SnzMag = mag(Sn.component(2));
-
-        // Loop over all faces of c/n-interface
-        forAll (cnFaces, facei)
         {
-            label faceI = cnFaces[facei];
+            fvScalarMatrix AReDivEqn
+            (
+                rMu0 * fvm::Sp(scalar(1.0),AReDiv)
+//            - rMu0 * fvc::div(ARe)
+            );
 
-            // Calculate face centre/cell centre distances Pf and fN
-            scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
-            scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
+            // Currently only work-around
+            // since diagonal insertion
+            // in block-matrix does not
+            // work correctly
+            AReDivEqn.upper() = 0.0;
 
-            // Calculate coefficient constraint weights
-            scalar w = fN / (Pf+fN);
-            scalar wOwn = w/(1-w);
-            scalar wNei = (1-w)/w;
+            fvScalarMatrix AImDivEqn
+            (
+                rMu0 * fvm::Sp(scalar(1.0),AImDiv)
+//            - rMu0 * fvc::div(AIm)
+            );
 
-            // Calculate coefficient direction weights
-            scalar wSnx = SnxMag[faceI];
-            scalar wSny = SnyMag[faceI];
-            scalar wSnz = SnzMag[faceI];
+            // Currently only work-around
+            // since diagonal insertion
+            // in block-matrix does not
+            // work correctly
+            AImDivEqn.upper() = 0.0;
 
-            // Eliminate upper/neighbour coeffs based on constraint
-            // Note: This will keep a SYMMETRIC matrices and it will
-            //       also sligthly improve their diagonal dominance
-            scalar wSnARexEqnUf = wSnx * ARexEqn.upper()[faceI];
-            ARexEqn.diag()[own[faceI]] -= wSnARexEqnUf * wOwn;
-            ARexEqn.diag()[nei[faceI]] -= wSnARexEqnUf * wNei;
-            ARexEqn.upper()[faceI] -= wSnARexEqnUf;
-            scalar wSnAReyEqnUf = wSny * AReyEqn.upper()[faceI];
-            AReyEqn.diag()[own[faceI]] -= wSnAReyEqnUf * wOwn;
-            AReyEqn.diag()[nei[faceI]] -= wSnAReyEqnUf * wNei;
-            AReyEqn.upper()[faceI] -= wSnAReyEqnUf;
-            scalar wSnARezEqnUf = wSnz * AReyEqn.upper()[faceI];
-            ARezEqn.diag()[own[faceI]] -= wSnARezEqnUf * wOwn;
-            ARezEqn.diag()[nei[faceI]] -= wSnARezEqnUf * wNei;
-            ARezEqn.upper()[faceI] -= wSnARezEqnUf;
-            scalar wSnAImxEqnUf = wSnx * AImxEqn.upper()[faceI];
-            AImxEqn.diag()[own[faceI]] -= wSnAImxEqnUf * wOwn;
-            AImxEqn.diag()[nei[faceI]] -= wSnAImxEqnUf * wNei;
-            AImxEqn.upper()[faceI] -= wSnAImxEqnUf;
-            scalar wSnAImyEqnUf = wSny * AImyEqn.upper()[faceI];
-            AImyEqn.diag()[own[faceI]] -= wSnAImyEqnUf * wOwn;
-            AImyEqn.diag()[nei[faceI]] -= wSnAImyEqnUf * wNei;
-            AImyEqn.upper()[faceI] -= wSnAImyEqnUf;
-            scalar wSnAImzEqnUf = wSnz * AImyEqn.upper()[faceI];
-            AImzEqn.diag()[own[faceI]] -= wSnAImzEqnUf * wOwn;
-            AImzEqn.diag()[nei[faceI]] -= wSnAImzEqnUf * wNei;
-            AImzEqn.upper()[faceI] -= wSnAImzEqnUf;
+            // Insert equations for divA
+            AEqn.insertEquation(6, AReDivEqn);
+            AEqn.insertEquation(7, AImDivEqn);
 
-            // TODO: What about gradient correction?
-            // We have to modifiy the source term, too. But
-            // this depends on the type of correction. Hmm...
+            // Assemble coupling of divA in A
+            BlockLduSystem<vector, vector> AReDivInARe(fvm::grad(AReDiv)); AReDivInARe *= -rMu0.value();
+            BlockLduSystem<vector, vector> AImDivInAIm(fvm::grad(AImDiv)); AImDivInAIm *= -rMu0.value();
+
+            // Modify fvm::grad() for A*n=0 at conductor interface
+            {
+                // Mesh addressing
+                const unallocLabelList& own = mesh.owner();
+                const unallocLabelList& nei = mesh.neighbour();
+
+                // Mesh geometry
+                const vectorField& Sf = mesh.Sf();
+                const scalarField& magSf = mesh.magSf();
+
+                // Derived mesh geometry
+                const vectorField Sn = Sf/magSf;
+                const vectorField SnCmptMag = cmptMag(Sn);
+
+                // Reference to parts of blockLduSystem
+                CoeffField<vector>::linearTypeField& AReDivInAReD = AReDivInARe.diag().asLinear();
+                CoeffField<vector>::linearTypeField& AReDivInAReU = AReDivInARe.upper().asLinear();
+                CoeffField<vector>::linearTypeField& AReDivInAReL = AReDivInARe.lower().asLinear();
+
+                CoeffField<vector>::linearTypeField& AImDivInAImD = AImDivInAIm.diag().asLinear();
+                CoeffField<vector>::linearTypeField& AImDivInAImU = AImDivInAIm.upper().asLinear();
+                CoeffField<vector>::linearTypeField& AImDivInAImL = AImDivInAIm.lower().asLinear();
+
+                // Loop over all faces of conductor interface
+                forAll (cnFaces, facei)
+                {
+                    label faceI = cnFaces[facei];
+
+                    // Eliminate all coeffs
+                    // TODO: Optimize
+                    {
+                        // Real part
+                        vector cReUf = diag(SnCmptMag[faceI] * AReDivInAReU[faceI]) & vector::one;
+                        vector cReLf = diag(SnCmptMag[faceI] * AReDivInAReL[faceI]) & vector::one;
+
+                        AReDivInAReD[own[faceI]] += cReUf;
+                        AReDivInAReD[nei[faceI]] += cReLf;
+                        AReDivInAReU[faceI] -= cReUf;
+                        AReDivInAReL[faceI] -= cReLf;
+
+                        // Imaginary part
+                        vector cImUf = diag(SnCmptMag[faceI] * AImDivInAImU[faceI]) & vector::one;
+                        vector cImLf = diag(SnCmptMag[faceI] * AImDivInAImL[faceI]) & vector::one;
+
+                        AImDivInAImD[own[faceI]] += cImUf;
+                        AImDivInAImD[nei[faceI]] += cImLf;
+                        AImDivInAImU[faceI] -= cImUf;
+                        AImDivInAImL[faceI] -= cImLf;
+                    }
+                }
+            }
+
+            // Insert coupling of divA in A
+            AEqn.insertBlockCoupling(0, 6, AReDivInARe, true);
+            AEqn.insertBlockCoupling(3, 7, AImDivInAIm, true);
+
+            // Assemble coupling of A in divA
+            BlockLduSystem<vector, scalar> AReInAReDiv(fvm::UDiv(ARe)); AReInAReDiv *= -rMu0.value();
+            BlockLduSystem<vector, scalar> AImInAImDiv(fvm::UDiv(AIm)); AImInAImDiv *= -rMu0.value();
+
+            // Is this necessary?
+            // Modify fvm::UDiv() for A*n=0 at conductor interface
+            {
+                // Mesh addressing
+                const unallocLabelList& own = mesh.owner();
+                const unallocLabelList& nei = mesh.neighbour();
+
+                // Mesh geometry
+                const vectorField& Sf = mesh.Sf();
+                const scalarField& magSf = mesh.magSf();
+
+                // Derived mesh geometry
+                const vectorField Sn = Sf/magSf;
+                const vectorField SnCmptMag = cmptMag(Sn);
+
+                // Reference to parts of blockLduSystem
+                CoeffField<vector>::linearTypeField& AReInAReDivD = AReInAReDiv.diag().asLinear();
+                CoeffField<vector>::linearTypeField& AReInAReDivU = AReInAReDiv.upper().asLinear();
+                CoeffField<vector>::linearTypeField& AReInAReDivL = AReInAReDiv.lower().asLinear();
+
+                CoeffField<vector>::linearTypeField& AImInAImDivD = AImInAImDiv.diag().asLinear();
+                CoeffField<vector>::linearTypeField& AImInAImDivU = AImInAImDiv.upper().asLinear();
+                CoeffField<vector>::linearTypeField& AImInAImDivL = AImInAImDiv.lower().asLinear();
+
+                // Loop over all faces of conductor interface
+                forAll (cnFaces, facei)
+                {
+                    label faceI = cnFaces[facei];
+
+                    // Eliminate all coeffs
+                    // TODO: Optimize
+                    {
+                        // Real part
+                        vector cReUf = diag(SnCmptMag[faceI] * AReInAReDivU[faceI]) & vector::one;
+                        vector cReLf = diag(SnCmptMag[faceI] * AReInAReDivL[faceI]) & vector::one;
+
+                        AReInAReDivD[own[faceI]] += cReUf;
+                        AReInAReDivD[nei[faceI]] += cReLf;
+                        AReInAReDivU[faceI] -= cReUf;
+                        AReInAReDivL[faceI] -= cReLf;
+
+                        // Imaginary part
+                        vector cImUf = diag(SnCmptMag[faceI] * AImInAImDivU[faceI]) & vector::one;
+                        vector cImLf = diag(SnCmptMag[faceI] * AImInAImDivL[faceI]) & vector::one;
+
+                        AImInAImDivD[own[faceI]] += cImUf;
+                        AImInAImDivD[nei[faceI]] += cImLf;
+                        AImInAImDivU[faceI] -= cImUf;
+                        AImInAImDivL[faceI] -= cImLf;
+                    }
+                }
+            }
+
+            // Insert coupling of A in divA
+            AEqn.insertBlockCoupling(6, 0, AReInAReDiv, false);
+            AEqn.insertBlockCoupling(7, 3, AImInAImDiv, false);
         }
     }
 
 
-
-    // Add explicit terms which are necessary if div(A) is NOT zero
-    volVectorField AReDivGrad("AReDivGrad", fvc::grad(fvc::div(ARe)));
-    volVectorField AImDivGrad("AImDivGrad", fvc::grad(fvc::div(AIm)));
-
-    ARexEqn -= rMu0 * AReDivGrad.component(0);
-    AReyEqn -= rMu0 * AReDivGrad.component(1);
-    ARezEqn -= rMu0 * AReDivGrad.component(2);
-    AImxEqn -= rMu0 * AImDivGrad.component(0);
-    AImyEqn -= rMu0 * AImDivGrad.component(1);
-    AImzEqn -= rMu0 * AImDivGrad.component(2);
-
-
-
-    // Add explicit parts of electric scalar potential V
-    volVectorField VReGrad("VReGrad", fvc::grad(VRe));
-    volVectorField VImGrad("VImGrad", fvc::grad(VIm));
-
-    ARexEqn -= sigma * VReGrad.component(0);
-    AReyEqn -= sigma * VReGrad.component(1);
-    ARezEqn -= sigma * VReGrad.component(2);
-    AImxEqn -= sigma * VImGrad.component(0);
-    AImyEqn -= sigma * VImGrad.component(1);
-    AImzEqn -= sigma * VImGrad.component(2);
-
-
-
-    // Solve A
-    {
-
-        // References to internal alpha field
-        const scalarField& alphaIn = alpha.internalField();
-
-        // Prepare block system for A/divA
-        fvBlockMatrix<vector6> AEqn(A);
-//         fvBlockMatrix<vector8> AEqn(A);
-
-        {
-            // Insert equations for A
-            AEqn.insertEquation(0, ARexEqn);
-            AEqn.insertEquation(1, AReyEqn);
-            AEqn.insertEquation(2, ARezEqn);
-            AEqn.insertEquation(3, AImxEqn);
-            AEqn.insertEquation(4, AImyEqn);
-            AEqn.insertEquation(5, AImzEqn);
-
-            // Add coupling terms for ARe-AIm coupling
-            AEqn.insertEquationCoupling(0, 3,  alphaIn);
-            AEqn.insertEquationCoupling(3, 0, -alphaIn);
-            AEqn.insertEquationCoupling(1, 4,  alphaIn);
-            AEqn.insertEquationCoupling(4, 1, -alphaIn);
-            AEqn.insertEquationCoupling(2, 5,  alphaIn);
-            AEqn.insertEquationCoupling(5, 2, -alphaIn);
-        }
-
-//         volScalarField AReDiv
-//         (
-//             IOobject
-//             (
-//                 "AReDiv",
-//                 runTime.timeName(),
-//                 mesh,
-//                 IOobject::NO_READ,
-//                 IOobject::NO_WRITE
-//             ),
-//             fvc::div(ARe),
-//             fixedValueFvPatchField<scalar>::typeName
-//         );
-//
-//         volScalarField AImDiv
-//         (
-//             IOobject
-//             (
-//                 "AImDiv",
-//                 runTime.timeName(),
-//                 mesh,
-//                 IOobject::NO_READ,
-//                 IOobject::NO_WRITE
-//             ),
-//             fvc::div(AIm),
-//             fixedValueFvPatchField<scalar>::typeName
-//         );
-//
-//         {
-//             fvScalarMatrix AReDivEqn
-//             (
-//                 rMu0 * fvm::Sp(scalar(1.0),AReDiv)
-// //            - rMu0 * fvc::div(ARe)
-//             );
-//
-//             // Currently only work-around
-//             // since diagonal insertion
-//             // in block-matrix does not
-//             // work correctly
-//             AReDivEqn.upper() = 0.0;
-//
-//             fvScalarMatrix AImDivEqn
-//             (
-//                 rMu0 * fvm::Sp(scalar(1.0),AImDiv)
-// //            - rMu0 * fvc::div(AIm)
-//             );
-//
-//             // Currently only work-around
-//             // since diagonal insertion
-//             // in block-matrix does not
-//             // work correctly
-//             AImDivEqn.upper() = 0.0;
-//
-//             // Insert equations for divA
-//             AEqn.insertEquation(6, AReDivEqn);
-//             AEqn.insertEquation(7, AImDivEqn);
-//
-//             // Assemble coupling of divA in A
-//             BlockLduSystem<vector, vector> AReDivInARe(fvm::grad(AReDiv)); AReDivInARe *= -rMu0.value();
-//             BlockLduSystem<vector, vector> AImDivInAIm(fvm::grad(AImDiv)); AImDivInAIm *= -rMu0.value();
-//
-//             // Modify fvm::grad() for A*n=0 at c/n-interface
-//             {
-//                 // Mesh addressing
-//                 const unallocLabelList& own = mesh.owner();
-//                 const unallocLabelList& nei = mesh.neighbour();
-//
-//                 // Mesh geometry
-//                 const vectorField& Sf = mesh.Sf();
-//                 const scalarField& magSf = mesh.magSf();
-//
-//                 // Derived mesh geometry
-//                 const vectorField Sn = Sf/magSf;
-//                 const vectorField SnCmptMag = cmptMag(Sn);
-//
-//                 // Reference to parts of blockLduSystem
-//                 CoeffField<vector>::linearTypeField& AReDivInAReD = AReDivInARe.diag().asLinear();
-//                 CoeffField<vector>::linearTypeField& AReDivInAReU = AReDivInARe.upper().asLinear();
-//                 CoeffField<vector>::linearTypeField& AReDivInAReL = AReDivInARe.lower().asLinear();
-//
-//                 CoeffField<vector>::linearTypeField& AImDivInAImD = AImDivInAIm.diag().asLinear();
-//                 CoeffField<vector>::linearTypeField& AImDivInAImU = AImDivInAIm.upper().asLinear();
-//                 CoeffField<vector>::linearTypeField& AImDivInAImL = AImDivInAIm.lower().asLinear();
-//
-//                 // Loop over all faces of c/n-interface
-//                 forAll (cnFaces, facei)
-//                 {
-//                     label faceI = cnFaces[facei];
-//
-//                     // Eliminate all coeffs
-//                     // TODO: Optimize
-//                     {
-//                         // Real part
-//                         vector cReUf = diag(SnCmptMag[faceI] * AReDivInAReU[faceI]) & vector::one;
-//                         vector cReLf = diag(SnCmptMag[faceI] * AReDivInAReL[faceI]) & vector::one;
-//
-//                         AReDivInAReD[own[faceI]] += cReUf;
-//                         AReDivInAReD[nei[faceI]] += cReLf;
-//                         AReDivInAReU[faceI] -= cReUf;
-//                         AReDivInAReL[faceI] -= cReLf;
-//
-//                         // Imaginary part
-//                         vector cImUf = diag(SnCmptMag[faceI] * AImDivInAImU[faceI]) & vector::one;
-//                         vector cImLf = diag(SnCmptMag[faceI] * AImDivInAImL[faceI]) & vector::one;
-//
-//                         AImDivInAImD[own[faceI]] += cImUf;
-//                         AImDivInAImD[nei[faceI]] += cImLf;
-//                         AImDivInAImU[faceI] -= cImUf;
-//                         AImDivInAImL[faceI] -= cImLf;
-//                     }
-//                 }
-//             }
-//
-//             // Insert coupling of divA in A
-//             AEqn.insertBlockCoupling(0, 6, AReDivInARe, true);
-//             AEqn.insertBlockCoupling(3, 7, AImDivInAIm, true);
-//
-//             // Assemble coupling of A in divA
-//             BlockLduSystem<vector, scalar> AReInAReDiv(fvm::UDiv(ARe)); AReInAReDiv *= -rMu0.value();
-//             BlockLduSystem<vector, scalar> AImInAImDiv(fvm::UDiv(AIm)); AImInAImDiv *= -rMu0.value();
-//
-//             // Is this necessary?
-//             // Modify fvm::UDiv() for A*n=0 at c/n-interface
-//             {
-//                 // Mesh addressing
-//                 const unallocLabelList& own = mesh.owner();
-//                 const unallocLabelList& nei = mesh.neighbour();
-//
-//                 // Mesh geometry
-//                 const vectorField& Sf = mesh.Sf();
-//                 const scalarField& magSf = mesh.magSf();
-//
-//                 // Derived mesh geometry
-//                 const vectorField Sn = Sf/magSf;
-//                 const vectorField SnCmptMag = cmptMag(Sn);
-//
-//                 // Reference to parts of blockLduSystem
-//                 CoeffField<vector>::linearTypeField& AReInAReDivD = AReInAReDiv.diag().asLinear();
-//                 CoeffField<vector>::linearTypeField& AReInAReDivU = AReInAReDiv.upper().asLinear();
-//                 CoeffField<vector>::linearTypeField& AReInAReDivL = AReInAReDiv.lower().asLinear();
-//
-//                 CoeffField<vector>::linearTypeField& AImInAImDivD = AImInAImDiv.diag().asLinear();
-//                 CoeffField<vector>::linearTypeField& AImInAImDivU = AImInAImDiv.upper().asLinear();
-//                 CoeffField<vector>::linearTypeField& AImInAImDivL = AImInAImDiv.lower().asLinear();
-//
-//                 // Loop over all faces of c/n-interface
-//                 forAll (cnFaces, facei)
-//                 {
-//                     label faceI = cnFaces[facei];
-//
-//                     // Eliminate all coeffs
-//                     // TODO: Optimize
-//                     {
-//                         // Real part
-//                         vector cReUf = diag(SnCmptMag[faceI] * AReInAReDivU[faceI]) & vector::one;
-//                         vector cReLf = diag(SnCmptMag[faceI] * AReInAReDivL[faceI]) & vector::one;
-//
-//                         AReInAReDivD[own[faceI]] += cReUf;
-//                         AReInAReDivD[nei[faceI]] += cReLf;
-//                         AReInAReDivU[faceI] -= cReUf;
-//                         AReInAReDivL[faceI] -= cReLf;
-//
-//                         // Imaginary part
-//                         vector cImUf = diag(SnCmptMag[faceI] * AImInAImDivU[faceI]) & vector::one;
-//                         vector cImLf = diag(SnCmptMag[faceI] * AImInAImDivL[faceI]) & vector::one;
-//
-//                         AImInAImDivD[own[faceI]] += cImUf;
-//                         AImInAImDivD[nei[faceI]] += cImLf;
-//                         AImInAImDivU[faceI] -= cImUf;
-//                         AImInAImDivL[faceI] -= cImLf;
-//                     }
-//                 }
-//             }
-//
-//             // Insert coupling of A in divA
-//             AEqn.insertBlockCoupling(6, 0, AReInAReDiv, false);
-//             AEqn.insertBlockCoupling(7, 3, AImInAImDiv, false);
-//         }
-
-        // Block coupled solver call to solve A
-        Info << "BlockMatrix solver call for A" << endl;
-        AEqn.solve();
-
-        // Retrieve solution
-        AEqn.retrieveSolution(0, ARex.internalField());
-        AEqn.retrieveSolution(1, ARey.internalField());
-        AEqn.retrieveSolution(2, ARez.internalField());
-        AEqn.retrieveSolution(3, AImx.internalField());
-        AEqn.retrieveSolution(4, AImy.internalField());
-        AEqn.retrieveSolution(5, AImz.internalField());
-
-        ARex.correctBoundaryConditions();
-        ARey.correctBoundaryConditions();
-        ARez.correctBoundaryConditions();
-        AImx.correctBoundaryConditions();
-        AImy.correctBoundaryConditions();
-        AImz.correctBoundaryConditions();
-
-        // Replace components
-        ARe.replace(0,ARex);
-        ARe.replace(1,ARey);
-        ARe.replace(2,ARez);
-        AIm.replace(0,AImx);
-        AIm.replace(1,AImy);
-        AIm.replace(2,AImz);
-
-        // TODO: This has to be the same as the
-        // component boundary conditions otherwise
-        // it gives non-sense. This means we currently
-        // cannot use directionMixed bc!!!
-        ARe.correctBoundaryConditions();
-        AIm.correctBoundaryConditions();
-    }
 
     // Gauge fixing: Solve for gauge fixing potential G
     {
         // Assemble G-equations
-        fvScalarMatrix GReEqn(fvm::laplacian(GRe) + fvc::div(ARe));
-        fvScalarMatrix GImEqn(fvm::laplacian(GIm) + fvc::div(AIm));
+        fvScalarMatrix GReEqn
+        (
+            fvm::laplacian(GRe)
+          + fvc::div(ARe)
+        );
+        fvScalarMatrix GImEqn
+        (
+            fvm::laplacian(GIm)
+          + fvc::div(AIm)
+        );
 
         // Reference settings
         label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
@@ -501,225 +210,10 @@
 
         GRe.correctBoundaryConditions();
         GIm.correctBoundaryConditions();
-    }
 
-
-
-    // Solve V
-    if (requireV)
-    {
-        // Get reference to sigmaV pointer
-        volScalarField& sigmaV = *sigmaVPtr;
-    }
-
-//     // Solve V in conducting subregion
-//     {
-//         // Create submesh
-//         fvMeshSubset cMeshSubSet
-//         (
-//             IOobject
-//             (
-//                 "conductor",
-//                 mesh.time().timeName(),
-//                 mesh,
-//                 IOobject::NO_READ
-//             ),
-//             mesh
-//         );
-//
-//         // Initialize large cell subset
-//         cMeshSubSet.setLargeCellSubset(cCellsHashSet);
-//
-//         // Create sub-mesh
-//         fvMesh& cMesh = cMeshSubSet.subMesh();
-//
-//         // References for maps
-//         const labelList& cCellMap = cMeshSubSet.cellMap();
-//
-//         // Create fields
-//         volScalarField cSigma
-//         (
-//             IOobject
-//             (
-//                 "sigma",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensionedScalar(word(), sigma.dimensions(), pTraits<scalar>::zero),
-//             zeroGradientFvPatchField<scalar>::typeName
-//         );
-//
-//         volScalarField cAlpha
-//         (
-//             IOobject
-//             (
-//                 "alpha",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensionedScalar(word(), alpha.dimensions(), pTraits<scalar>::zero),
-//             zeroGradientFvPatchField<scalar>::typeName
-//         );
-//
-//         volVectorField cARe
-//         (
-//             IOobject
-//             (
-//                 "ARe",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensioned<vector>(word(), ARe.dimensions(), pTraits<vector>::zero),
-//             zeroGradientFvPatchField<vector>::typeName
-//         );
-//
-//         volVectorField cAIm
-//         (
-//             IOobject
-//             (
-//                 "AIm",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensionedVector(word(), AIm.dimensions(), vector::zero),
-//             zeroGradientFvPatchField<vector>::typeName
-//         );
-//
-//         volScalarField cVRe
-//         (
-//             IOobject
-//             (
-//                 "VRe",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensionedScalar(word(), VRe.dimensions(), pTraits<scalar>::zero),
-//             zeroGradientFvPatchField<scalar>::typeName
-//         );
-//
-//         volScalarField cVIm
-//         (
-//             IOobject
-//             (
-//                 "VIm",
-//                 cMesh.time().timeName(),
-//                 cMesh,
-//                 IOobject::NO_READ
-//             ),
-//             cMesh,
-//             dimensionedScalar(word(), VIm.dimensions(), pTraits<scalar>::zero),
-//             zeroGradientFvPatchField<scalar>::typeName
-//         );
-//
-//         // Map internal values of volume fields
-//         // and correct their boundary values
-//         {
-//             forAll (cMesh.C(), cellI)
-//             {
-//                 cSigma.internalField()[cellI] = sigma.internalField()[cCellMap[cellI]];
-//                 cAlpha.internalField()[cellI] = alpha.internalField()[cCellMap[cellI]];
-//
-//                 cARe.internalField()[cellI] = ARe.internalField()[cCellMap[cellI]];
-//                 cAIm.internalField()[cellI] = AIm.internalField()[cCellMap[cellI]];
-//
-//                 cVRe.internalField()[cellI] = VRe.internalField()[cCellMap[cellI]];
-//                 cVIm.internalField()[cellI] = VIm.internalField()[cCellMap[cellI]];
-//             }
-//
-//             cSigma.correctBoundaryConditions();
-//             cAlpha.correctBoundaryConditions();
-//
-//             cARe.correctBoundaryConditions();
-//             cAIm.correctBoundaryConditions();
-//
-//             cVRe.correctBoundaryConditions();
-//             cVIm.correctBoundaryConditions();
-//         }
-//
-//         // Solve V equation
-//         {
-//             // Assemble V-equations
-//             fvScalarMatrix cVReEqn
-//             (
-//                 fvm::laplacian(cSigma, cVRe, "laplacian(VRe)")
-//               - fvc::div(cAlpha*cAIm, "div(AIm)")
-//             );
-//             fvScalarMatrix cVImEqn
-//             (
-//                 fvm::laplacian(cSigma, cVIm, "laplacian(VIm)")
-//               + fvc::div(cAlpha*cARe, "div(ARe)")
-//             );
-//
-//             label refCell = cMesh.findCell(point(0.00, 0.00, 0.01));
-//             scalar refValue = 0.0;
-//
-//             cVReEqn.setReference(refCell, refValue);
-//             cVImEqn.setReference(refCell, refValue);
-//
-//             // Solve V
-//             cVReEqn.solve();
-//             cVImEqn.solve();
-//
-//             cVRe.correctBoundaryConditions();
-//             cVIm.correctBoundaryConditions();
-//         }
-//
-//         // Reverse map fields
-//         {
-//             // Calculate gradient of electric scalar potential
-//             volVectorField cVReGrad("VReGrad", fvc::grad(cVRe));
-//             volVectorField cVImGrad("VImGrad", fvc::grad(cVIm));
-//
-//             // Calculate eddy currents
-//             volVectorField cjRe("jRe",   cAlpha * cAIm - cSigma * cVReGrad);
-//             volVectorField cjIm("jIm", - cAlpha * cARe - cSigma * cVImGrad);
-//
-//             forAll (cMesh.C(), cellI)
-//             {
-//                 VRe[cCellMap[cellI]] = cVRe[cellI];
-//                 VIm[cCellMap[cellI]] = cVIm[cellI];
-//
-//                 VReGrad[cCellMap[cellI]] = cVReGrad[cellI];
-//                 VImGrad[cCellMap[cellI]] = cVImGrad[cellI];
-//
-//                 jRe[cCellMap[cellI]] = cjRe[cellI];
-//                 jIm[cCellMap[cellI]] = cjIm[cellI];
-//             }
-//         }
-//     }
-
-    // TODO: Remove after debug
-    {
-        VReGrad.write();
-        VImGrad.write();
-
-        volScalarField AReDiv("AReDiv", fvc::div(ARe));
-        volScalarField AImDiv("AImDiv", fvc::div(AIm));
-        AReDiv.write();
-        AImDiv.write();
-
-        AReDivGrad.write();
-        AImDivGrad.write();
-
+        // TODO: Remove after debug
         volVectorField AReCoulomb("AReCoulomb", ARe + fvc::grad(GRe));
         volVectorField AImCoulomb("AImCoulomb", AIm + fvc::grad(GIm));
         AReCoulomb.write();
         AImCoulomb.write();
     }
-
-    BRe == fvc::curl(ARe);
-    BIm == fvc::curl(AIm);
-
-    // TODO: Influence of G or V
-    jRe ==   alpha * AIm;
-    jIm == - alpha * ARe;

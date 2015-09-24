@@ -64,7 +64,15 @@ expressions
     variables     $materialProperties;
     condition     "set(cellSet_material_conductor)";
     expression    "sigma_silicon_liquid";
-//     expression    "mag(pos().x)/0.035*sigma_silicon_liquid";
+//     expression    "(mag(pos().x-0.035)/0.035*sigma_silicon_liquid)+1";
+    keepPatches   true;
+  }
+  sigma_conductor2
+  {
+    field         sigma;
+    variables     $materialProperties;
+    condition     "set(cellSet_material_conductor) && pos().x>=0";
+    expression    "0.1*sigma_silicon_liquid";
     keepPatches   true;
   }
 
@@ -80,7 +88,7 @@ expressions
     field         jsRe;
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
-                   && pos().x>=0                 \
+                                    \
                    && mag(pos().y)<=coil_ry0     ";
     expression    "vector (0,coil_denRe,0)";
     keepPatches   true;

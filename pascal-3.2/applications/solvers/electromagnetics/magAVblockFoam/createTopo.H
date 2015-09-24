@@ -1,47 +1,7 @@
 
-    // Create set for conducting cells
+    // Create set for conducting/non-conducting cells (cn):
     labelHashSet cCellsHashSet;
-
-    forAll(mesh.cells(), cellI)
-    {
-        if (sigma.internalField()[cellI] > SMALL)
-        {
-            cCellsHashSet.insert(cellI);
-        }
-    }
-
-    labelList cCells = cCellsHashSet.toc();
-
-    cellSet cCellSet
-    (
-        mesh,
-        "cellSet_solver_c",
-        cCellsHashSet
-    ); cCellSet.write();
-
-
-
-    // Create set for non-conducting cells
     labelHashSet nCellsHashSet;
-
-    forAll(mesh.cells(), cellI)
-    {
-        if (sigma.internalField()[cellI] < SMALL)
-        {
-            nCellsHashSet.insert(cellI);
-        }
-    }
-
-    labelList nCells = nCellsHashSet.toc();
-
-    cellSet nCellSet
-    (
-        mesh,
-        "cellSet_solver_n",
-        nCellsHashSet
-    ); nCellSet.write();
-
-
 
     // Create sets for conducting/non-conducting faces (cn):
     // cnPN) Owner is in conducting region and neighbour
@@ -52,55 +12,90 @@
     labelHashSet cnPNfacesHashSet;
     labelHashSet cnNPfacesHashSet;
 
+    // Assemble topologies
     {
+        forAll(mesh.cells(), cellI)
+        {
+            if (sigma.internalField()[cellI] > SMALL)
+            {
+                cCellsHashSet.insert(cellI);
+            }
+            else
+            {
+                nCellsHashSet.insert(cellI);
+            }
+        }
+
         // Mesh references
         const unallocLabelList& own = mesh.owner();
         const unallocLabelList& nei = mesh.neighbour();
 
         // Find and insert faces
-        forAll (own, faceI)
+        forAll (own, facei)
         {
             if
             (
-                (sigma.internalField()[own[faceI]] > SMALL)
-             && (sigma.internalField()[nei[faceI]] < SMALL)
+                (sigma.internalField()[own[facei]] > SMALL)
+             && (sigma.internalField()[nei[facei]] < SMALL)
             )
             {
-                cnFacesHashSet.insert(faceI);
-                cnPNfacesHashSet.insert(faceI);
+                cnFacesHashSet.insert(facei);
+                cnPNfacesHashSet.insert(facei);
             }
 
             if
             (
-                (sigma.internalField()[own[faceI]] < SMALL)
-             && (sigma.internalField()[nei[faceI]] > SMALL)
+                (sigma.internalField()[own[facei]] < SMALL)
+             && (sigma.internalField()[nei[facei]] > SMALL)
             )
             {
-                cnFacesHashSet.insert(faceI);
-                cnNPfacesHashSet.insert(faceI);
+                cnFacesHashSet.insert(facei);
+                cnNPfacesHashSet.insert(facei);
             }
         }
     }
 
+    // Create table of content lists
+    labelList cCells = cCellsHashSet.toc();
+    labelList nCells = nCellsHashSet.toc();
+
     labelList cnFaces = cnFacesHashSet.toc();
+    labelList cnPNfaces = cnPNfacesHashSet.toc();
+    labelList cnNPfaces = cnNPfacesHashSet.toc();
+
+    // Create topoSets
+    cellSet cCellSet
+    (
+        mesh,
+        "cellSet_solver_c",
+        cCellsHashSet
+    ); cCellSet.write();
+
+
+    cellSet nCellSet
+    (
+        mesh,
+        "cellSet_solver_n",
+        nCellsHashSet
+    ); nCellSet.write();
 
     faceSet cnFaceSet
     (
         mesh,
-        "cellSet_solver_cn",
+        "faceSet_solver_cn",
         cnFacesHashSet
     ); cnFaceSet.write();
 
     faceSet cnPNfaceSet
     (
         mesh,
-        "cellSet_solver_cn_PN",
+        "faceSet_solver_cn_PN",
         cnPNfacesHashSet
     ); cnPNfaceSet.write();
 
     faceSet cnNPfaceSet
     (
         mesh,
-        "cellSet_solver_cn_NP",
+        "faceSet_solver_cn_NP",
         cnNPfacesHashSet
     ); cnNPfaceSet.write();

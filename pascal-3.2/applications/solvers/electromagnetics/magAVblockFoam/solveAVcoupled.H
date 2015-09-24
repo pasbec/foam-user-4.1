@@ -1,11 +1,31 @@
 
     {
+        // Finish assembling of V
+        {
+            // Reference settings
+            label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+            scalar refValue = 0.0;
+
+            VReEqn.setReference(refCell, refValue);
+            VImEqn.setReference(refCell, refValue);
+
+            // TEST
+            // Remove non-conducting cells from solution
+            scalarField nCellsV(nCells.size(), 0.0);
+            VReEqn.setValues(nCells, nCellsV);
+            VImEqn.setValues(nCells, nCellsV);
+        }
+
         // Prepare block system
         fvBlockMatrix<vector8> AVEqn(AV);
 
         // Insert equations for A
-        AVEqn.insertEquation(0, AReEqn);
-        AVEqn.insertEquation(4, AImEqn);
+        AVEqn.insertEquation(0, ARexEqn);
+        AVEqn.insertEquation(1, AReyEqn);
+        AVEqn.insertEquation(2, ARezEqn);
+        AVEqn.insertEquation(4, AImxEqn);
+        AVEqn.insertEquation(5, AImyEqn);
+        AVEqn.insertEquation(6, AImzEqn);
 
         // Insert equations for V
         AVEqn.insertEquation(3, VReEqn);
@@ -14,76 +34,199 @@
         // References to internal fields
         const scalarField& sigmaIn = sigma.internalField();
         const scalarField& alphaIn = alpha.internalField();
-        const vectorField& gradAlphaIn = gradAlpha.internalField();
 
-        // Add coupling terms for ARe-AIm coupling
-        AVEqn.insertEquationCoupling(0, 4,  alphaIn);
-        AVEqn.insertEquationCoupling(4, 0, -alphaIn);
-        AVEqn.insertEquationCoupling(1, 5,  alphaIn);
-        AVEqn.insertEquationCoupling(5, 1, -alphaIn);
-        AVEqn.insertEquationCoupling(2, 6,  alphaIn);
-        AVEqn.insertEquationCoupling(6, 2, -alphaIn);
-
-        // Coupling part of electric scalar potential equation in A
-        BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe)); VReInARe *= -sigmaIn;
-        BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm)); VImInAIm *= -sigmaIn;
-
-        AVEqn.insertBlockCoupling(0, 3, VReInARe, true);
-        AVEqn.insertBlockCoupling(4, 7, VImInAIm, true);
-
-        // Coupling part of electric scalar potential equation from A
-        bool useGradAlpha = true;
-
-        if (useGradAlpha)
+        // Coupling terms for real/imagninary ARe-AIm coupling
+        // of magnetic vector potential
         {
-            AVEqn.insertEquationCoupling(3, 4, -gradAlphaIn.component(0));
-            AVEqn.insertEquationCoupling(3, 5, -gradAlphaIn.component(1));
-            AVEqn.insertEquationCoupling(3, 6, -gradAlphaIn.component(2));
-
-            AVEqn.insertEquationCoupling(7, 0,  gradAlphaIn.component(0));
-            AVEqn.insertEquationCoupling(7, 1,  gradAlphaIn.component(1));
-            AVEqn.insertEquationCoupling(7, 2,  gradAlphaIn.component(2));
+            AVEqn.insertEquationCoupling(0, 4,  alphaIn);
+            AVEqn.insertEquationCoupling(4, 0, -alphaIn);
+            AVEqn.insertEquationCoupling(1, 5,  alphaIn);
+            AVEqn.insertEquationCoupling(5, 1, -alphaIn);
+            AVEqn.insertEquationCoupling(2, 6,  alphaIn);
+            AVEqn.insertEquationCoupling(6, 2, -alphaIn);
         }
-        else
+
+        // Coupling terms of electric scalar potential V
+        // in equation for magnetic vector potential A
         {
-            BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(sigmaf, AIm, "div(sigmaf,AIm)"));
-            BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(sigmaf, ARe, "div(sigmaf,ARe)"));
 
-            AImInVRe *= -omega.value();
-            AReInVIm *=  omega.value();
+            // Implicit gradient operators
+            BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe));
+            BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm));
 
-            BlockLduSystem<vector, scalar> AImInVReDiv(fvm::UDiv(AIm));
-            BlockLduSystem<vector, scalar> AReInVImDiv(fvm::UDiv(ARe));
+            // Term coefficients
+            VReInARe *= -sigmaIn;
+            VImInAIm *= -sigmaIn;
 
-            AImInVReDiv *= alphaIn;
-            AReInVImDiv *= alphaIn;
+            // Modify fvm::grad(VRe)/fvm::grad(VIm) to enforce zero normal
+            // gradient for V (d(V)/dn=0) at conductor interface as inner
+            // constraint
+            // TODO: Gradient correction for div(j)=0???
+            {
+                // Mesh addressing
+                const unallocLabelList& own = mesh.owner();
+                const unallocLabelList& nei = mesh.neighbour();
 
-            AImInVRe += AImInVReDiv;
-            AReInVIm -= AReInVImDiv;
+                // Mesh geometry
+                const vectorField& Sf = mesh.Sf();
+                const scalarField& magSf = mesh.magSf();
+
+                // Derived mesh geometry
+                const vectorField Sn = Sf/magSf;
+                const vectorField SnCmptMag = cmptMag(Sn);
+
+                // Reference to parts of blockLduSystem
+                CoeffField<vector>::linearTypeField& VReInAReD = VReInARe.diag().asLinear();
+                CoeffField<vector>::linearTypeField& VReInAReU = VReInARe.upper().asLinear();
+                CoeffField<vector>::linearTypeField& VReInAReL = VReInARe.lower().asLinear();
+
+                CoeffField<vector>::linearTypeField& VImInAImD = VImInAIm.diag().asLinear();
+                CoeffField<vector>::linearTypeField& VImInAImU = VImInAIm.upper().asLinear();
+                CoeffField<vector>::linearTypeField& VImInAImL = VImInAIm.lower().asLinear();
+
+                // Loop over all faces of conductor interface
+                forAll (cnFaces, facei)
+                {
+                    label faceI = cnFaces[facei];
+
+                    // Eliminate upper/lower coeffs based on constraint
+                    // Note: This will keep SYMMETRIC matrices and it will
+                    //       also sligthly improve their diagonal dominance
+                    // TODO: Is the current implementation really correct?
+                    {
+                        // Real part
+                        vector cReUf = diag(SnCmptMag[faceI] * VReInAReU[faceI]) & vector::one;
+                        vector cReLf = diag(SnCmptMag[faceI] * VReInAReL[faceI]) & vector::one;
+
+                        VReInAReD[own[faceI]] += cReUf;
+                        VReInAReD[nei[faceI]] += cReLf;
+                        VReInAReU[faceI] -= cReUf;
+                        VReInAReL[faceI] -= cReLf;
+
+                        // Imaginary part
+                        vector cImUf = diag(SnCmptMag[faceI] * VImInAImU[faceI]) & vector::one;
+                        vector cImLf = diag(SnCmptMag[faceI] * VImInAImL[faceI]) & vector::one;
+
+                        VImInAImD[own[faceI]] += cImUf;
+                        VImInAImD[nei[faceI]] += cImLf;
+                        VImInAImU[faceI] -= cImUf;
+                        VImInAImL[faceI] -= cImLf;
+                    }
+                }
+            }
+
+            // Insert coupling of V in A
+            AVEqn.insertBlockCoupling(0, 3, VReInARe, true);
+            AVEqn.insertBlockCoupling(4, 7, VImInAIm, true);
+        }
+
+        // Coupling terms of magnetic vector potential A
+        // in equation for electric scalar potential V
+        {
+            // Implicit divergence operators
+            BlockLduSystem<vector, scalar> AImInVRe(fvm::UDiv(sSigmaV, AIm, "div(AIm)"));
+            BlockLduSystem<vector, scalar> AReInVIm(fvm::UDiv(sSigmaV, ARe, "div(ARe)"));
+
+            AImInVRe *= -scaleV.value() * omega.value();
+            AReInVIm *=  scaleV.value() * omega.value();
+
+            // Modify fvm::UDiv(ARe)/fvm::UDiv(AIm) to enforce zero
+            // normal components (ARe*n=0) and (AIm*n=0) at the
+            // conductor interface as an inner constraint
+            {
+                // Mesh addressing
+                const unallocLabelList& own = mesh.owner();
+                const unallocLabelList& nei = mesh.neighbour();
+
+                // Mesh geometry
+                const vectorField& Sf = mesh.Sf();
+                const scalarField& magSf = mesh.magSf();
+
+                // Derived mesh geometry
+                const vectorField Sn = Sf/magSf;
+                const vectorField SnCmptMag = cmptMag(Sn);
+
+                // Reference to parts of blockLduSystem
+                CoeffField<vector>::linearTypeField& AImInVReD = AImInVRe.diag().asLinear();
+                CoeffField<vector>::linearTypeField& AImInVReU = AImInVRe.upper().asLinear();
+                CoeffField<vector>::linearTypeField& AImInVReL = AImInVRe.lower().asLinear();
+
+                CoeffField<vector>::linearTypeField& AReInVImD = AReInVIm.diag().asLinear();
+                CoeffField<vector>::linearTypeField& AReInVImU = AReInVIm.upper().asLinear();
+                CoeffField<vector>::linearTypeField& AReInVImL = AReInVIm.lower().asLinear();
+
+                // Loop over all faces of conductor interface
+                forAll (cnFaces, facei)
+                {
+                    label faceI = cnFaces[facei];
+
+                    // Eliminate upper/lower coeffs based on constraint
+                    // Note: This will keep SYMMETRIC matrices and it will
+                    //       also sligthly improve their diagonal dominance
+                    // TODO: Is the current implementation really correct?
+                    {
+                        // Real part
+                        vector cReUf = diag(SnCmptMag[faceI] * AImInVReU[faceI]) & vector::one;
+                        vector cReLf = diag(SnCmptMag[faceI] * AImInVReL[faceI]) & vector::one;
+
+                        AImInVReD[own[faceI]] += cReLf;
+                        AImInVReD[nei[faceI]] += cReUf;
+                        AImInVReU[faceI] -= cReUf;
+                        AImInVReL[faceI] -= cReLf;
+
+                        // Imaginary part
+                        vector cImUf = diag(SnCmptMag[faceI] * AReInVImU[faceI]) & vector::one;
+                        vector cImLf = diag(SnCmptMag[faceI] * AReInVImL[faceI]) & vector::one;
+
+                        AReInVImD[own[faceI]] += cImLf;
+                        AReInVImD[nei[faceI]] += cImUf;
+                        AReInVImU[faceI] -= cImUf;
+                        AReInVImL[faceI] -= cImLf;
+                    }
+                }
+            }
 
             AVEqn.insertBlockCoupling(3, 4, AImInVRe, false);
             AVEqn.insertBlockCoupling(7, 0, AReInVIm, false);
         }
 
-        // Block coupled solver call
+        // Solve A
         AVEqn.solve();
 
-        // Retrieve solution
-        AVEqn.retrieveSolution(0, ARe.internalField());
-        AVEqn.retrieveSolution(4, AIm.internalField());
+        // Retrieve solution for A
+        AVEqn.retrieveSolution(0, ARex.internalField());
+        AVEqn.retrieveSolution(1, ARey.internalField());
+        AVEqn.retrieveSolution(2, ARez.internalField());
+        AVEqn.retrieveSolution(4, AImx.internalField());
+        AVEqn.retrieveSolution(5, AImy.internalField());
+        AVEqn.retrieveSolution(6, AImz.internalField());
 
+        ARex.correctBoundaryConditions();
+        ARey.correctBoundaryConditions();
+        ARez.correctBoundaryConditions();
+        AImx.correctBoundaryConditions();
+        AImy.correctBoundaryConditions();
+        AImz.correctBoundaryConditions();
+
+        // Replace components
+        ARe.replace(0,ARex);
+        ARe.replace(1,ARey);
+        ARe.replace(2,ARez);
+        AIm.replace(0,AImx);
+        AIm.replace(1,AImy);
+        AIm.replace(2,AImz);
+
+        // TODO: This needs to be the same as the
+        // component boundary conditions otherwise
+        // it gives non-sense. This means we currently
+        // cannot use directionMixed bc!!!
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 
+        // Retrieve solution for V
         AVEqn.retrieveSolution(3, VRe.internalField());
         AVEqn.retrieveSolution(7, VIm.internalField());
 
         VRe.correctBoundaryConditions();
         VIm.correctBoundaryConditions();
     }
-
-    jRe ==   alpha * AIm - sigma * fvc::grad(VRe);
-    jIm == - alpha * ARe - sigma * fvc::grad(VIm);
-
-    BRe == fvc::curl(ARe);
-    BIm == fvc::curl(AIm);

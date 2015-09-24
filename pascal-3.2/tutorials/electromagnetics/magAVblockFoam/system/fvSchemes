@@ -26,15 +26,10 @@ gradSchemes
     curl(ARe)                         Gauss linear;
     curl(AIm)                         Gauss linear;
 
-    grad(div(ARe))                    Gauss linear;
-    grad(div(AIm))                    Gauss linear;
-
-    grad(div((ARe+GReGrad)))          Gauss linear;
-    grad(div((AIm+GImGrad)))          Gauss linear;
-
     grad(AReDiv)                      Gauss linear;
     grad(AImDiv)                      Gauss linear;
 
+    grad(sigmaV)                      Gauss linear;
     grad(VRe)                         Gauss linear;
     grad(VIm)                         Gauss linear;
 
@@ -48,9 +43,6 @@ divSchemes
 
     div(ARe)                          Gauss linear;
     div(AIm)                          Gauss linear;
-
-    div(jRe)                          Gauss linear;
-    div(jIm)                          Gauss linear;
 }
 
 laplacianSchemes
@@ -64,8 +56,9 @@ laplacianSchemes
     laplacian(AImy)                   Gauss linear uncorrected; // linear is not used here
     laplacian(AImz)                   Gauss linear uncorrected; // linear is not used here
 
-    laplacian(VRe)                    Gauss linear uncorrected; // linear is not used here
-    laplacian(VIm)                    Gauss linear uncorrected; // linear is not used here
+    laplacian(sigmaV)                 Gauss linear uncorrected; // linear is not used here
+    laplacian(sigmaV,VRe)             Gauss linear uncorrected; // linear is not used here
+    laplacian(sigmaV,VIm)             Gauss linear uncorrected; // linear is not used here
 
     laplacian(GRe)                    Gauss linear uncorrected; // linear is not used here
     laplacian(GIm)                    Gauss linear uncorrected; // linear is not used here
@@ -75,13 +68,13 @@ interpolationSchemes
 {
     default                           none;
 
+    interpolate(sigmaV)               linear;
+
     interpolate(ARe)                  linear;
     interpolate(AIm)                  linear;
-}
 
-snGradSchemes
-{
-    default                           none;
+    interpolate(VRe)                  linear;
+    interpolate(VIm)                  linear;
 }
 
 // ************************************************************************* //

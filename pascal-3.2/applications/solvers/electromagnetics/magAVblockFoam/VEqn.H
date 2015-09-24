@@ -1,138 +1,90 @@
 
-    // Calculate sigmaNoZero
-    volScalarField sigmaNoZero
+    // Get reference to sigmaV pointer
+    volScalarField& sigmaV = *sigmaVPtr;
+
+    dimensionedScalar rSigmaVavg = 1.0/average(sigmaV);
+
+    volScalarField rSigmaV
     (
-        "sigmaNoZero",
-        sigma
+        "rSigmaV",
+        1.0/sigmaV
     );
-
-    // Manipulate sigmaNoZero:
-    //
-    //  We will replace "zero"-values with very small
-    //  values at all faces in order to avoid a singular
-    //  solution
-    {
-        // Parameters
-        scalar sigmaNoZeroRef = 100;
-
-        // Manipulate internal faces
-        forAll(sigmaNoZero.internalField(), cellI)
-        {
-            if
-            (sigmaNoZero.internalField()[cellI] < sigmaNoZeroRef)
-            {
-                sigmaNoZero.internalField()[cellI] = sigmaNoZeroRef;
-            }
-        }
-
-        // Manipulate boundary faces
-        sigmaNoZero.boundaryField() == sigmaNoZeroRef;
-    }
 
     // Interpolate sigma to face centers
-    surfaceScalarField sigmaf
+    surfaceScalarField sSigmaV
     (
-        "sigmaf",
-        fvc::interpolate(sigmaNoZero, "interpolate(sigma)")
+        "sSigmaV",
+        fvc::interpolate(sigmaV)
     );
 
-    // Calculate gradient of alpha
-    volVectorField gradAlpha
+    // Enforce a zero normal gradient for
+    // sigmaV (d(sigmaV)/dn=0)
+    {
+        // Mesh cell-face addressing
+        const unallocLabelList& own = mesh.owner();
+        const unallocLabelList& nei = mesh.neighbour();
+
+        // Replace face values with cell values
+        // from conducting side
+        forAll (cnPNfaces, facei)
+        {
+            label faceI = cnPNfaces[facei];
+            sSigmaV[faceI] = sigmaV[own[faceI]];
+        }
+        forAll (cnNPfaces, facei)
+        {
+            label faceI = cnNPfaces[facei];
+            sSigmaV[faceI] = sigmaV[nei[faceI]];
+        }
+    }
+
+    // Create scale factor for V equation
+    dimensionedScalar scaleV
     (
-        "gradAlpha",
-        omega * fvc::grad(sigma)
+        "scaleV",
+//         rSigmaVavg * pow(average(mesh.V()),-3)
+        rSigmaVavg
     );
 
-
-
-    // Reference settings
-    label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
-//     label refCell = mesh.findCell(point(0.034999, 0.00, 0.01));
-//     label refCell = mesh.findCell(point(0.034999, 0.074999, 0.01));
-//     label refCell = mesh.findCell(point(0.15, 0.11, 0.01));
-    scalar refValue = 0.0;
-
-//     Sout << "refCell = " << refCell << endl << endl;
-//     Sout << "VRe.needReference() = " << VRe.needReference() << endl;
-//     Sout << "VIm.needReference() = " << VIm.needReference() << endl;
-
-    // Real part
+    // Assemble V-equations
     fvScalarMatrix VReEqn
     (
-        fvm::laplacian(sigmaf, VRe, "laplacian(VRe)")
-//       - fvc::div(alpha*AIm)
+        scaleV * fvm::laplacian(sSigmaV, VRe, "laplacian(sigmaV,VRe)")
+//    - scaleV * omega * fvc::div(sigmaV * AIm)
     );
-
-    VReEqn.setReference(refCell, refValue);
-//     VReEqn.relax(0.999);
-// // TEST: Begin
-//
-//     if (VReEqn.psi().needReference())
-//     {
-//         Info << "VReEqn.source()[refCell] = " << VReEqn.source()[refCell] << endl;
-//         Info << "VReEqn.diag()[refCell] = " << VReEqn.diag()[refCell] << endl;
-//
-// //         VReEqn.source()[refCell] += 1*VReEqn.diag()[refCell]*refValue;
-// //         VReEqn.diag()[refCell] += 1*VReEqn.diag()[refCell];
-//
-//         VReEqn.source()[refCell] += 1.0*refValue;
-//         VReEqn.diag()[refCell] += 1.0;
-//
-//         Info << "VReEqn.source()[refCell] = " << VReEqn.source()[refCell] << endl;
-//         Info << "VReEqn.diag()[refCell] = " << VReEqn.diag()[refCell] << endl;
-//     }
-//
-// // TEST: End
-
-    // Imaginary part
     fvScalarMatrix VImEqn
     (
-        fvm::laplacian(sigmaf, VIm, "laplacian(VIm)")
-//       + fvc::div(alpha*ARe)
+        scaleV * fvm::laplacian(sSigmaV, VIm, "laplacian(sigmaV,VIm)")
+//    + scaleV * omega * fvc::div(sigmaV * ARe)
     );
 
-    VImEqn.setReference(refCell, refValue);
-//     VImEqn.relax(0.999);
-// // TEST: Begin
-//
-//     if (VReEqn.psi().needReference())
-//     {
-//         Info << "VImEqn.source()[refCell] = " << VImEqn.source()[refCell] << endl;
-//         Info << "VImEqn.diag()[refCell] = " << VImEqn.diag()[refCell] << endl;
-//
-// //         VImEqn.source()[refCell] += 1*VImEqn.diag()[refCell]*refValue;
-// //         VImEqn.diag()[refCell] += 1*VImEqn.diag()[refCell];
-//
-//         VImEqn.source()[refCell] += 1.0*refValue;
-//         VImEqn.diag()[refCell] += 1.0;
-//
-//         Info << "VImEqn.source()[refCell] = " << VImEqn.source()[refCell] << endl;
-//         Info << "VImEqn.diag()[refCell] = " << VImEqn.diag()[refCell] << endl;
-//     }
-//
-// // TEST: End
+    // Modify fvm::laplacian() for VRe and VIm to enforce
+    // zero normal gradient (dVRe/dn=0) and (dVIm/dn=0) at
+    // the conductor interface as an inner constraint
+    {
+        // Mesh cell-face addressing
+        const unallocLabelList& own = mesh.owner();
+        const unallocLabelList& nei = mesh.neighbour();
 
-// // TEST: Begin
-//
-//     // Create set for non-conducting cells
-//     labelHashSet nonConductingCellsHashSet;
-//     forAll(mesh.cells(), cellI)
-//     {
-//         if
-//         (
-//             (sigma.internalField()[cellI] < SMALL)
-//          && (mag(gradAlpha.internalField()[cellI]) < SMALL)
-//         )
-//         {
-//             nonConductingCellsHashSet.insert(cellI);
-//         }
-//     }
-//     labelList nonConductingCells = nonConductingCellsHashSet.toc();
-//
-//     // Set values for non-conducting cells
-//     scalarField nonConductingCellValues(nonConductingCells.size(), 0.0);
-//     VReEqn.setValues(nonConductingCells, nonConductingCellValues);
-//     VImEqn.setValues(nonConductingCells, nonConductingCellValues);
-//
-// // TEST: End
+        // Loop over all faces of conductor interface
+        forAll (cnFaces, facei)
+        {
+            label faceI = cnFaces[facei];
 
+            // Eliminate upper/lower coeffs based on constraint
+            // Note: This will keep SYMMETRIC matrices and it will
+            //       also keep their diagonal dominance
+            scalar VReEqnUf = VReEqn.upper()[faceI];
+            VReEqn.diag()[own[faceI]] += VReEqnUf;
+            VReEqn.diag()[nei[faceI]] += VReEqnUf;
+            VReEqn.upper()[faceI] -= VReEqnUf;
+            scalar VImEqnUf = VImEqn.upper()[faceI];
+            VImEqn.diag()[own[faceI]] += VImEqnUf;
+            VImEqn.diag()[nei[faceI]] += VImEqnUf;
+            VImEqn.upper()[faceI] -= VImEqnUf;
+
+            // TODO: What about gradient correction?
+            // We have to modifiy the source term, too. But
+            // this depends on the type of correction. Hmm...
+        }
+    }

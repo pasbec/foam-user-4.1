@@ -107,19 +107,6 @@
         mesh,
         dimensionedVector6(word(),dimless,vector6::zero)
     );
-//     volVector8Field A
-//     (
-//         IOobject
-//         (
-//             "A",
-//             runTime.timeName(),
-//             mesh,
-//             IOobject::NO_READ,
-//             IOobject::NO_WRITE
-//         ),
-//         mesh,
-//         dimensionedVector8(word(),dimless,vector8::zero)
-//     );
 
 
     // Electric scalar potential (real part)
@@ -150,6 +137,57 @@
             IOobject::AUTO_WRITE
         ),
         mesh
+    );
+
+
+    // Magnetic vector potential and electric scalar potential (complex)
+    Info << "Create field AV" << nl << endl;
+    volVector8Field AV
+    (
+        IOobject
+        (
+            "AV",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector8(word(),dimless,vector8::zero)
+    );
+
+    // Electric scalar potential gradient (real part)
+    Info << "Create field VReGrad" << endl;
+    volVectorField VReGrad
+    (
+        IOobject
+        (
+            "VReGrad",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedVector(word(), VRe.dimensions()/dimLength, pTraits<vector>::zero),
+        calculatedFvPatchField<vector>::typeName
+    );
+
+    // Electric scalar potential gradient (imaginary part)
+    Info << "Create field VImGrad " << nl << endl;
+    volVectorField VImGrad
+    (
+        IOobject
+        (
+            "VImGrad",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedVector(word(), VIm.dimensions()/dimLength, pTraits<vector>::zero),
+        calculatedFvPatchField<vector>::typeName
     );
 
 
