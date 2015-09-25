@@ -1,4 +1,5 @@
 ../../../../.wm_project_dir/src/finiteVolume/lnInclude
 ../../../../.wm_project_dir/src/VectorN/lnInclude
 
-./newDirectionMixed
+./fvPatchFields/directionMixedMixed
+./fvPatchFields/patchDirectionMixedMixed
