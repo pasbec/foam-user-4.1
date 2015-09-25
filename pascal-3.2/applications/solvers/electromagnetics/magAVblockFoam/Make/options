@@ -1,6 +1,7 @@
 EXE_INC = \
     -IfvPatchFields/directionMixedMixed \
     -IfvPatchFields/patchDirectionMixedMixed \
+    -IfvPatchFields/tangentialMagnetic \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 

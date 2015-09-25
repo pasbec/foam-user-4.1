@@ -56,11 +56,7 @@
         AIm.replace(0,AImx);
         AIm.replace(1,AImy);
         AIm.replace(2,AImz);
-
-        // TODO: This needs to be the same as the
-        // component boundary conditions otherwise
-        // it gives non-sense. This means we currently
-        // cannot use directionMixed bc!!!
+        
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 
@@ -169,17 +165,69 @@
             // Remove non-conducting cells from solution
             // TODO: In how far will this change upper/lower of
             // cells in contact with non-conducting region?
-            scalarField nCellsV(nCells.size(), 0.0);
-            VReEqn.setValues(nCells, nCellsV);
-            VImEqn.setValues(nCells, nCellsV);
+            // NOTE: The usage of setValues does not work
+            //       correctly with block-matrices
+//             scalarField nCellsV(nCells.size(), 0.0);
+//             VReEqn.setValues(nCells, nCellsV);
+//             VImEqn.setValues(nCells, nCellsV);
         }
 
+        // Prepare block system for V
+        fvBlockMatrix<vector2> VEqn(V);
+
+        // Insert equations for V
+        VEqn.insertEquation(0, VReEqn);
+        VEqn.insertEquation(1, VImEqn);
+
         // Solve V
-        VReEqn.solve();
-        VImEqn.solve();
+        VEqn.solve();
+
+        // Retrieve solution
+        VEqn.retrieveSolution(0, VRe.internalField());
+        VEqn.retrieveSolution(1, VIm.internalField());
 
         VRe.correctBoundaryConditions();
         VIm.correctBoundaryConditions();
+
+        // TODO: Remove after debug
+        {
+            vector2Field VResIn = VEqn.residual(V.internalField());
+
+            volScalarField VReRes
+            (
+                IOobject
+                (
+                    "VReRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
+                fixedValueFvPatchField<scalar>::typeName
+            );
+            volScalarField VImRes
+            (
+                IOobject
+                (
+                    "VImRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
+                fixedValueFvPatchField<scalar>::typeName
+            );
+
+            VReRes.internalField().replace(0, VResIn.component(0));
+            VImRes.internalField().replace(0, VResIn.component(1));
+
+            VReRes.write();
+            VImRes.write();
+        }
     }
 
 //     // Solve V only in conducting subregion

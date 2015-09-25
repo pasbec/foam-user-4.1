@@ -19,11 +19,6 @@ AV
 //     method                       "segregated";
     method                       "coupled";
 
-    subset
-    {
-        corr                     1;
-    }
-
     segregated
     {
         corr                     1;
@@ -32,12 +27,6 @@ AV
     coupled
     {
         corr                     1;
-    }
-
-    coupledSegregated
-    {
-        coupledCorr              1;
-        segregatedCorr           3;
     }
 }
 
@@ -105,7 +94,7 @@ solvers
 //     }
 
 
-    "(A)"
+    "(A|V)"
     {
         solver                   BiCGStab;
 
@@ -113,7 +102,7 @@ solvers
         relTol                   0;
 
         minIter                  1;
-        maxIter                  30;
+        maxIter                  300;
 
         preconditioner           Cholesky;
     }

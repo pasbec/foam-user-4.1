@@ -4,8 +4,6 @@
     volScalarField& sigmaIc = *sigmaIcPtr;
     volScalarField& sigmaIn = *sigmaInPtr;
 
-    dimensionedScalar rSigmaVavg = 1.0/average(sigmaV);
-
     volScalarField rSigmaV
     (
         "rSigmaV",
@@ -40,13 +38,13 @@
         }
     }
 
-    // Create scale factor for V equation
+    // Create scale factor for V-equation in relation
+    // to A-equation based on dimensional relation
+    // [A] <=> [grad(V)]
     dimensionedScalar scaleV
     (
         "scaleV",
-//         rSigmaVavg * pow(average(mesh.V()),-3)
-//         rSigmaVavg * pow(sum(mesh.V()),-3)
-        rSigmaVavg
+        pow(average(mesh.V()), scalar(1.0/3.0))
     );
 
     // Assemble V-equations

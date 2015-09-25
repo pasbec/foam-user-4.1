@@ -139,6 +139,22 @@
         mesh
     );
 
+    // Electric scalar potential (complex)
+    Info << "Create field V" << nl << endl;
+    volVector2Field V
+    (
+        IOobject
+        (
+            "V",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector2(word(),dimless,vector2::zero)
+    );
+
 
     // Magnetic vector potential and electric scalar potential (complex)
     Info << "Create field AV" << nl << endl;

@@ -22,23 +22,20 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    patchDirectionMixedMixedFvPatchField
+    tangentialMagneticFvPatchField
 
 Description
-    Doubly mixed fixed value-fixed gradient boundary condition
-    separated into a normal and a tangential component given a
-    direction vector.  The mixture is controlled by two separate
-    valueFraction coefficients in the normal and tangential direction.
+    TODO
 
 SourceFiles
-    patchDirectionMixedMixedFvPatchField.C
+    tangentialMagneticFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef patchDirectionMixedMixedFvPatchField_H
-#define patchDirectionMixedMixedFvPatchField_H
+#ifndef tangentialMagneticFvPatchField_H
+#define tangentialMagneticFvPatchField_H
 
-#include "directionMixedMixedFvPatchField.H"
+#include "patchDirectionMixedMixedFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,39 +47,39 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class patchDirectionMixedMixedFvPatchField
+class tangentialMagneticFvPatchField
 :
-    public directionMixedMixedFvPatchField<Type>
+    public patchDirectionMixedMixedFvPatchField<Type>
 {
 
 public:
 
     //- Runtime type information
-    TypeName("patchDirectionMixedMixed");
+    TypeName("tangentialMagnetic");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        patchDirectionMixedMixedFvPatchField
+        tangentialMagneticFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        patchDirectionMixedMixedFvPatchField
+        tangentialMagneticFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given patchDirectionMixedMixedFvPatchField onto
+        //- Construct by mapping given tangentialMagneticFvPatchField onto
         //  a new patch
-        patchDirectionMixedMixedFvPatchField
+        tangentialMagneticFvPatchField
         (
-            const patchDirectionMixedMixedFvPatchField<Type>&,
+            const tangentialMagneticFvPatchField<Type>&,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
@@ -93,14 +90,14 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new patchDirectionMixedMixedFvPatchField<Type>(*this)
+                new tangentialMagneticFvPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        patchDirectionMixedMixedFvPatchField
+        tangentialMagneticFvPatchField
         (
-            const patchDirectionMixedMixedFvPatchField<Type>&,
+            const tangentialMagneticFvPatchField<Type>&,
             const DimensionedField<Type, volMesh>&
         );
 
@@ -112,21 +109,9 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new patchDirectionMixedMixedFvPatchField<Type>(*this, iF)
+                new tangentialMagneticFvPatchField<Type>(*this, iF)
             );
         }
-
-        //- Construct from patch, internal field, dictionary and data
-        patchDirectionMixedMixedFvPatchField
-        (
-            const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
-            const dictionary&,
-            const Field<Type>& refValue,
-            const Field<Type>& refGrad,
-            const scalarField& normalValueFraction,
-            const scalarField& tangentialValueFraction
-        );
 
 
     // Member functions
@@ -143,10 +128,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "patchDirectionMixedMixedFvPatchField.C"
+#   include "tangentialMagneticFvPatchField.C"
 #else
 #   ifdef xlC
-#   pragma implementation("patchDirectionMixedMixedFvPatchField.C")
+#   pragma implementation("tangentialMagneticFvPatchField.C")
 #   endif
 #endif
 

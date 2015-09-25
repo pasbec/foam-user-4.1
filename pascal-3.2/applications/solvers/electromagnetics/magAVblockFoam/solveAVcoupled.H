@@ -235,11 +235,7 @@
         AIm.replace(0,AImx);
         AIm.replace(1,AImy);
         AIm.replace(2,AImz);
-
-        // TODO: This needs to be the same as the
-        // component boundary conditions otherwise
-        // it gives non-sense. This means we currently
-        // cannot use directionMixed bc!!!
+        
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 

@@ -139,6 +139,19 @@ public:
             );
         }
 
+        //- Construct from patch, internal field, dictionary and data
+        directionMixedMixedFvPatchField
+        (
+            const fvPatch&,
+            const DimensionedField<Type, volMesh>&,
+            const dictionary&,
+            const Field<Type>& refValue,
+            const Field<Type>& refGrad,
+            const vectorField& nHat,
+            const scalarField& normalValueFraction,
+            const scalarField& tangentialValueFraction
+        );
+
 
     // Member functions
 

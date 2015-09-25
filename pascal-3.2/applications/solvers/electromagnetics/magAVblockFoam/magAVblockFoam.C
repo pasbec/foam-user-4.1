@@ -38,9 +38,7 @@ Description
 
 #include "zeroGradientFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
-#include "slipFvPatchFields.H"
-#include "directionMixedFvPatchFields.H"
-#include "patchDirectionMixedMixedFvPatchFields.H"
+#include "tangentialMagneticFvPatchFields.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

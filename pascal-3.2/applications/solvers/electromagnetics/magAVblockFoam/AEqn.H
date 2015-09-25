@@ -1,4 +1,23 @@
 
+    // Create list with boundary types
+    wordList ARePatches(mesh.boundary().size());
+    wordList AImPatches(mesh.boundary().size());
+
+    forAll(ARe.boundaryField(), patchI)
+    {
+        ARePatches[patchI] =
+            ARe.boundaryField()[patchI].type();
+    }
+    forAll(AIm.boundaryField(), patchI)
+    {
+        AImPatches[patchI] =
+            AIm.boundaryField()[patchI].type();
+    }
+
+    // TODO: Check, that ARe/AIm use correct boundary
+    //       conditions! Currently, only tangentialMagnetic
+    //       is supported!
+
     // Create component fields for A
     volScalarField ARex
     (
@@ -9,9 +28,8 @@
             mesh,
             IOobject::NO_READ
         ),
-        mesh,
-        dimensioned<scalar>(word(), ARe.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
+        ARe.component(0),
+        ARePatches
     );
     volScalarField ARey
     (
@@ -22,9 +40,8 @@
             mesh,
             IOobject::NO_READ
         ),
-        mesh,
-        dimensioned<scalar>(word(), ARe.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
+        ARe.component(1),
+        ARePatches
     );
     volScalarField ARez
     (
@@ -35,9 +52,8 @@
             mesh,
             IOobject::NO_READ
         ),
-        mesh,
-        dimensioned<scalar>(word(), ARe.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
+        ARe.component(2),
+        ARePatches
     );
     volScalarField AImx
     (
@@ -48,9 +64,8 @@
             mesh,
             IOobject::NO_READ
         ),
-        mesh,
-        dimensioned<scalar>(word(), AIm.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
+        AIm.component(0),
+        AImPatches
     );
     volScalarField AImy
     (
@@ -61,9 +76,8 @@
             mesh,
             IOobject::NO_READ
         ),
-        mesh,
-        dimensioned<scalar>(word(), AIm.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
+        AIm.component(1),
+        AImPatches
     );
     volScalarField AImz
     (
@@ -74,27 +88,9 @@
             mesh,
             IOobject::NO_READ
         ),
-        mesh,
-        dimensioned<scalar>(word(), AIm.dimensions(), pTraits<scalar>::zero),
-        fixedValueFvPatchField<scalar>::typeName
+        AIm.component(2),
+        AImPatches
     );
-
-
-
-    // Copy component data
-    ARex == ARe.component(0);
-    ARey == ARe.component(1);
-    ARez == ARe.component(2);
-    AImx == AIm.component(0);
-    AImy == AIm.component(1);
-    AImz == AIm.component(2);
-
-    ARex.correctBoundaryConditions();
-    ARey.correctBoundaryConditions();
-    ARez.correctBoundaryConditions();
-    AImx.correctBoundaryConditions();
-    AImy.correctBoundaryConditions();
-    AImz.correctBoundaryConditions();
 
 
 

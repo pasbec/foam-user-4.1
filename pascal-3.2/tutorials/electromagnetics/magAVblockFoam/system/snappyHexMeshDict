@@ -38,6 +38,13 @@ geometry
         name geometry_conductor;
     }
 
+    geometry_conductor_layer
+    {
+        type    searchableBox;
+        min     (-0.05000 -0.11000 -0.02000);
+        max     ( 0.05000  0.11000  0.04000);
+    }
+
     geometry_coil0.stl
     {
         type triSurfaceMesh;
@@ -80,7 +87,7 @@ castellatedMeshControls
     // Number of buffer layers between different levels.
     // 1 means normal 2:1 refinement restriction, larger means slower
     // refinement.
-    nCellsBetweenLevels 3;
+    nCellsBetweenLevels 2;
 
     // Specifies a level for any cell intersected by its edges.
     // This is a featureEdgeMesh, read from constant/triSurface.
@@ -172,6 +179,12 @@ castellatedMeshControls
         {
             mode inside;
             levels ((1e-15 3));
+        }
+
+        geometry_conductor_layer
+        {
+            mode inside;
+            levels ((1e-15 2));
         }
 
         geometry_coil0

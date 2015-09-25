@@ -134,6 +134,31 @@ directionMixedMixedFvPatchField<Type>::directionMixedMixedFvPatchField
 }
 
 
+template<class Type>
+directionMixedMixedFvPatchField<Type>::directionMixedMixedFvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const dictionary& dict,
+    const Field<Type>& refValue,
+    const Field<Type>& refGrad,
+    const vectorField& nHat,
+    const scalarField& normalValueFraction,
+    const scalarField& tangentialValueFraction
+)
+:
+    fvPatchField<Type>(p, iF, dict),
+    refValue_(refValue),
+    refGrad_(refGrad),
+    nHat_(nHat),
+    normalValueFraction_(normalValueFraction),
+    tangentialValueFraction_(tangentialValueFraction)
+{
+    this->checkNHat();
+    evaluate();
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Map from self

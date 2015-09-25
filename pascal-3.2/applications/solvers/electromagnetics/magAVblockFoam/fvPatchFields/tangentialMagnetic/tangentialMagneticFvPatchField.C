@@ -22,7 +22,7 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    patchDirectionMixedMixedFvPatchField
+    tangentialMagneticFvPatchField
 
 Description
     Doubly mixed fixed value-fixed gradient boundary condition
@@ -32,7 +32,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "patchDirectionMixedMixedFvPatchField.H"
+#include "tangentialMagneticFvPatchField.H"
 #include "transformField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,93 +43,76 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-patchDirectionMixedMixedFvPatchField<Type>::patchDirectionMixedMixedFvPatchField
+tangentialMagneticFvPatchField<Type>::tangentialMagneticFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    directionMixedMixedFvPatchField<Type>(p, iF)
+    patchDirectionMixedMixedFvPatchField<Type>(p, iF)
 {
+    this->refValue() = pTraits<Type>::zero;
+    this->refGrad() = pTraits<Type>::zero;
     this->nHat() = this->patch().nf();
+    this->normalValueFraction() = 0.0;
+    this->tangentialValueFraction() = 1.0;
 }
 
 
 template<class Type>
-patchDirectionMixedMixedFvPatchField<Type>::patchDirectionMixedMixedFvPatchField
+tangentialMagneticFvPatchField<Type>::tangentialMagneticFvPatchField
 (
-    const patchDirectionMixedMixedFvPatchField<Type>& ptf,
+    const tangentialMagneticFvPatchField<Type>& ptf,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    directionMixedMixedFvPatchField<Type>(ptf, p, iF, mapper)
+    patchDirectionMixedMixedFvPatchField<Type>(ptf, p, iF, mapper)
 {
+    this->refValue() = pTraits<Type>::zero;
+    this->refGrad() = pTraits<Type>::zero;
     this->nHat() = this->patch().nf();
+    this->normalValueFraction() = 0.0;
+    this->tangentialValueFraction() = 1.0;
 }
 
 
 template<class Type>
-patchDirectionMixedMixedFvPatchField<Type>::patchDirectionMixedMixedFvPatchField
+tangentialMagneticFvPatchField<Type>::tangentialMagneticFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict
 )
 :
-    directionMixedMixedFvPatchField<Type>
+    patchDirectionMixedMixedFvPatchField<Type>
     (
         p,
         iF,
         dict,
-        Field<Type>("refValue", dict, p.size()),
-        Field<Type>("refGradient", dict, p.size()),
-        vectorField(p.nf()),
-        scalarField("normalValueFraction", dict, p.size()),
-        scalarField("tangentialValueFraction", dict, p.size())
+        Field<Type>(p.size(), pTraits<Type>::zero),
+        Field<Type>(p.size(), pTraits<Type>::zero),
+        scalarField(p.size(), 0.0),
+        scalarField(p.size(), 1.0)
     )
 {}
 
 
 template<class Type>
-patchDirectionMixedMixedFvPatchField<Type>::patchDirectionMixedMixedFvPatchField
+tangentialMagneticFvPatchField<Type>::tangentialMagneticFvPatchField
 (
-    const patchDirectionMixedMixedFvPatchField<Type>& ptf,
+    const tangentialMagneticFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    directionMixedMixedFvPatchField<Type>(ptf, iF)
+    patchDirectionMixedMixedFvPatchField<Type>(ptf, iF)
 {
+    this->refValue() = pTraits<Type>::zero;
+    this->refGrad() = pTraits<Type>::zero;
     this->nHat() = this->patch().nf();
-}
-
-
-template<class Type>
-patchDirectionMixedMixedFvPatchField<Type>::patchDirectionMixedMixedFvPatchField
-(
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict,
-    const Field<Type>& refValue,
-    const Field<Type>& refGrad,
-    const scalarField& normalValueFraction,
-    const scalarField& tangentialValueFraction
-)
-:
-    directionMixedMixedFvPatchField<Type>
-    (
-        p,
-        iF,
-        dict,
-        Field<Type>(refValue),
-        Field<Type>(refGrad),
-        vectorField(p.nf()),
-        scalarField(normalValueFraction),
-        scalarField(tangentialValueFraction)
-    )
-{
-    this->evaluate();
+    this->normalValueFraction() = 0.0;
+    this->tangentialValueFraction() = 1.0;
 }
 
 
@@ -138,13 +121,9 @@ patchDirectionMixedMixedFvPatchField<Type>::patchDirectionMixedMixedFvPatchField
 
 // Write
 template<class Type>
-void patchDirectionMixedMixedFvPatchField<Type>::write(Ostream& os) const
+void tangentialMagneticFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    this->refValue().writeEntry("refValue", os);
-    this->refGrad().writeEntry("refGradient", os);
-    this->normalValueFraction().writeEntry("normalValueFraction", os);
-    this->tangentialValueFraction().writeEntry("tangentialValueFraction", os);
     this->writeEntry("value", os);
 }
 
