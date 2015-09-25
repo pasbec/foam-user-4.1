@@ -29,7 +29,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "newDirectionMixedFvPatchFields.H"
+#include "patchDirectionMixedMixedFvPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 
@@ -40,7 +40,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePatchFields(newDirectionMixed);
+makePatchFields(patchDirectionMixedMixed);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

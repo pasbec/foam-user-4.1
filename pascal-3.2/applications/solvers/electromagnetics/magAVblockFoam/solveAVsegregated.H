@@ -63,6 +63,50 @@
         // cannot use directionMixed bc!!!
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
+
+        // TODO: Remove after debug
+        {
+            vector6Field AResIn = AEqn.residual(A.internalField());
+
+            volVectorField AReRes
+            (
+                IOobject
+                (
+                    "AReRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+                fixedValueFvPatchField<vector>::typeName
+            );
+            volVectorField AImRes
+            (
+                IOobject
+                (
+                    "AImRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+                fixedValueFvPatchField<vector>::typeName
+            );
+
+            AReRes.internalField().replace(0, AResIn.component(0));
+            AReRes.internalField().replace(1, AResIn.component(1));
+            AReRes.internalField().replace(2, AResIn.component(2));
+            AImRes.internalField().replace(0, AResIn.component(4));
+            AImRes.internalField().replace(1, AResIn.component(5));
+            AImRes.internalField().replace(2, AResIn.component(6));
+
+            AReRes.write();
+            AImRes.write();
+        }
     }
 
     // Solve V
@@ -101,19 +145,30 @@
 
             VReEqn -= scaleV * omega * sigmaV * fvc::div(sAIm);
             VImEqn += scaleV * omega * sigmaV * fvc::div(sARe);
+
+            // Remove all source values from non-conducting cells
+            VReEqn.source() *= sigmaIc;
+            VImEqn.source() *= sigmaIc;
         }
 
         // Finish assembling of V
         {
             // Reference settings
+            // TODO: Automatically search refcell in
+            //       conducting region
             label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
             scalar refValue = 0.0;
 
-            VReEqn.setReference(refCell, refValue);
-            VImEqn.setReference(refCell, refValue);
+            // Force reference values for V-matrices in conducting
+            // region.
+            VReEqn.source()[refCell] +=  VReEqn.diag()[refCell]*refValue;
+            VReEqn.diag()[refCell] +=  VReEqn.diag()[refCell];
+            VImEqn.source()[refCell] +=  VImEqn.diag()[refCell]*refValue;
+            VImEqn.diag()[refCell] +=  VImEqn.diag()[refCell];
 
-            // TEST
             // Remove non-conducting cells from solution
+            // TODO: In how far will this change upper/lower of
+            // cells in contact with non-conducting region?
             scalarField nCellsV(nCells.size(), 0.0);
             VReEqn.setValues(nCells, nCellsV);
             VImEqn.setValues(nCells, nCellsV);

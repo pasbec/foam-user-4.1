@@ -1,4 +1,7 @@
 
+    // TODO: What if conductor is in contact with boundary?
+    // TODO: What happens on parallel?
+
     // Create set for conducting/non-conducting cells (cn):
     labelHashSet cCellsHashSet;
     labelHashSet nCellsHashSet;

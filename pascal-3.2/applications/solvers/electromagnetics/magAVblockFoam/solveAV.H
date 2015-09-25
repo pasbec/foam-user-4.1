@@ -93,6 +93,8 @@
         }
     }
 
+
+
     // Calculate magnetic field density
     BRe == fvc::curl(ARe);
     BIm == fvc::curl(AIm);
@@ -100,4 +102,41 @@
     // Calculate eddy current density
     jRe ==   alpha * AIm - sigma * VReGrad;
     jIm == - alpha * ARe - sigma * VImGrad;
-    
+
+
+
+    // Gauge fixing: Solve for gauge fixing potential G
+    {
+        // Assemble G-equations
+        fvScalarMatrix GReEqn
+        (
+            fvm::laplacian(GRe)
+          + fvc::div(ARe)
+        );
+        fvScalarMatrix GImEqn
+        (
+            fvm::laplacian(GIm)
+          + fvc::div(AIm)
+        );
+
+        // Reference settings
+        label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+        scalar refValue = 0.0;
+
+        GReEqn.setReference(refCell, refValue);
+        GImEqn.setReference(refCell, refValue);
+
+        // Solve G
+        GReEqn.solve();
+        GImEqn.solve();
+
+        GRe.correctBoundaryConditions();
+        GIm.correctBoundaryConditions();
+
+        // TODO: Remove after debug
+        volVectorField AReCoulomb("AReCoulomb", ARe + fvc::grad(GRe));
+        volVectorField AImCoulomb("AImCoulomb", AIm + fvc::grad(GIm));
+        AReCoulomb.write();
+        AImCoulomb.write();
+    }
+

@@ -1,6 +1,8 @@
 
-    // Get reference to sigmaV pointer
+    // Get reference to sigmaV/sigmaI pointer
     volScalarField& sigmaV = *sigmaVPtr;
+    volScalarField& sigmaIc = *sigmaIcPtr;
+    volScalarField& sigmaIn = *sigmaInPtr;
 
     dimensionedScalar rSigmaVavg = 1.0/average(sigmaV);
 
@@ -43,6 +45,7 @@
     (
         "scaleV",
 //         rSigmaVavg * pow(average(mesh.V()),-3)
+//         rSigmaVavg * pow(sum(mesh.V()),-3)
         rSigmaVavg
     );
 
@@ -72,7 +75,7 @@
             label faceI = cnFaces[facei];
 
             // Eliminate upper/lower coeffs based on constraint
-            // Note: This will keep SYMMETRIC matrices and it will
+            // NOTE: This will keep SYMMETRIC matrices and it will
             //       also keep their diagonal dominance
             scalar VReEqnUf = VReEqn.upper()[faceI];
             VReEqn.diag()[own[faceI]] += VReEqnUf;

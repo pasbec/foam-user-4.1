@@ -22,7 +22,7 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    newDirectionMixedFvPatchField
+    directionMixedMixedFvPatchField
 
 Description
     Doubly mixed fixed value-fixed gradient boundary condition
@@ -32,7 +32,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "newDirectionMixedFvPatchField.H"
+#include "directionMixedMixedFvPatchField.H"
 #include "transformField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,13 +43,13 @@ namespace Foam
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void newDirectionMixedFvPatchField<Type>::checkNHat()
+void directionMixedMixedFvPatchField<Type>::checkNHat()
 {
     scalarField magNHat(Foam::mag(nHat_));
 
     if (min(magNHat) < SMALL)
     {
-        FatalErrorIn("void newDirectionMixedFvPatchField<Type>::checkNHat()")
+        FatalErrorIn("void directionMixedMixedFvPatchField<Type>::checkNHat()")
             << "Incorrectly defined normal direction.  mag = "
             << min(magNHat)
             << abort(FatalError);
@@ -61,7 +61,7 @@ void newDirectionMixedFvPatchField<Type>::checkNHat()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-newDirectionMixedFvPatchField<Type>::newDirectionMixedFvPatchField
+directionMixedMixedFvPatchField<Type>::directionMixedMixedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -77,9 +77,9 @@ newDirectionMixedFvPatchField<Type>::newDirectionMixedFvPatchField
 
 
 template<class Type>
-newDirectionMixedFvPatchField<Type>::newDirectionMixedFvPatchField
+directionMixedMixedFvPatchField<Type>::directionMixedMixedFvPatchField
 (
-    const newDirectionMixedFvPatchField<Type>& ptf,
+    const directionMixedMixedFvPatchField<Type>& ptf,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -97,7 +97,7 @@ newDirectionMixedFvPatchField<Type>::newDirectionMixedFvPatchField
 
 
 template<class Type>
-newDirectionMixedFvPatchField<Type>::newDirectionMixedFvPatchField
+directionMixedMixedFvPatchField<Type>::directionMixedMixedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -117,9 +117,9 @@ newDirectionMixedFvPatchField<Type>::newDirectionMixedFvPatchField
 
 
 template<class Type>
-newDirectionMixedFvPatchField<Type>::newDirectionMixedFvPatchField
+directionMixedMixedFvPatchField<Type>::directionMixedMixedFvPatchField
 (
-    const newDirectionMixedFvPatchField<Type>& ptf,
+    const directionMixedMixedFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
 )
 :
@@ -138,7 +138,7 @@ newDirectionMixedFvPatchField<Type>::newDirectionMixedFvPatchField
 
 // Map from self
 template<class Type>
-void newDirectionMixedFvPatchField<Type>::autoMap
+void directionMixedMixedFvPatchField<Type>::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -154,7 +154,7 @@ void newDirectionMixedFvPatchField<Type>::autoMap
 
 // Reverse-map the given fvPatchField onto this fvPatchField
 template<class Type>
-void newDirectionMixedFvPatchField<Type>::rmap
+void directionMixedMixedFvPatchField<Type>::rmap
 (
     const fvPatchField<Type>& ptf,
     const labelList& addr
@@ -162,8 +162,8 @@ void newDirectionMixedFvPatchField<Type>::rmap
 {
     fvPatchField<Type>::rmap(ptf, addr);
 
-    const newDirectionMixedFvPatchField<Type>& dmptf =
-        refCast<const newDirectionMixedFvPatchField<Type> >(ptf);
+    const directionMixedMixedFvPatchField<Type>& dmptf =
+        refCast<const directionMixedMixedFvPatchField<Type> >(ptf);
 
     refValue_.rmap(dmptf.refValue_, addr);
     refGrad_.rmap(dmptf.refGrad_, addr);
@@ -175,7 +175,7 @@ void newDirectionMixedFvPatchField<Type>::rmap
 
 // Return gradient at boundary
 template<class Type>
-tmp<Field<Type> > newDirectionMixedFvPatchField<Type>::snGrad() const
+tmp<Field<Type> > directionMixedMixedFvPatchField<Type>::snGrad() const
 {
     Field<Type> pif = this->patchInternalField();
 
@@ -197,7 +197,7 @@ tmp<Field<Type> > newDirectionMixedFvPatchField<Type>::snGrad() const
 
 // Evaluate the field on the patch
 template<class Type>
-void newDirectionMixedFvPatchField<Type>::evaluate()
+void directionMixedMixedFvPatchField<Type>::evaluate()
 {
     if (!this->updated())
     {
@@ -227,7 +227,7 @@ void newDirectionMixedFvPatchField<Type>::evaluate()
 //- Return the matrix diagonal coefficients corresponding to the
 //  evaluation of the value of this patchField
 template<class Type>
-tmp<Field<Type> > newDirectionMixedFvPatchField<Type>::valueInternalCoeffs
+tmp<Field<Type> > directionMixedMixedFvPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>&
 ) const
@@ -244,7 +244,7 @@ tmp<Field<Type> > newDirectionMixedFvPatchField<Type>::valueInternalCoeffs
 //- Return the matrix source coefficients corresponding to the
 //  evaluation of the value of this patchField
 template<class Type>
-tmp<Field<Type> > newDirectionMixedFvPatchField<Type>::valueBoundaryCoeffs
+tmp<Field<Type> > directionMixedMixedFvPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>&
 ) const
@@ -273,7 +273,7 @@ tmp<Field<Type> > newDirectionMixedFvPatchField<Type>::valueBoundaryCoeffs
 //  evaluation of the gradient of this patchField
 template<class Type>
 tmp<Field<Type> >
-newDirectionMixedFvPatchField<Type>::gradientInternalCoeffs() const
+directionMixedMixedFvPatchField<Type>::gradientInternalCoeffs() const
 {
     const scalarField& deltaCoeffs = this->patch().deltaCoeffs();
     const Field<Type> one(this->size(), pTraits<Type>::one);
@@ -288,7 +288,7 @@ newDirectionMixedFvPatchField<Type>::gradientInternalCoeffs() const
 //  evaluation of the gradient of this patchField
 template<class Type>
 tmp<Field<Type> >
-newDirectionMixedFvPatchField<Type>::gradientBoundaryCoeffs() const
+directionMixedMixedFvPatchField<Type>::gradientBoundaryCoeffs() const
 {
     const scalarField& deltaCoeffs = this->patch().deltaCoeffs();
     const tensorField nn= nHat_*nHat_;
@@ -308,7 +308,7 @@ newDirectionMixedFvPatchField<Type>::gradientBoundaryCoeffs() const
 
 // Write
 template<class Type>
-void newDirectionMixedFvPatchField<Type>::write(Ostream& os) const
+void directionMixedMixedFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     refValue_.writeEntry("refValue", os);

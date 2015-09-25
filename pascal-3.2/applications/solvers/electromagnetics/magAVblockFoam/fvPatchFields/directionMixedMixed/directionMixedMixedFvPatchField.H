@@ -22,7 +22,7 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    newDirectionMixedFvPatchField
+    directionMixedMixedFvPatchField
 
 Description
     Doubly mixed fixed value-fixed gradient boundary condition
@@ -31,12 +31,12 @@ Description
     valueFraction coefficients in the normal and tangential direction.
 
 SourceFiles
-    newDirectionMixedFvPatchField.C
+    directionMixedMixedFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef newDirectionMixedFvPatchField_H
-#define newDirectionMixedFvPatchField_H
+#ifndef directionMixedMixedFvPatchField_H
+#define directionMixedMixedFvPatchField_H
 
 #include "fvPatchField.H"
 
@@ -50,7 +50,7 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class newDirectionMixedFvPatchField
+class directionMixedMixedFvPatchField
 :
     public fvPatchField<Type>
 {
@@ -81,31 +81,31 @@ class newDirectionMixedFvPatchField
 public:
 
     //- Runtime type information
-    TypeName("newDirectionMixed");
+    TypeName("directionMixedMixed");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        newDirectionMixedFvPatchField
+        directionMixedMixedFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        newDirectionMixedFvPatchField
+        directionMixedMixedFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given newDirectionMixedFvPatchField onto
+        //- Construct by mapping given directionMixedMixedFvPatchField onto
         //  a new patch
-        newDirectionMixedFvPatchField
+        directionMixedMixedFvPatchField
         (
-            const newDirectionMixedFvPatchField<Type>&,
+            const directionMixedMixedFvPatchField<Type>&,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
@@ -116,14 +116,14 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new newDirectionMixedFvPatchField<Type>(*this)
+                new directionMixedMixedFvPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        newDirectionMixedFvPatchField
+        directionMixedMixedFvPatchField
         (
-            const newDirectionMixedFvPatchField<Type>&,
+            const directionMixedMixedFvPatchField<Type>&,
             const DimensionedField<Type, volMesh>&
         );
 
@@ -135,7 +135,7 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new newDirectionMixedFvPatchField<Type>(*this, iF)
+                new directionMixedMixedFvPatchField<Type>(*this, iF)
             );
         }
 
@@ -287,10 +287,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "newDirectionMixedFvPatchField.C"
+#   include "directionMixedMixedFvPatchField.C"
 #else
 #   ifdef xlC
-#   pragma implementation("newDirectionMixedFvPatchField.C")
+#   pragma implementation("directionMixedMixedFvPatchField.C")
 #   endif
 #endif
 

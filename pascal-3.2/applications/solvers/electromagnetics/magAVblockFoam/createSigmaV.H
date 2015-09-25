@@ -2,8 +2,7 @@
     // Create pointer for modified sigma
     volScalarField* sigmaVPtr = NULL;
 
-    // Calculate modified sigma if required
-//     if (requireV)
+    // Calculate modified sigma
     {
         // Create artificial electrical conductivity. This
         // is done in order to solve the V equation for the
@@ -27,7 +26,7 @@
         volScalarField& sigmaV = *sigmaVPtr;
 
         // Assemble equation for modified sigma
-        // Note: Even though sigmaV has zero-gradient
+        // NOTE: Even though sigmaV has zero-gradient
         //       bc, we will NOT set a reference as we
         //       will copy and set all real sigma values
         //       from the conducting region

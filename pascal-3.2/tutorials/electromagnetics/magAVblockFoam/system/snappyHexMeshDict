@@ -80,7 +80,7 @@ castellatedMeshControls
     // Number of buffer layers between different levels.
     // 1 means normal 2:1 refinement restriction, larger means slower
     // refinement.
-    nCellsBetweenLevels 2;
+    nCellsBetweenLevels 3;
 
     // Specifies a level for any cell intersected by its edges.
     // This is a featureEdgeMesh, read from constant/triSurface.
@@ -180,7 +180,7 @@ castellatedMeshControls
 //             levels ((1e-15 3));
 
             mode distance;
-            levels ((0.01 2) (0.035 1));
+            levels ((0.015 2) (0.04 1));
         }
 
         geometry_coil1
@@ -189,7 +189,7 @@ castellatedMeshControls
 //             levels ((1e-15 3));
 
             mode distance;
-            levels ((0.01 2) (0.03 1));
+            levels ((0.015 2) (0.04 1));
         }
 
         geometry_coil2
@@ -198,7 +198,7 @@ castellatedMeshControls
 //             levels ((1e-15 3));
 
             mode distance;
-            levels ((0.01 2) (0.03 1));
+            levels ((0.015 2) (0.04 1));
         }
     }
 

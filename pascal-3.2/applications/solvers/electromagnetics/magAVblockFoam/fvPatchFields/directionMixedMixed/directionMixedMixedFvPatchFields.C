@@ -21,9 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    directionMixedFvPatchField
-
 Description
     Doubly mixed fixed value-fixed gradient boundary condition
     separated into a normal and a tangential component given a
@@ -32,36 +29,21 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directionMixedFvPatchFieldsFwd_H
-#define directionMixedFvPatchFieldsFwd_H
-
-#include "fieldTypes.H"
+#include "directionMixedMixedFvPatchFields.H"
+#include "addToRunTimeSelectionTable.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type> class newDirectionMixedFvPatchField;
-
-typedef newDirectionMixedFvPatchField<scalar>
-newDirectionMixedFvPatchScalarField;
-
-typedef newDirectionMixedFvPatchField<vector>
-newDirectionMixedFvPatchVectorField;
-
-typedef newDirectionMixedFvPatchField<tensor>
-newDirectionMixedFvPatchTensorField;
-
+makePatchFields(directionMixedMixed);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

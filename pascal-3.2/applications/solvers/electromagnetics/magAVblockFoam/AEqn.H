@@ -191,7 +191,7 @@
             scalar wSnz = SnzMag[faceI];
 
             // Eliminate upper/lower coeffs based on constraint
-            // Note: This will keep SYMMETRIC matrices and it will
+            // NOTE: This will keep SYMMETRIC matrices and it will
             //       also sligthly improve their diagonal dominance
             scalar wSnARexEqnUf = wSnx * ARexEqn.upper()[faceI];
             ARexEqn.diag()[own[faceI]] -= wSnARexEqnUf * wOwn;

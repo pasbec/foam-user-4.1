@@ -22,9 +22,9 @@ boundaryField
 {
     infinity
     {
-        type            zeroGradient;
-//         type            fixedValue;
-//         value           uniform 0;
+//         type            zeroGradient;
+        type            fixedValue;
+        value           uniform 0;
     }
     "procBoundary.*"
     {

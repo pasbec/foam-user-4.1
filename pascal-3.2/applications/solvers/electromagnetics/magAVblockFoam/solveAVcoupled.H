@@ -3,17 +3,26 @@
         // Finish assembling of V
         {
             // Reference settings
+            // TODO: Automatically search refcell in
+            //       conducting region
             label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
             scalar refValue = 0.0;
 
-            VReEqn.setReference(refCell, refValue);
-            VImEqn.setReference(refCell, refValue);
+            // Force reference values for V-matrices in conducting
+            // region.
+            VReEqn.source()[refCell] +=  VReEqn.diag()[refCell]*refValue;
+            VReEqn.diag()[refCell] +=  VReEqn.diag()[refCell];
+            VImEqn.source()[refCell] +=  VImEqn.diag()[refCell]*refValue;
+            VImEqn.diag()[refCell] +=  VImEqn.diag()[refCell];
 
-            // TEST
             // Remove non-conducting cells from solution
-            scalarField nCellsV(nCells.size(), 0.0);
-            VReEqn.setValues(nCells, nCellsV);
-            VImEqn.setValues(nCells, nCellsV);
+            // TODO: In how far will this change upper/lower of
+            // cells in contact with non-conducting region?
+            // NOTE: The usage of setValues does not work
+            //       correctly with block-matrices
+//             scalarField nCellsV(nCells.size(), 0.0);
+//             VReEqn.setValues(nCells, nCellsV);
+//             VImEqn.setValues(nCells, nCellsV);
         }
 
         // Prepare block system
@@ -90,9 +99,8 @@
                     label faceI = cnFaces[facei];
 
                     // Eliminate upper/lower coeffs based on constraint
-                    // Note: This will keep SYMMETRIC matrices and it will
+                    // NOTE: This will keep SYMMETRIC matrices and it will
                     //       also sligthly improve their diagonal dominance
-                    // TODO: Is the current implementation really correct?
                     {
                         // Real part
                         vector cReUf = diag(SnCmptMag[faceI] * VReInAReU[faceI]) & vector::one;
@@ -113,6 +121,12 @@
                         VImInAImL[faceI] -= cImLf;
                     }
                 }
+
+                // Remove coeffs for non-conducting cells
+                // TODO: In how far will this change upper/lower of
+                // cells in contact with non-conducting region?
+                VReInARe *= sigmaIc;
+                VImInAIm *= sigmaIc;
             }
 
             // Insert coupling of V in A
@@ -161,9 +175,8 @@
                     label faceI = cnFaces[facei];
 
                     // Eliminate upper/lower coeffs based on constraint
-                    // Note: This will keep SYMMETRIC matrices and it will
+                    // NOTE: This will keep SYMMETRIC matrices and it will
                     //       also sligthly improve their diagonal dominance
-                    // TODO: Is the current implementation really correct?
                     {
                         // Real part
                         vector cReUf = diag(SnCmptMag[faceI] * AImInVReU[faceI]) & vector::one;
@@ -184,8 +197,15 @@
                         AReInVImL[faceI] -= cImLf;
                     }
                 }
+
+                // Remove coeffs for non-conducting cells
+                // TODO: In how far will this change upper/lower of
+                // cells in contact with non-conducting region?
+                AImInVRe *= sigmaIc;
+                AReInVIm *= sigmaIc;
             }
 
+            // Insert coupling of A in V
             AVEqn.insertBlockCoupling(3, 4, AImInVRe, false);
             AVEqn.insertBlockCoupling(7, 0, AReInVIm, false);
         }
@@ -229,4 +249,80 @@
 
         VRe.correctBoundaryConditions();
         VIm.correctBoundaryConditions();
+
+        // TODO: Remove after debug
+        {
+            vector8Field AVResIn = AVEqn.residual(AV.internalField());
+
+            volVectorField AReRes
+            (
+                IOobject
+                (
+                    "AReRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+                fixedValueFvPatchField<vector>::typeName
+            );
+            volVectorField AImRes
+            (
+                IOobject
+                (
+                    "AImRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+                fixedValueFvPatchField<vector>::typeName
+            );
+            volScalarField VReRes
+            (
+                IOobject
+                (
+                    "VReRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
+                fixedValueFvPatchField<scalar>::typeName
+            );
+            volScalarField VImRes
+            (
+                IOobject
+                (
+                    "VImRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
+                fixedValueFvPatchField<scalar>::typeName
+            );
+
+            AReRes.internalField().replace(0, AVResIn.component(0));
+            AReRes.internalField().replace(1, AVResIn.component(1));
+            AReRes.internalField().replace(2, AVResIn.component(2));
+            AImRes.internalField().replace(0, AVResIn.component(4));
+            AImRes.internalField().replace(1, AVResIn.component(5));
+            AImRes.internalField().replace(2, AVResIn.component(6));
+            VReRes.internalField().replace(0, AVResIn.component(3));
+            VImRes.internalField().replace(0, AVResIn.component(7));
+
+            AReRes.write();
+            AImRes.write();
+            VReRes.write();
+            VImRes.write();
+        }
     }

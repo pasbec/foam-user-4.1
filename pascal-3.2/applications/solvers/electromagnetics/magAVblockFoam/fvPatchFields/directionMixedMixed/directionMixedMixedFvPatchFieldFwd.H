@@ -22,7 +22,7 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    newDirectionMixedFvPatchFields
+    directionMixedFvPatchField
 
 Description
     Doubly mixed fixed value-fixed gradient boundary condition
@@ -30,15 +30,11 @@ Description
     direction vector.  The mixture is controlled by two separate
     valueFraction cuefficients in the normal and tangential direction.
 
-SourceFiles
-    newDirectionMixedFvPatchFields.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef newDirectionMixedFvPatchFields_H
-#define newDirectionMixedFvPatchFields_H
+#ifndef directionMixedFvPatchFieldsFwd_H
+#define directionMixedFvPatchFieldsFwd_H
 
-#include "newDirectionMixedFvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,7 +44,17 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeFieldTypedefs(newDirectionMixed)
+template<class Type> class directionMixedMixedFvPatchField;
+
+typedef directionMixedMixedFvPatchField<scalar>
+directionMixedMixedFvPatchScalarField;
+
+typedef directionMixedMixedFvPatchField<vector>
+directionMixedMixedFvPatchVectorField;
+
+typedef directionMixedMixedFvPatchField<tensor>
+directionMixedMixedFvPatchTensorField;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
