@@ -1,5 +1,5 @@
 fvPatchFields/directionMixedMixed/directionMixedMixedFvPatchFields.C
-fvPatchFields/directionMixedMixed/patchDirectionMixedMixedFvPatchFields.C
+fvPatchFields/patchDirectionMixedMixed/patchDirectionMixedMixedFvPatchFields.C
 
 magAVblockFoam.C
 
