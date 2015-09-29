@@ -92,6 +92,40 @@
         mesh
     );
 
+    // Magnetic vector potential divergence (real part)
+    Info << "Create field AReDiv" << endl;
+    volScalarField AReDiv
+    (
+        IOobject
+        (
+            "AReDiv",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensioned<scalar>(word(), ARe.dimensions()/dimLength, pTraits<scalar>::zero),
+        calculatedFvPatchField<scalar>::typeName
+    );
+
+    // Magnetic vector potential divergence (imaginary part)
+    Info << "Create field AImDiv" << endl;
+    volScalarField AImDiv
+    (
+        IOobject
+        (
+            "AImDiv",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensioned<scalar>(word(), ARe.dimensions()/dimLength, pTraits<scalar>::zero),
+        calculatedFvPatchField<scalar>::typeName
+    );
+
     // Magnetic vector potential (complex)
     Info << "Create field A" << nl << endl;
     volVector6Field A
@@ -235,6 +269,40 @@
             IOobject::AUTO_WRITE
         ),
         mesh
+    );
+
+    // Gauge potential gradient (real part)
+    Info << "Create field GReGrad" << endl;
+    volVectorField GReGrad
+    (
+        IOobject
+        (
+            "GReGrad",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedVector(word(), GRe.dimensions()/dimLength, pTraits<vector>::zero),
+        calculatedFvPatchField<vector>::typeName
+    );
+
+    // Gauge potential gradient (imaginary part)
+    Info << "Create field GImGrad " << nl << endl;
+    volVectorField GImGrad
+    (
+        IOobject
+        (
+            "GImGrad",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedVector(word(), GIm.dimensions()/dimLength, pTraits<vector>::zero),
+        calculatedFvPatchField<vector>::typeName
     );
 
 

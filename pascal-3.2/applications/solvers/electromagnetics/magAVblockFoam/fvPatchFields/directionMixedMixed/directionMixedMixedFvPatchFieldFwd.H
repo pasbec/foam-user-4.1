@@ -27,7 +27,7 @@ Class
 Description
     Doubly mixed fixed value-fixed gradient boundary condition
     separated into a normal and a tangential component given a
-    direction vector.  The mixture is controlled by two separate
+    direction vector. The mixture is controlled by two separate
     valueFraction cuefficients in the normal and tangential direction.
 
 \*---------------------------------------------------------------------------*/

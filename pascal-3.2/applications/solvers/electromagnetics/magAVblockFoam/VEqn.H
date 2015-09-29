@@ -17,8 +17,14 @@
         fvc::interpolate(sigmaV)
     );
 
-    // Enforce a zero normal gradient for
-    // sigmaV (d(sigmaV)/dn=0)
+    // Enforce a zero normal gradient for sigmaV
+    // (dsigmaV/dn=0) at the conductor interface as an
+    // inner constraint:
+    //
+    // dsigmaV/dn=0: sigmaVf - sigmaV_P / |Pf| = 0
+    //
+    // dsigmaV/dn=0: V_P = V_f
+    //
     {
         // Mesh cell-face addressing
         const unallocLabelList& own = mesh.owner();
@@ -38,30 +44,32 @@
         }
     }
 
-    // Create scale factor for V-equation in relation
-    // to A-equation based on dimensional relation
-    // [A] <=> [grad(V)]
-    dimensionedScalar scaleV
-    (
-        "scaleV",
-        pow(average(mesh.V()), scalar(1.0/3.0))
-    );
-
     // Assemble V-equations
     fvScalarMatrix VReEqn
     (
-        scaleV * fvm::laplacian(sSigmaV, VRe, "laplacian(sigmaV,VRe)")
-//    - scaleV * omega * fvc::div(sigmaV * AIm)
+        fvm::laplacian(sSigmaV, VRe, "laplacian(sigmaV,VRe)")
+//    - omega * fvc::div(sigmaV * AIm)
     );
     fvScalarMatrix VImEqn
     (
-        scaleV * fvm::laplacian(sSigmaV, VIm, "laplacian(sigmaV,VIm)")
-//    + scaleV * omega * fvc::div(sigmaV * ARe)
+        fvm::laplacian(sSigmaV, VIm, "laplacian(sigmaV,VIm)")
+//    + omega * fvc::div(sigmaV * ARe)
     );
 
     // Modify fvm::laplacian() for VRe and VIm to enforce
     // zero normal gradient (dVRe/dn=0) and (dVIm/dn=0) at
-    // the conductor interface as an inner constraint
+    // the conductor interface as an inner constraint:
+    //
+    // dV/dn=0: V_N - V_P / |d| = V_f = 0
+    //
+    // dV/dn=0: V_P = V_N
+    //          V_N = V_P
+    //
+    // dV/dn=0: diag_P = diag_P + upper
+    //          diag_N = diag_N + lower
+    //          upper = 0
+    //          lower = 0
+    //
     {
         // Mesh cell-face addressing
         const unallocLabelList& own = mesh.owner();

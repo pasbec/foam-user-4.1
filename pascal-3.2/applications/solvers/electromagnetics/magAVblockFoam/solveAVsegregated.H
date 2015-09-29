@@ -56,7 +56,7 @@
         AIm.replace(0,AImx);
         AIm.replace(1,AImy);
         AIm.replace(2,AImz);
-        
+
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 
@@ -107,40 +107,20 @@
 
     // Solve V
     {
-
-        // Interpolate A to face centers
-        surfaceScalarField sARe
-        (
-            "sARe",
-            fvc::interpolate(ARe) & mesh.Sf()
-        );
-        surfaceScalarField sAIm
-        (
-            "sAIm",
-            fvc::interpolate(AIm) & mesh.Sf()
-        );
-
-        // Enforce enforce zero normal components (ARe*n=0)
-        // and (AIm*n=0) at the conductor interface as an
-        // inner constraint
-        {
-            // Replace face values with zeros
-            forAll (cnFaces, facei)
-            {
-                label faceI = cnFaces[facei];
-                sARe[faceI] = 0.0;
-                sAIm[faceI] = 0.0;
-            }
-        }
-
         // Coupling terms of magnetic vector potential A
         // in equation for electric scalar potential V
         {
-            VReEqn -= scaleV * omega * (fvc::grad(sSigmaV) & AIm);
-            VImEqn += scaleV * omega * (fvc::grad(sSigmaV) & ARe);
 
-            VReEqn -= scaleV * omega * sigmaV * fvc::div(sAIm);
-            VImEqn += scaleV * omega * sigmaV * fvc::div(sARe);
+//             VReEqn -= omega * fvc::div(sSigmaV*sAIm);
+//             VImEqn += omega * fvc::div(sSigmaV*sARe);
+
+            VReEqn -= omega * (fvc::grad(sSigmaV) & AIm);
+            VImEqn += omega * (fvc::grad(sSigmaV) & ARe);
+
+//             VReEqn -= omega * sigmaV * fvc::div(sAIm);
+//             VImEqn += omega * sigmaV * fvc::div(sARe);
+            VReEqn -= omega * sigmaV * AImDiv;
+            VImEqn += omega * sigmaV * AReDiv;
 
             // Remove all source values from non-conducting cells
             VReEqn.source() *= sigmaIc;

@@ -148,7 +148,15 @@
 
     // Modify fvm::laplacian() for all components of ARe and AIm to
     // enforce zero normal components (ARe*n=0) and (AIm*n=0) at the
-    // conductor interface as an inner constraint
+    // conductor interface as an inner constraint:
+    //
+    // A*Sf=Af=0: Af_P = - w/(1-w) * Af_N
+    //            Af_N = - (1-w)/w * Af_P
+    //
+    // A*Sf=Af=0: diag_P = TODO
+    //            diag_N = TODO
+    //            upper = 0
+    //            lower = 0
     {
         // Mesh cell-face addressing
         const unallocLabelList& own = mesh.owner();
@@ -197,7 +205,7 @@
             AReyEqn.diag()[own[faceI]] -= wSnAReyEqnUf * wOwn;
             AReyEqn.diag()[nei[faceI]] -= wSnAReyEqnUf * wNei;
             AReyEqn.upper()[faceI] -= wSnAReyEqnUf;
-            scalar wSnARezEqnUf = wSnz * AReyEqn.upper()[faceI];
+            scalar wSnARezEqnUf = wSnz * ARezEqn.upper()[faceI];
             ARezEqn.diag()[own[faceI]] -= wSnARezEqnUf * wOwn;
             ARezEqn.diag()[nei[faceI]] -= wSnARezEqnUf * wNei;
             ARezEqn.upper()[faceI] -= wSnARezEqnUf;
@@ -209,7 +217,7 @@
             AImyEqn.diag()[own[faceI]] -= wSnAImyEqnUf * wOwn;
             AImyEqn.diag()[nei[faceI]] -= wSnAImyEqnUf * wNei;
             AImyEqn.upper()[faceI] -= wSnAImyEqnUf;
-            scalar wSnAImzEqnUf = wSnz * AImyEqn.upper()[faceI];
+            scalar wSnAImzEqnUf = wSnz * AImzEqn.upper()[faceI];
             AImzEqn.diag()[own[faceI]] -= wSnAImzEqnUf * wOwn;
             AImzEqn.diag()[nei[faceI]] -= wSnAImzEqnUf * wNei;
             AImzEqn.upper()[faceI] -= wSnAImzEqnUf;
@@ -224,16 +232,18 @@
 
     // Add explicit terms which are necessary if div(A) is NOT zero
     {
-        volScalarField AReDiv
-        (
-            "AReDiv",
-            fvc::div(ARe)
-        );
-        volScalarField AImDiv
-        (
-            "AImDiv",
-            fvc::div(AIm)
-        );
+//         volScalarField AReDiv
+//         (
+//             "AReDiv",
+//             fvc::div(ARe)
+//         );
+//         volScalarField AImDiv
+//         (
+//             "AImDiv",
+//             fvc::div(AIm)
+//         );
+        AReDiv == fvc::div(ARe);
+        AImDiv == fvc::div(AIm);
 
         volVectorField AReDivGrad
         (

@@ -1,7 +1,21 @@
 
     {
+        // Create scale factor for V-equation compared
+        // to A-equation based on dimensional relation
+        // dim[A] <=> dim[grad(V)]
+        dimensionedScalar scaleV
+        (
+            "scaleV",
+            pow(average(mesh.V()), scalar(1.0/3.0))
+        );
+
         // Finish assembling of V
         {
+
+            // Multiply V-equations with scale factor
+            VReEqn *= scaleV;
+            VImEqn *= scaleV;
+
             // Reference settings
             // TODO: Automatically search refcell in
             //       conducting region
@@ -235,7 +249,7 @@
         AIm.replace(0,AImx);
         AIm.replace(1,AImy);
         AIm.replace(2,AImz);
-        
+
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 

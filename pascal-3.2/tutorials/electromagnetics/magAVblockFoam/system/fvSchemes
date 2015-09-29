@@ -103,6 +103,9 @@ interpolationSchemes
 
     interpolate(VRe)                  linear;
     interpolate(VIm)                  linear;
+
+    interpolate(GRe)                  linear;
+    interpolate(GIm)                  linear;
 }
 
 // ************************************************************************* //
