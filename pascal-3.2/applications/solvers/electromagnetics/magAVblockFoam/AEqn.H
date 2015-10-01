@@ -230,8 +230,79 @@
 
 
 
+//     // Add explicit terms from gauge G
+//     {
+//         volScalarField GReGradDiv
+//         (
+//             "GReGradDiv",
+//             fvc::div(GReGrad)
+//         );
+//         volScalarField GImGradDiv
+//         (
+//             "GImGradDiv",
+//             fvc::div(GImGrad)
+//         );
+//
+//         volVectorField GReGradDivGrad
+//         (
+//             "GReGradDivGrad",
+//             fvc::grad(AReDiv)
+//         );
+//         volVectorField GImGradDivGrad
+//         (
+//             "GImGradDivGrad",
+//             fvc::grad(AImDiv)
+//         );
+//
+//         ARexEqn += rMu0 * GReGradDivGrad.component(0);
+//         AReyEqn += rMu0 * GReGradDivGrad.component(1);
+//         ARezEqn += rMu0 * GReGradDivGrad.component(2);
+//         AImxEqn += rMu0 * GImGradDivGrad.component(0);
+//         AImyEqn += rMu0 * GImGradDivGrad.component(1);
+//         AImzEqn += rMu0 * GImGradDivGrad.component(2);
+//
+//         // TODO: Remove after debug
+//         GReGradDiv.write();
+//         GImGradDiv.write();
+//         GReGradDivGrad.write();
+//         GImGradDivGrad.write();
+//     }
+
+
+
     // Add explicit terms which are necessary if div(A) is NOT zero
     {
+        // Interpolate A to face centers
+        surfaceScalarField sARe
+        (
+            "sARe",
+            fvc::interpolate(ARe) & mesh.Sf()
+        );
+        surfaceScalarField sAIm
+        (
+            "sAIm",
+            fvc::interpolate(AIm) & mesh.Sf()
+        );
+
+        // Enforce enforce zero normal components (ARe*n=0)
+        // and (AIm*n=0) at the conductor interface as an
+        // inner constraint
+        {
+            // Replace face values with zeros
+            forAll (cnFaces, facei)
+            {
+                label faceI = cnFaces[facei];
+                sARe[faceI] = 0.0;
+                sAIm[faceI] = 0.0;
+            }
+        }
+
+        AReDiv == fvc::div(sARe);
+        AImDiv == fvc::div(sAIm);
+
+//         AReDiv == fvc::div(ARe);
+//         AImDiv == fvc::div(AIm);
+
 //         volScalarField AReDiv
 //         (
 //             "AReDiv",
@@ -242,8 +313,6 @@
 //             "AImDiv",
 //             fvc::div(AIm)
 //         );
-        AReDiv == fvc::div(ARe);
-        AImDiv == fvc::div(AIm);
 
         volVectorField AReDivGrad
         (

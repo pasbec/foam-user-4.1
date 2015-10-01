@@ -150,40 +150,100 @@
 
 
 
-    // Gauge fixing: Solve for gauge fixing potential G
-    {
-        // Assemble G-equations
-        fvScalarMatrix GReEqn
-        (
-            fvm::laplacian(GRe)
-          + fvc::div(ARe)
-        );
-        fvScalarMatrix GImEqn
-        (
-            fvm::laplacian(GIm)
-          + fvc::div(AIm)
-        );
+//     // Gauge fixing: Solve for gauge fixing potential G
+//     {
+//         // Interpolate A to face centers
+//         surfaceScalarField sARe
+//         (
+//             "sARe",
+//             fvc::interpolate(ARe) & mesh.Sf()
+//         );
+//         surfaceScalarField sAIm
+//         (
+//             "sAIm",
+//             fvc::interpolate(AIm) & mesh.Sf()
+//         );
+//
+//         // Enforce enforce zero normal components (ARe*n=0)
+//         // and (AIm*n=0) at the conductor interface as an
+//         // inner constraint
+//         {
+//             // Replace face values with zeros
+//             forAll (cnFaces, facei)
+//             {
+//                 label faceI = cnFaces[facei];
+//                 sARe[faceI] = 0.0;
+//                 sAIm[faceI] = 0.0;
+//             }
+//         }
+//
+//         // Assemble G-equations
+//         fvScalarMatrix GReEqn
+//         (
+//             fvm::laplacian(GRe)
+//           + fvc::div(sARe)
+//         );
+//         fvScalarMatrix GImEqn
+//         (
+//             fvm::laplacian(GIm)
+//           + fvc::div(sAIm)
+//         );
+//
+//         // Reference settings
+//         label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+//         scalar refValue = 0.0;
+//
+//         GReEqn.setReference(refCell, refValue);
+//         GImEqn.setReference(refCell, refValue);
+//
+//         // Solve G
+//         GReEqn.solve();
+//         GImEqn.solve();
+//
+//         GRe.correctBoundaryConditions();
+//         GIm.correctBoundaryConditions();
+//
+//         // TODO: Remove after debug
+//         volVectorField AReCoulomb("AReCoulomb", ARe + fvc::grad(GRe));
+//         volVectorField AImCoulomb("AImCoulomb", AIm + fvc::grad(GIm));
+//         AReCoulomb.write();
+//         AImCoulomb.write();
+//     }
 
-        // Reference settings
-        label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
-        scalar refValue = 0.0;
-
-        GReEqn.setReference(refCell, refValue);
-        GImEqn.setReference(refCell, refValue);
-
-        // Solve G
-        GReEqn.solve();
-        GImEqn.solve();
-
-        GRe.correctBoundaryConditions();
-        GIm.correctBoundaryConditions();
-
-        // TODO: Remove after debug
-        volVectorField AReCoulomb("AReCoulomb", ARe + fvc::grad(GRe));
-        volVectorField AImCoulomb("AImCoulomb", AIm + fvc::grad(GIm));
-        AReCoulomb.write();
-        AImCoulomb.write();
-    }
+//     // Gauge fixing: Solve for gauge fixing potential G
+//     {
+//         // Assemble G-equations
+//         fvScalarMatrix GReEqn
+//         (
+//             fvm::laplacian(GRe)
+//           + fvc::div(ARe)
+//         );
+//         fvScalarMatrix GImEqn
+//         (
+//             fvm::laplacian(GIm)
+//           + fvc::div(AIm)
+//         );
+//
+//         // Reference settings
+//         label refCell = mesh.findCell(point(0.00, 0.00, 0.01));
+//         scalar refValue = 0.0;
+//
+//         GReEqn.setReference(refCell, refValue);
+//         GImEqn.setReference(refCell, refValue);
+//
+//         // Solve G
+//         GReEqn.solve();
+//         GImEqn.solve();
+//
+//         GRe.correctBoundaryConditions();
+//         GIm.correctBoundaryConditions();
+//
+//         // TODO: Remove after debug
+//         volVectorField AReCoulomb("AReCoulomb", ARe + fvc::grad(GRe));
+//         volVectorField AImCoulomb("AImCoulomb", AIm + fvc::grad(GIm));
+//         AReCoulomb.write();
+//         AImCoulomb.write();
+//     }
 
 //     // Gauge fixing: Solve for gauge fixing potential G
 //     {
@@ -219,6 +279,7 @@
 //         AReCoulomb.write();
 //         AImCoulomb.write();
 //     }
+
 //     // Gauge fixing: Solve for gauge fixing potential G
 //     {
 //         // Assemble G-equations
