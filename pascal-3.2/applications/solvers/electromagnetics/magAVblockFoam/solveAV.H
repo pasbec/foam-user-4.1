@@ -44,6 +44,18 @@
 
     // Update corrected gradient of V
     {
+        // Interpolate A to face centers
+        surfaceScalarField sARe
+        (
+            "sARe",
+            fvc::interpolate(ARe) & mesh.Sf()
+        );
+        surfaceScalarField sAIm
+        (
+            "sAIm",
+            fvc::interpolate(AIm) & mesh.Sf()
+        );
+
         // Interpolate V to face centers
         surfaceScalarField sVRe
         (
@@ -56,26 +68,63 @@
             fvc::interpolate(VIm)
         );
 
-        // Enforce zero normal gradient for
-        // V (dV/dn=0)
+//         // Enforce zero normal gradient for
+//         // V (dV/dn=0)
+//         {
+//             // Mesh cell-face addressing
+//             const unallocLabelList& own = mesh.owner();
+//             const unallocLabelList& nei = mesh.neighbour();
+//
+//             // Replace face values with cell values
+//             // from conducting side
+//             forAll (cnPNfaces, facei)
+//             {
+//                 label faceI = cnPNfaces[facei];
+//                 sVRe[faceI] = VRe[own[faceI]];
+//                 sVIm[faceI] = VIm[own[faceI]];
+//             }
+//             forAll (cnNPfaces, facei)
+//             {
+//                 label faceI = cnNPfaces[facei];
+//                 sVRe[faceI] = VRe[nei[faceI]];
+//                 sVIm[faceI] = VIm[nei[faceI]];
+//             }
+//         }
+
         {
             // Mesh cell-face addressing
             const unallocLabelList& own = mesh.owner();
             const unallocLabelList& nei = mesh.neighbour();
 
-            // Replace face values with cell values
-            // from conducting side
+            // Mesh geometry
+            const vectorField& Cf = mesh.Cf();
+            const vectorField& C = mesh.C();
+            const vectorField& Sf = mesh.Sf();
+            const scalarField& magSf = mesh.magSf();
+
+            // Derived mesh geometry
+            const vectorField Sn = Sf/magSf;
+
             forAll (cnPNfaces, facei)
             {
                 label faceI = cnPNfaces[facei];
-                sVRe[faceI] = VRe[own[faceI]];
-                sVIm[faceI] = VIm[own[faceI]];
+
+                // Calculate face centre/cell centre distance Pf
+                scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
+
+                sVRe[faceI] = VRe[own[faceI]] + Pf/magSf[faceI] * omega.value() * sAIm[faceI];
+                sVIm[faceI] = VIm[own[faceI]] - Pf/magSf[faceI] * omega.value() * sARe[faceI];
             }
+
             forAll (cnNPfaces, facei)
             {
                 label faceI = cnNPfaces[facei];
-                sVRe[faceI] = VRe[nei[faceI]];
-                sVIm[faceI] = VIm[nei[faceI]];
+
+                // Calculate face centre/cell centre distance fN
+                scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
+
+                sVRe[faceI] = VRe[nei[faceI]] - fN/magSf[faceI] * omega.value() * sAIm[faceI];
+                sVIm[faceI] = VIm[nei[faceI]] + fN/magSf[faceI] * omega.value() * sARe[faceI];
             }
         }
 

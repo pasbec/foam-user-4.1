@@ -119,33 +119,60 @@
             fvc::interpolate(AIm) & mesh.Sf()
         );
 
-        // Enforce zero normal components (ARe*n=0)
-        // and (AIm*n=0) at the conductor interface as an
-        // inner constraint
+//         // Enforce zero normal components (ARe*n=0)
+//         // and (AIm*n=0) at the conductor interface as an
+//         // inner constraint
+//         {
+//             // Replace face values with zeros
+//             forAll (cnFaces, facei)
+//             {
+//                 label faceI = cnFaces[facei];
+//                 sARe[faceI] = 0.0;
+//                 sAIm[faceI] = 0.0;
+//             }
+//         }
+
         {
-            // Replace face values with zeros
+            // Mesh cell-face addressing
+            const unallocLabelList& own = mesh.owner();
+            const unallocLabelList& nei = mesh.neighbour();
+
+            // Loop over all faces of conductor interface
             forAll (cnFaces, facei)
             {
                 label faceI = cnFaces[facei];
-                sARe[faceI] = 0.0;
-                sAIm[faceI] = 0.0;
+
+                // Eliminate upper/lower coeffs based on constraint
+                // NOTE: This will keep SYMMETRIC matrices and it will
+                //       also keep their diagonal dominance
+                scalar VReEqnUf = VReEqn.upper()[faceI];
+                VReEqn.diag()[own[faceI]] += VReEqnUf;
+                VReEqn.diag()[nei[faceI]] += VReEqnUf;
+                VReEqn.upper()[faceI] -= VReEqnUf;
+
+                VReEqn.source()[own[faceI]] += -sSigmaV[faceI] * omega.value() * sAIm[faceI];
+                VReEqn.source()[nei[faceI]] -= -sSigmaV[faceI] * omega.value() * sAIm[faceI];
+
+                scalar VImEqnUf = VImEqn.upper()[faceI];
+                VImEqn.diag()[own[faceI]] += VImEqnUf;
+                VImEqn.diag()[nei[faceI]] += VImEqnUf;
+                VImEqn.upper()[faceI] -= VImEqnUf;
+
+                VImEqn.source()[own[faceI]] -= -sSigmaV[faceI] * omega.value() * sARe[faceI];
+                VImEqn.source()[nei[faceI]] += -sSigmaV[faceI] * omega.value() * sARe[faceI];
+
+                // TODO: What about gradient correction?
+                // We have to modifiy the source term, too. But
+                // this depends on the type of correction. Hmm...
             }
         }
 
         // Coupling terms of magnetic vector potential A
         // in equation for electric scalar potential V
         {
-
-//             VReEqn -= omega * fvc::div(sSigmaV*sAIm);
-//             VImEqn += omega * fvc::div(sSigmaV*sARe);
-
+            // Source terms due to variable sigma
             VReEqn -= omega * (fvc::grad(sSigmaV) & AIm);
             VImEqn += omega * (fvc::grad(sSigmaV) & ARe);
-
-            VReEqn -= omega * sigmaV * fvc::div(sAIm);
-            VImEqn += omega * sigmaV * fvc::div(sARe);
-//             VReEqn -= omega * sigmaV * AImDiv;
-//             VImEqn += omega * sigmaV * AReDiv;
 
             // Remove all source values from non-conducting cells
             VReEqn.source() *= sigmaIc;
