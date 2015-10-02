@@ -22,12 +22,12 @@
         // Coupling terms for real/imagninary ARe-AIm
         // dependence of magnetic vector potential
         {
-            AVEqn.insertEquationCoupling(0, 4,  alphaIn);
-            AVEqn.insertEquationCoupling(4, 0, -alphaIn);
-            AVEqn.insertEquationCoupling(1, 5,  alphaIn);
-            AVEqn.insertEquationCoupling(5, 1, -alphaIn);
-            AVEqn.insertEquationCoupling(2, 6,  alphaIn);
-            AVEqn.insertEquationCoupling(6, 2, -alphaIn);
+            AEqn.insertEquationCoupling(0, 3,  alphaIn);
+            AEqn.insertEquationCoupling(3, 0, -alphaIn);
+            AEqn.insertEquationCoupling(1, 4,  alphaIn);
+            AEqn.insertEquationCoupling(4, 1, -alphaIn);
+            AEqn.insertEquationCoupling(2, 5,  alphaIn);
+            AEqn.insertEquationCoupling(5, 2, -alphaIn);
         }
 
         // Solve A
