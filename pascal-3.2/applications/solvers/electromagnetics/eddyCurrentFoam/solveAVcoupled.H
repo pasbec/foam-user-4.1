@@ -126,7 +126,8 @@
                 // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
             }
 
-            // Implicit source terms due to variable sigma (force div(A)=0)
+            // Implicit source terms due to variable sigma
+            // with implied condition: div(A)=0
             AVEqn.insertEquationCoupling(3, 4, -scaleV.value() * indicatorVcIn * gradAlphaIn.component(0));
             AVEqn.insertEquationCoupling(3, 5, -scaleV.value() * indicatorVcIn * gradAlphaIn.component(1));
             AVEqn.insertEquationCoupling(3, 6, -scaleV.value() * indicatorVcIn * gradAlphaIn.component(2));

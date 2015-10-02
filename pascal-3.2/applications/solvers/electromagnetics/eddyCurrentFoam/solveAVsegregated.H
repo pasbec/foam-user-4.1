@@ -134,9 +134,9 @@
             }
 
             // Explicit source terms due to variable sigma
-            // (force div(A)=0)
-            VReEqn -= indicatorVc * omega * (gradAlpha & AIm);
-            VImEqn += indicatorVc * omega * (gradAlpha & ARe);
+            // with implied condition: div(A)=0
+            VReEqn -= indicatorVc * (gradAlpha & AIm);
+            VImEqn += indicatorVc * (gradAlpha & ARe);
         }
 
         // Prepare block system for V
