@@ -215,7 +215,7 @@
             "VReGrad",
             runTime.timeName(),
             mesh,
-            IOobject::READ_IF_PRESENT,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         mesh,
@@ -232,7 +232,7 @@
             "VImGrad",
             runTime.timeName(),
             mesh,
-            IOobject::READ_IF_PRESENT,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         mesh,

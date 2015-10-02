@@ -4,9 +4,19 @@
         // Coupling terms of electric scalar potential V
         // in equation for magnetic vector potential A
         {
-            // Explicit gradient terms of electric scalar potential V
-            AReEqn -= sigma * VReGrad;
-            AImEqn -= sigma * VImGrad;
+            // Get relaxation factor
+            scalar relax = AVmethodDict.lookupOrDefault<scalar>("relax",1.0);
+
+            if (relax < (1.0-SMALL))
+            {
+                // Relaxation of gradient of V
+                VReGrad.relax(relax);
+                VImGrad.relax(relax);
+
+                // Explicit gradient terms of electric scalar potential V
+                AReEqn -= sigma * VReGrad;
+                AImEqn -= sigma * VImGrad;
+            }
         }
 
         // References to internal alpha field
@@ -104,7 +114,7 @@
                 const scalarField& magSf = mesh.magSf();
                 const vectorField Sn = Sf/magSf;
 
-                // ...
+                // Loop over all faces of conductor interface
                 forAll (cnFaces, facei)
                 {
                     label faceI = cnFaces[facei];
@@ -121,20 +131,27 @@
                     scalar cP = omega.value() * sSigmaV[faceI] * magSf[faceI] * wP;
                     scalar cN = omega.value() * sSigmaV[faceI] * magSf[faceI] * wN;
 
-                    VReEqn.source()[own[faceI]] -= cP * (Sn[faceI] & AIm[own[faceI]]);
-                    VReEqn.source()[own[faceI]] -= cN * (Sn[faceI] & AIm[nei[faceI]]);
-                    VReEqn.source()[nei[faceI]] += cP * (Sn[faceI] & AIm[own[faceI]]);
-                    VReEqn.source()[nei[faceI]] += cN * (Sn[faceI] & AIm[nei[faceI]]);
+                    // Write
+                    {
+                        VReEqn.source()[own[faceI]] -= cP * (Sn[faceI] & AIm[own[faceI]]);
+                        VReEqn.source()[own[faceI]] -= cN * (Sn[faceI] & AIm[nei[faceI]]);
+                        VReEqn.source()[nei[faceI]] += cP * (Sn[faceI] & AIm[own[faceI]]);
+                        VReEqn.source()[nei[faceI]] += cN * (Sn[faceI] & AIm[nei[faceI]]);
 
-                    VImEqn.source()[own[faceI]] += cP * (Sn[faceI] & ARe[own[faceI]]);
-                    VImEqn.source()[own[faceI]] += cN * (Sn[faceI] & ARe[nei[faceI]]);
-                    VImEqn.source()[nei[faceI]] -= cP * (Sn[faceI] & ARe[own[faceI]]);
-                    VImEqn.source()[nei[faceI]] -= cN * (Sn[faceI] & ARe[nei[faceI]]);
+                        VImEqn.source()[own[faceI]] += cP * (Sn[faceI] & ARe[own[faceI]]);
+                        VImEqn.source()[own[faceI]] += cN * (Sn[faceI] & ARe[nei[faceI]]);
+                        VImEqn.source()[nei[faceI]] -= cP * (Sn[faceI] & ARe[own[faceI]]);
+                        VImEqn.source()[nei[faceI]] -= cN * (Sn[faceI] & ARe[nei[faceI]]);
+                    }
+
+                    // TODO: What about gradient correction?
+                    // We have to modifiy the source term, too. But
+                    // this depends on the type of correction. Hmm...
                 }
             }
 
             // Explicit source terms due to variable sigma
-            // with implied condition: div(A)=0
+            // in conducting region with implied condition: div(A)=0
             VReEqn -= indicatorVc * (gradAlpha & AIm);
             VImEqn += indicatorVc * (gradAlpha & ARe);
         }

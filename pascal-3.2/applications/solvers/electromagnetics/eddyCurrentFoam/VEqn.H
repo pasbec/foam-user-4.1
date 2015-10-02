@@ -1,8 +1,6 @@
 
-    // Get reference to sigmaV/sigmaI pointer
+    // Get reference to sigmaV pointer
     volScalarField& sigmaV = *sigmaVPtr;
-    volScalarField& indicatorVc = *indicatorVcPtr;
-    volScalarField& indicatorVn = *indicatorVnPtr;
 
     // Interpolate sigma to face centers
     surfaceScalarField sSigmaV
@@ -13,12 +11,7 @@
 
     // Enforce zero normal gradient for sigmaV
     // (dsigmaV/dn=0) at the conductor interface as
-    // inner constraint:
-    //
-    // dsigmaV/dn=0: sigmaVf - sigmaV_P / |Pf| = 0
-    //
-    // dsigmaV/dn=0: V_P = V_f
-    //
+    // inner constrain
     {
         // Mesh cell-face addressing
         const unallocLabelList& own = mesh.owner();
@@ -57,28 +50,32 @@
 //    + fvc::div(sigmaV * ARe)
     );
 
-    // Temporarily force zero gradient for V at conductor
-    // interface as inner constraint. We will set a new
-    // gradient depnding on A there, below.
+    // Temporarily force zero gradient for V (dV/dn=0)
+    // at conductor interface as inner constraint. We
+    // need to do this in order set a new gradient
+    // for V depnding on A, later!
     {
         // Mesh cell-face addressing
         const unallocLabelList& own = mesh.owner();
         const unallocLabelList& nei = mesh.neighbour();
 
-        // ...
+        // Loop over all faces of conductor interface
         forAll (cnFaces, facei)
         {
             label faceI = cnFaces[facei];
 
-            scalar VReEqnUf = VReEqn.upper()[faceI];
-            VReEqn.upper()[faceI] -= VReEqnUf;
-            VReEqn.diag()[own[faceI]] += VReEqnUf;
-            VReEqn.diag()[nei[faceI]] += VReEqnUf;
+            // Write
+            {
+                scalar VReEqnUf = VReEqn.upper()[faceI];
+                VReEqn.upper()[faceI] -= VReEqnUf;
+                VReEqn.diag()[own[faceI]] += VReEqnUf;
+                VReEqn.diag()[nei[faceI]] += VReEqnUf;
 
-            scalar VImEqnUf = VImEqn.upper()[faceI];
-            VImEqn.upper()[faceI] -= VImEqnUf;
-            VImEqn.diag()[own[faceI]] += VImEqnUf;
-            VImEqn.diag()[nei[faceI]] += VImEqnUf;
+                scalar VImEqnUf = VImEqn.upper()[faceI];
+                VImEqn.upper()[faceI] -= VImEqnUf;
+                VImEqn.diag()[own[faceI]] += VImEqnUf;
+                VImEqn.diag()[nei[faceI]] += VImEqnUf;
+            }
 
             // TODO: What about gradient correction?
             // We have to modifiy the source term, too. But
@@ -94,13 +91,13 @@
             scalar refValueCVRe = 0;
             scalar refValueCVIm = 0;
 
-            // Force reference cell in conducting region
+            // Force reference cell in conducting region (owner)
             VReEqn.diag()[own[refFace]] += VReEqn.diag()[own[refFace]];
             VImEqn.diag()[own[refFace]] += VImEqn.diag()[own[refFace]];
             VReEqn.source()[own[refFace]] += VReEqn.diag()[own[refFace]]*refValueCVRe;
             VImEqn.source()[own[refFace]] += VImEqn.diag()[own[refFace]]*refValueCVIm;
 
-            // Reference values in non-conducting region
+            // Reference values in non-conducting region (neighbour)
             // TODO: Which values to use here?
             scalar refValueNVRe = 0;
             scalar refValueNVIm = 0;
