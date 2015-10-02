@@ -1,9 +1,13 @@
 
     // Solve A
     {
-        // Add explicit parts of electric scalar potential V
-        AReEqn -= sigma * VReGrad;
-        AImEqn -= sigma * VImGrad;
+        // Coupling terms of electric scalar potential V
+        // in equation for magnetic vector potential A
+        {
+            // Explicit gradient terms of electric scalar potential V
+            AReEqn -= sigma * VReGrad;
+            AImEqn -= sigma * VImGrad;
+        }
 
         // References to internal alpha field
         const scalarField& alphaIn = alpha.internalField();
@@ -15,13 +19,16 @@
         AEqn.insertEquation(0, AReEqn);
         AEqn.insertEquation(3, AImEqn);
 
-        // Add coupling terms for ARe-AIm coupling
-        AEqn.insertEquationCoupling(0, 3,  alphaIn);
-        AEqn.insertEquationCoupling(3, 0, -alphaIn);
-        AEqn.insertEquationCoupling(1, 4,  alphaIn);
-        AEqn.insertEquationCoupling(4, 1, -alphaIn);
-        AEqn.insertEquationCoupling(2, 5,  alphaIn);
-        AEqn.insertEquationCoupling(5, 2, -alphaIn);
+        // Coupling terms for real/imagninary ARe-AIm
+        // dependence of magnetic vector potential
+        {
+            AVEqn.insertEquationCoupling(0, 4,  alphaIn);
+            AVEqn.insertEquationCoupling(4, 0, -alphaIn);
+            AVEqn.insertEquationCoupling(1, 5,  alphaIn);
+            AVEqn.insertEquationCoupling(5, 1, -alphaIn);
+            AVEqn.insertEquationCoupling(2, 6,  alphaIn);
+            AVEqn.insertEquationCoupling(6, 2, -alphaIn);
+        }
 
         // Solve A
         AEqn.solve();
@@ -80,58 +87,56 @@
 
     // Solve V
     {
-        // Set correct gradient at conductor interface
-        {
-            // Mesh cell-face addressing
-            const unallocLabelList& own = mesh.owner();
-            const unallocLabelList& nei = mesh.neighbour();
-
-            // Mesh geometry
-            const vectorField& Cf = mesh.Cf();
-            const vectorField& C = mesh.C();
-            const vectorField& Sf = mesh.Sf();
-            const scalarField& magSf = mesh.magSf();
-            const vectorField Sn = Sf/magSf;
-
-            // ...
-            forAll (cnFaces, facei)
-            {
-                label faceI = cnFaces[facei];
-
-                // Calculate face centre to cell centre distances Pf and fN
-                scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
-                scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
-
-                // Calculate weights
-                scalar wP = fN / (Pf+fN);
-                scalar wN = Pf / (Pf+fN);
-
-                // Calculate gradient coeffs
-                scalar cP = omega.value() * sSigmaV[faceI] * magSf[faceI] * wP;
-                scalar cN = omega.value() * sSigmaV[faceI] * magSf[faceI] * wN;
-
-                VReEqn.source()[own[faceI]] -= cP * (Sn[faceI] & AIm[own[faceI]]);
-                VReEqn.source()[own[faceI]] -= cN * (Sn[faceI] & AIm[nei[faceI]]);
-                VReEqn.source()[nei[faceI]] += cP * (Sn[faceI] & AIm[own[faceI]]);
-                VReEqn.source()[nei[faceI]] += cN * (Sn[faceI] & AIm[nei[faceI]]);
-
-                VImEqn.source()[own[faceI]] += cP * (Sn[faceI] & ARe[own[faceI]]);
-                VImEqn.source()[own[faceI]] += cN * (Sn[faceI] & ARe[nei[faceI]]);
-                VImEqn.source()[nei[faceI]] -= cP * (Sn[faceI] & ARe[own[faceI]]);
-                VImEqn.source()[nei[faceI]] -= cN * (Sn[faceI] & ARe[nei[faceI]]);
-            }
-        }
-
         // Coupling terms of magnetic vector potential A
         // in equation for electric scalar potential V
         {
-//             // Source terms due to variable sigma
-//             VReEqn -= sigmaIc * omega * (fvc::grad(sSigmaV) & AIm);
-//             VImEqn += sigmaIc * omega * (fvc::grad(sSigmaV) & ARe);
+            // Explicit gradient constraints
+            // at conductor interface
+            {
+                // Mesh cell-face addressing
+                const unallocLabelList& own = mesh.owner();
+                const unallocLabelList& nei = mesh.neighbour();
 
-            // Source terms due to variable sigma (force div(A)=0)
-            VReEqn -= sigmaIc * omega * (fvc::grad(sSigmaV) & AIm);
-            VImEqn += sigmaIc * omega * (fvc::grad(sSigmaV) & ARe);
+                // Mesh geometry
+                const vectorField& Cf = mesh.Cf();
+                const vectorField& C = mesh.C();
+                const vectorField& Sf = mesh.Sf();
+                const scalarField& magSf = mesh.magSf();
+                const vectorField Sn = Sf/magSf;
+
+                // ...
+                forAll (cnFaces, facei)
+                {
+                    label faceI = cnFaces[facei];
+
+                    // Calculate face centre to cell centre distances Pf and fN
+                    scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
+                    scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
+
+                    // Calculate weights
+                    scalar wP = fN / (Pf+fN);
+                    scalar wN = Pf / (Pf+fN);
+
+                    // Calculate gradient coeffs
+                    scalar cP = omega.value() * sSigmaV[faceI] * magSf[faceI] * wP;
+                    scalar cN = omega.value() * sSigmaV[faceI] * magSf[faceI] * wN;
+
+                    VReEqn.source()[own[faceI]] -= cP * (Sn[faceI] & AIm[own[faceI]]);
+                    VReEqn.source()[own[faceI]] -= cN * (Sn[faceI] & AIm[nei[faceI]]);
+                    VReEqn.source()[nei[faceI]] += cP * (Sn[faceI] & AIm[own[faceI]]);
+                    VReEqn.source()[nei[faceI]] += cN * (Sn[faceI] & AIm[nei[faceI]]);
+
+                    VImEqn.source()[own[faceI]] += cP * (Sn[faceI] & ARe[own[faceI]]);
+                    VImEqn.source()[own[faceI]] += cN * (Sn[faceI] & ARe[nei[faceI]]);
+                    VImEqn.source()[nei[faceI]] -= cP * (Sn[faceI] & ARe[own[faceI]]);
+                    VImEqn.source()[nei[faceI]] -= cN * (Sn[faceI] & ARe[nei[faceI]]);
+                }
+            }
+
+            // Explicit source terms due to variable sigma
+            // (force div(A)=0)
+            VReEqn -= indicatorVc * omega * (gradAlpha & AIm);
+            VImEqn += indicatorVc * omega * (gradAlpha & ARe);
         }
 
         // Prepare block system for V

@@ -116,8 +116,8 @@
 
         // Remove all gradient values from
         // non-conducting region
-        VReGrad *= sigmaIc;
-        VImGrad *= sigmaIc;
+        VReGrad *= indicatorVc;
+        VImGrad *= indicatorVc;
     }
 
 

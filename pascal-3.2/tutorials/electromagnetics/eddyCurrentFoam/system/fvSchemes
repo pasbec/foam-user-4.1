@@ -71,9 +71,6 @@ interpolationSchemes
 
     interpolate(sigmaV)               linear;
 
-    interpolate(ARe)                  linear;
-    interpolate(AIm)                  linear;
-
     interpolate(VRe)                  linear;
     interpolate(VIm)                  linear;
 }

@@ -1,8 +1,8 @@
 
     // Get reference to sigmaV/sigmaI pointer
     volScalarField& sigmaV = *sigmaVPtr;
-    volScalarField& sigmaIc = *sigmaIcPtr;
-    volScalarField& sigmaIn = *sigmaInPtr;
+    volScalarField& indicatorVc = *indicatorVcPtr;
+    volScalarField& indicatorVn = *indicatorVnPtr;
 
     // Interpolate sigma to face centers
     surfaceScalarField sSigmaV
@@ -37,6 +37,13 @@
             sSigmaV[faceI] = sigmaV[nei[faceI]];
         }
     }
+
+    // Calculate gradient of alpha
+    volVectorField gradAlpha
+    (
+        "gradAlpha",
+        omega * fvc::grad(sSigmaV)
+    );
 
     // Assemble V-equations
     fvScalarMatrix VReEqn

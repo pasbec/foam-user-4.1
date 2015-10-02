@@ -1,16 +1,16 @@
 
     // Create pointer for modified sigma indicator
-    volScalarField* sigmaIcPtr = NULL;
-    volScalarField* sigmaInPtr = NULL;
+    volScalarField* indicatorVcPtr = NULL;
+    volScalarField* indicatorVnPtr = NULL;
 
     // Calculate sigma indicator
     {
         // Create field for sigma indicator
-        sigmaIcPtr = new volScalarField
+        indicatorVcPtr = new volScalarField
         (
             IOobject
             (
-                "sigmaIc",
+                "indicatorVc",
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
@@ -20,11 +20,11 @@
             dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
             zeroGradientFvPatchField<scalar>::typeName
         );
-        sigmaInPtr = new volScalarField
+        indicatorVnPtr = new volScalarField
         (
             IOobject
             (
-                "sigmaIn",
+                "indicatorVn",
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
@@ -35,23 +35,24 @@
             zeroGradientFvPatchField<scalar>::typeName
         );
 
-        // Get references to sigmaI pointer
-        volScalarField& sigmaIc = *sigmaIcPtr;
-        volScalarField& sigmaIn = *sigmaInPtr;
+        // Get references to indicator pointers
+        volScalarField& indicatorVc = *indicatorVcPtr;
+        volScalarField& indicatorVn = *indicatorVnPtr;
 
-        // Set sigma to one in conducting/non-conducting region
+        // Set indicator to one in its corresponding
+        // conducting (c) or non-conducting (n) region
         forAll(cCells, celli)
         {
             label cellI = cCells[celli];
-            sigmaIc[cellI] = pTraits<scalar>::one;
+            indicatorVc[cellI] = pTraits<scalar>::one;
         }
         forAll(nCells, celli)
         {
             label cellI = nCells[celli];
-            sigmaIn[cellI] = pTraits<scalar>::one;
+            indicatorVn[cellI] = pTraits<scalar>::one;
         }
 
         // Write sigmaI
-        sigmaIc.write();
-        sigmaIn.write();
+        indicatorVc.write();
+        indicatorVn.write();
     }

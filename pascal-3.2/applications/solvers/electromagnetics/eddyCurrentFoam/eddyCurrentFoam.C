@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
 #   include "createFields.H"
 #   include "createTopo.H"
-#   include "createSigmaI.H"
+#   include "createIndicatorV.H"
 #   include "createSigmaV.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
