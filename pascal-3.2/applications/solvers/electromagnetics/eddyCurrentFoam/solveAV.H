@@ -44,18 +44,6 @@
 
     // Update corrected gradient of V
     {
-        // Interpolate A to face centers
-        surfaceScalarField sARe
-        (
-            "sARe",
-            fvc::interpolate(ARe) & mesh.Sf()
-        );
-        surfaceScalarField sAIm
-        (
-            "sAIm",
-            fvc::interpolate(AIm) & mesh.Sf()
-        );
-
         // Interpolate V to face centers
         surfaceScalarField sVRe
         (
@@ -79,30 +67,46 @@
             const vectorField& C = mesh.C();
             const vectorField& Sf = mesh.Sf();
             const scalarField& magSf = mesh.magSf();
-
-            // Derived mesh geometry
             const vectorField Sn = Sf/magSf;
 
             forAll (cnPNfaces, facei)
             {
                 label faceI = cnPNfaces[facei];
 
-                // Calculate face centre/cell centre distance Pf
+                // Calculate face centre to cell centre distances Pf and fN
                 scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
+                scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
 
-                sVRe[faceI] = VRe[own[faceI]] + Pf/magSf[faceI] * omega.value() * sAIm[faceI];
-                sVIm[faceI] = VIm[own[faceI]] - Pf/magSf[faceI] * omega.value() * sARe[faceI];
+                // Calculate weights
+                scalar wP = fN / (Pf+fN);
+                scalar wN = Pf / (Pf+fN);
+
+                // Linear interpolate A
+                vector sAReSn = wP * ARe[own[faceI]] + wN * ARe[nei[faceI]];
+                vector sAImSn = wP * AIm[own[faceI]] + wN * AIm[nei[faceI]];
+
+                sVRe[faceI] = VRe[own[faceI]] + omega.value() * Pf * (Sn[faceI] & sAImSn);
+                sVIm[faceI] = VIm[own[faceI]] - omega.value() * Pf * (Sn[faceI] & sAReSn);
             }
 
             forAll (cnNPfaces, facei)
             {
                 label faceI = cnNPfaces[facei];
 
-                // Calculate face centre/cell centre distance fN
+                // Calculate face centre to cell centre distances Pf and fN
+                scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
                 scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
 
-                sVRe[faceI] = VRe[nei[faceI]] - fN/magSf[faceI] * omega.value() * sAIm[faceI];
-                sVIm[faceI] = VIm[nei[faceI]] + fN/magSf[faceI] * omega.value() * sARe[faceI];
+                // Calculate weights
+                scalar wP = fN / (Pf+fN);
+                scalar wN = Pf / (Pf+fN);
+
+                // Linear interpolate A
+                vector sAReSn = wP * ARe[own[faceI]] + wN * ARe[nei[faceI]];
+                vector sAImSn = wP * AIm[own[faceI]] + wN * AIm[nei[faceI]];
+
+                sVRe[faceI] = VRe[nei[faceI]] - omega.value() * fN * (Sn[faceI] & sAImSn);
+                sVIm[faceI] = VIm[nei[faceI]] + omega.value() * fN * (Sn[faceI] & sAReSn);
             }
         }
 

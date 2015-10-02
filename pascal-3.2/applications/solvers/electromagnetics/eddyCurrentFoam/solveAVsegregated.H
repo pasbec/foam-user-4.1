@@ -107,45 +107,19 @@
                 scalar wN = Pf / (Pf+fN);
 
                 // Calculate gradient coeffs
-                scalar cP = sSigmaV[faceI] * omega.value() * wP;
-                scalar cN = sSigmaV[faceI] * omega.value() * wN;
+                scalar cP = omega.value() * sSigmaV[faceI] * magSf[faceI] * wP;
+                scalar cN = omega.value() * sSigmaV[faceI] * magSf[faceI] * wN;
 
-                VReEqn.source()[own[faceI]] -= cP * (Sf[faceI] & AIm[own[faceI]]);
-                VReEqn.source()[own[faceI]] -= cN * (Sf[faceI] & AIm[nei[faceI]]);
-                VReEqn.source()[nei[faceI]] += cP * (Sf[faceI] & AIm[own[faceI]]);
-                VReEqn.source()[nei[faceI]] += cN * (Sf[faceI] & AIm[nei[faceI]]);
+                VReEqn.source()[own[faceI]] -= cP * (Sn[faceI] & AIm[own[faceI]]);
+                VReEqn.source()[own[faceI]] -= cN * (Sn[faceI] & AIm[nei[faceI]]);
+                VReEqn.source()[nei[faceI]] += cP * (Sn[faceI] & AIm[own[faceI]]);
+                VReEqn.source()[nei[faceI]] += cN * (Sn[faceI] & AIm[nei[faceI]]);
 
-                VImEqn.source()[own[faceI]] += cP * (Sf[faceI] & ARe[own[faceI]]);
-                VImEqn.source()[own[faceI]] += cN * (Sf[faceI] & ARe[nei[faceI]]);
-                VImEqn.source()[nei[faceI]] -= cP * (Sf[faceI] & ARe[own[faceI]]);
-                VImEqn.source()[nei[faceI]] -= cN * (Sf[faceI] & ARe[nei[faceI]]);
+                VImEqn.source()[own[faceI]] += cP * (Sn[faceI] & ARe[own[faceI]]);
+                VImEqn.source()[own[faceI]] += cN * (Sn[faceI] & ARe[nei[faceI]]);
+                VImEqn.source()[nei[faceI]] -= cP * (Sn[faceI] & ARe[own[faceI]]);
+                VImEqn.source()[nei[faceI]] -= cN * (Sn[faceI] & ARe[nei[faceI]]);
             }
-
-//             // ...
-//             forAll (cnPNfaces, facei)
-//             {
-//                 label faceI = cnPNfaces[facei];
-//
-//                 scalar VReGradSf = sSigmaV[faceI] * omega.value() * sAIm[faceI];
-//                 VReEqn.source()[own[faceI]] -= VReGradSf;
-//                 VReEqn.source()[nei[faceI]] += cnValueFraction * VReGradSf;
-//
-//                 scalar VImGradSf = sSigmaV[faceI] * omega.value() * sARe[faceI];
-//                 VImEqn.source()[own[faceI]] += VImGradSf;
-//                 VImEqn.source()[nei[faceI]] -= cnValueFraction * VImGradSf;
-//             }
-//             forAll (cnNPfaces, facei)
-//             {
-//                 label faceI = cnNPfaces[facei];
-//
-//                 scalar VReGradSf = sSigmaV[faceI] * omega.value() * sAIm[faceI];
-//                 VReEqn.source()[own[faceI]] -= cnValueFraction * VReGradSf;
-//                 VReEqn.source()[nei[faceI]] += VReGradSf;
-//
-//                 scalar VImGradSf = sSigmaV[faceI] * omega.value() * sARe[faceI];
-//                 VImEqn.source()[own[faceI]] += cnValueFraction * VImGradSf;
-//                 VImEqn.source()[nei[faceI]] -= VImGradSf;
-//             }
         }
 
         // Coupling terms of magnetic vector potential A
