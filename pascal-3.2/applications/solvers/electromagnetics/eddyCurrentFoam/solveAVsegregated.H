@@ -12,11 +12,11 @@
                 // Relaxation of gradient of V
                 VReGrad.relax(relax);
                 VImGrad.relax(relax);
-
-                // Explicit gradient terms of electric scalar potential V
-                AReEqn -= sigma * VReGrad;
-                AImEqn -= sigma * VImGrad;
             }
+
+            // Explicit gradient terms of electric scalar potential V
+            AReEqn -= sigma * VReGrad;
+            AImEqn -= sigma * VImGrad;
         }
 
         // References to internal alpha field
@@ -50,49 +50,49 @@
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 
-        // TODO: Remove after debug
-        {
-            vector6Field AResIn = AEqn.residual(A.internalField());
-
-            volVectorField AReRes
-            (
-                IOobject
-                (
-                    "AReRes",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh,
-                dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
-                fixedValueFvPatchField<vector>::typeName
-            );
-            volVectorField AImRes
-            (
-                IOobject
-                (
-                    "AImRes",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh,
-                dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
-                fixedValueFvPatchField<vector>::typeName
-            );
-
-            AReRes.internalField().replace(0, AResIn.component(0));
-            AReRes.internalField().replace(1, AResIn.component(1));
-            AReRes.internalField().replace(2, AResIn.component(2));
-            AImRes.internalField().replace(0, AResIn.component(4));
-            AImRes.internalField().replace(1, AResIn.component(5));
-            AImRes.internalField().replace(2, AResIn.component(6));
-
-            AReRes.write();
-            AImRes.write();
-        }
+//         // TODO: Remove after debug
+//         {
+//             vector6Field AResIn = AEqn.residual(A.internalField());
+//
+//             volVectorField AReRes
+//             (
+//                 IOobject
+//                 (
+//                     "AReRes",
+//                     mesh.time().timeName(),
+//                     mesh,
+//                     IOobject::NO_READ,
+//                     IOobject::NO_WRITE
+//                 ),
+//                 mesh,
+//                 dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+//                 fixedValueFvPatchField<vector>::typeName
+//             );
+//             volVectorField AImRes
+//             (
+//                 IOobject
+//                 (
+//                     "AImRes",
+//                     mesh.time().timeName(),
+//                     mesh,
+//                     IOobject::NO_READ,
+//                     IOobject::NO_WRITE
+//                 ),
+//                 mesh,
+//                 dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+//                 fixedValueFvPatchField<vector>::typeName
+//             );
+//
+//             AReRes.internalField().replace(0, AResIn.component(0));
+//             AReRes.internalField().replace(1, AResIn.component(1));
+//             AReRes.internalField().replace(2, AResIn.component(2));
+//             AImRes.internalField().replace(0, AResIn.component(4));
+//             AImRes.internalField().replace(1, AResIn.component(5));
+//             AImRes.internalField().replace(2, AResIn.component(6));
+//
+//             AReRes.write();
+//             AImRes.write();
+//         }
     }
 
     // Solve V
@@ -151,7 +151,7 @@
             }
 
             // Explicit source terms due to variable sigma
-            // in conducting region with implied condition: div(A)=0
+            // in conducting region with implied condition div(A)=0
             VReEqn -= indicatorVc * (gradAlpha & AIm);
             VImEqn += indicatorVc * (gradAlpha & ARe);
         }
@@ -173,43 +173,43 @@
         VRe.correctBoundaryConditions();
         VIm.correctBoundaryConditions();
 
-        // TODO: Remove after debug
-        {
-            vector2Field VResIn = VEqn.residual(V.internalField());
-
-            volScalarField VReRes
-            (
-                IOobject
-                (
-                    "VReRes",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh,
-                dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
-                fixedValueFvPatchField<scalar>::typeName
-            );
-            volScalarField VImRes
-            (
-                IOobject
-                (
-                    "VImRes",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh,
-                dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
-                fixedValueFvPatchField<scalar>::typeName
-            );
-
-            VReRes.internalField().replace(0, VResIn.component(0));
-            VImRes.internalField().replace(0, VResIn.component(1));
-
-            VReRes.write();
-            VImRes.write();
-        }
+//         // TODO: Remove after debug
+//         {
+//             vector2Field VResIn = VEqn.residual(V.internalField());
+//
+//             volScalarField VReRes
+//             (
+//                 IOobject
+//                 (
+//                     "VReRes",
+//                     mesh.time().timeName(),
+//                     mesh,
+//                     IOobject::NO_READ,
+//                     IOobject::NO_WRITE
+//                 ),
+//                 mesh,
+//                 dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
+//                 fixedValueFvPatchField<scalar>::typeName
+//             );
+//             volScalarField VImRes
+//             (
+//                 IOobject
+//                 (
+//                     "VImRes",
+//                     mesh.time().timeName(),
+//                     mesh,
+//                     IOobject::NO_READ,
+//                     IOobject::NO_WRITE
+//                 ),
+//                 mesh,
+//                 dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
+//                 fixedValueFvPatchField<scalar>::typeName
+//             );
+//
+//             VReRes.internalField().replace(0, VResIn.component(0));
+//             VImRes.internalField().replace(0, VResIn.component(1));
+//
+//             VReRes.write();
+//             VImRes.write();
+//         }
     }

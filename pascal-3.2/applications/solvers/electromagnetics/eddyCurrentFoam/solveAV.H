@@ -4,6 +4,7 @@
     volScalarField& indicatorVn = *indicatorVnPtr;
 
     // Update corrected gradient of V
+    // TODO: Put this somewhere else
     {
         // Interpolate V to face centers
         surfaceScalarField sVRe
@@ -42,12 +43,14 @@
                 scalar wP = fN / (Pf+fN);
                 scalar wN = Pf / (Pf+fN);
 
-                // Linear interpolate A
-                vector sAReSn = wP * ARe[own[faceI]] + wN * ARe[nei[faceI]];
-                vector sAImSn = wP * AIm[own[faceI]] + wN * AIm[nei[faceI]];
+                // Calculate gradient coeffs
+                scalar cP = omega.value() * Pf * wP;
+                scalar cN = omega.value() * Pf * wN;
 
-                sVRe[faceI] = VRe[own[faceI]] + omega.value() * Pf * (Sn[faceI] & sAImSn);
-                sVIm[faceI] = VIm[own[faceI]] - omega.value() * Pf * (Sn[faceI] & sAReSn);
+                sVRe[faceI] = VRe[own[faceI]] + cP * (Sn[faceI] & AIm[own[faceI]])
+                                              + cN * (Sn[faceI] & AIm[nei[faceI]]);
+                sVIm[faceI] = VIm[own[faceI]] - cP * (Sn[faceI] & ARe[own[faceI]])
+                                              - cN * (Sn[faceI] & ARe[nei[faceI]]);
             }
 
             forAll (cnNPfaces, facei)
@@ -62,12 +65,14 @@
                 scalar wP = fN / (Pf+fN);
                 scalar wN = Pf / (Pf+fN);
 
-                // Linear interpolate A
-                vector sAReSn = wP * ARe[own[faceI]] + wN * ARe[nei[faceI]];
-                vector sAImSn = wP * AIm[own[faceI]] + wN * AIm[nei[faceI]];
+                // Calculate gradient coeffs
+                scalar cP = omega.value() * fN * wP;
+                scalar cN = omega.value() * fN * wN;
 
-                sVRe[faceI] = VRe[nei[faceI]] - omega.value() * fN * (Sn[faceI] & sAImSn);
-                sVIm[faceI] = VIm[nei[faceI]] + omega.value() * fN * (Sn[faceI] & sAReSn);
+                sVRe[faceI] = VRe[nei[faceI]] - cP * (Sn[faceI] & AIm[own[faceI]])
+                                              - cN * (Sn[faceI] & AIm[nei[faceI]]);
+                sVIm[faceI] = VIm[nei[faceI]] + cP * (Sn[faceI] & ARe[own[faceI]])
+                                              + cN * (Sn[faceI] & ARe[nei[faceI]]);
             }
         }
 

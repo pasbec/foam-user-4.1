@@ -92,8 +92,8 @@
             scalar refValueCVIm = 0;
 
             // Force reference cell in conducting region (owner)
-            VReEqn.diag()[own[refFace]] += VReEqn.diag()[own[refFace]];
-            VImEqn.diag()[own[refFace]] += VImEqn.diag()[own[refFace]];
+            VReEqn.diag()[own[refFace]]   += VReEqn.diag()[own[refFace]];
+            VImEqn.diag()[own[refFace]]   += VImEqn.diag()[own[refFace]];
             VReEqn.source()[own[refFace]] += VReEqn.diag()[own[refFace]]*refValueCVRe;
             VImEqn.source()[own[refFace]] += VImEqn.diag()[own[refFace]]*refValueCVIm;
 

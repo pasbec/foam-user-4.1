@@ -16,12 +16,13 @@ FoamFile
 
 AV
 {
-    method                       "segregated";
-//     method                       "coupled";
+    method                       segregated;
+//     method                       coupled;
 
     segregated
     {
         corr                     1;
+        relax                    1.0;
     }
 
     coupled
@@ -46,17 +47,17 @@ solvers
 //
 //         nSweeps                  1;
 //     }
-    {
-        solver                   BiCGStab;
-
-        tolerance                1e-05;
-        relTol                   0;
-
-        minIter                  1;
-        maxIter                  30;
-
-        preconditioner           Cholesky;
-    }
+//     {
+//         solver                   BiCGStab;
+//
+//         tolerance                1e-05;
+//         relTol                   0;
+//
+//         minIter                  1;
+//         maxIter                  30;
+//
+//         preconditioner           Cholesky;
+//     }
 //     {
 //         solver                   GMRES;
 //
@@ -70,28 +71,28 @@ solvers
 //
 //         nDirections              3;
 //     }
-//     {
-//         solver                   AMG;
-//         tolerance                1e-05;
-//         relTol                   0;
-//
-//         minIter                  0;
-//         maxIter                  500;
-//
-//         smoother                 GaussSeidel; // ILU, GaussSeidel
-//         nPreSweeps               0;
-//         nPostSweeps              2;
-//
-//         coarseningType           AAMG; // AAMG
-//         cycle                    V-cycle; // V-cycle, F-cycle, W-cycle
-//         minCoarseEqns            4;
-//         nMaxLevels               100;
-//         groupSize                10;
-//
-//         norm                     twoNorm; // componentNorm, maxNorm, twoNorm
-//         normComponent            0; // for norm=componentNorm
-//         scale                    on;
-//     }
+    {
+        solver                   AMG;
+        tolerance                1e-05;
+        relTol                   0;
+
+        minIter                  0;
+        maxIter                  100;
+
+        smoother                 GaussSeidel; // ILU, GaussSeidel
+        nPreSweeps               0;
+        nPostSweeps              2;
+
+        coarseningType           AAMG; // AAMG
+        cycle                    V-cycle; // V-cycle, F-cycle, W-cycle
+        minCoarseEqns            4;
+        nMaxLevels               100;
+        groupSize                10;
+
+        norm                     twoNorm; // componentNorm, maxNorm, twoNorm
+        normComponent            0; // for norm=componentNorm
+        scale                    on;
+    }
 
 
     "(A|V)"
@@ -112,7 +113,7 @@ solvers
 //         relTol                   0;
 //
 //         minIter                  0;
-//         maxIter                  500;
+//         maxIter                  100;
 //
 //         smoother                 ILU; // ILU, GaussSeidel
 //         nPreSweeps               0;
