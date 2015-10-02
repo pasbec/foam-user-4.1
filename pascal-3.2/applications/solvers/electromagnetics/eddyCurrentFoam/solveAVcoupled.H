@@ -43,12 +43,8 @@
         fvBlockMatrix<vector8> AVEqn(AV);
 
         // Insert equations for A
-        AVEqn.insertEquation(0, ARexEqn);
-        AVEqn.insertEquation(1, AReyEqn);
-        AVEqn.insertEquation(2, ARezEqn);
-        AVEqn.insertEquation(4, AImxEqn);
-        AVEqn.insertEquation(5, AImyEqn);
-        AVEqn.insertEquation(6, AImzEqn);
+        AVEqn.insertEquation(0, AReEqn);
+        AVEqn.insertEquation(4, AImEqn);
 
         // Insert equations for V
         AVEqn.insertEquation(3, VReEqn);
@@ -228,27 +224,8 @@
         AVEqn.solve();
 
         // Retrieve solution for A
-        AVEqn.retrieveSolution(0, ARex.internalField());
-        AVEqn.retrieveSolution(1, ARey.internalField());
-        AVEqn.retrieveSolution(2, ARez.internalField());
-        AVEqn.retrieveSolution(4, AImx.internalField());
-        AVEqn.retrieveSolution(5, AImy.internalField());
-        AVEqn.retrieveSolution(6, AImz.internalField());
-
-        ARex.correctBoundaryConditions();
-        ARey.correctBoundaryConditions();
-        ARez.correctBoundaryConditions();
-        AImx.correctBoundaryConditions();
-        AImy.correctBoundaryConditions();
-        AImz.correctBoundaryConditions();
-
-        // Replace components
-        ARe.replace(0,ARex);
-        ARe.replace(1,ARey);
-        ARe.replace(2,ARez);
-        AIm.replace(0,AImx);
-        AIm.replace(1,AImy);
-        AIm.replace(2,AImz);
+        AVEqn.retrieveSolution(0, ARe.internalField());
+        AVEqn.retrieveSolution(4, AIm.internalField());
 
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();

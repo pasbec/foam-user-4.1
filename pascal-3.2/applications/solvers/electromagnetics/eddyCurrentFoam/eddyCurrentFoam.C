@@ -58,9 +58,6 @@ int main(int argc, char *argv[])
 #   include "createSigmaI.H"
 #   include "createSigmaV.H"
 
-    // TODO
-    bool gauged = false;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Constants, Frequency and Alpha

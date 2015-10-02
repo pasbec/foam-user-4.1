@@ -129,7 +129,7 @@ solvers
 //         scale                    on;
 //     }
 
-    "(sigmaV|VRe|VIm)"
+    "(sigmaV)"
     {
         solver                   BiCGStab;
 
@@ -161,7 +161,7 @@ solvers
 //         mergeLevels              1;
 //     }
 
-    "(GRe|GIm)"
+    "(VRe|VIm)"
     {
         solver                   BiCGStab;
 
@@ -171,7 +171,7 @@ solvers
         minIter                  1;
         maxIter                  1000;
 
-        preconditioner           Cholesky;
+        preconditioner           DILU; // Cholesky
     }
 //     {
 //         solver                   GAMG;
@@ -182,7 +182,8 @@ solvers
 //         minIter                  1;
 //         maxIter                  100;
 //
-//         smoother                 DICGaussSeidel;
+// //         smoother                 DICGaussSeidel;
+//         smoother                 DILUGaussSeidel;
 //         nPreSweeps               0;
 //         nPostSweeps              2;
 //

@@ -9,26 +9,27 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      GIm;
+    class       volVectorField;
+    object      AIm;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 2 -2 0 0 -1 0];
+dimensions      [1 1 -2 0 0 -1 0];
 
-internalField   uniform 0;
+internalField   uniform (0 0 0);
 
 boundaryField
 {
     infinity
     {
-        type            fixedValue;
-        value           uniform 0;
+//         type                     fixedValue;
+        type                     tangentialMagnetic;
+        value                    uniform (0 0 0);
     }
     "procBoundary.*"
     {
-        type            processor;
-        value           uniform 0;
+        type                     processor;
+        value                    uniform (0 0 0);
     }
 }
 

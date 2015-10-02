@@ -215,7 +215,7 @@
             "VReGrad",
             runTime.timeName(),
             mesh,
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         mesh,
@@ -232,76 +232,11 @@
             "VImGrad",
             runTime.timeName(),
             mesh,
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         mesh,
         dimensionedVector(word(), VIm.dimensions()/dimLength, pTraits<vector>::zero),
-        calculatedFvPatchField<vector>::typeName
-    );
-
-
-    // Gauge potential (real part)
-    Info << "Create field GRe" << endl;
-    volScalarField GRe
-    (
-        IOobject
-        (
-            "GRe",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    // Gauge potential (imaginary part)
-    Info << "Create field GIm" << nl << endl;
-    volScalarField GIm
-    (
-        IOobject
-        (
-            "GIm",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    // Gauge potential gradient (real part)
-    Info << "Create field GReGrad" << endl;
-    volVectorField GReGrad
-    (
-        IOobject
-        (
-            "GReGrad",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedVector(word(), GRe.dimensions()/dimLength, pTraits<vector>::zero),
-        calculatedFvPatchField<vector>::typeName
-    );
-
-    // Gauge potential gradient (imaginary part)
-    Info << "Create field GImGrad " << nl << endl;
-    volVectorField GImGrad
-    (
-        IOobject
-        (
-            "GImGrad",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedVector(word(), GIm.dimensions()/dimLength, pTraits<vector>::zero),
         calculatedFvPatchField<vector>::typeName
     );
 

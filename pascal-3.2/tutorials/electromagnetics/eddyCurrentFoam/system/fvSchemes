@@ -26,29 +26,16 @@ gradSchemes
     curl(ARe)                         Gauss linear;
     curl(AIm)                         Gauss linear;
 
-    grad(AReDiv)                      Gauss linear;
-    grad(AImDiv)                      Gauss linear;
-
     grad(sigmaV)                      Gauss linear;
     grad(VRe)                         Gauss linear;
     grad(VIm)                         Gauss linear;
 
-    grad(GRe)                         Gauss linear;
-    grad(GIm)                         Gauss linear;
-
-    snGradCorr(ARex)                  Gauss linear;
-    snGradCorr(ARey)                  Gauss linear;
-    snGradCorr(ARez)                  Gauss linear;
-    snGradCorr(AImx)                  Gauss linear;
-    snGradCorr(AImy)                  Gauss linear;
-    snGradCorr(AImz)                  Gauss linear;
+    snGradCorr(ARe)                   Gauss linear;
+    snGradCorr(AIm)                   Gauss linear;
 
     snGradCorr(sigmaV)                Gauss linear;
     snGradCorr(VRe)                   Gauss linear;
     snGradCorr(VIm)                   Gauss linear;
-
-    snGradCorr(GRe)                   Gauss linear;
-    snGradCorr(GIm)                   Gauss linear;
 }
 
 divSchemes
@@ -63,33 +50,19 @@ laplacianSchemes
 {
     default                           none;
 
-    laplacian(ARex)                   Gauss linear uncorrected; // linear is not used here
-    laplacian(ARey)                   Gauss linear uncorrected; // linear is not used here
-    laplacian(ARez)                   Gauss linear uncorrected; // linear is not used here
-    laplacian(AImx)                   Gauss linear uncorrected; // linear is not used here
-    laplacian(AImy)                   Gauss linear uncorrected; // linear is not used here
-    laplacian(AImz)                   Gauss linear uncorrected; // linear is not used here
+    laplacian(ARe)                    Gauss linear uncorrected; // linear is not used here
+    laplacian(AIm)                    Gauss linear uncorrected; // linear is not used here
 
     laplacian(sigmaV)                 Gauss linear uncorrected; // linear is not used here
     laplacian(sigmaV,VRe)             Gauss linear uncorrected; // linear is not used here
     laplacian(sigmaV,VIm)             Gauss linear uncorrected; // linear is not used here
 
-    laplacian(GRe)                    Gauss linear uncorrected; // linear is not used here
-    laplacian(GIm)                    Gauss linear uncorrected; // linear is not used here
-
-//     laplacian(ARex)                   Gauss linear corrected; // linear is not used here
-//     laplacian(ARey)                   Gauss linear corrected; // linear is not used here
-//     laplacian(ARez)                   Gauss linear corrected; // linear is not used here
-//     laplacian(AImx)                   Gauss linear corrected; // linear is not used here
-//     laplacian(AImy)                   Gauss linear corrected; // linear is not used here
-//     laplacian(AImz)                   Gauss linear corrected; // linear is not used here
+//     laplacian(ARe)                    Gauss linear corrected; // linear is not used here
+//     laplacian(AIm)                    Gauss linear corrected; // linear is not used here
 //
 //     laplacian(sigmaV)                 Gauss linear corrected; // linear is not used here
 //     laplacian(sigmaV,VRe)             Gauss linear corrected; // linear is not used here
 //     laplacian(sigmaV,VIm)             Gauss linear corrected; // linear is not used here
-//
-//     laplacian(GRe)                    Gauss linear corrected; // linear is not used here
-//     laplacian(GIm)                    Gauss linear corrected; // linear is not used here
 }
 
 interpolationSchemes
@@ -103,9 +76,6 @@ interpolationSchemes
 
     interpolate(VRe)                  linear;
     interpolate(VIm)                  linear;
-
-    interpolate(GRe)                  linear;
-    interpolate(GIm)                  linear;
 }
 
 // ************************************************************************* //
