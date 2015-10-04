@@ -18,28 +18,47 @@ solvers
 {
     A
 //     {
-//         solver            GMRES;
+//         solver            GaussSeidel; // GGI works, no convergence
+//         nSweeps           1;
 //         tolerance         1e-09;
 // //         relTol            1e-03;
 //         relTol            1e-06;
 // //         relTol            0;
 //         minIter           1;
 //         maxIter           1000;
-//         preconditioner    Cholesky;
+//     }
+//     {
+//         solver            GMRES; // GGI does NOT work
+//         tolerance         1e-09;
+// //         relTol            1e-03;
+//         relTol            1e-06;
+// //         relTol            0;
+//         minIter           1;
+//         maxIter           100;
+//         preconditioner
+//         {
+//             preconditioner GaussSeidel;
+//             nSweeps        5;
+//         }
 //         nDirections       6;
 //     }
     {
-        solver            BiCGStab;
+        solver            BiCGStab; // GGI does NOT work
         tolerance         1e-09;
 //         relTol            1e-03;
         relTol            1e-06;
 //         relTol            0;
         minIter           1;
-        maxIter           1000;
-        preconditioner    Cholesky;
+        maxIter           100;
+        preconditioner    none;
+//         preconditioner
+//         {
+//             preconditioner GaussSeidel;
+//             nSweeps        5;
+//         }
     }
 //     {
-//         solver            AMG;
+//         solver            AMG; // GGI does NOT work
 //         tolerance         1e-09;
 //         relTol            0;
 //         minIter           1;

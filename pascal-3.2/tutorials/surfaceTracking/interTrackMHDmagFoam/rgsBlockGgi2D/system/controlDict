@@ -34,13 +34,13 @@ adjustTimeStep      yes;
 
 maxCo               0.3;
 
-maxDeltaT           0.001;
+maxDeltaT           0.01;
 
 // *************************** OUTPUT SETTINGS ***************************** //
 
 writeControl        adjustableRunTime;
 
-writeInterval       0.001;
+writeInterval       0.01;
 
 purgeWrite          0;
 

@@ -1,7 +1,7 @@
 
     // Get reference to indicator pointers
     volScalarField& indicatorVc = *indicatorVcPtr;
-    volScalarField& indicatorVn = *indicatorVnPtr;
+//     volScalarField& indicatorVn = *indicatorVnPtr;
 
     // Update corrected gradient of V
     // TODO: Put this somewhere else
