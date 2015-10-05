@@ -67,14 +67,14 @@
             // Write
             {
                 scalar VReEqnUf = VReEqn.upper()[faceI];
-                VReEqn.upper()[faceI] -= VReEqnUf;
                 VReEqn.diag()[own[faceI]] += VReEqnUf;
                 VReEqn.diag()[nei[faceI]] += VReEqnUf;
+                VReEqn.upper()[faceI] -= VReEqnUf;
 
                 scalar VImEqnUf = VImEqn.upper()[faceI];
-                VImEqn.upper()[faceI] -= VImEqnUf;
                 VImEqn.diag()[own[faceI]] += VImEqnUf;
                 VImEqn.diag()[nei[faceI]] += VImEqnUf;
+                VImEqn.upper()[faceI] -= VImEqnUf;
             }
 
             // TODO: What about gradient correction?

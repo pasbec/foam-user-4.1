@@ -15,8 +15,8 @@
             }
 
             // Explicit gradient terms of electric scalar potential V
-            AReEqn -= sigma * VReGrad;
-            AImEqn -= sigma * VImGrad;
+            AReEqn -= sigma * VReGrad * indicatorVc;
+            AImEqn -= sigma * VImGrad * indicatorVc;
         }
 
         // References to internal alpha field
@@ -108,40 +108,33 @@
                 const unallocLabelList& nei = mesh.neighbour();
 
                 // Mesh geometry
-                const vectorField& Cf = mesh.Cf();
-                const vectorField& C = mesh.C();
                 const vectorField& Sf = mesh.Sf();
-                const scalarField& magSf = mesh.magSf();
-                const vectorField Sn = Sf/magSf;
+                const scalarField& w = mesh.weights();
 
                 // Loop over all faces of conductor interface
                 forAll (cnFaces, facei)
                 {
                     label faceI = cnFaces[facei];
 
-                    // Calculate face centre to cell centre distances Pf and fN
-                    scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
-                    scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
+                    // Calculate weight coeffs
+                    scalar wP = omega.value() * w[faceI];
+                    scalar wN = omega.value() - wP;
 
-                    // Calculate weights
-                    scalar wP = fN / (Pf+fN);
-                    scalar wN = Pf / (Pf+fN);
+                    // Calculate equation coeffs
+                    scalar e = sSigmaV[faceI];
 
-                    // Calculate gradient coeffs
-                    scalar cP = omega.value() * sSigmaV[faceI] * magSf[faceI] * wP;
-                    scalar cN = omega.value() * sSigmaV[faceI] * magSf[faceI] * wN;
-
-                    // Write
+                    // Write source which represent gradient
+                    // of V depending on A
                     {
-                        VReEqn.source()[own[faceI]] -= cP * (Sn[faceI] & AIm[own[faceI]]);
-                        VReEqn.source()[own[faceI]] -= cN * (Sn[faceI] & AIm[nei[faceI]]);
-                        VReEqn.source()[nei[faceI]] += cP * (Sn[faceI] & AIm[own[faceI]]);
-                        VReEqn.source()[nei[faceI]] += cN * (Sn[faceI] & AIm[nei[faceI]]);
+                        VReEqn.source()[own[faceI]] -= e * wP * (Sf[faceI] & AIm[own[faceI]]);
+                        VReEqn.source()[own[faceI]] -= e * wN * (Sf[faceI] & AIm[nei[faceI]]);
+                        VReEqn.source()[nei[faceI]] += e * wP * (Sf[faceI] & AIm[own[faceI]]);
+                        VReEqn.source()[nei[faceI]] += e * wN * (Sf[faceI] & AIm[nei[faceI]]);
 
-                        VImEqn.source()[own[faceI]] += cP * (Sn[faceI] & ARe[own[faceI]]);
-                        VImEqn.source()[own[faceI]] += cN * (Sn[faceI] & ARe[nei[faceI]]);
-                        VImEqn.source()[nei[faceI]] -= cP * (Sn[faceI] & ARe[own[faceI]]);
-                        VImEqn.source()[nei[faceI]] -= cN * (Sn[faceI] & ARe[nei[faceI]]);
+                        VImEqn.source()[own[faceI]] += e * wP * (Sf[faceI] & ARe[own[faceI]]);
+                        VImEqn.source()[own[faceI]] += e * wN * (Sf[faceI] & ARe[nei[faceI]]);
+                        VImEqn.source()[nei[faceI]] -= e * wP * (Sf[faceI] & ARe[own[faceI]]);
+                        VImEqn.source()[nei[faceI]] -= e * wN * (Sf[faceI] & ARe[nei[faceI]]);
                     }
 
                     // TODO: What about gradient correction?
@@ -152,8 +145,8 @@
 
             // Explicit source terms due to variable sigma
             // in conducting region with implied condition div(A)=0
-            VReEqn -= indicatorVc * (gradAlpha & AIm);
-            VImEqn += indicatorVc * (gradAlpha & ARe);
+            VReEqn -= (gradAlpha & AIm) * indicatorVc;
+            VImEqn += (gradAlpha & ARe) * indicatorVc;
         }
 
         // Prepare block system for V

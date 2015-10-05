@@ -34,8 +34,8 @@
         // in equation for magnetic vector potential A
         {
             // Implicit gradient terms of electric scalar potential V
-            BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe)); VReInARe *= -sigmaIn;
-            BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm)); VImInAIm *= -sigmaIn;
+            BlockLduSystem<vector, vector> VReInARe(fvm::grad(VRe));
+            BlockLduSystem<vector, vector> VImInAIm(fvm::grad(VIm));
 
             // Grab parts of BlockLduSystem as linear
             CoeffField<vector>::linearTypeField& VReInAReD = VReInARe.diag().asLinear();
@@ -48,7 +48,7 @@
             // Force zero gradient of V (dV/dn=0)
             // at conductor interface as inner constraint.. We
             // need to do this in order set a new gradient
-            // for V depnding on A, later!
+            // for V depnding on A in a second step.
             {
                 // Mesh cell-face addressing
                 const unallocLabelList& own = mesh.owner();
@@ -76,17 +76,45 @@
                         VImInAImU[faceI]      -= VImInAImU[faceI];
                         VImInAImL[faceI]      -= VImInAImL[faceI];
                     }
+//                     {
+//                         VReInAReD[own[faceI]] += Sf[faceI];
+//                         VReInAReD[nei[faceI]] -= Sf[faceI];
+//
+//                         VImInAImD[own[faceI]] += Sf[faceI];
+//                         VImInAImD[nei[faceI]] -= Sf[faceI];
+//                     }
+                }
 
-                    // Write diag coeffs to set zero gradient
+                // Write diag coeffs to set zero gradient
+                // only at the side of conducting region
+                forAll (cnPNfaces, facei)
+                {
+                    label faceI = cnPNfaces[facei];
+
+                    // Write coeffs which represent gradient part in V
+                    // from other complex part of A
                     {
                         VReInAReD[own[faceI]] += Sf[faceI];
-                        VReInAReD[nei[faceI]] -= Sf[faceI];
-
                         VImInAImD[own[faceI]] += Sf[faceI];
+                    }
+                }
+                forAll (cnNPfaces, facei)
+                {
+                    label faceI = cnNPfaces[facei];
+
+                    // Write coeffs which represent gradient part in V
+                    // from other complex part of A
+                    {
+                        VReInAReD[nei[faceI]] -= Sf[faceI];
                         VImInAImD[nei[faceI]] -= Sf[faceI];
                     }
                 }
             }
+
+            // Multiply with equation coeffs
+            // FIXME
+            VReInARe *= - sigmaIn * indicatorVcIn;
+            VImInAIm *= - sigmaIn * indicatorVcIn;
 
             // Insert implicit gradient terms
             AVEqn.insertBlockCoupling(0, 3, VReInARe);
@@ -95,7 +123,7 @@
 
         // Coupling terms for real/imagninary parts of A
         {
-            // Explicitely create empty BlockLduSystems
+            // Explicitly create empty BlockLduSystems
             BlockLduSystem<tensor, vector> AImInARe(mesh);
             BlockLduSystem<tensor, vector> AReInAIm(mesh);
 
@@ -106,6 +134,107 @@
             CoeffField<tensor>::linearTypeField& AReInAImD = AReInAIm.diag().asLinear();
             CoeffField<tensor>::linearTypeField& AReInAImU = AReInAIm.upper().asLinear();
             CoeffField<tensor>::linearTypeField& AReInAImL = AReInAIm.lower().asLinear();
+
+            // Correct gradient
+            {
+                // Mesh cell-face addressing
+                const unallocLabelList& own = mesh.owner();
+                const unallocLabelList& nei = mesh.neighbour();
+
+                // Mesh geometry
+                const vectorField& Sf = mesh.Sf();
+                const scalarField& w = mesh.weights();
+                const scalarField& d = mesh.deltaCoeffs();
+
+                // Derived mesh geometry
+//                 tensorField SfT(Sf.size(), pTraits<tensor>::zero);
+//                 SfT.replace(0, Sf.component(0));
+//                 SfT.replace(4, Sf.component(1));
+//                 SfT.replace(8, Sf.component(2));
+                tensorField SfT = vector::one * Sf;
+
+//                 forAll (cnFaces, facei)
+//                 {
+//                     label faceI = cnFaces[facei];
+//
+//                     // Calculate face centre to cell centre distances Pf and fN
+//                     scalar fN = w[faceI] / d[faceI];
+//                     scalar Pf = 1.0 / d[faceI] - fN;
+//
+//                     // Calculate weight coeffs
+//                     scalar wP = omega.value() * w[faceI];
+//                     scalar wN = omega.value() - wP;
+//
+//                     //  Calculate equation coeffs
+//                     scalar eP = -sigmaIn[own[faceI]] * Pf;
+//                     scalar eN = -sigmaIn[nei[faceI]] * fN;
+//
+//                     // Write coeffs which represent gradient part in V
+//                     // from other complex part of A
+//                     {
+//                         AImInAReD[own[faceI]] += eP * wP * SfT[faceI];
+//                         AImInAReU[faceI]      += eP * wN * SfT[faceI];
+//                         AImInAReL[faceI]      -= eN * wP * SfT[faceI];
+//                         AImInAReD[nei[faceI]] -= eN * wN * SfT[faceI];
+//
+//                         AReInAImD[own[faceI]] -= eP * wP * SfT[faceI];
+//                         AReInAImU[faceI]      -= eP * wN * SfT[faceI];
+//                         AReInAImL[faceI]      += eN * wP * SfT[faceI];
+//                         AReInAImD[nei[faceI]] += eN * wN * SfT[faceI];
+//                     }
+//                 }
+
+                // Correct gradient only at the side of
+                // conducting region
+                forAll (cnPNfaces, facei)
+                {
+                    label faceI = cnPNfaces[facei];
+
+                    // Calculate face centre to cell centre distance Pf
+                    scalar Pf = (1.0 - w[faceI]) / d[faceI];
+
+                    // Calculate weight coeffs
+                    scalar wP = omega.value() * w[faceI];
+                    scalar wN = omega.value() - wP;
+
+                    //  Calculate equation coeffs
+                    scalar eP = - sigmaIn[own[faceI]] * Pf;
+
+                    // Write coeffs which represent gradient part in V
+                    // from other complex part of A
+                    {
+                        AImInAReD[own[faceI]] += eP * wP * SfT[faceI];
+                        AImInAReU[faceI]      += eP * wN * SfT[faceI];
+
+                        AReInAImD[own[faceI]] -= eP * wP * SfT[faceI];
+                        AReInAImU[faceI]      -= eP * wN * SfT[faceI];
+                    }
+                }
+                forAll (cnNPfaces, facei)
+                {
+                    label faceI = cnNPfaces[facei];
+
+                    // Calculate face centre to cell centre distance fN
+                    scalar fN = w[faceI] / d[faceI];
+
+                    // Calculate gradient coeffs
+                    scalar wP = omega.value() * w[faceI];
+                    scalar wN = omega.value() - wP;
+
+                    //  Calculate equation coeffs
+                    scalar eN = - sigmaIn[nei[faceI]] * fN;
+
+                    // Write coeffs which represent gradient part in V
+                    // from other complex part of A
+                    {
+                        AImInAReL[faceI]      -= eN * wP * SfT[faceI];
+                        AImInAReD[nei[faceI]] -= eN * wN * SfT[faceI];
+
+                        AReInAImL[faceI]      += eN * wP * SfT[faceI];
+                        AReInAImD[nei[faceI]] += eN * wN * SfT[faceI];
+                    }
+                }
+            }
 
             // Point-implicit coupling from complex
             // harmonic time derivatives
@@ -124,7 +253,7 @@
         // Coupling terms of magnetic vector potential A
         // in equations for electric scalar potential V
         {
-            // Explicitely create empty BlockLduSystems
+            // Explicitly create empty BlockLduSystems
             BlockLduSystem<vector, scalar> AImInVRe(mesh);
             BlockLduSystem<vector, scalar> AReInVIm(mesh);
 
@@ -144,50 +273,46 @@
                 const unallocLabelList& nei = mesh.neighbour();
 
                 // Mesh geometry
-                const vectorField& Cf = mesh.Cf();
-                const vectorField& C = mesh.C();
                 const vectorField& Sf = mesh.Sf();
-                const scalarField& magSf = mesh.magSf();
-                const vectorField Sn = Sf/magSf;
+                const scalarField& w = mesh.weights();
 
                 // Loop over all faces of conductor interface
                 forAll (cnFaces, facei)
                 {
                     label faceI = cnFaces[facei];
 
-                    // Calculate face centre to cell centre distances Pf and fN
-                    scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
-                    scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
-
-                    // Calculate weights
-                    scalar wP = fN / (Pf+fN);
-                    scalar wN = Pf / (Pf+fN);
-
                     // Calculate gradient coeffs
-                    scalar cP = scaleV.value() * omega.value() * sSigmaV[faceI] * magSf[faceI] * wP;
-                    scalar cN = scaleV.value() * omega.value() * sSigmaV[faceI] * magSf[faceI] * wN;
+                    scalar wP = omega.value() * w[faceI];
+                    scalar wN = omega.value() - wP;
+
+                    // Calculate equation coeffs
+                    scalar e = scaleV.value() * sSigmaV[faceI];
 
                     // Write coeffs which represent gradient
                     // of V depending on A
                     {
-                        AImInVReD[own[faceI]] += cP * Sn[faceI];
-                        AImInVReU[faceI]      += cN * Sn[faceI];
-                        AImInVReL[faceI]      -= cP * Sn[faceI];
-                        AImInVReD[nei[faceI]] -= cN * Sn[faceI];
+                        AImInVReD[own[faceI]] += e * wP * Sf[faceI];
+                        AImInVReU[faceI]      += e * wN * Sf[faceI];
+                        AImInVReL[faceI]      -= e * wP * Sf[faceI];
+                        AImInVReD[nei[faceI]] -= e * wN * Sf[faceI];
 
-                        AReInVImD[own[faceI]] -= cP * Sn[faceI];
-                        AReInVImU[faceI]      -= cN * Sn[faceI];
-                        AReInVImL[faceI]      += cP * Sn[faceI];
-                        AReInVImD[nei[faceI]] += cN * Sn[faceI];
+                        AReInVImD[own[faceI]] -= e * wP * Sf[faceI];
+                        AReInVImU[faceI]      -= e * wN * Sf[faceI];
+                        AReInVImL[faceI]      += e * wP * Sf[faceI];
+                        AReInVImD[nei[faceI]] += e * wN * Sf[faceI];
                     }
+
+                    // TODO: What about gradient correction?
+                    // We have to modifiy the source term, too. But
+                    // this depends on the type of correction. Hmm...
                 }
             }
 
             // Implicit source terms due to variable sigma
             // in conducting region with implied condition div(A)=0
             {
-                AImInVReD -= scaleV.value() * indicatorVcIn * gradAlphaIn;
-                AReInVImD += scaleV.value() * indicatorVcIn * gradAlphaIn;
+                AImInVReD -= scaleV.value() * gradAlphaIn * indicatorVcIn;
+                AReInVImD += scaleV.value() * gradAlphaIn * indicatorVcIn;
             }
 
             AVEqn.insertBlockCoupling(3, 4, AImInVRe);

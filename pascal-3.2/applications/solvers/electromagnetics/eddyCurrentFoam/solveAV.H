@@ -18,61 +18,60 @@
             fvc::interpolate(VIm)
         );
 
-        // Correct gradient
+        // Correct gradient only at the side of
+        // conducting region
         {
             // Mesh cell-face addressing
             const unallocLabelList& own = mesh.owner();
             const unallocLabelList& nei = mesh.neighbour();
 
             // Mesh geometry
-            const vectorField& Cf = mesh.Cf();
-            const vectorField& C = mesh.C();
             const vectorField& Sf = mesh.Sf();
             const scalarField& magSf = mesh.magSf();
+            const scalarField& w = mesh.weights();
+            const scalarField& d = mesh.deltaCoeffs();
+
+            // Derived mesh geometry
             const vectorField Sn = Sf/magSf;
 
             forAll (cnPNfaces, facei)
             {
                 label faceI = cnPNfaces[facei];
 
-                // Calculate face centre to cell centre distances Pf and fN
-                scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
-                scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
+                // Calculate face centre to cell centre distance Pf
+                scalar Pf = (1.0 - w[faceI]) / d[faceI];
 
-                // Calculate weights
-                scalar wP = fN / (Pf+fN);
-                scalar wN = Pf / (Pf+fN);
+                // Calculate weight coeffs
+                scalar wP = omega.value() * w[faceI];
+                scalar wN = omega.value() - wP;
 
-                // Calculate gradient coeffs
-                scalar cP = omega.value() * Pf * wP;
-                scalar cN = omega.value() * Pf * wN;
+                sVRe[faceI] = VRe[own[faceI]];
+                sVRe[faceI] += Pf * wP * (Sn[faceI] & AIm[own[faceI]]);
+                sVRe[faceI] += Pf * wN * (Sn[faceI] & AIm[nei[faceI]]);
 
-                sVRe[faceI] = VRe[own[faceI]] + cP * (Sn[faceI] & AIm[own[faceI]])
-                                              + cN * (Sn[faceI] & AIm[nei[faceI]]);
-                sVIm[faceI] = VIm[own[faceI]] - cP * (Sn[faceI] & ARe[own[faceI]])
-                                              - cN * (Sn[faceI] & ARe[nei[faceI]]);
+                sVIm[faceI] = VIm[own[faceI]];
+                sVIm[faceI] -= Pf * wP * (Sn[faceI] & ARe[own[faceI]]);
+                sVIm[faceI] -= Pf * wN * (Sn[faceI] & ARe[nei[faceI]]);
             }
 
             forAll (cnNPfaces, facei)
             {
                 label faceI = cnNPfaces[facei];
 
-                // Calculate face centre to cell centre distances Pf and fN
-                scalar Pf = mag(Sn[faceI] & (Cf[faceI] - C[own[faceI]]));
-                scalar fN = mag(Sn[faceI] & (C[nei[faceI]] - Cf[faceI]));
+                // Calculate face centre to cell centre distance fN
+                scalar fN = w[faceI] / d[faceI];
 
-                // Calculate weights
-                scalar wP = fN / (Pf+fN);
-                scalar wN = Pf / (Pf+fN);
+                // Calculate weight coeffs
+                scalar wP = omega.value() * w[faceI];
+                scalar wN = omega.value() - wP;
 
-                // Calculate gradient coeffs
-                scalar cP = omega.value() * fN * wP;
-                scalar cN = omega.value() * fN * wN;
+                sVRe[faceI] = VRe[nei[faceI]];
+                sVRe[faceI] -= fN * wP * (Sn[faceI] & AIm[own[faceI]]);
+                sVRe[faceI] -= fN * wN * (Sn[faceI] & AIm[nei[faceI]]);
 
-                sVRe[faceI] = VRe[nei[faceI]] - cP * (Sn[faceI] & AIm[own[faceI]])
-                                              - cN * (Sn[faceI] & AIm[nei[faceI]]);
-                sVIm[faceI] = VIm[nei[faceI]] + cP * (Sn[faceI] & ARe[own[faceI]])
-                                              + cN * (Sn[faceI] & ARe[nei[faceI]]);
+                sVIm[faceI] = VIm[nei[faceI]];
+                sVIm[faceI] += fN * wP * (Sn[faceI] & ARe[own[faceI]]);
+                sVIm[faceI] += fN * wN * (Sn[faceI] & ARe[nei[faceI]]);
             }
         }
 
@@ -81,13 +80,8 @@
         VImGrad.storePrevIter();
 
         // Update corrected gradient
-        VReGrad = fvc::grad(sVRe);
-        VImGrad = fvc::grad(sVIm);
-
-        // Remove all gradient values from
-        // non-conducting region
-        VReGrad *= indicatorVc;
-        VImGrad *= indicatorVc;
+        VReGrad = fvc::grad(sVRe) * indicatorVc;
+        VImGrad = fvc::grad(sVIm) * indicatorVc;
     }
 
     // Assemble base-matrix for A
