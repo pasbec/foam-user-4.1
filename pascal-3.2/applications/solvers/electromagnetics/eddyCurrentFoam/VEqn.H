@@ -55,6 +55,14 @@
     // need to do this in order set a new gradient
     // for V depnding on A, later!
     {
+        // Grab parts of V-equations
+        scalarField& VReEqnD = VReEqn.diag();
+        scalarField& VReEqnU = VReEqn.upper();
+        scalarField& VReEqnS = VReEqn.source();
+        scalarField& VImEqnD = VImEqn.diag();
+        scalarField& VImEqnU = VImEqn.upper();
+        scalarField& VImEqnS = VImEqn.source();
+
         // Mesh cell-face addressing
         const unallocLabelList& own = mesh.owner();
         const unallocLabelList& nei = mesh.neighbour();
@@ -66,15 +74,13 @@
 
             // Write
             {
-                scalar VReEqnUf = VReEqn.upper()[faceI];
-                VReEqn.diag()[own[faceI]] += VReEqnUf;
-                VReEqn.diag()[nei[faceI]] += VReEqnUf;
-                VReEqn.upper()[faceI] -= VReEqnUf;
+                VReEqnD[own[faceI]] += VReEqnU[faceI];
+                VReEqnD[nei[faceI]] += VReEqnU[faceI];
+                VReEqnU[faceI]      -= VReEqnU[faceI];
 
-                scalar VImEqnUf = VImEqn.upper()[faceI];
-                VImEqn.diag()[own[faceI]] += VImEqnUf;
-                VImEqn.diag()[nei[faceI]] += VImEqnUf;
-                VImEqn.upper()[faceI] -= VImEqnUf;
+                VImEqnD[own[faceI]] += VImEqnU[faceI];
+                VImEqnD[nei[faceI]] += VImEqnU[faceI];
+                VImEqnU[faceI]      -= VImEqnU[faceI];
             }
 
             // TODO: What about gradient correction?
@@ -92,10 +98,10 @@
             scalar refValueCVIm = 0;
 
             // Force reference cell in conducting region (owner)
-            VReEqn.diag()[own[refFace]]   += VReEqn.diag()[own[refFace]];
-            VImEqn.diag()[own[refFace]]   += VImEqn.diag()[own[refFace]];
-            VReEqn.source()[own[refFace]] += VReEqn.diag()[own[refFace]]*refValueCVRe;
-            VImEqn.source()[own[refFace]] += VImEqn.diag()[own[refFace]]*refValueCVIm;
+            VReEqnD[own[refFace]] += VReEqnD[own[refFace]];
+            VImEqnD[own[refFace]] += VImEqnD[own[refFace]];
+            VReEqnS[own[refFace]] += VReEqnD[own[refFace]]*refValueCVRe;
+            VImEqnS[own[refFace]] += VImEqnD[own[refFace]]*refValueCVIm;
 
             // Reference values in non-conducting region (neighbour)
             // TODO: Which values to use here?

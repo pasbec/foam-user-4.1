@@ -34,10 +34,7 @@ Description
 #include "cellSet.H"
 #include "faceSet.H"
 
-#include "fvMeshSubset.H"
-
-#include "zeroGradientFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
+#include "electricPotentialGrad.H"
 #include "tangentialMagneticFvPatchFields.H"
 
 

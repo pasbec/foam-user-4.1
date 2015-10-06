@@ -1,5 +1,10 @@
 
     {
+        // TEST
+        // Explicit gradient terms of electric scalar potential V
+        AReEqn -= sigma * VReGrad * indicatorVc;
+        AImEqn -= sigma * VImGrad * indicatorVc;
+
         // Create scale factor for V-equation compared
         // to A-equation based on dimensional relation
         // dim[A] <=> dim[grad(V)]
@@ -76,43 +81,19 @@
                         VImInAImU[faceI]      -= VImInAImU[faceI];
                         VImInAImL[faceI]      -= VImInAImL[faceI];
                     }
-//                     {
-//                         VReInAReD[own[faceI]] += Sf[faceI];
-//                         VReInAReD[nei[faceI]] -= Sf[faceI];
-//
-//                         VImInAImD[own[faceI]] += Sf[faceI];
-//                         VImInAImD[nei[faceI]] -= Sf[faceI];
-//                     }
-                }
 
-                // Write diag coeffs to set zero gradient
-                // only at the side of conducting region
-                forAll (cnPNfaces, facei)
-                {
-                    label faceI = cnPNfaces[facei];
-
-                    // Write coeffs which represent gradient part in V
-                    // from other complex part of A
+                    // Write zero gradient coeffs
                     {
                         VReInAReD[own[faceI]] += Sf[faceI];
-                        VImInAImD[own[faceI]] += Sf[faceI];
-                    }
-                }
-                forAll (cnNPfaces, facei)
-                {
-                    label faceI = cnNPfaces[facei];
-
-                    // Write coeffs which represent gradient part in V
-                    // from other complex part of A
-                    {
                         VReInAReD[nei[faceI]] -= Sf[faceI];
+
+                        VImInAImD[own[faceI]] += Sf[faceI];
                         VImInAImD[nei[faceI]] -= Sf[faceI];
                     }
                 }
             }
 
             // Multiply with equation coeffs
-            // FIXME
             VReInARe *= - sigmaIn * indicatorVcIn;
             VImInAIm *= - sigmaIn * indicatorVcIn;
 
@@ -143,97 +124,45 @@
 
                 // Mesh geometry
                 const vectorField& Sf = mesh.Sf();
+                const scalarField& magSf = mesh.magSf();
                 const scalarField& w = mesh.weights();
                 const scalarField& d = mesh.deltaCoeffs();
 
                 // Derived mesh geometry
-//                 tensorField SfT(Sf.size(), pTraits<tensor>::zero);
-//                 SfT.replace(0, Sf.component(0));
-//                 SfT.replace(4, Sf.component(1));
-//                 SfT.replace(8, Sf.component(2));
-                tensorField SfT = vector::one * Sf;
+                const vectorField Sn = Sf/magSf;
+                tensorField SfSn = Sf * Sn;
 
-//                 forAll (cnFaces, facei)
-//                 {
-//                     label faceI = cnFaces[facei];
-//
-//                     // Calculate face centre to cell centre distances Pf and fN
-//                     scalar fN = w[faceI] / d[faceI];
-//                     scalar Pf = 1.0 / d[faceI] - fN;
-//
-//                     // Calculate weight coeffs
-//                     scalar wP = omega.value() * w[faceI];
-//                     scalar wN = omega.value() - wP;
-//
-//                     //  Calculate equation coeffs
-//                     scalar eP = -sigmaIn[own[faceI]] * Pf;
-//                     scalar eN = -sigmaIn[nei[faceI]] * fN;
-//
-//                     // Write coeffs which represent gradient part in V
-//                     // from other complex part of A
-//                     {
-//                         AImInAReD[own[faceI]] += eP * wP * SfT[faceI];
-//                         AImInAReU[faceI]      += eP * wN * SfT[faceI];
-//                         AImInAReL[faceI]      -= eN * wP * SfT[faceI];
-//                         AImInAReD[nei[faceI]] -= eN * wN * SfT[faceI];
-//
-//                         AReInAImD[own[faceI]] -= eP * wP * SfT[faceI];
-//                         AReInAImU[faceI]      -= eP * wN * SfT[faceI];
-//                         AReInAImL[faceI]      += eN * wP * SfT[faceI];
-//                         AReInAImD[nei[faceI]] += eN * wN * SfT[faceI];
-//                     }
-//                 }
-
-                // Correct gradient only at the side of
-                // conducting region
-                forAll (cnPNfaces, facei)
+                // Set correct gradient
+                forAll (cnFaces, facei)
                 {
-                    label faceI = cnPNfaces[facei];
+                    label faceI = cnFaces[facei];
 
-                    // Calculate face centre to cell centre distance Pf
-                    scalar Pf = (1.0 - w[faceI]) / d[faceI];
+                    // Calculate face centre to cell centre distances Pf and fN
+                    scalar fN = w[faceI] / d[faceI];
+                    scalar Pf = 1.0 / d[faceI] - fN;
 
                     // Calculate weight coeffs
                     scalar wP = omega.value() * w[faceI];
                     scalar wN = omega.value() - wP;
 
-                    //  Calculate equation coeffs
-                    scalar eP = - sigmaIn[own[faceI]] * Pf;
-
                     // Write coeffs which represent gradient part in V
                     // from other complex part of A
                     {
-                        AImInAReD[own[faceI]] += eP * wP * SfT[faceI];
-                        AImInAReU[faceI]      += eP * wN * SfT[faceI];
+                        AImInAReD[own[faceI]] += Pf * wP * SfSn[faceI];
+                        AImInAReU[faceI]      += Pf * wN * SfSn[faceI];
+                        AImInAReL[faceI]      += fN * wP * SfSn[faceI];
+                        AImInAReD[nei[faceI]] += fN * wN * SfSn[faceI];
 
-                        AReInAImD[own[faceI]] -= eP * wP * SfT[faceI];
-                        AReInAImU[faceI]      -= eP * wN * SfT[faceI];
+                        AReInAImD[own[faceI]] -= Pf * wP * SfSn[faceI];
+                        AReInAImU[faceI]      -= Pf * wN * SfSn[faceI];
+                        AReInAImL[faceI]      -= fN * wP * SfSn[faceI];
+                        AReInAImD[nei[faceI]] -= fN * wN * SfSn[faceI];
                     }
                 }
-                forAll (cnNPfaces, facei)
-                {
-                    label faceI = cnNPfaces[facei];
 
-                    // Calculate face centre to cell centre distance fN
-                    scalar fN = w[faceI] / d[faceI];
-
-                    // Calculate gradient coeffs
-                    scalar wP = omega.value() * w[faceI];
-                    scalar wN = omega.value() - wP;
-
-                    //  Calculate equation coeffs
-                    scalar eN = - sigmaIn[nei[faceI]] * fN;
-
-                    // Write coeffs which represent gradient part in V
-                    // from other complex part of A
-                    {
-                        AImInAReL[faceI]      -= eN * wP * SfT[faceI];
-                        AImInAReD[nei[faceI]] -= eN * wN * SfT[faceI];
-
-                        AReInAImL[faceI]      += eN * wP * SfT[faceI];
-                        AReInAImD[nei[faceI]] += eN * wN * SfT[faceI];
-                    }
-                }
+                // Multiply with equation coeffs
+                AImInARe *= - sigmaIn * indicatorVcIn;
+                AReInAIm *= - sigmaIn * indicatorVcIn;
             }
 
             // Point-implicit coupling from complex
@@ -311,8 +240,11 @@
             // Implicit source terms due to variable sigma
             // in conducting region with implied condition div(A)=0
             {
-                AImInVReD -= scaleV.value() * gradAlphaIn * indicatorVcIn;
-                AReInVImD += scaleV.value() * gradAlphaIn * indicatorVcIn;
+                // Mesh geometry
+                const scalarField& V = mesh.V();
+
+                AImInVReD -= scaleV.value() * gradAlphaIn * V * indicatorVcIn;
+                AReInVImD += scaleV.value() * gradAlphaIn * V * indicatorVcIn;
             }
 
             AVEqn.insertBlockCoupling(3, 4, AImInVRe);
@@ -336,79 +268,79 @@
         VRe.correctBoundaryConditions();
         VIm.correctBoundaryConditions();
 
-//         // TODO: Remove after debug
-//         {
-//             vector8Field AVResIn = AVEqn.residual(AV.internalField());
-//
-//             volVectorField AReRes
-//             (
-//                 IOobject
-//                 (
-//                     "AReRes",
-//                     mesh.time().timeName(),
-//                     mesh,
-//                     IOobject::NO_READ,
-//                     IOobject::NO_WRITE
-//                 ),
-//                 mesh,
-//                 dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
-//                 fixedValueFvPatchField<vector>::typeName
-//             );
-//             volVectorField AImRes
-//             (
-//                 IOobject
-//                 (
-//                     "AImRes",
-//                     mesh.time().timeName(),
-//                     mesh,
-//                     IOobject::NO_READ,
-//                     IOobject::NO_WRITE
-//                 ),
-//                 mesh,
-//                 dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
-//                 fixedValueFvPatchField<vector>::typeName
-//             );
-//             volScalarField VReRes
-//             (
-//                 IOobject
-//                 (
-//                     "VReRes",
-//                     mesh.time().timeName(),
-//                     mesh,
-//                     IOobject::NO_READ,
-//                     IOobject::NO_WRITE
-//                 ),
-//                 mesh,
-//                 dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
-//                 fixedValueFvPatchField<scalar>::typeName
-//             );
-//             volScalarField VImRes
-//             (
-//                 IOobject
-//                 (
-//                     "VImRes",
-//                     mesh.time().timeName(),
-//                     mesh,
-//                     IOobject::NO_READ,
-//                     IOobject::NO_WRITE
-//                 ),
-//                 mesh,
-//                 dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
-//                 fixedValueFvPatchField<scalar>::typeName
-//             );
-//
-//             AReRes.internalField().replace(0, AVResIn.component(0));
-//             AReRes.internalField().replace(1, AVResIn.component(1));
-//             AReRes.internalField().replace(2, AVResIn.component(2));
-//             AImRes.internalField().replace(0, AVResIn.component(4));
-//             AImRes.internalField().replace(1, AVResIn.component(5));
-//             AImRes.internalField().replace(2, AVResIn.component(6));
-//             VReRes.internalField().replace(0, AVResIn.component(3));
-//             VImRes.internalField().replace(0, AVResIn.component(7));
-//
-//             AReRes.write();
-//             AImRes.write();
-//             VReRes.write();
-//             VImRes.write();
-//         }
+        // TODO: Remove after debug
+        {
+            vector8Field AVResIn = AVEqn.residual(AV.internalField());
+
+            volVectorField AReRes
+            (
+                IOobject
+                (
+                    "AReRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+                fixedValueFvPatchField<vector>::typeName
+            );
+            volVectorField AImRes
+            (
+                IOobject
+                (
+                    "AImRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+                fixedValueFvPatchField<vector>::typeName
+            );
+            volScalarField VReRes
+            (
+                IOobject
+                (
+                    "VReRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
+                fixedValueFvPatchField<scalar>::typeName
+            );
+            volScalarField VImRes
+            (
+                IOobject
+                (
+                    "VImRes",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensioned<scalar>(word(),dimless,pTraits<scalar>::zero),
+                fixedValueFvPatchField<scalar>::typeName
+            );
+
+            AReRes.internalField().replace(0, AVResIn.component(0));
+            AReRes.internalField().replace(1, AVResIn.component(1));
+            AReRes.internalField().replace(2, AVResIn.component(2));
+            AImRes.internalField().replace(0, AVResIn.component(4));
+            AImRes.internalField().replace(1, AVResIn.component(5));
+            AImRes.internalField().replace(2, AVResIn.component(6));
+            VReRes.internalField().replace(0, AVResIn.component(3));
+            VImRes.internalField().replace(0, AVResIn.component(7));
+
+            AReRes.write();
+            AImRes.write();
+            VReRes.write();
+            VImRes.write();
+        }
     }

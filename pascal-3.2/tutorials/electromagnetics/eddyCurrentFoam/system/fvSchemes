@@ -27,15 +27,17 @@ gradSchemes
     curl(AIm)                         Gauss linear;
 
     grad(sigmaV)                      Gauss linear;
-    grad(VRe)                         Gauss linear;
-    grad(VIm)                         Gauss linear;
+//     grad(VRe)                         Gauss linear;
+//     grad(VIm)                         Gauss linear;
+    grad(VRe)                         electricPotential Gauss linear;
+    grad(VIm)                         electricPotential Gauss linear;
 
-    snGradCorr(ARe)                   Gauss linear;
-    snGradCorr(AIm)                   Gauss linear;
-
-    snGradCorr(sigmaV)                Gauss linear;
-    snGradCorr(VRe)                   Gauss linear;
-    snGradCorr(VIm)                   Gauss linear;
+//     snGradCorr(ARe)                   Gauss linear;
+//     snGradCorr(AIm)                   Gauss linear;
+//
+//     snGradCorr(sigmaV)                Gauss linear;
+//     snGradCorr(VRe)                   Gauss linear;
+//     snGradCorr(VIm)                   Gauss linear;
 }
 
 divSchemes

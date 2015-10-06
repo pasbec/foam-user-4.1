@@ -14,6 +14,14 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-frequency            frequency [ 0 0 -1 0 0 0 0 ] 10000.0;
+names
+{
+    interface          "faceSet_solver_cn";
+
+    scalarPotential    "V";
+    vectorPotential    "A";
+}
+
+frequency              frequency [ 0 0 -1 0 0 0 0 ] 10000.0;
 
 // ************************************************************************* //

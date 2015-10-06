@@ -1,3 +1,6 @@
+gradSchemes/electricPotentialGrad/scalarElectricPotentialGrad.C
+gradSchemes/electricPotentialGrad/electricPotentialGrads.C
+
 fvPatchFields/directionMixedMixed/directionMixedMixedFvPatchFields.C
 fvPatchFields/patchDirectionMixedMixed/patchDirectionMixedMixedFvPatchFields.C
 fvPatchFields/tangentialMagnetic/tangentialMagneticFvPatchFields.C

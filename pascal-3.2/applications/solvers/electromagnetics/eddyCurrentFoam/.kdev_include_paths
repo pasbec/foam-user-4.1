@@ -1,6 +1,8 @@
 ../../../../.wm_project_dir/src/finiteVolume/lnInclude
 ../../../../.wm_project_dir/src/VectorN/lnInclude
 
+./gradSchemes/electricPotentialGrad
+
 ./fvPatchFields/directionMixedMixed
 ./fvPatchFields/patchDirectionMixedMixed
 ./fvPatchFields/tangentialMagnetic
