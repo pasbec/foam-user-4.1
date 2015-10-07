@@ -91,25 +91,40 @@
         // Reference settings
         {
             // Reference face
-            label refFace = cnPNfaces[0];
+            label refFace = -1;
+            label cRefCell = -1;
+            label nRefCell = -1;
+
+            if (cnPNRefFaceSigmaMax >= cnNPRefFaceSigmaMax)
+            {
+                refFace = cnPNRefFace;
+                cRefCell = own[refFace];
+                nRefCell = nei[refFace];
+            }
+            else
+            {
+                refFace = cnNPRefFace;
+                cRefCell = nei[refFace];
+                nRefCell = own[refFace];
+            }
 
             // Reference values in conducting region
-            scalar refValueCVRe = 0;
-            scalar refValueCVIm = 0;
+            scalar cRefValueVRe = 0;
+            scalar cRefValueVIm = 0;
 
-            // Force reference cell in conducting region (owner)
-            VReEqnD[own[refFace]] += VReEqnD[own[refFace]];
-            VImEqnD[own[refFace]] += VImEqnD[own[refFace]];
-            VReEqnS[own[refFace]] += VReEqnD[own[refFace]]*refValueCVRe;
-            VImEqnS[own[refFace]] += VImEqnD[own[refFace]]*refValueCVIm;
+            // Force reference cell in conducting region
+            VReEqnD[cRefCell] += VReEqnD[cRefCell];
+            VImEqnD[cRefCell] += VImEqnD[cRefCell];
+            VReEqnS[cRefCell] += VReEqnD[cRefCell]*cRefValueVRe;
+            VImEqnS[cRefCell] += VImEqnD[cRefCell]*cRefValueVIm;
 
-            // Reference values in non-conducting region (neighbour)
+            // Reference values in non-conducting region
             // TODO: Which values to use here?
-            scalar refValueNVRe = 0;
-            scalar refValueNVIm = 0;
+            scalar nRefValueVRe = 0;
+            scalar nRefValueVIm = 0;
 
             // Set reference cell in non-conducting region if needed
-            VReEqn.setReference(nei[refFace], refValueNVRe);
-            VImEqn.setReference(nei[refFace], refValueNVIm);
+            VReEqn.setReference(nRefCell, nRefValueVRe);
+            VImEqn.setReference(nRefCell, nRefValueVIm);
         }
     }

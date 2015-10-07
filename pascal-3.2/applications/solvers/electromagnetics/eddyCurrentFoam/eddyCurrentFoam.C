@@ -34,7 +34,9 @@ Description
 #include "cellSet.H"
 #include "faceSet.H"
 
+#include "fluxConservativeValue.H"
 #include "electricPotentialGrad.H"
+
 #include "tangentialMagneticFvPatchFields.H"
 
 

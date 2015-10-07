@@ -15,6 +15,11 @@
     labelHashSet cnPNfacesHashSet;
     labelHashSet cnNPfacesHashSet;
 
+    label  cnPNRefFace = 0;
+    scalar cnPNRefFaceSigmaMax = -VGREAT;
+    label  cnNPRefFace = 0;
+    scalar cnNPRefFaceSigmaMax = -VGREAT;
+
     // Assemble topologies
     {
         forAll(mesh.cells(), cellI)
@@ -44,6 +49,12 @@
             {
                 cnFacesHashSet.insert(facei);
                 cnPNfacesHashSet.insert(facei);
+
+                if (sigma.internalField()[own[facei]] >= cnPNRefFaceSigmaMax)
+                {
+                    cnPNRefFaceSigmaMax = sigma.internalField()[own[facei]];
+                    cnPNRefFace = facei;
+                }
             }
 
             if
@@ -54,6 +65,12 @@
             {
                 cnFacesHashSet.insert(facei);
                 cnNPfacesHashSet.insert(facei);
+
+                if (sigma.internalField()[nei[facei]] >= cnNPRefFaceSigmaMax)
+                {
+                    cnNPRefFaceSigmaMax = sigma.internalField()[nei[facei]];
+                    cnNPRefFace = facei;
+                }
             }
         }
     }

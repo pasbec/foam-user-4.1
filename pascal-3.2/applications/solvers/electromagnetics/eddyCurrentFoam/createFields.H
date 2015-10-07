@@ -92,38 +92,48 @@
         mesh
     );
 
-    // Magnetic vector potential divergence (real part)
-    Info << "Create field AReDiv" << endl;
-    volScalarField AReDiv
+    // Magnetic vector potential (complex)
+    Info << "Create field Ax" << endl;
+    volVector2Field Ax
     (
         IOobject
         (
-            "AReDiv",
+            "Ax",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         mesh,
-        dimensioned<scalar>(word(), ARe.dimensions()/dimLength, pTraits<scalar>::zero),
-        calculatedFvPatchField<scalar>::typeName
+        dimensionedVector2(word(),dimless,vector2::zero)
     );
-
-    // Magnetic vector potential divergence (imaginary part)
-    Info << "Create field AImDiv" << endl;
-    volScalarField AImDiv
+    Info << "Create field Ay" << endl;
+    volVector2Field Ay
     (
         IOobject
         (
-            "AImDiv",
+            "Ay",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         mesh,
-        dimensioned<scalar>(word(), ARe.dimensions()/dimLength, pTraits<scalar>::zero),
-        calculatedFvPatchField<scalar>::typeName
+        dimensionedVector2(word(),dimless,vector2::zero)
+    );
+    Info << "Create field Az" << nl << endl;
+    volVector2Field Az
+    (
+        IOobject
+        (
+            "Az",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector2(word(),dimless,vector2::zero)
     );
 
     // Magnetic vector potential (complex)
@@ -173,39 +183,6 @@
         mesh
     );
 
-    // Electric scalar potential (complex)
-    Info << "Create field V" << nl << endl;
-    volVector2Field V
-    (
-        IOobject
-        (
-            "V",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionedVector2(word(),dimless,vector2::zero)
-    );
-
-
-    // Magnetic vector potential and electric scalar potential (complex)
-    Info << "Create field AV" << nl << endl;
-    volVector8Field AV
-    (
-        IOobject
-        (
-            "AV",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionedVector8(word(),dimless,vector8::zero)
-    );
-
     // Electric scalar potential gradient (real part)
     Info << "Create field VReGrad" << endl;
     volVectorField VReGrad
@@ -238,6 +215,39 @@
         mesh,
         dimensionedVector(word(), VIm.dimensions()/dimLength, pTraits<vector>::zero),
         calculatedFvPatchField<vector>::typeName
+    );
+
+    // Electric scalar potential (complex)
+    Info << "Create field V" << nl << endl;
+    volVector2Field V
+    (
+        IOobject
+        (
+            "V",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector2(word(),dimless,vector2::zero)
+    );
+
+
+    // Magnetic vector potential and electric scalar potential (complex)
+    Info << "Create field AV" << nl << endl;
+    volVector8Field AV
+    (
+        IOobject
+        (
+            "AV",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedVector8(word(),dimless,vector8::zero)
     );
 
 

@@ -76,8 +76,9 @@ electricPotentialGrad<scalar>::gradf
     );
     volVectorField& gGrad = tgGrad();
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const unallocLabelList& own = mesh.owner();
+    const unallocLabelList& nei = mesh.neighbour();
+
     const vectorField& Sf = mesh.Sf();
     const scalarField& magSf = mesh.magSf();
     const scalarField& w = mesh.weights();
@@ -89,12 +90,12 @@ electricPotentialGrad<scalar>::gradf
     vectorField& igGrad = gGrad;
     const scalarField& issf = ssf;
 
-    forAll(owner, facei)
+    forAll(own, facei)
     {
         vector Sfssf = Sf[facei]*issf[facei];
 
-        igGrad[owner[facei]] += Sfssf;
-        igGrad[neighbour[facei]] -= Sfssf;
+        igGrad[own[facei]] += Sfssf;
+        igGrad[nei[facei]] -= Sfssf;
     }
 
     // TODO: Optimize speed with tmp
@@ -155,37 +156,40 @@ electricPotentialGrad<scalar>::gradf
     {
         label faceI = cnFaces[facei];
 
-        // Remove wrongly interpolated
-        // gradient contributions
+        // Remove wrongly interpolated gradient
+        // contributions from cells at the interface
+        // between non-conducting and conducting region
         {
             vector Sfssf = Sf[faceI]*issf[faceI];
 
-            igGrad[owner[faceI]] -= Sfssf;
-            igGrad[neighbour[faceI]] += Sfssf;
+            igGrad[own[faceI]] -= Sfssf;
+            igGrad[nei[faceI]] += Sfssf;
         }
 
         // Add correct face value contributions to cells
-        // from corresponding gradient at interface between
-        // non-conducting/conducting based on magnetic vector potential
+        // for the electric scalar potential from its
+        // corresponding gradient at the interface between
+        // non-conducting and conducting region depending on
+        // the magnetic vector potential
         {
-            // Calculate face centre to cell centre distances Pf and fN
+            // Face centre to cell centre distances
             scalar fN = w[faceI] / d[faceI];
             scalar Pf = 1.0 / d[faceI] - fN;
 
-            // Calculate weight coeffs
+            // Gradient weight coeffs
             scalar wP = omega.value() * w[faceI];
             scalar wN = omega.value() - wP;
 
-            // Calculate weighted face gradients
-            scalar SfAwOwn = wP * As * (Sn[faceI] & A[owner[faceI]]);
-            scalar SfAwNei = wN * As * (Sn[faceI] & A[neighbour[faceI]]);
+            // Weighted face gradients
+            scalar SfAwOwn = wP * As * (A[own[faceI]] & Sn[faceI]);
+            scalar SfAwNei = wN * As * (A[nei[faceI]] & Sn[faceI]);
 
-            // Calculate extrapolated Sfssf
-            scalar ssfOwn = vsf[owner[faceI]] + Pf * (SfAwOwn + SfAwNei);
-            scalar ssfNei = vsf[neighbour[faceI]] - fN * (SfAwOwn + SfAwNei);
+            // Extrapolated face values
+            scalar ssfOwn = vsf[own[faceI]] + Pf * (SfAwOwn + SfAwNei);
+            scalar ssfNei = vsf[nei[faceI]] - fN * (SfAwOwn + SfAwNei);
 
-            igGrad[owner[faceI]] += Sf[faceI] * ssfOwn;
-            igGrad[neighbour[faceI]] -= Sf[faceI] * ssfNei;
+            igGrad[own[faceI]] += Sf[faceI] * ssfOwn;
+            igGrad[nei[faceI]] -= Sf[faceI] * ssfNei;
         }
     }
 

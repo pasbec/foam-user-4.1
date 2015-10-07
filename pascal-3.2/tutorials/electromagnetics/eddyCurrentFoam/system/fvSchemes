@@ -23,19 +23,19 @@ gradSchemes
 {
     default                           none;
 
+    grad(sigmaV)                      Gauss linear;
+
+    grad(VRe)                         electricPotential;
+    grad(VIm)                         electricPotential;
+
     curl(ARe)                         Gauss linear;
     curl(AIm)                         Gauss linear;
 
-    grad(sigmaV)                      Gauss linear;
-//     grad(VRe)                         Gauss linear;
-//     grad(VIm)                         Gauss linear;
-    grad(VRe)                         electricPotential Gauss linear;
-    grad(VIm)                         electricPotential Gauss linear;
-
+//     snGradCorr(sigmaV)                Gauss linear;
+//
 //     snGradCorr(ARe)                   Gauss linear;
 //     snGradCorr(AIm)                   Gauss linear;
 //
-//     snGradCorr(sigmaV)                Gauss linear;
 //     snGradCorr(VRe)                   Gauss linear;
 //     snGradCorr(VIm)                   Gauss linear;
 }
@@ -52,19 +52,22 @@ laplacianSchemes
 {
     default                           none;
 
+    laplacian(sigmaV)                 Gauss linear uncorrected; // linear is not used here
+
+    laplacian(sigmaV,VRe)             Gauss harmonic uncorrected; // harmonic is not used here
+    laplacian(sigmaV,VIm)             Gauss harmonic uncorrected; // harmonic is not used here
+
+    laplacian(AxRe)                   Gauss linear uncorrected; // linear is not used here
+    laplacian(AxIm)                   Gauss linear uncorrected; // linear is not used here
+
+    laplacian(AyRe)                   Gauss linear uncorrected; // linear is not used here
+    laplacian(AyIm)                   Gauss linear uncorrected; // linear is not used here
+
+    laplacian(AzRe)                   Gauss linear uncorrected; // linear is not used here
+    laplacian(AzIm)                   Gauss linear uncorrected; // linear is not used here
+
     laplacian(ARe)                    Gauss linear uncorrected; // linear is not used here
     laplacian(AIm)                    Gauss linear uncorrected; // linear is not used here
-
-    laplacian(sigmaV)                 Gauss linear uncorrected; // linear is not used here
-    laplacian(sigmaV,VRe)             Gauss linear uncorrected; // linear is not used here
-    laplacian(sigmaV,VIm)             Gauss linear uncorrected; // linear is not used here
-
-//     laplacian(ARe)                    Gauss linear corrected; // linear is not used here
-//     laplacian(AIm)                    Gauss linear corrected; // linear is not used here
-//
-//     laplacian(sigmaV)                 Gauss linear corrected; // linear is not used here
-//     laplacian(sigmaV,VRe)             Gauss linear corrected; // linear is not used here
-//     laplacian(sigmaV,VIm)             Gauss linear corrected; // linear is not used here
 }
 
 interpolationSchemes
@@ -72,9 +75,6 @@ interpolationSchemes
     default                           none;
 
     interpolate(sigmaV)               linear;
-
-    interpolate(VRe)                  linear;
-    interpolate(VIm)                  linear;
 }
 
 // ************************************************************************* //

@@ -1,6 +1,9 @@
 ../../../../.wm_project_dir/src/finiteVolume/lnInclude
 ../../../../.wm_project_dir/src/VectorN/lnInclude
 
+./interpolationSchemes/fluxConservativeValue
+./interpolationSchemes/fluxConservativeGradient
+
 ./gradSchemes/electricPotentialGrad
 
 ./fvPatchFields/directionMixedMixed

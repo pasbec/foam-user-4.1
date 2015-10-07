@@ -1,4 +1,6 @@
 EXE_INC = \
+    -IinterpolationSchemes/fluxConservativeValue \
+    -IinterpolationSchemes/fluxConservativeGradient \
     -IgradSchemes/electricPotentialGrad \
     -IfvPatchFields/directionMixedMixed \
     -IfvPatchFields/patchDirectionMixedMixed \

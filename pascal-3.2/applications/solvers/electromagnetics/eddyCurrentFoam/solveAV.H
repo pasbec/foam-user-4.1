@@ -35,7 +35,7 @@
 
         forAll (labelList(nCorr), corr)
         {
-#           include "solveAVcoupled.H"
+// #           include "solveAVcoupled.H"
         }
     }
     else
@@ -53,11 +53,11 @@
         BRe == fvc::curl(ARe);
         BIm == fvc::curl(AIm);
 
+        // Update gradient
+        VReGrad = fvc::grad(VRe);
+        VImGrad = fvc::grad(VIm);
+
         // Eddy current density
         jRe ==   alpha * AIm - sigma * VReGrad;
         jIm == - alpha * ARe - sigma * VImGrad;
-
-        // TODO: Remove after debug
-        AReDiv == fvc::div(ARe);
-        AImDiv == fvc::div(AIm);
     }

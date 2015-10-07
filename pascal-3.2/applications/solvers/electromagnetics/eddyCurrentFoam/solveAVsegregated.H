@@ -15,44 +15,70 @@
             }
 
             // Explicit gradient terms of electric scalar potential V
-            AReEqn -= sigma * VReGrad * indicatorVc;
-            AImEqn -= sigma * VImGrad * indicatorVc;
+            AxReEqn -= sigma * VReGrad.component(0) * indicatorVc;
+            AxImEqn -= sigma * VImGrad.component(0) * indicatorVc;
+            AyReEqn -= sigma * VReGrad.component(1) * indicatorVc;
+            AyImEqn -= sigma * VImGrad.component(1) * indicatorVc;
+            AzReEqn -= sigma * VReGrad.component(2) * indicatorVc;
+            AzImEqn -= sigma * VImGrad.component(2) * indicatorVc;
         }
 
         // References to internal alpha field
         const scalarField& alphaIn = alpha.internalField();
 
-        // Prepare block system for A
-        fvBlockMatrix<vector6> AEqn(A);
+        // Prepare block systems for A
+        fvBlockMatrix<vector2> AxEqn(Ax);
+        fvBlockMatrix<vector2> AyEqn(Ay);
+        fvBlockMatrix<vector2> AzEqn(Az);
 
         // Insert equations for A
-        AEqn.insertEquation(0, AReEqn);
-        AEqn.insertEquation(3, AImEqn);
+        AxEqn.insertEquation(0, AxReEqn);
+        AxEqn.insertEquation(1, AxImEqn);
+        AyEqn.insertEquation(0, AyReEqn);
+        AyEqn.insertEquation(1, AyImEqn);
+        AzEqn.insertEquation(0, AzReEqn);
+        AzEqn.insertEquation(1, AzImEqn);
 
         // Coupling terms for real/imagninary ARe-AIm
         // dependence of magnetic vector potential
         {
-            AEqn.insertEquationCoupling(0, 3,  alphaIn);
-            AEqn.insertEquationCoupling(3, 0, -alphaIn);
-            AEqn.insertEquationCoupling(1, 4,  alphaIn);
-            AEqn.insertEquationCoupling(4, 1, -alphaIn);
-            AEqn.insertEquationCoupling(2, 5,  alphaIn);
-            AEqn.insertEquationCoupling(5, 2, -alphaIn);
+            AxEqn.insertEquationCoupling(0, 1,  alphaIn);
+            AxEqn.insertEquationCoupling(1, 0, -alphaIn);
+            AyEqn.insertEquationCoupling(0, 1,  alphaIn);
+            AyEqn.insertEquationCoupling(1, 0, -alphaIn);
+            AzEqn.insertEquationCoupling(0, 1,  alphaIn);
+            AzEqn.insertEquationCoupling(1, 0, -alphaIn);
         }
 
         // Solve A
-        AEqn.solve();
+        AxEqn.solve();
+        AyEqn.solve();
+        AzEqn.solve();
 
         // Retrieve solution
-        AEqn.retrieveSolution(0, ARe.internalField());
-        AEqn.retrieveSolution(3, AIm.internalField());
+        AxEqn.retrieveSolution(0, AxRe.internalField());
+        AxEqn.retrieveSolution(1, AxIm.internalField());
+        AyEqn.retrieveSolution(0, AyRe.internalField());
+        AyEqn.retrieveSolution(1, AyIm.internalField());
+        AzEqn.retrieveSolution(0, AzRe.internalField());
+        AzEqn.retrieveSolution(1, AzIm.internalField());
+
+        // Replace components
+        ARe.replace(0,AxRe);
+        ARe.replace(1,AyRe);
+        ARe.replace(2,AzRe);
+        AIm.replace(0,AxIm);
+        AIm.replace(1,AyIm);
+        AIm.replace(2,AzIm);
 
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 
         // TODO: Remove after debug
         {
-            vector6Field AResIn = AEqn.residual(A.internalField());
+            vector2Field AxResIn = AxEqn.residual(Ax.internalField());
+            vector2Field AyResIn = AyEqn.residual(Ay.internalField());
+            vector2Field AzResIn = AzEqn.residual(Az.internalField());
 
             volVectorField AReRes
             (
@@ -83,16 +109,109 @@
                 fixedValueFvPatchField<vector>::typeName
             );
 
-            AReRes.internalField().replace(0, AResIn.component(0));
-            AReRes.internalField().replace(1, AResIn.component(1));
-            AReRes.internalField().replace(2, AResIn.component(2));
-            AImRes.internalField().replace(0, AResIn.component(4));
-            AImRes.internalField().replace(1, AResIn.component(5));
-            AImRes.internalField().replace(2, AResIn.component(6));
+            AReRes.internalField().replace(0, AxResIn.component(0));
+            AReRes.internalField().replace(1, AyResIn.component(1));
+            AReRes.internalField().replace(2, AzResIn.component(0));
+            AImRes.internalField().replace(0, AxResIn.component(1));
+            AImRes.internalField().replace(1, AyResIn.component(0));
+            AImRes.internalField().replace(2, AzResIn.component(1));
 
             AReRes.write();
             AImRes.write();
         }
+
+//         // Coupling terms of electric scalar potential V
+//         // in equation for magnetic vector potential A
+//         {
+//             // Get relaxation factor
+//             scalar relax = AVmethodDict.lookupOrDefault<scalar>("relax",1.0);
+//
+//             if (relax < (1.0-SMALL))
+//             {
+//                 // Relaxation of gradient of V
+//                 VReGrad.relax(relax);
+//                 VImGrad.relax(relax);
+//             }
+//
+//             // Explicit gradient terms of electric scalar potential V
+//             AReEqn -= sigma * VReGrad * indicatorVc;
+//             AImEqn -= sigma * VImGrad * indicatorVc;
+//         }
+//
+//         // References to internal alpha field
+//         const scalarField& alphaIn = alpha.internalField();
+//
+//         // Prepare block system for A
+//         fvBlockMatrix<vector6> AEqn(A);
+//
+//         // Insert equations for A
+//         AEqn.insertEquation(0, AReEqn);
+//         AEqn.insertEquation(3, AImEqn);
+//
+//         // Coupling terms for real/imagninary ARe-AIm
+//         // dependence of magnetic vector potential
+//         {
+//             AEqn.insertEquationCoupling(0, 3,  alphaIn);
+//             AEqn.insertEquationCoupling(3, 0, -alphaIn);
+//             AEqn.insertEquationCoupling(1, 4,  alphaIn);
+//             AEqn.insertEquationCoupling(4, 1, -alphaIn);
+//             AEqn.insertEquationCoupling(2, 5,  alphaIn);
+//             AEqn.insertEquationCoupling(5, 2, -alphaIn);
+//         }
+//
+//         // Solve A
+//         AEqn.solve();
+//
+//         // Retrieve solution
+//         AEqn.retrieveSolution(0, ARe.internalField());
+//         AEqn.retrieveSolution(3, AIm.internalField());
+//
+//         ARe.correctBoundaryConditions();
+//         AIm.correctBoundaryConditions();
+//
+//         // TODO: Remove after debug
+//         {
+//             vector6Field AResIn = AEqn.residual(A.internalField());
+//
+//             volVectorField AReRes
+//             (
+//                 IOobject
+//                 (
+//                     "AReRes",
+//                     mesh.time().timeName(),
+//                     mesh,
+//                     IOobject::NO_READ,
+//                     IOobject::NO_WRITE
+//                 ),
+//                 mesh,
+//                 dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+//                 fixedValueFvPatchField<vector>::typeName
+//             );
+//             volVectorField AImRes
+//             (
+//                 IOobject
+//                 (
+//                     "AImRes",
+//                     mesh.time().timeName(),
+//                     mesh,
+//                     IOobject::NO_READ,
+//                     IOobject::NO_WRITE
+//                 ),
+//                 mesh,
+//                 dimensioned<vector>(word(),dimless,pTraits<vector>::zero),
+//                 fixedValueFvPatchField<vector>::typeName
+//             );
+//
+//             AReRes.internalField().replace(0, AResIn.component(0));
+//             AReRes.internalField().replace(1, AResIn.component(1));
+//             AReRes.internalField().replace(2, AResIn.component(2));
+//             AImRes.internalField().replace(0, AResIn.component(4));
+//             AImRes.internalField().replace(1, AResIn.component(5));
+//             AImRes.internalField().replace(2, AResIn.component(6));
+//
+//             AReRes.write();
+//             AImRes.write();
+//         }
     }
 
     // Solve V

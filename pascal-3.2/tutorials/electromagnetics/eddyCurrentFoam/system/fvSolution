@@ -40,7 +40,7 @@ solvers
 //         tolerance                1e-04;
 //         relTol                   0;
 //
-//         minIter                  1;
+//         minIter                  0;
 //         maxIter                  1000;
 //
 //         preconditioner           none;
@@ -53,7 +53,7 @@ solvers
         tolerance                1e-04;
         relTol                   0;
 
-        minIter                  1;
+        minIter                  0;
 //         maxIter                  300;
         maxIter                  100;
 
@@ -65,7 +65,7 @@ solvers
 //         tolerance                1e-04;
 //         relTol                   0;
 //
-//         minIter                  1;
+//         minIter                  0;
 //         maxIter                  300;
 //
 //         preconditioner           Cholesky;
@@ -96,14 +96,14 @@ solvers
 //     }
 
 
-    "(A)"
+    "(Ax|Ay|Az|A)"
     {
         solver                   BiCGStab;
 
         tolerance                1e-04;
         relTol                   0;
 
-        minIter                  1;
+        minIter                  0;
         maxIter                  300;
 
         preconditioner           Cholesky;
@@ -114,7 +114,7 @@ solvers
 //         tolerance                1e-04;
 //         relTol                   0;
 //
-//         minIter                  1;
+//         minIter                  0;
 //         maxIter                  300;
 //
 //         preconditioner           Cholesky;
@@ -130,7 +130,7 @@ solvers
         tolerance                1e-04;
         relTol                   0;
 
-        minIter                  1;
+        minIter                  0;
         maxIter                  300;
 
         preconditioner           Cholesky;
@@ -141,7 +141,7 @@ solvers
 //         tolerance                1e-04;
 //         relTol                   0;
 //
-//         minIter                  1;
+//         minIter                  0;
 //         maxIter                  300;
 //
 //         preconditioner           Cholesky;
@@ -156,7 +156,7 @@ solvers
         tolerance                1e-04;
         relTol                   0;
 
-        minIter                  1;
+        minIter                  0;
         maxIter                  300;
 
         preconditioner           Cholesky;
@@ -169,7 +169,7 @@ solvers
         tolerance                1e-04;
         relTol                   0;
 
-        minIter                  1;
+        minIter                  0;
         maxIter                  300;
 
         preconditioner           DILU; // Cholesky
