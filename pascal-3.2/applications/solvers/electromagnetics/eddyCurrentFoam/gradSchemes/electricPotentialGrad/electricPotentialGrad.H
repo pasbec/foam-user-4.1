@@ -65,20 +65,23 @@ class electricPotentialGrad
 {
     // Private data
 
-        //- Base gradient scheme
-        word baseGradSchemeName_;
-
         //- Interpolation scheme
         tmp<surfaceInterpolationScheme<Type> > tinterpScheme_;
 
-        //- Name magnetic properties dictionary
-        word nameMagneticProperties_;
+        //- Magnetic properties dictionary
+        const IOdictionary& magneticProperties_;
 
+        //- Base gradient scheme
+        word nameBaseGradScheme_;
+
+        //- Name of the faceSet for non-conducting/conducting interface
         word nameInterface_;
 
-        word nameScalarPotential_;
+        //- Name of the electric scalar potential
+        word nameElectricPotential_;
 
-        word nameVectorPotential_;
+        //- Name of the magnetic vector potential
+        word nameMagneticPotential_;
 
     // Private Member Functions
 
@@ -106,7 +109,13 @@ public:
         :
             gradScheme<Type>(mesh),
             tinterpScheme_(new linear<Type>(mesh)),
-            nameMagneticProperties_("magneticProperties")
+            magneticProperties_
+            (
+                mesh.lookupObject<IOdictionary>
+                (
+                    "magneticProperties"
+                )
+            )
         {}
 
         //- Construct from mesh and Istream
@@ -117,9 +126,20 @@ public:
         )
         :
             gradScheme<Type>(mesh),
-            tinterpScheme_(NULL)
+            tinterpScheme_(NULL),
+            magneticProperties_
+            (
+                mesh.lookupObject<IOdictionary>
+                (
+                    "magneticProperties"
+                )
+            )
         {
-            nameMagneticProperties_ = word("magneticProperties");
+            dictionary namesDict(magneticProperties_.subDict("names"));
+
+            nameInterface_ = word(namesDict.lookup("interface"));
+            nameElectricPotential_ = word(namesDict.lookup("electricPotential"));
+            nameMagneticPotential_ = word(namesDict.lookup("magneticPotential"));
 
             if (is.eof())
             {
@@ -127,33 +147,28 @@ public:
                 (
                     "electricPotentialGrad<Type>::electricPotentialGrad(const fvMesh&, Istream&)",
                     is
-                )   << "Name of magnetic vector potential not specified"
+                )   << "Base gradient scheme not specified!" << endl
+                    << "Valid base gradient schemes are :" << endl
+                    << "1" << endl << "(" << endl
+                    << "Gauss" << endl
+                    << ")" << endl
                     << exit(FatalIOError);
             }
 
-            dictionary namesDict
-            (
-                mesh.lookupObject<IOdictionary>
-                (
-                    nameMagneticProperties_
-                ).subDict("names")
-            );
+            nameBaseGradScheme_ = word(is);
 
-            nameInterface_ = word(namesDict.lookup("interface"));
-            nameScalarPotential_ = word(namesDict.lookup("scalarPotential"));
-            nameVectorPotential_ = word(namesDict.lookup("vectorPotential"));
-
-            baseGradSchemeName_ = word(is);
-
-            if (baseGradSchemeName_ != "Gauss")
+            if (nameBaseGradScheme_ != "Gauss")
             {
                 FatalIOErrorIn
                 (
                     "electricPotentialGrad<Type>::electricPotentialGrad(const fvMesh&, Istream&)",
                     is
-                )   << "Base gradient scheme "
-                    << baseGradSchemeName_
-                    << " is not supported!"
+                )   << "Base gradient scheme " << nameBaseGradScheme_
+                    << " is not supported!" << endl
+                    << "Valid base gradient schemes are :" << endl
+                    << "1" << endl << "(" << endl
+                    << "Gauss" << endl
+                    << ")" << endl
                     << exit(FatalIOError);
             }
 
