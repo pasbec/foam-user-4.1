@@ -39,7 +39,7 @@ SourceFiles
 #define electricPotentialGrad_H
 
 #include "gradScheme.H"
-#include "fluxConservativeValue.H"
+#include "surfaceInterpolationScheme.H"
 #include "linear.H"
 
 #include "faceSet.H"
@@ -68,8 +68,11 @@ class electricPotentialGrad
         //- Magnetic properties dictionary
         const IOdictionary& magneticProperties_;
 
-        //- Flux conservative face value interpolation scheme
-        tmp<fluxConservativeValue<Type> > tinterpScheme_;
+        //- Interpolation scheme
+        tmp<surfaceInterpolationScheme<Type> > tinterpScheme_;
+
+        //- Name of base gradient scheme
+        word nameBaseGradScheme_;
 
         //- Name of the faceSet for non-conducting/conducting interface
         word nameInterface_;
@@ -118,9 +121,9 @@ public:
             ),
             tinterpScheme_
             (
-                new fluxConservativeValue<Type>
+                new linear<Type>
                 (
-                    word(magneticProperties_.lookup("conductivity"))
+                    mesh
                 )
             )
         {
@@ -147,21 +150,50 @@ public:
                     "magneticProperties"
                 )
             ),
-            tinterpScheme_
-            (
-                new fluxConservativeValue<Type>
-                (
-                    mesh.lookupObject<volScalarField>
-                    (
-                        word
-                        (
-                            magneticProperties_.subDict("names")
-                            .lookup("conductivity")
-                        )
-                    )
-                )
-            )
+            tinterpScheme_(NULL)
         {
+
+            if (is.eof())
+            {
+                FatalIOErrorIn
+                (
+                    "electricPotentialGrad<Type>::electricPotentialGrad(const fvMesh&, Istream&)",
+                    is
+                )   << "Base gradient scheme not specified!" << endl
+                    << "Valid base gradient schemes are :" << endl
+                    << "1" << endl << "(" << endl
+                    << "Gauss" << endl
+                    << ")" << endl
+                    << exit(FatalIOError);
+            }
+
+            nameBaseGradScheme_ = word(is);
+
+            if (nameBaseGradScheme_ != "Gauss")
+            {
+                FatalIOErrorIn
+                (
+                    "electricPotentialGrad<Type>::electricPotentialGrad(const fvMesh&, Istream&)",
+                    is
+                )   << "Base gradient scheme " << nameBaseGradScheme_
+                    << " is not supported!" << endl
+                    << "Valid base gradient schemes are :" << endl
+                    << "1" << endl << "(" << endl
+                    << "Gauss" << endl
+                    << ")" << endl
+                    << exit(FatalIOError);
+            }
+
+            tinterpScheme_ =
+            tmp<surfaceInterpolationScheme<Type> >
+            (
+                surfaceInterpolationScheme<Type>::New
+                (
+                    mesh,
+                    is
+                )
+            );
+
             dictionary namesDict(magneticProperties_.subDict("names"));
 
             nameInterface_ = word(namesDict.lookup("interface"));
