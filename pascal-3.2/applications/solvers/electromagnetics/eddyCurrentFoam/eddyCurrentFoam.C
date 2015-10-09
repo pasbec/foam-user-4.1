@@ -34,9 +34,15 @@ Description
 #include "cellSet.H"
 #include "faceSet.H"
 
+#include "fvMeshSubset.H"
+
 #include "fluxConservativeValue.H"
 #include "electricPotentialGrad.H"
 
+#include "zeroGradientFvPatchFields.H"
+#include "fixedGradientFvPatchFields.H"
+#include "fixedValueFvPatchFields.H"
+#include "lookupFixedGradientFvPatchFields.H"
 #include "tangentialMagneticFvPatchFields.H"
 
 
@@ -86,20 +92,54 @@ int main(int argc, char *argv[])
         omega * sigma
     );
 
+    // Initialize gradient of V
+    {
+#       include "readAVControls.H"
+
+        if
+        (
+            AVmethod == "coupled"
+         || AVmethod == "segregated"
+        )
+        {
+            VReGrad = fvc::grad(VRe);
+            VImGrad = fvc::grad(VIm);
+        }
+    }
+
     while (runTime.run())
     {
         runTime++;
 
         Info << "Time = " << runTime.value() << nl << endl;
 
-        // Solve AV-system
-#       include "readAVControls.H"
-#       include "solveAV.H"
+        // Solve AV system
+        {
+            // Read controls
+#           include "readAVControls.H"
 
-        FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
+            // Solve for A and V
+#           include "solveAV.H"
+        }
 
-        pB == 0.5 * rMu0
-            * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
+        // Derived fields
+        {
+            // Magnetic field density
+            BRe == fvc::curl(ARe);
+            BIm == fvc::curl(AIm);
+
+            // Eddy current density
+            jRe ==   alpha * AIm - sigma * VReGrad;
+            jIm == - alpha * ARe - sigma * VImGrad;
+        }
+
+        // Time-averaged fields
+        {
+            FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
+
+            pB == 0.5 * rMu0
+                * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
+        }
 
         runTime.write();
 

@@ -3,39 +3,47 @@
     volScalarField& indicatorVc = *indicatorVcPtr;
 //     volScalarField& indicatorVn = *indicatorVnPtr;
 
-    // Update gradient of V
-    {
-        // Store old gradient
-        VReGrad.storePrevIter();
-        VImGrad.storePrevIter();
-
-        VReGrad = fvc::grad(VRe);
-        VImGrad = fvc::grad(VIm);
-    }
-
-    // Assemble base-matrix for A
-#   include "AEqn.H"
-
-    // Assemble base-matrix for V
-#   include "VEqn.H"
-
     // Solve AV-system
-    if (AVmethod == "segregated")
-    {
-        int nCorr = AVmethodDict.lookupOrDefault<int>("corr",10);
-
-        forAll (labelList(nCorr), corr)
-        {
-#           include "solveAVsegregated.H"
-        }
-    }
-    else if (AVmethod == "coupled")
+    if (AVmethod == "coupled")
     {
         int nCorr = AVmethodDict.lookupOrDefault<int>("corr",4);
 
         forAll (labelList(nCorr), corr)
         {
-// #           include "solveAVcoupled.H"
+            // Assemble base-matrix for A
+#           include "AEqn.H"
+
+            // Assemble base-matrix for V
+        #   include "VEqn.H"
+
+#           include "solveAVcoupled.H"
+        }
+    }
+    else if (AVmethod == "subset")
+    {
+        int nCorr = AVmethodDict.lookupOrDefault<int>("corr",4);
+
+        forAll (labelList(nCorr), corr)
+        {
+            // Assemble base-matrix for A
+#           include "AEqn.H"
+
+#           include "solveAVsubset.H"
+        }
+    }
+    else if (AVmethod == "segregated")
+    {
+        int nCorr = AVmethodDict.lookupOrDefault<int>("corr",10);
+
+        forAll (labelList(nCorr), corr)
+        {
+            // Assemble base-matrix for A
+#           include "AEqn.H"
+
+            // Assemble base-matrix for V
+#           include "VEqn.H"
+
+#           include "solveAVsegregated.H"
         }
     }
     else
@@ -45,19 +53,4 @@
         << AVmethod
         << "' is not supported!"
         << abort(FatalError);
-    }
-
-    // Calculate derived fields
-    {
-        // Magnetic field density
-        BRe == fvc::curl(ARe);
-        BIm == fvc::curl(AIm);
-
-        // Update gradient
-        VReGrad = fvc::grad(VRe);
-        VImGrad = fvc::grad(VIm);
-
-        // Eddy current density
-        jRe ==   alpha * AIm - sigma * VReGrad;
-        jIm == - alpha * ARe - sigma * VImGrad;
     }

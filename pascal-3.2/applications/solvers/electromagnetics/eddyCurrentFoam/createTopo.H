@@ -15,10 +15,16 @@
     labelHashSet cnPNfacesHashSet;
     labelHashSet cnNPfacesHashSet;
 
+    // Reference settings
     label  cnPNRefFace = 0;
     scalar cnPNRefFaceSigmaMax = -VGREAT;
     label  cnNPRefFace = 0;
     scalar cnNPRefFaceSigmaMax = -VGREAT;
+
+    label refFace = -1;
+    label cRefCell = -1;
+    label nRefCell = -1;
+    label csRefCell = -1;
 
     // Assemble topologies
     {
@@ -73,6 +79,28 @@
                 }
             }
         }
+
+        // Set reference settings
+        refFace = cnPNfacesHashSet.toc()[0];
+        cRefCell = own[refFace];
+        nRefCell = nei[refFace];
+
+//         // TEST
+//         cRefCell = mesh.findCell(point(0.00, 0.00, 0.01));
+//         nRefCell = mesh.findCell(point(0.12, 0.00, 0.01));
+
+//         if (cnPNRefFaceSigmaMax >= cnNPRefFaceSigmaMax)
+//         {
+//             refFace = cnPNRefFace;
+//             cRefCell = own[refFace];
+//             nRefCell = nei[refFace];
+//         }
+//         else
+//         {
+//             refFace = cnNPRefFace;
+//             cRefCell = nei[refFace];
+//             nRefCell = own[refFace];
+//         }
     }
 
     // Create table of content lists
@@ -119,3 +147,41 @@
         "faceSet_solver_cn_NP",
         cnNPfacesHashSet
     ); cnNPfaceSet.write();
+
+
+
+    // Create submesh
+    // FIXME: Only if subset-solver is active!
+    fvMeshSubset cMeshSubSet
+    (
+        IOobject
+        (
+            "conductor",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ
+        ),
+        mesh
+    );
+
+    // Initialize large cell subset
+    cMeshSubSet.setLargeCellSubset(cCellsHashSet);
+
+    // Create sub-mesh
+    fvMesh& cMesh = cMeshSubSet.subMesh();
+
+    // Mappings
+    labelList cMeshCellMap = cMeshSubSet.cellMap();
+    labelList cMeshFaceMap = cMeshSubSet.faceMap();
+
+    // Reverse map reference cell for conducting region
+    forAll(cMesh.C(), celli)
+    {
+        if (cMeshCellMap[celli] == cRefCell)
+        {
+            csRefCell = celli;
+        }
+    }
+
+//     // TEST
+//     csRefCell = cMesh.findCell(point(0.00, 0.00, 0.01));

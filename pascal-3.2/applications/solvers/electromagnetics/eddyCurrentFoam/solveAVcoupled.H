@@ -1,10 +1,5 @@
 
     {
-        // TEST
-        // Explicit gradient terms of electric scalar potential V
-        AReEqn -= sigma * VReGrad * indicatorVc;
-        AImEqn -= sigma * VImGrad * indicatorVc;
-
         // Create scale factor for V-equation compared
         // to A-equation based on dimensional relation
         // dim[A] <=> dim[grad(V)]
@@ -343,4 +338,10 @@
             VReRes.write();
             VImRes.write();
         }
+    }
+
+    // Update gradient of V
+    {
+        VReGrad = fvc::grad(VRe);
+        VImGrad = fvc::grad(VIm);
     }

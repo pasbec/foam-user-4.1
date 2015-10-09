@@ -180,24 +180,13 @@ public:
                 scalar fN = wl[facei] / d[facei];
                 scalar Pf = 1.0 / d[facei] - fN;
 
-//                 // Linear weight coeffs
-//                 scalar wP = w[faceI];
-//                 scalar wN = 1.0 - wP;
-
                 // New owner/neighbour coeffs
                 scalar cOwn = cIn[own[facei]] / Pf;
                 scalar cNei = cIn[nei[facei]] / fN;
-//                 scalar cOwn = wP * cIn[own[facei]] / Pf;
-//                 scalar cNei = wN * cIn[nei[facei]] / fN;
 
                 // TODO: What's wrong with this?
                 wIn[facei] = cOwn/(cOwn + cNei + VSMALL);
 //                 wIn[facei] = cNei/(cOwn + cNei + VSMALL);
-
-                // TEST: Linear weighting
-//                 wIn[facei] = wl[facei];
-
-//                 Info << "wIn[facei] = " << wIn[facei] << " (" << cOwn << " " << cNei << ")" << endl;
             }
 
             return tWeightingFactors;

@@ -4,6 +4,10 @@
         // Coupling terms of electric scalar potential V
         // in equation for magnetic vector potential A
         {
+            // Store old gradient
+            VReGrad.storePrevIter();
+            VImGrad.storePrevIter();
+
             // Get relaxation factor
             scalar relax = AVmethodDict.lookupOrDefault<scalar>("relax",1.0);
 
@@ -119,7 +123,10 @@
             AReRes.write();
             AImRes.write();
         }
+    }
 
+//     // Solve A
+//     {
 //         // Coupling terms of electric scalar potential V
 //         // in equation for magnetic vector potential A
 //         {
@@ -212,7 +219,7 @@
 //             AReRes.write();
 //             AImRes.write();
 //         }
-    }
+//     }
 
     // Solve V
     {
@@ -268,9 +275,79 @@
 
             // Explicit source terms due to variable sigma
             // in conducting region with implied condition div(A)=0
-            VReEqn -= (gradAlpha & AIm) * indicatorVc;
-            VImEqn += (gradAlpha & ARe) * indicatorVc;
+            volScalarField VReEqnSource("VReEqnSource",   gradAlpha & AIm);
+            volScalarField VImEqnSource("VImEqnSource", - gradAlpha & ARe);
+
+            // TODO: Remove after debug
+            VReEqnSource.write();
+            VImEqnSource.write();
+
+//             // TEST
+//             VReEqnSource +=   alpha * fvc::div(AIm);
+//             VImEqnSource += - alpha * fvc::div(ARe);
+
+            // TODO: Remove after debug
+            VReEqnSource.write();
+            VImEqnSource.write();
+
+            VReEqn -= VReEqnSource * indicatorVc;
+            VImEqn -= VImEqnSource * indicatorVc;
+
+
+            // FIXME: Refpoint problems!
+            // Check Poisson compatibility
+            {
+                // Sums
+                scalar VReEqnSumSource = 0.0;
+                scalar VImEqnSumSource = 0.0;
+
+                // Mesh geometry
+                const scalarField& V = mesh.V();
+
+                forAll (cCells, celli)
+                {
+                    label cellI = cCells[celli];
+
+                    VReEqnSumSource += VReEqnSource[cellI] * V[cellI];
+                    VImEqnSumSource += VImEqnSource[cellI] * V[cellI];
+                }
+
+                scalar VReEqnSumFlux = 0.0;
+                scalar VImEqnSumFlux = 0.0;
+
+                surfaceScalarField SfARe("SfARe", linearInterpolate(ARe) & mesh.Sf());
+                surfaceScalarField SfAIm("SfAIm", linearInterpolate(AIm) & mesh.Sf());
+
+                forAll (cnPNfaces, facei)
+                {
+                    label faceI = cnPNfaces[facei];
+
+                    VReEqnSumFlux += omega.value() * SfAIm[faceI];
+                    VImEqnSumFlux -= omega.value() * SfARe[faceI];
+                }
+
+                forAll (cnNPfaces, facei)
+                {
+                    label faceI = cnNPfaces[facei];
+
+                    VReEqnSumFlux -= omega.value() * SfAIm[faceI];
+                    VImEqnSumFlux += omega.value() * SfARe[faceI];
+                }
+
+                Info << "VRe Poisson equation compatibility check (Source, Flux):"
+                    << "(" << VReEqnSumSource << ", " << VReEqnSumFlux << ")" << endl;
+                Info << "VIm Poisson equation compatibility check (Source, Flux):"
+                    << "(" << VImEqnSumSource << ", " << VImEqnSumFlux << ")" << endl;
+            }
         }
+
+//         // Solve V-equations
+//         // FIXME: Why does GAMG or amgSolver not work well?
+//         VReEqn.solve();
+//         VImEqn.solve();
+//
+//         VRe.correctBoundaryConditions();
+//         VIm.correctBoundaryConditions();
 
         // Prepare block system for V
         fvBlockMatrix<vector2> VEqn(V);
@@ -328,4 +405,10 @@
             VReRes.write();
             VImRes.write();
         }
+    }
+
+    // Update gradient of V
+    {
+        VReGrad = fvc::grad(VRe);
+        VImGrad = fvc::grad(VIm);
     }
