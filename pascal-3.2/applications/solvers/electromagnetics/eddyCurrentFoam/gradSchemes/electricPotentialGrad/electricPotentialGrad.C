@@ -33,67 +33,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace fv
-{
+template<class Type>
+const NamedEnum<typename fv::electricPotentialGrad<Type>::baseGradScheme, 2>
+fv::electricPotentialGrad<Type>::baseGradSchemeNames_;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-tmp
-<
-    GeometricField
-    <
-        typename outerProduct<vector, Type>::type, fvPatchField, volMesh
-    >
->
-electricPotentialGrad<Type>::gradf
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vsf,
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf,
-    const word& name
-) const
+namespace fv
 {
-    FatalErrorIn
-    (
-        "tmp<GeometricField> gradf\n"
-        "(\n"
-        "    GeometricField<Type, fvPatchField, volMesh>&,\n"
-        "    GeometricField<Type, fvsPatchField, surfaceMesh>&,\n"
-        "    const word&,\n"
-        ")\n"
-    )   << "Gradient face calculation defined only for scalar."
-        << abort(FatalError);
-
-    typedef typename outerProduct<vector, Type>::type GradType;
-
-    const fvMesh& mesh = ssf.mesh();
-
-    tmp<GeometricField<GradType, fvPatchField, volMesh> > tgGrad
-    (
-        new GeometricField<GradType, fvPatchField, volMesh>
-        (
-            IOobject
-            (
-                name,
-                ssf.instance(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensioned<GradType>
-            (
-                "0",
-                ssf.dimensions()/dimLength,
-                pTraits<GradType>::zero
-            ),
-            zeroGradientFvPatchField<GradType>::typeName
-        )
-    );
-
-    return tgGrad;
-}
-
 
 template<class Type>
 tmp
@@ -121,12 +68,32 @@ electricPotentialGrad<Type>::calcGrad
 
     typedef typename outerProduct<vector, Type>::type GradType;
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh> > tgGrad
+    const fvMesh& mesh = vsf.mesh();
+
+    tmp<GeometricField<GradType, fvPatchField, volMesh> > tepGrad
     (
-        gradf(vsf, tinterpScheme_().interpolate(vsf), name)
+        new GeometricField<GradType, fvPatchField, volMesh>
+        (
+            IOobject
+            (
+                name,
+                vsf.instance(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensioned<GradType>
+            (
+                "zero",
+                vsf.dimensions()/dimLength,
+                pTraits<GradType>::zero
+            ),
+            zeroGradientFvPatchField<GradType>::typeName
+        )
     );
 
-    return tgGrad;
+    return tepGrad;
 }
 
 

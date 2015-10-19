@@ -63,16 +63,33 @@ class electricPotentialGrad
 :
     public fv::gradScheme<Type>
 {
+
+public:
+
+    //- Enumeration defining the valid
+    //  base gradient schemes
+    enum baseGradScheme
+    {
+        GAUSS,
+        LEASTSQUARES,
+        UNDEFINED
+    };
+
+private:
+
     // Private data
 
         //- Magnetic properties dictionary
         const IOdictionary& magneticProperties_;
 
+        //- Names of valid base gradient schemes
+        static const NamedEnum<baseGradScheme, 2> baseGradSchemeNames_;
+
+        //- Base gradient scheme
+        baseGradScheme baseGradScheme_;
+
         //- Interpolation scheme
         tmp<surfaceInterpolationScheme<Type> > tinterpScheme_;
-
-        //- Name of base gradient scheme
-        word nameBaseGradScheme_;
 
         //- Name of the faceSet for non-conducting/conducting interface
         word nameInterface_;
@@ -119,6 +136,7 @@ public:
                     "magneticProperties"
                 )
             ),
+            baseGradScheme_(GAUSS),
             tinterpScheme_
             (
                 new linear<Type>
@@ -150,9 +168,9 @@ public:
                     "magneticProperties"
                 )
             ),
+            baseGradScheme_(UNDEFINED),
             tinterpScheme_(NULL)
         {
-
             if (is.eof())
             {
                 FatalIOErrorIn
@@ -161,28 +179,29 @@ public:
                     is
                 )   << "Base gradient scheme not specified!" << endl
                     << "Valid base gradient schemes are :" << endl
-                    << "1" << endl << "(" << endl
-                    << "Gauss" << endl
-                    << ")" << endl
+                    << baseGradSchemeNames_.sortedToc()
                     << exit(FatalIOError);
             }
 
-            nameBaseGradScheme_ = word(is);
+            word nameBaseGradScheme = word(is);
 
-            if (nameBaseGradScheme_ != "Gauss")
+            typename NamedEnum<baseGradScheme, 2>::const_iterator
+                cIter = baseGradSchemeNames_.find(nameBaseGradScheme);
+
+            if (cIter == baseGradSchemeNames_.end())
             {
                 FatalIOErrorIn
                 (
                     "electricPotentialGrad<Type>::electricPotentialGrad(const fvMesh&, Istream&)",
                     is
-                )   << "Base gradient scheme " << nameBaseGradScheme_
+                )   << "Base gradient scheme " << nameBaseGradScheme
                     << " is not supported!" << endl
                     << "Valid base gradient schemes are :" << endl
-                    << "1" << endl << "(" << endl
-                    << "Gauss" << endl
-                    << ")" << endl
+                    << baseGradSchemeNames_.sortedToc()
                     << exit(FatalIOError);
             }
+
+            baseGradScheme_ = baseGradSchemeNames_[nameBaseGradScheme];
 
             tinterpScheme_ =
             tmp<surfaceInterpolationScheme<Type> >
@@ -205,19 +224,6 @@ public:
 
     // Member Functions
 
-        //- Return the gradient of the given field
-        //  calculated using Gauss' theorem on the given surface field
-        tmp
-        <
-            GeometricField
-            <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
-        > gradf
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vsf,
-            const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf,
-            const word& name
-        ) const;
-
         //- Return the gradient of the given field calculated
         //  using Gauss' theorem on the interpolated field
         virtual tmp
@@ -232,7 +238,7 @@ public:
 
         //- Return the BlockLduSystem corresponding to the implicit grad
         // discretization. For block coupled systems.
-        tmp
+        virtual tmp
         <
             BlockLduSystem<vector, typename outerProduct<vector, Type>::type>
         > fvmGrad

@@ -51,15 +51,6 @@ namespace fv
 
 template<>
 tmp<GeometricField<vector, fvPatchField, volMesh> >
-electricPotentialGrad<scalar>::gradf
-(
-    const GeometricField<scalar, fvPatchField, volMesh>& vsf,
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>& ssf,
-    const word& name
-) const;
-
-template<>
-tmp<GeometricField<vector, fvPatchField, volMesh> >
 electricPotentialGrad<scalar>::calcGrad
 (
     const GeometricField<scalar, fvPatchField, volMesh>& vsf,
