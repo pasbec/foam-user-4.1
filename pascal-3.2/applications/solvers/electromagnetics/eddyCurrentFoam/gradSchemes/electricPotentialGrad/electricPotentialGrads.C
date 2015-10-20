@@ -31,25 +31,32 @@ License
 
 namespace Foam
 {
-
-template<>
-const char* NamedEnum<typename fv::electricPotentialGrad<scalar>::baseGradScheme, 2>::names[] =
-{
-    "Gauss",
-    "leastSquares"
-};
-
-template<>
-const char* NamedEnum<typename fv::electricPotentialGrad<vector>::baseGradScheme, 2>::names[] =
-{
-    "Gauss",
-    "leastSquares"
-};
-
 namespace fv
 {
     makeFvGradScheme(electricPotentialGrad)
 }
 }
+
+
+#define declareElectricPotentialGradNamedEnum(Type)                          \
+                                                                             \
+template<>                                                                   \
+const char* Foam::NamedEnum                                                  \
+<                                                                            \
+    typename Foam::fv::electricPotentialGrad                                 \
+    <                                                                        \
+        Foam::Type                                                           \
+    >::baseGradScheme,                                                       \
+    2                                                                        \
+>::names[] =                                                                 \
+{                                                                            \
+    "Gauss",                                                                 \
+    "leastSquares"                                                           \
+}
+
+
+declareElectricPotentialGradNamedEnum(scalar);
+declareElectricPotentialGradNamedEnum(vector);
+
 
 // ************************************************************************* //

@@ -57,11 +57,12 @@ electricPotentialGrad<scalar>::calcGrad
     const word& name
 ) const;
 
-// template<>
-// tmp<BlockLduSystem<vector, vector> > electricPotentialGrad<scalar>::fvmGrad
-// (
-//     const GeometricField<scalar, fvPatchField, volMesh>&
-// ) const;
+
+template<>
+tmp<BlockLduSystem<vector, vector> > electricPotentialGrad<scalar>::fvmGrad
+(
+    const GeometricField<scalar, fvPatchField, volMesh>&
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

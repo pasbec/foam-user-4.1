@@ -150,58 +150,58 @@ electricPotentialGrad<scalar>::calcGrad
         tgGrad.clear();
         tssf.clear();
     }
-    else if (this->baseGradScheme_ == this->LEASTSQUARES)
-    {
-        tmp<leastSquaresGrad<scalar> > tlsScheme
-        (
-            new leastSquaresGrad<scalar>(mesh)
-        );
-        leastSquaresGrad<scalar>& lsScheme = tlsScheme();
-
-        // Copy leastSquares gradient values
-        tmp<volVectorField> tlsGrad
-        (
-            lsScheme.calcGrad
-            (
-                vsf,
-                name
-            )
-        );
-        tepGrad() == tlsGrad();
-
-        const leastSquaresVectors& lsv = leastSquaresVectors::New(mesh);
-
-        const surfaceVectorField& ownLs = lsv.pVectors();
-        const surfaceVectorField& neiLs = lsv.nVectors();
-
-        const vectorField& ownLsIn = ownLs.internalField();
-        const vectorField& neiLsIn = neiLs.internalField();
-
-        register label faceI, ownFaceI, neiFaceI;
-
-        // Remove wrong contributions
-        // from interal faces
-        forAll(cnFaces, facei)
-        {
-            faceI = cnFaces[facei];
-
-            ownFaceI = own[faceI];
-            neiFaceI = nei[faceI];
-
-            {
-                scalar deltaVsf = vsfIn[neiFaceI] - vsfIn[ownFaceI];
-
-                epGradIn[ownFaceI] -= ownLsIn[facei] * deltaVsf;
-                epGradIn[neiFaceI] += neiLsIn[facei] * deltaVsf;
-            }
-        }
-
-        // TODO: Remove wrong contributions
-        // from boundary faces
-
-        tlsGrad.clear();
-        tlsScheme.clear();
-    }
+//     else if (this->baseGradScheme_ == this->LEASTSQUARES)
+//     {
+//         tmp<leastSquaresGrad<scalar> > tlsScheme
+//         (
+//             new leastSquaresGrad<scalar>(mesh)
+//         );
+//         leastSquaresGrad<scalar>& lsScheme = tlsScheme();
+//
+//         // Copy leastSquares gradient values
+//         tmp<volVectorField> tlsGrad
+//         (
+//             lsScheme.calcGrad
+//             (
+//                 vsf,
+//                 name
+//             )
+//         );
+//         tepGrad() == tlsGrad();
+//
+//         const leastSquaresVectors& lsv = leastSquaresVectors::New(mesh);
+//
+//         const surfaceVectorField& ownLs = lsv.pVectors();
+//         const surfaceVectorField& neiLs = lsv.nVectors();
+//
+//         const vectorField& ownLsIn = ownLs.internalField();
+//         const vectorField& neiLsIn = neiLs.internalField();
+//
+//         register label faceI, ownFaceI, neiFaceI;
+//
+//         // Remove wrong contributions
+//         // from interal faces
+//         forAll(cnFaces, facei)
+//         {
+//             faceI = cnFaces[facei];
+//
+//             ownFaceI = own[faceI];
+//             neiFaceI = nei[faceI];
+//
+//             {
+//                 scalar deltaVsf = vsfIn[neiFaceI] - vsfIn[ownFaceI];
+//
+//                 epGradIn[ownFaceI] -= ownLsIn[faceI] * deltaVsf;
+//                 epGradIn[neiFaceI] += neiLsIn[faceI] * deltaVsf;
+//             }
+//         }
+//
+//         // TODO: Remove wrong contributions
+//         // from boundary faces
+//
+//         tlsGrad.clear();
+//         tlsScheme.clear();
+//     }
 
     // Add correct face value contributions to cells
     // for the electric scalar potential from its
@@ -273,6 +273,9 @@ electricPotentialGrad<scalar>::calcGrad
                 scalar wP = omega.value() * w[faceI];
                 scalar wN = omega.value() - wP;
 
+                // TODO: Interpolation of A?
+                // Currently, a linear interpolation is hard-coded!
+
                 // Weighted face gradients
                 scalar SfAwOwn = wP * As * (A[ownFaceI] & Sn[faceI]);
                 scalar SfAwNei = wN * As * (A[neiFaceI] & Sn[faceI]);
@@ -280,8 +283,6 @@ electricPotentialGrad<scalar>::calcGrad
                 // Extrapolated face values
                 scalar ssfOwn = vsf[ownFaceI] + Pf * (SfAwOwn + SfAwNei);
                 scalar ssfNei = vsf[neiFaceI] - fN * (SfAwOwn + SfAwNei);
-                
-                // TODO: Correction for interpolation of A?
 
                 epGrad[ownFaceI] += Sf[faceI] * ssfOwn / V[ownFaceI];
                 epGrad[neiFaceI] -= Sf[faceI] * ssfNei / V[neiFaceI];
@@ -319,7 +320,6 @@ electricPotentialGrad<scalar>::fvmGrad
     );
     return tbs;
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

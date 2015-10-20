@@ -106,6 +106,9 @@ private:
 
     // Private Member Functions
 
+        //- Read dictionary data
+        void readMagneticProperties();
+
         //- Disallow default bitwise copy construct
         electricPotentialGrad(const electricPotentialGrad&);
 
@@ -124,8 +127,7 @@ public:
         //- Construct from mesh
         electricPotentialGrad
         (
-            const fvMesh& mesh,
-            word nameMagneticProperties
+            const fvMesh& mesh
         )
         :
             gradScheme<Type>(mesh),
@@ -145,12 +147,7 @@ public:
                 )
             )
         {
-            dictionary namesDict(magneticProperties_.subDict("names"));
-
-            nameInterface_ = word(namesDict.lookup("interface"));
-            nameConductivity_ = word(namesDict.lookup("conductivity"));
-            nameElectricPotential_ = word(namesDict.lookup("electricPotential"));
-            nameMagneticPotential_ = word(namesDict.lookup("magneticPotential"));
+            readMagneticProperties();
         }
 
         //- Construct from mesh and Istream
@@ -203,22 +200,20 @@ public:
 
             baseGradScheme_ = baseGradSchemeNames_[nameBaseGradScheme];
 
-            tinterpScheme_ =
-            tmp<surfaceInterpolationScheme<Type> >
-            (
-                surfaceInterpolationScheme<Type>::New
+            if (baseGradScheme_ == GAUSS)
+            {
+                tinterpScheme_ =
+                tmp<surfaceInterpolationScheme<Type> >
                 (
-                    mesh,
-                    is
-                )
-            );
+                    surfaceInterpolationScheme<Type>::New
+                    (
+                        mesh,
+                        is
+                    )
+                );
+            }
 
-            dictionary namesDict(magneticProperties_.subDict("names"));
-
-            nameInterface_ = word(namesDict.lookup("interface"));
-            nameConductivity_ = word(namesDict.lookup("conductivity"));
-            nameElectricPotential_ = word(namesDict.lookup("electricPotential"));
-            nameMagneticPotential_ = word(namesDict.lookup("magneticPotential"));
+            readMagneticProperties();
         }
 
 
