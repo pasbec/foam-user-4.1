@@ -6,6 +6,9 @@
 
 ./gradSchemes/electricPotentialGrad
 
+./laplacianSchemes/electricPotentialLaplacian
+
+./fvPatchFields/lookupFixedGradient
 ./fvPatchFields/directionMixedMixed
 ./fvPatchFields/patchDirectionMixedMixed
 ./fvPatchFields/tangentialMagnetic

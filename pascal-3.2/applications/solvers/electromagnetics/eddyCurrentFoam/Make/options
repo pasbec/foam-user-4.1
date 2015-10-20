@@ -3,6 +3,7 @@ EXE_INC = \
     -IinterpolationSchemes/fluxConservativeGradient \
     -IfvPatchFields/lookupFixedGradient \
     -IgradSchemes/electricPotentialGrad \
+    -IlaplacianSchemes/electricPotentialLaplacian \
     -IfvPatchFields/directionMixedMixed \
     -IfvPatchFields/patchDirectionMixedMixed \
     -IfvPatchFields/tangentialMagnetic \

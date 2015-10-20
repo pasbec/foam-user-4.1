@@ -38,6 +38,7 @@ Description
 
 #include "fluxConservativeValue.H"
 #include "electricPotentialGrad.H"
+#include "electricPotentialLaplacian.H"
 
 #include "zeroGradientFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"

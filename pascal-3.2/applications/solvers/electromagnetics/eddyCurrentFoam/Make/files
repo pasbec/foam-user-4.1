@@ -1,7 +1,10 @@
+
 interpolationSchemes/fluxConservativeValue/fluxConservativeValue.C
 
 gradSchemes/electricPotentialGrad/electricPotentialGrads.C
 gradSchemes/electricPotentialGrad/scalarElectricPotentialGrad.C
+
+laplacianSchemes/electricPotentialLaplacian/electricPotentialLaplacians.C
 
 fvPatchFields/lookupFixedGradient/lookupFixedGradientFvPatchFields.C
 fvPatchFields/lookupFixedGradient/lookupVectorFixedGradientFvPatchScalarField.C
