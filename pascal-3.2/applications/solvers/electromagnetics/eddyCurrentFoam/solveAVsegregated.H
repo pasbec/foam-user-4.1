@@ -296,18 +296,21 @@
 
             // Correct source integrals
             // TEST
-            // FIXME: Parallel?
             {
+                // Global conducting cell size
+                label cCellsSizeGlobal = returnReduce(cCells.size(), sumOp<label>());
 
-                VReEqnSumSource = sum(VReEqnSource.internalField() * V);
-                VImEqnSumSource = sum(VImEqnSource.internalField() * V);
+                // Global source integrals
+                VReEqnSumSource = gSum(VReEqnSource.internalField() * V);
+                VImEqnSumSource = gSum(VImEqnSource.internalField() * V);
 
+                // Force global source integral to zero
                 forAll (cCells, celli)
                 {
                     label cellI = cCells[celli];
 
-                    VReEqnSource[cellI] -= VReEqnSumSource/cCells.size()/V[cellI];
-                    VImEqnSource[cellI] -= VImEqnSumSource/cCells.size()/V[cellI];
+                    VReEqnSource[cellI] -= VReEqnSumSource / cCellsSizeGlobal / V[cellI];
+                    VImEqnSource[cellI] -= VImEqnSumSource / cCellsSizeGlobal / V[cellI];
                 }
             }
 
@@ -335,6 +338,9 @@
                     VReEqnSumFlux -= omega.value() * SfAIm[faceI];
                     VImEqnSumFlux += omega.value() * SfARe[faceI];
                 }
+
+                reduce(VReEqnSumFlux, sumOp<scalar>());
+                reduce(VImEqnSumFlux, sumOp<scalar>());
             }
 
             Info << "VRe Poisson equation compatibility check (Source, Flux):"
@@ -346,6 +352,61 @@
         // Add source terms
         VReEqn -= VReEqnSource;
         VImEqn -= VImEqnSource;
+
+        // Reference points
+        // FIXME: Refpoint problems!
+        {
+            // Grab parts of V-equations
+            scalarField& VReEqnD = VReEqn.diag();
+            scalarField& VReEqnS = VReEqn.source();
+            scalarField& VImEqnD = VImEqn.diag();
+            scalarField& VImEqnS = VImEqn.source();
+
+            // Reference values in conducting region
+            scalar cRefValueVRe = 0.0;
+            scalar cRefValueVIm = 0.0;
+
+            // Force reference cells in conducting region
+            VReEqnD[cRefCell] += VReEqnD[cRefCell];
+            VImEqnD[cRefCell] += VImEqnD[cRefCell];
+            VReEqnS[cRefCell] += VReEqnD[cRefCell]*cRefValueVRe;
+            VImEqnS[cRefCell] += VImEqnD[cRefCell]*cRefValueVIm;
+
+            // Reference values in non-conducting region
+            // TODO: Which values to use here best?
+            scalar nRefValueVRe = 0.0;
+            scalar nRefValueVIm = 0.0;
+
+            // Set reference cells in non-conducting region if needed
+            VReEqn.setReference(nRefCell, nRefValueVRe);
+            VImEqn.setReference(nRefCell, nRefValueVIm);
+        }
+
+//         // Pseudo time-stepping based on Euler-explicit
+//         // TEST
+//         {
+//             // Grab parts of V-equations
+//             scalarField& VReEqnD = VReEqn.diag();
+//             scalarField& VReEqnS = VReEqn.source();
+//             scalarField& VImEqnD = VImEqn.diag();
+//             scalarField& VImEqnS = VImEqn.source();
+//
+// //             // Fictive time step
+// //             // NOTE: Minus sign as laplacian is in matrix with plus sign
+// //             scalarField V = mesh.V();
+// //             scalar pseudoDeltaT = 1.0;
+// //             VReEqnD -= V/pseudoDeltaT;
+// //             VImEqnD -= V/pseudoDeltaT;
+// //             VReEqnS -= V/pseudoDeltaT * VRe.internalField();
+// //             VImEqnS -= V/pseudoDeltaT * VIm.internalField();
+//
+//             // Arbitrary damp factor based on diagonal value
+//             scalar damp = 1.0e-04;
+//             VReEqnD += damp * VReEqnD;
+//             VImEqnD += damp * VImEqnD;
+//             VReEqnS += damp * VReEqnD * VRe.internalField();
+//             VImEqnS += damp * VImEqnD * VIm.internalField();
+//         }
 
         // Restore solution
         VRe += VReAverage;

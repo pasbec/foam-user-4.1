@@ -16,13 +16,14 @@ FoamFile
 
 AV
 {
-//     method                       coupled;
-//     method                       segregated;
     method                       subset;
+//     method                       segregated;
+//     method                       coupled;
 
-    coupled
+    subset
     {
         corr                     1;
+        relax                    1.0;
     }
 
     segregated
@@ -31,10 +32,9 @@ AV
         relax                    1.0;
     }
 
-    subset
+    coupled
     {
         corr                     1;
-        relax                    1.0;
     }
 }
 

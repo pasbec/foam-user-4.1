@@ -359,46 +359,6 @@
         fvScalarMatrix cVReEqn(fvm::laplacian(cSigma, cVRe, "laplacian(sigma,VRe)"));
         fvScalarMatrix cVImEqn(fvm::laplacian(cSigma, cVIm, "laplacian(sigma,VIm)"));
 
-        // Reference point
-        // FIXME: Refpoint problems!
-        {
-            // Reference values in conducting region
-            scalar cRefValueVRe = 0.0;
-            scalar cRefValueVIm = 0.0;
-
-            // Reference cells in conducting region
-            cVReEqn.setReference(csRefCell, cRefValueVRe);
-            cVImEqn.setReference(csRefCell, cRefValueVIm);
-        }
-
-//         // Pseudo time-stepping based on Euler-explicit
-//         // TEST
-//         {
-//             // Grab parts of V-equations
-//             scalarField& cVReEqnD = cVReEqn.diag();
-//             scalarField& cVReEqnS = cVReEqn.source();
-//             scalarField& cVImEqnD = cVImEqn.diag();
-//             scalarField& cVImEqnS = cVImEqn.source();
-//
-// //             // Fictive time step
-// //             // NOTE: Minus sign as laplacian is in matrix with plus sign
-// //             scalarField V = cMesh.V();
-// //             scalar pseudoDeltaT = 1.0;
-// //             cVReEqnD -= V/pseudoDeltaT;
-// //             cVImEqnD -= V/pseudoDeltaT;
-// //             cVReEqnS -= V/pseudoDeltaT * cVRe.internalField();
-// //             cVImEqnS -= V/pseudoDeltaT * cVIm.internalField();
-//
-//             // Arbitrary damp factor based on diagonal value
-//             scalar damp = 1.0e-04;
-//             cVReEqnD += damp * cVReEqnD;
-//             cVImEqnD += damp * cVImEqnD;
-//             cVReEqnS += damp * cVReEqnD * cVRe.internalField();
-//             cVImEqnS += damp * cVImEqnD * cVIm.internalField();
-//         }
-
-//         // NOTE: Currently deflated solver is necessary as matrix is kept singluar!
-
         volVectorField cSigmaGrad = fvc::grad(cSigma);
 
         // Explicit source terms due to variable sigma
@@ -428,12 +388,16 @@
             // TEST
             // FIXME: Parallel?
             {
+                // Global cell size
+                label nCellsGlobal = returnReduce(cMesh.nCells(), sumOp<label>());
 
-                cVReEqnSumSource = sum(cVReEqnSource.internalField() * cV);
-                cVImEqnSumSource = sum(cVImEqnSource.internalField() * cV);
+                // Global source integrals
+                cVReEqnSumSource = gSum(cVReEqnSource.internalField() * cV);
+                cVImEqnSumSource = gSum(cVImEqnSource.internalField() * cV);
 
-                cVReEqnSource.internalField() -= cVReEqnSumSource / cMesh.nCells() / cV;
-                cVImEqnSource.internalField() -= cVImEqnSumSource / cMesh.nCells() / cV;
+                // Force global source integral to zero
+                cVReEqnSource.internalField() -= cVReEqnSumSource / nCellsGlobal / cV;
+                cVImEqnSource.internalField() -= cVImEqnSumSource / nCellsGlobal / cV;
             }
 
             // Source integrals
@@ -441,23 +405,28 @@
             cVImEqnSumSource = gSum(cVImEqnSource.internalField() * cV);
 
             // Boundary integrals
-            forAll(cMesh.boundaryMesh(), patchI)
             {
-                const polyPatch& patch = cMesh.boundaryMesh()[patchI];
-
-                const vectorField& SfP = cMesh.Sf().boundaryField()[patchI];
-
-                const vectorField& cAReP = cARe.boundaryField()[patchI];
-                const vectorField& cAImP = cAIm.boundaryField()[patchI];
-
-                // Old internal faces
-                if (patch.name() == "oldInternalFaces")
+                forAll(cMesh.boundaryMesh(), patchI)
                 {
-                    cVReEqnSumFlux += gSum(omega.value() * (cAReP & SfP));
-                    cVImEqnSumFlux += gSum(omega.value() * (cAImP & SfP));
+                    const polyPatch& patch = cMesh.boundaryMesh()[patchI];
+
+                    const vectorField& SfP = cMesh.Sf().boundaryField()[patchI];
+
+                    const vectorField& cAReP = cARe.boundaryField()[patchI];
+                    const vectorField& cAImP = cAIm.boundaryField()[patchI];
+
+                    // Old internal faces
+                    if (patch.name() == "oldInternalFaces")
+                    {
+                        cVReEqnSumFlux += sum(omega.value() * (cAReP & SfP));
+                        cVImEqnSumFlux += sum(omega.value() * (cAImP & SfP));
+                    }
+
+                    // TODO: What about other patches?
                 }
 
-                // TODO: What about other patches?
+                reduce(cVReEqnSumFlux, sumOp<scalar>());
+                reduce(cVImEqnSumFlux, sumOp<scalar>());
             }
 
             Info << "VRe Poisson equation compatibility check (Source, Flux):"
@@ -469,6 +438,46 @@
         // Add source terms
         cVReEqn -= cVReEqnSource;
         cVImEqn -= cVImEqnSource;
+
+//         // Reference point
+//         // FIXME: Refpoint problems!
+//         {
+//             // Reference values in conducting region
+//             scalar cRefValueVRe = 0.0;
+//             scalar cRefValueVIm = 0.0;
+//
+//             // Reference cells in conducting region
+//             cVReEqn.setReference(csRefCell, cRefValueVRe);
+//             cVImEqn.setReference(csRefCell, cRefValueVIm);
+//         }
+
+//         // Pseudo time-stepping based on Euler-explicit
+//         // TEST
+//         {
+//             // Grab parts of V-equations
+//             scalarField& cVReEqnD = cVReEqn.diag();
+//             scalarField& cVReEqnS = cVReEqn.source();
+//             scalarField& cVImEqnD = cVImEqn.diag();
+//             scalarField& cVImEqnS = cVImEqn.source();
+//
+// //             // Fictive time step
+// //             // NOTE: Minus sign as laplacian is in matrix with plus sign
+// //             scalarField V = cMesh.V();
+// //             scalar pseudoDeltaT = 1.0;
+// //             cVReEqnD -= V/pseudoDeltaT;
+// //             cVImEqnD -= V/pseudoDeltaT;
+// //             cVReEqnS -= V/pseudoDeltaT * cVRe.internalField();
+// //             cVImEqnS -= V/pseudoDeltaT * cVIm.internalField();
+//
+//             // Arbitrary damp factor based on diagonal value
+//             scalar damp = 1.0e-04;
+//             cVReEqnD += damp * cVReEqnD;
+//             cVImEqnD += damp * cVImEqnD;
+//             cVReEqnS += damp * cVReEqnD * cVRe.internalField();
+//             cVImEqnS += damp * cVImEqnD * cVIm.internalField();
+//         }
+
+        // NOTE NOTE NOTE: Currently deflated solver is necessary as matrix is kept singluar!
 
         // Restore solution level
         cVRe += VReAverage;

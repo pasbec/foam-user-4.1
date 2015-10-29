@@ -13,6 +13,35 @@
         VReEqn *= scaleV;
         VImEqn *= scaleV;
 
+        // Reference points for V equation
+        // FIXME: Refpoint problems!
+        {
+            // Grab parts of V-equations
+            scalarField& VReEqnD = VReEqn.diag();
+            scalarField& VReEqnS = VReEqn.source();
+            scalarField& VImEqnD = VImEqn.diag();
+            scalarField& VImEqnS = VImEqn.source();
+
+            // Reference values in conducting region
+            scalar cRefValueVRe = 0.0;
+            scalar cRefValueVIm = 0.0;
+
+            // Force reference cells in conducting region
+            VReEqnD[cRefCell] += VReEqnD[cRefCell];
+            VImEqnD[cRefCell] += VImEqnD[cRefCell];
+            VReEqnS[cRefCell] += VReEqnD[cRefCell]*cRefValueVRe;
+            VImEqnS[cRefCell] += VImEqnD[cRefCell]*cRefValueVIm;
+
+            // Reference values in non-conducting region
+            // TODO: Which values to use here best?
+            scalar nRefValueVRe = 0.0;
+            scalar nRefValueVIm = 0.0;
+
+            // Set reference cells in non-conducting region if needed
+            VReEqn.setReference(nRefCell, nRefValueVRe);
+            VImEqn.setReference(nRefCell, nRefValueVIm);
+        }
+
         // Prepare block system
         fvBlockMatrix<vector8> AVEqn(AV);
 
