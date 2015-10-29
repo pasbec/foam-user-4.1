@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.1                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default                           none;
+}
+
+gradSchemes
+{
+    default                           none;
+
+    grad(sigma)                       Gauss linear;
+
+    grad(VRe)                         Gauss linear;
+    grad(VIm)                         Gauss linear;
+
+    snGradCorr(VRe)                   Gauss linear;
+    snGradCorr(VIm)                   Gauss linear;
+
+    snGradCorr(VReCorr)               Gauss linear;
+    snGradCorr(VImCorr)               Gauss linear;
+}
+
+divSchemes
+{
+    default                           none;
+
+    div(ARe)                          Gauss linear;
+    div(AIm)                          Gauss linear;
+}
+
+laplacianSchemes
+{
+    default                           none;
+
+    laplacian(sigma,VRe)              Gauss linear corrected;
+    laplacian(sigma,VIm)              Gauss linear corrected;
+//     laplacian(sigma,VRe)              Gauss linear uncorrected;
+//     laplacian(sigma,VIm)              Gauss linear uncorrected;
+//     laplacian(sigma,VRe)              Gauss harmonic uncorrected;
+//     laplacian(sigma,VIm)              Gauss harmonic uncorrected;
+}
+
+interpolationSchemes
+{
+    default                           none;
+}
+
+// ************************************************************************* //

@@ -1,9 +1,11 @@
 
 interpolationSchemes/fluxConservativeValue/fluxConservativeValue.C
 
+gradSchemes/electricPotentialGrad/electricPotentialGradBase.C
 gradSchemes/electricPotentialGrad/electricPotentialGrads.C
 gradSchemes/electricPotentialGrad/scalarElectricPotentialGrad.C
 
+laplacianSchemes/electricPotentialLaplacian/electricPotentialLaplacianBase.C
 laplacianSchemes/electricPotentialLaplacian/electricPotentialLaplacians.C
 
 fvPatchFields/lookupFixedGradient/lookupFixedGradientFvPatchFields.C
@@ -11,6 +13,8 @@ fvPatchFields/lookupFixedGradient/lookupVectorFixedGradientFvPatchScalarField.C
 fvPatchFields/directionMixedMixed/directionMixedMixedFvPatchFields.C
 fvPatchFields/patchDirectionMixedMixed/patchDirectionMixedMixedFvPatchFields.C
 fvPatchFields/tangentialMagnetic/tangentialMagneticFvPatchFields.C
+
+deflatedPCG/deflatedPCG.C
 
 eddyCurrentFoam.C
 

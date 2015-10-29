@@ -46,6 +46,7 @@ Description
 #include "lookupFixedGradientFvPatchFields.H"
 #include "tangentialMagneticFvPatchFields.H"
 
+#include "deflatedPCG.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

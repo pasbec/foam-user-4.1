@@ -12,3 +12,5 @@
 ./fvPatchFields/directionMixedMixed
 ./fvPatchFields/patchDirectionMixedMixed
 ./fvPatchFields/tangentialMagnetic
+
+./deflatedPCG

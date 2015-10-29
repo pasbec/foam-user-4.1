@@ -1,0 +1,78 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.1                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "(VRe|VIm)"
+//     {
+//         solver                   GAMG;
+//
+//         tolerance                1e-04;
+//         relTol                   0;
+//
+//         minIter                  0;
+//         maxIter                  100;
+//
+//         smoother                 DICGaussSeidel;
+//         nPreSweeps               0;
+//         nPostSweeps              2;
+//
+//         cacheAgglomeration       on;
+//         agglomerator             faceAreaPair;
+//         nCellsInCoarsestLevel    200;
+//         mergeLevels              1;
+//     }
+//     {
+//         solver                   BiCGStab;
+//
+//         tolerance                1e-04;
+//         relTol                   0;
+//
+//         minIter                  0;
+//         maxIter                  300;
+//
+//         preconditioner           DIC; // Cholesky
+//     }
+    {
+        solver                   deflatedPCG;
+
+        tolerance                1e-04;
+        relTol                   0;
+
+        minIter                  0;
+        maxIter                  300;
+
+        preconditioner           DIC;
+    }
+
+//     "(VReCorr)" { $VRe; minIter 1; }
+//     "(VImCorr)" { $VIm; minIter 1; }
+
+    "(VReCorr|VImCorr)"
+    {
+        solver                   PCG;
+
+        tolerance                1e-04;
+        relTol                   0;
+
+        minIter                  1;
+        maxIter                  300;
+
+        preconditioner           DIC;
+    }
+}
+
+// ************************************************************************* //
