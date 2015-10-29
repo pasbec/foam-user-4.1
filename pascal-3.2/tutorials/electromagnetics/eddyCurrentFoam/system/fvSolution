@@ -16,8 +16,14 @@ FoamFile
 
 AV
 {
-    method                       segregated;
 //     method                       coupled;
+//     method                       segregated;
+    method                       subset;
+
+    coupled
+    {
+        corr                     1;
+    }
 
     segregated
     {
@@ -25,9 +31,10 @@ AV
         relax                    1.0;
     }
 
-    coupled
+    subset
     {
         corr                     1;
+        relax                    1.0;
     }
 }
 
@@ -174,6 +181,56 @@ solvers
 
         preconditioner           DILU; // Cholesky
     }
+//     {
+//         solver                   PCG;
+//
+//         tolerance                1e-04;
+//         relTol                   0;
+//
+//         minIter                  0;
+//         maxIter                  300;
+//
+//         preconditioner           DILU; // Cholesky
+//     }
+//     {
+//         solver                   GAMG;
+//
+//         tolerance                1e-04;
+//         relTol                   0;
+//
+//         minIter                  0;
+//         maxIter                  100;
+//
+//         smoother                 DICGaussSeidel;
+//         nPreSweeps               0;
+//         nPostSweeps              2;
+//
+//         cacheAgglomeration       on;
+//         agglomerator             faceAreaPair;
+//         nCellsInCoarsestLevel    200;
+//         mergeLevels              1;
+//     }
+//     {
+//         solver                   amgSolver;
+//
+//         cycle                    V-cycle;
+//         policy                   PAMG;
+//
+//         tolerance                1e-04;
+//         relTol                   0;
+//
+//         minIter                  0;
+//         maxIter                  100;
+//
+//         smoother                 GaussSeidel; // ILU, GaussSeidel
+//         nPreSweeps               0;
+//         nPostSweeps              2;
+//
+//         groupSize                4;
+//         minCoarseEqns            30;
+//         nMaxLevels               100;
+//         scale                    on;
+//     }
 }
 
 // ************************************************************************* //
