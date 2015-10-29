@@ -167,6 +167,22 @@
         ),
         mesh
     );
+    uniformDimensionedScalarField VReAverage
+    (
+        IOobject
+        (
+            "VReAverage",
+            runTime.timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        dimensionedScalar(
+            word(),
+            VRe.dimensions(),
+            gAverage(VRe.internalField())
+        )
+    );
 
     // Electric scalar potential (imaginary part)
     Info << "Create field VIm " << nl << endl;
@@ -181,6 +197,22 @@
             IOobject::AUTO_WRITE
         ),
         mesh
+    );
+    uniformDimensionedScalarField VImAverage
+    (
+        IOobject
+        (
+            "VImAverage",
+            runTime.timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        dimensionedScalar(
+            word(),
+            VIm.dimensions(),
+            gAverage(VIm.internalField())
+        )
     );
 
     // Electric scalar potential gradient (real part)

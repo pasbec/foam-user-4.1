@@ -15,12 +15,6 @@
     labelHashSet cnPNfacesHashSet;
     labelHashSet cnNPfacesHashSet;
 
-    // Reference settings
-    label  cnPNRefFace = 0;
-    scalar cnPNRefFaceSigmaMax = -VGREAT;
-    label  cnNPRefFace = 0;
-    scalar cnNPRefFaceSigmaMax = -VGREAT;
-
     label refFace = -1;
     label cRefCell = -1;
     label nRefCell = -1;
@@ -55,12 +49,6 @@
             {
                 cnFacesHashSet.insert(facei);
                 cnPNfacesHashSet.insert(facei);
-
-                if (sigma.internalField()[own[facei]] >= cnPNRefFaceSigmaMax)
-                {
-                    cnPNRefFaceSigmaMax = sigma.internalField()[own[facei]];
-                    cnPNRefFace = facei;
-                }
             }
 
             if
@@ -71,36 +59,20 @@
             {
                 cnFacesHashSet.insert(facei);
                 cnNPfacesHashSet.insert(facei);
-
-                if (sigma.internalField()[nei[facei]] >= cnNPRefFaceSigmaMax)
-                {
-                    cnNPRefFaceSigmaMax = sigma.internalField()[nei[facei]];
-                    cnNPRefFace = facei;
-                }
             }
         }
 
+//         // Set reference settings
+//         // FIXME: Refpoint problems!
+//         refFace = cnPNfacesHashSet.toc()[0];
+//         cRefCell = own[refFace];
+//         nRefCell = nei[refFace];
+
         // Set reference settings
-        refFace = cnPNfacesHashSet.toc()[0];
-        cRefCell = own[refFace];
-        nRefCell = nei[refFace];
-
-//         // TEST
-//         cRefCell = mesh.findCell(point(0.00, 0.00, 0.01));
-//         nRefCell = mesh.findCell(point(0.12, 0.00, 0.01));
-
-//         if (cnPNRefFaceSigmaMax >= cnNPRefFaceSigmaMax)
-//         {
-//             refFace = cnPNRefFace;
-//             cRefCell = own[refFace];
-//             nRefCell = nei[refFace];
-//         }
-//         else
-//         {
-//             refFace = cnNPRefFace;
-//             cRefCell = nei[refFace];
-//             nRefCell = own[refFace];
-//         }
+        // TEST
+        // FIXME: Refpoint problems!
+        cRefCell = mesh.findCell(point(0.00, 0.00, 0.01));
+        nRefCell = mesh.findCell(point(0.12, 0.00, 0.01));
     }
 
     // Create table of content lists
@@ -182,6 +154,3 @@
             csRefCell = celli;
         }
     }
-
-//     // TEST
-//     csRefCell = cMesh.findCell(point(0.00, 0.00, 0.01));

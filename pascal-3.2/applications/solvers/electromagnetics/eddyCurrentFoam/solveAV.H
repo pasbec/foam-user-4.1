@@ -4,22 +4,7 @@
 //     volScalarField& indicatorVn = *indicatorVnPtr;
 
     // Solve AV-system
-    if (AVmethod == "coupled")
-    {
-        int nCorr = AVmethodDict.lookupOrDefault<int>("corr",4);
-
-        forAll (labelList(nCorr), corr)
-        {
-            // Assemble base-matrix for A
-#           include "AEqn.H"
-
-            // Assemble base-matrix for V
-        #   include "VEqn.H"
-
-#           include "solveAVcoupled.H"
-        }
-    }
-    else if (AVmethod == "subset")
+    if (AVmethod == "subset")
     {
         int nCorr = AVmethodDict.lookupOrDefault<int>("corr",4);
 
@@ -44,6 +29,21 @@
 #           include "VEqn.H"
 
 #           include "solveAVsegregated.H"
+        }
+    }
+    else if (AVmethod == "coupled")
+    {
+        int nCorr = AVmethodDict.lookupOrDefault<int>("corr",4);
+
+        forAll (labelList(nCorr), corr)
+        {
+            // Assemble base-matrix for A
+#           include "AEqn.H"
+
+            // Assemble base-matrix for V
+        #   include "VEqn.H"
+
+#           include "solveAVcoupled.H"
         }
     }
     else

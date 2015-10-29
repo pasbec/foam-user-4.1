@@ -181,6 +181,7 @@
         surfaceVectorField sARe("sARe", fvc::interpolate(ARe));
         surfaceVectorField sAIm("sAIm", fvc::interpolate(AIm));
 
+        // Create local magnetic vector potential A
         volVectorField cARe
         (
             IOobject
@@ -194,7 +195,6 @@
             dimensioned<vector>(word(), ARe.dimensions(), vector::zero),
             fixedValueFvPatchField<vector>::typeName
         );
-
         volVectorField cAIm
         (
             IOobject
@@ -209,6 +209,7 @@
             fixedValueFvPatchField<vector>::typeName
         );
 
+        // Create local electric scalar potential V
         volScalarField cVRe
         (
             IOobject
@@ -222,7 +223,6 @@
             dimensioned<scalar>(word(), VRe.dimensions(), 0.0),
             fixedGradientFvPatchField<scalar>::typeName
         );
-
         volScalarField cVIm
         (
             IOobject
@@ -237,6 +237,7 @@
             fixedGradientFvPatchField<scalar>::typeName
         );
 
+        // Create local conductivity
         volScalarField cSigma
         (
             IOobject
@@ -251,86 +252,112 @@
             zeroGradientFvPatchField<scalar>::typeName
         );
 
-        // Map volume fields
+        // Internal fields
         forAll (cMesh.C(), cellI)
         {
+            // Map internal values for A
             cARe.internalField()[cellI] = ARe.internalField()[cMeshCellMap[cellI]];
             cAIm.internalField()[cellI] = AIm.internalField()[cMeshCellMap[cellI]];
 
+            // Map internal values for V
             cVRe.internalField()[cellI] = VRe.internalField()[cMeshCellMap[cellI]];
             cVIm.internalField()[cellI] = VIm.internalField()[cMeshCellMap[cellI]];
 
+            // Map internal values for sigma
             cSigma.internalField()[cellI] = sigma.internalField()[cMeshCellMap[cellI]];
         }
+
+        // Boundary fields
         forAll(cMesh.boundaryMesh(), patchI)
         {
             polyPatch patch = cMesh.boundaryMesh()[patchI];
 
-            // Map old internal faces
+            // Old internal faces
             if (patch.name() == "oldInternalFaces")
             {
-                forAll(patch, facei)
+                // Boundary values for A
                 {
-                    label faceI = patch.start() + facei;
+                    vectorField& cAReP = cARe.boundaryField()[patchI];
+                    vectorField& cAImP = cAIm.boundaryField()[patchI];
 
-                    cARe.boundaryField()[patchI][facei] == sARe[cMeshFaceMap[faceI]];
-                    cAIm.boundaryField()[patchI][facei] == sAIm[cMeshFaceMap[faceI]];
+                    forAll(patch, facei)
+                    {
+                        label faceI = patch.start() + facei;
+
+                        cAReP[facei] = sARe[cMeshFaceMap[faceI]];
+                        cAImP[facei] = sAIm[cMeshFaceMap[faceI]];
+                    }
+                }
+
+                // Boundary values for V
+                {
+                    if
+                    (
+                        cVRe.boundaryField()[patchI].type()
+                    == fixedGradientFvPatchField<scalar>::typeName
+                    )
+                    {
+                        fixedGradientFvPatchField<scalar>& cVReP =
+                            refCast<fixedGradientFvPatchField<scalar> >
+                            (
+                                cVRe.boundaryField()[patchI]
+                            );
+
+                        // Set correct gradient
+                        cVReP.gradient() =  omega.value()
+                        * (cAIm.boundaryField()[patchI] & cVReP.patch().nf());
+
+                        // Evaluate values
+                        cVReP.evaluate();
+                    }
+
+                    if
+                    (
+                        cVIm.boundaryField()[patchI].type()
+                    == fixedGradientFvPatchField<scalar>::typeName
+                    )
+                    {
+                        fixedGradientFvPatchField<scalar>& cVImP =
+                            refCast<fixedGradientFvPatchField<scalar> >
+                            (
+                                cVIm.boundaryField()[patchI]
+                            );
+
+                        // Set correct gradient
+                        cVImP.gradient() = -omega.value()
+                        * (cARe.boundaryField()[patchI] & cVImP.patch().nf());
+
+                        // Evaluate values
+                        cVImP.evaluate();
+                    }
+                }
+
+                // Boundary values for sigma
+                {
+                    fvPatchField<scalar>& cSigmaP = cSigma.boundaryField()[patchI];
+
+                    // Evaluate values
+                    cSigmaP.evaluate();
                 }
             }
 
             // TODO: What about other patches?
         }
 
-        // Boundary conditions for V
-        forAll(cVRe.boundaryField(), patchI)
-        {
-            if
-            (
-                cVRe.boundaryField()[patchI].type()
-             == fixedGradientFvPatchField<scalar>::typeName
-            )
-            {
-                fixedGradientFvPatchField<scalar>& cVReP =
-                    refCast<fixedGradientFvPatchField<scalar> >
-                    (
-                        cVRe.boundaryField()[patchI]
-                    );
+        // Correct boundary conditions for A
+        cARe.correctBoundaryConditions();
+        cAIm.correctBoundaryConditions();
 
-                // Set correct gradient
-                cVReP.gradient() =  omega.value()
-                   * (cAIm.boundaryField()[patchI] & cVReP.patch().nf());
-            }
-        }
-        forAll(cVIm.boundaryField(), patchI)
-        {
-            if
-            (
-                cVIm.boundaryField()[patchI].type()
-             == fixedGradientFvPatchField<scalar>::typeName
-            )
-            {
-                fixedGradientFvPatchField<scalar>& cVImP =
-                    refCast<fixedGradientFvPatchField<scalar> >
-                    (
-                        cVIm.boundaryField()[patchI]
-                    );
+        // Correct boundary conditions for V
+        cVRe.correctBoundaryConditions();
+        cVIm.correctBoundaryConditions();
 
-                // Set correct gradient
-                cVImP.gradient() = -omega.value()
-                   * (cARe.boundaryField()[patchI] & cVImP.patch().nf());
-            }
-        }
-
-        // Interpolate sigma to face centers
-        surfaceScalarField csSigma
-        (
-            "sSigma",
-            fvc::interpolate(cSigma, "interpolate(sigma)")
-        );
+        // Correct boundary conditions for sigma
+        cSigma.correctBoundaryConditions();
 
         // Prepare V-equations
-        fvScalarMatrix cVReEqn(fvm::laplacian(csSigma, cVRe, "laplacian(sigma,VRe)"));
-        fvScalarMatrix cVImEqn(fvm::laplacian(csSigma, cVIm, "laplacian(sigma,VIm)"));
+        fvScalarMatrix cVReEqn(fvm::laplacian(cSigma, cVRe, "laplacian(sigma,VRe)"));
+        fvScalarMatrix cVImEqn(fvm::laplacian(cSigma, cVIm, "laplacian(sigma,VIm)"));
 
         volVectorField cSigmaGrad = fvc::grad(cSigma);
 
@@ -346,97 +373,184 @@
         cVReEqn -= cVReEqnSource;
         cVImEqn -= cVImEqnSource;
 
-        // Check Poisson compatibility
-        {
-            // Sums
-            scalar cVReEqnSumSource = 0.0;
-            scalar cVImEqnSumSource = 0.0;
+//         // Check Poisson compatibility
+//         // TEST
+//         {
+//             // Mesh geometry
+//             const scalarField& cV = cMesh.V();
+//
+//             // Source sums
+//             scalar cVReEqnSumSource = 0.0;
+//             scalar cVImEqnSumSource = 0.0;
+//
+//             // Flux sums
+//             scalar cVReEqnSumFlux = 0.0;
+//             scalar cVImEqnSumFlux = 0.0;
+//
+//             // Correct source integrals
+//             // TEST
+//             // FIXME: Parallel?
+//             {
+//
+//                 cVReEqnSumSource = sum(cVReEqnSource.internalField() * cV);
+//                 cVImEqnSumSource = sum(cVImEqnSource.internalField() * cV);
+//
+//                 cVReEqnSource.internalField() -= cVReEqnSumSource / cMesh.nCells() / cV;
+//                 cVImEqnSource.internalField() -= cVImEqnSumSource / cMesh.nCells() / cV;
+//             }
+//
+//             // Source integrals
+//             cVReEqnSumSource = gSum(cVReEqnSource.internalField() * cV);
+//             cVImEqnSumSource = gSum(cVImEqnSource.internalField() * cV);
+//
+//             // Boundary integrals
+//             forAll(cMesh.boundaryMesh(), patchI)
+//             {
+//                 const polyPatch& patch = cMesh.boundaryMesh()[patchI];
+//
+//                 const vectorField& SfP = cMesh.Sf().boundaryField()[patchI];
+//
+//                 const vectorField& cAReP = cARe.boundaryField()[patchI];
+//                 const vectorField& cAImP = cAIm.boundaryField()[patchI];
+//
+//                 // Old internal faces
+//                 if (patch.name() == "oldInternalFaces")
+//                 {
+//                     cVReEqnSumFlux += gSum(omega.value() * (cAReP & SfP));
+//                     cVImEqnSumFlux += gSum(omega.value() * (cAImP & SfP));
+//                 }
+//
+//                 // TODO: What about other patches?
+//             }
+//
+//             Info << "VRe Poisson equation compatibility check (Source, Flux):"
+//                 << "(" << cVReEqnSumSource << ", " << cVReEqnSumFlux << ")" << endl;
+//             Info << "VIm Poisson equation compatibility check (Source, Flux):"
+//                 << "(" << cVImEqnSumSource << ", " << cVImEqnSumFlux << ")" << endl;
+//         }
 
-            // Mesh geometry
-            const scalarField& V = cMesh.V();
+//         // Reference point
+//         // FIXME: Refpoint problems!
+//         {
+//             // Reference values in conducting region
+//             scalar cRefValueVRe = 0.0;
+//             scalar cRefValueVIm = 0.0;
+//
+//             // Reference cells in conducting region
+//             cVReEqn.setReference(csRefCell, cRefValueVRe);
+//             cVImEqn.setReference(csRefCell, cRefValueVIm);
+//         }
 
-            forAll (cMesh.C(), cellI)
-            {
-                cVReEqnSumSource += cVReEqnSource[cellI] * V[cellI];
-                cVImEqnSumSource += cVImEqnSource[cellI] * V[cellI];
-            }
+//         // Pseudo time-stepping based on Euler-explicit
+//         // TEST
+//         {
+//             // Grab parts of V-equations
+//             scalarField& cVReEqnD = cVReEqn.diag();
+//             scalarField& cVReEqnS = cVReEqn.source();
+//             scalarField& cVImEqnD = cVImEqn.diag();
+//             scalarField& cVImEqnS = cVImEqn.source();
+//
+// //             // Fictive time step
+// //             // NOTE: Minus sign as laplacian is in matrix with plus sign
+// //             scalarField V = cMesh.V();
+// //             scalar pseudoDeltaT = 1.0;
+// //             cVReEqnD -= V/pseudoDeltaT;
+// //             cVImEqnD -= V/pseudoDeltaT;
+// //             cVReEqnS -= V/pseudoDeltaT * cVRe.internalField();
+// //             cVImEqnS -= V/pseudoDeltaT * cVIm.internalField();
+//
+//             // Arbitrary damp factor based on diagonal value
+//             scalar damp = 1.0e-04;
+//             cVReEqnD += damp * cVReEqnD;
+//             cVImEqnD += damp * cVImEqnD;
+//             cVReEqnS += damp * cVReEqnD * cVRe.internalField();
+//             cVImEqnS += damp * cVImEqnD * cVIm.internalField();
+//         }
 
-            scalar cVReEqnSumFlux = 0.0;
-            scalar cVImEqnSumFlux = 0.0;
-
-            forAll(cMesh.boundaryMesh(), patchI)
-            {
-                const polyPatch& patch = cMesh.boundaryMesh()[patchI];
-
-                vectorField Nf = cMesh.Sf().boundaryField()[patchI] / cMesh.magSf().boundaryField()[patchI];
-
-                // Old internal faces
-                if (patch.name() == "oldInternalFaces")
-                {
-                    forAll(patch, facei)
-                    {
-                        label faceI = patch.start() + facei;
-
-                        cVReEqnSumFlux += omega.value() * (sAIm[cMeshFaceMap[faceI]] & Nf[cMeshFaceMap[faceI]]);
-                        cVImEqnSumFlux += omega.value() * (sARe[cMeshFaceMap[faceI]] & Nf[cMeshFaceMap[faceI]]);
-                    }
-                }
-
-                // TODO: What about other patches?
-            }
-
-            Info << "VRe Poisson equation compatibility check (Source, Flux):"
-                << "(" << cVReEqnSumSource << ", " << cVReEqnSumFlux << ")" << endl;
-            Info << "VIm Poisson equation compatibility check (Source, Flux):"
-                << "(" << cVImEqnSumSource << ", " << cVImEqnSumFlux << ")" << endl;
-        }
-
-        // Reference settings
-        {
-            // Reference values in conducting region
-            scalar cRefValueVRe = 0.0;
-            scalar cRefValueVIm = 0.0;
-
-            // Reference cells in conducting region
-            // FIXME: Refpoint problems!
-            cVReEqn.setReference(csRefCell, cRefValueVRe);
-            cVImEqn.setReference(csRefCell, cRefValueVIm);
-        }
+        // Restore solution level
+        cVRe += VReAverage;
+        cVIm += VImAverage;
 
         // Solve V-equations
         cVReEqn.solve();
         cVImEqn.solve();
 
+        // Correct boundary conditions
         cVRe.correctBoundaryConditions();
         cVIm.correctBoundaryConditions();
 
-        // FIXME: Wrong gradient values at boundary
-        volVectorField cVReGrad
-        (
-            IOobject
-            (
-                "VRe",
-                cMesh.time().timeName(),
-                cMesh,
-                IOobject::NO_READ
-            ),
-            fvc::grad(cVRe)
-        );
+        // Calculate average
+        VReAverage = average(cVRe);
+        VImAverage = average(cVIm);
 
-        // FIXME: Wrong gradient values at boundary
-        volVectorField cVImGrad
-        (
-            IOobject
-            (
-                "VIm",
-                cMesh.time().timeName(),
-                cMesh,
-                IOobject::NO_READ
-            ),
-            fvc::grad(cVIm)
-        );
+        // Normalize solution level
+        cVRe -= VReAverage;
+        cVIm -= VImAverage;
 
-        // Reverse map V
+//         // Dirichlet correction
+//         // TEST
+//         {
+//             // Create copy of electric scalar potential V
+//             // based on fixed value boundary conditions
+//             volScalarField cVReCorr
+//             (
+//                 IOobject
+//                 (
+//                     "VReCorr",
+//                     cMesh.time().timeName(),
+//                     cMesh,
+//                     IOobject::NO_READ
+//                 ),
+//                 cMesh,
+//                 dimensioned<scalar>(word(), VRe.dimensions(), 0.0),
+//                 fixedValueFvPatchField<scalar>::typeName
+//             );
+//             volScalarField cVImCorr
+//             (
+//                 IOobject
+//                 (
+//                     "VImCorr",
+//                     cMesh.time().timeName(),
+//                     cMesh,
+//                     IOobject::NO_READ
+//                 ),
+//                 cMesh,
+//                 dimensioned<scalar>(word(), VIm.dimensions(), 0.0),
+//                 fixedValueFvPatchField<scalar>::typeName
+//             );
+//
+//             // Copy Neumann-Solution including evaluated boundary values
+//             cVReCorr == cVRe;
+//             cVImCorr == cVIm;
+//
+//             // Prepare V-equations based on fixed value boundary conditions
+//             fvScalarMatrix cVReCorrEqn
+//             (
+//                 fvm::laplacian(cSigma, cVReCorr, "laplacian(sigma,VRe)")
+//             );
+//             fvScalarMatrix cVImCorrEqn
+//             (
+//                 fvm::laplacian(cSigma, cVImCorr, "laplacian(sigma,VIm)")
+//             );
+//
+//             // Add source to matrix
+//             cVReCorrEqn -= cVReEqnSource;
+//             cVImCorrEqn -= cVImEqnSource;
+//
+//             // Solve V-equations based on fixed value boundary conditions
+//             cVReCorrEqn.solve(cMesh.solutionDict().solver("VReCorr"));
+//             cVImCorrEqn.solve(cMesh.solutionDict().solver("VImCorr"));
+//
+//             // Correct Neumann-Solution
+//             cVRe == cVReCorr;
+//             cVIm == cVImCorr;
+//         }
+
+        // Calculate gradient
+        volVectorField cVReGrad = fvc::grad(cVRe);
+        volVectorField cVImGrad = fvc::grad(cVIm);
+
+        // Reverse map V and its gradient
         forAll (cMesh.C(), cellI)
         {
             VRe[cMeshCellMap[cellI]] = cVRe[cellI];
@@ -445,12 +559,4 @@
             VReGrad[cMeshCellMap[cellI]] = cVReGrad[cellI];
             VImGrad[cMeshCellMap[cellI]] = cVImGrad[cellI];
         }
-    }
-
-    // TEST
-    // FIXME: Wrong gradient values at boundary (see above)
-    // Update gradient of V
-    {
-        VReGrad = fvc::grad(VRe);
-        VImGrad = fvc::grad(VIm);
     }
