@@ -37,6 +37,7 @@ SourceFiles
 
 #include "laplacianScheme.H"
 #include "gaussLaplacianScheme.H"
+#include "electricPotentialLaplacianBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,18 +56,9 @@ namespace fv
 template<class Type, class GType>
 class electricPotentialLaplacian
 :
+    public fv::electricPotentialLaplacianBase,
     public fv::laplacianScheme<Type, GType>
 {
-
-public:
-
-    //- Enumeration defining the valid
-    //  base laplacian schemes
-    enum baseLaplacianScheme
-    {
-        GAUSS,
-        UNDEFINED
-    };
 
 private:
 
@@ -74,12 +66,6 @@ private:
 
         //- Magnetic properties dictionary
         const IOdictionary& magneticProperties_;
-
-        //- Names of valid base laplacian schemes
-        static const NamedEnum<baseLaplacianScheme, 1> baseLaplacianSchemeNames_;
-
-        //- Base laplacian scheme
-        baseLaplacianScheme baseLaplacianScheme_;
 
         //- Name of the faceSet for non-conducting/conducting interface
         word nameInterface_;
@@ -128,6 +114,7 @@ public:
         //- Construct null
         electricPotentialLaplacian(const fvMesh& mesh)
         :
+            electricPotentialLaplacianBase(GAUSS),
             laplacianScheme<Type, GType>(mesh),
             magneticProperties_
             (
@@ -135,15 +122,17 @@ public:
                 (
                     "magneticProperties"
                 )
-            ),
-            baseLaplacianScheme_(GAUSS)
+            )
         {
+            checkBaseScheme();
+
             readMagneticProperties();
         }
 
         //- Construct from Istream
         electricPotentialLaplacian(const fvMesh& mesh, Istream& is)
         :
+            electricPotentialLaplacianBase(is),
             laplacianScheme<Type, GType>(mesh, is),
             magneticProperties_
             (
@@ -151,40 +140,9 @@ public:
                 (
                     "magneticProperties"
                 )
-            ),
-            baseLaplacianScheme_(UNDEFINED)
+            )
         {
-            if (is.eof())
-            {
-                FatalIOErrorIn
-                (
-                    "electricPotentialLaplacian<Type, GType>::electricPotentialLaplacian()",
-                    is
-                )   << "Base laplacian scheme not specified!" << endl
-                    << "Valid base gradient schemes are :" << endl
-                    << baseLaplacianSchemeNames_.sortedToc()
-                    << exit(FatalIOError);
-            }
-
-            word nameBaseLaplacianScheme = word(is);
-
-            typename NamedEnum<baseLaplacianScheme, 1>::const_iterator
-                cIter = baseLaplacianSchemeNames_.find(nameBaseLaplacianScheme);
-
-            if (cIter == baseLaplacianSchemeNames_.end())
-            {
-                FatalIOErrorIn
-                (
-                    "electricPotentialLaplacian<Type, GType>::electricPotentialLaplacian()",
-                    is
-                )   << "Base gradient scheme " << nameBaseLaplacianScheme
-                    << " is not supported!" << endl
-                    << "Valid base gradient schemes are :" << endl
-                    << baseLaplacianSchemeNames_.sortedToc()
-                    << exit(FatalIOError);
-            }
-
-            baseLaplacianScheme_ = baseLaplacianSchemeNames_[nameBaseLaplacianScheme];
+            checkBaseScheme();
 
             readMagneticProperties();
         }
@@ -197,6 +155,7 @@ public:
             const tmp<snGradScheme<Type> >& sngs
         )
         :
+            electricPotentialLaplacianBase(GAUSS),
             laplacianScheme<Type, GType>(mesh, igs, sngs),
             magneticProperties_
             (
@@ -204,21 +163,23 @@ public:
                 (
                     "magneticProperties"
                 )
-            ),
-            baseLaplacianScheme_(GAUSS)
+            )
         {
+            checkBaseScheme();
+
             readMagneticProperties();
         }
 
-        //- Construct from mesh, interpolation, snGrad and baseLaplcian schemes
+        //- Construct from mesh, baseLaplcian, interpolation and snGrad schemes
         electricPotentialLaplacian
         (
             const fvMesh& mesh,
+            const scheme bls,
             const tmp<surfaceInterpolationScheme<GType> >& igs,
-            const tmp<snGradScheme<Type> >& sngs,
-            const baseLaplacianScheme bls
+            const tmp<snGradScheme<Type> >& sngs
         )
         :
+            electricPotentialLaplacianBase(bls),
             laplacianScheme<Type, GType>(mesh, igs, sngs),
             magneticProperties_
             (
@@ -226,19 +187,33 @@ public:
                 (
                     "magneticProperties"
                 )
-            ),
-            baseLaplacianScheme_(bls)
+            )
         {
-            if (bls == UNDEFINED)
-            {
-                FatalErrorIn
+            checkBaseScheme();
+
+            readMagneticProperties();
+        }
+
+        //- Construct from mesh, baseLaplcian, interpolation and snGrad schemes
+        electricPotentialLaplacian
+        (
+            const fvMesh& mesh,
+            const word blsName,
+            const tmp<surfaceInterpolationScheme<GType> >& igs,
+            const tmp<snGradScheme<Type> >& sngs
+        )
+        :
+            electricPotentialLaplacianBase(blsName),
+            laplacianScheme<Type, GType>(mesh, igs, sngs),
+            magneticProperties_
+            (
+                mesh.lookupObject<IOdictionary>
                 (
-                    "electricPotentialLaplacian<Type, GType>::electricPotentialLaplacian()"
-                )   << "Base laplacian scheme not specified!" << endl
-                    << "Valid base gradient schemes are :" << endl
-                    << baseLaplacianSchemeNames_.sortedToc()
-                    << exit(FatalIOError);
-            }
+                    "magneticProperties"
+                )
+            )
+        {
+            checkBaseScheme();
 
             readMagneticProperties();
         }

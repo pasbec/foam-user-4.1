@@ -105,7 +105,7 @@ electricPotentialGrad<scalar>::calcGrad
     // Remove wrongly interpolated gradient
     // contributions from cells at the interface
     // between non-conducting and conducting region
-    if (this->baseGradScheme_ == this->GAUSS)
+    if (this->baseScheme() == this->GAUSS)
     {
         tmp<surfaceScalarField> tssf
         (
@@ -150,7 +150,7 @@ electricPotentialGrad<scalar>::calcGrad
         tgGrad.clear();
         tssf.clear();
     }
-//     else if (this->baseGradScheme_ == this->LEASTSQUARES)
+//     else if (this->baseScheme() == this->LEASTSQUARES)
 //     {
 //         tmp<leastSquaresGrad<scalar> > tlsScheme
 //         (

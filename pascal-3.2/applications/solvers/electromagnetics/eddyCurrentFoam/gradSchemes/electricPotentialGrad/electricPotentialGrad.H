@@ -41,8 +41,8 @@ SourceFiles
 #include "gradScheme.H"
 #include "surfaceInterpolationScheme.H"
 #include "linear.H"
-
 #include "faceSet.H"
+#include "electricPotentialGradBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,35 +61,19 @@ namespace fv
 template<class Type>
 class electricPotentialGrad
 :
+    public fv::electricPotentialGradBase,
     public fv::gradScheme<Type>
 {
-
-public:
-
-    //- Enumeration defining the valid
-    //  base gradient schemes
-    enum baseGradScheme
-    {
-        GAUSS,
-        LEASTSQUARES,
-        UNDEFINED
-    };
 
 private:
 
     // Private data
 
-        //- Magnetic properties dictionary
-        const IOdictionary& magneticProperties_;
-
-        //- Names of valid base gradient schemes
-        static const NamedEnum<baseGradScheme, 2> baseGradSchemeNames_;
-
-        //- Base gradient scheme
-        baseGradScheme baseGradScheme_;
-
         //- Interpolation scheme
         tmp<surfaceInterpolationScheme<Type> > tinterpScheme_;
+
+        //- Magnetic properties dictionary
+        const IOdictionary& magneticProperties_;
 
         //- Name of the faceSet for non-conducting/conducting interface
         word nameInterface_;
@@ -130,23 +114,25 @@ public:
             const fvMesh& mesh
         )
         :
+            electricPotentialGradBase(GAUSS),
             gradScheme<Type>(mesh),
-            magneticProperties_
-            (
-                mesh.lookupObject<IOdictionary>
-                (
-                    "magneticProperties"
-                )
-            ),
-            baseGradScheme_(GAUSS),
             tinterpScheme_
             (
                 new linear<Type>
                 (
                     mesh
                 )
+            ),
+            magneticProperties_
+            (
+                mesh.lookupObject<IOdictionary>
+                (
+                    "magneticProperties"
+                )
             )
         {
+            checkBaseScheme();
+
             readMagneticProperties();
         }
 
@@ -157,50 +143,20 @@ public:
             Istream& is
         )
         :
+            electricPotentialGradBase(is),
             gradScheme<Type>(mesh),
+            tinterpScheme_(NULL),
             magneticProperties_
             (
                 mesh.lookupObject<IOdictionary>
                 (
                     "magneticProperties"
                 )
-            ),
-            baseGradScheme_(UNDEFINED),
-            tinterpScheme_(NULL)
+            )
         {
-            if (is.eof())
-            {
-                FatalIOErrorIn
-                (
-                    "electricPotentialGrad<Type>::electricPotentialGrad(const fvMesh&, Istream&)",
-                    is
-                )   << "Base gradient scheme not specified!" << endl
-                    << "Valid base gradient schemes are :" << endl
-                    << baseGradSchemeNames_.sortedToc()
-                    << exit(FatalIOError);
-            }
+            checkBaseScheme();
 
-            word nameBaseGradScheme = word(is);
-
-            typename NamedEnum<baseGradScheme, 2>::const_iterator
-                cIter = baseGradSchemeNames_.find(nameBaseGradScheme);
-
-            if (cIter == baseGradSchemeNames_.end())
-            {
-                FatalIOErrorIn
-                (
-                    "electricPotentialGrad<Type>::electricPotentialGrad(const fvMesh&, Istream&)",
-                    is
-                )   << "Base gradient scheme " << nameBaseGradScheme
-                    << " is not supported!" << endl
-                    << "Valid base gradient schemes are :" << endl
-                    << baseGradSchemeNames_.sortedToc()
-                    << exit(FatalIOError);
-            }
-
-            baseGradScheme_ = baseGradSchemeNames_[nameBaseGradScheme];
-
-            if (baseGradScheme_ == GAUSS)
+            if (baseScheme() == GAUSS)
             {
                 tinterpScheme_ =
                 tmp<surfaceInterpolationScheme<Type> >

@@ -33,20 +33,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-const NamedEnum
-<
-    typename fv::electricPotentialGrad<Type>::baseGradScheme,
-    2
->
-fv::electricPotentialGrad<Type>::baseGradSchemeNames_;
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace fv
 {
-    
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>

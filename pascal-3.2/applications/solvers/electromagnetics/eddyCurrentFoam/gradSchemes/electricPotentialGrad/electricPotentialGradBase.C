@@ -23,19 +23,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvMesh.H"
-#include "electricPotentialGrad.H"
-#include "scalarElectricPotentialGrad.H"
+#include "electricPotentialGradBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fv
-{
-    makeFvGradScheme(electricPotentialGrad)
-}
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<>
+const char*
+NamedEnum
+<
+    typename fv::electricPotentialGradBase::scheme,
+    2
+>::names[] =
+{
+    "Gauss",
+    "leastSquares"
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+const NamedEnum
+<
+    typename fv::electricPotentialGradBase::scheme,
+    2
+>
+fv::electricPotentialGradBase::schemeNames_;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

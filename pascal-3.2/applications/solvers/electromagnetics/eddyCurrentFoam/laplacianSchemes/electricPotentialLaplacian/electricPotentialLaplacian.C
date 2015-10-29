@@ -36,17 +36,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type, class GType>
-const NamedEnum
-<
-    typename fv::electricPotentialLaplacian<Type, GType>::baseLaplacianScheme,
-    1
->
-fv::electricPotentialLaplacian<Type, GType>::baseLaplacianSchemeNames_;
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace fv
 {
 
