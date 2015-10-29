@@ -359,87 +359,17 @@
         fvScalarMatrix cVReEqn(fvm::laplacian(cSigma, cVRe, "laplacian(sigma,VRe)"));
         fvScalarMatrix cVImEqn(fvm::laplacian(cSigma, cVIm, "laplacian(sigma,VIm)"));
 
-        volVectorField cSigmaGrad = fvc::grad(cSigma);
+        // Reference point
+        // FIXME: Refpoint problems!
+        {
+            // Reference values in conducting region
+            scalar cRefValueVRe = 0.0;
+            scalar cRefValueVIm = 0.0;
 
-        // Explicit source terms due to variable sigma
-        // in conducting region with implied condition div(A)=0
-        volScalarField cVReEqnSource =   omega * (cSigmaGrad & cAIm);
-        volScalarField cVImEqnSource = - omega * (cSigmaGrad & cARe);
-
-//         // TEST
-//         cVReEqnSource +=   omega * cSigma * fvc::div(cAIm);
-//         cVImEqnSource += - omega * cSigma * fvc::div(cARe);
-
-        cVReEqn -= cVReEqnSource;
-        cVImEqn -= cVImEqnSource;
-
-//         // Check Poisson compatibility
-//         // TEST
-//         {
-//             // Mesh geometry
-//             const scalarField& cV = cMesh.V();
-//
-//             // Source sums
-//             scalar cVReEqnSumSource = 0.0;
-//             scalar cVImEqnSumSource = 0.0;
-//
-//             // Flux sums
-//             scalar cVReEqnSumFlux = 0.0;
-//             scalar cVImEqnSumFlux = 0.0;
-//
-//             // Correct source integrals
-//             // TEST
-//             // FIXME: Parallel?
-//             {
-//
-//                 cVReEqnSumSource = sum(cVReEqnSource.internalField() * cV);
-//                 cVImEqnSumSource = sum(cVImEqnSource.internalField() * cV);
-//
-//                 cVReEqnSource.internalField() -= cVReEqnSumSource / cMesh.nCells() / cV;
-//                 cVImEqnSource.internalField() -= cVImEqnSumSource / cMesh.nCells() / cV;
-//             }
-//
-//             // Source integrals
-//             cVReEqnSumSource = gSum(cVReEqnSource.internalField() * cV);
-//             cVImEqnSumSource = gSum(cVImEqnSource.internalField() * cV);
-//
-//             // Boundary integrals
-//             forAll(cMesh.boundaryMesh(), patchI)
-//             {
-//                 const polyPatch& patch = cMesh.boundaryMesh()[patchI];
-//
-//                 const vectorField& SfP = cMesh.Sf().boundaryField()[patchI];
-//
-//                 const vectorField& cAReP = cARe.boundaryField()[patchI];
-//                 const vectorField& cAImP = cAIm.boundaryField()[patchI];
-//
-//                 // Old internal faces
-//                 if (patch.name() == "oldInternalFaces")
-//                 {
-//                     cVReEqnSumFlux += gSum(omega.value() * (cAReP & SfP));
-//                     cVImEqnSumFlux += gSum(omega.value() * (cAImP & SfP));
-//                 }
-//
-//                 // TODO: What about other patches?
-//             }
-//
-//             Info << "VRe Poisson equation compatibility check (Source, Flux):"
-//                 << "(" << cVReEqnSumSource << ", " << cVReEqnSumFlux << ")" << endl;
-//             Info << "VIm Poisson equation compatibility check (Source, Flux):"
-//                 << "(" << cVImEqnSumSource << ", " << cVImEqnSumFlux << ")" << endl;
-//         }
-
-//         // Reference point
-//         // FIXME: Refpoint problems!
-//         {
-//             // Reference values in conducting region
-//             scalar cRefValueVRe = 0.0;
-//             scalar cRefValueVIm = 0.0;
-//
-//             // Reference cells in conducting region
-//             cVReEqn.setReference(csRefCell, cRefValueVRe);
-//             cVImEqn.setReference(csRefCell, cRefValueVIm);
-//         }
+            // Reference cells in conducting region
+            cVReEqn.setReference(csRefCell, cRefValueVRe);
+            cVImEqn.setReference(csRefCell, cRefValueVIm);
+        }
 
 //         // Pseudo time-stepping based on Euler-explicit
 //         // TEST
@@ -466,6 +396,79 @@
 //             cVReEqnS += damp * cVReEqnD * cVRe.internalField();
 //             cVImEqnS += damp * cVImEqnD * cVIm.internalField();
 //         }
+
+//         // NOTE: Currently deflated solver is necessary as matrix is kept singluar!
+
+        volVectorField cSigmaGrad = fvc::grad(cSigma);
+
+        // Explicit source terms due to variable sigma
+        // in conducting region with implied condition div(A)=0
+        volScalarField cVReEqnSource =   omega * (cSigmaGrad & cAIm);
+        volScalarField cVImEqnSource = - omega * (cSigmaGrad & cARe);
+
+//         // TEST
+//         cVReEqnSource +=   omega * cSigma * fvc::div(cAIm);
+//         cVImEqnSource += - omega * cSigma * fvc::div(cARe);
+
+        // Check/Correct Poisson compatibility
+        // TEST
+        {
+            // Mesh geometry
+            const scalarField& cV = cMesh.V();
+
+            // Source sums
+            scalar cVReEqnSumSource = 0.0;
+            scalar cVImEqnSumSource = 0.0;
+
+            // Flux sums
+            scalar cVReEqnSumFlux = 0.0;
+            scalar cVImEqnSumFlux = 0.0;
+
+            // Correct source integrals
+            // TEST
+            // FIXME: Parallel?
+            {
+
+                cVReEqnSumSource = sum(cVReEqnSource.internalField() * cV);
+                cVImEqnSumSource = sum(cVImEqnSource.internalField() * cV);
+
+                cVReEqnSource.internalField() -= cVReEqnSumSource / cMesh.nCells() / cV;
+                cVImEqnSource.internalField() -= cVImEqnSumSource / cMesh.nCells() / cV;
+            }
+
+            // Source integrals
+            cVReEqnSumSource = gSum(cVReEqnSource.internalField() * cV);
+            cVImEqnSumSource = gSum(cVImEqnSource.internalField() * cV);
+
+            // Boundary integrals
+            forAll(cMesh.boundaryMesh(), patchI)
+            {
+                const polyPatch& patch = cMesh.boundaryMesh()[patchI];
+
+                const vectorField& SfP = cMesh.Sf().boundaryField()[patchI];
+
+                const vectorField& cAReP = cARe.boundaryField()[patchI];
+                const vectorField& cAImP = cAIm.boundaryField()[patchI];
+
+                // Old internal faces
+                if (patch.name() == "oldInternalFaces")
+                {
+                    cVReEqnSumFlux += gSum(omega.value() * (cAReP & SfP));
+                    cVImEqnSumFlux += gSum(omega.value() * (cAImP & SfP));
+                }
+
+                // TODO: What about other patches?
+            }
+
+            Info << "VRe Poisson equation compatibility check (Source, Flux):"
+                << "(" << cVReEqnSumSource << ", " << cVReEqnSumFlux << ")" << endl;
+            Info << "VIm Poisson equation compatibility check (Source, Flux):"
+                << "(" << cVImEqnSumSource << ", " << cVImEqnSumFlux << ")" << endl;
+        }
+
+        // Add source terms
+        cVReEqn -= cVReEqnSource;
+        cVImEqn -= cVImEqnSource;
 
         // Restore solution level
         cVRe += VReAverage;

@@ -223,98 +223,100 @@
 
     // Solve V
     {
-        // Coupling terms of magnetic vector potential A
-        // in equation for electric scalar potential V
+
+        // Explicit gradient constraints
+        // at conductor interface
         {
             // Grab source of V-equations
             scalarField& VReEqnS = VReEqn.source();
             scalarField& VImEqnS = VImEqn.source();
 
-            // Explicit gradient constraints
-            // at conductor interface
+            // Mesh cell-face addressing
+            const unallocLabelList& own = mesh.owner();
+            const unallocLabelList& nei = mesh.neighbour();
+
+            // Mesh geometry
+            const vectorField& Sf = mesh.Sf();
+            const scalarField& w = mesh.weights();
+
+            // Loop over all faces of conductor interface
+            forAll (cnFaces, facei)
             {
-                // Mesh cell-face addressing
-                const unallocLabelList& own = mesh.owner();
-                const unallocLabelList& nei = mesh.neighbour();
+                label faceI = cnFaces[facei];
 
-                // Mesh geometry
-                const vectorField& Sf = mesh.Sf();
-                const scalarField& w = mesh.weights();
+                // Calculate weight coeffs
+                scalar wP = omega.value() * w[faceI];
+                scalar wN = omega.value() - wP;
 
-                // Loop over all faces of conductor interface
-                forAll (cnFaces, facei)
+                // Calculate equation coeffs
+                scalar e = sSigmaV[faceI];
+
+                // Write source which represents gradient
+                // of V depending on A
                 {
-                    label faceI = cnFaces[facei];
+                    VReEqnS[own[faceI]] -= e * wP * (Sf[faceI] & AIm[own[faceI]]);
+                    VReEqnS[own[faceI]] -= e * wN * (Sf[faceI] & AIm[nei[faceI]]);
+                    VReEqnS[nei[faceI]] += e * wP * (Sf[faceI] & AIm[own[faceI]]);
+                    VReEqnS[nei[faceI]] += e * wN * (Sf[faceI] & AIm[nei[faceI]]);
 
-                    // Calculate weight coeffs
-                    scalar wP = omega.value() * w[faceI];
-                    scalar wN = omega.value() - wP;
-
-                    // Calculate equation coeffs
-                    scalar e = sSigmaV[faceI];
-
-                    // Write source which represents gradient
-                    // of V depending on A
-                    {
-                        VReEqnS[own[faceI]] -= e * wP * (Sf[faceI] & AIm[own[faceI]]);
-                        VReEqnS[own[faceI]] -= e * wN * (Sf[faceI] & AIm[nei[faceI]]);
-                        VReEqnS[nei[faceI]] += e * wP * (Sf[faceI] & AIm[own[faceI]]);
-                        VReEqnS[nei[faceI]] += e * wN * (Sf[faceI] & AIm[nei[faceI]]);
-
-                        VImEqnS[own[faceI]] += e * wP * (Sf[faceI] & ARe[own[faceI]]);
-                        VImEqnS[own[faceI]] += e * wN * (Sf[faceI] & ARe[nei[faceI]]);
-                        VImEqnS[nei[faceI]] -= e * wP * (Sf[faceI] & ARe[own[faceI]]);
-                        VImEqnS[nei[faceI]] -= e * wN * (Sf[faceI] & ARe[nei[faceI]]);
-                    }
-
-                    // TODO: What about gradient correction?
-                    // We have to modifiy the source term, too. But
-                    // this depends on the type of correction. Hmm...
+                    VImEqnS[own[faceI]] += e * wP * (Sf[faceI] & ARe[own[faceI]]);
+                    VImEqnS[own[faceI]] += e * wN * (Sf[faceI] & ARe[nei[faceI]]);
+                    VImEqnS[nei[faceI]] -= e * wP * (Sf[faceI] & ARe[own[faceI]]);
+                    VImEqnS[nei[faceI]] -= e * wN * (Sf[faceI] & ARe[nei[faceI]]);
                 }
+
+                // TODO: What about gradient correction?
+                // We have to modifiy the source term, too. But
+                // this depends on the type of correction. Hmm...
             }
+        }
 
-            // Explicit source terms due to variable sigma
-            // in conducting region with implied condition div(A)=0
-            volScalarField VReEqnSource("VReEqnSource",   gradAlpha & AIm);
-            volScalarField VImEqnSource("VImEqnSource", - gradAlpha & ARe);
+        // Explicit source terms due to variable sigma
+        // in conducting region with implied condition div(A)=0
+        volScalarField VReEqnSource("VReEqnSource",   gradAlpha & AIm);
+        volScalarField VImEqnSource("VImEqnSource", - gradAlpha & ARe);
 
-            // TODO: Remove after debug
-            VReEqnSource.write();
-            VImEqnSource.write();
+//         // TEST
+//         VReEqnSource +=   alpha * fvc::div(AIm);
+//         VImEqnSource += - alpha * fvc::div(ARe);
 
-//             // TEST
-//             VReEqnSource +=   alpha * fvc::div(AIm);
-//             VImEqnSource += - alpha * fvc::div(ARe);
+        // FIXME: Refpoint problems!
+        // Check/Correct Poisson compatibility
+        {
+            // Mesh geometry
+            const scalarField& V = mesh.V();
 
-            // TODO: Remove after debug
-            VReEqnSource.write();
-            VImEqnSource.write();
+            // Source sums
+            scalar VReEqnSumSource = 0.0;
+            scalar VImEqnSumSource = 0.0;
 
-            VReEqn -= VReEqnSource * indicatorVc;
-            VImEqn -= VImEqnSource * indicatorVc;
+            // Flux sums
+            scalar VReEqnSumFlux = 0.0;
+            scalar VImEqnSumFlux = 0.0;
 
-
-            // FIXME: Refpoint problems!
-            // Check Poisson compatibility
+            // Correct source integrals
+            // TEST
+            // FIXME: Parallel?
             {
-                // Sums
-                scalar VReEqnSumSource = 0.0;
-                scalar VImEqnSumSource = 0.0;
 
-                // Mesh geometry
-                const scalarField& V = mesh.V();
+                VReEqnSumSource = sum(VReEqnSource.internalField() * V);
+                VImEqnSumSource = sum(VImEqnSource.internalField() * V);
 
                 forAll (cCells, celli)
                 {
                     label cellI = cCells[celli];
 
-                    VReEqnSumSource += VReEqnSource[cellI] * V[cellI];
-                    VImEqnSumSource += VImEqnSource[cellI] * V[cellI];
+                    VReEqnSource[cellI] -= VReEqnSumSource/cCells.size()/V[cellI];
+                    VImEqnSource[cellI] -= VImEqnSumSource/cCells.size()/V[cellI];
                 }
+            }
 
-                scalar VReEqnSumFlux = 0.0;
-                scalar VImEqnSumFlux = 0.0;
+            // Source integrals
+            VReEqnSumSource = gSum(VReEqnSource.internalField()*V);
+            VImEqnSumSource = gSum(VImEqnSource.internalField()*V);
 
+            // Boundary integrals
+            {
                 surfaceScalarField SfARe("SfARe", linearInterpolate(ARe) & mesh.Sf());
                 surfaceScalarField SfAIm("SfAIm", linearInterpolate(AIm) & mesh.Sf());
 
@@ -333,13 +335,21 @@
                     VReEqnSumFlux -= omega.value() * SfAIm[faceI];
                     VImEqnSumFlux += omega.value() * SfARe[faceI];
                 }
-
-                Info << "VRe Poisson equation compatibility check (Source, Flux):"
-                    << "(" << VReEqnSumSource << ", " << VReEqnSumFlux << ")" << endl;
-                Info << "VIm Poisson equation compatibility check (Source, Flux):"
-                    << "(" << VImEqnSumSource << ", " << VImEqnSumFlux << ")" << endl;
             }
+
+            Info << "VRe Poisson equation compatibility check (Source, Flux):"
+                << "(" << VReEqnSumSource << ", " << VReEqnSumFlux << ")" << endl;
+            Info << "VIm Poisson equation compatibility check (Source, Flux):"
+                << "(" << VImEqnSumSource << ", " << VImEqnSumFlux << ")" << endl;
         }
+
+        // Add source terms
+        VReEqn -= VReEqnSource;
+        VImEqn -= VImEqnSource;
+
+        // Restore solution
+        VRe += VReAverage;
+        VIm += VImAverage;
 
 //         // Solve V-equations
 //         // FIXME: Why does GAMG or amgSolver not work well?
@@ -365,6 +375,14 @@
 
         VRe.correctBoundaryConditions();
         VIm.correctBoundaryConditions();
+
+        // Calculate average
+        VReAverage = average(VRe);
+        VImAverage = average(VIm);
+
+        // Normalize solution
+        VRe -= VReAverage;
+        VIm -= VImAverage;
 
         // TODO: Remove after debug
         {
