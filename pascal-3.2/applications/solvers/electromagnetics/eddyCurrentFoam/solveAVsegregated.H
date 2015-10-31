@@ -283,9 +283,6 @@
         // FIXME: Refpoint problems!
         // Check/Correct Poisson compatibility
         {
-            // Mesh geometry
-            const scalarField& V = mesh.V();
-
             // Source sums
             scalar VReEqnSumSource = 0.0;
             scalar VImEqnSumSource = 0.0;
@@ -301,22 +298,22 @@
                 label cCellsSizeGlobal = returnReduce(cCells.size(), sumOp<label>());
 
                 // Global source integrals
-                VReEqnSumSource = gSum(VReEqnSource.internalField() * V);
-                VImEqnSumSource = gSum(VImEqnSource.internalField() * V);
+                VReEqnSumSource = gSum(VReEqnSource.internalField() * mesh.V());
+                VImEqnSumSource = gSum(VImEqnSource.internalField() * mesh.V());
 
                 // Force global source integral to zero
                 forAll (cCells, celli)
                 {
                     label cellI = cCells[celli];
 
-                    VReEqnSource[cellI] -= VReEqnSumSource / cCellsSizeGlobal / V[cellI];
-                    VImEqnSource[cellI] -= VImEqnSumSource / cCellsSizeGlobal / V[cellI];
+                    VReEqnSource[cellI] -= VReEqnSumSource / cCellsSizeGlobal / mesh.V()[cellI];
+                    VImEqnSource[cellI] -= VImEqnSumSource / cCellsSizeGlobal / mesh.V()[cellI];
                 }
             }
 
             // Source integrals
-            VReEqnSumSource = gSum(VReEqnSource.internalField()*V);
-            VImEqnSumSource = gSum(VImEqnSource.internalField()*V);
+            VReEqnSumSource = gSum(VReEqnSource.internalField()*mesh.V());
+            VImEqnSumSource = gSum(VImEqnSource.internalField()*mesh.V());
 
             // Boundary integrals
             {

@@ -181,6 +181,22 @@
         surfaceVectorField sARe("sARe", fvc::interpolate(ARe));
         surfaceVectorField sAIm("sAIm", fvc::interpolate(AIm));
 
+        // Create local dictionory for magnetic properties
+        // TODO: This is currently necessary for
+        //       electricPotentialGrad
+        IOdictionary cMagneticProperties
+        (
+            IOobject
+            (
+                "magneticProperties",
+                cMesh.time().constant(),
+                cMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            magneticProperties
+        );
+
         // Create local magnetic vector potential A
         volVectorField cARe
         (
@@ -373,9 +389,6 @@
         // Check/Correct Poisson compatibility
         // TEST
         {
-            // Mesh geometry
-            const scalarField& cV = cMesh.V();
-
             // Source sums
             scalar cVReEqnSumSource = 0.0;
             scalar cVImEqnSumSource = 0.0;
@@ -392,17 +405,17 @@
                 label nCellsGlobal = returnReduce(cMesh.nCells(), sumOp<label>());
 
                 // Global source integrals
-                cVReEqnSumSource = gSum(cVReEqnSource.internalField() * cV);
-                cVImEqnSumSource = gSum(cVImEqnSource.internalField() * cV);
+                cVReEqnSumSource = gSum(cVReEqnSource.internalField() * cMesh.V());
+                cVImEqnSumSource = gSum(cVImEqnSource.internalField() * cMesh.V());
 
                 // Force global source integral to zero
-                cVReEqnSource.internalField() -= cVReEqnSumSource / nCellsGlobal / cV;
-                cVImEqnSource.internalField() -= cVImEqnSumSource / nCellsGlobal / cV;
+                cVReEqnSource.internalField() -= cVReEqnSumSource / nCellsGlobal / cMesh.V();
+                cVImEqnSource.internalField() -= cVImEqnSumSource / nCellsGlobal / cMesh.V();
             }
 
             // Source integrals
-            cVReEqnSumSource = gSum(cVReEqnSource.internalField() * cV);
-            cVImEqnSumSource = gSum(cVImEqnSource.internalField() * cV);
+            cVReEqnSumSource = gSum(cVReEqnSource.internalField() * cMesh.V());
+            cVImEqnSumSource = gSum(cVImEqnSource.internalField() * cMesh.V());
 
             // Boundary integrals
             {

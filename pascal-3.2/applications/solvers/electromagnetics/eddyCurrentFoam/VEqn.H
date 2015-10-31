@@ -61,10 +61,8 @@
         // Grab parts of V-equations
         scalarField& VReEqnD = VReEqn.diag();
         scalarField& VReEqnU = VReEqn.upper();
-        scalarField& VReEqnS = VReEqn.source();
         scalarField& VImEqnD = VImEqn.diag();
         scalarField& VImEqnU = VImEqn.upper();
-        scalarField& VImEqnS = VImEqn.source();
 
         // Mesh cell-face addressing
         const unallocLabelList& own = mesh.owner();
