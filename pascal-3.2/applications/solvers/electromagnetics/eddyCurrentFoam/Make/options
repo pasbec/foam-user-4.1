@@ -1,6 +1,4 @@
 EXE_INC = \
-    -IinterpolationSchemes/fluxConservativeValue \
-    -IinterpolationSchemes/fluxConservativeGradient \
     -IfvPatchFields/lookupFixedGradient \
     -IgradSchemes/electricPotentialGrad \
     -IlaplacianSchemes/electricPotentialLaplacian \
