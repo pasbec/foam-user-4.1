@@ -50,7 +50,7 @@
         }
 
         // Loop over components
-        for(direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
+        for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
         {
             // Create fields
             volScalarField AReCmpt
@@ -126,8 +126,8 @@
             AImCmptEqn.source() = AImEqn.source().component(cmpt);
 
             // Add explicit gradient terms of electric scalar potential V
-            AReCmptEqn -= sigma * VReGrad.component(cmpt) * indicatorVc;
-            AImCmptEqn -= sigma * VImGrad.component(cmpt) * indicatorVc;
+            AReCmptEqn -= sigma * VReGrad.component(cmpt);
+            AImCmptEqn -= sigma * VImGrad.component(cmpt);
 
             // References to internal alpha field
             const scalarField& alphaIn = alpha.internalField();

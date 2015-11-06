@@ -1,12 +1,12 @@
 
-    // Get reference to indicator pointers
-    volScalarField& indicatorVc = *indicatorVcPtr;
-//     volScalarField& indicatorVn = *indicatorVnPtr;
-
     // AV iterations
-    int nCorr = AVdict.lookupOrDefault<int>("corr",4);
+    int minIter = AVdict.lookupOrDefault<int>("minIter", 0);
+    int maxIter = AVdict.lookupOrDefault<int>("maxIter", 100);
+    scalar tolerance = AVdict.lookupOrDefault<scalar>("tolerance", 1e-04);
 
-    forAll (labelList(nCorr), corr)
+    // Tolerance
+
+    for (label iter = 0; iter < maxIter; iter++)
     {
         // Solve for A
 #       include "AEqn.H"
