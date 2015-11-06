@@ -13,7 +13,11 @@
             // Assemble base-matrix for A
 #           include "AEqn.H"
 
-#           include "solveAVsubset.H"
+            // Solve for A
+#           include "solveAVsegregatedA.H"
+
+            // Solve for V
+#           include "solveAVsegregatedV.H"
         }
     }
     else if (AVmethod == "segregated")
@@ -28,7 +32,11 @@
             // Assemble base-matrix for V
 #           include "VEqn.H"
 
-#           include "solveAVsegregated.H"
+            // Solve for A
+#           include "solveAVsegregatedA.H"
+
+            // Solve for V
+#           include "solveAVsegregatedVall.H"
         }
     }
     else if (AVmethod == "coupled")
@@ -41,7 +49,7 @@
 #           include "AEqn.H"
 
             // Assemble base-matrix for V
-        #   include "VEqn.H"
+#           include "VEqn.H"
 
 #           include "solveAVcoupled.H"
         }

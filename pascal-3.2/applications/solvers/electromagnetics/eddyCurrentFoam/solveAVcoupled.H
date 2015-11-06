@@ -42,6 +42,31 @@
             VImEqn.setReference(nRefCell, nRefValueVIm);
         }
 
+        // Create complex vector8 field
+        volVector8Field AV
+        (
+            IOobject
+            (
+                "AV",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedVector8(word(),dimless,vector8::zero)
+        );
+
+        // Init complex vector8 field
+        AV.replace(0, ARe.component(0));
+        AV.replace(1, ARe.component(1));
+        AV.replace(2, ARe.component(2));
+        AV.replace(3, VRe);
+        AV.replace(4, AIm.component(0));
+        AV.replace(5, AIm.component(1));
+        AV.replace(6, AIm.component(2));
+        AV.replace(7, VIm);
+
         // Prepare block system
         fvBlockMatrix<vector8> AVEqn(AV);
 
