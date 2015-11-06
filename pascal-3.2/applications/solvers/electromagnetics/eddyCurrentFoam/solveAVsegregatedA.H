@@ -1,6 +1,21 @@
 
     // Solve A component-wise
     {
+        // Create list with boundary types
+        wordList ARePatchTypes(mesh.boundary().size());
+        wordList AImPatchTypes(mesh.boundary().size());
+
+        forAll(ARe.boundaryField(), patchI)
+        {
+            ARePatchTypes[patchI] =
+                ARe.boundaryField()[patchI].type();
+        }
+        forAll(AIm.boundaryField(), patchI)
+        {
+            AImPatchTypes[patchI] =
+                AIm.boundaryField()[patchI].type();
+        }
+
         // Relax gradient of V
         {
             // Store old gradient
@@ -19,31 +34,31 @@
         }
 
         // Loop over components
-        forAll(vector::one, cI)
+        for(direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
         {
             // Create fields
             volScalarField AReCmpt
             (
                 IOobject
                 (
-                    "A" + word(vector::componentNames[cI]) + "Re",
+                    "A" + word(vector::componentNames[cmpt]) + "Re",
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ
                 ),
-                ARe.component(cI),
+                ARe.component(cmpt),
                 ARePatchTypes
             );
             volScalarField AImCmpt
             (
                 IOobject
                 (
-                    "A" + word(vector::componentNames[cI]) + "Im",
+                    "A" + word(vector::componentNames[cmpt]) + "Im",
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ
                 ),
-                AIm.component(cI),
+                AIm.component(cmpt),
                 AImPatchTypes
             );
 
@@ -56,7 +71,7 @@
             (
                 IOobject
                 (
-                    "A" + word(vector::componentNames[cI]),
+                    "A" + word(vector::componentNames[cmpt]),
                     runTime.timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -85,18 +100,18 @@
             // Copy symmetric matrix coeffs and source
             AReCmptEqn.diag() = AReEqn.diag();
             AReCmptEqn.upper() = AReEqn.upper();
-            AReCmptEqn.internalCoeffs() = AReEqn.internalCoeffs().component(cI);
-            AReCmptEqn.boundaryCoeffs() = AReEqn.boundaryCoeffs().component(cI);
-            AReCmptEqn.source() = AReEqn.source().component(cI);
+            AReCmptEqn.internalCoeffs() = AReEqn.internalCoeffs().component(cmpt);
+            AReCmptEqn.boundaryCoeffs() = AReEqn.boundaryCoeffs().component(cmpt);
+            AReCmptEqn.source() = AReEqn.source().component(cmpt);
             AImCmptEqn.diag() = AImEqn.diag();
             AImCmptEqn.upper() = AImEqn.upper();
-            AImCmptEqn.internalCoeffs() = AImEqn.internalCoeffs().component(cI);
-            AImCmptEqn.boundaryCoeffs() = AImEqn.boundaryCoeffs().component(cI);
-            AImCmptEqn.source() = AImEqn.source().component(cI);
+            AImCmptEqn.internalCoeffs() = AImEqn.internalCoeffs().component(cmpt);
+            AImCmptEqn.boundaryCoeffs() = AImEqn.boundaryCoeffs().component(cmpt);
+            AImCmptEqn.source() = AImEqn.source().component(cmpt);
 
             // Add explicit gradient terms of electric scalar potential V
-            AReCmptEqn -= sigma * VReGrad.component(cI) * indicatorVc;
-            AImCmptEqn -= sigma * VImGrad.component(cI) * indicatorVc;
+            AReCmptEqn -= sigma * VReGrad.component(cmpt) * indicatorVc;
+            AImCmptEqn -= sigma * VImGrad.component(cmpt) * indicatorVc;
 
             // References to internal alpha field
             const scalarField& alphaIn = alpha.internalField();
@@ -125,8 +140,8 @@
             AImCmpt.correctBoundaryConditions();
 
             // Replace components of A
-            ARe.replace(cI,AReCmpt);
-            AIm.replace(cI,AImCmpt);
+            ARe.replace(cmpt, AReCmpt);
+            AIm.replace(cmpt, AImCmpt);
         }
 
         // Correct boundary conditions

@@ -93,21 +93,6 @@ int main(int argc, char *argv[])
         omega * sigma
     );
 
-    // Initialize gradient of V
-    {
-#       include "readAVControls.H"
-
-        if
-        (
-            AVmethod == "coupled"
-         || AVmethod == "segregated"
-        )
-        {
-            VReGrad = fvc::grad(VRe);
-            VImGrad = fvc::grad(VIm);
-        }
-    }
-
     while (runTime.run())
     {
         runTime++;

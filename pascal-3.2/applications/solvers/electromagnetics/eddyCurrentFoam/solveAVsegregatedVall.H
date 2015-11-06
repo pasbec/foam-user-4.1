@@ -1,7 +1,6 @@
 
     // Solve V
     {
-
         // Explicit gradient constraints
         // at conductor interface
         {
@@ -278,10 +277,8 @@
             VReRes.write();
             VImRes.write();
         }
-    }
 
-    // Update gradient of V
-    {
+        // Update gradient of V
         VReGrad = fvc::grad(VRe);
         VImGrad = fvc::grad(VIm);
     }

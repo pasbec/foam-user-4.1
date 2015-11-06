@@ -14,20 +14,3 @@
 //    - sigma * VImGrad
       + jsIm
     );
-
-
-
-    // Create list with boundary types
-    wordList ARePatchTypes(mesh.boundary().size());
-    wordList AImPatchTypes(mesh.boundary().size());
-
-    forAll(ARe.boundaryField(), patchI)
-    {
-        ARePatchTypes[patchI] =
-            ARe.boundaryField()[patchI].type();
-    }
-    forAll(AIm.boundaryField(), patchI)
-    {
-        AImPatchTypes[patchI] =
-            AIm.boundaryField()[patchI].type();
-    }

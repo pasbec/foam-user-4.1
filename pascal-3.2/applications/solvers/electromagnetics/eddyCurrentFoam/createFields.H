@@ -167,9 +167,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh,
-        dimensionedVector(word(), VRe.dimensions()/dimLength, pTraits<vector>::zero),
-        calculatedFvPatchField<vector>::typeName
+        fvc::grad(VRe)
     );
 
     // Electric scalar potential gradient (imaginary part)
@@ -184,9 +182,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh,
-        dimensionedVector(word(), VIm.dimensions()/dimLength, pTraits<vector>::zero),
-        calculatedFvPatchField<vector>::typeName
+        fvc::grad(VIm)
     );
 
 

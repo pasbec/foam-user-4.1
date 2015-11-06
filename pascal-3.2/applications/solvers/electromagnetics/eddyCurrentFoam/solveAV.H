@@ -29,11 +29,11 @@
             // Assemble base-matrix for A
 #           include "AEqn.H"
 
-            // Assemble base-matrix for V
-#           include "VEqn.H"
-
             // Solve for A
 #           include "solveAVsegregatedA.H"
+
+            // Assemble base-matrix for V
+#           include "VEqn.H"
 
             // Solve for V
 #           include "solveAVsegregatedVall.H"
