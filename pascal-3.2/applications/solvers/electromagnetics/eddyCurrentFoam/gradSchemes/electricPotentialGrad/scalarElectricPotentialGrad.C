@@ -60,12 +60,9 @@ electricPotentialGrad<scalar>::calcGrad
     const scalarField& magSf = mesh.magSf();
     const scalarField& w = mesh.weights();
     const scalarField& d = mesh.deltaCoeffs();
-    const scalarField& V = mesh.V();
 
     // Derived mesh data
     const vectorField Sn = Sf/magSf;
-
-    const scalarField& vsfIn = vsf.internalField();
 
     // Prepare gradient data
     tmp<volVectorField> tepGrad
@@ -93,121 +90,8 @@ electricPotentialGrad<scalar>::calcGrad
     volVectorField& epGrad = tepGrad();
     vectorField& epGradIn = epGrad.internalField();
 
-    // Get list of conductor faces
-    labelList cnFaces
-    (
-        mesh.lookupObject<faceSet>
-        (
-            nameInterface_
-        ).toc()
-    );
-
-    // Remove wrongly interpolated gradient
-    // contributions from cells at the interface
-    // between non-conducting and conducting region
+    //
     if (this->baseScheme() == this->GAUSS)
-    {
-        tmp<surfaceScalarField> tssf
-        (
-            tinterpScheme_().interpolate(vsf)
-        );
-        surfaceScalarField& ssf = tssf();
-        scalarField& ssfIn = ssf.internalField();
-
-        // Copy Gauss gradient values
-        tmp<volVectorField> tgGrad
-        (
-            gaussGrad<scalar>::gradf
-            (
-                tssf,
-                name
-            )
-        );
-        tepGrad() == tgGrad();
-
-        register label faceI, ownFaceI, neiFaceI;
-
-        // Remove wrong face contributions
-        // from interal faces
-        forAll(cnFaces, facei)
-        {
-            faceI = cnFaces[facei];
-
-            ownFaceI = own[faceI];
-            neiFaceI = nei[faceI];
-
-            {
-                vector Sfssf = Sf[faceI] * ssfIn[faceI];
-
-                epGradIn[ownFaceI] -= Sfssf / V[ownFaceI];
-                epGradIn[neiFaceI] += Sfssf / V[neiFaceI];
-            }
-        }
-
-        // TODO: Remove wrong contributions
-        // from boundary faces
-
-        tgGrad.clear();
-        tssf.clear();
-    }
-//     else if (this->baseScheme() == this->LEASTSQUARES)
-//     {
-//         tmp<leastSquaresGrad<scalar> > tlsScheme
-//         (
-//             new leastSquaresGrad<scalar>(mesh)
-//         );
-//         leastSquaresGrad<scalar>& lsScheme = tlsScheme();
-//
-//         // Copy leastSquares gradient values
-//         tmp<volVectorField> tlsGrad
-//         (
-//             lsScheme.calcGrad
-//             (
-//                 vsf,
-//                 name
-//             )
-//         );
-//         tepGrad() == tlsGrad();
-//
-//         const leastSquaresVectors& lsv = leastSquaresVectors::New(mesh);
-//
-//         const surfaceVectorField& ownLs = lsv.pVectors();
-//         const surfaceVectorField& neiLs = lsv.nVectors();
-//
-//         const vectorField& ownLsIn = ownLs.internalField();
-//         const vectorField& neiLsIn = neiLs.internalField();
-//
-//         register label faceI, ownFaceI, neiFaceI;
-//
-//         // Remove wrong contributions
-//         // from interal faces
-//         forAll(cnFaces, facei)
-//         {
-//             faceI = cnFaces[facei];
-//
-//             ownFaceI = own[faceI];
-//             neiFaceI = nei[faceI];
-//
-//             {
-//                 scalar deltaVsf = vsfIn[neiFaceI] - vsfIn[ownFaceI];
-//
-//                 epGradIn[ownFaceI] -= ownLsIn[faceI] * deltaVsf;
-//                 epGradIn[neiFaceI] += neiLsIn[faceI] * deltaVsf;
-//             }
-//         }
-//
-//         // TODO: Remove wrong contributions
-//         // from boundary faces
-//
-//         tlsGrad.clear();
-//         tlsScheme.clear();
-//     }
-
-    // Add correct face value contributions to cells
-    // for the electric scalar potential from its
-    // corresponding gradient at the interface between
-    // non-conducting and conducting region depending on
-    // the magnetic vector potential
     {
         const dimensionedScalar frequency
         (
@@ -219,6 +103,8 @@ electricPotentialGrad<scalar>::calcGrad
             "omega",
             2.0 * mathematicalConstant::pi * frequency
         );
+
+        // TODO: Check if vsf.name() ~ nameElectricPotential_
 
         // TODO: Prevent segfault!
         word complexNameV = vsf.name();
@@ -247,6 +133,12 @@ electricPotentialGrad<scalar>::calcGrad
             // TODO: Error handling!
         }
 
+        const volScalarField& sigma =
+            mesh.lookupObject<volScalarField>
+            (
+                nameConductivity_
+            );
+
         const volVectorField& A =
             mesh.lookupObject<volVectorField>
             (
@@ -255,39 +147,89 @@ electricPotentialGrad<scalar>::calcGrad
 
         scalar As = complexSignA;
 
-        register label faceI, ownFaceI, neiFaceI;
-
-        forAll(cnFaces, facei)
+        // Internal contributions
+        forAll(own, faceI)
+        // TODO: Optimize speed
         {
-            faceI = cnFaces[facei];
-
-            ownFaceI = own[faceI];
-            neiFaceI = nei[faceI];
+            label ownFaceI = own[faceI];
+            label neiFaceI = nei[faceI];
 
             {
-                // Face centre to cell centre distances
-                scalar fN = w[faceI] / d[faceI];
-                scalar Pf = 1.0 / d[faceI] - fN;
+                // Interpolation weights
+                scalar wP = w[faceI];
+                scalar wN = 1.0 - wP;
 
-                // Gradient weight coeffs
-                scalar wP = omega.value() * w[faceI];
-                scalar wN = omega.value() - wP;
+                // Conductivity
+                scalar sigmaOwn = sigma[ownFaceI];
+                scalar SigmaNei = sigma[neiFaceI];
 
-                // TODO: Interpolation of A?
-                // Currently, a linear interpolation is hard-coded!
+                // Conductivity-weighted inverse face centre
+                // to cell centre distances
+                scalar dByWsigmaOwn = d[faceI] / wN * sigmaOwn;
+                scalar dByWsigmaNei = d[faceI] / wP * SigmaNei;
 
-                // Weighted face gradients
-                scalar SfAwOwn = wP * As * (A[ownFaceI] & Sn[faceI]);
-                scalar SfAwNei = wN * As * (A[neiFaceI] & Sn[faceI]);
+                // Compex signed sigma difference
+                scalar sigmaDiff = As * (sigmaOwn - SigmaNei);
 
-                // Extrapolated face values
-                scalar ssfOwn = vsf[ownFaceI] + Pf * (SfAwOwn + SfAwNei);
-                scalar ssfNei = vsf[neiFaceI] - fN * (SfAwOwn + SfAwNei);
+                // Face interpolated complex time derivative of A
+                scalar wPownAn = wP * (A[ownFaceI] & Sn[faceI]);
+                scalar wNneiAn = wN * (A[neiFaceI] & Sn[faceI]);
+                scalar ddtAfn = omega.value() * (wPownAn + wNneiAn);
 
-                epGrad[ownFaceI] += Sf[faceI] * ssfOwn / V[ownFaceI];
-                epGrad[neiFaceI] -= Sf[faceI] * ssfNei / V[neiFaceI];
+                // Current conserving face value of V
+                scalar Vf = sigmaDiff * ddtAfn;
+                Vf += dByWsigmaOwn * vsf[ownFaceI];
+                Vf += dByWsigmaNei * vsf[neiFaceI];
+                Vf /= dByWsigmaOwn + dByWsigmaNei;
+
+                // Gradient contributions
+                epGrad[ownFaceI] += Sf[faceI] * Vf;
+                epGrad[neiFaceI] -= Sf[faceI] * Vf;
             }
         }
+
+        // Boundary contributions
+        // TEST
+        // TODO: Is this enough? What if there are symmetry,
+        //       empty or other special bc?
+        {
+            tmp<surfaceScalarField> tssf
+            (
+                tinterpScheme_().interpolate(vsf)
+            );
+            surfaceScalarField& ssf = tssf();
+
+            forAll(mesh.boundary(), patchi)
+            {
+                const unallocLabelList& pFaceCells =
+                    mesh.boundary()[patchi].faceCells();
+
+                const vectorField& pSf = mesh.Sf().boundaryField()[patchi];
+
+                const fvsPatchScalarField& pssf = ssf.boundaryField()[patchi];
+
+                forAll(mesh.boundary()[patchi], facei)
+                {
+                    epGrad[pFaceCells[facei]] += pSf[facei]*pssf[facei];
+                }
+            }
+
+            tssf.clear();
+        }
+
+        epGradIn /= mesh.V();
+    }
+    else if (this->baseScheme() == this->LEASTSQUARES)
+    {
+        FatalErrorIn
+        (
+            "electricPotentialGrad<scalar>::calcGrad\n"
+            "(\n"
+            "    GeometricField<Type, fvPatchField, volMesh>&\n"
+            ")\n"
+        )   << "Gradient calculation for LEASTSQUARES "
+            << "base scheme not yet implemented."
+            << abort(FatalError);
     }
 
     epGrad.rename("grad(" + vsf.name() + ')');
@@ -302,12 +244,12 @@ template<>
 tmp<BlockLduSystem<vector, vector> >
 electricPotentialGrad<scalar>::fvmGrad
 (
-    const GeometricField<scalar, fvPatchField, volMesh>& vf
+    const GeometricField<scalar, fvPatchField, volMesh>& vsf
 ) const
 {
     FatalErrorIn
     (
-        "tmp<BlockLduSystem> fvmGrad\n"
+        "electricPotentialGrad<scalar>::fvmGrad\n"
         "(\n"
         "    GeometricField<Type, fvPatchField, volMesh>&\n"
         ")\n"
@@ -316,7 +258,7 @@ electricPotentialGrad<scalar>::fvmGrad
 
     tmp<BlockLduSystem<vector, vector> > tbs
     (
-        new BlockLduSystem<vector, vector>(vf.mesh())
+        new BlockLduSystem<vector, vector>(vsf.mesh())
     );
     return tbs;
 }
