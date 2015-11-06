@@ -1,7 +1,7 @@
 
     // Solve V
     {
-        // Create interpolated surface normal components of A
+        // Create interpolated surface field of A
         surfaceVectorField sARe("sARe", fvc::interpolate(ARe));
         surfaceVectorField sAIm("sAIm", fvc::interpolate(AIm));
 
@@ -321,8 +321,12 @@
         cVIm += VImAverage;
 
         // Solve V-equations
-        cVReEqn.solve();
-        cVImEqn.solve();
+        lduSolverPerformance cVReEqnPerf = cVReEqn.solve(Vdict);
+        lduSolverPerformance cVImEqnPerf = cVImEqn.solve(Vdict);
+
+        scalar curTolVRe = cVReEqnPerf.initialResidual();
+        scalar curTolVIm = cVImEqnPerf.initialResidual();
+        curTolV = max(curTolVRe, curTolVIm);
 
         // Correct boundary conditions
         cVRe.correctBoundaryConditions();

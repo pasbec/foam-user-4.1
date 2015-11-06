@@ -145,7 +145,7 @@
             AcmptEqn.insertEquationCoupling(1, 0, -alphaIn);
 
             // Solve A
-            AcmptEqn.solve();
+            AcmptEqn.solve(Adict);
 
             // Retrieve solution
             AcmptEqn.retrieveSolution(0, AReCmpt.internalField());
