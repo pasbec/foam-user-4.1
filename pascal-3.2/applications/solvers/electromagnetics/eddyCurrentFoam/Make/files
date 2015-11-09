@@ -13,6 +13,7 @@ fvPatchFields/patchDirectionMixedMixed/patchDirectionMixedMixedFvPatchFields.C
 fvPatchFields/tangentialMagnetic/tangentialMagneticFvPatchFields.C
 
 deflatedPCG/deflatedPCG.C
+deflatedICCG/deflatedICCG.C
 
 eddyCurrentFoam.C
 

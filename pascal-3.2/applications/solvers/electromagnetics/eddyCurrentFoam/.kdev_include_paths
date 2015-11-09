@@ -11,3 +11,4 @@
 ./fvPatchFields/tangentialMagnetic
 
 ./deflatedPCG
+./deflatedICCG

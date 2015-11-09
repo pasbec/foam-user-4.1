@@ -6,6 +6,7 @@ EXE_INC = \
     -IfvPatchFields/patchDirectionMixedMixed \
     -IfvPatchFields/tangentialMagnetic \
     -IdeflatedPCG \
+    -IdeflatedICCG \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 

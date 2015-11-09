@@ -46,6 +46,7 @@ Description
 #include "tangentialMagneticFvPatchFields.H"
 
 #include "deflatedPCG.H"
+#include "deflatedICCG.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
