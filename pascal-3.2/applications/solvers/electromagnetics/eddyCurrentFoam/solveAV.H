@@ -1,28 +1,17 @@
 
-    // AV dictionary
-    dictionary& AVdict = mesh.solutionDict().subDict("AV");
-
-    // AV settings
-    int minIter = AVdict.lookupOrDefault<int>("minIter", 0);
-    int maxIter = AVdict.lookupOrDefault<int>("maxIter", 100);
-    scalar tol = AVdict.lookupOrDefault<scalar>("tolerance", 1e-04);
-
     // Copy local solver dictionaries
     dictionary Adict = mesh.solutionDict().subDict("solvers").subDict("A");
     dictionary Vdict = cMesh.solutionDict().subDict("solvers").subDict("V");
 
-    // Init current tolerances
-    scalar curTol = 1.0;
-    scalar curTolA = curTol - SMALL;
-    scalar curTolV = curTol - SMALL;
+    // Reset current tolerance
+    curTol = 1.0;
 
     // AV iterations
-    for (label iter = 0; iter < maxIter; iter++)
+    for (int iter = 0; iter < maxIter; iter++)
     {
-        if ((iter >= minIter) && (curTol <= tol)) break;
+        if ((iter >= minIter) && (res < tol)) break;
 
-        // TODO; curTolA
-        if (curTolV < curTol)
+        if (res < curTol)
         {
             curTol /= 10.0;
 
@@ -38,4 +27,7 @@
 
         // Solve for V
 #       include "VEqn.H"
+
+        // Update residual
+        res = max(resA, resV);
     }

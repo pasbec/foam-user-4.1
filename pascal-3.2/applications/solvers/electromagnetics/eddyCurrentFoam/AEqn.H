@@ -49,10 +49,13 @@
             }
         }
 
+        // Component residual
+        scalar resAcmpt = VSMALL;
+
         // Loop over components
         for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
         {
-            // Create fields
+            // Create component fields
             volScalarField AReCmpt
             (
                 IOobject
@@ -145,7 +148,13 @@
             AcmptEqn.insertEquationCoupling(1, 0, -alphaIn);
 
             // Solve A
-            AcmptEqn.solve(Adict);
+            BlockSolverPerformance<vector2> AcmptEqnPerf = AcmptEqn.solve(Adict);
+
+            // Store residuals
+            scalar resAcmptRe = AcmptEqnPerf.initialResidual().component(0);
+            scalar resAcmptIm = AcmptEqnPerf.initialResidual().component(1);
+            resAcmpt = max(resAcmpt, max(resAcmptRe, resAcmptIm));
+            reduce(resAcmpt, maxOp<scalar>());
 
             // Retrieve solution
             AcmptEqn.retrieveSolution(0, AReCmpt.internalField());
@@ -159,6 +168,9 @@
             ARe.replace(cmpt, AReCmpt);
             AIm.replace(cmpt, AImCmpt);
         }
+
+        // Store max residual
+        resA = resAcmpt;
 
         // Correct boundary conditions
         ARe.correctBoundaryConditions();

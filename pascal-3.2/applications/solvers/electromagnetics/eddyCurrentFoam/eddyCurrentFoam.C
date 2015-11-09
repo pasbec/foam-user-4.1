@@ -62,6 +62,9 @@ int main(int argc, char *argv[])
 #   include "createFields.H"
 #   include "createTopo.H"
 
+#   include "readAVControls.H"
+#   include "initAVControls.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Constants, Frequency and Alpha
@@ -99,9 +102,6 @@ int main(int argc, char *argv[])
 
         // Solve AV system
         {
-            // Read controls
-#           include "readAVControls.H"
-
             // Solve for A and V
 #           include "solveAV.H"
         }
