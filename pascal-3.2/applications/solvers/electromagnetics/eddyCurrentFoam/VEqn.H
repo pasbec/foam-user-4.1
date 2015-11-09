@@ -328,7 +328,6 @@
         scalar resVRe = cVReEqnPerf.initialResidual();
         scalar resVIm = cVImEqnPerf.initialResidual();
         resV = max(resVRe, resVIm);
-        reduce(resV, maxOp<scalar>());
 
         // Correct boundary conditions
         cVRe.correctBoundaryConditions();

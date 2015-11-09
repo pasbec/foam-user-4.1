@@ -154,7 +154,6 @@
             scalar resAcmptRe = AcmptEqnPerf.initialResidual().component(0);
             scalar resAcmptIm = AcmptEqnPerf.initialResidual().component(1);
             resAcmpt = max(resAcmpt, max(resAcmptRe, resAcmptIm));
-            reduce(resAcmpt, maxOp<scalar>());
 
             // Retrieve solution
             AcmptEqn.retrieveSolution(0, AReCmpt.internalField());

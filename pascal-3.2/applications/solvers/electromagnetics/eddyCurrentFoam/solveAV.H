@@ -30,4 +30,5 @@
 
         // Update residual
         res = max(resA, resV);
+        reduce(res, maxOp<scalar>());
     }
