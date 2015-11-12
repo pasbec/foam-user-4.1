@@ -32,13 +32,13 @@ Description
 #include "fvBlockMatrix.H"
 #include "blockMatrixTools.H"
 
-#include "fixedGradientFvPatchFields.H"
-
 #include "regionDynamicFvMesh.H"
 #include "regionVolFields.H"
 #include "regionPointMesh.H"
 #include "regionPointFields.H"
 #include "regionControl.H"
+
+#include "fixedGradientFvPatchFields.H"
 
 #include "fvcExtrapolate.H"
 

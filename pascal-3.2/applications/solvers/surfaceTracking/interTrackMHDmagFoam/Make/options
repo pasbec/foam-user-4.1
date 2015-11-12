@@ -3,6 +3,7 @@ EXE_INC = \
     -Iregion \
     -Iregion/fluid \
     -Iregion/fluid/coupled \
+    -I../trackedSurface/lnInclude \
     -I$(FOAM_USER_SRC)/regionModel/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
@@ -11,8 +12,7 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel/lnInclude \
-    -I$(LIB_SRC)/finiteArea/lnInclude \
-    -I../trackedSurface/lnInclude
+    -I$(LIB_SRC)/finiteArea/lnInclude
 
 
 EXE_LIBS = \
