@@ -19,6 +19,4 @@ regionVolFields/regionVolFields.C
 
 regionControl/regionControl.C
 
-fvc/fvcExtrapolate.C
-
 LIB = $(FOAM_USER_LIBBIN)/libregionModel

@@ -2,4 +2,5 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
+wmakeLnInclude regionModel || exit 1
 wmake libso regionModel || exit 1

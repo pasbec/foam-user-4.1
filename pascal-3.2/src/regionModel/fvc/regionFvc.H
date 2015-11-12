@@ -29,12 +29,14 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvc_H
-#define fvc_H
+#ifndef regionFvc_H
+#define regionFvc_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "fvcExtrapolate.H"
+
+#include "regionFvcGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
