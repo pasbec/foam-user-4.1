@@ -103,10 +103,10 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-#   include "createMultiRegionMesh.H"
-#   include "createMultiRegionFields.H"
-#   include "createMultiRegionControl.H"
-#   include "initMultiRegionCourantNo.H"
+#   include "createRegionMesh.H"
+#   include "createRegionFields.H"
+#   include "createRegionControl.H"
+#   include "initRegionCourantNo.H"
 
 #   include "createBaseFields.H"
 #   include "readBaseControls.H"
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 
 // TODO [High]: Do CourantNo reset in regionControl
         // Reset global Courant No
-#       include "initMultiRegionCourantNo.H"
+#       include "initRegionCourantNo.H"
 
         // ==================================================================//
         // Re-read variable controls and adjust time step
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
         {
 #           include "setBaseFields.H"
 
-#           include "updateMultiRegionCourantNo.H"
+#           include "updateRegionCourantNo.H"
         }
 
 #       include "readFluidControls.H"
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 #           include "updateFluidGravitationalAcceleration.H"
 #           include "updateFluidCourantNumber.H"
 
-#           include "updateMultiRegionCourantNo.H"
+#           include "updateRegionCourantNo.H"
         }
 
         {
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 
 // TODO [High]: Global deltaT setting necessary?
 // TODO [High]: Global deltaT setting in regionControl
-#       include "updateMultiRegionDeltaT.H"
+#       include "updateRegionDeltaT.H"
 
         runTime++;
 
