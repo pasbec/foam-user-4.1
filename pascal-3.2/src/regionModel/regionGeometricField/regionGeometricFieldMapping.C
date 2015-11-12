@@ -127,15 +127,15 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::rmap
     const label& regionI
 ) const
 {
+    GeometricField<Type, PatchField, GeoMesh>& vf0 =
+        field(polyMesh::defaultRegion);
+
+    const GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
+
+    const labelIOList& map = mesh().cellMap(regionI);
+
     forAll(field(regionI), cellI)
     {
-        GeometricField<Type, PatchField, GeoMesh>& vf0 =
-            field(polyMesh::defaultRegion);
-
-        const GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
-
-        const labelIOList& map = mesh().cellMap(regionI);
-
         vf0[map[cellI]] = vf[cellI];
     }
 }

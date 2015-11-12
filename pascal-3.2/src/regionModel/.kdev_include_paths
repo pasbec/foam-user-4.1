@@ -1,0 +1,17 @@
+
+./regionPolyMesh
+./regionPointMesh
+./regionFvMesh
+./regionDynamicFvMesh
+./regionGeoMesh
+
+./regionGeometricField
+./regionVolFields
+./regionPointFields
+
+./regionControl
+
+../../.wm_project_dir/src/dynamicMesh/dynamicMesh/lnInclude
+../../.wm_project_dir/src/dynamicMesh/dynamicFvMesh/lnInclude
+../../.wm_project_dir/src/dynamicMesh/meshMotion/tetMotionSolver/lnInclude
+../../.wm_project_dir/src/tetFiniteElement/lnInclude

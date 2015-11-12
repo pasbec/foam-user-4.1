@@ -1,18 +1,5 @@
 fvc/fvcExtrapolate.C
 
-regionModel/regionPolyMesh/regionPolyMesh.C
-regionModel/regionPolyMesh/regionPolyMeshMapping.C
-regionModel/regionPolyMesh/makeRegionPolyMeshData.C
-regionModel/regionPointMesh/regionPointMesh.C
-regionModel/regionFvMesh/regionFvMesh.C
-regionModel/regionDynamicFvMesh/regionDynamicFvMesh.C
-regionModel/regionDynamicFvMesh/regionDynamicFvMeshMapping.C
-
-regionModel/regionVolFields/regionVolFields.C
-regionModel/regionPointFields/regionPointFields.C
-
-regionModel/regionControl/regionControl.C
-
 interTrackMHDmagFoam.C
 
 EXE = $(FOAM_USER_APPBIN)/interTrackMHDmagFoam

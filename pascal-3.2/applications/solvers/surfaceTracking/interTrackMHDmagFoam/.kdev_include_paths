@@ -1,16 +1,16 @@
 ./fvc
 
-./regionModel/regionPolyMesh
-./regionModel/regionPointMesh
-./regionModel/regionFvMesh
-./regionModel/regionDynamicFvMesh
-./regionModel/regionGeoMesh
+../../../../src/regionModel/regionPolyMesh
+../../../../src/regionModel/regionPointMesh
+../../../../src/regionModel/regionFvMesh
+../../../../src/regionModel/regionDynamicFvMesh
+../../../../src/regionModel/regionGeoMesh
 
-./regionModel/regionGeometricField
-./regionModel/regionVolFields
-./regionModel/regionPointFields
+../../../../src/regionModel/regionGeometricField
+../../../../src/regionModel/regionVolFields
+../../../../src/regionModel/regionPointFields
 
-./regionModel/regionControl
+../../../../src/regionModel/regionControl
 
 ./region
 ./region/fluid
