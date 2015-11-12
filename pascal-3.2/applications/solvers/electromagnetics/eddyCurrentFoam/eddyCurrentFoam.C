@@ -31,6 +31,9 @@ Description
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
 
+#include "regionVolFields.H"
+#include "regionControl.H"
+
 #include "cellSet.H"
 #include "faceSet.H"
 
@@ -56,7 +59,12 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 #   include "createTime.H"
-#   include "createNamedMesh.H"
+
+#   include "createRegionMesh.H"
+#   include "createRegionFields.H"
+#   include "createRegionControl.H"
+
+#   include "createMesh.H"
 
     using namespace Foam;
 

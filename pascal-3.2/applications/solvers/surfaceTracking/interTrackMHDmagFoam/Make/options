@@ -1,10 +1,4 @@
 EXE_INC = \
-    -Ifvc \
-    -Iregion \
-    -Iregion/fluid \
-    -Iregion/fluid/coupled \
-    -I../trackedSurface/lnInclude \
-    -I$(FOAM_USER_SRC)/regionModel/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -12,12 +6,16 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel/lnInclude \
-    -I$(LIB_SRC)/finiteArea/lnInclude
+    -I$(LIB_SRC)/finiteArea/lnInclude \
+    -I$(FOAM_USER_SRC)/regionModel/lnInclude \
+    -I../trackedSurface/lnInclude \
+    -Iregions \
+    -Iregions/fluid \
+    -Iregions/fluid/coupled \
+    -Ifvc
 
 
 EXE_LIBS = \
-    -L$(FOAM_USER_LIBBIN) -ltrackedSurface \
-    -L$(FOAM_USER_LIBBIN) -lregionModel \
     -lfiniteVolume \
     -ldynamicMesh \
     -ldynamicFvMesh \
@@ -29,4 +27,6 @@ EXE_LIBS = \
     -lincompressibleTurbulenceModel \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
-    -lfiniteArea
+    -lfiniteArea \
+    -L$(FOAM_USER_LIBBIN) -lregionModel \
+    -L$(FOAM_USER_LIBBIN) -ltrackedSurface

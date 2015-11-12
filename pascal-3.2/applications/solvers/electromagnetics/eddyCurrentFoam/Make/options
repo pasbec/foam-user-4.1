@@ -1,4 +1,8 @@
 EXE_INC = \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(FOAM_USER_SRC)/regionModel/lnInclude \
+    -Iregions \
     -IfvPatchFields/lookupFixedGradient \
     -IgradSchemes/electricPotentialGrad \
     -IlaplacianSchemes/electricPotentialLaplacian \
@@ -6,12 +10,14 @@ EXE_INC = \
     -IfvPatchFields/patchDirectionMixedMixed \
     -IfvPatchFields/tangentialMagnetic \
     -IdeflatedPCG \
-    -IdeflatedICCG \
-    -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/meshTools/lnInclude
+    -IdeflatedICCG
 
 
 EXE_LIBS = \
     -lfiniteVolume \
+    -ldynamicMesh \
+    -ldynamicFvMesh \
     -lmeshTools \
-    -llduSolvers
+    -ltetFiniteElement \
+    -llduSolvers \
+    -L$(FOAM_USER_LIBBIN) -lregionModel

@@ -1,20 +1,3 @@
-./fvc
-
-../../../../src/regionModel/regionPolyMesh
-../../../../src/regionModel/regionPointMesh
-../../../../src/regionModel/regionFvMesh
-../../../../src/regionModel/regionDynamicFvMesh
-../../../../src/regionModel/regionGeoMesh
-
-../../../../src/regionModel/regionGeometricField
-../../../../src/regionModel/regionVolFields
-../../../../src/regionModel/regionPointFields
-
-../../../../src/regionModel/regionControl
-
-./region
-./region/fluid
-./region/fluid/coupled
 
 ../../../../.wm_project_dir/src/finiteVolume/lnInclude
 ../../../../.wm_project_dir/src/VectorN/lnInclude
@@ -26,4 +9,12 @@
 
 ../../../../.wm_project_dir/src/finiteArea/lnInclude
 
+../../../../src/regionModel/lnInclude
+
 ../trackedSurface/lnInclude
+
+./regions
+./regions/fluid
+./regions/fluid/coupled
+
+./fvc
