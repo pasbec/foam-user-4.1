@@ -1,7 +1,6 @@
 
     // Lorentz force
-    Info << "Create region field FL"
-        << endl;
+    Info << "Create region field FL" << endl;
     regionVolVectorField FL_
     (
         IOobject
@@ -25,8 +24,7 @@
 
 
     // Lorentz force
-    Info << "Create region field pB"
-        << endl;
+    Info << "Create region field pB" << endl;
     regionVolScalarField pB_
     (
         IOobject

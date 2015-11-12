@@ -30,9 +30,7 @@ Description
 
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
-
-#include "regionVolFields.H"
-#include "regionControl.H"
+#include "regionModelling.H"
 
 #include "cellSet.H"
 #include "faceSet.H"

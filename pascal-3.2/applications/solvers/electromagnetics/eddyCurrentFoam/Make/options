@@ -1,6 +1,10 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/meshMotion/tetMotionSolver/lnInclude \
+    -I$(LIB_SRC)/tetFiniteElement/lnInclude \
     -I$(FOAM_USER_SRC)/regionModel/lnInclude \
     -Iregions \
     -IfvPatchFields/lookupFixedGradient \
@@ -15,9 +19,8 @@ EXE_INC = \
 
 EXE_LIBS = \
     -lfiniteVolume \
+    -lmeshTools \
     -ldynamicMesh \
     -ldynamicFvMesh \
-    -lmeshTools \
     -ltetFiniteElement \
-    -llduSolvers \
     -L$(FOAM_USER_LIBBIN) -lregionModel

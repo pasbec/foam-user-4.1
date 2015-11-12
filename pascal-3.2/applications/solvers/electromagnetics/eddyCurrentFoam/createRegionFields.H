@@ -1,7 +1,6 @@
 
     // Electric scalar potential (real part)
-    Info << "Create region field VRe"
-        << endl;
+    Info << "Create region field VRe" << endl;
     regionVolScalarField VRe_
     (
         IOobject
@@ -14,11 +13,9 @@
         ),
         mesh_
     );
-    Info << endl;
 
     // Electric scalar potential (real part)
-    Info << "Create region field VIm"
-        << endl;
+    Info << "Create region field VIm" << endl;
     regionVolScalarField VIm_
     (
         IOobject
