@@ -39,18 +39,6 @@ if ((gf1).mesh() != (gf2).mesh())                                   \
         << abort(FatalError);                                       \
 }
 
-// check region mesh for two regionFields
-
-#define checkRegionField(gf1, gf2, op)                              \
-if ((gf1).mesh() != (gf2).mesh())                                   \
-{                                                                   \
-    FatalErrorIn("checkRegionField(gf1, gf2, op)")                  \
-        << "different mesh for fields "                             \
-        << (gf1).name() << " and " << (gf2).name()                  \
-        << " during operatrion " <<  op                             \
-        << abort(FatalError);                                       \
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -336,7 +324,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
             << abort(FatalError);
     }
 
-    checkRegionField(*this, rgf, "=");
+    checkField(*this, rgf, "=");
 
     forAll(this->mesh().regionNames(), regionI)
     {
@@ -387,7 +375,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
     >&
     rgf = trgf();
 
-    checkRegionField(*this, rgf, "=");
+    checkField(*this, rgf, "=");
 
     forAll(this->mesh().regionNames(), regionI)
     {
