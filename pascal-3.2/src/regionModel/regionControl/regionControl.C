@@ -34,6 +34,7 @@ namespace Foam
 
 defineTypeNameAndDebug(regionControl, 0);
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -54,11 +55,13 @@ regionControl::regionControl(const regionPolyMesh& rpMesh)
 {
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 regionControl::~regionControl()
 {
 }
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -66,6 +69,7 @@ bool regionControl::writeData(Ostream&) const
 {
     return false;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

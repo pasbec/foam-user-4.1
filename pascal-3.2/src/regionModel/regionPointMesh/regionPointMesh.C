@@ -34,12 +34,14 @@ namespace Foam
 
 defineTypeNameAndDebug(regionPointMesh, 0);
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 pointMesh* regionPointMesh::newMesh(const label& regionI) const
 {
     return new pointMesh(rpMesh_[regionI]);
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -66,11 +68,26 @@ regionPointMesh::regionPointMesh
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 regionPointMesh::~regionPointMesh()
 {
 }
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+bool regionPointMesh::operator!=(const regionPointMesh& brm) const
+{
+    return &brm != this;
+}
+
+bool regionPointMesh::operator==(const regionPointMesh& brm) const
+{
+    return &brm == this;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

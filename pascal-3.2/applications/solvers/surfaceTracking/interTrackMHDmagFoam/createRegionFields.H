@@ -14,7 +14,7 @@
         mesh_,
         dimensioned<vector>
         (
-            "FL",
+            word(),
             dimMass/pow(dimLength,2)/pow(dimTime,2),
             pTraits<vector>::zero
         ),
@@ -38,7 +38,7 @@
         mesh_,
         dimensioned<scalar>
         (
-            "pB",
+            word(),
             dimMass/dimLength/pow(dimTime,2),
             pTraits<scalar>::zero
         ),

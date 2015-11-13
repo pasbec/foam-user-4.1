@@ -37,6 +37,7 @@ namespace Foam
 
 defineTypeNameAndDebug(regionDynamicFvMesh, 0);
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 autoPtr<dynamicFvMesh>*
@@ -56,6 +57,7 @@ regionDynamicFvMesh::newMesh(const label& regionI) const
         )
     );
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -123,11 +125,13 @@ regionDynamicFvMesh::regionDynamicFvMesh
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 regionDynamicFvMesh::~regionDynamicFvMesh()
 {
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -101,45 +101,39 @@ namespace fvc
     <
         regionGeometricField
         <
-            typename outerProduct<vector, Type>::type,
-            fvPatchField,
-            volMesh,
+            typename outerProduct<vector, Type>::type, fvPatchField, volMesh,
             regionGeoMesh<regionFvMesh>
         >
     > grad
     (
         const regionGeometricField
         <
-            Type,
-            fvPatchField,
-            volMesh,
+            Type, fvPatchField, volMesh,
             regionGeoMesh<regionFvMesh>
         >&
     );
 
-    template<class Type>
-    tmp
-    <
-        regionGeometricField
-        <
-            typename outerProduct<vector, Type>::type,
-            fvPatchField,
-            volMesh,
-            regionGeoMesh<regionFvMesh>
-        >
-    > grad
-    (
-        const tmp
-        <
-            regionGeometricField
-            <
-                Type,
-                fvPatchField,
-                volMesh,
-                regionGeoMesh<regionFvMesh>
-            >
-        >&
-    );
+//     template<class Type>
+//     tmp
+//     <
+//         regionGeometricField
+//         <
+//             typename outerProduct<vector, Type>::type, fvPatchField, volMesh,
+//             regionGeoMesh<regionFvMesh>
+//         >
+//     > grad
+//     (
+//         const tmp
+//         <
+//             regionGeometricField
+//             <
+//                 Type,
+//                 fvPatchField,
+//                 volMesh,
+//                 regionGeoMesh<regionFvMesh>
+//             >
+//         >&
+//     );
 }
 
 

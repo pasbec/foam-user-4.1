@@ -372,25 +372,25 @@ public:
             //- Return const reference to mesh point mapping
             const labelIOList& pointMap(const word& regionName) const;
 
-        // Operators
+    // Member operators
 
-            //- Mesh access operator for default region (lookup)
-            const polyMesh& operator()() const
-            {
-                return *meshes_[regionIndex(polyMesh::defaultRegion)];
-            }
+        //- Mesh access operator for default region (lookup)
+        const polyMesh& operator()() const
+        {
+            return *meshes_[regionIndex(polyMesh::defaultRegion)];
+        }
 
-            //- Mesh access operator by index (direct)
-            const polyMesh& operator[](const label& regionI) const
-            {
-                return *meshes_[regionI];
-            }
+        //- Mesh access operator by index (direct)
+        const polyMesh& operator[](const label& regionI) const
+        {
+            return *meshes_[regionI];
+        }
 
-            //- Mesh access operator by regionName (lookup)
-            const polyMesh& operator()(const word& regionName) const
-            {
-                return *meshes_[regionIndex(regionName)];
-            }
+        //- Mesh access operator by regionName (lookup)
+        const polyMesh& operator()(const word& regionName) const
+        {
+            return *meshes_[regionIndex(regionName)];
+        }
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

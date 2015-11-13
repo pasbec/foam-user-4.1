@@ -61,7 +61,8 @@ template
 >
 class regionGeometricField
 :
-    regIOobject
+    public refCount,
+    public regIOobject
 {
 public:
 
@@ -89,13 +90,6 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        regionGeometricField(const regionGeometricField&);
-
-        //- Disallow default bitwise assignment
-        void
-        operator=(const regionGeometricField&);
-
         // Helper functions for constructor
 
             //- Return IOobject for region with index regionI
@@ -122,7 +116,8 @@ public:
 
     // Constructors
 
-        //- Constructor given IOobject, mesh, dimensioned<Type> and patch type.
+        //- Constructor given IOobject, mesh, dimensioned<Type>
+        //  and patch type.
         regionGeometricField
         (
             const IOobject&,
@@ -148,6 +143,17 @@ public:
             const RegionMesh&
         );
 
+        //- Construct as copy resetting IO parameters
+        regionGeometricField
+        (
+            const IOobject&,
+            const regionGeometricField
+            <
+                Type, PatchField, GeoMesh,
+                RegionGeoMesh
+            >&
+        );
+
     // Destructor
 
         virtual ~regionGeometricField();
@@ -161,6 +167,15 @@ public:
             {
                 return regionMesh_;
             };
+
+            //- Return dimensions
+            const dimensionSet& dimensions() const
+            {
+                return fields_
+                [
+                    mesh().regionIndex(polyMesh::defaultRegion)
+                ]->dimensions();
+            }
 
             //- Return reference to field of default region
             GeometricField<Type, PatchField, GeoMesh>&
@@ -212,28 +227,49 @@ public:
             //- Map field from non-default region to default region
             void rmap(const word& regionName) const;
 
-        // Operators
+    // Member operators
 
-            //- Field access operator for default region (lookup)
-            GeometricField<Type, PatchField, GeoMesh>&
-            operator()()
-            {
-                return field(polyMesh::defaultRegion);
-            }
+        //- Field access operator for default region (lookup)
+        GeometricField<Type, PatchField, GeoMesh>&
+        operator()() const
+        {
+            return field(polyMesh::defaultRegion);
+        }
 
-            //- Field access operator by index (direct)
-            GeometricField<Type, PatchField, GeoMesh>&
-            operator[](const label& regionI)
-            {
-                return field(regionI);
-            }
+        //- Field access operator by index (direct)
+        GeometricField<Type, PatchField, GeoMesh>&
+        operator[](const label& regionI) const
+        {
+            return field(regionI);
+        }
 
-            //- Field access operator by regionName (lookup)
-            GeometricField<Type, PatchField, GeoMesh>&
-            operator()(const word& regionName)
-            {
-                return field(regionName);
-            }
+        //- Field access operator by regionName (lookup)
+        GeometricField<Type, PatchField, GeoMesh>&
+        operator()(const word& regionName) const
+        {
+            return field(regionName);
+        }
+
+
+        void operator=
+        (
+            const regionGeometricField
+            <
+                Type, PatchField, GeoMesh,
+                RegionGeoMesh
+            >&
+        );
+        void operator=
+        (
+            const tmp
+            <
+                regionGeometricField
+                <
+                    Type, PatchField, GeoMesh,
+                    RegionGeoMesh
+                >
+            >&
+        );
 
 };
 

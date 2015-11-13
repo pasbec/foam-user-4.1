@@ -196,6 +196,7 @@ void regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
     );
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

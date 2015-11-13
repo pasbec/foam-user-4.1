@@ -277,6 +277,7 @@ void regionPolyMesh::makePointMap(const label& regionI) const
     }
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 labelIOList* regionPolyMesh::newRegionMap
@@ -576,6 +577,7 @@ labelIOList* regionPolyMesh::newPointRegionProcMap
     }
 }
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const labelIOList&
@@ -625,6 +627,7 @@ regionPolyMesh::pointMap(const word& regionName) const
 
     return *pointMap_[regionI];
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

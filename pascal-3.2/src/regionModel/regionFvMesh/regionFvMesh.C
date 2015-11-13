@@ -34,6 +34,7 @@ namespace Foam
 
 defineTypeNameAndDebug(regionFvMesh, 0);
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 fvMesh* regionFvMesh::newMesh(const label& regionI) const
@@ -49,6 +50,7 @@ fvMesh* regionFvMesh::newMesh(const label& regionI) const
         )
     );
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -96,11 +98,26 @@ regionFvMesh::regionFvMesh
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 regionFvMesh::~regionFvMesh()
 {
 }
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+bool regionFvMesh::operator!=(const regionFvMesh& brm) const
+{
+    return &brm != this;
+}
+
+bool regionFvMesh::operator==(const regionFvMesh& brm) const
+{
+    return &brm == this;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

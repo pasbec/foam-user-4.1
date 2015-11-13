@@ -194,25 +194,28 @@ public:
                 return rpMesh_.pointMap(regionName);
             };
 
-        // Operators
+    // Member operators
 
-            //- Mesh access operator for default region (lookup)
-            const pointMesh& operator()() const
-            {
-                return *meshes_[regionIndex(polyMesh::defaultRegion)];
-            }
+        //- Mesh access operator for default region (lookup)
+        const pointMesh& operator()() const
+        {
+            return *meshes_[regionIndex(polyMesh::defaultRegion)];
+        }
 
-            //- Mesh access operator by index (direct)
-            const pointMesh& operator[](const label& regionI) const
-            {
-                return *meshes_[regionI];
-            }
+        //- Mesh access operator by index (direct)
+        const pointMesh& operator[](const label& regionI) const
+        {
+            return *meshes_[regionI];
+        }
 
-            //- Mesh access operator by regionName (lookup)
-            const pointMesh& operator()(const word& regionName) const
-            {
-                return *meshes_[regionIndex(regionName)];
-            }
+        //- Mesh access operator by regionName (lookup)
+        const pointMesh& operator()(const word& regionName) const
+        {
+            return *meshes_[regionIndex(regionName)];
+        }
+
+        bool operator!=(const regionPointMesh&) const;
+        bool operator==(const regionPointMesh&) const;
 
 };
 

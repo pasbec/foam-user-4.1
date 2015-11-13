@@ -127,44 +127,95 @@ namespace fvc
 //     return tGrad;
 // }
 
+template<class Type>
+tmp
+<
+    regionGeometricField
+    <
+        typename outerProduct<vector, Type>::type, fvPatchField, volMesh,
+        regionGeoMesh<regionFvMesh>
+    >
+> grad
+(
+    const regionGeometricField
+    <
+        Type, fvPatchField, volMesh,
+        regionGeoMesh<regionFvMesh>
+    >& vf
+)
+{
+    typedef typename outerProduct<vector, Type>::type GradType;
+
+    tmp
+    <
+        regionGeometricField
+        <
+            GradType, fvPatchField, volMesh,
+            regionGeoMesh<regionFvMesh>
+        >
+    >
+    tvfGrad
+    (
+        new regionGeometricField
+        <
+            GradType, fvPatchField, volMesh,
+            regionGeoMesh<regionFvMesh>
+        >
+        (
+            IOobject
+            (
+                "grad(" + vf.name() + ')',
+                vf.mesh().time().timeName(),
+                vf.mesh(),
+                IOobject::NO_READ
+            ),
+            vf.mesh(),
+            dimensioned<GradType>
+            (
+                word(),
+                vf.dimensions()/dimLength,
+                pTraits<GradType>::zero
+            ),
+            zeroGradientFvPatchField<GradType>::typeName
+        )
+    );
+
+    regionGeometricField
+    <
+        GradType, fvPatchField, volMesh,
+        regionGeoMesh<regionFvMesh>
+    >&
+    vfgrad = tvfGrad();
+
+    forAll(vf.mesh().regionNames(), regionI)
+    {
+        vfgrad[regionI] = fvc::grad(vf[regionI]);
+    }
+
+    return tvfGrad;
+}
 
 // template<class Type>
 // tmp
 // <
-//     GeometricField
+//     regionGeometricField
 //     <
-//         typename outerProduct<vector,Type>::type, fvPatchField, volMesh
+//         typename outerProduct<vector, Type>::type, fvPatchField, volMesh,
+//         regionGeoMesh<regionFvMesh>
 //     >
-// >
-// grad
+// > grad
 // (
-//     const GeometricField<Type, fvPatchField, volMesh>& vf
+//     tmp
+//     <
+//         const regionGeometricField
+//         <
+//             Type, fvPatchField, volMesh,
+//             regionGeoMesh<regionFvMesh>
+//         >
+//     >& tvf
 // )
 // {
-//     return fvc::grad(vf, "grad(" + vf.name() + ')');
-// }
-//
-//
-// template<class Type>
-// tmp
-// <
-//     GeometricField
-//     <
-//         typename outerProduct<vector,Type>::type, fvPatchField, volMesh
-//     >
-// >
-// grad
-// (
-//     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
-// )
-// {
-//     typedef typename outerProduct<vector, Type>::type GradType;
-//     tmp<GeometricField<GradType, fvPatchField, volMesh> > Grad
-//     (
-//         fvc::grad(tvf())
-//     );
-//     tvf.clear();
-//     return Grad;
+//     return tvf;
 // }
 
 

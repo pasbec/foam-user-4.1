@@ -124,25 +124,28 @@ public:
                 return *meshes()[regionIndex(regionName)];
             }
 
-        // Operators
+    // Member operators
 
-            //- Mesh access operator for default region (lookup)
-            fvMesh& operator()() const
-            {
-                return *meshes()[regionIndex(polyMesh::defaultRegion)];
-            }
+        //- Mesh access operator for default region (lookup)
+        fvMesh& operator()() const
+        {
+            return *meshes()[regionIndex(polyMesh::defaultRegion)];
+        }
 
-            //- Mesh access operator by index (direct)
-            fvMesh& operator[](const label& regionI) const
-            {
-                return *meshes()[regionI];
-            }
+        //- Mesh access operator by index (direct)
+        fvMesh& operator[](const label& regionI) const
+        {
+            return *meshes()[regionI];
+        }
 
-            //- Mesh access operator by regionName (lookup)
-            fvMesh& operator()(const word& regionName) const
-            {
-                return *meshes()[regionIndex(regionName)];
-            }
+        //- Mesh access operator by regionName (lookup)
+        fvMesh& operator()(const word& regionName) const
+        {
+            return *meshes()[regionIndex(regionName)];
+        }
+
+        bool operator!=(const regionFvMesh&) const;
+        bool operator==(const regionFvMesh&) const;
 
 };
 

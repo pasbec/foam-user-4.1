@@ -52,6 +52,7 @@ polyMesh* regionPolyMesh::newMesh(const label& regionI) const
     );
 }
 
+
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void regionPolyMesh::setParallelSplitRegions()
@@ -121,6 +122,7 @@ void regionPolyMesh::setParallelSplitRegions()
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 regionPolyMesh::regionPolyMesh
@@ -180,11 +182,13 @@ regionPolyMesh::regionPolyMesh
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 regionPolyMesh::~regionPolyMesh()
 {
 }
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -210,6 +214,7 @@ label regionPolyMesh::regionIndex(const word& regionName) const
 
     return regionID;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

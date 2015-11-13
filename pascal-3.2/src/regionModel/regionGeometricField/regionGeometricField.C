@@ -27,6 +27,33 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// check mesh for two fields
+
+#define checkField(gf1, gf2, op)                                    \
+if ((gf1).mesh() != (gf2).mesh())                                   \
+{                                                                   \
+    FatalErrorIn("checkField(gf1, gf2, op)")                        \
+        << "different mesh for fields "                             \
+        << (gf1).name() << " and " << (gf2).name()                  \
+        << " during operatrion " <<  op                             \
+        << abort(FatalError);                                       \
+}
+
+// check region mesh for two regionFields
+
+#define checkRegionField(gf1, gf2, op)                              \
+if ((gf1).mesh() != (gf2).mesh())                                   \
+{                                                                   \
+    FatalErrorIn("checkRegionField(gf1, gf2, op)")                  \
+        << "different mesh for fields "                             \
+        << (gf1).name() << " and " << (gf2).name()                  \
+        << " during operatrion " <<  op                             \
+        << abort(FatalError);                                       \
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
@@ -58,6 +85,7 @@ regionIO
         io.writeOpt()
     );
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -102,9 +130,7 @@ regionGeometricField
                 << endl;
         }
 
-        //- Construct and read given IOobject
         fields_[regionI] =
-
             new GeometricField<Type, PatchField, GeoMesh>
             (
                 regionIO(regionI, io),
@@ -156,9 +182,7 @@ regionGeometricField
                 << endl;
         }
 
-        //- Construct and read given IOobject
         fields_[regionI] =
-
             new GeometricField<Type, PatchField, GeoMesh>
             (
                 regionIO(regionI, io),
@@ -208,9 +232,7 @@ regionGeometricField
                 << endl;
         }
 
-        //- Construct and read given IOobject
         fields_[regionI] =
-
             new GeometricField<Type, PatchField, GeoMesh>
             (
                 regionIO(regionI, io),
@@ -218,6 +240,59 @@ regionGeometricField
             );
     }
 }
+
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+regionGeometricField
+(
+    const IOobject& io,
+    const regionGeometricField
+    <
+        Type, PatchField, GeoMesh,
+        RegionGeoMesh
+    >& rgf
+)
+:
+    regIOobject
+    (
+        IOobject
+        (
+            io.name(),
+            io.time().timeName(),
+            rgf.mesh().thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            true
+        )
+    ),
+    size_(rgf.mesh().size()),
+    regionNames_(rgf.mesh().regionNames()),
+    regionMesh_(rgf.mesh()),
+    fields_(List<GeometricField<Type, PatchField, GeoMesh>*>(size_,NULL))
+{
+    forAll(regionNames_, regionI)
+    {
+        if (debug)
+        {
+            Info << "regionGeometricField::regionGeometricField(...) : "
+                << "Create field for region "
+                << regionMesh_.regionName(regionI)
+                << endl;
+        }
+
+        fields_[regionI] =
+            new GeometricField<Type, PatchField, GeoMesh>
+            (
+                regionIO(regionI, io),
+                rgf.field(regionI)
+            );
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -230,6 +305,111 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 ~regionGeometricField()
 {
 }
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+void
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
+(
+    const regionGeometricField
+        <
+            Type,
+            PatchField,
+            GeoMesh,
+            RegionGeoMesh
+        >& rgf
+)
+{
+    if (this == &rgf)
+    {
+        FatalErrorIn
+        (
+            "regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator="
+            "(const regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>&)"
+        )   << "attempted assignment to self"
+            << abort(FatalError);
+    }
+
+    checkRegionField(*this, rgf, "=");
+
+    forAll(this->mesh().regionNames(), regionI)
+    {
+        checkField(this->field(regionI), rgf.field(regionI), "=");
+
+        // only equate field contents not ID
+
+        this->field(regionI).dimensionedInternalField()
+            = rgf.field(regionI).dimensionedInternalField();
+
+        this->field(regionI).boundaryField()
+            = rgf.field(regionI).boundaryField();
+    }
+}
+
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+void
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
+(
+    const tmp
+    <
+        regionGeometricField
+        <
+            Type, PatchField, GeoMesh,
+            RegionGeoMesh
+        >
+    >& trgf
+)
+{
+    if (this == &(trgf()))
+    {
+        FatalErrorIn
+        (
+            "regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator="
+            "(const tmp<regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh> >&)"
+        )   << "attempted assignment to self"
+            << abort(FatalError);
+    }
+
+    const regionGeometricField
+    <
+        Type, PatchField, GeoMesh,
+        RegionGeoMesh
+    >&
+    rgf = trgf();
+
+    checkRegionField(*this, rgf, "=");
+
+    forAll(this->mesh().regionNames(), regionI)
+    {
+        checkField(this->field(regionI), rgf.field(regionI), "=");
+
+        // only equate field contents not ID
+
+        this->field(regionI).dimensions()
+            = rgf.field(regionI).dimensions();
+
+        this->field(regionI).internalField().transfer
+        (
+            const_cast<Field<Type>&>(rgf.field(regionI).internalField())
+        );
+
+        this->field(regionI).boundaryField()
+            = rgf.field(regionI).boundaryField();
+    }
+
+    trgf.clear();
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

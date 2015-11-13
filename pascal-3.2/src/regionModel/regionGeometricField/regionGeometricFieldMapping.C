@@ -154,6 +154,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::rmap
     rmap(mesh().regionIndex(regionName));
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
