@@ -132,9 +132,6 @@
             AReCmptEqn -= sigma * VReGrad.component(cmpt);
             AImCmptEqn -= sigma * VImGrad.component(cmpt);
 
-            // References to internal alpha field
-            const scalarField& alphaIn = alpha.internalField();
-
             // Prepare block system for current component
             fvBlockMatrix<vector2> AcmptEqn(ACmpt);
 
@@ -142,10 +139,13 @@
             AcmptEqn.insertEquation(0, AReCmptEqn);
             AcmptEqn.insertEquation(1, AImCmptEqn);
 
+            // Coupling coeff field
+//             const scalarField alpha = omega * sigma;
+
             // Add coupling terms for real/imagninary ARe-AIm
             // dependence of magnetic vector potential
-            AcmptEqn.insertEquationCoupling(0, 1,  alphaIn);
-            AcmptEqn.insertEquationCoupling(1, 0, -alphaIn);
+            AcmptEqn.insertEquationCoupling(0, 1,  omega * sigma);
+            AcmptEqn.insertEquationCoupling(1, 0, -omega * sigma);
 
             // Solve A
             BlockSolverPerformance<vector2> AcmptEqnPerf = AcmptEqn.solve(Adict);

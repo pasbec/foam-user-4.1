@@ -83,6 +83,31 @@ void regionPolyMesh::makePointRegionMap(const label& regionI) const
     pointRegionMap_[regionI] = newRegionMap(regionI,"point");
 }
 
+void regionPolyMesh::makeFaceRegionMap(const label& regionI) const
+{
+    if (debug)
+    {
+        Info << "regionPolyMesh::makeFaceRegionMap(...) : "
+            << "Create region face map for region "
+            << regionName(regionI)
+            << endl;
+    }
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (faceRegionMap_[regionI])
+    {
+        FatalErrorIn("regionPolyMesh::makeFaceRegionMap(...)")
+            << "Region face map for region "
+            << regionName(regionI)
+            << " already exists"
+            << abort(FatalError);
+    }
+
+    // Create region face map
+    faceRegionMap_[regionI] = newRegionMap(regionI,"face");
+}
+
 void regionPolyMesh::makeCellProcMap(const label& regionI) const
 {
     if (debug)
@@ -275,6 +300,54 @@ void regionPolyMesh::makePointMap(const label& regionI) const
             pointMap_[regionI] = pointRegionProcMap_[regionI];
         }
     }
+}
+
+void regionPolyMesh::makeFaceMap(const label& regionI) const
+{
+    if (debug)
+    {
+        Info << "regionPolyMesh::makeFaceMap(...) : "
+            << "Create face map for region "
+            << regionName(regionI)
+            << endl;
+    }
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (faceMap_[regionI])
+    {
+        FatalErrorIn("regionPolyMesh::makeFaceMap(...)")
+            << "Face map for region "
+            << regionName(regionI)
+            << " already exists"
+            << abort(FatalError);
+    }
+
+    // Create face map
+    if (!parallel())
+    {
+        // Serial
+        if (!faceRegionMap_[regionI])
+        {
+            makeFaceRegionMap(regionI);
+        }
+
+        faceMap_[regionI] = faceRegionMap_[regionI];
+    }
+// TODO
+//     else
+//     {
+//         if (!parallelSplitRegions())
+//         {
+//             // Parallel split region-processor
+//             if (!faceRegionProcMap_[regionI])
+//             {
+//                 makeFaceRegionProcMap(regionI);
+//             }
+//
+//             faceMap_[regionI] = faceRegionProcMap_[regionI];
+//         }
+//     }
 }
 
 
@@ -626,6 +699,30 @@ regionPolyMesh::pointMap(const word& regionName) const
     }
 
     return *pointMap_[regionI];
+}
+
+const labelIOList&
+regionPolyMesh::faceMap(const label& regionI) const
+{
+    if (!faceMap_[regionI])
+    {
+        makeFaceMap(regionI);
+    }
+
+    return *faceMap_[regionI];
+}
+
+const labelIOList&
+regionPolyMesh::faceMap(const word& regionName) const
+{
+    label regionI = regionIndex(regionName);
+
+    if (!faceMap_[regionI])
+    {
+        makeFaceMap(regionI);
+    }
+
+    return *faceMap_[regionI];
 }
 
 

@@ -4,6 +4,7 @@
 ../../../../src/regionModel/lnInclude
 
 ./regions
+./regions/conductor
 
 ./gradSchemes/electricPotentialGrad
 

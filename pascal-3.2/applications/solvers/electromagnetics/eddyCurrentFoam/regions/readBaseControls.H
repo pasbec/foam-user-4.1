@@ -1,6 +1,6 @@
 
     // AV dictionary
-    dictionary& AVdict = mesh.solutionDict().subDict("AV");
+    dictionary& AVdict = mesh_[defaultRegionID].solutionDict().subDict("AV");
 
     // AV settings
     int minIter = AVdict.lookupOrDefault<int>("minIter", 0);

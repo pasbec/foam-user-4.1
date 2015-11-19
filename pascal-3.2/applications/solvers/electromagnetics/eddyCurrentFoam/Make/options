@@ -7,6 +7,7 @@ EXE_INC = \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
     -I$(FOAM_USER_SRC)/regionModel/lnInclude \
     -Iregions \
+    -Iregions/conductor \
     -IfvPatchFields/lookupFixedGradient \
     -IgradSchemes/electricPotentialGrad \
     -IlaplacianSchemes/electricPotentialLaplacian \

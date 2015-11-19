@@ -151,12 +151,16 @@ regionPolyMesh::regionPolyMesh
     meshes_(List<polyMesh*>(size_,NULL)),
     cellRegionMap_(List<labelIOList*>(size_,NULL)),
     pointRegionMap_(List<labelIOList*>(size_,NULL)),
+    faceRegionMap_(List<labelIOList*>(size_,NULL)),
     cellProcMap_(List<labelIOList*>(size_,NULL)),
     pointProcMap_(List<labelIOList*>(size_,NULL)),
+    faceProcMap_(List<labelIOList*>(size_,NULL)),
     cellRegionProcMap_(List<labelIOList*>(size_,NULL)),
     pointRegionProcMap_(List<labelIOList*>(size_,NULL)),
+    faceRegionProcMap_(List<labelIOList*>(size_,NULL)),
     cellMap_(List<labelIOList*>(size_,NULL)),
-    pointMap_(List<labelIOList*>(size_,NULL))
+    pointMap_(List<labelIOList*>(size_,NULL)),
+    faceMap_(List<labelIOList*>(size_,NULL))
 {
     if(init)
     {

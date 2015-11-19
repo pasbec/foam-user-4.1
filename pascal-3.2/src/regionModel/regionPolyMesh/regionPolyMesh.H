@@ -42,14 +42,19 @@ SourceFiles
 #include "foamTime.H"
 #include "wordList.H"
 
+// TODO [High]: Finish implementation of face mapping in parallel!
+
+// TODO [High]: Sort that parallel clutter out (remove local maps and return based on if)!!!
+
+// TODO [High]: Remove heaps of duplicated code
+
+// TODO [High]: Remove copies of mappings
+
 // TODO [High]: Check if all region names are unique
 
 // TODO [High]: Implement forward (base->regionI) point mapping
 //              ala map()-functions
 
-// TODO [Medium]: Implement face mapping
-
-// TODO [Medium]: Move all cell stuff to regionFvMesh
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,11 +103,17 @@ protected:
         //- Region point mapping
         mutable List<labelIOList*> pointRegionMap_;
 
+        //- Region face mapping
+        mutable List<labelIOList*> faceRegionMap_;
+
         //- Processor cell mapping
         mutable List<labelIOList*> cellProcMap_;
 
         //- Processor point mapping
         mutable List<labelIOList*> pointProcMap_;
+
+        //- Processor face mapping
+        mutable List<labelIOList*> faceProcMap_;
 
         //- Region-processor cell mapping
         //  (if split in order region->proc)
@@ -112,11 +123,18 @@ protected:
         //  (if split in order region->proc)
         mutable List<labelIOList*> pointRegionProcMap_;
 
+        //- Region-processor face mapping
+        //  (if split in order region->proc)
+        mutable List<labelIOList*> faceRegionProcMap_;
+
         //- Local cell mapping
         mutable List<labelIOList*> cellMap_;
 
         //- Local point mapping
         mutable List<labelIOList*> pointMap_;
+
+        //- Local face mapping
+        mutable List<labelIOList*> faceMap_;
 
     // Protected Member Functions
 
@@ -130,18 +148,22 @@ protected:
             //- Region maps
             void makeCellRegionMap(const label& regionI) const;
             void makePointRegionMap(const label& regionI) const;
+            void makeFaceRegionMap(const label& regionI) const;
 
             //- Processor maps
             void makeCellProcMap(const label& regionI) const;
             void makePointProcMap(const label& regionI) const;
+//             void makeFaceProcMap(const label& regionI) const;
 
             //- Region-processor maps
             void makeCellRegionProcMap(const label& regionI) const;
             void makePointRegionProcMap(const label& regionI) const;
+//             void makeFaceRegionProcMap(const label& regionI) const;
 
             //- Maps
             void makeCellMap(const label& regionI) const;
             void makePointMap(const label& regionI) const;
+            void makeFaceMap(const label& regionI) const;
 
         // Helper functions for demand-driven data
 
@@ -371,6 +393,12 @@ public:
 
             //- Return const reference to mesh point mapping
             const labelIOList& pointMap(const word& regionName) const;
+
+            //- Return const reference to mesh face mapping
+            const labelIOList& faceMap(const label& regionI) const;
+
+            //- Return const reference to mesh face mapping
+            const labelIOList& faceMap(const word& regionName) const;
 
     // Member operators
 

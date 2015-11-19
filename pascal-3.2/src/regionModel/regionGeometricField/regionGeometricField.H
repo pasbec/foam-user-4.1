@@ -43,7 +43,7 @@ SourceFiles
 
 #include "regionGeoMesh.H"
 
-// TODO [High]: Mapping should be based on field type cell, point, face, ...
+// TODO [High]: Mapping should be based on virtual functions of field type cell, point, face, ...
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
