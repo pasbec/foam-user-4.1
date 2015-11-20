@@ -204,51 +204,191 @@ public:
                 return false;
             };
 
-        // Mapping
+        // Internal field data processing
+
+            //- Internal field forward mapping
+            void mapInteralField(const label& regionI) const
+            {
+                notImplemented(type() + "::rmap()");
+            };
+
+            //- Internal field reverse mapping
+            void rmapInteralField(const label& regionI) const
+            {
+                notImplemented(type() + "::rmap()");
+            };
+
+        // Boundary field data processing
+
+            //- TODO: Boundary field mapping where possible
+            void mapBoundaryField(const label& regionI) const
+            ;
+//             {
+//                 notImplemented(type() + "::rmap()");
+//             };
+
+            //- TODO FIXME: Boundary field copy from internal field
+            void copyInternalBoundaryField(const label& regionI) const
+            ;
+//             {
+//                 notImplemented(type() + "::rmap()");
+//             };
+
+            //- TODO: Boundary field interpolation
+            void interpolateBoundaryField(const label& regionI) const
+            ;
+//             {
+//                 notImplemented(type() + "::rmap()");
+//             };
+
+            //- TODO: Boundary field extrapolation
+            void extrapolateBoundaryField(const label& regionI) const
+            ;
+//             {
+//                 notImplemented(type() + "::rmap()");
+//             };
+
+        // Mapping with patch mapping where possible
 
             //- Map field from default region to all non-default regions
             void map() const
             {
-                notImplemented(type() + "::map()");
+                forAll(mesh().regionNames(), regionI)
+                {
+                    word regionNameI = mesh().regionName(regionI);
+
+                    if (regionNameI != polyMesh::defaultRegion)
+                    {
+                        map(regionI);
+                    }
+                }
             };
 
             //- Map field from default region to non-default region
             void map(const label& regionI) const
             {
-                notImplemented(type() + "::map()");
+                mapInteralField(regionI);
+                mapBoundaryField(regionI);
             };
 
             //- Map field from default region to non-default region
             void map(const word& regionName) const
             {
-                notImplemented(type() + "::map()");
+                map(mesh().regionIndex(regionName));
             };
 
             //- Map field from all non-default regions to default region
             void rmap() const
             {
-                notImplemented(type() + "::rmap()");
+                forAll(mesh().regionNames(), regionI)
+                {
+                    word regionNameI = mesh().regionName(regionI);
+
+                    if (regionNameI != polyMesh::defaultRegion)
+                    {
+                        rmap(regionI);
+                    }
+                }
             };
 
             //- Map field from non-default region to default region
             void rmap(const label& regionI) const
             {
-                notImplemented(type() + "::rmap()");
+                rmapInteralField(regionI);
             };
 
             //- Map field from non-default region to default region
             void rmap(const word& regionName) const
             {
-                notImplemented(type() + "::rmap()");
+                rmap(mesh().regionIndex(regionName));
             };
 
-        // Interpolation
+        // Mapping with patch interpolation
 
-            //- TODO: Patch interpolation
-            void interpolatePatches(const label& regionI) const;
+            //- Map/Interpolate field from default region to all non-default regions
+            void mapCopyInternal() const
+            {
+                forAll(mesh().regionNames(), regionI)
+                {
+                    word regionNameI = mesh().regionName(regionI);
 
-            //- TODO: Interpolate field from default region to non-default region
-            void interpolate(const label& regionI) const;
+                    if (regionNameI != polyMesh::defaultRegion)
+                    {
+                        mapCopyInternal(regionI);
+                    }
+                }
+            };
+
+            //- Map/Interpolate field from default region to non-default region
+            void mapCopyInternal(const label& regionI) const
+            {
+                map(regionI);
+                copyInternalBoundaryField(regionI);
+            };
+
+            //- Map/Interpolate field from default region to non-default region
+            void mapCopyInternal(const word& regionName) const
+            {
+                mapCopyInternal(mesh().regionIndex(regionName));
+            };
+
+        // Mapping with patch interpolation
+
+            //- Map/Interpolate field from default region to all non-default regions
+            void mapInterpolate() const
+            {
+                forAll(mesh().regionNames(), regionI)
+                {
+                    word regionNameI = mesh().regionName(regionI);
+
+                    if (regionNameI != polyMesh::defaultRegion)
+                    {
+                        mapInterpolate(regionI);
+                    }
+                }
+            };
+
+            //- Map/Interpolate field from default region to non-default region
+            void mapInterpolate(const label& regionI) const
+            {
+                map(regionI);
+                interpolateBoundaryField(regionI);
+            };
+
+            //- Map/Interpolate field from default region to non-default region
+            void mapInterpolate(const word& regionName) const
+            {
+                mapInterpolate(mesh().regionIndex(regionName));
+            };
+
+        // Mapping with patch extrapolation
+
+            //- Map/Extrapolate field from default region to all non-default regions
+            void mapExtrapolate() const
+            {
+                forAll(mesh().regionNames(), regionI)
+                {
+                    word regionNameI = mesh().regionName(regionI);
+
+                    if (regionNameI != polyMesh::defaultRegion)
+                    {
+                        mapExtrapolate(regionI);
+                    }
+                }
+            };
+
+            //- Map/Extrapolate field from default region to non-default region
+            void mapExtrapolate(const label& regionI) const
+            {
+                map(regionI);
+                extrapolateBoundaryField(regionI);
+            };
+
+            //- Map/Extrapolate field from default region to non-default region
+            void mapExtrapolate(const word& regionName) const
+            {
+                mapExtrapolate(mesh().regionIndex(regionName));
+            };
 
     // Member operators
 

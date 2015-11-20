@@ -1,80 +1,65 @@
 
     // Solve V
     {
-        // Boundary fields
-        forAll(mesh.boundaryMesh(), patchI)
+        // Update gradient boundary condition for V
         {
-            polyPatch patch = mesh.boundaryMesh()[patchI];
-
-            // Old internal faces
-            // TODO: What about an more appropriate patch name?
-            if (patch.name() == "oldInternalFaces")
+            forAll(mesh.boundaryMesh(), patchI)
             {
-                // Boundary values for V
+                polyPatch patch = mesh.boundaryMesh()[patchI];
+
+                // Old internal faces
+                // TODO: What about an more appropriate patch name?
+                if (patch.name() == "oldInternalFaces")
                 {
-                    if
-                    (
-                        VRe.boundaryField()[patchI].type()
-                     == fixedGradientFvPatchField<scalar>::typeName
-                    )
+                    // Boundary values for V
                     {
-                        fixedGradientFvPatchField<scalar>& VReP =
-                            refCast<fixedGradientFvPatchField<scalar> >
-                            (
-                                VRe.boundaryField()[patchI]
-                            );
+                        if
+                        (
+                            VRe.boundaryField()[patchI].type()
+                        == fixedGradientFvPatchField<scalar>::typeName
+                        )
+                        {
+                            fixedGradientFvPatchField<scalar>& VReP =
+                                refCast<fixedGradientFvPatchField<scalar> >
+                                (
+                                    VRe.boundaryField()[patchI]
+                                );
 
-                        // Set correct gradient
-                        VReP.gradient() =  omega.value()
-                        * (AIm.boundaryField()[patchI] & VReP.patch().nf());
+                            // Set correct gradient
+                            VReP.gradient() =  omega.value()
+                            * (AIm.boundaryField()[patchI] & VReP.patch().nf());
 
-                        // Evaluate values
-                        VReP.evaluate();
+                            // Evaluate values
+                            VReP.evaluate();
+                        }
+
+                        if
+                        (
+                            VIm.boundaryField()[patchI].type()
+                        == fixedGradientFvPatchField<scalar>::typeName
+                        )
+                        {
+                            fixedGradientFvPatchField<scalar>& VImP =
+                                refCast<fixedGradientFvPatchField<scalar> >
+                                (
+                                    VIm.boundaryField()[patchI]
+                                );
+
+                            // Set correct gradient
+                            VImP.gradient() = -omega.value()
+                            * (ARe.boundaryField()[patchI] & VImP.patch().nf());
+
+                            // Evaluate values
+                            VImP.evaluate();
+                        }
                     }
-
-                    if
-                    (
-                        VIm.boundaryField()[patchI].type()
-                     == fixedGradientFvPatchField<scalar>::typeName
-                    )
-                    {
-                        fixedGradientFvPatchField<scalar>& VImP =
-                            refCast<fixedGradientFvPatchField<scalar> >
-                            (
-                                VIm.boundaryField()[patchI]
-                            );
-
-                        // Set correct gradient
-                        VImP.gradient() = -omega.value()
-                        * (ARe.boundaryField()[patchI] & VImP.patch().nf());
-
-                        // Evaluate values
-                        VImP.evaluate();
-                    }
-                }
-
-                // Boundary values for sigma
-                {
-                    fvPatchField<scalar>& sigmaP = sigma.boundaryField()[patchI];
-
-                    // Evaluate values
-                    sigmaP = sigmaP.patchInternalField();
                 }
             }
 
-            // TODO: What about other patches?
+            // Correct boundary conditions for V
+            VRe.correctBoundaryConditions();
+            VIm.correctBoundaryConditions();
         }
-
-        // Correct boundary conditions for A
-        ARe.correctBoundaryConditions();
-        AIm.correctBoundaryConditions();
-
-        // Correct boundary conditions for V
-        VRe.correctBoundaryConditions();
-        VIm.correctBoundaryConditions();
-
-        // Correct boundary conditions for sigma
-        sigma.correctBoundaryConditions();
 
         // Prepare V-equations
         fvScalarMatrix VReEqn(fvm::laplacian(sigma, VRe));
@@ -117,8 +102,4 @@
 //         // Normalize solution level
 //         cVRe -= VReAverage;
 //         cVIm -= VImAverage;
-
-        // Calculate gradient
-        VReGrad = fvc::grad(VRe);
-        VImGrad = fvc::grad(VIm);
     }

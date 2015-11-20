@@ -39,6 +39,10 @@ Description
 // #include "deflatedPCG.H"
 // #include "deflatedICCG.H"
 
+// TODO: Finish parallel face mapping
+// TODO: Find bug in mapCopyInternal() member function of regionVolFields
+// TODO: Finish template specialization for regionVolFields mapping
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -66,6 +70,19 @@ int main(int argc, char *argv[])
 
     // Constants, Frequency and Alpha
 
+    dimensionedScalar mu0
+    (
+        "mu0",
+        dimensionSet(1, 1, -2, 0, 0, -2, 0),
+        4.0 * mathematicalConstant::pi * 1e-07
+    );
+
+    dimensionedScalar rMu0
+    (
+        "rMu0",
+        1.0/mu0
+    );
+
     // Magnetic properties
     Info << "Read Magnetic properties" << nl << endl;
     IOdictionary magneticProperties
@@ -82,26 +99,15 @@ int main(int argc, char *argv[])
 
     dimensionedScalar frequency (magneticProperties.lookup("frequency"));
 
-    dimensionedScalar mu0
-    (
-        "mu0",
-        dimensionSet(1, 1, -2, 0, 0, -2, 0),
-        4.0 * mathematicalConstant::pi * 1e-07
-    );
-
-    dimensionedScalar rMu0
-    (
-        "rMu0",
-        1.0/mu0
-    );
-
     dimensionedScalar omega
     (
         "omega",
         2.0 * mathematicalConstant::pi * frequency
     );
 
-    // Calculate gradient of V
+
+    // Initial gradient calculation of V in conductor region
+    Info << "Init gradient of V" << nl << endl;
     {
         setRegionReferences(conductorRegionID);
 
@@ -109,14 +115,9 @@ int main(int argc, char *argv[])
         VImGrad = fvc::grad(VIm);
     }
 
-    // Initialize gradient of V in base region
-    Info << "Init gradient of V" << nl << endl;
+    // Initial reverse map gradient of V from conductor to base region
     VReGrad_.rmap(conductorRegionID);
     VImGrad_.rmap(conductorRegionID);
-
-    // Initialize conductivity in conductor region
-    Info << "Init sigma" << nl << endl;
-    sigma_.map(conductorRegionID);
 
     // TODO: Realize AV-loops as time loops
     while (runTime.run())
@@ -155,11 +156,11 @@ int main(int argc, char *argv[])
 #               include "AEqn.H"
             }
 
-            // Map/interpolate fields from base to conductor region
-            ARe_.interpolate(conductorRegionID);
-            AIm_.interpolate(conductorRegionID);
-            AIm_.map(conductorRegionID);
-            sigma_.map(conductorRegionID);
+            // Map internal field from base to conductor region
+            // and interpolate/extrapolate boundary values
+            ARe_.mapInterpolate(conductorRegionID);
+            AIm_.mapInterpolate(conductorRegionID);
+            sigma_.mapExtrapolate(conductorRegionID);
 
             // Solve for V in conductor region
             {
@@ -168,7 +169,15 @@ int main(int argc, char *argv[])
 #               include "VEqn.H"
             }
 
-            // Reverse map fields from base to conductor region
+            // Calculate gradient of V in conductor region
+            {
+                setRegionReferences(conductorRegionID);
+
+                VReGrad = fvc::grad(VRe);
+                VImGrad = fvc::grad(VIm);
+            }
+
+            // Reverse map gradient of V from conductor to base region
             VReGrad_.rmap(conductorRegionID);
             VImGrad_.rmap(conductorRegionID);
 
@@ -182,7 +191,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        // Derived fields
+        // Derived fields in base region
         {
             setRegionReferences(defaultRegionID);
 
@@ -195,7 +204,7 @@ int main(int argc, char *argv[])
             jIm == - omega * sigma * ARe - sigma * VImGrad;
         }
 
-        // Time-averaged fields
+        // Time-averaged fields in base region
         {
             setRegionReferences(defaultRegionID);
 

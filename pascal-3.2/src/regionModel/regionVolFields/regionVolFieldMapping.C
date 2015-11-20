@@ -27,14 +27,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// define template specialization for volField mapping functions
+// TODO define template specialization for volField mapping functions
 # define defineRegionVolFieldMapping(Type)                                    \
                                                                               \
 template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::map                                                                        \
+>::mapInteralField                                                            \
 (                                                                             \
     const label& regionI                                                      \
 ) const                                                                       \
@@ -52,41 +52,12 @@ void regionGeometricField                                                     \
     }                                                                         \
 }                                                                             \
                                                                               \
-template<>                                                                    \
-void regionGeometricField                                                     \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::map                                                                        \
-(                                                                             \
-    const word& regionName                                                    \
-) const                                                                       \
-{                                                                             \
-    map(mesh().regionIndex(regionName));                                      \
-}                                                                             \
                                                                               \
 template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::map() const                                                                \
-{                                                                             \
-    forAll(mesh().regionNames(), regionI)                                     \
-    {                                                                         \
-        word regionNameI = mesh().regionName(regionI);                        \
-                                                                              \
-        if (regionNameI != polyMesh::defaultRegion)                           \
-        {                                                                     \
-            map(regionI);                                                     \
-        }                                                                     \
-    }                                                                         \
-}                                                                             \
-                                                                              \
-                                                                              \
-template<>                                                                    \
-void regionGeometricField                                                     \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::rmap                                                                       \
+>::rmapInteralField                                                           \
 (                                                                             \
     const label& regionI                                                      \
 ) const                                                                       \
@@ -101,36 +72,6 @@ void regionGeometricField                                                     \
     forAll(field(regionI), cellI)                                             \
     {                                                                         \
         vf0[map[cellI]] = vf[cellI];                                          \
-    }                                                                         \
-}                                                                             \
-                                                                              \
-template<>                                                                    \
-void regionGeometricField                                                     \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::rmap                                                                       \
-(                                                                             \
-    const word& regionName                                                    \
-) const                                                                       \
-{                                                                             \
-    rmap(mesh().regionIndex(regionName));                                     \
-}                                                                             \
-                                                                              \
-template<>                                                                    \
-void regionGeometricField                                                     \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::rmap() const                                                               \
-{                                                                             \
-    forAll(mesh().regionNames(), regionI)                                     \
-    {                                                                         \
-        word regionNameI = mesh().regionName(regionI);                        \
-                                                                              \
-        if (regionNameI != polyMesh::defaultRegion)                           \
-                                                                              \
-        {                                                                     \
-            rmap(regionI);                                                    \
-        }                                                                     \
     }                                                                         \
 }
 

@@ -154,12 +154,12 @@ protected:
             //- Processor maps
             void makeCellProcMap(const label& regionI) const;
             void makePointProcMap(const label& regionI) const;
-//             void makeFaceProcMap(const label& regionI) const;
+// TODO            void makeFaceProcMap(const label& regionI) const;
 
             //- Region-processor maps
             void makeCellRegionProcMap(const label& regionI) const;
             void makePointRegionProcMap(const label& regionI) const;
-//             void makeFaceRegionProcMap(const label& regionI) const;
+// TODO            void makeFaceRegionProcMap(const label& regionI) const;
 
             //- Maps
             void makeCellMap(const label& regionI) const;

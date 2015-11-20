@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "regionGeometricField.H"
+#include "fvcExtrapolate.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -385,16 +386,105 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 }
 
 
-
-
-//- TODO: Patch interpolation
+// TODO: Only for calculated- and fixedValue- patchFields
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
     class RegionGeoMesh
 >
 void
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolatePatches
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::mapBoundaryField
+(
+    const label& regionI
+) const
+{
+    const GeometricField<Type, PatchField, GeoMesh>& vf0 =
+        field(polyMesh::defaultRegion);
+
+    GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
+
+    const polyBoundaryMesh& pbm0 = vf0.mesh().boundaryMesh();
+    const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
+
+    forAll(pbm, patchI)
+    {
+        const polyPatch& patch = pbm[patchI];
+
+        label patchI0 = pbm0.findPatchID(patch.name());
+
+        // Patch is present in regionI AND also in
+        // default region. Mapping is done based on
+        // direct addressing.
+        if (patchI0 > -1)
+        {
+            const polyPatch& patch0 = pbm0[patchI0];
+            const Field<Type>& patchField0 = vf0.boundaryField()[patchI0];
+            label patchStart0 = patch0.start();
+            label patchSize0 = patchField0.size();
+
+            Field<Type>& patchField = vf.boundaryField()[patchI];
+            label patchStart = patch.start();
+
+            const labelList& fmap = mesh().faceMap(regionI);
+
+            forAll(patchField, facei)
+            {
+                label faceI = patchStart + facei;
+                label faceI0 = fmap[faceI];
+
+                label facei0 = faceI0 - patchStart0;
+
+                if (facei0 > -1 && facei0 < patchSize0)
+                {
+                    patchField[facei] = patchField0[facei0];
+                }
+                else
+                {
+                    // TODO: Mapped from internal face. Do what?
+                    //       one side of an intersecting patch?
+                    // NOTE: This should already be avoided during
+                    //       construction of regionPolyMesh
+                    //       (or the first time faceMap is used) by
+                    //       checking all boundary faces?
+                }
+            }
+        }
+    }
+};
+
+// TODO: Only for calculated- and fixedValue- patchFields
+// FIXME: Small bug? Some faces missing?
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+void
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::copyInternalBoundaryField
+(
+    const label& regionI
+) const
+{
+    GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
+    const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
+
+    forAll(pbm, patchI)
+    {
+        const Field<Type>& patchInternalField = vf.boundaryField()[patchI].patchInternalField();
+        Field<Type>& patchField = vf.boundaryField()[patchI];
+
+        patchField = patchInternalField;
+    }
+};
+
+// TODO: Only for calculated- and fixedValue- patchFields
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+void
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolateBoundaryField
 (
     const label& regionI
 ) const
@@ -415,8 +505,8 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolatePatch
 
         // Patch is only present in regionI but NOT in
         // default region. Thus, all faces of this patch
-        // corresponf to interal faces of default region.
-        // Linear interpolation is applied to get valus
+        // correspond to interal faces of default region.
+        // Linear interpolation is applied to get values
         // for the corresponding patch field.
         if (patchI0 == -1)
         {
@@ -426,7 +516,6 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolatePatch
             const labelList& ngb0 = vf0.mesh().faceNeighbour();
 
             Field<Type>& patchField = vf.boundaryField()[patchI];
-
             label patchStart = patch.start();
 
             const labelList& fmap = mesh().faceMap(regionI);
@@ -443,23 +532,33 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolatePatch
                  + (1.0 - w0I) * vf0I[ngb0[faceI0]];
             }
         }
+        else
+        {
+            // TODO: What if someone changes the name of
+            //       one side of an intersecting patch?
+            // NOTE: This should already be avoided during
+            //       construction of regionPolyMesh
+            //       (or the first time faceMap is used) by
+            //       checking all boundary faces?
+        }
     }
 };
 
-//- TODO: Interpolate field from default region to non-default region
+//- TODO: Only for calculated- and fixedValue- patchFields
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
     class RegionGeoMesh
 >
 void
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolate
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::extrapolateBoundaryField
 (
     const label& regionI
 ) const
 {
-    map(regionI);
-    interpolatePatches(regionI);
+    GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
+
+    fvc::extrapolate(vf);
 };
 
 

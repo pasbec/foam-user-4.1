@@ -47,57 +47,27 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// declare template specialization for volField mapping functions
+// TODO declare template specialization for volField mapping functions
 # define declareRegionVolFieldMapping(Type)                                   \
                                                                               \
 template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::map                                                                        \
+>::mapInteralField                                                            \
 (                                                                             \
     const label& regionI                                                      \
 ) const;                                                                      \
                                                                               \
-template<>                                                                    \
-void regionGeometricField                                                     \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::map                                                                        \
-(                                                                             \
-    const word& regionName                                                    \
-) const;                                                                      \
                                                                               \
 template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::map() const;                                                               \
-                                                                              \
-                                                                              \
-template<>                                                                    \
-void regionGeometricField                                                     \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::rmap                                                                       \
+>::rmapInteralField                                                           \
 (                                                                             \
     const label& regionI                                                      \
-) const;                                                                      \
-                                                                              \
-template<>                                                                    \
-void regionGeometricField                                                     \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::rmap                                                                       \
-(                                                                             \
-    const word& regionName                                                    \
-) const;                                                                      \
-                                                                              \
-template<>                                                                    \
-void regionGeometricField                                                     \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::rmap() const;
+) const;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
