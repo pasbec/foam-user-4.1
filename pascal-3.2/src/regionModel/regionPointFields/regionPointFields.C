@@ -27,11 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "regionGeometricField.C"
-#include "regionGeometricFieldMapping.C"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace Foam
 {
 
@@ -41,22 +36,6 @@ defineTemplateTypeNameAndDebug(regionPointScalarField, 0);
 defineTemplateTypeNameAndDebug(regionPointVectorField, 0);
 defineTemplateTypeNameAndDebug(regionPointTensorField, 0);
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * Template definitions  * * * * * * * * * * * * * * //
-
-template class regionGeometricField
-    <scalar, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh> >;
-template class regionGeometricField
-    <vector, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh> >;
-template class regionGeometricField
-    <tensor, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh> >;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

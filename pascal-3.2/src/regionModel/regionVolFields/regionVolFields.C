@@ -27,11 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "regionGeometricField.C"
-#include "regionGeometricFieldMapping.C"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace Foam
 {
 
@@ -45,30 +40,6 @@ defineTemplateTypeNameAndDebug(regionVolSymmTensor4thOrderField, 0);
 defineTemplateTypeNameAndDebug(regionVolDiagTensorField, 0);
 defineTemplateTypeNameAndDebug(regionVolTensorField, 0);
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * Template definitions  * * * * * * * * * * * * * * //
-
-template class regionGeometricField
-    <scalar, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
-template class regionGeometricField
-    <vector, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
-template class regionGeometricField
-    <sphericalTensor, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
-template class regionGeometricField
-    <symmTensor, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
-template class regionGeometricField
-    <symmTensor4thOrder, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
-template class regionGeometricField
-    <diagTensor, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
-template class regionGeometricField
-    <tensor, fvPatchField, volMesh, regionGeoMesh<regionFvMesh> >;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

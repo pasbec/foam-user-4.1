@@ -94,7 +94,7 @@ public:
 
     // Destructor
 
-        virtual ~regionFvMesh();
+        virtual ~regionFvMesh() {};
 
     // Member Functions
 

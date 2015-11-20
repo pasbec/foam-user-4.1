@@ -44,7 +44,8 @@ SourceFiles
 
 // TODO [High]: Finish implementation of face mapping in parallel!
 
-// TODO [High]: Sort that parallel clutter out (remove local maps and return based on if)!!!
+// TODO [High]: Sort that parallel clutter out (remove local maps
+//              and return maps based on if)!!!
 
 // TODO [High]: Remove heaps of duplicated code
 
@@ -54,7 +55,6 @@ SourceFiles
 
 // TODO [High]: Implement forward (base->regionI) point mapping
 //              ala map()-functions
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -231,7 +231,7 @@ public:
 
     // Destructor
 
-        virtual ~regionPolyMesh();
+        virtual ~regionPolyMesh() {};
 
     // Member Functions
 

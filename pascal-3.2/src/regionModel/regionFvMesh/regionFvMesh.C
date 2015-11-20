@@ -99,13 +99,6 @@ regionFvMesh::regionFvMesh
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-regionFvMesh::~regionFvMesh()
-{
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 bool regionFvMesh::operator!=(const regionFvMesh& brm) const

@@ -80,10 +80,6 @@ public:
         //- Construct from regionPolyMesh
         explicit regionControl(const regionPolyMesh& rpMesh);
 
-    // Destructor
-
-        virtual ~regionControl();
-
     // Member Functions
 
         // Access

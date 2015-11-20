@@ -187,13 +187,6 @@ regionPolyMesh::regionPolyMesh
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-regionPolyMesh::~regionPolyMesh()
-{
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 label regionPolyMesh::regionIndex(const word& regionName) const

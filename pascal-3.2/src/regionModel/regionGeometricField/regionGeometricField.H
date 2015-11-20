@@ -30,7 +30,6 @@ Description
 
 SourceFiles
     regionGeometricField.C
-    regionGeometricFieldMapping.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,8 +41,6 @@ SourceFiles
 #include "dimensionedType.H"
 
 #include "regionGeoMesh.H"
-
-// TODO [High]: Mapping should be based on virtual functions of field type cell, point, face, ...
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -120,43 +117,39 @@ public:
         //  and patch type.
         regionGeometricField
         (
-            const IOobject&,
-            const RegionMesh&,
-            const dimensioned<Type>&,
-            const word& patchFieldType=PatchField<Type>::calculatedType()
+            const IOobject& io,
+            const RegionMesh& regionMesh,
+            const dimensioned<Type>& dim,
+            const word& patchFieldType
         );
 
         //- Constructor given IOobject, mesh, dimensioned<Type>
         //  and patch types.
         regionGeometricField
         (
-            const IOobject&,
-            const RegionMesh&,
-            const dimensioned<Type>&,
+            const IOobject& io,
+            const RegionMesh& regionMesh,
+            const dimensioned<Type>& dim,
             const wordList& patchFieldTypes
         );
 
         //- Construct and read given IOobject
         regionGeometricField
         (
-            const IOobject&,
-            const RegionMesh&
+            const IOobject& io,
+            const RegionMesh& regionMesh
         );
 
         //- Construct as copy resetting IO parameters
         regionGeometricField
         (
-            const IOobject&,
+            const IOobject& io,
             const regionGeometricField
             <
                 Type, PatchField, GeoMesh,
                 RegionGeoMesh
-            >&
+            >& rgf
         );
-
-    // Destructor
-
-        virtual ~regionGeometricField();
 
     // Member Functions
 
@@ -175,7 +168,7 @@ public:
                 [
                     mesh().regionIndex(polyMesh::defaultRegion)
                 ]->dimensions();
-            }
+            };
 
             //- Return reference to field of default region
             GeometricField<Type, PatchField, GeoMesh>&
@@ -185,47 +178,65 @@ public:
                 [
                     mesh().regionIndex(polyMesh::defaultRegion)
                 ];
-            }
+            };
 
             //- Return reference to field
             GeometricField<Type, PatchField, GeoMesh>&
             field(const label& regionI) const
             {
                 return *fields_[regionI];
-            }
+            };
 
             //- Return reference to field
             GeometricField<Type, PatchField, GeoMesh>&
             field(const word& regionName) const
             {
                 return *fields_[mesh().regionIndex(regionName)];
-            }
+            };
 
             //- WriteData member function required by regIOobject
             bool writeData(Ostream&) const
             {
                 return false;
-            }
+            };
 
         // Mapping
 
             //- Map field from default region to all non-default regions
-            void map() const;
+            void map() const
+            {
+                notImplemented(type() + "::map()");
+            };
 
             //- Map field from default region to non-default region
-            void map(const label& regionI) const;
+            void map(const label& regionI) const
+            {
+                notImplemented(type() + "::map()");
+            };
 
             //- Map field from default region to non-default region
-            void map(const word& regionName) const;
+            void map(const word& regionName) const
+            {
+                notImplemented(type() + "::map()");
+            };
 
             //- Map field from all non-default regions to default region
-            void rmap() const;
+            void rmap() const
+            {
+                notImplemented(type() + "::rmap()");
+            };
 
             //- Map field from non-default region to default region
-            void rmap(const label& regionI) const;
+            void rmap(const label& regionI) const
+            {
+                notImplemented(type() + "::rmap()");
+            };
 
             //- Map field from non-default region to default region
-            void rmap(const word& regionName) const;
+            void rmap(const word& regionName) const
+            {
+                notImplemented(type() + "::rmap()");
+            };
 
     // Member operators
 
@@ -276,6 +287,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "regionGeometricField.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

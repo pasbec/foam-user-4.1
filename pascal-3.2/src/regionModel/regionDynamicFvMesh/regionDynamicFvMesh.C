@@ -126,13 +126,6 @@ regionDynamicFvMesh::regionDynamicFvMesh
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-regionDynamicFvMesh::~regionDynamicFvMesh()
-{
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

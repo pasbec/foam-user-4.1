@@ -28,7 +28,6 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // check mesh for two fields
-
 #define checkField(gf1, gf2, op)                                    \
 if ((gf1).mesh() != (gf2).mesh())                                   \
 {                                                                   \
@@ -279,19 +278,6 @@ regionGeometricField
                 rgf.field(regionI)
             );
     }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template
-<
-    class Type, template<class> class PatchField, class GeoMesh,
-    class RegionGeoMesh
->
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
-~regionGeometricField()
-{
 }
 
 

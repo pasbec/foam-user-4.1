@@ -56,13 +56,6 @@ regionControl::regionControl(const regionPolyMesh& rpMesh)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-regionControl::~regionControl()
-{
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool regionControl::writeData(Ostream&) const

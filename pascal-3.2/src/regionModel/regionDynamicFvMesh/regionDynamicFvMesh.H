@@ -101,7 +101,7 @@ public:
 
     // Destructor
 
-        virtual ~regionDynamicFvMesh();
+        virtual ~regionDynamicFvMesh() {};
 
     // Member Functions
 

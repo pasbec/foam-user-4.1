@@ -69,13 +69,6 @@ regionPointMesh::regionPointMesh
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-regionPointMesh::~regionPointMesh()
-{
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 bool regionPointMesh::operator!=(const regionPointMesh& brm) const

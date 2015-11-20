@@ -94,7 +94,7 @@ public:
 
     // Destructor
 
-        virtual ~regionPointMesh();
+        virtual ~regionPointMesh() {};
 
     // Member Functions
 
