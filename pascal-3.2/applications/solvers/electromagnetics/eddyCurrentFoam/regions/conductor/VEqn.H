@@ -1,43 +1,15 @@
 
     // Solve V
     {
-
         // Boundary fields
         forAll(mesh.boundaryMesh(), patchI)
         {
             polyPatch patch = mesh.boundaryMesh()[patchI];
 
-// FIXME: START
-            // Create interpolated surface field of A
-            surfaceVectorField sARe("sARe", fvc::interpolate(ARe_[defaultRegionID]));
-            surfaceVectorField sAIm("sAIm", fvc::interpolate(AIm_[defaultRegionID]));
-
-            // Get ref to face map
-            labelList meshFaceMap = mesh_.faceMap(conductorRegionID);
-// FIXME: END
-
             // Old internal faces
             // TODO: What about an more appropriate patch name?
             if (patch.name() == "oldInternalFaces")
             {
-// FIXME: START
-
-                // TODO: ARe/AIm
-                // Boundary values for A
-                {
-                    vectorField& AReP = ARe.boundaryField()[patchI];
-                    vectorField& AImP = AIm.boundaryField()[patchI];
-
-                    forAll(patch, facei)
-                    {
-                        label faceI = patch.start() + facei;
-
-                        AReP[facei] = sARe[meshFaceMap[faceI]];
-                        AImP[facei] = sAIm[meshFaceMap[faceI]];
-                    }
-                }
-
-                // TODO: VRe/VIm
                 // Boundary values for V
                 {
                     if
@@ -80,7 +52,6 @@
                         VImP.evaluate();
                     }
                 }
-// FIXME: END
 
                 // Boundary values for sigma
                 {

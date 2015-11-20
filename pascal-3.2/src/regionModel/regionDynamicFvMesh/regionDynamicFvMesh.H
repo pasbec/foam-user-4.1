@@ -40,8 +40,6 @@ SourceFiles
 
 #include "regionFvMesh.H"
 
-// TODO [High]: Make reference to dynamicFvMesh in access operators constant?
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

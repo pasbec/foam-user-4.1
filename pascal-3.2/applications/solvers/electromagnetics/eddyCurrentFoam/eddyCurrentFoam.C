@@ -155,8 +155,9 @@ int main(int argc, char *argv[])
 #               include "AEqn.H"
             }
 
-            // Map fields from base to conductor region
-            ARe_.map(conductorRegionID);
+            // Map/interpolate fields from base to conductor region
+            ARe_.interpolate(conductorRegionID);
+            AIm_.interpolate(conductorRegionID);
             AIm_.map(conductorRegionID);
             sigma_.map(conductorRegionID);
 

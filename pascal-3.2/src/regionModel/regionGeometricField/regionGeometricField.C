@@ -385,6 +385,84 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 }
 
 
+
+
+//- TODO: Patch interpolation
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+void
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolatePatches
+(
+    const label& regionI
+) const
+{
+    const GeometricField<Type, PatchField, GeoMesh>& vf0 =
+        field(polyMesh::defaultRegion);
+
+    GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
+
+    const polyBoundaryMesh& pbm0 = vf0.mesh().boundaryMesh();
+    const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
+
+    forAll(pbm, patchI)
+    {
+        const polyPatch& patch = pbm[patchI];
+
+        label patchI0 = pbm0.findPatchID(patch.name());
+
+        // Patch is only present in regionI but NOT in
+        // default region. Thus, all faces of this patch
+        // corresponf to interal faces of default region.
+        // Linear interpolation is applied to get valus
+        // for the corresponding patch field.
+        if (patchI0 == -1)
+        {
+            const Field<Type>& vf0I = vf0.internalField();
+            const scalarField& w0 = vf0.mesh().weights().internalField();
+            const labelList& own0 = vf0.mesh().faceOwner();
+            const labelList& ngb0 = vf0.mesh().faceNeighbour();
+
+            Field<Type>& patchField = vf.boundaryField()[patchI];
+
+            label patchStart = patch.start();
+
+            const labelList& fmap = mesh().faceMap(regionI);
+
+            forAll(patchField, facei)
+            {
+                label faceI = patchStart + facei;
+                label faceI0 = fmap[faceI];
+
+                scalar w0I = w0[faceI0];
+
+                patchField[facei] =
+                    w0I * vf0I[own0[faceI0]]
+                 + (1.0 - w0I) * vf0I[ngb0[faceI0]];
+            }
+        }
+    }
+};
+
+//- TODO: Interpolate field from default region to non-default region
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+void
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolate
+(
+    const label& regionI
+) const
+{
+    map(regionI);
+    interpolatePatches(regionI);
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

@@ -39,6 +39,7 @@ SourceFiles
 
 #include "objectRegistry.H"
 #include "polyMesh.H"
+#include "polyBoundaryMesh.H"
 #include "foamTime.H"
 #include "wordList.H"
 

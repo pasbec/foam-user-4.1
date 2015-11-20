@@ -41,6 +41,10 @@ SourceFiles
 #include "dimensionedType.H"
 
 #include "regionGeoMesh.H"
+#include "regionPolyMesh.H"
+
+// TODO [High]: Realize patch mapping for volFields as template specialization
+//              in regionVolFieldMapping.C
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -237,6 +241,14 @@ public:
             {
                 notImplemented(type() + "::rmap()");
             };
+
+        // Interpolation
+
+            //- TODO: Patch interpolation
+            void interpolatePatches(const label& regionI) const;
+
+            //- TODO: Interpolate field from default region to non-default region
+            void interpolate(const label& regionI) const;
 
     // Member operators
 
