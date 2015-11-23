@@ -9,5 +9,5 @@
 
     FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
 
-    pB == 0.5 * rMu0
+    pB == 0.5 * physicalConstant::rMu0
         * 0.5 * ( (BRe & BRe) + (BIm & BIm) );

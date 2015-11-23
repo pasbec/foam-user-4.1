@@ -9,6 +9,7 @@
 
 ../../../../.wm_project_dir/src/finiteArea/lnInclude
 
+../../../../src/foamTools/lnInclude
 ../../../../src/regionModel/lnInclude
 
 ../trackedSurface/lnInclude

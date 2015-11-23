@@ -1,27 +1,12 @@
 
     // ==================================================================//
-    // Constants
-    // ==================================================================//
-
-    scalar pi = mathematicalConstant::pi;
-
-    dimensionedScalar mu0
-    (
-        "mu0",
-        dimensionSet(1, 1, -2, 0, 0, -2, 0),
-        4.0 * pi * 1e-07
-    );
-
-    dimensionedScalar rMu0 = 1.0/mu0;
-
-    // ==================================================================//
     // Omega and alpha
     // ==================================================================//
 
     dimensionedScalar omega
     (
         "omega",
-        2.0 * pi * frequency
+        2.0 * mathematicalConstant::pi * frequency
     );
 
     volScalarField alpha = omega * sigma;
@@ -56,7 +41,7 @@
 
     fvVectorMatrix AReEqn
     (
-        - rMu0 * fvm::laplacian(ARe)
+        - physicalConstant::rMu0 * fvm::laplacian(ARe)
     //  - alpha * AIm // substituted by point-implicit block-coupling
         - jsRe
     );
@@ -67,7 +52,7 @@
 
     fvVectorMatrix AImEqn
     (
-        - rMu0 * fvm::laplacian(AIm)
+        - physicalConstant::rMu0 * fvm::laplacian(AIm)
     //  + alpha * ARe // substituted by point-implicit block-coupling
         - jsIm
     );

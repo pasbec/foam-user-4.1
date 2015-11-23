@@ -32,6 +32,7 @@ Description
 #include "fvBlockMatrix.H"
 #include "blockMatrixTools.H"
 #include "regionModelling.H"
+#include "physicalConstants.H"
 
 #include "fixedGradientFvPatchFields.H"
 
@@ -130,14 +131,14 @@ int main(int argc, char *argv[])
 
 #       include "readBaseControls.H"
         {
-#           include "setBaseFields.H"
+            setRegionReferences(defaultRegionID);
 
 #           include "updateRegionCourantNo.H"
         }
 
 #       include "readFluidControls.H"
         {
-#           include "setFluidFields.H"
+            setRegionReferences(fluidRegionID);
 
 #           include "updateFluidGravitationalAcceleration.H"
 #           include "updateFluidCourantNumber.H"
@@ -201,7 +202,7 @@ int main(int argc, char *argv[])
 
         if (mfUpdate)
         {
-#           include "setBaseFields.H"
+            setRegionReferences(defaultRegionID);
 #           include "solveBase.H"
         }
 
@@ -222,7 +223,7 @@ int main(int argc, char *argv[])
 
         if (mfUpdate)
         {
-#           include "setFluidFields.H"
+            setRegionReferences(fluidRegionID);
 
             fvc::extrapolate(FL);
             fvc::extrapolate(pB);
@@ -247,7 +248,7 @@ int main(int argc, char *argv[])
         // ==================================================================//
 
         {
-#           include "setFluidFields.H"
+            setRegionReferences(fluidRegionID);
 #           include "solveFluid.H"
         }
 

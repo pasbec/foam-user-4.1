@@ -1,4 +1,20 @@
 
+# define setRegionReference(region, refName)                        \
+                                                                    \
+    typeof(refName##_[region])& refName =                           \
+        refName##_[region];                                         \
+                                                                    \
+    if (&refName != &refName) {} // Hack to trick -Wunused-variable
+
+# define setRegionReferences(region)                                \
+                                                                    \
+    setRegionReference(region, mesh);                               \
+    setRegionReference(region, FL);                                 \
+    setRegionReference(region, pB);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     // Lorentz force
     Info << "Create region field FL" << endl;
     regionVolVectorField FL_
