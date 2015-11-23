@@ -23,43 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "regionControl.H"
+#include "regionControls.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template <class RegionGeoMesh>
-regionControl<RegionGeoMesh>::regionControl(const RegionMesh& rmesh)
-:
-    regIOobject
-    (
-        IOobject
-        (
-            "regionControl",
-            rmesh.time().constant(),
-            rmesh.time().db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    rMesh_(rmesh)
-{
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template <class RegionGeoMesh>
-bool regionControl<RegionGeoMesh>::writeData(Ostream&) const
-{
-    return false;
-}
+defineTemplateTypeNameAndDebug(regionPolyControl, 0);
+defineTemplateTypeNameAndDebug(regionFvControl, 0);
+defineTemplateTypeNameAndDebug(regionDynamicFvControl, 0);
+defineTemplateTypeNameAndDebug(regionPointControl, 0);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -67,4 +43,3 @@ bool regionControl<RegionGeoMesh>::writeData(Ostream&) const
 } // End namespace Foam
 
 // ************************************************************************* //
-

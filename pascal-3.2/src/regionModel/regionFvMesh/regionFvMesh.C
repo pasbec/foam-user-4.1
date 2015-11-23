@@ -51,8 +51,69 @@ fvMesh* regionFvMesh::newMesh(const label& regionI) const
     );
 }
 
+void regionFvMesh::initMeshes(const wordList& regionNames) const
+{
+    size_ = 1 + regionNames.size();
+    regionNames_ = regionNames;
+
+    resizeLists();
+
+    forAll(regionNames_, regionI)
+    {
+        if (debug)
+        {
+            Info << "regionFvMesh::regionFvMesh(...) : "
+                << "Create mesh for region "
+                << regionName(regionI)
+                << endl;
+        }
+
+        // Create mesh
+        meshesData_[regionI] = newMesh(regionI);
+
+        // Link access pointer
+        meshes_[regionI] = meshesData_[regionI];
+
+        // Link access pointer of regionPolyMesh class
+        regionPolyMesh::meshes_[regionI] =
+            meshes_[regionI];
+    }
+
+    setParallelSplitRegions();
+
+    initialized_ = true;
+}
+
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void regionFvMesh::resizeLists() const
+{
+    regionPolyMesh::resizeLists();
+
+    meshesData_.resize(size_, NULL);
+    meshes_.resize(size_, NULL);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+regionFvMesh::regionFvMesh
+(
+    const Time& runTime,
+    bool init
+)
+:
+    regionPolyMesh::regionPolyMesh
+    (
+        runTime,
+        false
+    ),
+    meshesData_(List<fvMesh*>(0)),
+    meshes_(List<fvMesh*>(0))
+{
+    if(init) initMeshes(readRegionNames());
+}
 
 regionFvMesh::regionFvMesh
 (
@@ -64,38 +125,12 @@ regionFvMesh::regionFvMesh
     regionPolyMesh::regionPolyMesh
     (
         runTime,
-        regionNames,
         false
     ),
-    meshesData_(List<fvMesh*>(size_,NULL)),
-    meshes_(List<fvMesh*>(size_,NULL))
+    meshesData_(List<fvMesh*>(0)),
+    meshes_(List<fvMesh*>(0))
 {
-    if(init)
-    {
-        forAll(regionNames_, regionI)
-        {
-            if (debug)
-            {
-                Info << "regionFvMesh::regionFvMesh(...) : "
-                    << "Create mesh for region "
-                    << regionName(regionI)
-                    << endl;
-            }
-
-            // Create mesh
-            meshesData_[regionI] = newMesh(regionI);
-
-            // Link access pointer
-            meshes_[regionI] = meshesData_[regionI];
-
-            // Link access pointer of regionPolyMesh class
-            regionPolyMesh::meshes_[regionI] =
-                meshes_[regionI];
-        }
-
-        // Set parallel split type
-        setParallelSplitRegions();
-    }
+    if(init) initMeshes(regionNames);
 }
 
 

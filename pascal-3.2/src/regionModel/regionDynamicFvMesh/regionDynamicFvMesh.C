@@ -58,8 +58,92 @@ regionDynamicFvMesh::newMesh(const label& regionI) const
     );
 }
 
+void regionDynamicFvMesh::initMeshes(const wordList& regionNames) const
+{
+    size_ = 1 + regionNames.size();
+    regionNames_ = regionNames;
+
+    resizeLists();
+
+    forAll(regionNames_, regionI)
+    {
+        if (debug)
+        {
+            Info << "regionDynamicFvMesh::regionDynamicFvMesh(...) : "
+                << "Create mesh for region "
+                << regionName(regionI)
+                << endl;
+        }
+
+        // Create mesh
+        meshesData_[regionI] = newMesh(regionI);
+
+        // Link access pointer
+        meshes_[regionI] = meshesData_[regionI]->operator->();
+
+        // Link access pointer of regionFvMesh class
+        regionFvMesh::meshes_[regionI] =
+            meshes_[regionI];
+
+        // Link access pointer of regionPolyMesh class
+        regionPolyMesh::meshes_[regionI] =
+            meshes_[regionI];
+
+        // Remember if type of motion solver is fe
+        isFeMotionSolver_[regionI] = meshes_[regionI]
+            ->objectRegistry::foundObject<tetPointVectorField>
+            (
+                "motionU"
+            );
+
+        // Remember if type of motion solver is fv
+        isFvMotionSolver_[regionI] = meshes_[regionI]
+            ->objectRegistry::foundObject<pointVectorField>
+            (
+                "pointMotionU"
+            );
+    }
+
+    setParallelSplitRegions();
+
+    initialized_ = true;
+}
+
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void regionDynamicFvMesh::resizeLists() const
+{
+    regionFvMesh::resizeLists();
+
+    isFeMotionSolver_.resize(size_, NULL);
+    isFvMotionSolver_.resize(size_, NULL);
+
+    meshesData_.resize(size_, NULL);
+    meshes_.resize(size_, NULL);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+regionDynamicFvMesh::regionDynamicFvMesh
+(
+    const Time& runTime,
+    bool init
+)
+:
+    regionFvMesh::regionFvMesh
+    (
+        runTime,
+        false
+    ),
+    meshesData_(List<autoPtr<dynamicFvMesh>*>(0)),
+    meshes_(List<dynamicFvMesh*>(0)),
+    isFeMotionSolver_(boolList(0)),
+    isFvMotionSolver_(boolList(0))
+{
+    if(init) initMeshes(readRegionNames());
+}
 
 regionDynamicFvMesh::regionDynamicFvMesh
 (
@@ -71,58 +155,14 @@ regionDynamicFvMesh::regionDynamicFvMesh
     regionFvMesh::regionFvMesh
     (
         runTime,
-        regionNames,
         false
     ),
-    meshesData_(List<autoPtr<dynamicFvMesh>*>(size_,NULL)),
-    meshes_(List<dynamicFvMesh*>(size_,NULL)),
-    isFeMotionSolver_(boolList(size_,false)),
-    isFvMotionSolver_(boolList(size_,false))
+    meshesData_(List<autoPtr<dynamicFvMesh>*>(0)),
+    meshes_(List<dynamicFvMesh*>(0)),
+    isFeMotionSolver_(boolList(0)),
+    isFvMotionSolver_(boolList(0))
 {
-    if(init)
-    {
-        forAll(regionNames_, regionI)
-        {
-            if (debug)
-            {
-                Info << "regionDynamicFvMesh::regionDynamicFvMesh(...) : "
-                    << "Create mesh for region "
-                    << regionName(regionI)
-                    << endl;
-            }
-
-            // Create mesh
-            meshesData_[regionI] = newMesh(regionI);
-
-            // Link access pointer
-            meshes_[regionI] = meshesData_[regionI]->operator->();
-
-            // Link access pointer of regionPolyMesh class
-            regionPolyMesh::meshes_[regionI] =
-                meshes_[regionI];
-
-            // Link access pointer of regionFvMesh class
-            regionFvMesh::meshes_[regionI] =
-                meshes_[regionI];
-
-            // Remember if type of motion solver is fe
-            isFeMotionSolver_[regionI] = meshes_[regionI]
-                ->objectRegistry::foundObject<tetPointVectorField>
-                (
-                    "motionU"
-                );
-
-            // Remember if type of motion solver is fv
-            isFvMotionSolver_[regionI] = meshes_[regionI]
-                ->objectRegistry::foundObject<pointVectorField>
-                (
-                    "pointMotionU"
-                );
-        }
-
-        // Set parallel split type
-        setParallelSplitRegions();
-    }
+    if(init) initMeshes(regionNames);
 }
 
 

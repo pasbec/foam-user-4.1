@@ -15,6 +15,8 @@ fvPatchFields/tangentialMagnetic/tangentialMagneticFvPatchFields.C
 deflatedPCG/deflatedPCG.C
 deflatedICCG/deflatedICCG.C
 
+eddyCurrentControl/eddyCurrentControl.C
+
 eddyCurrentFoam.C
 
 EXE = $(FOAM_USER_APPBIN)/eddyCurrentFoam

@@ -1,3 +1,4 @@
+
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
@@ -21,50 +22,47 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    regionControls
+
+Description
+    ...
+
+SourceFiles
+    regionControls.C
+
 \*---------------------------------------------------------------------------*/
 
+#ifndef regionControls_H
+#define regionControls_H
+
 #include "regionControl.H"
+#include "regionGeoMesh.H"
+#include "regionPolyMesh.H"
+#include "regionFvMesh.H"
+#include "regionDynamicFvMesh.H"
+#include "regionPointMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template <class RegionGeoMesh>
-regionControl<RegionGeoMesh>::regionControl(const RegionMesh& rmesh)
-:
-    regIOobject
-    (
-        IOobject
-        (
-            "regionControl",
-            rmesh.time().constant(),
-            rmesh.time().db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    rMesh_(rmesh)
-{
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template <class RegionGeoMesh>
-bool regionControl<RegionGeoMesh>::writeData(Ostream&) const
-{
-    return false;
-}
+typedef regionControl <regionGeoMesh<regionPolyMesh> >
+    regionPolyControl;
+typedef regionControl <regionGeoMesh<regionFvMesh> >
+    regionFvControl;
+typedef regionControl <regionGeoMesh<regionDynamicFvMesh> >
+    regionDynamicFvControl;
+typedef regionControl <regionGeoMesh<regionPointMesh> >
+    regionPointControl;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#endif
+
+// ************************************************************************* //

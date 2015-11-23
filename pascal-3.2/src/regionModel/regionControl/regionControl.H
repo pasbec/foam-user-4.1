@@ -35,9 +35,8 @@ SourceFiles
 #ifndef regionControl_H
 #define regionControl_H
 
+#include "foamTime.H"
 #include "regIOobject.H"
-
-#include "regionPolyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,19 +47,29 @@ namespace Foam
                        Class regionControl Declaration
 \*---------------------------------------------------------------------------*/
 
+template <class RegionGeoMesh>
 class regionControl
 :
     regIOobject
 {
+public:
+
+    // Public typedefs
+
+        typedef typename RegionGeoMesh::Mesh RegionMesh;
+
 protected:
 
-    // Private Data
+    // Protected Data
 
-    // Private Member Functions
+    // Protected Member Functions
 
 private:
 
     // Private Data
+
+        //- Reference to region mesh
+        const RegionMesh& rMesh_;
 
     // Private Member Functions
 
@@ -77,12 +86,22 @@ public:
 
     // Constructors
 
-        //- Construct from regionPolyMesh
-        explicit regionControl(const regionPolyMesh& rpMesh);
+        //- Construct from region mesh
+        regionControl(const RegionMesh& rmesh);
+
+    // Destructor
+
+        virtual ~regionControl() {};
 
     // Member Functions
 
         // Access
+
+            //- Reference to mesh
+            const RegionMesh& rmesh() const
+            {
+                return rMesh_;
+            };
 
             //- WriteData member function required by regIOobject
             bool writeData(Ostream&) const;
@@ -92,6 +111,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "regionControl.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

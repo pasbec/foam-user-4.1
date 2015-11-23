@@ -26,7 +26,7 @@
                                 );
 
                             // Set correct gradient
-                            VReP.gradient() =  omega.value()
+                            VReP.gradient() =  eddy.omega().value()
                             * (AIm.boundaryField()[patchI] & VReP.patch().nf());
 
                             // Evaluate values
@@ -46,7 +46,7 @@
                                 );
 
                             // Set correct gradient
-                            VImP.gradient() = -omega.value()
+                            VImP.gradient() = -eddy.omega().value()
                             * (ARe.boundaryField()[patchI] & VImP.patch().nf());
 
                             // Evaluate values
@@ -69,12 +69,12 @@
 
         // Explicit source terms due to variable sigma
         // in conducting region with implied condition div(A)=0
-        VReEqn -= omega * (sigmaGrad & AIm);
-        VImEqn += omega * (sigmaGrad & ARe);
+        VReEqn -= eddy.omega() * (sigmaGrad & AIm);
+        VImEqn += eddy.omega() * (sigmaGrad & ARe);
 
 //         // TEST
-//         VReEqn -= omega * sigma * fvc::div(AIm);
-//         VImEqn += omega * sigma * fvc::div(ARe);
+//         VReEqn -= eddy.omega() * sigma * fvc::div(AIm);
+//         VImEqn += eddy.omega() * sigma * fvc::div(ARe);
 
 //         // Restore solution level
 //         cVRe += VReAverage;

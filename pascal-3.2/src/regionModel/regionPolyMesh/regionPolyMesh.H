@@ -41,7 +41,7 @@ SourceFiles
 #include "polyMesh.H"
 #include "polyBoundaryMesh.H"
 #include "foamTime.H"
-#include "wordList.H"
+#include "wordIOList.H"
 
 // TODO [High]: Finish implementation of face mapping in parallel!
 
@@ -70,6 +70,24 @@ class regionPolyMesh
 :
     public objectRegistry
 {
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        regionPolyMesh(const regionPolyMesh&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const regionPolyMesh&);
+
+        // Helper functions for constructor
+
+            //- Create new mesh for region with index regionI
+            polyMesh* newMesh(const label& regionI) const;
+
+            //- Init regions
+            virtual void initMeshes(const wordList& regionNames) const;
+
 protected:
 
     // Protected data
@@ -77,24 +95,27 @@ protected:
         //- Reference to time
         const Time& time_;
 
-        //- Global region count
-        label size_;
-
-        //- List of all region names
-        wordList regionNames_;
-
         //- Processor mesh?
         bool parallel_;
 
+        //- Global region count
+        mutable label size_;
+
+        //- List of all region names
+        mutable wordList regionNames_;
+
         //- Processor mesh: Was the mesh split into regions
         //  AFTER parallel decomposition of processors?
-        bool parallelSplitRegions_;
+        mutable bool parallelSplitRegions_;
 
         //- Meshes data
-        List<polyMesh*> meshesData_;
+        mutable List<polyMesh*> meshesData_;
 
         //- Meshes access pointers
         mutable List<polyMesh*> meshes_;
+
+        // - Is mesh initialized?
+        mutable bool initialized_;
 
     // Protected demand-driven data
 
@@ -142,7 +163,13 @@ protected:
         // Helper functions for constructor
 
             //- Set parallel split type
-            void setParallelSplitRegions();
+            void setParallelSplitRegions() const;
+
+            //- Read region names from file
+            wordList readRegionNames() const;
+
+            //- Resize lists storing data
+            virtual void resizeLists() const;
 
         // Make demand-driven data
 
@@ -195,21 +222,6 @@ protected:
                 const label& regionI
             ) const;
 
-private:
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        regionPolyMesh(const regionPolyMesh&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const regionPolyMesh&);
-
-        // Helper functions for constructor
-
-            //- Create new mesh for region with index regionI
-            polyMesh* newMesh(const label& regionI) const;
-
 public:
 
     //- Runtime type information
@@ -221,6 +233,13 @@ public:
     // Public typedefs
 
     // Constructors
+
+        //- Construct from time
+        regionPolyMesh
+        (
+            const Time& runTime,
+            bool init = true
+        );
 
         //- Construct from time and list of region names
         regionPolyMesh
@@ -235,6 +254,19 @@ public:
         virtual ~regionPolyMesh() {};
 
     // Member Functions
+
+        // Initialization
+
+            //- Init meshes
+            void init(const wordList& regionNames) const
+            {
+                if (!initialized()) initMeshes(regionNames);
+            };
+
+            bool initialized() const
+            {
+                return initialized_;
+            }
 
         // Access
 

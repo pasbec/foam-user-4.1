@@ -36,7 +36,7 @@ Description
 #include "regionVolFields.H"
 #include "regionPointMesh.H"
 #include "regionPointFields.H"
-#include "regionControl.H"
+#include "regionControls.H"
 
 #include "regionFvc.H"
 

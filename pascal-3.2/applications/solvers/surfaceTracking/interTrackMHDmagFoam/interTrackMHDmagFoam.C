@@ -31,8 +31,8 @@ Description
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
 #include "blockMatrixTools.H"
-#include "regionModelling.H"
 #include "physicalConstants.H"
+#include "regionModelling.H"
 
 #include "fixedGradientFvPatchFields.H"
 
@@ -99,7 +99,6 @@ int main(int argc, char *argv[])
 
 #   include "createRegionMesh.H"
 #   include "createRegionFields.H"
-#   include "createRegionControl.H"
 #   include "initRegionCourantNo.H"
 
 #   include "createBaseFields.H"

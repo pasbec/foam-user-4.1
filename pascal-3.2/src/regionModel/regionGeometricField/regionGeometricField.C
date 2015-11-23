@@ -45,8 +45,6 @@ if ((gf1).mesh() != (gf2).mesh())                                   \
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template

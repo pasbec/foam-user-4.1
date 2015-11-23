@@ -5,14 +5,14 @@
         fvVectorMatrix AReEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(ARe)
-//        + sigma * omega * AIm
+//        + sigma * eddy.omega() * AIm
 //        - sigma * VReGrad
           + jsRe
         );
         fvVectorMatrix AImEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(AIm)
-//        - sigma * omega * ARe
+//        - sigma * eddy.omega() * ARe
 //        - sigma * VImGrad
           + jsIm
         );
@@ -39,7 +39,7 @@
             VImGrad.storePrevIter();
 
             // Get relaxation factor
-            scalar relax = AVdict.lookupOrDefault<scalar>("relax",1.0);
+            scalar relax = eddy.AVdict().lookupOrDefault<scalar>("relax",1.0);
 
             if (relax < (1.0-SMALL))
             {
@@ -141,8 +141,8 @@
 
             // Add coupling terms for real/imagninary ARe-AIm
             // dependence of magnetic vector potential
-            AcmptEqn.insertEquationCoupling(0, 1,  omega * sigma);
-            AcmptEqn.insertEquationCoupling(1, 0, -omega * sigma);
+            AcmptEqn.insertEquationCoupling(0, 1,  eddy.omega() * sigma);
+            AcmptEqn.insertEquationCoupling(1, 0, -eddy.omega() * sigma);
 
             // Solve A
             BlockSolverPerformance<vector2> AcmptEqnPerf = AcmptEqn.solve(Adict);

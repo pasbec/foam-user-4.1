@@ -8,11 +8,11 @@
         (
             "jsRe",
             runTime.timeName(),
-            mesh_[defaultRegionID],
+            mesh_[eddy.baseRegion()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[defaultRegionID]
+        mesh_[eddy.baseRegion()]
     );
 
     // Source current density (imaginary part)
@@ -23,11 +23,11 @@
         (
             "jsIm",
             runTime.timeName(),
-            mesh_[defaultRegionID],
+            mesh_[eddy.baseRegion()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[defaultRegionID]
+        mesh_[eddy.baseRegion()]
     );
 
 
@@ -39,11 +39,11 @@
 //         (
 //             "VRe",
 //             runTime.timeName(),
-//             mesh_[defaultRegionID],
+//             mesh_[eddy.baseRegion()],
 //             IOobject::MUST_READ,
 //             IOobject::AUTO_WRITE
 //         ),
-//         mesh_[defaultRegionID]
+//         mesh_[eddy.baseRegion()]
 //     );
 //     uniformDimensionedScalarField VReAverage
 //     (
@@ -51,7 +51,7 @@
 //         (
 //             "VReAverage",
 //             runTime.timeName(),
-//             mesh_[defaultRegionID],
+//             mesh_[eddy.baseRegion()],
 //             IOobject::READ_IF_PRESENT,
 //             IOobject::AUTO_WRITE
 //         ),
@@ -70,11 +70,11 @@
 //         (
 //             "VIm",
 //             runTime.timeName(),
-//             mesh_[defaultRegionID],
+//             mesh_[eddy.baseRegion()],
 //             IOobject::MUST_READ,
 //             IOobject::AUTO_WRITE
 //         ),
-//         mesh_[defaultRegionID]
+//         mesh_[eddy.baseRegion()]
 //     );
 //     uniformDimensionedScalarField VImAverage
 //     (
@@ -82,7 +82,7 @@
 //         (
 //             "VImAverage",
 //             runTime.timeName(),
-//             mesh_[defaultRegionID],
+//             mesh_[eddy.baseRegion()],
 //             IOobject::READ_IF_PRESENT,
 //             IOobject::AUTO_WRITE
 //         ),
@@ -102,11 +102,11 @@
         (
             "BRe",
             runTime.timeName(),
-            mesh_[defaultRegionID],
+            mesh_[eddy.baseRegion()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[defaultRegionID]
+        mesh_[eddy.baseRegion()]
     );
 
     // Magnetic field density (imaginary part)
@@ -117,11 +117,11 @@
         (
             "BIm",
             runTime.timeName(),
-            mesh_[defaultRegionID],
+            mesh_[eddy.baseRegion()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[defaultRegionID]
+        mesh_[eddy.baseRegion()]
     );
 
 
@@ -133,11 +133,11 @@
         (
             "jRe",
             runTime.timeName(),
-            mesh_[defaultRegionID],
+            mesh_[eddy.baseRegion()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        mesh_[defaultRegionID],
+        mesh_[eddy.baseRegion()],
         dimensionedVector(word(),dimensionSet(0,-2,0,0,0,1,0),vector::zero)
     );
 
@@ -149,11 +149,11 @@
         (
             "jIm",
             runTime.timeName(),
-            mesh_[defaultRegionID],
+            mesh_[eddy.baseRegion()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        mesh_[defaultRegionID],
+        mesh_[eddy.baseRegion()],
         dimensionedVector(word(),dimensionSet(0,-2,0,0,0,1,0),vector::zero)
     );
 
@@ -166,11 +166,11 @@
         (
             "FL",
             runTime.timeName(),
-            mesh_[defaultRegionID],
+            mesh_[eddy.baseRegion()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        mesh_[defaultRegionID],
+        mesh_[eddy.baseRegion()],
         dimensioned<vector>
         (
             "FL",
@@ -190,11 +190,11 @@
         (
             "pB",
             runTime.timeName(),
-            mesh_[defaultRegionID],
+            mesh_[eddy.baseRegion()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        mesh_[defaultRegionID],
+        mesh_[eddy.baseRegion()],
         dimensioned<scalar>
         (
             "pB",

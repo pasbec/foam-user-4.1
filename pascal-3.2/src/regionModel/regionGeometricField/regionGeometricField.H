@@ -155,6 +155,10 @@ public:
             >& rgf
         );
 
+    // Destructor
+
+        virtual ~regionGeometricField() {};
+
     // Member Functions
 
         // Access

@@ -52,15 +52,6 @@ class regionFvMesh
 :
     public regionPolyMesh
 {
-protected:
-
-    // Protected data
-
-        //- Meshes data
-        List<fvMesh*> meshesData_;
-
-        //- Meshes access pointers
-        mutable List<fvMesh*> meshes_;
 
 private:
 
@@ -77,12 +68,39 @@ private:
             //- Create new mesh for region with index regionI
             fvMesh* newMesh(const label& regionI) const;
 
+            //- Init regions
+            virtual void initMeshes(const wordList& regionNames) const;
+
+protected:
+
+    // Protected data
+
+        //- Meshes data
+        mutable List<fvMesh*> meshesData_;
+
+        //- Meshes access pointers
+        mutable List<fvMesh*> meshes_;
+
+    // Private Member Functions
+
+        // Helper functions for constructor
+
+            //- Resize lists storing data
+            virtual void resizeLists() const;
+
 public:
 
     //- Runtime type information
     TypeName("regionFvMesh");
 
     // Constructors
+
+        //- Construct from time
+        regionFvMesh
+        (
+            const Time& runTime,
+            bool init = true
+        );
 
         //- Construct from time and list of region names
         regionFvMesh

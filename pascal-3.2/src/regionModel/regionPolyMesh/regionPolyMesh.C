@@ -36,6 +36,7 @@ defineTypeNameAndDebug(regionPolyMesh, 0);
 
 word regionPolyMesh::regionPolyMeshSubDir = "regionPolyMesh";
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 polyMesh* regionPolyMesh::newMesh(const label& regionI) const
@@ -52,10 +53,75 @@ polyMesh* regionPolyMesh::newMesh(const label& regionI) const
     );
 }
 
+void regionPolyMesh::initMeshes(const wordList& regionNames) const
+{
+    size_ = 1 + regionNames.size();
+    regionNames_ = regionNames;
+
+    resizeLists();
+
+    forAll(regionNames_, regionI)
+    {
+        if (debug)
+        {
+            Info << "regionPolyMesh::regionPolyMesh(...) : "
+                << "Create mesh for region "
+                << regionName(regionI)
+                << endl;
+        }
+
+        // Create mesh
+        meshesData_[regionI] = newMesh(regionI);
+
+        // Link access pointer
+        meshes_[regionI] = meshesData_[regionI];
+    }
+
+    setParallelSplitRegions();
+
+    initialized_ = true;
+}
+
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void regionPolyMesh::setParallelSplitRegions()
+wordList regionPolyMesh::readRegionNames() const
+{
+    wordIOList regionNames
+    (
+        IOobject
+        (
+            "regions",
+            this->time().constant(),
+            *this,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
+
+    return regionNames;
+}
+
+void regionPolyMesh::resizeLists() const
+{
+    meshesData_.resize(size_, NULL);
+    meshes_.resize(size_, NULL);
+
+    cellRegionMap_.resize(size_, NULL);
+    pointRegionMap_.resize(size_, NULL);
+    faceRegionMap_.resize(size_, NULL);
+    cellProcMap_.resize(size_, NULL);
+    pointProcMap_.resize(size_, NULL);
+    faceProcMap_.resize(size_, NULL);
+    cellRegionProcMap_.resize(size_, NULL);
+    pointRegionProcMap_.resize(size_, NULL);
+    faceRegionProcMap_.resize(size_, NULL);
+    cellMap_.resize(size_, NULL);
+    pointMap_.resize(size_, NULL);
+    faceMap_.resize(size_, NULL);
+}
+
+void regionPolyMesh::setParallelSplitRegions() const
 {
     if (parallel())
     {
@@ -128,14 +194,13 @@ void regionPolyMesh::setParallelSplitRegions()
 regionPolyMesh::regionPolyMesh
 (
     const Time& runTime,
-    const wordList& regionNames,
     bool init
 )
 :
     objectRegistry(
         IOobject
         (
-            "multiRegion",
+            "regionPolyMesh",
             runTime.constant(),
             runTime.db(),
             IOobject::NO_READ,
@@ -143,47 +208,68 @@ regionPolyMesh::regionPolyMesh
         )
     ),
     time_(runTime),
+    parallel_(runTime.processorCase()),
+    size_ (0),
+    regionNames_(List<word>(0)),
+    parallelSplitRegions_(0),
+    meshesData_(List<polyMesh*>(0)),
+    meshes_(List<polyMesh*>(0)),
+    initialized_(false),
+    cellRegionMap_(List<labelIOList*>(0)),
+    pointRegionMap_(List<labelIOList*>(0)),
+    faceRegionMap_(List<labelIOList*>(0)),
+    cellProcMap_(List<labelIOList*>(0)),
+    pointProcMap_(List<labelIOList*>(0)),
+    faceProcMap_(List<labelIOList*>(0)),
+    cellRegionProcMap_(List<labelIOList*>(0)),
+    pointRegionProcMap_(List<labelIOList*>(0)),
+    faceRegionProcMap_(List<labelIOList*>(0)),
+    cellMap_(List<labelIOList*>(0)),
+    pointMap_(List<labelIOList*>(0)),
+    faceMap_(List<labelIOList*>(0))
+{
+    if(init) initMeshes(readRegionNames());
+}
+
+regionPolyMesh::regionPolyMesh
+(
+    const Time& runTime,
+    const wordList& regionNames,
+    bool init
+)
+:
+    objectRegistry(
+        IOobject
+        (
+            "regionPolyMesh",
+            runTime.constant(),
+            runTime.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    time_(runTime),
+    parallel_(runTime.processorCase()),
     size_ (1 + regionNames.size()),
     regionNames_(regionNames),
-    parallel_(runTime.processorCase()),
     parallelSplitRegions_(0),
-    meshesData_(List<polyMesh*>(size_,NULL)),
-    meshes_(List<polyMesh*>(size_,NULL)),
-    cellRegionMap_(List<labelIOList*>(size_,NULL)),
-    pointRegionMap_(List<labelIOList*>(size_,NULL)),
-    faceRegionMap_(List<labelIOList*>(size_,NULL)),
-    cellProcMap_(List<labelIOList*>(size_,NULL)),
-    pointProcMap_(List<labelIOList*>(size_,NULL)),
-    faceProcMap_(List<labelIOList*>(size_,NULL)),
-    cellRegionProcMap_(List<labelIOList*>(size_,NULL)),
-    pointRegionProcMap_(List<labelIOList*>(size_,NULL)),
-    faceRegionProcMap_(List<labelIOList*>(size_,NULL)),
-    cellMap_(List<labelIOList*>(size_,NULL)),
-    pointMap_(List<labelIOList*>(size_,NULL)),
-    faceMap_(List<labelIOList*>(size_,NULL))
+    meshesData_(List<polyMesh*>(0)),
+    meshes_(List<polyMesh*>(0)),
+    initialized_(false),
+    cellRegionMap_(List<labelIOList*>(0)),
+    pointRegionMap_(List<labelIOList*>(0)),
+    faceRegionMap_(List<labelIOList*>(0)),
+    cellProcMap_(List<labelIOList*>(0)),
+    pointProcMap_(List<labelIOList*>(0)),
+    faceProcMap_(List<labelIOList*>(0)),
+    cellRegionProcMap_(List<labelIOList*>(0)),
+    pointRegionProcMap_(List<labelIOList*>(0)),
+    faceRegionProcMap_(List<labelIOList*>(0)),
+    cellMap_(List<labelIOList*>(0)),
+    pointMap_(List<labelIOList*>(0)),
+    faceMap_(List<labelIOList*>(0))
 {
-    if(init)
-    {
-        forAll(regionNames_, regionI)
-        {
-            if (debug)
-            {
-                Info << "regionPolyMesh::regionPolyMesh(...) : "
-                    << "Create mesh for region "
-                    << regionName(regionI)
-                    << endl;
-            }
-
-            // Create mesh
-            meshesData_[regionI] = newMesh(regionI);
-
-            // Link access pointer
-            meshes_[regionI] = meshesData_[regionI];
-        }
-
-        // Set parallel split type
-        setParallelSplitRegions();
-    }
+    if(init) initMeshes(regionNames);
 }
 
 

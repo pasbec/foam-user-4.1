@@ -30,8 +30,11 @@ Description
 
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
-#include "regionModelling.H"
 #include "physicalConstants.H"
+#include "regionModelling.H"
+#include "eddyCurrentControl.H"
+
+#include "wordIOList.H"
 
 #include "fixedGradientFvPatchFields.H"
 #include "tangentialMagneticFvPatchFields.H" // TODO: add A in name
@@ -48,14 +51,14 @@ Description
 
 int main(int argc, char *argv[])
 {
-#   include "addRegionOption.H"
-
 #   include "setRootCase.H"
 #   include "createTime.H"
 
 #   include "createRegionMesh.H"
 #   include "createRegionFields.H"
-#   include "createRegionControl.H"
+
+    // Eddy current controls
+    eddyCurrentControl eddy(control_);
 
 #   include "createBaseFields.H"
 #   include "readBaseControls.H"
@@ -69,41 +72,18 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Magnetic properties
-    Info << "Read Magnetic properties" << nl << endl;
-    IOdictionary magneticProperties
-    (
-        IOobject
-        (
-            "magneticProperties",
-            runTime.constant(),
-            mesh_[defaultRegionID],
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
-
-    dimensionedScalar frequency (magneticProperties.lookup("frequency"));
-
-    dimensionedScalar omega
-    (
-        "omega",
-        2.0 * mathematicalConstant::pi * frequency
-    );
-
-
     // Initial gradient calculation of V in conductor region
     Info << "Init gradient of V" << nl << endl;
     {
-        setRegionReferences(conductorRegionID);
+        setRegionReferences(eddy.conductorRegion());
 
         VReGrad = fvc::grad(VRe);
         VImGrad = fvc::grad(VIm);
     }
 
     // Initial reverse map gradient of V from conductor to base region
-    VReGrad_.rmap(conductorRegionID);
-    VImGrad_.rmap(conductorRegionID);
+    VReGrad_.rmap(eddy.conductorRegion());
+    VImGrad_.rmap(eddy.conductorRegion());
 
     // TODO [Low]: Realize AV-loops as time loops
     while (runTime.run())
@@ -113,23 +93,23 @@ int main(int argc, char *argv[])
         Info << "Time = " << runTime.value() << nl << endl;
 
         // Copy local solver dictionaries
-        dictionary Adict = mesh_[defaultRegionID].solutionDict().subDict("solvers").subDict("A");
-        dictionary Vdict = mesh_[conductorRegionID].solutionDict().subDict("solvers").subDict("V");
+        dictionary Adict = eddy.Adict();
+        dictionary Vdict = eddy.Vdict();
 
         // Reset current tolerance
         curTol = 1.0;
 
         // AV iterations
-        for (int iter = 0; iter < maxIter; iter++)
+        for (int iter = 0; iter < eddy.maxIter(); iter++)
         {
-            if ((iter >= minIter) && (res < tol)) break;
+            if ((iter >= eddy.minIter()) && (res < eddy.tol())) break;
 
             if (res < curTol)
             {
                 curTol /= 10.0;
 
                 Info << nl << "Tolerance = " << curTol
-                    << " / " << tol << endl << nl;
+                    << " / " << eddy.tol() << endl << nl;
 
                 Adict.set<scalar>("tolerance", curTol);
                 Vdict.set<scalar>("tolerance", curTol);
@@ -137,35 +117,35 @@ int main(int argc, char *argv[])
 
             // Solve for A in base region
             {
-                setRegionReferences(defaultRegionID);
+                setRegionReferences(eddy.baseRegion());
 
 #               include "AEqn.H"
             }
 
             // Map internal field from base to conductor region
             // and interpolate/extrapolate boundary values
-            ARe_.mapInterpolate(conductorRegionID);
-            AIm_.mapInterpolate(conductorRegionID);
-            sigma_.mapExtrapolate(conductorRegionID);
+            ARe_.mapInterpolate(eddy.conductorRegion());
+            AIm_.mapInterpolate(eddy.conductorRegion());
+            sigma_.mapExtrapolate(eddy.conductorRegion());
 
             // Solve for V in conductor region
             {
-                setRegionReferences(conductorRegionID);
+                setRegionReferences(eddy.conductorRegion());
 
 #               include "VEqn.H"
             }
 
             // Calculate gradient of V in conductor region
             {
-                setRegionReferences(conductorRegionID);
+                setRegionReferences(eddy.conductorRegion());
 
                 VReGrad = fvc::grad(VRe);
                 VImGrad = fvc::grad(VIm);
             }
 
             // Reverse map gradient of V from conductor to base region
-            VReGrad_.rmap(conductorRegionID);
-            VImGrad_.rmap(conductorRegionID);
+            VReGrad_.rmap(eddy.conductorRegion());
+            VImGrad_.rmap(eddy.conductorRegion());
 
             // Update residual
             res = max(resA, resV);
@@ -179,20 +159,20 @@ int main(int argc, char *argv[])
 
         // Derived fields in base region
         {
-            setRegionReferences(defaultRegionID);
+            setRegionReferences(eddy.baseRegion());
 
             // Magnetic field density
             BRe == fvc::curl(ARe);
             BIm == fvc::curl(AIm);
 
             // Eddy current density
-            jRe ==   omega * sigma * AIm - sigma * VReGrad;
-            jIm == - omega * sigma * ARe - sigma * VImGrad;
+            jRe ==   eddy.omega() * sigma * AIm - sigma * VReGrad;
+            jIm == - eddy.omega() * sigma * ARe - sigma * VImGrad;
         }
 
         // Time-averaged fields in base region
         {
-            setRegionReferences(defaultRegionID);
+            setRegionReferences(eddy.baseRegion());
 
             FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
 

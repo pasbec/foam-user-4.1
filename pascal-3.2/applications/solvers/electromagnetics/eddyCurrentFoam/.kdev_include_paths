@@ -18,3 +18,5 @@
 
 ./deflatedPCG
 ./deflatedICCG
+
+./eddyCurrentControl

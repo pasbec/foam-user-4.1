@@ -23,40 +23,90 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "regionControl.H"
+#include "eddyCurrentControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(eddyCurrentControl, 0);
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class RegionGeoMesh>
-regionControl<RegionGeoMesh>::regionControl(const RegionMesh& rmesh)
+eddyCurrentControl::eddyCurrentControl(const regionFvControl& rfvc)
 :
     regIOobject
     (
         IOobject
         (
-            "regionControl",
-            rmesh.time().constant(),
-            rmesh.time().db(),
+            "eddyCurrentControl",
+            rfvc.rmesh().time().constant(),
+            rfvc.rmesh().time().db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         )
     ),
-    rMesh_(rmesh)
+    control_(rfvc),
+    rmesh_(rfvc.rmesh()),
+    propDict_
+    (
+        IOdictionary
+        (
+            IOobject
+            (
+                "eddyCurrentProperties",
+                rfvc.rmesh().time().constant(),
+                rfvc.rmesh().time().db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    ),
+    baseRegionName_
+    (
+        word(propDict_.subDict("regions").lookup("base"))
+    ),
+    conductorRegionName_
+    (
+        word(propDict_.subDict("regions").lookup("conductor"))
+    ),
+    baseRegion_
+    (
+        rmesh_.regionIndex(baseRegionName_)
+    ),
+    conductorRegion_
+    (
+        rmesh_.regionIndex(conductorRegionName_)
+    ),
+    frequency_
+    (
+        "frequency",
+        dimensionedScalar(propDict_.lookup("frequency"))
+    ),
+    omega_
+    (
+        "omega",
+        2.0 * mathematicalConstant::pi * frequency_
+    ),
+    AVdict_(rmesh_[baseRegion_].solutionDict().subDict("solvers").subDict("AV")),
+    Adict_(rmesh_[baseRegion_].solutionDict().subDict("solvers").subDict("A")),
+    Vdict_(rmesh_[conductorRegion_].solutionDict().subDict("solvers").subDict("V")),
+    minIter_(AVdict_.lookupOrDefault<int>("minIter", 0)),
+    maxIter_(AVdict_.lookupOrDefault<int>("maxIter", 100)),
+    tol_(AVdict_.lookupOrDefault<scalar>("tol", 1e-04))
 {
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class RegionGeoMesh>
-bool regionControl<RegionGeoMesh>::writeData(Ostream&) const
+bool eddyCurrentControl::writeData(Ostream&) const
 {
     return false;
 }

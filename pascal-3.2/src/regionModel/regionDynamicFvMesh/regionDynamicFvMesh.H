@@ -40,6 +40,8 @@ SourceFiles
 
 #include "regionFvMesh.H"
 
+// TODO [Low]: What if neighbour regions do se different motion solver types?
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -55,20 +57,6 @@ class regionDynamicFvMesh
 {
 private:
 
-    // Private data
-
-        //- Meshes data
-        List<autoPtr<dynamicFvMesh>*> meshesData_;
-
-        //- Meshes access pointers
-        List<dynamicFvMesh*> meshes_;
-
-        //- Finite element motion solver type
-        boolList isFeMotionSolver_;
-
-        //- Finite volume motion solver type
-        boolList isFvMotionSolver_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -82,12 +70,49 @@ private:
             //- Create new mesh for region with index regionI
             autoPtr<dynamicFvMesh>* newMesh(const label& regionI) const;
 
+            //- Init regions
+            virtual void initMeshes(const wordList& regionNames) const;
+
+protected:
+
+    // Protected data
+
+        //- Meshes data
+        mutable List<autoPtr<dynamicFvMesh>*> meshesData_;
+
+        //- Meshes access pointers
+        mutable List<dynamicFvMesh*> meshes_;
+
+    // Private Member Functions
+
+        // Helper functions for constructor
+
+            //- Resize lists storing data
+            virtual void resizeLists() const;
+
+private:
+
+    // Private data
+
+        //- Finite element motion solver type
+        mutable boolList isFeMotionSolver_;
+
+        //- Finite volume motion solver type
+        mutable boolList isFvMotionSolver_;
+
 public:
 
     //- Runtime type information
     TypeName("regionDynamicFvMesh");
 
     // Constructors
+
+        //- Construct from time (without init)
+        regionDynamicFvMesh
+        (
+            const Time& runTime,
+            bool init = true
+        );
 
         //- Construct from time and list of region names
         regionDynamicFvMesh
