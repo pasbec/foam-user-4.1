@@ -31,6 +31,7 @@ Description
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
 #include "regionModelling.H"
+#include "physicalConstants.H"
 
 #include "fixedGradientFvPatchFields.H"
 #include "tangentialMagneticFvPatchFields.H" // TODO: add A in name
@@ -68,21 +69,6 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Constants, Frequency and Alpha
-
-    dimensionedScalar mu0
-    (
-        "mu0",
-        dimensionSet(1, 1, -2, 0, 0, -2, 0),
-        4.0 * mathematicalConstant::pi * 1e-07
-    );
-
-    dimensionedScalar rMu0
-    (
-        "rMu0",
-        1.0/mu0
-    );
-
     // Magnetic properties
     Info << "Read Magnetic properties" << nl << endl;
     IOdictionary magneticProperties
@@ -119,7 +105,7 @@ int main(int argc, char *argv[])
     VReGrad_.rmap(conductorRegionID);
     VImGrad_.rmap(conductorRegionID);
 
-    // TODO: Realize AV-loops as time loops
+    // TODO [Low]: Realize AV-loops as time loops
     while (runTime.run())
     {
         runTime++;
@@ -210,7 +196,7 @@ int main(int argc, char *argv[])
 
             FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
 
-            pB == 0.5 * rMu0
+            pB == 0.5 * physicalConstant::rMu0
                 * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
         }
 

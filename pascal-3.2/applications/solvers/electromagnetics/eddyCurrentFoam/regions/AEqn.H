@@ -4,15 +4,15 @@
         // Assemble base-matrices for A
         fvVectorMatrix AReEqn
         (
-            rMu0 * fvm::laplacian(ARe)
-//        + alpha * AIm
+            physicalConstant::rMu0 * fvm::laplacian(ARe)
+//        + sigma * omega * AIm
 //        - sigma * VReGrad
           + jsRe
         );
         fvVectorMatrix AImEqn
         (
-            rMu0 * fvm::laplacian(AIm)
-//        - alpha * ARe
+            physicalConstant::rMu0 * fvm::laplacian(AIm)
+//        - sigma * omega * ARe
 //        - sigma * VImGrad
           + jsIm
         );
@@ -138,9 +138,6 @@
             // Insert equations into block matrix
             AcmptEqn.insertEquation(0, AReCmptEqn);
             AcmptEqn.insertEquation(1, AImCmptEqn);
-
-            // Coupling coeff field
-//             const scalarField alpha = omega * sigma;
 
             // Add coupling terms for real/imagninary ARe-AIm
             // dependence of magnetic vector potential
