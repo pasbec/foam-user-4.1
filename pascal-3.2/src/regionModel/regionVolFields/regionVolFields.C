@@ -43,6 +43,11 @@ defineTemplateTypeNameAndDebug(regionVolTensorField, 0);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#   include "regionVolFieldMapping.C"
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // ************************************************************************* //

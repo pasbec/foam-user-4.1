@@ -7,11 +7,11 @@
         (
             "VRe",
             runTime.timeName(),
-            mesh_[eddy.conductorRegion()],
+            mesh_[eddy.conductor()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.conductorRegion()]
+        mesh_[eddy.conductor()]
     );
     uniformDimensionedScalarField VReAverage
     (
@@ -19,7 +19,7 @@
         (
             "VReAverage",
             runTime.timeName(),
-            mesh_[eddy.conductorRegion()],
+            mesh_[eddy.conductor()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
@@ -38,11 +38,11 @@
         (
             "VIm",
             runTime.timeName(),
-            mesh_[eddy.conductorRegion()],
+            mesh_[eddy.conductor()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.conductorRegion()]
+        mesh_[eddy.conductor()]
     );
     uniformDimensionedScalarField VImAverage
     (
@@ -50,7 +50,7 @@
         (
             "VImAverage",
             runTime.timeName(),
-            mesh_[eddy.conductorRegion()],
+            mesh_[eddy.conductor()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),

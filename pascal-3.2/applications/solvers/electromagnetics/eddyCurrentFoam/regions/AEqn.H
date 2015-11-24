@@ -32,23 +32,6 @@
                 AIm.boundaryField()[patchI].type();
         }
 
-        // Relax gradient of V
-        {
-            // Store old gradient
-            VReGrad.storePrevIter();
-            VImGrad.storePrevIter();
-
-            // Get relaxation factor
-            scalar relax = eddy.AVdict().lookupOrDefault<scalar>("relax",1.0);
-
-            if (relax < (1.0-SMALL))
-            {
-                // Relaxation of gradient of V
-                VReGrad.relax(relax);
-                VImGrad.relax(relax);
-            }
-        }
-
         // Component residual
         scalar resAcmpt = VSMALL;
 
@@ -145,7 +128,7 @@
             AcmptEqn.insertEquationCoupling(1, 0, -eddy.omega() * sigma);
 
             // Solve A
-            BlockSolverPerformance<vector2> AcmptEqnPerf = AcmptEqn.solve(Adict);
+            BlockSolverPerformance<vector2> AcmptEqnPerf = AcmptEqn.solve(eddy.Adict());
 
             // Store residuals
             scalar resAcmptRe = AcmptEqnPerf.initialResidual().component(0);
@@ -166,7 +149,7 @@
         }
 
         // Store max residual
-        resA = resAcmpt;
+        eddy.setResidualOfA(resAcmpt);
 
         // Correct boundary conditions
         ARe.correctBoundaryConditions();

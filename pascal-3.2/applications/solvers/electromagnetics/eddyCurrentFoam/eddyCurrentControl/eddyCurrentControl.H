@@ -35,8 +35,12 @@ SourceFiles
 #ifndef eddyCurrentControl_H
 #define eddyCurrentControl_H
 
-#include "regionControls.H"
+#include "foamTime.H"
 #include "mathematicalConstants.H"
+#include "PstreamReduceOps.H"
+#include "volFields.H"
+#include "regionVolFields.H"
+#include "regionControls.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,6 +65,9 @@ private:
         // Reference to region mesh
         const regionFvMesh& rmesh_;
 
+        // Reference to region mesh
+        const Time& time_;
+
         // Properties
 
             //- Properties dictionary
@@ -84,16 +91,28 @@ private:
             //- Cyclic velocity based on frequency
             dimensionedScalar omega_;
 
-        // Solution
+        // Solution properties
+
+            //- Solution dictionary of base region
+            IOdictionary& baseSolutionDict_;
+
+            //-Solution dictionary of conducting region
+            IOdictionary& conductorSolutionDict_;
 
             //- AV-solution dictionary
-            dictionary& AVdict_;
+            dictionary AVdict_;
 
             //- A-solution dictionary
-            dictionary& Adict_;
+            dictionary Adict_;
 
             //- V-solution dictionary
-            dictionary& Vdict_;
+            dictionary Vdict_;
+
+            //- Solution tolerance
+            scalar tol_;
+
+            //- Solution tolerance
+            scalar tolScale_;
 
             //- Minimum number of iterations
             int minIter_;
@@ -101,8 +120,45 @@ private:
             //- Maximum number of iterations
             int maxIter_;
 
+            //- Realxation factor
+            scalar relax_;
+
+        // Solution state variables
+
+            //- Stop state
+            mutable bool stop_;
+
+            //- Run/Convergence state
+            mutable bool run_;
+
+            //- Iteration counter
+            mutable int iter_;
+
+            //- Sub-Run/Convergence state
+            mutable bool subRun_;
+
+            //- Sub-iteration counter
+            mutable int subIter_;
+
             //- Solution tolerance
-            scalar tol_;
+            mutable scalar subTol_;
+
+            //- Temporary copy of A-solution dictionary
+            mutable dictionary subAdict_;
+
+            //- Temporary copy of V-solution dictionary
+            mutable dictionary subVdict_;
+
+        // Solution residual variables
+
+            //- AV-residual
+            mutable scalar AVres_;
+
+            //- A-residual
+            mutable scalar Ares_;
+
+            //- V-residual
+            mutable scalar Vres_;
 
     // Private Member Functions
 
@@ -111,6 +167,70 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const eddyCurrentControl&);
+
+        //- Inline helper
+
+            //- Check if relax factor is valid
+            inline bool checkRelax() const
+            {
+                return (relax_ > VSMALL) && (relax_ < 1.0-VSMALL);
+            };
+
+            //- Iteration only initialized?
+            inline bool noIter() const
+            {
+                return (iter_ == -1);
+            };
+
+            //- Is this the first iteration?
+            inline bool firstIter() const
+            {
+                return (iter_ == 0);
+            };
+
+            //- Check minimum iterations state
+            inline bool checkMinIterations() const
+            {
+                return (iter_ >= minIter_);
+            };
+
+            //- Check minimum iterations state
+            inline bool checkMaxIterations() const
+            {
+                return (iter_ < maxIter_);
+            };
+
+            //- Check convergence state
+            inline void updateResidual() const
+            {
+                AVres_ = returnReduce(max(Ares_, Vres_), maxOp<scalar>());
+            };
+
+            //- Check convergence state
+            inline bool checkConvergence() const
+            {
+                return (AVres_ < tol_);
+            };
+
+            //- Check sub-convergence state
+            inline bool checkSubConvergence() const
+            {
+                return (AVres_ < subTol_);
+            };
+
+        //- Helper
+
+            //- Read dictionaries and update data
+            void readDictDataIfModified();
+
+            //- Reset for next time step
+            void timeReset();
+
+            //- Check sub-convergence state
+            void decreaseSubTolerance() const;
+
+            //- Check and return sub-run state
+            const bool& subRun() const;
 
 public:
 
@@ -137,13 +257,13 @@ public:
             };
 
             //- Reference to base ID
-            const label& baseRegion() const
+            const label& base() const
             {
                 return baseRegion_;
             };
 
             //- Reference to base ID
-            const label& conductorRegion() const
+            const label& conductor() const
             {
                 return conductorRegion_;
             };
@@ -160,49 +280,55 @@ public:
                 return omega_;
             };
 
-        // Solution
-
-            //- Reference to AV-solution dictionary
-            const dictionary& AVdict() const
-            {
-                return AVdict_;
-            };
-
-            //- Reference to A-solution dictionary
-            const dictionary& Adict() const
-            {
-                return Adict_;
-            };
-
-            //- Reference to V-solution dictionary
-            const dictionary& Vdict() const
-            {
-                return Vdict_;
-            };
-
-            //- Reference to minimum number of iterations
-            const int& minIter() const
-            {
-                return minIter_;
-            };
-
-            //- Reference to maximum number of iterations
-            const int& maxIter() const
-            {
-                return maxIter_;
-            };
+        // Solution properties
 
             //- Reference to solution tolerance
-            const scalar& tol() const
+            const scalar& tolerance() const
             {
                 return tol_;
             };
 
-        // Other
+        // Solution state variables
+
+            //- Reference to temporary A-solution dictionary
+            const dictionary& Adict() const
+            {
+                return subAdict_;
+            };
+
+            //- Reference to temporary V-solution dictionary
+            const dictionary& Vdict() const
+            {
+                return subVdict_;
+            };
+
+            //- Relax V-volVectorField
+            void relax(volVectorField& vf) const;
+
+            //- Relax V-regionVolVectorField
+            void relax(const regionVolVectorField& rvf) const;
+
+            //- Check, set and return run state
+            const bool& run();
+
+        // Solution residual variables
+
+            //- Set A-residual
+            void setResidualOfA(scalar residual) const;
+
+            //- Set V-residual
+            void setResidualOfV(scalar residual) const;
+
+        // Time and database
+
+            //- Commence time database write during sub-iteration
+            void subWrite() const;
 
             //- WriteData member function required by regIOobject
-            bool writeData(Ostream&) const;
-
+            bool writeData(Ostream&) const
+            {
+                return false;
+            };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -37,6 +37,87 @@ defineTypeNameAndDebug(eddyCurrentControl, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void eddyCurrentControl::readDictDataIfModified()
+{
+    // Eddy current properties
+    if (propDict_.readIfModified())
+    {
+        // Update data
+        frequency_.value() = propDict_.lookupOrDefault<dimensionedScalar>
+            ("frequency", frequency_).value();
+        omega_.value() = 2.0 * mathematicalConstant::pi * frequency_.value();
+    }
+
+    // Solution properties
+    if
+    (
+        baseSolutionDict_.readIfModified()
+     || conductorSolutionDict_.readIfModified()
+    )
+    {
+        // Update subdicts
+        AVdict_ = baseSolutionDict_.subDict("solvers").subDict("AV");
+        Adict_ = baseSolutionDict_.subDict("solvers").subDict("A");
+        Vdict_ = conductorSolutionDict_.subDict("solvers").subDict("V");
+
+        // Update data
+        tol_ = AVdict_.lookupOrDefault<scalar>("tolerance", tol_);
+        tolScale_ = AVdict_.lookupOrDefault<scalar>("scale",tolScale_);
+        minIter_ = AVdict_.lookupOrDefault<int>("minIter", minIter_);
+        maxIter_ = AVdict_.lookupOrDefault<int>("maxIter", maxIter_);
+        relax_ = AVdict_.lookupOrDefault<scalar>("relax", relax_);
+    }
+}
+
+void eddyCurrentControl::timeReset()
+{
+    readDictDataIfModified();
+
+    run_ = false;
+    iter_ = -1;
+
+    subRun_ = false;
+    subIter_ = -1;
+    subTol_ = 1.0;
+    subAdict_ = Adict_;
+    subVdict_ = Vdict_;
+}
+
+void eddyCurrentControl::decreaseSubTolerance() const
+{
+    if ((tol_ <= subTol_) && !firstIter())
+    {
+        // Scale sub-tolerance
+        subTol_ *= min(mag(tolScale_), 1.0);
+
+        // If residual is already smaller
+        // adjust sub-tolerance accordingly
+        subTol_ = min(subTol_, AVres_);
+
+        // Make sure sub-tolerance does
+        // not get smaller then tolerance
+        subTol_ = max(subTol_, tol_);
+    }
+
+    Info << nl << "Tolerance = " << subTol_
+        << " / " << tol_ << endl << nl;
+
+    subAdict_.set<scalar>("tolerance", subTol_);
+    subVdict_.set<scalar>("tolerance", subTol_);
+
+    subIter_ = 0;
+}
+
+const bool& eddyCurrentControl::subRun() const
+{
+    subRun_ = !checkSubConvergence();
+
+    subIter_++;
+
+    return subRun_;
+};
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 eddyCurrentControl::eddyCurrentControl(const regionFvControl& rfvc)
@@ -46,14 +127,16 @@ eddyCurrentControl::eddyCurrentControl(const regionFvControl& rfvc)
         IOobject
         (
             "eddyCurrentControl",
-            rfvc.rmesh().time().constant(),
+            rfvc.rmesh().time().timeName(),
+            "uniform",
             rfvc.rmesh().time().db(),
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         )
     ),
     control_(rfvc),
     rmesh_(rfvc.rmesh()),
+    time_(rmesh_.time()),
     propDict_
     (
         IOdictionary
@@ -61,8 +144,8 @@ eddyCurrentControl::eddyCurrentControl(const regionFvControl& rfvc)
             IOobject
             (
                 "eddyCurrentProperties",
-                rfvc.rmesh().time().constant(),
-                rfvc.rmesh().time().db(),
+                time_.constant(),
+                time_.db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             )
@@ -94,21 +177,122 @@ eddyCurrentControl::eddyCurrentControl(const regionFvControl& rfvc)
         "omega",
         2.0 * mathematicalConstant::pi * frequency_
     ),
-    AVdict_(rmesh_[baseRegion_].solutionDict().subDict("solvers").subDict("AV")),
-    Adict_(rmesh_[baseRegion_].solutionDict().subDict("solvers").subDict("A")),
-    Vdict_(rmesh_[conductorRegion_].solutionDict().subDict("solvers").subDict("V")),
+    baseSolutionDict_(rmesh_[baseRegion_].solutionDict()),
+    conductorSolutionDict_(rmesh_[conductorRegion_].solutionDict()),
+    AVdict_(baseSolutionDict_.subDict("solvers").subDict("AV")),
+    Adict_(baseSolutionDict_.subDict("solvers").subDict("A")),
+    Vdict_(conductorSolutionDict_.subDict("solvers").subDict("V")),
+    tol_(AVdict_.lookupOrDefault<scalar>("tolerance", 1e-04)),
+    tolScale_(AVdict_.lookupOrDefault<scalar>("scale", 0.1)),
     minIter_(AVdict_.lookupOrDefault<int>("minIter", 0)),
     maxIter_(AVdict_.lookupOrDefault<int>("maxIter", 100)),
-    tol_(AVdict_.lookupOrDefault<scalar>("tol", 1e-04))
+    relax_(AVdict_.lookupOrDefault<scalar>("relax", 1.0)),
+    run_(false),
+    iter_(-1),
+    subRun_(false),
+    subIter_(-1),
+    subTol_(1.0),
+    subAdict_(Adict_),
+    subVdict_(Vdict_),
+    AVres_(subTol_-SMALL),
+    Ares_(AVres_),
+    Vres_(AVres_)
 {
+    // TODO: Check tol_ < 1 ???
+    // TODO: Check maxIter_ > 0
+    // TODO: Check maxIter_ > minIter_
+    // TODO: Check 0 < relax_ <= 1
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool eddyCurrentControl::writeData(Ostream&) const
+void eddyCurrentControl::relax(volVectorField& vf) const
 {
-    return false;
+    if (!firstIter())
+    {
+        if (checkRelax())
+        {
+            Info << "Relax " << vf.name()
+                << " = " << relax_ << endl;
+
+            vf.relax(relax_);
+        }
+    }
+}
+
+void eddyCurrentControl::relax(const regionVolVectorField& rvf) const
+{
+    if (!firstIter())
+    {
+        if (checkRelax())
+        {
+            Info << "Relax " << rvf.name()
+                << " = " << relax_ << endl;
+
+            forAll(rvf.mesh().regionNames(), regionI)
+            {
+                rvf[regionI].relax(relax_);
+            }
+        }
+    }
+}
+
+const bool& eddyCurrentControl::run()
+{
+    bool converged = checkConvergence();
+    bool subConverged = checkSubConvergence();
+    bool iterAboveMin = checkMinIterations(); // TODO: Makes only sense with relTol
+    bool iterBelowMax = checkMaxIterations();
+
+    // Update data if last subiteration has converged
+    if (!converged && subConverged) readDictDataIfModified();
+
+    // Run if not converged or below max iterations
+    run_ = !converged && iterBelowMax;
+
+    if (run_)
+    {
+        iter_++;
+
+        if (!subRun()) decreaseSubTolerance();
+    }
+    else
+    {
+        timeReset();
+    }
+
+    return run_;
+}
+
+
+void eddyCurrentControl::setResidualOfA(scalar residual) const
+{
+    Ares_ = residual;
+
+    updateResidual();
+}
+
+void eddyCurrentControl::setResidualOfV(scalar residual) const
+{
+    Vres_ = residual;
+
+    updateResidual();
+}
+
+
+void eddyCurrentControl::subWrite() const
+{
+    if
+    (
+        checkSubConvergence()
+        && !checkConvergence()
+    )
+    {
+        Info << "Write current solution" << endl;
+
+        time_.write();
+    }
 }
 
 

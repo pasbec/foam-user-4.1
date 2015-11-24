@@ -82,14 +82,15 @@
 
         // Solve V-equations
         // NOTE: Currently a deflated solver is necessary
+        // TODO: WARNING if no deflated solver is used!
         //       as both matrices are kept singluar!
-        lduSolverPerformance VReEqnPerf = VReEqn.solve(Vdict);
-        lduSolverPerformance VImEqnPerf = VImEqn.solve(Vdict);
+        lduSolverPerformance VReEqnPerf = VReEqn.solve(eddy.Vdict());
+        lduSolverPerformance VImEqnPerf = VImEqn.solve(eddy.Vdict());
 
         // Store max residual
         scalar resVRe = VReEqnPerf.initialResidual();
         scalar resVIm = VImEqnPerf.initialResidual();
-        resV = max(resVRe, resVIm);
+        eddy.setResidualOfV(max(resVRe, resVIm));
 
         // Correct boundary conditions
         VRe.correctBoundaryConditions();

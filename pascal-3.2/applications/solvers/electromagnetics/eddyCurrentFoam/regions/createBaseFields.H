@@ -8,11 +8,11 @@
         (
             "jsRe",
             runTime.timeName(),
-            mesh_[eddy.baseRegion()],
+            mesh_[eddy.base()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.baseRegion()]
+        mesh_[eddy.base()]
     );
 
     // Source current density (imaginary part)
@@ -23,76 +23,12 @@
         (
             "jsIm",
             runTime.timeName(),
-            mesh_[eddy.baseRegion()],
+            mesh_[eddy.base()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.baseRegion()]
+        mesh_[eddy.base()]
     );
-
-
-//     // Electric scalar potential (real part)
-//     Info << "Create field VRe" << endl;
-//     volScalarField VRe
-//     (
-//         IOobject
-//         (
-//             "VRe",
-//             runTime.timeName(),
-//             mesh_[eddy.baseRegion()],
-//             IOobject::MUST_READ,
-//             IOobject::AUTO_WRITE
-//         ),
-//         mesh_[eddy.baseRegion()]
-//     );
-//     uniformDimensionedScalarField VReAverage
-//     (
-//         IOobject
-//         (
-//             "VReAverage",
-//             runTime.timeName(),
-//             mesh_[eddy.baseRegion()],
-//             IOobject::READ_IF_PRESENT,
-//             IOobject::AUTO_WRITE
-//         ),
-//         dimensionedScalar(
-//             word(),
-//             VRe.dimensions(),
-//             gAverage(VRe.internalField())
-//         )
-//     );
-
-//     // Electric scalar potential (imaginary part)
-//     Info << "Create field VIm " << nl << endl;
-//     volScalarField VIm
-//     (
-//         IOobject
-//         (
-//             "VIm",
-//             runTime.timeName(),
-//             mesh_[eddy.baseRegion()],
-//             IOobject::MUST_READ,
-//             IOobject::AUTO_WRITE
-//         ),
-//         mesh_[eddy.baseRegion()]
-//     );
-//     uniformDimensionedScalarField VImAverage
-//     (
-//         IOobject
-//         (
-//             "VImAverage",
-//             runTime.timeName(),
-//             mesh_[eddy.baseRegion()],
-//             IOobject::READ_IF_PRESENT,
-//             IOobject::AUTO_WRITE
-//         ),
-//         dimensionedScalar(
-//             word(),
-//             VIm.dimensions(),
-//             gAverage(VIm.internalField())
-//         )
-//     );
-
 
     // Magnetic field density (real part)
     Info << "Create field BRe" << endl;
@@ -102,11 +38,11 @@
         (
             "BRe",
             runTime.timeName(),
-            mesh_[eddy.baseRegion()],
+            mesh_[eddy.base()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.baseRegion()]
+        mesh_[eddy.base()]
     );
 
     // Magnetic field density (imaginary part)
@@ -117,11 +53,11 @@
         (
             "BIm",
             runTime.timeName(),
-            mesh_[eddy.baseRegion()],
+            mesh_[eddy.base()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.baseRegion()]
+        mesh_[eddy.base()]
     );
 
 
@@ -133,11 +69,11 @@
         (
             "jRe",
             runTime.timeName(),
-            mesh_[eddy.baseRegion()],
+            mesh_[eddy.base()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.baseRegion()],
+        mesh_[eddy.base()],
         dimensionedVector(word(),dimensionSet(0,-2,0,0,0,1,0),vector::zero)
     );
 
@@ -149,11 +85,11 @@
         (
             "jIm",
             runTime.timeName(),
-            mesh_[eddy.baseRegion()],
+            mesh_[eddy.base()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.baseRegion()],
+        mesh_[eddy.base()],
         dimensionedVector(word(),dimensionSet(0,-2,0,0,0,1,0),vector::zero)
     );
 
@@ -166,11 +102,11 @@
         (
             "FL",
             runTime.timeName(),
-            mesh_[eddy.baseRegion()],
+            mesh_[eddy.base()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.baseRegion()],
+        mesh_[eddy.base()],
         dimensioned<vector>
         (
             "FL",
@@ -190,11 +126,11 @@
         (
             "pB",
             runTime.timeName(),
-            mesh_[eddy.baseRegion()],
+            mesh_[eddy.base()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.baseRegion()],
+        mesh_[eddy.base()],
         dimensioned<scalar>
         (
             "pB",

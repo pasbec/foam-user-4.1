@@ -34,8 +34,6 @@ Description
 #include "regionModelling.H"
 #include "eddyCurrentControl.H"
 
-#include "wordIOList.H"
-
 #include "fixedGradientFvPatchFields.H"
 #include "tangentialMagneticFvPatchFields.H" // TODO: add A in name
 
@@ -55,35 +53,30 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 
 #   include "createRegionMesh.H"
+#   include "createRegionControls.H"
 #   include "createRegionFields.H"
 
-    // Eddy current controls
-    eddyCurrentControl eddy(control_);
-
 #   include "createBaseFields.H"
-#   include "readBaseControls.H"
-#   include "initBaseControls.H"
-
 #   include "createConductorFields.H"
-#   include "readConductorControls.H"
-#   include "initConductorControls.H"
 
     using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Initial gradient calculation of V in conductor region
-    Info << "Init gradient of V" << nl << endl;
+    // Init gradient of V
     {
-        setRegionReferences(eddy.conductorRegion());
+        // Calculate gradient of V in conductor region
+        {
+            setRegionReferences(eddy.conductor());
 
-        VReGrad = fvc::grad(VRe);
-        VImGrad = fvc::grad(VIm);
+            VReGrad = fvc::grad(VRe);
+            VImGrad = fvc::grad(VIm);
+        }
+
+        // Reverse map gradient of V from conductor to base region
+        VReGrad_.rmap(eddy.conductor());
+        VImGrad_.rmap(eddy.conductor());
     }
-
-    // Initial reverse map gradient of V from conductor to base region
-    VReGrad_.rmap(eddy.conductorRegion());
-    VImGrad_.rmap(eddy.conductorRegion());
 
     // TODO [Low]: Realize AV-loops as time loops
     while (runTime.run())
@@ -92,74 +85,63 @@ int main(int argc, char *argv[])
 
         Info << "Time = " << runTime.value() << nl << endl;
 
-        // Copy local solver dictionaries
-        dictionary Adict = eddy.Adict();
-        dictionary Vdict = eddy.Vdict();
-
-        // Reset current tolerance
-        curTol = 1.0;
-
         // AV iterations
-        for (int iter = 0; iter < eddy.maxIter(); iter++)
+        while (eddy.run())
         {
-            if ((iter >= eddy.minIter()) && (res < eddy.tol())) break;
-
-            if (res < curTol)
-            {
-                curTol /= 10.0;
-
-                Info << nl << "Tolerance = " << curTol
-                    << " / " << eddy.tol() << endl << nl;
-
-                Adict.set<scalar>("tolerance", curTol);
-                Vdict.set<scalar>("tolerance", curTol);
-            }
-
             // Solve for A in base region
             {
-                setRegionReferences(eddy.baseRegion());
+                setRegionReferences(eddy.base());
+
+                eddy.relax(VReGrad);
+                eddy.relax(VImGrad);
 
 #               include "AEqn.H"
             }
 
             // Map internal field from base to conductor region
             // and interpolate/extrapolate boundary values
-            ARe_.mapInterpolate(eddy.conductorRegion());
-            AIm_.mapInterpolate(eddy.conductorRegion());
-            sigma_.mapExtrapolate(eddy.conductorRegion());
+            {
+                ARe_.mapInterpolate(eddy.conductor());
+                AIm_.mapInterpolate(eddy.conductor());
+                sigma_.mapExtrapolate(eddy.conductor());
+            }
 
             // Solve for V in conductor region
             {
-                setRegionReferences(eddy.conductorRegion());
+                setRegionReferences(eddy.conductor());
 
 #               include "VEqn.H"
             }
 
-            // Calculate gradient of V in conductor region
+            // Gradient of V
             {
-                setRegionReferences(eddy.conductorRegion());
+                // Calculate gradient of V in conductor region
+                {
+                    setRegionReferences(eddy.conductor());
 
-                VReGrad = fvc::grad(VRe);
-                VImGrad = fvc::grad(VIm);
+                    VReGrad = fvc::grad(VRe);
+                    VImGrad = fvc::grad(VIm);
+                }
+
+                // Reverse map gradient of V from conductor to base region
+                VReGrad_.rmap(eddy.conductor());
+                VImGrad_.rmap(eddy.conductor());
+
+                // Store old gradient of V in base region
+                {
+                    setRegionReferences(eddy.base());
+
+                    VReGrad.storePrevIter();
+                    VImGrad.storePrevIter();
+                }
             }
 
-            // Reverse map gradient of V from conductor to base region
-            VReGrad_.rmap(eddy.conductorRegion());
-            VImGrad_.rmap(eddy.conductorRegion());
-
-            // Update residual
-            res = max(resA, resV);
-            reduce(res, maxOp<scalar>());
-
-            if (res < curTol)
-            {
-                runTime.writeNow();
-            }
+            eddy.subWrite();
         }
 
         // Derived fields in base region
         {
-            setRegionReferences(eddy.baseRegion());
+            setRegionReferences(eddy.base());
 
             // Magnetic field density
             BRe == fvc::curl(ARe);
@@ -172,7 +154,7 @@ int main(int argc, char *argv[])
 
         // Time-averaged fields in base region
         {
-            setRegionReferences(eddy.baseRegion());
+            setRegionReferences(eddy.base());
 
             FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
 
