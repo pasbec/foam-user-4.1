@@ -33,8 +33,10 @@ Description
 
 #include "regionDynamicFvMesh.H"
 #include "regionFvMesh.H"
-#include "regionVolFields.H"
+#include "regionPolyMesh.H"
 #include "regionPointMesh.H"
+#include "regionGeoMesh.H"
+#include "regionVolFields.H"
 #include "regionPointFields.H"
 #include "regionControls.H"
 

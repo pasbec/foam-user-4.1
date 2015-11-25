@@ -30,20 +30,7 @@ Description
 
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
-#include "physicalConstants.H"
-#include "regionModelling.H"
 #include "eddyCurrentControl.H"
-
-#include "fixedGradientFvPatchFields.H"
-#include "tangentialMagneticFvPatchFields.H" // TODO: add A in name
-
-// TODO
-// #include "deflatedPCG.H"
-// #include "deflatedICCG.H"
-
-// TODO: Finish parallel face mapping
-// TODO: Find bug in mapCopyInternal() member function of regionVolFields
-// TODO: Finish template specialization for regionVolFields mapping
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,22 +50,6 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Init gradient of V
-    {
-        // Calculate gradient of V in conductor region
-        {
-            setRegionReferences(eddy.conductor());
-
-            VReGrad = fvc::grad(VRe);
-            VImGrad = fvc::grad(VIm);
-        }
-
-        // Reverse map gradient of V from conductor to base region
-        VReGrad_.rmap(eddy.conductor());
-        VImGrad_.rmap(eddy.conductor());
-    }
-
-    // TODO [Low]: Realize AV-loops as time loops
     while (runTime.run())
     {
         runTime++;
@@ -88,60 +59,42 @@ int main(int argc, char *argv[])
         // AV iterations
         while (eddy.run())
         {
+            // Init gradient of V in first iteration
+            if (eddy.firstIter())
+            {
+                updateGradientV(eddy.conductor());
+            }
+
             // Solve for A in base region
             {
-                setRegionReferences(eddy.base());
+                setRegion(eddy.base());
 
+                // Relax gradient of V
                 eddy.relax(VReGrad);
                 eddy.relax(VImGrad);
 
 #               include "AEqn.H"
             }
 
-            // Map internal field from base to conductor region
-            // and interpolate/extrapolate boundary values
-            {
-                ARe_.mapInterpolate(eddy.conductor());
-                AIm_.mapInterpolate(eddy.conductor());
-                sigma_.mapExtrapolate(eddy.conductor());
-            }
+            // Update A and sigma
+            updateSigmaA(eddy.conductor());
 
             // Solve for V in conductor region
             {
-                setRegionReferences(eddy.conductor());
+                setRegion(eddy.conductor());
 
 #               include "VEqn.H"
             }
 
-            // Gradient of V
-            {
-                // Calculate gradient of V in conductor region
-                {
-                    setRegionReferences(eddy.conductor());
-
-                    VReGrad = fvc::grad(VRe);
-                    VImGrad = fvc::grad(VIm);
-                }
-
-                // Reverse map gradient of V from conductor to base region
-                VReGrad_.rmap(eddy.conductor());
-                VImGrad_.rmap(eddy.conductor());
-
-                // Store old gradient of V in base region
-                {
-                    setRegionReferences(eddy.base());
-
-                    VReGrad.storePrevIter();
-                    VImGrad.storePrevIter();
-                }
-            }
+            // Update gradient of V
+            updateGradientV(eddy.conductor());
 
             eddy.subWrite();
         }
 
         // Derived fields in base region
         {
-            setRegionReferences(eddy.base());
+            setRegion(eddy.base());
 
             // Magnetic field density
             BRe == fvc::curl(ARe);
@@ -150,14 +103,11 @@ int main(int argc, char *argv[])
             // Eddy current density
             jRe ==   eddy.omega() * sigma * AIm - sigma * VReGrad;
             jIm == - eddy.omega() * sigma * ARe - sigma * VImGrad;
-        }
 
-        // Time-averaged fields in base region
-        {
-            setRegionReferences(eddy.base());
-
+            // Time-averaged Lorentz-force
             FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
 
+            // Time-averaged magnetic pressure
             pB == 0.5 * physicalConstant::rMu0
                 * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
         }

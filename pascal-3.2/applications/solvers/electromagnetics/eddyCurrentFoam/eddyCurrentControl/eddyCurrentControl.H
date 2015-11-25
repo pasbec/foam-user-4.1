@@ -35,12 +35,17 @@ SourceFiles
 #ifndef eddyCurrentControl_H
 #define eddyCurrentControl_H
 
-#include "foamTime.H"
-#include "mathematicalConstants.H"
 #include "PstreamReduceOps.H"
+#include "foamTime.H"
 #include "volFields.H"
-#include "regionVolFields.H"
-#include "regionControls.H"
+#include "mathematicalConstants.H"
+#include "physicalConstants.H"
+#include "regionModelling.H"
+
+#include "fixedGradientFvPatchFields.H"
+#include "tangentialMagneticFvPatchFields.H"
+
+// TODO [Low]: checkMinIterations() makes only sense with relTol!?
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -173,7 +178,7 @@ private:
             //- Check if relax factor is valid
             inline bool checkRelax() const
             {
-                return (relax_ > VSMALL) && (relax_ < 1.0-VSMALL);
+                return (relax_ > 0.0) && (relax_ < 1.0);
             };
 
             //- Iteration only initialized?
@@ -183,9 +188,15 @@ private:
             };
 
             //- Is this the first iteration?
-            inline bool firstIter() const
+            inline bool firstIteration() const
             {
                 return (iter_ == 0);
+            };
+
+            //- Is this the first sub-iteration?
+            inline bool firstSubIteration() const
+            {
+                return (subIter_ == 0);
             };
 
             //- Check minimum iterations state
@@ -308,6 +319,18 @@ public:
             //- Relax V-regionVolVectorField
             void relax(const regionVolVectorField& rvf) const;
 
+            //- Is this the first iteration?
+            bool firstIter() const
+            {
+                return firstIteration();
+            };
+
+            //- Is this the first sub-iteration?
+            bool firstSubIter() const
+            {
+                return firstSubIteration();
+            };
+
             //- Check, set and return run state
             const bool& run();
 
@@ -334,6 +357,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "eddyCurrentControl.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

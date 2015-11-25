@@ -1,19 +1,32 @@
 
-# define setRegionReference(region, refName)                        \
-                                                                    \
-    typeof(refName##_[region])& refName =                           \
-        refName##_[region];                                         \
-                                                                    \
-    if (&refName != &refName) {} // Hack to trick -Wunused-variable
+# define setRegionReference(regionI, vf)                                      \
+                                                                              \
+    typeof(vf##_[regionI])& vf = vf##_[regionI]; if (&vf != &vf) {}
 
-# define setRegionReferences(region)                                \
-                                                                    \
-    setRegionReference(region, mesh);                               \
-    setRegionReference(region, sigma);                              \
-    setRegionReference(region, ARe);                                \
-    setRegionReference(region, AIm);                                \
-    setRegionReference(region, VReGrad);                            \
-    setRegionReference(region, VImGrad);
+# define setRegion(regionI)                                                   \
+                                                                              \
+    setRegionReference(regionI, mesh);                                        \
+    setRegionReference(regionI, sigma);                                       \
+    setRegionReference(regionI, ARe);                                         \
+    setRegionReference(regionI, AIm);                                         \
+    setRegionReference(regionI, VReGrad);                                     \
+    setRegionReference(regionI, VImGrad);
+
+# define updateSigmaA(regionI)                                                \
+                                                                              \
+    sigma_.mapExtrapolate(regionI);                                           \
+    ARe_.mapInterpolate(regionI);                                             \
+    AIm_.mapInterpolate(regionI);
+
+# define updateRmapGradient(regionI,vsf)                                      \
+                                                                              \
+    vsf##Grad_[regionI] = fvc::grad(vsf);                                     \
+    vsf##Grad_.rmap(regionI);
+
+# define updateGradientV(regionI)                                             \
+                                                                              \
+    updateRmapGradient(regionI,VRe);                                          \
+    updateRmapGradient(regionI,VIm);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

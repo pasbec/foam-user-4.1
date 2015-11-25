@@ -85,7 +85,7 @@ void eddyCurrentControl::timeReset()
 
 void eddyCurrentControl::decreaseSubTolerance() const
 {
-    if ((tol_ <= subTol_) && !firstIter())
+    if ((tol_ <= subTol_) && !firstIteration())
     {
         // Scale sub-tolerance
         subTol_ *= min(mag(tolScale_), 1.0);
@@ -187,6 +187,7 @@ eddyCurrentControl::eddyCurrentControl(const regionFvControl& rfvc)
     minIter_(AVdict_.lookupOrDefault<int>("minIter", 0)),
     maxIter_(AVdict_.lookupOrDefault<int>("maxIter", 100)),
     relax_(AVdict_.lookupOrDefault<scalar>("relax", 1.0)),
+    stop_(false),
     run_(false),
     iter_(-1),
     subRun_(false),
@@ -209,23 +210,25 @@ eddyCurrentControl::eddyCurrentControl(const regionFvControl& rfvc)
 
 void eddyCurrentControl::relax(volVectorField& vf) const
 {
-    if (!firstIter())
+    if (checkRelax())
     {
-        if (checkRelax())
+        if (!firstIteration())
         {
             Info << "Relax " << vf.name()
-                << " = " << relax_ << endl;
+                << ", Factor = " << relax_ << endl;
 
             vf.relax(relax_);
         }
+
+        vf.storePrevIter();
     }
 }
 
 void eddyCurrentControl::relax(const regionVolVectorField& rvf) const
 {
-    if (!firstIter())
+    if (checkRelax())
     {
-        if (checkRelax())
+        if (!firstIteration())
         {
             Info << "Relax " << rvf.name()
                 << " = " << relax_ << endl;
@@ -235,6 +238,11 @@ void eddyCurrentControl::relax(const regionVolVectorField& rvf) const
                 rvf[regionI].relax(relax_);
             }
         }
+
+        forAll(rvf.mesh().regionNames(), regionI)
+        {
+            rvf[regionI].storePrevIter();
+        }
     }
 }
 
@@ -242,11 +250,14 @@ const bool& eddyCurrentControl::run()
 {
     bool converged = checkConvergence();
     bool subConverged = checkSubConvergence();
-    bool iterAboveMin = checkMinIterations(); // TODO: Makes only sense with relTol
+//     bool iterAboveMin = checkMinIterations(); // TODO: Makes only sense with relTol
     bool iterBelowMax = checkMaxIterations();
 
     // Update data if last subiteration has converged
-    if (!converged && subConverged) readDictDataIfModified();
+    if (!converged && subConverged)
+    {
+        readDictDataIfModified();
+    }
 
     // Run if not converged or below max iterations
     run_ = !converged && iterBelowMax;
@@ -255,7 +266,10 @@ const bool& eddyCurrentControl::run()
     {
         iter_++;
 
-        if (!subRun()) decreaseSubTolerance();
+        if (!subRun())
+        {
+            decreaseSubTolerance();
+        }
     }
     else
     {
@@ -286,7 +300,7 @@ void eddyCurrentControl::subWrite() const
     if
     (
         checkSubConvergence()
-        && !checkConvergence()
+     && !checkConvergence()
     )
     {
         Info << "Write current solution" << endl;

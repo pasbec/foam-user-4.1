@@ -43,7 +43,7 @@ SourceFiles
 #include "foamTime.H"
 #include "wordIOList.H"
 
-// TODO [High]: Finish implementation of face mapping in parallel!
+// TODO [High]: Finish parallel face mapping
 
 // TODO [High]: Sort that parallel clutter out (remove local maps
 //              and return maps based on if)!!!

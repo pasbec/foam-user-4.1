@@ -43,6 +43,8 @@ SourceFiles
 #include "regionGeoMesh.H"
 #include "regionPolyMesh.H"
 
+// TODO [High]: Finish parallel face mapping
+// TODO [High]: Find bug in mapCopyInternal() member function of regionVolFields
 // TODO [High]: Realize patch mapping for volFields as template specialization
 //              in regionVolFieldMapping.C
 
