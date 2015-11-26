@@ -30,6 +30,8 @@ Description
 SourceFiles
     regionControl.C
 
+// TODO: Create seperate derived Types for regionPolyControl, regionFvControl, regionDynamicFvControl and regionPointControl
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef regionControl_H
@@ -37,6 +39,7 @@ SourceFiles
 
 #include "foamTime.H"
 #include "IOdictionary.H"
+#include "regionFvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,17 +50,10 @@ namespace Foam
                        Class regionControl Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class RegionGeoMesh>
 class regionControl
 :
     IOdictionary
 {
-public:
-
-    // Public typedefs
-
-        typedef typename RegionGeoMesh::Mesh RegionMesh;
-
 protected:
 
     // Protected Data
@@ -69,7 +65,7 @@ private:
     // Private Data
 
         //- Reference to region mesh
-        const RegionMesh& rMesh_;
+        const regionFvMesh& rMesh_;
 
     // Private Member Functions
 
@@ -87,7 +83,7 @@ public:
     // Constructors
 
         //- Construct from region mesh
-        regionControl(const RegionMesh& rmesh);
+        regionControl(const regionFvMesh& rmesh);
 
     // Destructor
 
@@ -98,7 +94,7 @@ public:
         // Access
 
             //- Reference to mesh
-            const RegionMesh& rmesh() const
+            const regionFvMesh& rmesh() const
             {
                 return rMesh_;
             };
@@ -111,12 +107,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "regionControl.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

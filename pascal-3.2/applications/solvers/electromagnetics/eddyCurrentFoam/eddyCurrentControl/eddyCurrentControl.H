@@ -65,7 +65,7 @@ private:
     // Private Data
 
         // Reference to region control
-        const regionFvControl& control_;
+        const regionControl& control_;
 
         // Reference to region mesh
         const regionFvMesh& rmesh_;
@@ -250,8 +250,8 @@ public:
 
     // Constructors
 
-        //- Construct from regionFvControl
-        eddyCurrentControl(const regionFvControl& rfvc);
+        //- Construct from regionControl
+        eddyCurrentControl(const regionControl& rfvc);
 
     // Destructor
 

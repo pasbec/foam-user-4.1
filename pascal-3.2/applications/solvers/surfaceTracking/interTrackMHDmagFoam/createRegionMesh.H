@@ -14,7 +14,6 @@
     // Create region mesh
     Info << "Create region mesh" << endl << endl;;
     regionDynamicFvMesh mesh_(runTime, regionNames);
-    regionDynamicFvControl control_(mesh_);
 
 //     // Region point mesh
 //     Info << "Create region point mesh"

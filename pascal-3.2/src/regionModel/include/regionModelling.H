@@ -38,7 +38,7 @@ Description
 #include "regionGeoMesh.H"
 #include "regionVolFields.H"
 #include "regionPointFields.H"
-#include "regionControls.H"
+#include "regionControl.H"
 
 #include "regionFvc.H"
 

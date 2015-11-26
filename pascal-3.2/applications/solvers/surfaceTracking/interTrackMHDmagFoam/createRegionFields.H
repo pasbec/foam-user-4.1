@@ -1,16 +1,13 @@
 
-# define setRegionReference(region, refName)                        \
-                                                                    \
-    typeof(refName##_[region])& refName =                           \
-        refName##_[region];                                         \
-                                                                    \
-    if (&refName != &refName) {} // Hack to trick -Wunused-variable
+# define setRegionReference(regionI, t, f)                                    \
+                                                                              \
+    t& f = f##_[regionI]; if (&f != &f) {}
 
-# define setRegionReferences(region)                                \
-                                                                    \
-    setRegionReference(region, mesh);                               \
-    setRegionReference(region, FL);                                 \
-    setRegionReference(region, pB);
+# define setRegionScope(region)                                               \
+                                                                              \
+    setRegionReference(region, dynamicFvMesh, mesh);                          \
+    setRegionReference(region, volVectorField, FL);                           \
+    setRegionReference(region, volScalarField, pB);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -126,7 +126,7 @@ const bool& eddyCurrentControl::subRun() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-eddyCurrentControl::eddyCurrentControl(const regionFvControl& rfvc)
+eddyCurrentControl::eddyCurrentControl(const regionControl& rfvc)
 :
     regIOobject
     (

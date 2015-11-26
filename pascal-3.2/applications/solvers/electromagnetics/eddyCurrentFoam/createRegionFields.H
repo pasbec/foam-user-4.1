@@ -8,18 +8,18 @@
     Info << "Create field " << #f                                             \
         << " (" << mesh_.regionName(regionI) << ")" << endl;
 
-# define setRegionReference(regionI, f)                                       \
+# define setRegionReference(regionI, t, f)                                    \
                                                                               \
-    typeof(f##_[regionI])& f = f##_[regionI]; if (&f != &f) {}
+    t& f = f##_[regionI]; if (&f != &f) {}
 
 # define setRegionScope(regionI)                                              \
                                                                               \
-    setRegionReference(regionI, mesh);                                        \
-    setRegionReference(regionI, sigma);                                       \
-    setRegionReference(regionI, ARe);                                         \
-    setRegionReference(regionI, AIm);                                         \
-    setRegionReference(regionI, VReGrad);                                     \
-    setRegionReference(regionI, VImGrad);
+    setRegionReference(regionI, fvMesh, mesh);                                \
+    setRegionReference(regionI, volScalarField, sigma);                       \
+    setRegionReference(regionI, volVectorField, ARe);                         \
+    setRegionReference(regionI, volVectorField, AIm);                         \
+    setRegionReference(regionI, volVectorField, VReGrad);                     \
+    setRegionReference(regionI, volVectorField, VImGrad);
 
 # define updateSigmaA(regionI)                                                \
                                                                               \

@@ -130,14 +130,14 @@ int main(int argc, char *argv[])
 
 #       include "readBaseControls.H"
         {
-            setRegionReferences(defaultRegionID);
+            setRegionScope(defaultRegionID);
 
 #           include "updateRegionCourantNo.H"
         }
 
 #       include "readFluidControls.H"
         {
-            setRegionReferences(fluidRegionID);
+            setRegionScope(fluidRegionID);
 
 #           include "updateFluidGravitationalAcceleration.H"
 #           include "updateFluidCourantNumber.H"
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 
         if (mfUpdate)
         {
-            setRegionReferences(defaultRegionID);
+            setRegionScope(defaultRegionID);
 #           include "solveBase.H"
         }
 
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 
         if (mfUpdate)
         {
-            setRegionReferences(fluidRegionID);
+            setRegionScope(fluidRegionID);
 
             fvc::extrapolate(FL);
             fvc::extrapolate(pB);
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
         // ==================================================================//
 
         {
-            setRegionReferences(fluidRegionID);
+            setRegionScope(fluidRegionID);
 #           include "solveFluid.H"
         }
 

@@ -30,12 +30,15 @@ License
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(regionControl, 0);
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class RegionGeoMesh>
-regionControl<RegionGeoMesh>::regionControl(const RegionMesh& rmesh)
+regionControl::regionControl(const regionFvMesh& rmesh)
 :
     IOdictionary
     (
@@ -56,8 +59,7 @@ regionControl<RegionGeoMesh>::regionControl(const RegionMesh& rmesh)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class RegionGeoMesh>
-bool regionControl<RegionGeoMesh>::writeData(Ostream&) const
+bool regionControl::writeData(Ostream&) const
 {
     return false;
 }
