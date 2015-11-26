@@ -37,7 +37,6 @@
     updateRmapGradient(regionI,VRe);                                          \
     updateRmapGradient(regionI,VIm);
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Conductivity

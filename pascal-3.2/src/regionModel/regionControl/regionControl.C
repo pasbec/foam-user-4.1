@@ -37,15 +37,16 @@ namespace Foam
 template <class RegionGeoMesh>
 regionControl<RegionGeoMesh>::regionControl(const RegionMesh& rmesh)
 :
-    regIOobject
+    IOdictionary
     (
         IOobject
         (
             "regionControl",
-            rmesh.time().constant(),
+            rmesh.time().timeName(),
+            "uniform",
             rmesh.time().db(),
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         )
     ),
     rMesh_(rmesh)

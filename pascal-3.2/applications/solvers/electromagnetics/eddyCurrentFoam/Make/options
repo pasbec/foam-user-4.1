@@ -17,8 +17,7 @@ EXE_INC = \
     -IfvPatchFields/patchDirectionMixedMixed \
     -IfvPatchFields/tangentialMagnetic \
     -IdeflatedLduSolvers/deflatedPCG \
-    -IdeflatedLduSolvers/deflatedICCG \
-    -Wfatal-errors
+    -IdeflatedLduSolvers/deflatedICCG
 
 
 EXE_LIBS = \

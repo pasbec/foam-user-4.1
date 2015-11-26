@@ -2,5 +2,5 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-rm lnInclude/* 2>/dev/null
+rm lnInclude 2>/dev/null
 wclean || exit 1

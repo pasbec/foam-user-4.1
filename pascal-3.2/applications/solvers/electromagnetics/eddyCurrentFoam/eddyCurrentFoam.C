@@ -40,13 +40,17 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 
 #   include "createRegionMesh.H"
-#   include "createRegionControls.H"
-#   include "createRegionFields.H"
+#   include "createRegionControl.H"
 
+#   include "createControls.H"
+#   include "createRegionFields.H"
 #   include "createBaseFields.H"
 #   include "createConductorFields.H"
 
+#ifndef namespaceFoam
+#define namespaceFoam
     using namespace Foam;
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

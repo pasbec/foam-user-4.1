@@ -36,7 +36,7 @@ SourceFiles
 #define regionControl_H
 
 #include "foamTime.H"
-#include "regIOobject.H"
+#include "IOdictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +50,7 @@ namespace Foam
 template <class RegionGeoMesh>
 class regionControl
 :
-    regIOobject
+    IOdictionary
 {
 public:
 
