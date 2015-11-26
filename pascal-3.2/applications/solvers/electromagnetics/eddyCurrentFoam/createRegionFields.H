@@ -1,9 +1,18 @@
 
-# define setRegionReference(regionI, vf)                                      \
+# define infoCreateRegionField(f)                                             \
                                                                               \
-    typeof(vf##_[regionI])& vf = vf##_[regionI]; if (&vf != &vf) {}
+    Info << "Create region field " << #f << endl;
 
-# define setRegion(regionI)                                                   \
+# define infoCreateField(regionI, f)                                          \
+                                                                              \
+    Info << "Create field " << #f                                             \
+        << " (" << mesh_.regionName(regionI) << ")" << endl;
+
+# define setRegionReference(regionI, f)                                       \
+                                                                              \
+    typeof(f##_[regionI])& f = f##_[regionI]; if (&f != &f) {}
+
+# define setRegionScope(regionI)                                              \
                                                                               \
     setRegionReference(regionI, mesh);                                        \
     setRegionReference(regionI, sigma);                                       \
@@ -32,7 +41,7 @@
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Conductivity
-    Info << "Create region field sigma" << nl << endl;
+    infoCreateRegionField(sigma);
     regionVolScalarField sigma_
     (
         IOobject
@@ -45,10 +54,11 @@
         ),
         mesh_
     );
+    Info << nl;
 
 
     // Magnetic vector potential (real part)
-    Info << "Create region field ARe" << endl;
+    infoCreateRegionField(ARe);
     regionVolVectorField ARe_
     (
         IOobject
@@ -63,7 +73,7 @@
     );
 
     // Magnetic vector potential (imaginary part)
-    Info << "Create region field AIm" << nl << endl;
+    infoCreateRegionField(AIm);
     regionVolVectorField AIm_
     (
         IOobject
@@ -76,10 +86,11 @@
         ),
         mesh_
     );
+    Info << nl;
 
 
     // Gradient of electric scalar potential (real part)
-    Info << "Create region field VReGrad" << endl;
+    infoCreateRegionField(VReGrad);
     regionVolVectorField VReGrad_
     (
         IOobject
@@ -101,7 +112,7 @@
     );
 
     // Gradient of electric scalar potential (imaginary part)
-    Info << "Create region field VImGrad" << nl << endl;
+    infoCreateRegionField(VImGrad);
     regionVolVectorField VImGrad_
     (
         IOobject
@@ -121,3 +132,4 @@
         ),
         calculatedFvPatchField<vector>::typeName
     );
+    Info << nl;

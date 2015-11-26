@@ -1,6 +1,6 @@
 
     // Electric scalar potential (real part)
-    Info << "Create field VRe" << endl;
+    infoCreateField(eddy.conductor(), VRe);
     volScalarField VRe
     (
         IOobject
@@ -31,7 +31,7 @@
     );
 
     // Electric scalar potential (imaginary part)
-    Info << "Create field VIm " << nl << endl;
+    infoCreateField(eddy.conductor(), VIm);
     volScalarField VIm
     (
         IOobject
@@ -60,3 +60,4 @@
             gAverage(VIm.internalField())
         )
     );
+    Info << nl;

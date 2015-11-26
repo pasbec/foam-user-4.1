@@ -1,7 +1,7 @@
 
 
     // Source current density (real part)
-    Info << "Create field jsRe" << endl;
+    infoCreateField(eddy.base(), jsRe);
     volVectorField jsRe
     (
         IOobject
@@ -16,7 +16,7 @@
     );
 
     // Source current density (imaginary part)
-    Info << "Create field jsIm" << nl << endl;
+    infoCreateField(eddy.base(), jsIm);
     volVectorField jsIm
     (
         IOobject
@@ -29,9 +29,10 @@
         ),
         mesh_[eddy.base()]
     );
+    Info << nl;
 
     // Magnetic field density (real part)
-    Info << "Create field BRe" << endl;
+    infoCreateField(eddy.base(), BRe);
     volVectorField BRe
     (
         IOobject
@@ -46,7 +47,7 @@
     );
 
     // Magnetic field density (imaginary part)
-    Info << "Create field BIm" << nl << endl;
+    infoCreateField(eddy.base(), BIm);
     volVectorField BIm
     (
         IOobject
@@ -59,10 +60,11 @@
         ),
         mesh_[eddy.base()]
     );
+    Info << nl;
 
 
     // Current density (real part)
-    Info << "Create field jRe" << endl;
+    infoCreateField(eddy.base(), jRe);
     volVectorField jRe
     (
         IOobject
@@ -78,7 +80,7 @@
     );
 
     // Current density (imaginary part)
-    Info << "Create field jIm" << nl << endl;
+    infoCreateField(eddy.base(), jIm);
     volVectorField jIm
     (
         IOobject
@@ -92,10 +94,11 @@
         mesh_[eddy.base()],
         dimensionedVector(word(),dimensionSet(0,-2,0,0,0,1,0),vector::zero)
     );
+    Info << nl;
 
 
     // Lorentz force
-    Info << "Create field FL" << endl;
+    infoCreateField(eddy.base(), FL);
     volVectorField FL
     (
         IOobject
@@ -115,11 +118,11 @@
         ),
         calculatedFvPatchField<vector>::typeName
     );
-    Info << endl;
+    Info << nl;
 
 
     // Lorentz force
-    Info << "Create field pB" << endl;
+    infoCreateField(eddy.base(), pB);
     volScalarField pB
     (
         IOobject
@@ -139,4 +142,4 @@
         ),
         calculatedFvPatchField<scalar>::typeName
     );
-    Info << endl;
+    Info << nl;

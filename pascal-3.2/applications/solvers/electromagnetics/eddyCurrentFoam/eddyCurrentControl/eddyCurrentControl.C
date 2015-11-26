@@ -66,6 +66,12 @@ void eddyCurrentControl::readDictDataIfModified()
         minIter_ = AVdict_.lookupOrDefault<int>("minIter", minIter_);
         maxIter_ = AVdict_.lookupOrDefault<int>("maxIter", maxIter_);
         relax_ = AVdict_.lookupOrDefault<scalar>("relax", relax_);
+
+        // Update subDict copies
+        subAdict_ = Adict_;
+        subVdict_ = Vdict_;
+        subAdict_.set<scalar>("tolerance", subTol_);
+        subVdict_.set<scalar>("tolerance", subTol_);
     }
 }
 
@@ -259,7 +265,7 @@ const bool& eddyCurrentControl::run()
         readDictDataIfModified();
     }
 
-    // Run if not converged or below max iterations
+    // Run if not converged and below max iterations
     run_ = !converged && iterBelowMax;
 
     if (run_)
@@ -305,7 +311,11 @@ void eddyCurrentControl::subWrite() const
     {
         Info << "Write current solution" << endl;
 
-        time_.write();
+        Time& time = const_cast<Time&>(time_);
+
+        // TODO: Why is writeNow() not const,
+        //       but write() is?
+        time.writeNow();
     }
 }
 

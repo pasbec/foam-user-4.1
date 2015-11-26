@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
             // Solve for A in base region
             {
-                setRegion(eddy.base());
+                setRegionScope(eddy.base());
 
                 // Relax gradient of V
                 eddy.relax(VReGrad);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
             // Solve for V in conductor region
             {
-                setRegion(eddy.conductor());
+                setRegionScope(eddy.conductor());
 
 #               include "VEqn.H"
             }
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 
         // Derived fields in base region
         {
-            setRegion(eddy.base());
+            setRegionScope(eddy.base());
 
             // Magnetic field density
             BRe == fvc::curl(ARe);
