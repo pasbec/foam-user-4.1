@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "regionControl.H"
+#include "interTrackEddyCurrentControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -32,37 +32,33 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(regionControl, 0);
+defineTypeNameAndDebug(interTrackEddyCurrentControl, 0);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-regionControl::regionControl(const regionFvMesh& rmesh)
+interTrackEddyCurrentControl::interTrackEddyCurrentControl
+(
+    const regionDynamicFvMesh& rmesh,
+    const word& name
+)
 :
-    IOdictionary
+    solverControl<regionDynamicFvMesh>
     (
-        IOobject
-        (
-            "regionControl",
-            rmesh.time().timeName(),
-            "uniform",
-            rmesh.time().db(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        )
+        rmesh,
+        name,
+        rmesh.regionIndex()
     ),
-    rMesh_(rmesh)
+    tramag_(rmesh),
+    eddy_(rmesh)
 {
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool regionControl::writeData(Ostream&) const
-{
-    return false;
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

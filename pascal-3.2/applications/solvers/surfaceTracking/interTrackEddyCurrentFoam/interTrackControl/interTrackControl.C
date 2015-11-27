@@ -21,28 +21,55 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    ...
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionModelling_H
-#define regionModelling_H
+#include "interTrackControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "regionDynamicFvMesh.H"
-#include "regionFvMesh.H"
-#include "regionPolyMesh.H"
-#include "regionPointMesh.H"
-#include "regionGeoMesh.H"
-#include "regionVolFields.H"
-#include "regionPointFields.H"
+namespace Foam
+{
 
-#include "regionFvc.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(interTrackControl, 0);
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+interTrackControl::interTrackControl
+(
+    const regionFvMesh& rmesh,
+    const word& name
+)
+:
+    solverControl<regionFvMesh>
+    (
+        rmesh,
+        name,
+        rmesh.regionIndex()
+    ),
+    fluidAregionName_
+    (
+        word(propDict_.subDict("regions").lookup("fluidA"))
+    ),
+    fluidAregion_
+    (
+        mesh_.regionIndex(fluidAregionName_)
+    )
+{
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+} // End namespace Foam
 
 // ************************************************************************* //
+

@@ -1,15 +1,17 @@
 
-    // ==================================================================//
-    // Omega and alpha
-    // ==================================================================//
-
-    dimensionedScalar omega
+    volVector6Field A
     (
-        "omega",
-        2.0 * mathematicalConstant::pi * frequency
+        IOobject
+        (
+            "A",
+            runTime.timeName(),
+            mesh_[control.base()],
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_[control.base()],
+        dimensionedVector6(word(),dimless,vector6::zero)
     );
-
-    volScalarField alpha = omega * sigma;
 
     // ==================================================================//
     // Block matrix preparations
@@ -42,7 +44,7 @@
     fvVectorMatrix AReEqn
     (
         - physicalConstant::rMu0 * fvm::laplacian(ARe)
-    //  - alpha * AIm // substituted by point-implicit block-coupling
+    //  - control.omega() * sigma * AIm // substituted by point-implicit block-coupling
         - jsRe
     );
 
@@ -53,7 +55,7 @@
     fvVectorMatrix AImEqn
     (
         - physicalConstant::rMu0 * fvm::laplacian(AIm)
-    //  + alpha * ARe // substituted by point-implicit block-coupling
+    //  + control.omega() * sigma * ARe // substituted by point-implicit block-coupling
         - jsIm
     );
 
@@ -72,7 +74,7 @@
     // Add off-diagonal terms
     forAll(AEqnD, i)
     {
-        dimensionedScalar alphai = alpha[i];
+        dimensionedScalar alphai = control.omega() * sigma[i];
 
         AEqnD[i](0,3) = -alphai.value() * mesh.V()[i];
         AEqnD[i](3,0) = +alphai.value() * mesh.V()[i];

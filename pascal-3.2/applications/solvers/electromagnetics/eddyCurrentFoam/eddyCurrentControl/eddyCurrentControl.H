@@ -36,10 +36,9 @@ SourceFiles
 #define eddyCurrentControl_H
 
 #include "PstreamReduceOps.H"
-#include "foamTime.H"
-#include "volFields.H"
 #include "mathematicalConstants.H"
 #include "physicalConstants.H"
+#include "solverControl.H"
 #include "regionModelling.H"
 
 #include "fixedGradientFvPatchFields.H"
@@ -58,34 +57,18 @@ namespace Foam
 
 class eddyCurrentControl
 :
-    regIOobject
+    public solverControl<regionFvMesh>
 {
 private:
 
     // Private Data
 
-        // Reference to region control
-        const regionControl& control_;
-
-        // Reference to region mesh
-        const regionFvMesh& rmesh_;
-
-        // Reference to region mesh
-        const Time& time_;
+        // Controls
 
         // Properties
 
-            //- Properties dictionary
-            IOdictionary propDict_;
-
-            //- Name of base region
-            word baseRegionName_;
-
             //- Name of conducting region
             word conductorRegionName_;
-
-            //- Label of base region
-            label baseRegion_;
 
             //- Label of conducting region
             label conductorRegion_;
@@ -96,10 +79,7 @@ private:
             //- Cyclic velocity based on frequency
             dimensionedScalar omega_;
 
-        // Solution properties
-
-            //- Solution dictionary of base region
-            IOdictionary& baseSolutionDict_;
+        // Dictionaries
 
             //-Solution dictionary of conducting region
             IOdictionary& conductorSolutionDict_;
@@ -112,6 +92,8 @@ private:
 
             //- V-solution dictionary
             dictionary Vdict_;
+
+        // Solution properties
 
             //- Solution tolerance
             scalar tol_;
@@ -133,14 +115,14 @@ private:
             //- Stop state
             mutable bool stop_;
 
-            //- Run/Convergence state
-            mutable bool run_;
+            //- Loop/Convergence state
+            mutable bool loop_;
 
             //- Iteration counter
             mutable int iter_;
 
-            //- Sub-Run/Convergence state
-            mutable bool subRun_;
+            //- Sub-loop/Convergence state
+            mutable bool subLoop_;
 
             //- Sub-iteration counter
             mutable int subIter_;
@@ -240,8 +222,8 @@ private:
             //- Check sub-convergence state
             void decreaseSubTolerance() const;
 
-            //- Check and return sub-run state
-            const bool& subRun() const;
+            //- Check and return sub-loop state
+            const bool& subLoop() const;
 
 public:
 
@@ -250,8 +232,12 @@ public:
 
     // Constructors
 
-        //- Construct from regionControl
-        eddyCurrentControl(const regionControl& rfvc);
+        //- Construct from mesh and name
+        eddyCurrentControl
+        (
+            const regionFvMesh& rmesh,
+            const word& name = "eddyCurrent"
+        );
 
     // Destructor
 
@@ -261,19 +247,13 @@ public:
 
         // Properties
 
-            //- Reference to base ID
-            const dictionary& properties() const
+            //- Reference to conductor region name
+            const word& conductorName() const
             {
-                return propDict_;
+                return conductorRegionName_;
             };
 
-            //- Reference to base ID
-            const label& base() const
-            {
-                return baseRegion_;
-            };
-
-            //- Reference to base ID
+            //- Reference to conductor region ID
             const label& conductor() const
             {
                 return conductorRegion_;
@@ -331,8 +311,8 @@ public:
                 return firstSubIteration();
             };
 
-            //- Check, set and return run state
-            const bool& run();
+            //- Check, set and return loop state
+            const bool& loop();
 
         // Solution residual variables
 

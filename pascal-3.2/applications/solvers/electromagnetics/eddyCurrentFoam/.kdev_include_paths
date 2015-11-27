@@ -1,11 +1,8 @@
 ../../../../.wm_project_dir/src/finiteVolume/lnInclude
 ../../../../.wm_project_dir/src/VectorN/lnInclude
 
-../../../../src/regionModel/lnInclude
 ../../../../src/foamTools/lnInclude
-
-./regions
-./regions/conductor
+../../../../src/regionModel/lnInclude
 
 ./gradSchemes/electricPotentialGrad
 
@@ -20,3 +17,6 @@
 ./deflatedLduSolvers/deflatedICCG
 
 ./eddyCurrentControl
+
+./regions
+./regions/conductor

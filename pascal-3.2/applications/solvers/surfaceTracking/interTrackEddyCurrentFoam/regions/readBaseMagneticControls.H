@@ -1,5 +1,5 @@
 
-    dictionary& magnetic = mesh_[defaultRegionID].solutionDict().subDict("Magnetic");
+    dictionary& magnetic = mesh_[control.base()].solutionDict().subDict("Magnetic");
 
     // Update settings
     dictionary& mfUpdateDict(magnetic.subDict("update"));

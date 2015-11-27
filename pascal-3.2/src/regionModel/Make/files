@@ -10,8 +10,6 @@ regionFvMesh/regionFvMesh.C
 regionDynamicFvMesh/regionDynamicFvMesh.C
 regionDynamicFvMesh/regionDynamicFvMeshMapping.C
 
-regionControl/regionControl.C
-
 regionVolFields/regionVolFields.C
 
 regionPointFields/regionPointFields.C

@@ -13,9 +13,12 @@
 ../../../../src/regionModel/lnInclude
 
 ../trackedSurface/lnInclude
+../../electromagnetics/eddyCurrentFoam/lnInclude
 
 ./regions
 ./regions/fluid
 ./regions/fluid/coupled
 
-./fvc
+./interTrackControl
+./interTrackMagneticControl
+./interTrackEddyCurrentControl

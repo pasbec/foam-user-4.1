@@ -7,9 +7,6 @@ EXE_INC = \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
     -I$(FOAM_USER_SRC)/foamTools/lnInclude \
     -I$(FOAM_USER_SRC)/regionModel/lnInclude \
-    -IeddyCurrentControl \
-    -Iregions \
-    -Iregions/conductor \
     -IfvPatchFields/lookupFixedGradient \
     -IgradSchemes/electricPotentialGrad \
     -IlaplacianSchemes/electricPotentialLaplacian \
@@ -17,7 +14,10 @@ EXE_INC = \
     -IfvPatchFields/patchDirectionMixedMixed \
     -IfvPatchFields/tangentialMagnetic \
     -IdeflatedLduSolvers/deflatedPCG \
-    -IdeflatedLduSolvers/deflatedICCG
+    -IdeflatedLduSolvers/deflatedICCG \
+    -IeddyCurrentControl \
+    -Iregions \
+    -Iregions/conductor
 
 
 EXE_LIBS = \

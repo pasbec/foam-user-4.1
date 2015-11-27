@@ -1,6 +1,6 @@
 
     dictionary pimple =
-        mesh_[fluidRegionID].solutionDict().subDict("PIMPLE");
+        mesh_[control.fluidA()].solutionDict().subDict("PIMPLE");
 
     word methodUp =
         pimple.lookupOrDefault<word>("methodUp", "default");

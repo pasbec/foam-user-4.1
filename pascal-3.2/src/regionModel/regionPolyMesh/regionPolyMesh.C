@@ -275,6 +275,13 @@ regionPolyMesh::regionPolyMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+label regionPolyMesh::regionIndex() const
+{
+    return regionIndex(polyMesh::defaultRegion);
+
+    // TODO: If default region not allocated, return -1
+}
+
 label regionPolyMesh::regionIndex(const word& regionName) const
 {
     label regionID = -1;
@@ -287,6 +294,7 @@ label regionPolyMesh::regionIndex(const word& regionName) const
         }
     }
 
+    // TODO: Catch default region here and return -1
     if(regionID == -1)
     {
         FatalErrorIn("regionPolyMesh::regionIndex")

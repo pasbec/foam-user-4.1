@@ -6,7 +6,7 @@
             "magnetic",
             runTime.timeName(),
             "uniform",
-            mesh_[defaultRegionID],
+            mesh_[control.base()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE,
             true

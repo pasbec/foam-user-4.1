@@ -47,6 +47,7 @@ SourceFiles
 // TODO [High]: Find bug in mapCopyInternal() member function of regionVolFields
 // TODO [High]: Realize patch mapping for volFields as template specialization
 //              in regionVolFieldMapping.C
+// TODO [High]: Make this class demand-driven and allow all fields to be region-fields
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

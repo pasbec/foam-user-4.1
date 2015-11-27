@@ -21,28 +21,79 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    ...
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionModelling_H
-#define regionModelling_H
+#include "solverControl.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "regionDynamicFvMesh.H"
-#include "regionFvMesh.H"
-#include "regionPolyMesh.H"
-#include "regionPointMesh.H"
-#include "regionGeoMesh.H"
-#include "regionVolFields.H"
-#include "regionPointFields.H"
+namespace Foam
+{
 
-#include "regionFvc.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template <class MESH>
+solverControl<MESH>::solverControl
+(
+    const MESH& mesh,
+    const word& name,
+    const label& base
+)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            name + "Control",
+            mesh.time().timeName(),
+            "uniform",
+            mesh.time().db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    time_(mesh.time()),
+    mesh_(mesh),
+    baseRegionName_(polyMesh::defaultRegion),
+    baseRegion_(base),
+    propDict_
+    (
+        IOdictionary
+        (
+            IOobject
+            (
+                name + "Properties",
+                time_.constant(),
+                time_.db(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE
+            )
+        )
+    ),
+    baseSolutionDict_(mesh_.solutionDict())
+{
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template <class MESH>
+bool solverControl<MESH>::writeData(Ostream&) const
+{
+    return false;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+} // End namespace Foam
 
 // ************************************************************************* //
+

@@ -1,17 +1,17 @@
 
     // Electric scalar potential (real part)
-    infoCreateField(eddy.conductor(), VRe);
+    infoCreateField(control.conductor(), VRe);
     volScalarField VRe
     (
         IOobject
         (
             "VRe",
             runTime.timeName(),
-            mesh_[eddy.conductor()],
+            mesh_[control.conductor()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.conductor()]
+        mesh_[control.conductor()]
     );
     uniformDimensionedScalarField VReAverage
     (
@@ -19,7 +19,7 @@
         (
             "VReAverage",
             runTime.timeName(),
-            mesh_[eddy.conductor()],
+            mesh_[control.conductor()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
@@ -31,18 +31,18 @@
     );
 
     // Electric scalar potential (imaginary part)
-    infoCreateField(eddy.conductor(), VIm);
+    infoCreateField(control.conductor(), VIm);
     volScalarField VIm
     (
         IOobject
         (
             "VIm",
             runTime.timeName(),
-            mesh_[eddy.conductor()],
+            mesh_[control.conductor()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[eddy.conductor()]
+        mesh_[control.conductor()]
     );
     uniformDimensionedScalarField VImAverage
     (
@@ -50,7 +50,7 @@
         (
             "VImAverage",
             runTime.timeName(),
-            mesh_[eddy.conductor()],
+            mesh_[control.conductor()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),

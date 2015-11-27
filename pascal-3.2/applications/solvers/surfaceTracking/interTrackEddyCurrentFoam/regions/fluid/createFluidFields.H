@@ -1,7 +1,7 @@
 
     // Gravity
     Info << "Create field g for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
     uniformDimensionedVectorField g
     (
@@ -9,7 +9,7 @@
         (
             "g",
             runTime.constant(),
-            mesh_[fluidRegionID],
+            mesh_[control.fluidA()],
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -18,7 +18,7 @@
 
     // Pressure
     Info << "Create field p for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
     volScalarField p
     (
@@ -26,17 +26,17 @@
         (
             "p",
             runTime.timeName(),
-            mesh_[fluidRegionID],
+            mesh_[control.fluidA()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[fluidRegionID]
+        mesh_[control.fluidA()]
     );
 
 
     // Velocity
     Info << "Create field U for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
     volVectorField U
     (
@@ -44,11 +44,11 @@
         (
             "U",
             runTime.timeName(),
-            mesh_[fluidRegionID],
+            mesh_[control.fluidA()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[fluidRegionID]
+        mesh_[control.fluidA()]
     );
 
 
@@ -59,7 +59,7 @@
         if (methodUp == "coupled")
         {
             Info << "Create field Up for"
-                << " region " << mesh_[fluidRegionID].name()
+                << " region " << mesh_[control.fluidA()].name()
                 << nl << endl;
             UpPtr = new volVector4Field
             (
@@ -67,11 +67,11 @@
                 (
                     "Up",
                     runTime.timeName(),
-                    mesh_[fluidRegionID],
+                    mesh_[control.fluidA()],
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
-                mesh_[fluidRegionID],
+                mesh_[control.fluidA()],
                 dimensionedVector4("zero", dimless, vector4::zero)
             );
         }
@@ -80,7 +80,7 @@
 
     // Face volume flux based on U
     Info << "Create field phi for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
     surfaceScalarField phi
     (
@@ -88,17 +88,17 @@
         (
             "phi",
             runTime.timeName(),
-            mesh_[fluidRegionID],
+            mesh_[control.fluidA()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        fvc::interpolate(U) & mesh_[fluidRegionID].Sf()
+        fvc::interpolate(U) & mesh_[control.fluidA()].Sf()
     );
 
 
     // Phase indicator
     Info << "Create field fluidIndicator for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
     volScalarField fluidIndicator
     (
@@ -106,17 +106,17 @@
         (
             "fluidIndicator",
             runTime.timeName(),
-            mesh_[fluidRegionID],
+            mesh_[control.fluidA()],
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_[fluidRegionID]
+        mesh_[control.fluidA()]
     );
 
 
     // Transport model
     Info << "Create transport model for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << endl;
     twoPhaseMixture twoPhaseProperties(U, phi, "fluidIndicator");
     Info << endl;
@@ -124,7 +124,7 @@
 
     // Density
     Info << "Create field rho for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
     volScalarField rho
     (
@@ -132,7 +132,7 @@
         (
             "rho",
             runTime.timeName(),
-            mesh_[fluidRegionID],
+            mesh_[control.fluidA()],
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -142,7 +142,7 @@
 
     // Dynamic viscosity
     Info << "Create field mu for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
     volScalarField mu
     (
@@ -150,7 +150,7 @@
         (
             "mu",
             runTime.timeName(),
-            mesh_[fluidRegionID],
+            mesh_[control.fluidA()],
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -160,7 +160,7 @@
 
     // Turbulence model
     Info << "Create turbulence model for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << endl;
     autoPtr<incompressible::turbulenceModel> turbulence
     (
@@ -176,15 +176,15 @@
 
     // Tracked surface
     Info << "Create tracked surface for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << endl;
     trackedSurface interface
     (
-        mesh_[fluidRegionID],
+        mesh_[control.fluidA()],
         rho,
         U,
         p,
-        pB_[fluidRegionID],
+        pB_[control.fluidA()],
         phi,
         g,
         twoPhaseProperties,
@@ -195,7 +195,7 @@
 
     // Volume force
     Info << "Create field F for"
-        << " region " << mesh_[fluidRegionID].name()
+        << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
     volVectorField F
     (
@@ -203,11 +203,11 @@
         (
             "F",
             runTime.timeName(),
-            mesh_[fluidRegionID],
+            mesh_[control.fluidA()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        mesh_[fluidRegionID],
+        mesh_[control.fluidA()],
         dimensioned<vector>
         (
             "F",
@@ -228,7 +228,7 @@
     if (debug)
     {
         Info << "Create field Fgrad for"
-            << " region " << mesh_[fluidRegionID].name()
+            << " region " << mesh_[control.fluidA()].name()
             << nl << endl;
         debug_FgradPtr = new volVectorField
         (
@@ -236,18 +236,18 @@
             (
                 "Fgrad",
                 runTime.timeName(),
-                mesh_[fluidRegionID],
+                mesh_[control.fluidA()],
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE,
                 true
             ),
-            -fvc::grad(pB_[fluidRegionID])
+            -fvc::grad(pB_[control.fluidA()])
         );
         debug_FgradPtr->write();
 
 
         Info << "Create field divU for"
-            << " region " << mesh_[fluidRegionID].name()
+            << " region " << mesh_[control.fluidA()].name()
             << nl << endl;
         debug_divUPtr = new volScalarField
         (
@@ -255,7 +255,7 @@
             (
                 "divU",
                 runTime.timeName(),
-                mesh_[fluidRegionID],
+                mesh_[control.fluidA()],
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE,
                 true
@@ -266,7 +266,7 @@
 
 
         Info << "Create field divPhi for"
-            << " region " << mesh_[fluidRegionID].name()
+            << " region " << mesh_[control.fluidA()].name()
             << nl << endl;
         debug_divPhiPtr = new volScalarField
         (
@@ -274,7 +274,7 @@
             (
                 "divPhi",
                 runTime.timeName(),
-                mesh_[fluidRegionID],
+                mesh_[control.fluidA()],
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE,
                 true
@@ -285,7 +285,7 @@
 
 
         Info << "Create field Uphi for"
-            << " region " << mesh_[fluidRegionID].name()
+            << " region " << mesh_[control.fluidA()].name()
             << nl << endl;
         debug_UphiPtr = new volVectorField
         (
@@ -293,7 +293,7 @@
             (
                 "Uphi",
                 runTime.timeName(),
-                mesh_[fluidRegionID],
+                mesh_[control.fluidA()],
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),
@@ -303,7 +303,7 @@
 
 
         Info << "Create field UmeshPhi for"
-            << " region " << mesh_[fluidRegionID].name()
+            << " region " << mesh_[control.fluidA()].name()
             << nl << endl;
         debug_UmeshPhiPtr = new volVectorField
         (
@@ -311,7 +311,7 @@
             (
                 "UmeshPhi",
                 runTime.timeName(),
-                mesh_[fluidRegionID],
+                mesh_[control.fluidA()],
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),

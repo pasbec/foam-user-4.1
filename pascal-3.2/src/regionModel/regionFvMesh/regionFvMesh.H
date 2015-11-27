@@ -142,6 +142,24 @@ public:
                 return *meshes()[regionIndex(regionName)];
             }
 
+            //- Return reference to default solution dict
+            fvSolution& solutionDict() const
+            {
+                return meshes()[regionIndex(polyMesh::defaultRegion)]->solutionDict();
+            };
+
+            //- Return reference to solution dict
+            fvSolution& solutionDict(const label& regionI) const
+            {
+                return meshes()[regionI]->solutionDict();
+            };
+
+            //- Return reference to solution dict
+            fvSolution& solutionDict(const word& regionName) const
+            {
+                return meshes()[regionIndex(regionName)]->solutionDict();
+            };
+
     // Member operators
 
         //- Mesh access operator for default region (lookup)

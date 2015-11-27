@@ -6,7 +6,7 @@
             "fluidVolume",
             runTime.timeName(),
             "uniform",
-            mesh_[fluidRegionID],
+            mesh_[control.fluidA()],
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE,
             true

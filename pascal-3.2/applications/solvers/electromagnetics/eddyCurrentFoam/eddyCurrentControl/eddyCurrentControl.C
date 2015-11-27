@@ -79,10 +79,10 @@ void eddyCurrentControl::timeReset()
 {
     readDictDataIfModified();
 
-    run_ = false;
+    loop_ = false;
     iter_ = -1;
 
-    subRun_ = false;
+    subLoop_ = false;
     subIter_ = -1;
     subTol_ = 1.0;
     subAdict_ = Adict_;
@@ -114,64 +114,37 @@ void eddyCurrentControl::decreaseSubTolerance() const
     subIter_ = 0;
 }
 
-const bool& eddyCurrentControl::subRun() const
+const bool& eddyCurrentControl::subLoop() const
 {
-    subRun_ = !checkSubConvergence();
+    subLoop_ = !checkSubConvergence();
 
     subIter_++;
 
-    return subRun_;
+    return subLoop_;
 };
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-eddyCurrentControl::eddyCurrentControl(const regionControl& rfvc)
+eddyCurrentControl::eddyCurrentControl
+(
+    const regionFvMesh& rmesh,
+    const word& name
+)
 :
-    regIOobject
+    solverControl<regionFvMesh>
     (
-        IOobject
-        (
-            "eddyCurrentControl",
-            rfvc.rmesh().time().timeName(),
-            "uniform",
-            rfvc.rmesh().time().db(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        )
-    ),
-    control_(rfvc),
-    rmesh_(rfvc.rmesh()),
-    time_(rmesh_.time()),
-    propDict_
-    (
-        IOdictionary
-        (
-            IOobject
-            (
-                "eddyCurrentProperties",
-                time_.constant(),
-                time_.db(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            )
-        )
-    ),
-    baseRegionName_
-    (
-        word(propDict_.subDict("regions").lookup("base"))
+        rmesh,
+        name,
+        rmesh.regionIndex()
     ),
     conductorRegionName_
     (
         word(propDict_.subDict("regions").lookup("conductor"))
     ),
-    baseRegion_
-    (
-        rmesh_.regionIndex(baseRegionName_)
-    ),
     conductorRegion_
     (
-        rmesh_.regionIndex(conductorRegionName_)
+        mesh_.regionIndex(conductorRegionName_)
     ),
     frequency_
     (
@@ -183,8 +156,7 @@ eddyCurrentControl::eddyCurrentControl(const regionControl& rfvc)
         "omega",
         2.0 * mathematicalConstant::pi * frequency_
     ),
-    baseSolutionDict_(rmesh_[baseRegion_].solutionDict()),
-    conductorSolutionDict_(rmesh_[conductorRegion_].solutionDict()),
+    conductorSolutionDict_(mesh_[conductorRegion_].solutionDict()),
     AVdict_(baseSolutionDict_.subDict("solvers").subDict("AV")),
     Adict_(baseSolutionDict_.subDict("solvers").subDict("A")),
     Vdict_(conductorSolutionDict_.subDict("solvers").subDict("V")),
@@ -194,9 +166,9 @@ eddyCurrentControl::eddyCurrentControl(const regionControl& rfvc)
     maxIter_(AVdict_.lookupOrDefault<int>("maxIter", 100)),
     relax_(AVdict_.lookupOrDefault<scalar>("relax", 1.0)),
     stop_(false),
-    run_(false),
+    loop_(false),
     iter_(-1),
-    subRun_(false),
+    subLoop_(false),
     subIter_(-1),
     subTol_(1.0),
     subAdict_(Adict_),
@@ -252,7 +224,7 @@ void eddyCurrentControl::relax(const regionVolVectorField& rvf) const
     }
 }
 
-const bool& eddyCurrentControl::run()
+const bool& eddyCurrentControl::loop()
 {
     bool converged = checkConvergence();
     bool subConverged = checkSubConvergence();
@@ -265,14 +237,14 @@ const bool& eddyCurrentControl::run()
         readDictDataIfModified();
     }
 
-    // Run if not converged and below max iterations
-    run_ = !converged && iterBelowMax;
+    // Loop if not converged and below max iterations
+    loop_ = !converged && iterBelowMax;
 
-    if (run_)
+    if (loop_)
     {
         iter_++;
 
-        if (!subRun())
+        if (!subLoop())
         {
             decreaseSubTolerance();
         }
@@ -282,7 +254,7 @@ const bool& eddyCurrentControl::run()
         timeReset();
     }
 
-    return run_;
+    return loop_;
 }
 
 

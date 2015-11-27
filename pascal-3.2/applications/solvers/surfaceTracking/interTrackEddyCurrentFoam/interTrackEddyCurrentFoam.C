@@ -30,11 +30,8 @@ Description
 
 #include "fvCFD.H"
 #include "fvBlockMatrix.H"
-#include "blockMatrixTools.H"
-#include "physicalConstants.H"
-#include "regionModelling.H"
-
-#include "fixedGradientFvPatchFields.H"
+#include "blockMatrixTools.H" // TODO
+#include "interTrackEddyCurrentControl.H"
 
 #include "transportModel.H"
 #include "twoPhaseMixture.H"
@@ -96,8 +93,8 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 #   include "createTime.H"
+#   include "createRegionDynamicFvMesh.H"
 
-#   include "createRegionMesh.H"
 #   include "createRegionFields.H"
 #   include "initRegionCourantNo.H"
 
@@ -130,14 +127,14 @@ int main(int argc, char *argv[])
 
 #       include "readBaseControls.H"
         {
-            setRegionScope(defaultRegionID);
+            setRegionScope(control.base());
 
 #           include "updateRegionCourantNo.H"
         }
 
 #       include "readFluidControls.H"
         {
-            setRegionScope(fluidRegionID);
+            setRegionScope(control.fluidA());
 
 #           include "updateFluidGravitationalAcceleration.H"
 #           include "updateFluidCourantNumber.H"
@@ -188,11 +185,11 @@ int main(int argc, char *argv[])
         {
             // Create new point field for base region
             // with current points of fluid region
-            pointField newPoints = mesh_.rmap(fluidRegionID);
+            pointField newPoints = mesh_.rmap(control.fluidA());
 
             // Move and update mesh of base region
-            mesh_[defaultRegionID].movePoints(newPoints);
-            mesh_[defaultRegionID].update();
+            mesh_[control.base()].movePoints(newPoints);
+            mesh_[control.base()].update();
         }
 
         // ==================================================================//
@@ -201,7 +198,7 @@ int main(int argc, char *argv[])
 
         if (mfUpdate)
         {
-            setRegionScope(defaultRegionID);
+            setRegionScope(control.base());
 #           include "solveBase.H"
         }
 
@@ -211,8 +208,8 @@ int main(int argc, char *argv[])
 
         if (mfUpdate)
         {
-            FL_.map(fluidRegionID);
-            pB_.map(fluidRegionID);
+            FL_.map(control.fluidA());
+            pB_.map(control.fluidA());
         }
 
         // ==================================================================//
@@ -222,7 +219,7 @@ int main(int argc, char *argv[])
 
         if (mfUpdate)
         {
-            setRegionScope(fluidRegionID);
+            setRegionScope(control.fluidA());
 
             fvc::extrapolate(FL);
             fvc::extrapolate(pB);
@@ -247,7 +244,7 @@ int main(int argc, char *argv[])
         // ==================================================================//
 
         {
-            setRegionScope(fluidRegionID);
+            setRegionScope(control.fluidA());
 #           include "solveFluid.H"
         }
 
@@ -261,20 +258,20 @@ int main(int argc, char *argv[])
             // in fluid region
             mesh_.patchMapMeshVelocityDirectMapped
             (
-                fluidRegionID,
-                dynamicRegionID
+                control.fluidA(),
+                control.dynamic()
             );
 
             // Grab current points of dynamic region as new point field
-            pointField newPoints = mesh_[dynamicRegionID].points();
+            pointField newPoints = mesh_[control.dynamic()].points();
 
             // Correct points for 2D-motion of dynamic region
-            twoDPointCorrector dynamicTwoDPointCorr(mesh_[dynamicRegionID]);
+            twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
             dynamicTwoDPointCorr.correctPoints(newPoints);
 
             // Use motionSolver to move mesh of dynamic region
-            mesh_[dynamicRegionID].movePoints(newPoints);
-            mesh_[dynamicRegionID].update();
+            mesh_[control.dynamic()].movePoints(newPoints);
+            mesh_[control.dynamic()].update();
         }
 
         // ==================================================================//
@@ -287,16 +284,16 @@ int main(int argc, char *argv[])
 // TODO [High] : If the fluid volume is being corrected in the current time step
 //               we may not only use interface points, but all fluid points instead!
 //               Do we really get loose much performance with this?
-//             pointField newPoints = mesh_.rmap(fluidRegionID,"trackedSurface");
-            pointField newPoints = mesh_.rmap(fluidRegionID);
+//             pointField newPoints = mesh_.rmap(control.fluidA(),"trackedSurface");
+            pointField newPoints = mesh_.rmap(control.fluidA());
 
             // Replace point positions of dynamic region in
             // new point field for base region
-            mesh_.rmap(newPoints,dynamicRegionID);
+            mesh_.rmap(newPoints,control.dynamic());
 
             // Update base mesh
-            mesh_[defaultRegionID].movePoints(newPoints);
-            mesh_[defaultRegionID].update();
+            mesh_[control.base()].movePoints(newPoints);
+            mesh_[control.base()].update();
 
             Info << endl;
         }

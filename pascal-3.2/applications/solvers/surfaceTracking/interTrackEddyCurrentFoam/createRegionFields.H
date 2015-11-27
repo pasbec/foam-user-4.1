@@ -14,34 +14,20 @@
 
 # define setRegionScope(regionI)                                              \
                                                                               \
-    setRegionReference(regionI, fvMesh, mesh);                                \
+    setRegionReference(regionI, dynamicFvMesh, mesh);                         \
     setRegionReference(regionI, volScalarField, sigma);                       \
     setRegionReference(regionI, volVectorField, ARe);                         \
     setRegionReference(regionI, volVectorField, AIm);                         \
     setRegionReference(regionI, volVectorField, VReGrad);                     \
-    setRegionReference(regionI, volVectorField, VImGrad);
-
-# define updateSigmaA(regionI)                                                \
-                                                                              \
-    sigma_.mapExtrapolate(regionI);                                           \
-    ARe_.mapInterpolate(regionI);                                             \
-    AIm_.mapInterpolate(regionI);
-
-# define updateRmapGradient(regionI,vsf)                                      \
-                                                                              \
-    vsf##Grad_[regionI] = fvc::grad(vsf);                                     \
-    vsf##Grad_.rmap(regionI);
-
-# define updateGradientV(regionI)                                             \
-                                                                              \
-    updateRmapGradient(regionI,VRe);                                          \
-    updateRmapGradient(regionI,VIm);
+    setRegionReference(regionI, volVectorField, VImGrad);                     \
+    setRegionReference(regionI, volVectorField, FL);                          \
+    setRegionReference(regionI, volScalarField, pB);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Control class
     Info << "Create control" << nl << endl;
-    eddyCurrentControl control(mesh_);
+    interTrackEddyCurrentControl control(mesh_);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -138,3 +124,51 @@
         calculatedFvPatchField<vector>::typeName
     );
     Info << nl;
+
+
+    // Lorentz force
+    infoCreateRegionField(FL);
+    regionVolVectorField FL_
+    (
+        IOobject
+        (
+            "FL",
+            runTime.timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensioned<vector>
+        (
+            word(),
+            dimMass/pow(dimLength,2)/pow(dimTime,2),
+            pTraits<vector>::zero
+        ),
+        calculatedFvPatchField<vector>::typeName
+    );
+    Info << endl;
+
+
+    // Lorentz force
+    infoCreateRegionField(pB);
+    regionVolScalarField pB_
+    (
+        IOobject
+        (
+            "pB",
+            runTime.timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensioned<scalar>
+        (
+            word(),
+            dimMass/dimLength/pow(dimTime,2),
+            pTraits<scalar>::zero
+        ),
+        calculatedFvPatchField<scalar>::typeName
+    );
+    Info << endl;

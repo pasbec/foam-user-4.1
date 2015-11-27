@@ -5,14 +5,14 @@
         fvVectorMatrix AReEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(ARe)
-//        + sigma * eddy.omega() * AIm
+//        + sigma * control.omega() * AIm
 //        - sigma * VReGrad
           + jsRe
         );
         fvVectorMatrix AImEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(AIm)
-//        - sigma * eddy.omega() * ARe
+//        - sigma * control.omega() * ARe
 //        - sigma * VImGrad
           + jsIm
         );
@@ -124,11 +124,11 @@
 
             // Add coupling terms for real/imagninary ARe-AIm
             // dependence of magnetic vector potential
-            AcmptEqn.insertEquationCoupling(0, 1,  eddy.omega() * sigma);
-            AcmptEqn.insertEquationCoupling(1, 0, -eddy.omega() * sigma);
+            AcmptEqn.insertEquationCoupling(0, 1,  control.omega() * sigma);
+            AcmptEqn.insertEquationCoupling(1, 0, -control.omega() * sigma);
 
             // Solve A
-            BlockSolverPerformance<vector2> AcmptEqnPerf = AcmptEqn.solve(eddy.Adict());
+            BlockSolverPerformance<vector2> AcmptEqnPerf = AcmptEqn.solve(control.Adict());
 
             // Store residuals
             scalar resAcmptRe = AcmptEqnPerf.initialResidual().component(0);
@@ -149,7 +149,7 @@
         }
 
         // Store max residual
-        eddy.setResidualOfA(resAcmpt);
+        control.setResidualOfA(resAcmpt);
 
         // Correct boundary conditions
         ARe.correctBoundaryConditions();

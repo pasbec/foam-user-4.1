@@ -2,5 +2,6 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-rm -rf lnInclude 2>/dev/null
-wclean || exit 1
+wmakeLnInclude . || exit 1
+# TODO: rm -f ...
+wmake || exit 1

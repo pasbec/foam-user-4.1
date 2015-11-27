@@ -32,17 +32,16 @@ Description
 #include "fvBlockMatrix.H"
 #include "eddyCurrentControl.H"
 
+// TODO: Derived gradient boundary condition for VRe/VIm in conductor region
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
 #   include "setRootCase.H"
 #   include "createTime.H"
-
 #   include "createRegionMesh.H"
-#   include "createRegionControl.H"
 
-#   include "createControls.H"
 #   include "createRegionFields.H"
 #   include "createBaseFields.H"
 #   include "createConductorFields.H"
@@ -61,52 +60,52 @@ int main(int argc, char *argv[])
         Info << "Time = " << runTime.value() << nl << endl;
 
         // AV iterations
-        while (eddy.run())
+        while (control.loop())
         {
             // Init gradient of V in first iteration
-            if (eddy.firstIter())
+            if (control.firstIter())
             {
-                updateGradientV(eddy.conductor());
+                updateGradientV(control.conductor());
             }
 
             // Solve for A in base region
             {
-                setRegionScope(eddy.base());
+                setRegionScope(control.base());
 
                 // Relax gradient of V
-                eddy.relax(VReGrad);
-                eddy.relax(VImGrad);
+                control.relax(VReGrad);
+                control.relax(VImGrad);
 
 #               include "AEqn.H"
             }
 
             // Update A and sigma
-            updateSigmaA(eddy.conductor());
+            updateSigmaA(control.conductor());
 
             // Solve for V in conductor region
             {
-                setRegionScope(eddy.conductor());
+                setRegionScope(control.conductor());
 
 #               include "VEqn.H"
             }
 
             // Update gradient of V
-            updateGradientV(eddy.conductor());
+            updateGradientV(control.conductor());
 
-            eddy.subWrite();
+            control.subWrite();
         }
 
         // Derived fields in base region
         {
-            setRegionScope(eddy.base());
+            setRegionScope(control.base());
 
             // Magnetic field density
             BRe == fvc::curl(ARe);
             BIm == fvc::curl(AIm);
 
             // Eddy current density
-            jRe ==   eddy.omega() * sigma * AIm - sigma * VReGrad;
-            jIm == - eddy.omega() * sigma * ARe - sigma * VImGrad;
+            jRe ==   control.omega() * sigma * AIm - sigma * VReGrad;
+            jIm == - control.omega() * sigma * ARe - sigma * VImGrad;
 
             // Time-averaged Lorentz-force
             FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );

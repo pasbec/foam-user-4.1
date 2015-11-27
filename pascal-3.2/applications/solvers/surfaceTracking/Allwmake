@@ -8,4 +8,4 @@ wmake interTrackFoam || exit 1
 wmake all trackedSurface || exit 1
 wmake interTrackMHDFoam || exit 1
 wmake interTrackMHDcoupledFoam || exit 1
-wmake interTrackMHDmagFoam || exit 1
+wmake interTrackEddyCurrentFoam || exit 1

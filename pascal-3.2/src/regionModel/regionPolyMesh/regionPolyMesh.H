@@ -52,6 +52,8 @@ SourceFiles
 
 // TODO [High]: Remove copies of mappings
 
+// TODO [High]: Allow default region to be absent. WE NEED A LOT OF CHECKS!!!
+
 // TODO [High]: Check if all region names are unique
 
 // TODO [High]: Implement forward (base->regionI) point mapping
@@ -294,6 +296,12 @@ public:
                 return regionNames_;
             };
 
+            //- Return name of default region
+            word regionName() const
+            {
+                return regionNames_[regionIndex(polyMesh::defaultRegion)];
+            }
+
             //- Return name of region with index regionI
             word regionName(const label& regionI) const
             {
@@ -312,6 +320,9 @@ public:
             {
                 return parallelSplitRegions_;
             }
+
+            //- Return region index for region with regionName
+            label regionIndex() const;
 
             //- Return region index for region with regionName
             label regionIndex(const word& regionName) const;

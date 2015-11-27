@@ -22,24 +22,24 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    regionControl
+    interTrackControl
 
 Description
     ...
 
 SourceFiles
-    regionControl.C
-
-// TODO: Create seperate derived Types for regionPolyControl, regionFvControl, regionDynamicFvControl and regionPointControl
+    interTrackControl.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionControl_H
-#define regionControl_H
+#ifndef interTrackControl_H
+#define interTrackControl_H
 
-#include "foamTime.H"
-#include "IOdictionary.H"
-#include "regionFvMesh.H"
+#include "PstreamReduceOps.H"
+#include "mathematicalConstants.H"
+#include "physicalConstants.H"
+#include "solverControl.H"
+#include "regionModelling.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,66 +47,103 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class regionControl Declaration
+                       Class interTrackControl Declaration
 \*---------------------------------------------------------------------------*/
 
-class regionControl
+class interTrackControl
 :
-    IOdictionary
+    public solverControl<regionFvMesh>
 {
-protected:
-
-    // Protected Data
-
-    // Protected Member Functions
-
 private:
 
     // Private Data
 
-        //- Reference to region mesh
-        const regionFvMesh& rMesh_;
+        // Controls
+
+        // Properties
+
+            //- Name of fluidA region
+            word fluidAregionName_;
+
+            //- Label of fluidA region
+            label fluidAregion_;
+
+        // Solution properties
+
+        // Solution state variables
+
+        // Solution residual variables
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        regionControl(const regionControl&);
+        interTrackControl(const interTrackControl&);
 
         //- Disallow default bitwise assignment
-        void operator=(const regionControl&);
+        void operator=(const interTrackControl&);
+
+        //- Inline helper
+
+        //- Helper
 
 public:
 
     //- Runtime type information
-    TypeName("regionControl");
+    TypeName("interTrackControl");
 
     // Constructors
 
-        //- Construct from region mesh
-        regionControl(const regionFvMesh& rmesh);
+        //- Construct from mesh and name
+        interTrackControl
+        (
+            const regionFvMesh& rmesh,
+            const word& name = "interTrack"
+        );
 
     // Destructor
 
-        virtual ~regionControl() {};
+        virtual ~interTrackControl() {};
 
     // Member Functions
 
-        // Access
+        // Properties
 
-            //- Reference to mesh
-            const regionFvMesh& rmesh() const
+            //- Reference to fluidA region name
+            const word& fluidAname() const
             {
-                return rMesh_;
+                return fluidAregionName_;
             };
 
-            //- WriteData member function required by regIOobject
-            bool writeData(Ostream&) const;
+            //- Reference to fluidA region ID
+            const label& fluidA() const
+            {
+                return fluidAregion_;
+            };
 
+        // Solution properties
+
+        // Solution state variables
+
+        // Solution residual variables
+
+        // Time and database
+
+            //- WriteData member function required by regIOobject
+            bool writeData(Ostream&) const
+            {
+                return false;
+            };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "interTrackControl.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

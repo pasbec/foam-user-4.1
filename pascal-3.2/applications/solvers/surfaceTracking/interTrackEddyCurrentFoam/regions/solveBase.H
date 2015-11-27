@@ -1,8 +1,8 @@
 
 #   include "ABlockEqn.H"
 
-    jRe ==  alpha * AIm;
-    jIm == -alpha * ARe;
+    jRe ==  control.omega() * sigma * AIm;
+    jIm == -control.omega() * sigma * ARe;
 
     BRe == fvc::curl(ARe);
     BIm == fvc::curl(AIm);
