@@ -3,5 +3,4 @@ cd ${0%/*} || exit 1    # run from this directory
 set -x
 
 wmakeLnInclude . || exit 1
-# TODO: rm -f ...
 wmake || exit 1

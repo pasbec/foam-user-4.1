@@ -106,6 +106,8 @@ public:
 
     // Member Functions
 
+        // Controls
+
         // Properties
 
             //- Reference to fluidA region name

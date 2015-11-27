@@ -76,9 +76,6 @@ protected:
     // Protected data
 
         //- Meshes data
-        mutable List<fvMesh*> meshesData_;
-
-        //- Meshes access pointers
         mutable List<fvMesh*> meshes_;
 
     // Private Member Functions
@@ -118,66 +115,60 @@ public:
 
         // Access
 
-            //- Return reference to mesh access ist
-            const List<fvMesh*>& meshes() const
-            {
-                return meshes_;
-            };
-
             //- Return reference to default mesh
-            fvMesh& mesh() const
+            virtual fvMesh& mesh() const
             {
-                return *meshes()[regionIndex(polyMesh::defaultRegion)];
+                return *meshes_[regionIndex(polyMesh::defaultRegion)];
             }
 
             //- Return reference to mesh
-            fvMesh& mesh(const label& regionI) const
+            virtual fvMesh& mesh(const label& regionI) const
             {
-                return *meshes()[regionI];
+                return *meshes_[regionI];
             }
 
             //- Return reference to mesh
-            fvMesh& mesh(const word& regionName) const
+            virtual fvMesh& mesh(const word& regionName) const
             {
-                return *meshes()[regionIndex(regionName)];
+                return *meshes_[regionIndex(regionName)];
             }
 
             //- Return reference to default solution dict
             fvSolution& solutionDict() const
             {
-                return meshes()[regionIndex(polyMesh::defaultRegion)]->solutionDict();
+                return meshes_[regionIndex(polyMesh::defaultRegion)]->solutionDict();
             };
 
             //- Return reference to solution dict
             fvSolution& solutionDict(const label& regionI) const
             {
-                return meshes()[regionI]->solutionDict();
+                return meshes_[regionI]->solutionDict();
             };
 
             //- Return reference to solution dict
             fvSolution& solutionDict(const word& regionName) const
             {
-                return meshes()[regionIndex(regionName)]->solutionDict();
+                return meshes_[regionIndex(regionName)]->solutionDict();
             };
 
     // Member operators
 
         //- Mesh access operator for default region (lookup)
-        fvMesh& operator()() const
+        virtual fvMesh& operator()() const
         {
-            return *meshes()[regionIndex(polyMesh::defaultRegion)];
+            return *meshes_[regionIndex(polyMesh::defaultRegion)];
         }
 
         //- Mesh access operator by index (direct)
-        fvMesh& operator[](const label& regionI) const
+        virtual fvMesh& operator[](const label& regionI) const
         {
-            return *meshes()[regionI];
+            return *meshes_[regionI];
         }
 
         //- Mesh access operator by regionName (lookup)
-        fvMesh& operator()(const word& regionName) const
+        virtual fvMesh& operator()(const word& regionName) const
         {
-            return *meshes()[regionIndex(regionName)];
+            return *meshes_[regionIndex(regionName)];
         }
 
         bool operator!=(const regionFvMesh&) const;

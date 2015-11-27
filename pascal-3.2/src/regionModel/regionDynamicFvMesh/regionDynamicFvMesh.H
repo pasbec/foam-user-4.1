@@ -130,26 +130,20 @@ public:
 
         // Access
 
-            //- Return reference to mesh access ist
-            const List<dynamicFvMesh*>& meshes() const
-            {
-                return meshes_;
-            };
-
             //- Return reference to default mesh
-            dynamicFvMesh& mesh() const
+            virtual dynamicFvMesh& mesh() const
             {
                 return *meshes_[regionIndex(polyMesh::defaultRegion)];
             }
 
             //- Return reference to mesh
-            dynamicFvMesh& mesh(const label& regionI) const
+            virtual dynamicFvMesh& mesh(const label& regionI) const
             {
                 return *meshes_[regionI];
             }
 
             //- Return reference to mesh
-            dynamicFvMesh& mesh(const word& regionName) const
+            virtual dynamicFvMesh& mesh(const word& regionName) const
             {
                 return *meshes_[regionIndex(regionName)];
             }
@@ -211,19 +205,19 @@ public:
     // Member operators
 
         //- Mesh access operator for default region (lookup)
-        dynamicFvMesh& operator()() const
+        virtual dynamicFvMesh& operator()() const
         {
             return *meshes_[regionIndex(polyMesh::defaultRegion)];
         }
 
         //- Mesh access operator by index (direct)
-        dynamicFvMesh& operator[](const label& regionI) const
+        virtual dynamicFvMesh& operator[](const label& regionI) const
         {
             return *meshes_[regionI];
         }
 
         //- Mesh access operator by regionName (lookup)
-        dynamicFvMesh& operator()(const word& regionName) const
+        virtual dynamicFvMesh& operator()(const word& regionName) const
         {
             return *meshes_[regionIndex(regionName)];
         }

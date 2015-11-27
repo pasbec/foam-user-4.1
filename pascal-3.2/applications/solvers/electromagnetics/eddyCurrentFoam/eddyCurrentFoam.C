@@ -42,9 +42,9 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createRegionMesh.H"
 
-#   include "createRegionFields.H"
-#   include "createBaseFields.H"
-#   include "createConductorFields.H"
+#   include "eddyCurrentRegionFields.H"
+#   include "eddyCurrentBaseFields.H"
+#   include "eddyCurrentConductorFields.H"
 
 #ifndef namespaceFoam
 #define namespaceFoam
@@ -59,61 +59,9 @@ int main(int argc, char *argv[])
 
         Info << "Time = " << runTime.value() << nl << endl;
 
-        // AV iterations
-        while (control.loop())
-        {
-            // Init gradient of V in first iteration
-            if (control.firstIter())
-            {
-                updateGradientV(control.conductor());
-            }
+#       include "eddyCurrentAVloop.H"
 
-            // Solve for A in base region
-            {
-                setRegionScope(control.base());
-
-                // Relax gradient of V
-                control.relax(VReGrad);
-                control.relax(VImGrad);
-
-#               include "AEqn.H"
-            }
-
-            // Update A and sigma
-            updateSigmaA(control.conductor());
-
-            // Solve for V in conductor region
-            {
-                setRegionScope(control.conductor());
-
-#               include "VEqn.H"
-            }
-
-            // Update gradient of V
-            updateGradientV(control.conductor());
-
-            control.subWrite();
-        }
-
-        // Derived fields in base region
-        {
-            setRegionScope(control.base());
-
-            // Magnetic field density
-            BRe == fvc::curl(ARe);
-            BIm == fvc::curl(AIm);
-
-            // Eddy current density
-            jRe ==   control.omega() * sigma * AIm - sigma * VReGrad;
-            jIm == - control.omega() * sigma * ARe - sigma * VImGrad;
-
-            // Time-averaged Lorentz-force
-            FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
-
-            // Time-averaged magnetic pressure
-            pB == 0.5 * physicalConstant::rMu0
-                * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
-        }
+#       include "eddyCurrentDerivedFields.H"
 
         runTime.write();
 

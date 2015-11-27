@@ -81,14 +81,6 @@ void regionDynamicFvMesh::initMeshes(const wordList& regionNames) const
         // Link access pointer
         meshes_[regionI] = meshesData_[regionI]->operator->();
 
-        // Link access pointer of regionFvMesh class
-        regionFvMesh::meshes_[regionI] =
-            meshes_[regionI];
-
-        // Link access pointer of regionPolyMesh class
-        regionPolyMesh::meshes_[regionI] =
-            meshes_[regionI];
-
         // Remember if type of motion solver is fe
         isFeMotionSolver_[regionI] = meshes_[regionI]
             ->objectRegistry::foundObject<tetPointVectorField>

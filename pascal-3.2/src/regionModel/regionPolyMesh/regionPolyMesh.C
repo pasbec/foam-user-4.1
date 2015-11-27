@@ -71,10 +71,7 @@ void regionPolyMesh::initMeshes(const wordList& regionNames) const
         }
 
         // Create mesh
-        meshesData_[regionI] = newMesh(regionI);
-
-        // Link access pointer
-        meshes_[regionI] = meshesData_[regionI];
+        meshes_[regionI] = newMesh(regionI);
     }
 
     setParallelSplitRegions();
@@ -104,7 +101,6 @@ wordList regionPolyMesh::readRegionNames() const
 
 void regionPolyMesh::resizeLists() const
 {
-    meshesData_.resize(size_, NULL);
     meshes_.resize(size_, NULL);
 
     cellRegionMap_.resize(size_, NULL);
@@ -212,7 +208,6 @@ regionPolyMesh::regionPolyMesh
     size_ (0),
     regionNames_(List<word>(0)),
     parallelSplitRegions_(0),
-    meshesData_(List<polyMesh*>(0)),
     meshes_(List<polyMesh*>(0)),
     initialized_(false),
     cellRegionMap_(List<labelIOList*>(0)),
@@ -253,7 +248,6 @@ regionPolyMesh::regionPolyMesh
     size_ (1 + regionNames.size()),
     regionNames_(regionNames),
     parallelSplitRegions_(0),
-    meshesData_(List<polyMesh*>(0)),
     meshes_(List<polyMesh*>(0)),
     initialized_(false),
     cellRegionMap_(List<labelIOList*>(0)),

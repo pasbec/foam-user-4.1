@@ -69,14 +69,7 @@ void regionFvMesh::initMeshes(const wordList& regionNames) const
         }
 
         // Create mesh
-        meshesData_[regionI] = newMesh(regionI);
-
-        // Link access pointer
-        meshes_[regionI] = meshesData_[regionI];
-
-        // Link access pointer of regionPolyMesh class
-        regionPolyMesh::meshes_[regionI] =
-            meshes_[regionI];
+        meshes_[regionI] = newMesh(regionI);
     }
 
     setParallelSplitRegions();
@@ -91,7 +84,6 @@ void regionFvMesh::resizeLists() const
 {
     regionPolyMesh::resizeLists();
 
-    meshesData_.resize(size_, NULL);
     meshes_.resize(size_, NULL);
 }
 
@@ -109,7 +101,6 @@ regionFvMesh::regionFvMesh
         runTime,
         false
     ),
-    meshesData_(List<fvMesh*>(0)),
     meshes_(List<fvMesh*>(0))
 {
     if(init) initMeshes(readRegionNames());
@@ -127,7 +118,6 @@ regionFvMesh::regionFvMesh
         runTime,
         false
     ),
-    meshesData_(List<fvMesh*>(0)),
     meshes_(List<fvMesh*>(0))
 {
     if(init) initMeshes(regionNames);

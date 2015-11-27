@@ -30,8 +30,6 @@ Description
 SourceFiles
     solverControl.C
 
-// TODO: Create seperate derived Types for regionPolyControl, regionFvControl, regionDynamicFvControl and regionPointControl
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef solverControl_H
@@ -39,6 +37,15 @@ SourceFiles
 
 #include "foamTime.H"
 #include "IOdictionary.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define setControlScope(name)                                                \
+                                                                              \
+    name##Control& name = control.name();                                     \
+    name##Control& control = name;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

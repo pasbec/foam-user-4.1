@@ -63,7 +63,7 @@ private:
         // Controls
 
             //- Interface-tracking specific controls
-            interTrackControl track_;
+            mutable interTrackControl track_;
 
         // Properties
 
@@ -110,6 +110,14 @@ public:
         virtual ~interTrackMagneticControl() {};
 
     // Member Functions
+
+        // Controls
+
+            //- Reference to interface-tracking control
+            interTrackControl& interTrack() const
+            {
+                return track_;
+            };
 
         // Properties
 

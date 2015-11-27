@@ -111,9 +111,6 @@ protected:
         mutable bool parallelSplitRegions_;
 
         //- Meshes data
-        mutable List<polyMesh*> meshesData_;
-
-        //- Meshes access pointers
         mutable List<polyMesh*> meshes_;
 
         // - Is mesh initialized?
@@ -327,26 +324,20 @@ public:
             //- Return region index for region with regionName
             label regionIndex(const word& regionName) const;
 
-            //- Return reference to mesh access ist
-            const List<polyMesh*>& meshes() const
-            {
-                return meshes_;
-            };
-
             //- Return reference to mesh of default region
-            const polyMesh& mesh() const
+            virtual const polyMesh& mesh() const
             {
                 return *meshes_[regionIndex(polyMesh::defaultRegion)];
             }
 
             //- Return reference to mesh
-            const polyMesh& mesh(const label& regionI) const
+            virtual const polyMesh& mesh(const label& regionI) const
             {
                 return *meshes_[regionI];
             }
 
             //- Return reference to mesh
-            const polyMesh& mesh(const word& regionName) const
+            virtual const polyMesh& mesh(const word& regionName) const
             {
                 return *meshes_[regionIndex(regionName)];
             }
@@ -447,19 +438,19 @@ public:
     // Member operators
 
         //- Mesh access operator for default region (lookup)
-        const polyMesh& operator()() const
+        virtual const polyMesh& operator()() const
         {
             return *meshes_[regionIndex(polyMesh::defaultRegion)];
         }
 
         //- Mesh access operator by index (direct)
-        const polyMesh& operator[](const label& regionI) const
+        virtual const polyMesh& operator[](const label& regionI) const
         {
             return *meshes_[regionI];
         }
 
         //- Mesh access operator by regionName (lookup)
-        const polyMesh& operator()(const word& regionName) const
+        virtual const polyMesh& operator()(const word& regionName) const
         {
             return *meshes_[regionIndex(regionName)];
         }

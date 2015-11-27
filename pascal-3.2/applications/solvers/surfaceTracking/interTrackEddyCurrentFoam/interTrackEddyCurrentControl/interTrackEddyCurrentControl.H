@@ -66,10 +66,10 @@ private:
             //- TODO: Time controls
 
             //- Interface-tracking specific controls
-            interTrackMagneticControl tramag_;
+            mutable interTrackMagneticControl tramag_;
 
             //- Eddy current specific controls
-            eddyCurrentControl eddy_;
+            mutable eddyCurrentControl eddy_;
 
         // Properties
 
@@ -111,6 +111,20 @@ public:
 
     // Member Functions
 
+        // Controls
+
+            //- Reference to interface-tracking control
+            interTrackMagneticControl& interTrackMagnetic() const
+            {
+                return tramag_;
+            };
+
+            //- Reference to eddy current control
+            eddyCurrentControl& eddyCurrent() const
+            {
+                return eddy_;
+            };
+
         // Properties
 
             //- Reference to fluidA region name
@@ -125,13 +139,13 @@ public:
                 return tramag_.fluidA();
             };
 
-            //- Reference to fluidA region name
+            //- Reference to dynamic region name
             const word& dynamicName() const
             {
                 return tramag_.dynamicName();
             };
 
-            //- Reference to fluidA region ID
+            //- Reference to dynamic region ID
             const label& dynamic() const
             {
                 return tramag_.dynamic();

@@ -3,7 +3,4 @@ cd ${0%/*} || exit 1    # run from this directory
 set -x
 
 wmakeLnInclude . || exit 1
-rm -f lnInclude/createBaseFields.H
-rm -f lnInclude/createConductorFields.H
-rm -f lnInclude/createRegionFields.H
 wmake || exit 1

@@ -95,7 +95,11 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createRegionDynamicFvMesh.H"
 
-#   include "createRegionFields.H"
+#   include "interTrackEddyCurrentRegionFields.H"
+#   include "eddyCurrentConductorFields.H"
+
+    // TODO: From here!!!
+
 #   include "initRegionCourantNo.H"
 
 #   include "createBaseFields.H"
@@ -198,8 +202,11 @@ int main(int argc, char *argv[])
 
         if (mfUpdate)
         {
-            setRegionScope(control.base());
-#           include "solveBase.H"
+            setControlScope(eddyCurrent);
+
+#           include "eddyCurrentAVloop.H"
+
+#           include "eddyCurrentDerivedFields.H"
         }
 
         // ==================================================================//

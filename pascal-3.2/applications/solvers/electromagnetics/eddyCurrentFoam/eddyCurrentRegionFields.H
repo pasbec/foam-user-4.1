@@ -1,33 +1,18 @@
 
-# define infoCreateRegionField(f)                                             \
-                                                                              \
-    Info << "Create region field " << #f << endl;
-
-# define infoCreateField(regionI, f)                                          \
-                                                                              \
-    Info << "Create field " << #f                                             \
-        << " (" << mesh_.regionName(regionI) << ")" << endl;
-
-# define setRegionReference(regionI, t, f)                                    \
-                                                                              \
-    t& f = f##_[regionI]; if (&f != &f) {}
-
 # define setRegionScope(regionI)                                              \
                                                                               \
-    setRegionReference(regionI, dynamicFvMesh, mesh);                         \
+    setRegionReference(regionI, fvMesh, mesh);                                \
     setRegionReference(regionI, volScalarField, sigma);                       \
     setRegionReference(regionI, volVectorField, ARe);                         \
     setRegionReference(regionI, volVectorField, AIm);                         \
     setRegionReference(regionI, volVectorField, VReGrad);                     \
-    setRegionReference(regionI, volVectorField, VImGrad);                     \
-    setRegionReference(regionI, volVectorField, FL);                          \
-    setRegionReference(regionI, volScalarField, pB);
+    setRegionReference(regionI, volVectorField, VImGrad);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Control class
     Info << "Create control" << nl << endl;
-    interTrackEddyCurrentControl control(mesh_);
+    eddyCurrentControl control(mesh_);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -124,51 +109,3 @@
         calculatedFvPatchField<vector>::typeName
     );
     Info << nl;
-
-
-    // Lorentz force
-    infoCreateRegionField(FL);
-    regionVolVectorField FL_
-    (
-        IOobject
-        (
-            "FL",
-            runTime.timeName(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensioned<vector>
-        (
-            word(),
-            dimMass/pow(dimLength,2)/pow(dimTime,2),
-            pTraits<vector>::zero
-        ),
-        calculatedFvPatchField<vector>::typeName
-    );
-    Info << endl;
-
-
-    // Lorentz force
-    infoCreateRegionField(pB);
-    regionVolScalarField pB_
-    (
-        IOobject
-        (
-            "pB",
-            runTime.timeName(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensioned<scalar>
-        (
-            word(),
-            dimMass/dimLength/pow(dimTime,2),
-            pTraits<scalar>::zero
-        ),
-        calculatedFvPatchField<scalar>::typeName
-    );
-    Info << endl;
