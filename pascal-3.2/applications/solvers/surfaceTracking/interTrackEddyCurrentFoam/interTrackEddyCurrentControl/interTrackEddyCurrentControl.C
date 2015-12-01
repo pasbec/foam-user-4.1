@@ -52,9 +52,10 @@ interTrackEddyCurrentControl::interTrackEddyCurrentControl
         name,
         rmesh.regionIndex()
     ),
-    tramag_(rmesh),
-    eddy_(rmesh)
+    tramag_(rmesh, name),
+    eddy_(rmesh, name)
 {
+    Info << "[DEBUG] Create " << typeName << endl;
 }
 
 

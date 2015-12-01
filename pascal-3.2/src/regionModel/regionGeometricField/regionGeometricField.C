@@ -476,6 +476,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::copyInternalBoun
 };
 
 // TODO: Only for calculated- and fixedValue- patchFields
+// FIXME: Small bug? Wrong mapping?
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
@@ -508,10 +509,10 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolateBound
         // for the corresponding patch field.
         if (patchI0 == -1)
         {
-            const Field<Type>& vf0I = vf0.internalField();
+            const Field<Type>& vf0In = vf0.internalField();
             const scalarField& w0 = vf0.mesh().weights().internalField();
-            const labelList& own0 = vf0.mesh().faceOwner();
-            const labelList& ngb0 = vf0.mesh().faceNeighbour();
+            const labelList& own0 = vf0.mesh().owner();
+            const labelList& ngb0 = vf0.mesh().neighbour();
 
             Field<Type>& patchField = vf.boundaryField()[patchI];
             label patchStart = patch.start();
@@ -526,8 +527,8 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolateBound
                 scalar w0I = w0[faceI0];
 
                 patchField[facei] =
-                    w0I * vf0I[own0[faceI0]]
-                 + (1.0 - w0I) * vf0I[ngb0[faceI0]];
+                    w0I * vf0In[own0[faceI0]]
+                 + (1.0 - w0I) * vf0In[ngb0[faceI0]];
             }
         }
         else

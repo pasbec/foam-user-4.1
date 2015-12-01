@@ -61,6 +61,7 @@ interTrackControl::interTrackControl
         mesh_.regionIndex(fluidAregionName_)
     )
 {
+    Info << "[DEBUG] Create " << typeName << endl;
 }
 
 

@@ -4,11 +4,11 @@
 
     Foam::Info
         << "Create dynamic region mesh for time = "
-        << runTime.timeName();
+        << runTime.timeName() << endl;
 
     Foam::regionDynamicFvMesh mesh_(runTime);
 
-    Foam::Info << " (";
+    Foam::Info << "Regions: ";
 
     forAll (mesh_.regionNames(), regionI)
     {
@@ -19,4 +19,4 @@
         }
     }
 
-    Foam::Info << ")" << Foam::nl << Foam::endl;
+    Foam::Info << Foam::nl << Foam::endl;

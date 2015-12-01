@@ -146,6 +146,14 @@ eddyCurrentControl::eddyCurrentControl
     (
         mesh_.regionIndex(conductorRegionName_)
     ),
+    interfacePatchName_
+    (
+        word(propDict_.subDict("patches").lookup("interface"))
+    ),
+    interfacePatch_
+    (
+        mesh_[conductorRegion_].boundaryMesh().findPatchID(interfacePatchName_)
+    ),
     frequency_
     (
         "frequency",
@@ -177,6 +185,7 @@ eddyCurrentControl::eddyCurrentControl
     Ares_(AVres_),
     Vres_(AVres_)
 {
+    Info << "[DEBUG] Create " << typeName << endl;
     // TODO: Check tol_ < 1 ???
     // TODO: Check maxIter_ > 0
     // TODO: Check maxIter_ > minIter_

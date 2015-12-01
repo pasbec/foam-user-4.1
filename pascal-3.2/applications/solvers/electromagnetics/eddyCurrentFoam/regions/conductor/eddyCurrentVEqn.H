@@ -7,9 +7,8 @@
             {
                 polyPatch patch = mesh.boundaryMesh()[patchI];
 
-                // Old internal faces
-                // TODO: What about an more appropriate patch name?
-                if (patch.name() == "oldInternalFaces")
+                // Interface patch
+                if (patch.name() == control.interfaceName())
                 {
                     // Boundary values for V
                     {

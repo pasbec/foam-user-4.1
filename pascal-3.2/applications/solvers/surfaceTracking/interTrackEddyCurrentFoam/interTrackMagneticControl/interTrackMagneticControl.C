@@ -52,7 +52,7 @@ interTrackMagneticControl::interTrackMagneticControl
         name,
         rmesh.regionIndex()
     ),
-    track_(rmesh),
+    track_(rmesh, name),
     dynamicRegionName_
     (
         word(propDict_.subDict("regions").lookup("dynamic"))
@@ -62,6 +62,7 @@ interTrackMagneticControl::interTrackMagneticControl
         mesh_.regionIndex(dynamicRegionName_)
     )
 {
+    Info << "[DEBUG] Create " << typeName << endl;
 }
 
 

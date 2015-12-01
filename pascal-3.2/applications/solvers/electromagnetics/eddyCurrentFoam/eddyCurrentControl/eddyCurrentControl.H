@@ -73,6 +73,12 @@ private:
             //- Label of conducting region
             label conductorRegion_;
 
+            //- Name of conductor interface
+            word interfacePatchName_;
+
+            //- Label of conductor interface
+            word interfacePatch_;
+
             //- Frequency
             dimensionedScalar frequency_;
 
@@ -259,6 +265,18 @@ public:
             const label& conductor() const
             {
                 return conductorRegion_;
+            };
+
+            //- Reference to conductor interface name
+            const word& interfaceName() const
+            {
+                return interfacePatchName_;
+            };
+
+            //- Reference to conductor interface ID
+            const word& interface() const
+            {
+                return interfacePatch_;
             };
 
             //- Reference to region control
