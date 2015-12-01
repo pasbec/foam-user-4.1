@@ -63,20 +63,20 @@ setErrorTrap ()
 runApplication ()
 {
     LOG_NAME=
-    while getopts "l:" OPTFLAG ; do
-        LOG_NAME=$OPTARG
-        shift $((OPTIND-1)) ; OPTIND=1
-    done
-
     LOG_REGION=
-    LOG_REGION_FOUND='false'
-    for APP_ARG in $@; do
-        if [[ $LOG_REGION_FOUND == 'true' ]]; then
-          LOG_REGION=$APP_ARG
-          break
-        fi
-        [[ $APP_ARG == "-region" ]] && LOG_REGION_FOUND='true'
+
+    local OPTIND
+    while getopts "r:l:" OPTFLAG; do
+        case "$OPTFLAG" in
+            r)
+                LOG_REGION="$OPTARG"
+                ;;
+            l)
+                LOG_NAME="$OPTARG"
+                ;;
+        esac
     done
+    shift $((OPTIND-1))
 
     APP_RUN=$1; shift
     APP_NAME=${APP_RUN##*/}
@@ -103,20 +103,20 @@ runParallel ()
     APP_PROCS=$1; shift
 
     LOG_NAME=
-    while getopts "l:" OPTFLAG ; do
-        LOG_NAME=$OPTARG
-        shift $((OPTIND-1)) ; OPTIND=1
-    done
-
     LOG_REGION=
-    LOG_REGION_FOUND='false'
-    for APP_ARG in $@; do
-        if [[ $LOG_REGION_FOUND == 'true' ]]; then
-          LOG_REGION=$APP_ARG
-          break
-        fi
-        [[ $APP_ARG == "-region" ]] && LOG_REGION_FOUND='true'
+
+    local OPTIND
+    while getopts "r:l:" OPTFLAG; do
+        case "$OPTFLAG" in
+            r)
+                LOG_REGION="$OPTARG"
+                ;;
+            l)
+                LOG_NAME="$OPTARG"
+                ;;
+        esac
     done
+    shift $((OPTIND-1))
 
     APP_RUN=$1; shift
     APP_NAME=${APP_RUN##*/}
