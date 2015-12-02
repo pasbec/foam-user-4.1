@@ -136,19 +136,19 @@ public:
             //- Return reference to default solution dict
             fvSolution& solutionDict() const
             {
-                return meshes_[regionIndex(polyMesh::defaultRegion)]->solutionDict();
+                return mesh(regionIndex(polyMesh::defaultRegion)).solutionDict();
             };
 
             //- Return reference to solution dict
             fvSolution& solutionDict(const label& regionI) const
             {
-                return meshes_[regionI]->solutionDict();
+                return mesh(regionI).solutionDict();
             };
 
             //- Return reference to solution dict
             fvSolution& solutionDict(const word& regionName) const
             {
-                return meshes_[regionIndex(regionName)]->solutionDict();
+                return mesh(regionIndex(regionName)).solutionDict();
             };
 
     // Member operators

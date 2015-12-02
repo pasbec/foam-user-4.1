@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     |
-    \\  /    A nd           | For copyright notice see file Copyright
-     \\/     M anipulation  |
+   \\    /   O peration     | Version:     3.2
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
     This file is part of foam-extend.
@@ -23,54 +23,46 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackMagneticControl.H"
+#include "lookupFixedGradientFvPatchField.H"
+#include "dictionary.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(interTrackMagneticControl, 0);
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-interTrackMagneticControl::interTrackMagneticControl
-(
-    const regionDynamicFvMesh& rmesh,
-    const word& name
-)
-:
-    solverControl<regionDynamicFvMesh>
-    (
-        rmesh,
-        name,
-        rmesh.regionIndex()
-    ),
-    track_(rmesh, name),
-    dynamicRegionName_
-    (
-        word(propDict_.subDict("regions").lookup("dynamic"))
-    ),
-    dynamicRegion_
-    (
-        mesh_.regionIndex(dynamicRegionName_)
-    )
-{
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<>
+void lookupFixedGradientFvPatchField<scalar>::updateCoeffs()
+{
+    if (this->updated())
+    {
+        return;
+    }
+
+    if (lookupType_ == "surface")
+    {
+        const vectorField& vf =
+            lookupPatchField<surfaceVectorField, vector>(lookupName_);
+
+        gradient_ = vf & this->patch().nf();
+    }
+    else if (lookupType_ == "volume")
+    {
+        const vectorField& vf =
+            lookupPatchField<volVectorField, vector>(lookupName_);
+
+        gradient_ = vf & this->patch().nf();
+    }
+
+    fvPatchField<scalar>::updateCoeffs();
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
 // ************************************************************************* //
-

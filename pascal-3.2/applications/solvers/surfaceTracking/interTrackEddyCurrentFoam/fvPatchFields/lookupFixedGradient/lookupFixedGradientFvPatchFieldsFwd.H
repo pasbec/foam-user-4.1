@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     |
-    \\  /    A nd           | For copyright notice see file Copyright
-     \\/     M anipulation  |
+   \\    /   O peration     | Version:     3.2
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
     This file is part of foam-extend.
@@ -23,54 +23,29 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackMagneticControl.H"
+#ifndef lookupFixedGradientFvPatchFieldsFwd_H
+#define lookupFixedGradientFvPatchFieldsFwd_H
+
+#include "fvPatchField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(interTrackMagneticControl, 0);
+template<class Type> class lookupFixedGradientFvPatchField;
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-interTrackMagneticControl::interTrackMagneticControl
-(
-    const regionDynamicFvMesh& rmesh,
-    const word& name
-)
-:
-    solverControl<regionDynamicFvMesh>
-    (
-        rmesh,
-        name,
-        rmesh.regionIndex()
-    ),
-    track_(rmesh, name),
-    dynamicRegionName_
-    (
-        word(propDict_.subDict("regions").lookup("dynamic"))
-    ),
-    dynamicRegion_
-    (
-        mesh_.regionIndex(dynamicRegionName_)
-    )
-{
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
+makePatchTypeFieldTypedefs(lookupFixedGradient)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#endif
+
+// ************************************************************************* //

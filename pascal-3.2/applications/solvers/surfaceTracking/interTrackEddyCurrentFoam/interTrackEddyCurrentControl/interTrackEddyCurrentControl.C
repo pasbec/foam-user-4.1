@@ -55,7 +55,6 @@ interTrackEddyCurrentControl::interTrackEddyCurrentControl
     tramag_(rmesh, name),
     eddy_(rmesh, name)
 {
-    Info << "[DEBUG] Create " << typeName << endl;
 }
 
 

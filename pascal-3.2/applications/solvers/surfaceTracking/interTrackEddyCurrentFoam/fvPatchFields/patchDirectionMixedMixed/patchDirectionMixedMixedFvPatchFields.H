@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     |
-    \\  /    A nd           | For copyright notice see file Copyright
-     \\/     M anipulation  |
+   \\    /   O peration     | Version:     3.2
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
     This file is part of foam-extend.
@@ -21,56 +21,38 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    patchDirectionMixedMixedFvPatchFields
+
+Description
+    TODO
+
+SourceFiles
+    patchDirectionMixedMixedFvPatchFields.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackMagneticControl.H"
+#ifndef patchDirectionMixedMixedFvPatchFields_H
+#define patchDirectionMixedMixedFvPatchFields_H
+
+#include "patchDirectionMixedMixedFvPatchField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(interTrackMagneticControl, 0);
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-interTrackMagneticControl::interTrackMagneticControl
-(
-    const regionDynamicFvMesh& rmesh,
-    const word& name
-)
-:
-    solverControl<regionDynamicFvMesh>
-    (
-        rmesh,
-        name,
-        rmesh.regionIndex()
-    ),
-    track_(rmesh, name),
-    dynamicRegionName_
-    (
-        word(propDict_.subDict("regions").lookup("dynamic"))
-    ),
-    dynamicRegion_
-    (
-        mesh_.regionIndex(dynamicRegionName_)
-    )
-{
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
+makePatchTypeFieldTypedefs(patchDirectionMixedMixed)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#endif
+
+// ************************************************************************* //

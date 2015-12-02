@@ -185,7 +185,6 @@ eddyCurrentControl::eddyCurrentControl
     Ares_(AVres_),
     Vres_(AVres_)
 {
-    Info << "[DEBUG] Create " << typeName << endl;
     // TODO: Check tol_ < 1 ???
     // TODO: Check maxIter_ > 0
     // TODO: Check maxIter_ > minIter_
