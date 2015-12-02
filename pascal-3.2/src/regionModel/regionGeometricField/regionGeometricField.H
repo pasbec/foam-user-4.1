@@ -44,9 +44,11 @@ SourceFiles
 #include "regionPolyMesh.H"
 
 // TODO [High]: Finish parallel face mapping
-// TODO [High]: Find bug in mapCopyInternal() member function of regionVolFields
+// FIXME [High]: faceRegionAddressing and faceMap does not seem to be the same (flip-sign!!!)
+
 // TODO [High]: Realize patch mapping for volFields as template specialization
 //              in regionVolFieldMapping.C
+
 // TODO [High]: Make this class demand-driven and allow all fields to be region-fields
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -334,9 +334,10 @@ void regionPolyMesh::makeFaceMap(const label& regionI) const
 
         faceMap_[regionI] = faceRegionMap_[regionI];
     }
+    else
+    {
 // TODO
-//     else
-//     {
+        notImplemented(type() + "::makeFaceMap() for parallel case");
 //         if (!parallelSplitRegions())
 //         {
 //             // Parallel split region-processor
@@ -347,7 +348,7 @@ void regionPolyMesh::makeFaceMap(const label& regionI) const
 //
 //             faceMap_[regionI] = faceRegionProcMap_[regionI];
 //         }
-//     }
+    }
 }
 
 
@@ -377,7 +378,7 @@ labelIOList* regionPolyMesh::newRegionMap
 
     IOobject mapObj
     (
-        topoType + word("RegionAddressing"),
+        topoType + word("Map"),
         mapInstance,
         polyMesh::meshSubDir,
         mesh(regionI),
@@ -385,9 +386,19 @@ labelIOList* regionPolyMesh::newRegionMap
         IOobject::NO_WRITE
     );
 
+    if (!mapObj.headerOk())
+    {
+        mapObj.rename
+        (
+            topoType + word("RegionAddressing")
+        );
+    }
+
+    labelIOList* regionMapPtr;
+
     if(regionName(regionI) == polyMesh::defaultRegion)
     {
-        return new labelIOList
+        regionMapPtr = new labelIOList
         (
             mapObj,
             labelList()
@@ -396,13 +407,37 @@ labelIOList* regionPolyMesh::newRegionMap
     else
     {
         mapObj.readOpt() = IOobject::MUST_READ;
-        mapObj.writeOpt() = IOobject::AUTO_WRITE;
 
-        return new labelIOList
+        regionMapPtr = new labelIOList
         (
             mapObj
         );
     }
+
+    // For face maps remove flip shift and factors
+    // if map object is of type faceRegionAddressing
+    if (regionMapPtr->name() == "faceRegionAddressing")
+    {
+        regionMapPtr->rename("faceMap");
+
+        labelList& map = *regionMapPtr;
+
+        forAll(map, facei)
+        {
+            label mapI = map[facei];
+
+            if (mapI<0)
+            {
+                map[facei] *= -1;
+            }
+
+            map[facei] -= 1;
+        }
+
+        regionMapPtr->write();
+    }
+
+    return regionMapPtr;
 }
 
 labelIOList* regionPolyMesh::newProcMap
@@ -471,11 +506,12 @@ labelIOList* regionPolyMesh::newCellRegionProcMap
     }
     else
     {
-        mapObj.readOpt() = IOobject::MUST_READ;
         mapObj.writeOpt() = IOobject::AUTO_WRITE;
 
         if (mapObj.headerOk())
         {
+            mapObj.readOpt() = IOobject::MUST_READ;
+
             return new labelIOList
             (
                 mapObj
@@ -579,7 +615,7 @@ labelIOList* regionPolyMesh::newPointRegionProcMap
         polyMesh::meshSubDir,
         mesh(regionI),
         IOobject::NO_READ,
-        IOobject::AUTO_WRITE
+        IOobject::NO_WRITE
     );
 
     if (regionName(regionI) == polyMesh::defaultRegion)
@@ -592,11 +628,12 @@ labelIOList* regionPolyMesh::newPointRegionProcMap
     }
     else
     {
-        mapObj.readOpt() = IOobject::MUST_READ;
         mapObj.writeOpt() = IOobject::AUTO_WRITE;
 
         if (mapObj.headerOk())
         {
+            mapObj.readOpt() = IOobject::MUST_READ;
+
             return new labelIOList
             (
                 mapObj

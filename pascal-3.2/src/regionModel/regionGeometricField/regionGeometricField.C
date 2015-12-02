@@ -451,7 +451,6 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::mapBoundaryField
 };
 
 // TODO: Only for calculated- and fixedValue- patchFields
-// FIXME: Small bug? Some faces missing?
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
@@ -476,7 +475,6 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::copyInternalBoun
 };
 
 // TODO: Only for calculated- and fixedValue- patchFields
-// FIXME: Small bug? Wrong mapping?
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
@@ -511,8 +509,8 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolateBound
         {
             const Field<Type>& vf0In = vf0.internalField();
             const scalarField& w0 = vf0.mesh().weights().internalField();
-            const labelList& own0 = vf0.mesh().owner();
-            const labelList& ngb0 = vf0.mesh().neighbour();
+            const labelList& own0 = vf0.mesh().faceOwner();
+            const labelList& ngb0 = vf0.mesh().faceNeighbour();
 
             Field<Type>& patchField = vf.boundaryField()[patchI];
             label patchStart = patch.start();

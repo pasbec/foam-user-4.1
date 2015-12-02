@@ -44,6 +44,9 @@ SourceFiles
 #include "wordIOList.H"
 
 // TODO [High]: Finish parallel face mapping
+// TODO [High]: faceRegionAddressing and faceMap does not seem to be the same (flip-sign!!!)
+// TODO [High]: How to deal with faceRegionAddressing and faceMap, properly?
+
 
 // TODO [High]: Sort that parallel clutter out (remove local maps
 //              and return maps based on if)!!!

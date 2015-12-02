@@ -7,7 +7,7 @@
 
 # define updateRmapGradient(regionI,vsf)                                      \
                                                                               \
-    vsf##Grad_[regionI] = fvc::grad(vsf);                                     \
+    vsf##Grad_[regionI] == fvc::grad(vsf);                                    \
     vsf##Grad_.rmap(regionI);
 
 # define updateGradientV(regionI)                                             \
