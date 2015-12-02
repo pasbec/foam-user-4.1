@@ -23,24 +23,21 @@ gradSchemes
 {
     default                           none;
 
-    grad(sigma)                       Gauss linear;
+    grad(sigma)                       leastSquares;
 
-    grad(VRe)                         Gauss linear;
-    grad(VIm)                         Gauss linear;
+    grad(VRe)                         leastSquares;
+    grad(VIm)                         leastSquares;
 
-    snGradCorr(VRe)                   Gauss linear;
-    snGradCorr(VIm)                   Gauss linear;
-
-    snGradCorr(VReCorr)               Gauss linear;
-    snGradCorr(VImCorr)               Gauss linear;
+    snGradCorr(VRe)                   leastSquares;
+    snGradCorr(VIm)                   leastSquares;
 }
 
 divSchemes
 {
     default                           none;
 
-    div(ARe)                          Gauss linear;
-    div(AIm)                          Gauss linear;
+    div(ARe)                          leastSquares;
+    div(AIm)                          leastSquares;
 }
 
 laplacianSchemes

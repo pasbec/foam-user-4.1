@@ -88,11 +88,6 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]] || \
             rm -rf "constant/setSubset"
             rm -rf "system/setSubset"
 
-            # TODO Use suffix "Map" OR "RegionAddressing"
-            for map in $(ls -1 "0/$region/polyMesh/"*'Map'); do
-                mv "$map" "${map%'Map'}RegionAddressing"
-            done
-
             runApplication -r "$region" \
                 createPatch -region "$region" -overwrite || exit 1
 

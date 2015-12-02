@@ -27,14 +27,9 @@ gradSchemes
 
     grad(VRe)                         Gauss linear;
     grad(VIm)                         Gauss linear;
-//     grad(VRe)                         electricPotential Gauss linear;
-//     grad(VIm)                         electricPotential Gauss linear;
 
     snGradCorr(VRe)                   Gauss linear;
     snGradCorr(VIm)                   Gauss linear;
-
-    snGradCorr(VReCorr)               Gauss linear;
-    snGradCorr(VImCorr)               Gauss linear;
 }
 
 divSchemes

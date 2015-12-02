@@ -57,9 +57,6 @@ solvers
 
         preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC, GAMG, SymGaussSeidel, diagonal, none
     }
-
-    VReCorr { $VRe; solver PCG; minIter 1; }
-    VImCorr { $VIm; solver PCG; minIter 1; }
 }
 
 // ************************************************************************* //
