@@ -1,8 +1,8 @@
 
-    dictionary& magnetic = mesh_[control.base()].solutionDict().subDict("Magnetic");
+    const dictionary& magnetic = mesh_[control.base()].solutionDict().subDict("Magnetic");
 
     // Update settings
-    dictionary& mfUpdateDict(magnetic.subDict("update"));
+    const dictionary& mfUpdateDict(magnetic.subDict("update"));
 
         bool mfUpdateSwitch =
             mfUpdateDict.lookupOrDefault<bool>("active", true);

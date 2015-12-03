@@ -50,7 +50,7 @@ interTrackEddyCurrentControl::interTrackEddyCurrentControl
     (
         rmesh,
         name,
-        rmesh.regionIndex()
+        rmesh.regionIndex(polyMesh::defaultRegion)
     ),
     tramag_(rmesh, name),
     eddy_(rmesh, name)

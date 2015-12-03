@@ -50,7 +50,7 @@ interTrackMagneticControl::interTrackMagneticControl
     (
         rmesh,
         name,
-        rmesh.regionIndex()
+        rmesh.regionIndex(polyMesh::defaultRegion)
     ),
     track_(rmesh, name),
     dynamicRegionName_

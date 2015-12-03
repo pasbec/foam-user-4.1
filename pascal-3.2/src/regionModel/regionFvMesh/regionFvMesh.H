@@ -52,8 +52,12 @@ class regionFvMesh
 :
     public regionPolyMesh
 {
-
 private:
+
+    // Private data
+
+        //- Meshes data
+        mutable List<fvMesh*> fvMeshes_;
 
     // Private Member Functions
 
@@ -68,15 +72,9 @@ private:
             //- Create new mesh for region with index regionI
             fvMesh* newMesh(const label& regionI) const;
 
-            //- Init regions
-            virtual void initMeshes(const wordList& regionNames) const;
-
 protected:
 
     // Protected data
-
-        //- Meshes data
-        mutable List<fvMesh*> meshes_;
 
     // Private Member Functions
 
@@ -84,6 +82,9 @@ protected:
 
             //- Resize lists storing data
             virtual void resizeLists() const;
+
+            //- Init regions
+            virtual void initMeshes(const wordList& regionNames) const;
 
 public:
 
@@ -115,22 +116,16 @@ public:
 
         // Access
 
-            //- Return reference to default mesh
-            virtual fvMesh& mesh() const
+            //- Return reference to mesh
+            fvMesh& mesh(const label& regionI) const
             {
-                return *meshes_[regionIndex(polyMesh::defaultRegion)];
+                return operator[](regionI);
             }
 
             //- Return reference to mesh
-            virtual fvMesh& mesh(const label& regionI) const
+            fvMesh& mesh(const word& regionName) const
             {
-                return *meshes_[regionI];
-            }
-
-            //- Return reference to mesh
-            virtual fvMesh& mesh(const word& regionName) const
-            {
-                return *meshes_[regionIndex(regionName)];
+                return operator[](regionIndex(regionName));
             }
 
             //- Return reference to default solution dict
@@ -153,27 +148,20 @@ public:
 
     // Member operators
 
-        //- Mesh access operator for default region (lookup)
-        virtual fvMesh& operator()() const
-        {
-            return *meshes_[regionIndex(polyMesh::defaultRegion)];
-        }
-
-        //- Mesh access operator by index (direct)
+        //- Mesh access operator by index
         virtual fvMesh& operator[](const label& regionI) const
         {
-            return *meshes_[regionI];
+            return *fvMeshes_[regionI];
         }
 
-        //- Mesh access operator by regionName (lookup)
-        virtual fvMesh& operator()(const word& regionName) const
+        //- Mesh access operator by regionName
+        polyMesh& operator[](const word& regionName) const
         {
-            return *meshes_[regionIndex(regionName)];
+            return operator[](regionIndex(regionName));
         }
 
         bool operator!=(const regionFvMesh&) const;
         bool operator==(const regionFvMesh&) const;
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

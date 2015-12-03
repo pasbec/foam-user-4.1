@@ -44,7 +44,7 @@ solverControl<MESH>::solverControl
 (
     const MESH& mesh,
     const word& name,
-    const label& base
+    const label& regionI0
 )
 :
     IOdictionary
@@ -62,7 +62,7 @@ solverControl<MESH>::solverControl
     time_(mesh.time()),
     mesh_(mesh),
     baseRegionName_(polyMesh::defaultRegion),
-    baseRegion_(base),
+    baseRegion_(regionI0),
     propDict_
     (
         IOdictionary

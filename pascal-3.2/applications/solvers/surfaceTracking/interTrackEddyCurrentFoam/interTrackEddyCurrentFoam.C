@@ -164,6 +164,8 @@ int main(int argc, char *argv[])
         // ==================================================================//
 
         {
+            setRegionScope(control.fluidA());
+
             // Move and update mesh of fluid region
             interface.moveMeshPointsForOldTrackedSurfDisplacement();
             interface.updateDisplacementDirections();
@@ -182,22 +184,68 @@ int main(int argc, char *argv[])
         }
 
         // ==================================================================//
-        // Update mesh points of base region if magnetic update is due
+        // Move mesh of dynamic region
         // ==================================================================//
 
-        if (mfUpdate)
+        if (mfUpdate && (mfUpdateCounter > 0))
+        {
+            // Calculate mesh velocity at dynamic/fluid-interface
+            // in dynamic region from current boundary displacement
+            // in fluid region
+            mesh_.patchMapMeshVelocityDirectMapped
+            (
+                control.fluidA(),
+                control.dynamic()
+            );
+
+            // Grab current points of dynamic region as new point field
+            pointField newPoints = mesh_[control.dynamic()].points();
+
+//             // Correct points for 2D-motion of dynamic region
+//             twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
+//             dynamicTwoDPointCorr.correctPoints(newPoints);
+
+            // Use motionSolver to move mesh of dynamic region
+            mesh_[control.dynamic()].movePoints(newPoints);
+            mesh_[control.dynamic()].update();
+        }
+
+        // ==================================================================//
+        // Update mesh points of base region
+        // ==================================================================//
+
+        if (mfUpdate && (mfUpdateCounter > 0))
         {
             // Create new point field for base region
-            // with current points of fluid region
+            // with current point positions of fluid region
             pointField newPoints = mesh_.rmap(control.fluidA());
 
-            // Move and update mesh of base region
+            // Replace point positions of dynamic region in
+            // new point field for base region
+            mesh_.rmap(newPoints,control.dynamic());
+
+            // Update base mesh
             mesh_[control.base()].movePoints(newPoints);
             mesh_[control.base()].update();
         }
 
         // ==================================================================//
-        // Solve for magnetic and derived fields in base region if due
+        // Update mesh points of conductor region if magnetic update is due
+        // ==================================================================//
+
+        if (mfUpdate && (mfUpdateCounter > 0))
+        {
+            // Create new point field for conductor region
+            // with current points of base region
+            pointField newPoints = mesh_.map(control.conductor());
+
+            // Move and update mesh of conductor region
+            mesh_[control.conductor()].movePoints(newPoints);
+            mesh_[control.conductor()].update();
+        }
+
+        // ==================================================================//
+        // Solve for magnetic and derived fields in base/conductor region
         // ==================================================================//
 
         if (mfUpdate)
@@ -210,26 +258,24 @@ int main(int argc, char *argv[])
         }
 
         // ==================================================================//
-        // Map region fields from base region to fluid region
+        // Map Lorentz-force and magnetic pressure fields from base region
+        // to fluid region and extrapolate their boundary values
         // ==================================================================//
 
         if (mfUpdate)
         {
-            FL_.map(control.fluidA());
-            pB_.map(control.fluidA());
+            FL_.mapExtrapolate(control.fluidA());
+            pB_.mapExtrapolate(control.fluidA());
         }
 
         // ==================================================================//
-        // Extrapolate boundary values of mapped fields in fluid region
+        // Process magnetic-field related fields in fluid region
         // and correct gradient of fluid pressure at corresponding boundaries
         // ==================================================================//
 
         if (mfUpdate)
         {
             setRegionScope(control.fluidA());
-
-            fvc::extrapolate(FL);
-            fvc::extrapolate(pB);
 
             pB *= lorentzForceRotationalFactor;
 
@@ -252,57 +298,8 @@ int main(int argc, char *argv[])
 
         {
             setRegionScope(control.fluidA());
+
 #           include "solveFluid.H"
-        }
-
-        // ==================================================================//
-        // Move mesh of dynamic region
-        // ==================================================================//
-
-        {
-            // Calculate mesh velocity at dynamic/fluid-interface
-            // in dynamic region from current boundary displacement
-            // in fluid region
-            mesh_.patchMapMeshVelocityDirectMapped
-            (
-                control.fluidA(),
-                control.dynamic()
-            );
-
-            // Grab current points of dynamic region as new point field
-            pointField newPoints = mesh_[control.dynamic()].points();
-
-            // Correct points for 2D-motion of dynamic region
-            twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
-            dynamicTwoDPointCorr.correctPoints(newPoints);
-
-            // Use motionSolver to move mesh of dynamic region
-            mesh_[control.dynamic()].movePoints(newPoints);
-            mesh_[control.dynamic()].update();
-        }
-
-        // ==================================================================//
-        // Update mesh points of base region
-        // ==================================================================//
-
-        {
-            // Create new point field for base region
-            // with current points of patch trackedSurface in fluid region
-// TODO [High] : If the fluid volume is being corrected in the current time step
-//               we may not only use interface points, but all fluid points instead!
-//               Do we really get loose much performance with this?
-//             pointField newPoints = mesh_.rmap(control.fluidA(),"trackedSurface");
-            pointField newPoints = mesh_.rmap(control.fluidA());
-
-            // Replace point positions of dynamic region in
-            // new point field for base region
-            mesh_.rmap(newPoints,control.dynamic());
-
-            // Update base mesh
-            mesh_[control.base()].movePoints(newPoints);
-            mesh_[control.base()].update();
-
-            Info << endl;
         }
 
         // ==================================================================//

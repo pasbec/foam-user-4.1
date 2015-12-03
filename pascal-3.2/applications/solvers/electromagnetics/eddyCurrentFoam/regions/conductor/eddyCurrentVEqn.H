@@ -3,55 +3,60 @@
     {
         // Update gradient boundary condition for V
         {
-            forAll(mesh.boundaryMesh(), patchI)
+            const polyBoundaryMesh& boundaryMesh = mesh.boundaryMesh();
+
+            label patchI = boundaryMesh.findPatchID(control.interfaceName());
+
+            if (patchI == -1)
             {
-                polyPatch patch = mesh.boundaryMesh()[patchI];
+                FatalError
+                    << "Given patch name " << control.interfaceName()
+                    << " for point mapping does not exist."
+                    << abort(FatalError);
+            }
 
-                // Interface patch
-                if (patch.name() == control.interfaceName())
+            polyPatch patch = mesh.boundaryMesh()[patchI];
+
+            // Boundary values for V
+            {
+                if
+                (
+                    VRe.boundaryField()[patchI].type()
+                == fixedGradientFvPatchField<scalar>::typeName
+                )
                 {
-                    // Boundary values for V
-                    {
-                        if
+                    fixedGradientFvPatchField<scalar>& VReP =
+                        refCast<fixedGradientFvPatchField<scalar> >
                         (
-                            VRe.boundaryField()[patchI].type()
-                        == fixedGradientFvPatchField<scalar>::typeName
-                        )
-                        {
-                            fixedGradientFvPatchField<scalar>& VReP =
-                                refCast<fixedGradientFvPatchField<scalar> >
-                                (
-                                    VRe.boundaryField()[patchI]
-                                );
+                            VRe.boundaryField()[patchI]
+                        );
 
-                            // Set correct gradient
-                            VReP.gradient() =  control.omega().value()
-                            * (AIm.boundaryField()[patchI] & VReP.patch().nf());
+                    // Set correct gradient
+                    VReP.gradient() =  control.omega().value()
+                    * (AIm.boundaryField()[patchI] & VReP.patch().nf());
 
-                            // Evaluate values
-                            VReP.evaluate();
-                        }
+                    // Evaluate values
+                    VReP.evaluate();
+                }
 
-                        if
+                if
+                (
+                    VIm.boundaryField()[patchI].type()
+                == fixedGradientFvPatchField<scalar>::typeName
+                )
+                {
+                    fixedGradientFvPatchField<scalar>& VImP =
+                        refCast<fixedGradientFvPatchField<scalar> >
                         (
-                            VIm.boundaryField()[patchI].type()
-                        == fixedGradientFvPatchField<scalar>::typeName
-                        )
-                        {
-                            fixedGradientFvPatchField<scalar>& VImP =
-                                refCast<fixedGradientFvPatchField<scalar> >
-                                (
-                                    VIm.boundaryField()[patchI]
-                                );
+                            VIm.boundaryField()[patchI]
+                        );
 
-                            // Set correct gradient
-                            VImP.gradient() = -control.omega().value()
-                            * (ARe.boundaryField()[patchI] & VImP.patch().nf());
+                    // Set correct gradient
+                    VImP.gradient() = -control.omega().value()
+                    * (ARe.boundaryField()[patchI] & VImP.patch().nf());
 
-                            // Evaluate values
-                            VImP.evaluate();
-                        }
-                    }
+                    // Evaluate values
+                    VImP.evaluate();
                 }
             }
 

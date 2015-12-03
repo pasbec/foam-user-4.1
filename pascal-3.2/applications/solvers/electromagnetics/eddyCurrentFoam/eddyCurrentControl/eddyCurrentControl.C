@@ -136,7 +136,7 @@ eddyCurrentControl::eddyCurrentControl
     (
         rmesh,
         name,
-        rmesh.regionIndex()
+        rmesh.regionIndex(polyMesh::defaultRegion)
     ),
     conductorRegionName_
     (

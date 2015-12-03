@@ -51,7 +51,7 @@ regionPointMesh::regionPointMesh
 )
 :
     rpMesh_(rpMesh),
-    meshes_(List<pointMesh*>(rpMesh_.size(),NULL))
+    pointMeshes_(List<pointMesh*>(rpMesh_.size(),NULL))
 {
     forAll(regionNames(), regionI)
     {
@@ -64,7 +64,7 @@ regionPointMesh::regionPointMesh
         }
 
         // Create mesh
-        meshes_[regionI] = newMesh(regionI);
+        pointMeshes_[regionI] = newMesh(regionI);
     }
 }
 

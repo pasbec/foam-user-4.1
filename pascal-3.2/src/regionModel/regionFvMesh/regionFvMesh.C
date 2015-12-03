@@ -51,6 +51,9 @@ fvMesh* regionFvMesh::newMesh(const label& regionI) const
     );
 }
 
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
 void regionFvMesh::initMeshes(const wordList& regionNames) const
 {
     size_ = 1 + regionNames.size();
@@ -69,7 +72,7 @@ void regionFvMesh::initMeshes(const wordList& regionNames) const
         }
 
         // Create mesh
-        meshes_[regionI] = newMesh(regionI);
+        fvMeshes_[regionI] = newMesh(regionI);
     }
 
     setParallelSplitRegions();
@@ -77,14 +80,11 @@ void regionFvMesh::initMeshes(const wordList& regionNames) const
     initialized_ = true;
 }
 
-
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
-
 void regionFvMesh::resizeLists() const
 {
     regionPolyMesh::resizeLists();
 
-    meshes_.resize(size_, NULL);
+    fvMeshes_.resize(size_, NULL);
 }
 
 
@@ -101,7 +101,7 @@ regionFvMesh::regionFvMesh
         runTime,
         false
     ),
-    meshes_(List<fvMesh*>(0))
+    fvMeshes_(List<fvMesh*>(0))
 {
     if(init) initMeshes(readRegionNames());
 }
@@ -118,7 +118,7 @@ regionFvMesh::regionFvMesh
         runTime,
         false
     ),
-    meshes_(List<fvMesh*>(0))
+    fvMeshes_(List<fvMesh*>(0))
 {
     if(init) initMeshes(regionNames);
 }

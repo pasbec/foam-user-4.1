@@ -57,6 +57,20 @@ class regionDynamicFvMesh
 {
 private:
 
+    // Private data
+
+        //- Meshes data
+        mutable List<autoPtr<dynamicFvMesh>*> dynamicFvMeshesData_;
+
+        //- Meshes access pointers
+        mutable List<dynamicFvMesh*> dynamicFvMeshes_;
+
+        //- Finite element motion solver type
+        mutable boolList isFeMotionSolver_;
+
+        //- Finite volume motion solver type
+        mutable boolList isFvMotionSolver_;
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -70,35 +84,19 @@ private:
             //- Create new mesh for region with index regionI
             autoPtr<dynamicFvMesh>* newMesh(const label& regionI) const;
 
-            //- Init regions
-            virtual void initMeshes(const wordList& regionNames) const;
-
 protected:
 
     // Protected data
-
-        //- Meshes data
-        mutable List<autoPtr<dynamicFvMesh>*> meshesData_;
-
-        //- Meshes access pointers
-        mutable List<dynamicFvMesh*> meshes_;
 
     // Private Member Functions
 
         // Helper functions for constructor
 
+            //- Init regions
+            virtual void initMeshes(const wordList& regionNames) const;
+
             //- Resize lists storing data
             virtual void resizeLists() const;
-
-private:
-
-    // Private data
-
-        //- Finite element motion solver type
-        mutable boolList isFeMotionSolver_;
-
-        //- Finite volume motion solver type
-        mutable boolList isFvMotionSolver_;
 
 public:
 
@@ -130,22 +128,16 @@ public:
 
         // Access
 
-            //- Return reference to default mesh
-            virtual dynamicFvMesh& mesh() const
+            //- Return reference to mesh
+            dynamicFvMesh& mesh(const label& regionI) const
             {
-                return *meshes_[regionIndex(polyMesh::defaultRegion)];
+                return operator[](regionI);
             }
 
             //- Return reference to mesh
-            virtual dynamicFvMesh& mesh(const label& regionI) const
+            dynamicFvMesh& mesh(const word& regionName) const
             {
-                return *meshes_[regionI];
-            }
-
-            //- Return reference to mesh
-            virtual dynamicFvMesh& mesh(const word& regionName) const
-            {
-                return *meshes_[regionIndex(regionName)];
+                return operator[](regionIndex(regionName));
             }
 
             //- Return refrence to fe motion solver list
@@ -204,24 +196,17 @@ public:
 
     // Member operators
 
-        //- Mesh access operator for default region (lookup)
-        virtual dynamicFvMesh& operator()() const
-        {
-            return *meshes_[regionIndex(polyMesh::defaultRegion)];
-        }
-
-        //- Mesh access operator by index (direct)
+        //- Mesh access operator by index
         virtual dynamicFvMesh& operator[](const label& regionI) const
         {
-            return *meshes_[regionI];
+            return *dynamicFvMeshes_[regionI];
         }
 
-        //- Mesh access operator by regionName (lookup)
-        virtual dynamicFvMesh& operator()(const word& regionName) const
+        //- Mesh access operator by regionName
+        dynamicFvMesh& operator[](const word& regionName) const
         {
-            return *meshes_[regionIndex(regionName)];
+            return operator[](regionIndex(regionName));
         }
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

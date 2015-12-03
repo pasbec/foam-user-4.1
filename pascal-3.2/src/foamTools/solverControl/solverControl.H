@@ -110,7 +110,7 @@ public:
         (
             const MESH& mesh,
             const word& name = "solver",
-            const label& base = -1
+            const label& regionI0 = -1
         );
 
     // Destructor

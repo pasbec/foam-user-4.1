@@ -62,7 +62,7 @@ private:
         const regionPolyMesh& rpMesh_;
 
         //- Meshes
-        List<pointMesh*> meshes_;
+        List<pointMesh*> pointMeshes_;
 
     // Private demand-driven data
 
@@ -136,28 +136,22 @@ public:
                 return rpMesh_.regionIndex(regionName);
             };
 
-            //- Return reference to mesh access list
-            const List<pointMesh*>& meshes() const
-            {
-                return meshes_;
-            };
-
             //- Return reference to default mesh
             const pointMesh& mesh() const
             {
-                return *meshes_[regionIndex(polyMesh::defaultRegion)];
+                return operator[](regionIndex(polyMesh::defaultRegion));
             }
 
             //- Return reference to mesh
             const pointMesh& mesh(const label& regionI) const
             {
-                return *meshes_[regionI];
+                return operator[](regionI);
             }
 
             //- Return reference to mesh
             const pointMesh& mesh(const word& regionName) const
             {
-                return *meshes_[regionIndex(regionName)];
+                return operator[](regionIndex(regionName));
             }
 
             //- Return the object registry
@@ -196,22 +190,16 @@ public:
 
     // Member operators
 
-        //- Mesh access operator for default region (lookup)
-        const pointMesh& operator()() const
-        {
-            return *meshes_[regionIndex(polyMesh::defaultRegion)];
-        }
-
         //- Mesh access operator by index (direct)
-        const pointMesh& operator[](const label& regionI) const
+        pointMesh& operator[](const label& regionI) const
         {
-            return *meshes_[regionI];
+            return *pointMeshes_[regionI];
         }
 
-        //- Mesh access operator by regionName (lookup)
-        const pointMesh& operator()(const word& regionName) const
+        //- Mesh access operator by regionName
+        pointMesh& operator[](const word& regionName) const
         {
-            return *meshes_[regionIndex(regionName)];
+            return operator[](regionIndex(regionName));
         }
 
         bool operator!=(const regionPointMesh&) const;

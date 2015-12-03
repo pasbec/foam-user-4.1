@@ -58,6 +58,9 @@ regionDynamicFvMesh::newMesh(const label& regionI) const
     );
 }
 
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
 void regionDynamicFvMesh::initMeshes(const wordList& regionNames) const
 {
     size_ = 1 + regionNames.size();
@@ -76,20 +79,20 @@ void regionDynamicFvMesh::initMeshes(const wordList& regionNames) const
         }
 
         // Create mesh
-        meshesData_[regionI] = newMesh(regionI);
+        dynamicFvMeshesData_[regionI] = newMesh(regionI);
 
         // Link access pointer
-        meshes_[regionI] = meshesData_[regionI]->operator->();
+        dynamicFvMeshes_[regionI] = dynamicFvMeshesData_[regionI]->operator->();
 
         // Remember if type of motion solver is fe
-        isFeMotionSolver_[regionI] = meshes_[regionI]
+        isFeMotionSolver_[regionI] = dynamicFvMeshes_[regionI]
             ->objectRegistry::foundObject<tetPointVectorField>
             (
                 "motionU"
             );
 
         // Remember if type of motion solver is fv
-        isFvMotionSolver_[regionI] = meshes_[regionI]
+        isFvMotionSolver_[regionI] = dynamicFvMeshes_[regionI]
             ->objectRegistry::foundObject<pointVectorField>
             (
                 "pointMotionU"
@@ -101,9 +104,6 @@ void regionDynamicFvMesh::initMeshes(const wordList& regionNames) const
     initialized_ = true;
 }
 
-
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
-
 void regionDynamicFvMesh::resizeLists() const
 {
     regionFvMesh::resizeLists();
@@ -111,8 +111,8 @@ void regionDynamicFvMesh::resizeLists() const
     isFeMotionSolver_.resize(size_, NULL);
     isFvMotionSolver_.resize(size_, NULL);
 
-    meshesData_.resize(size_, NULL);
-    meshes_.resize(size_, NULL);
+    dynamicFvMeshesData_.resize(size_, NULL);
+    dynamicFvMeshes_.resize(size_, NULL);
 }
 
 
@@ -129,8 +129,8 @@ regionDynamicFvMesh::regionDynamicFvMesh
         runTime,
         false
     ),
-    meshesData_(List<autoPtr<dynamicFvMesh>*>(0)),
-    meshes_(List<dynamicFvMesh*>(0)),
+    dynamicFvMeshesData_(List<autoPtr<dynamicFvMesh>*>(0)),
+    dynamicFvMeshes_(List<dynamicFvMesh*>(0)),
     isFeMotionSolver_(boolList(0)),
     isFvMotionSolver_(boolList(0))
 {
@@ -149,8 +149,8 @@ regionDynamicFvMesh::regionDynamicFvMesh
         runTime,
         false
     ),
-    meshesData_(List<autoPtr<dynamicFvMesh>*>(0)),
-    meshes_(List<dynamicFvMesh*>(0)),
+    dynamicFvMeshesData_(List<autoPtr<dynamicFvMesh>*>(0)),
+    dynamicFvMeshes_(List<dynamicFvMesh*>(0)),
     isFeMotionSolver_(boolList(0)),
     isFvMotionSolver_(boolList(0))
 {

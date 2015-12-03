@@ -50,7 +50,7 @@ interTrackControl::interTrackControl
     (
         rmesh,
         name,
-        rmesh.regionIndex()
+        rmesh.regionIndex(polyMesh::defaultRegion)
     ),
     fluidAregionName_
     (

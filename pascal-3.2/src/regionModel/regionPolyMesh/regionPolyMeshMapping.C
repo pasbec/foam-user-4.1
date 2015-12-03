@@ -40,16 +40,104 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void regionPolyMesh::rmap
+void regionPolyMesh::map
 (
     pointField& givenPoints,
+    const label& regionI,
     const word& patchName
 ) const
 {
-    forAll(regionNames(), regionI)
+    label regionI0 = regionIndex(polyMesh::defaultRegion);
+
+    const pointField& points = mesh(regionI0).points();
+
+    const labelIOList& map = pointMap(regionI);
+
+    if (patchName == "")
     {
-        rmap(givenPoints,regionI,patchName);
+        forAll(givenPoints, pointI)
+        {
+            givenPoints[pointI] = points[map[pointI]];
+        }
     }
+    else
+    {
+        const polyBoundaryMesh& boundaryMesh =
+            mesh(regionI).boundaryMesh();
+
+        label patchI = boundaryMesh.findPatchID(patchName);
+
+        if (patchI == -1)
+        {
+            FatalErrorIn("regionPolyMesh::rmap(...)")
+                << "Given patch name " << patchName
+                << " for point mapping does not exist in"
+                << " region " << regionName(regionI)
+                << abort(FatalError);
+        }
+
+        const polyPatch& patch = boundaryMesh[patchI];
+
+        labelList mpmap = patch.meshPointMap().toc();
+
+        forAll(mpmap, patchPointI)
+        {
+            label pointI = mpmap[patchPointI];
+
+            givenPoints[pointI] = points[map[pointI]];
+        }
+    }
+}
+
+void regionPolyMesh::map
+(
+    pointField& givenPoints,
+    const word& regionName,
+    const word& patchName
+) const
+{
+    map
+    (
+        givenPoints,
+        regionIndex(regionName),
+        patchName
+    );
+}
+
+tmp<pointField> regionPolyMesh::map
+(
+    const label& regionI,
+    const word& patchName
+) const
+{
+    tmp<pointField> tNewPoints
+    (
+        new pointField(mesh(regionI).points())
+    );
+
+    pointField& newPoints = tNewPoints();
+
+    map
+    (
+        newPoints,
+        regionI,
+        patchName
+    );
+
+    return tNewPoints;
+}
+
+tmp<pointField> regionPolyMesh::map
+(
+    const word& regionName,
+    const word& patchName
+) const
+{
+    return map
+    (
+        regionIndex(regionName),
+        patchName
+    );
 }
 
 void regionPolyMesh::rmap
@@ -77,6 +165,15 @@ void regionPolyMesh::rmap
 
         label patchI = boundaryMesh.findPatchID(patchName);
 
+        if (patchI == -1)
+        {
+            FatalErrorIn("regionPolyMesh::rmap(...)")
+                << "Given patch name " << patchName
+                << " for point mapping does not exist in"
+                << " region " << regionName(regionI)
+                << abort(FatalError);
+        }
+
         const polyPatch& patch = boundaryMesh[patchI];
 
         labelList mpmap = patch.meshPointMap().toc();
@@ -97,27 +194,12 @@ void regionPolyMesh::rmap
     const word& patchName
 ) const
 {
-    rmap(givenPoints,regionIndex(regionName),patchName);
-}
-
-tmp<pointField> regionPolyMesh::rmap
-(
-    const word& patchName
-) const
-{
-    tmp<pointField> tNewPoints
+    rmap
     (
-        new pointField(mesh().points())
+        givenPoints,
+        regionIndex(regionName),
+        patchName
     );
-
-    pointField& newPoints = tNewPoints();
-
-    forAll(regionNames(), regionI)
-    {
-        rmap(newPoints,regionI,patchName);
-    }
-
-    return tNewPoints;
 }
 
 tmp<pointField> regionPolyMesh::rmap
@@ -126,14 +208,21 @@ tmp<pointField> regionPolyMesh::rmap
     const word& patchName
 ) const
 {
+    label regionI0 = regionIndex(polyMesh::defaultRegion);
+
     tmp<pointField> tNewPoints
     (
-        new pointField(mesh().points())
+        new pointField(mesh(regionI0).points())
     );
 
     pointField& newPoints = tNewPoints();
 
-    rmap(newPoints,regionI,patchName);
+    rmap
+    (
+        newPoints,
+        regionI,
+        patchName
+    );
 
     return tNewPoints;
 }
@@ -144,7 +233,11 @@ tmp<pointField> regionPolyMesh::rmap
     const word& patchName
 ) const
 {
-    return rmap(regionIndex(regionName),patchName);
+    return rmap
+    (
+        regionIndex(regionName),
+        patchName
+    );
 }
 
 labelListList regionPolyMesh::patchMapDirectMapped

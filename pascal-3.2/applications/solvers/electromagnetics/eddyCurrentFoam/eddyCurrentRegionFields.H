@@ -1,7 +1,7 @@
 
 # define setRegionScope(regionI)                                              \
                                                                               \
-    setRegionReference(regionI, fvMesh, mesh);                                \
+    setConstRegionReference(regionI, fvMesh, mesh);                           \
     setRegionReference(regionI, volScalarField, sigma);                       \
     setRegionReference(regionI, volVectorField, ARe);                         \
     setRegionReference(regionI, volVectorField, AIm);                         \

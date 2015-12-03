@@ -47,20 +47,16 @@ SourceFiles
 // TODO [High]: faceRegionAddressing and faceMap does not seem to be the same (flip-sign!!!)
 // TODO [High]: How to deal with faceRegionAddressing and faceMap, properly?
 
-
 // TODO [High]: Sort that parallel clutter out (remove local maps
 //              and return maps based on if)!!!
 
 // TODO [High]: Remove heaps of duplicated code
 
-// TODO [High]: Remove copies of mappings
+// TODO [High]: Remove copies of makeRegionPolyMeshData functions
 
 // TODO [High]: Allow default region to be absent. WE NEED A LOT OF CHECKS!!!
 
 // TODO [High]: Check if all region names are unique
-
-// TODO [High]: Implement forward (base->regionI) point mapping
-//              ala map()-functions
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +73,11 @@ class regionPolyMesh
 {
 private:
 
+    // Private data
+
+        //- Meshes data
+        mutable List<polyMesh*> polyMeshes_;
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -89,9 +90,6 @@ private:
 
             //- Create new mesh for region with index regionI
             polyMesh* newMesh(const label& regionI) const;
-
-            //- Init regions
-            virtual void initMeshes(const wordList& regionNames) const;
 
 protected:
 
@@ -112,9 +110,6 @@ protected:
         //- Processor mesh: Was the mesh split into regions
         //  AFTER parallel decomposition of processors?
         mutable bool parallelSplitRegions_;
-
-        //- Meshes data
-        mutable List<polyMesh*> meshes_;
 
         // - Is mesh initialized?
         mutable bool initialized_;
@@ -169,6 +164,9 @@ protected:
 
             //- Read region names from file
             wordList readRegionNames() const;
+
+            //- Init regions
+            virtual void initMeshes(const wordList& regionNames) const;
 
             //- Resize lists storing data
             virtual void resizeLists() const;
@@ -296,17 +294,14 @@ public:
                 return regionNames_;
             };
 
-            //- Return name of default region
-            word regionName() const
-            {
-                return regionNames_[regionIndex(polyMesh::defaultRegion)];
-            }
-
             //- Return name of region with index regionI
             word regionName(const label& regionI) const
             {
                 return regionNames_[regionI];
             }
+
+            //- Return region index for region with regionName
+            label regionIndex(const word& regionName) const;
 
             //- Return whether this is a processor mesh
             const bool& parallel() const
@@ -321,28 +316,16 @@ public:
                 return parallelSplitRegions_;
             }
 
-            //- Return region index for region with regionName
-            label regionIndex() const;
-
-            //- Return region index for region with regionName
-            label regionIndex(const word& regionName) const;
-
-            //- Return reference to mesh of default region
-            virtual const polyMesh& mesh() const
+            //- Return reference to mesh
+            polyMesh& mesh(const label& regionI) const
             {
-                return *meshes_[regionIndex(polyMesh::defaultRegion)];
+                return operator[](regionI);
             }
 
             //- Return reference to mesh
-            virtual const polyMesh& mesh(const label& regionI) const
+            polyMesh& mesh(const word& regionName) const
             {
-                return *meshes_[regionI];
-            }
-
-            //- Return reference to mesh
-            virtual const polyMesh& mesh(const word& regionName) const
-            {
-                return *meshes_[regionIndex(regionName)];
+                return operator[](regionIndex(regionName));
             }
 
             //- Return the object registry
@@ -353,11 +336,37 @@ public:
 
         // Mapping
 
-            //- Map mesh points from all non-default region and replace them
-            //  in a given point field of default region
-            void rmap
+            //- Map mesh points from default region and replace them
+            //  in a given point field of non-default region
+            void map
             (
                 pointField& givenPoints,
+                const label& regionI,
+                const word& patchName = ""
+            ) const;
+
+            //- Map mesh points from default region and replace them
+            //  in a given point field of non-default region
+            void map
+            (
+                pointField& givenPoints,
+                const word& regionName,
+                const word& patchName = ""
+            ) const;
+
+            //- Map mesh points from default region
+            //  to a new point field for non-default region
+            tmp<pointField> map
+            (
+                const label& regionI,
+                const word& patchName = ""
+            ) const;
+
+            //- Map mesh points from default region
+            //  to a new point field for non-default region
+            tmp<pointField> map
+            (
+                const word& regionName,
                 const word& patchName = ""
             ) const;
 
@@ -376,13 +385,6 @@ public:
             (
                 pointField& givenPoints,
                 const word& regionName,
-                const word& patchName = ""
-            ) const;
-
-            //- Map mesh points from all non-default regions
-            //  to a new point field for default region
-            tmp<pointField> rmap
-            (
                 const word& patchName = ""
             ) const;
 
@@ -440,22 +442,16 @@ public:
 
     // Member operators
 
-        //- Mesh access operator for default region (lookup)
-        virtual const polyMesh& operator()() const
+        //- Mesh access operator by index
+        virtual polyMesh& operator[](const label& regionI) const
         {
-            return *meshes_[regionIndex(polyMesh::defaultRegion)];
+            return *polyMeshes_[regionI];
         }
 
-        //- Mesh access operator by index (direct)
-        virtual const polyMesh& operator[](const label& regionI) const
+        //- Mesh access operator by regionName
+        polyMesh& operator[](const word& regionName) const
         {
-            return *meshes_[regionI];
-        }
-
-        //- Mesh access operator by regionName (lookup)
-        virtual const polyMesh& operator()(const word& regionName) const
-        {
-            return *meshes_[regionIndex(regionName)];
+            return operator[](regionIndex(regionName));
         }
 };
 

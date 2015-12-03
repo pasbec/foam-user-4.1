@@ -71,7 +71,7 @@ void regionPolyMesh::initMeshes(const wordList& regionNames) const
         }
 
         // Create mesh
-        meshes_[regionI] = newMesh(regionI);
+        polyMeshes_[regionI] = newMesh(regionI);
     }
 
     setParallelSplitRegions();
@@ -101,7 +101,7 @@ wordList regionPolyMesh::readRegionNames() const
 
 void regionPolyMesh::resizeLists() const
 {
-    meshes_.resize(size_, NULL);
+    polyMeshes_.resize(size_, NULL);
 
     cellRegionMap_.resize(size_, NULL);
     pointRegionMap_.resize(size_, NULL);
@@ -203,12 +203,12 @@ regionPolyMesh::regionPolyMesh
             IOobject::NO_WRITE
         )
     ),
+    polyMeshes_(List<polyMesh*>(0)),
     time_(runTime),
     parallel_(runTime.processorCase()),
     size_ (0),
     regionNames_(List<word>(0)),
     parallelSplitRegions_(0),
-    meshes_(List<polyMesh*>(0)),
     initialized_(false),
     cellRegionMap_(List<labelIOList*>(0)),
     pointRegionMap_(List<labelIOList*>(0)),
@@ -243,12 +243,12 @@ regionPolyMesh::regionPolyMesh
             IOobject::NO_WRITE
         )
     ),
+    polyMeshes_(List<polyMesh*>(0)),
     time_(runTime),
     parallel_(runTime.processorCase()),
     size_ (1 + regionNames.size()),
     regionNames_(regionNames),
     parallelSplitRegions_(0),
-    meshes_(List<polyMesh*>(0)),
     initialized_(false),
     cellRegionMap_(List<labelIOList*>(0)),
     pointRegionMap_(List<labelIOList*>(0)),
@@ -269,13 +269,6 @@ regionPolyMesh::regionPolyMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-label regionPolyMesh::regionIndex() const
-{
-    return regionIndex(polyMesh::defaultRegion);
-
-    // TODO: If default region not allocated, return -1
-}
-
 label regionPolyMesh::regionIndex(const word& regionName) const
 {
     label regionID = -1;
@@ -291,7 +284,7 @@ label regionPolyMesh::regionIndex(const word& regionName) const
     // TODO: Catch default region here and return -1
     if(regionID == -1)
     {
-        FatalErrorIn("regionPolyMesh::regionIndex")
+        FatalErrorIn("regionPolyMesh::regionIndex(...)")
             << "Region " << regionName
             << " is not part of this regionPolyMesh!"
             << abort(FatalError);
