@@ -18,11 +18,21 @@ blockMesh
 # Run snappyHexMesh (needs OpenFOAM 2.2.0 + for featureSnapping)
 snappyHexMesh -overwrite
 
+# Remove leftovers from snappyHexMesh
+rm -rf 'constant/cellLevel' \
+        'constant/polyMesh/cellLevel'* \
+        'constant/pointLevel' \
+        'constant/polyMesh/pointLevel'* \
+        'constant/polyMesh/refinementHistory'* \
+        'constant/polyMesh/surfaceIndex'* \
+        > /dev/null 2>&1
+
 # Remove empty patches
 createPatch -overwrite
 
 # Copy new polyMesh files to storage folder
-cp 'constant/polyMesh/boundary' \
+cp 'constant/polyMesh/blockMeshDict' \
+   'constant/polyMesh/boundary' \
    'constant/polyMesh/faces' \
    'constant/polyMesh/neighbour' \
    'constant/polyMesh/owner' \

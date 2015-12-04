@@ -56,20 +56,22 @@ if [[ $flagClean -eq 1 ]]; then
 
 fi
 
-if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]] || \
-   [[ $flagPrepare -eq 1 && ! -e '0/region_conductor' ]] || \
-   [[ $flagPrepare -eq 1 && ! -e 'constant/polyMesh' ]] || \
-   [[ $flagPrepare -eq 1 && ! -e 'constant/region_conductor/polyMesh' ]]; then
+if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
 
     # Restore polymesh from org backup
     restorePolyMeshOrg
+
+    # Remove all zones
+    rm 'constant/polyMesh/cellZones' > /dev/null 2>&1
+    rm 'constant/polyMesh/faceZones' > /dev/null 2>&1
+    rm 'constant/polyMesh/pointZones' > /dev/null 2>&1
 
     if [[ $flagParallel2 -eq 1 ]]; then
 
         # TODO?
         echo "Parallel 2 not supported!"
         exit 1
-
+        
     else
 
         # Create new topoSets
