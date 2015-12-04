@@ -61,6 +61,17 @@ regionDynamicFvMesh::newMesh(const label& regionI) const
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
+void regionDynamicFvMesh::resizeLists() const
+{
+    regionFvMesh::resizeLists();
+
+    isFeMotionSolver_.resize(size_, NULL);
+    isFvMotionSolver_.resize(size_, NULL);
+
+    dynamicFvMeshesData_.resize(size_, NULL);
+    dynamicFvMeshes_.resize(size_, NULL);
+}
+
 void regionDynamicFvMesh::initMeshes(const wordList& regionNames) const
 {
     size_ = 1 + regionNames.size();
@@ -102,17 +113,6 @@ void regionDynamicFvMesh::initMeshes(const wordList& regionNames) const
     setParallelSplitRegions();
 
     initialized_ = true;
-}
-
-void regionDynamicFvMesh::resizeLists() const
-{
-    regionFvMesh::resizeLists();
-
-    isFeMotionSolver_.resize(size_, NULL);
-    isFvMotionSolver_.resize(size_, NULL);
-
-    dynamicFvMeshesData_.resize(size_, NULL);
-    dynamicFvMeshes_.resize(size_, NULL);
 }
 
 

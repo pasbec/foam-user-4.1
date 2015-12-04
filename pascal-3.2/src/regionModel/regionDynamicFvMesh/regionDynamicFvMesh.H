@@ -92,11 +92,11 @@ protected:
 
         // Helper functions for constructor
 
-            //- Init regions
-            virtual void initMeshes(const wordList& regionNames) const;
-
             //- Resize lists storing data
             virtual void resizeLists() const;
+
+            //- Init regions
+            virtual void initMeshes(const wordList& regionNames) const;
 
 public:
 

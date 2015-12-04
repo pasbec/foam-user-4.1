@@ -159,17 +159,17 @@ protected:
 
         // Helper functions for constructor
 
-            //- Set parallel split type
-            void setParallelSplitRegions() const;
-
             //- Read region names from file
             wordList readRegionNames() const;
+
+            //- Resize lists storing data
+            virtual void resizeLists() const;
 
             //- Init regions
             virtual void initMeshes(const wordList& regionNames) const;
 
-            //- Resize lists storing data
-            virtual void resizeLists() const;
+            //- Set parallel split type
+            void setParallelSplitRegions() const;
 
         // Make demand-driven data
 

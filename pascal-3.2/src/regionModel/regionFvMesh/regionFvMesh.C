@@ -54,6 +54,13 @@ fvMesh* regionFvMesh::newMesh(const label& regionI) const
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
+void regionFvMesh::resizeLists() const
+{
+    regionPolyMesh::resizeLists();
+
+    fvMeshes_.resize(size_, NULL);
+}
+
 void regionFvMesh::initMeshes(const wordList& regionNames) const
 {
     size_ = 1 + regionNames.size();
@@ -78,13 +85,6 @@ void regionFvMesh::initMeshes(const wordList& regionNames) const
     setParallelSplitRegions();
 
     initialized_ = true;
-}
-
-void regionFvMesh::resizeLists() const
-{
-    regionPolyMesh::resizeLists();
-
-    fvMeshes_.resize(size_, NULL);
 }
 
 

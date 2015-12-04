@@ -53,32 +53,6 @@ polyMesh* regionPolyMesh::newMesh(const label& regionI) const
     );
 }
 
-void regionPolyMesh::initMeshes(const wordList& regionNames) const
-{
-    size_ = 1 + regionNames.size();
-    regionNames_ = regionNames;
-
-    resizeLists();
-
-    forAll(regionNames_, regionI)
-    {
-        if (debug)
-        {
-            Info << "regionPolyMesh::regionPolyMesh(...) : "
-                << "Create mesh for region "
-                << regionName(regionI)
-                << endl;
-        }
-
-        // Create mesh
-        polyMeshes_[regionI] = newMesh(regionI);
-    }
-
-    setParallelSplitRegions();
-
-    initialized_ = true;
-}
-
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -115,6 +89,32 @@ void regionPolyMesh::resizeLists() const
     cellMap_.resize(size_, NULL);
     pointMap_.resize(size_, NULL);
     faceMap_.resize(size_, NULL);
+}
+
+void regionPolyMesh::initMeshes(const wordList& regionNames) const
+{
+    size_ = 1 + regionNames.size();
+    regionNames_ = regionNames;
+
+    resizeLists();
+
+    forAll(regionNames_, regionI)
+    {
+        if (debug)
+        {
+            Info << "regionPolyMesh::regionPolyMesh(...) : "
+                << "Create mesh for region "
+                << regionName(regionI)
+                << endl;
+        }
+
+        // Create mesh
+        polyMeshes_[regionI] = newMesh(regionI);
+    }
+
+    setParallelSplitRegions();
+
+    initialized_ = true;
 }
 
 void regionPolyMesh::setParallelSplitRegions() const
