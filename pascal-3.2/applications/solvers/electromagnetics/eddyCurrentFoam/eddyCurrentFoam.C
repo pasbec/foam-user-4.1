@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
     if (!args.optionFound("overwrite"))
     {
         runTime++;
-    }
 
-    control.msg().time();
+        control.msg().time();
+    }
 
 #   include "eddyCurrentAVloop.H"
 
