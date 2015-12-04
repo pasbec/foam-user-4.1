@@ -38,6 +38,8 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::validOptions.insert("overwrite", "");
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createRegionMesh.H"
@@ -53,20 +55,22 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    while (runTime.run())
+    runTime++;
+
+    control.msg().time();
+
+#   include "eddyCurrentAVloop.H"
+
+#   include "eddyCurrentDerivedFields.H"
+
+    if (!args.optionFound("overwrite"))
     {
         runTime++;
-
-        control.msg().time();
-
-#       include "eddyCurrentAVloop.H"
-
-#       include "eddyCurrentDerivedFields.H"
-
-        runTime.write();
-
-        control.msg().executionTime();
     }
+
+    runTime.write();
+
+    control.msg().executionTime();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

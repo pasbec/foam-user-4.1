@@ -163,6 +163,12 @@ private:
 
         //- Inline helper
 
+            //- Check if mesh is 3D
+            inline bool meshIs3Dimensional() const
+            {
+                return (mesh_[baseRegion_].nGeometricD() == 3);
+            };
+
             //- Check if relax factor is valid
             inline bool checkRelax() const
             {
@@ -293,6 +299,17 @@ public:
             };
 
         // Solution properties
+
+            //- Mesh geometry is 3D
+            bool meshIs3D() const
+            {
+                if (!meshIs3Dimensional())
+                {
+                    Vres_ = 0.0;
+                }
+
+                return meshIs3Dimensional();
+            };
 
             //- Reference to solution tolerance
             const scalar& tolerance() const

@@ -79,6 +79,7 @@ void eddyCurrentControl::timeReset()
 {
     readDictDataIfModified();
 
+    stop_ = false;
     loop_ = false;
     iter_ = -1;
 
@@ -87,6 +88,11 @@ void eddyCurrentControl::timeReset()
     subTol_ = 1.0;
     subAdict_ = Adict_;
     subVdict_ = Vdict_;
+
+    AVres_ = subTol_-SMALL;
+    Ares_ = AVres_;
+    Vres_ = AVres_;
+
 }
 
 void eddyCurrentControl::decreaseSubTolerance() const
@@ -105,7 +111,9 @@ void eddyCurrentControl::decreaseSubTolerance() const
         subTol_ = max(subTol_, tol_);
     }
 
-    Info << nl << "Tolerance = " << subTol_
+    if (firstIteration()) Info << nl;
+
+    Info << "Tolerance = " << subTol_
         << " / " << tol_ << endl << nl;
 
     subAdict_.set<scalar>("tolerance", subTol_);
@@ -254,7 +262,7 @@ const bool& eddyCurrentControl::loop()
     {
         iter_++;
 
-        if (!subLoop())
+        if (!subLoop() && meshIs3Dimensional())
         {
             decreaseSubTolerance();
         }

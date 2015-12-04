@@ -128,7 +128,16 @@
             AcmptEqn.insertEquationCoupling(1, 0, -control.omega() * sigma);
 
             // Solve A
-            BlockSolverPerformance<vector2> AcmptEqnPerf = AcmptEqn.solve(control.Adict());
+            BlockSolverPerformance<vector2> AcmptEqnPerf("A", "A");
+            // TODO TEST: Prevent segfault for "0"-Solution
+            scalar preResidual= gMax(mag(AcmptEqn.residual(ACmpt, AcmptEqn.source())));
+            if (preResidual > 0)
+            {
+                AcmptEqnPerf = AcmptEqn.solve(control.Adict());
+            }
+
+//             // Solve A
+//             AcmptEqnPerf = AcmptEqn.solve(control.Adict());
 
             // Store residuals
             scalar resAcmptRe = AcmptEqnPerf.initialResidual().component(0);

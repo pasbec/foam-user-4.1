@@ -21,7 +21,7 @@
     while (control.loop())
     {
         // Init gradient of V in first iteration
-        if (control.firstIter())
+        if (control.meshIs3D() && control.firstIter())
         {
             updateGradientV(control.conductor());
         }
@@ -37,20 +37,24 @@
 #           include "eddyCurrentAEqn.H"
         }
 
-        // Update A and sigma
-        updateSigmaA(control.conductor());
-
-        // Solve for V in conductor region
+        // Only if mesh is 3D
+        if (control.meshIs3D())
         {
-            setRegionScope(control.conductor());
+            // Update A and sigma
+            updateSigmaA(control.conductor());
 
-#           include "eddyCurrentVEqn.H"
+            // Solve for V in conductor region
+            {
+                setRegionScope(control.conductor());
+
+#               include "eddyCurrentVEqn.H"
+            }
+
+            // Update gradient of V
+            updateGradientV(control.conductor());
+
+            control.subWrite();
         }
-
-        // Update gradient of V
-        updateGradientV(control.conductor());
-
-        control.subWrite();
     }
 
     Info << nl;
