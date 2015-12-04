@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     {
         runTime++;
 
-        Info << "Time = " << runTime.value() << nl << endl;
+        control.msg().time();
 
 #       include "eddyCurrentAVloop.H"
 
@@ -65,14 +65,12 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-        Info << "ExecutionTime = "
-            << scalar(runTime.elapsedCpuTime()) << " s"
-            << nl << endl << endl;
+        control.msg().executionTime();
     }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info << "End" << nl << endl;
+    control.msg().end();
 
     return(0);
 }

@@ -128,15 +128,17 @@ const bool& eddyCurrentControl::subLoop() const
 
 eddyCurrentControl::eddyCurrentControl
 (
-    const regionFvMesh& rmesh,
-    const word& name
+    const regionFvMesh& mesh,
+    const word& name,
+    const bool& master
 )
 :
     solverControl<regionFvMesh>
     (
-        rmesh,
+        mesh,
         name,
-        rmesh.regionIndex(polyMesh::defaultRegion)
+        master,
+        mesh.regionIndex(polyMesh::defaultRegion)
     ),
     conductorRegionName_
     (

@@ -88,9 +88,6 @@ Description
 
 int main(int argc, char *argv[])
 {
-    // Solver debug flag
-    bool debug = true;
-
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createRegionDynamicFvMesh.H"
@@ -99,6 +96,9 @@ int main(int argc, char *argv[])
 #   include "eddyCurrentConductorFields.H"
 
     // TODO: From here!!!
+
+    // Solver debug flag
+    bool debug = true;
 
 #   include "initRegionCourantNo.H"
 
@@ -111,15 +111,18 @@ int main(int argc, char *argv[])
 #   include "initFluidContinuityErrs.H"
 #   include "initFluidVolume.H"
 
+#ifndef namespaceFoam
+#define namespaceFoam
     using namespace Foam;
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info << nl << "Starting time loop" << nl << endl;
+    control.msg().startTimeLoop();
 
     while (runTime.run())
     {
-        Info << "Time step = " << runTime.timeIndex() << nl << endl;
+        control.msg().timeStep();
 
 // TODO [High]: Do CourantNo reset in regionControl
         // Reset global Courant No
@@ -157,7 +160,7 @@ int main(int argc, char *argv[])
 
         runTime++;
 
-        Info << "Time = " << runTime.value() << nl << endl;
+        control.msg().time();
 
         // ==================================================================//
         // Move mesh of fluid region and do prediction step
@@ -201,6 +204,7 @@ int main(int argc, char *argv[])
             // Grab current points of dynamic region as new point field
             pointField newPoints = mesh_[control.dynamic()].points();
 
+// TODO/FIXME: Really necessary?
 //             // Correct points for 2D-motion of dynamic region
 //             twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
 //             dynamicTwoDPointCorr.correctPoints(newPoints);
@@ -316,14 +320,12 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-        Info << "ExecutionTime = "
-            << scalar(runTime.elapsedCpuTime()) << " s"
-            << nl << endl << endl;
+        control.msg().executionTime();
     }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info << "End" << nl << endl;
+    control.msg().end();
 
     return(0);
 }

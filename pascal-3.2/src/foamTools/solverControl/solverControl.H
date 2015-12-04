@@ -61,6 +61,85 @@ class solverControl
 :
     public IOdictionary
 {
+public:
+
+    // Message class
+    class solverControlMessages
+    {
+    private:
+
+        // Private Data
+
+            // Basic
+
+                //- Reference to time
+                const Time& time_;
+
+                //- Reference to region mesh
+                const MESH& mesh_;
+
+        // Private Member Functions
+
+            //- Disallow default bitwise copy construct
+            solverControlMessages(const solverControlMessages&);
+
+            //- Disallow default bitwise assignment
+            void operator=(const solverControlMessages&);
+
+
+
+    public:
+
+        // Constructors
+
+            //- Construct from mesh
+            solverControlMessages(const MESH& mesh)
+            :
+            time_(mesh.time()),
+            mesh_(mesh)
+            {};
+
+        // Member Functions
+
+            //- Info about starting time loop
+            void startTimeLoop() const
+            {
+                Info << nl << "Starting time loop"
+                    << nl << endl;
+            }
+
+            //- Info about current time step
+            void timeStep() const
+            {
+                Info << "Time step = "
+                    << time_.timeIndex()
+                    << nl << endl;
+            };
+
+            //- Print current time
+            void time() const
+            {
+                Info << "Time = "
+                    << time_.value()
+                    << nl << endl;
+            };
+
+            //- Print execution time
+            void executionTime() const
+            {
+                Info << "ExecutionTime = "
+                    << scalar(time_.elapsedCpuTime()) << " s"
+                    << nl << endl << endl;
+            };
+
+            //- Print end statement
+            void end() const
+            {
+                Info << "End" << nl << endl;
+            };
+
+    };
+
 protected:
 
     // Protected Data
@@ -72,6 +151,9 @@ protected:
 
             //- Reference to region mesh
             const MESH& mesh_;
+
+            //- Master control
+            const bool master_;
 
             //- Name of base region
             const word baseRegionName_;
@@ -87,7 +169,24 @@ protected:
             //- Solution dictionary (of base region)
             IOdictionary& baseSolutionDict_;
 
+        // Master control
+
+            //- Message
+            solverControlMessages* msg_;
+
     // Protected Member Functions
+
+        //- Error if not master control
+        void errorIfNotMaster() const
+        {
+            if (!master_)
+            {
+                FatalErrorIn("solverControl::msg()")
+                    << "This solverControl instantiation is NOT"
+                    << " the master control."
+                    << abort(FatalError);
+            }
+        };
 
 private:
 
@@ -110,12 +209,16 @@ public:
         (
             const MESH& mesh,
             const word& name = "solver",
+            const bool& master = true,
             const label& regionI0 = -1
         );
 
     // Destructor
 
-        virtual ~solverControl() {};
+        virtual ~solverControl()
+        {
+            if (master_) delete msg_;
+        };
 
     // Member Functions
 
@@ -137,6 +240,16 @@ public:
             const IOdictionary& properties() const
             {
                 return propDict_;
+            };
+
+        // Master control
+
+            //- Message
+            const solverControlMessages& msg() const
+            {
+                errorIfNotMaster();
+
+                return *msg_;
             };
 
         // Properties

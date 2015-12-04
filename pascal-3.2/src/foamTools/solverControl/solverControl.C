@@ -44,6 +44,7 @@ solverControl<MESH>::solverControl
 (
     const MESH& mesh,
     const word& name,
+    const bool& master,
     const label& regionI0
 )
 :
@@ -61,6 +62,7 @@ solverControl<MESH>::solverControl
     ),
     time_(mesh.time()),
     mesh_(mesh),
+    master_(master),
     baseRegionName_(polyMesh::defaultRegion),
     baseRegion_(regionI0),
     propDict_
@@ -77,8 +79,10 @@ solverControl<MESH>::solverControl
             )
         )
     ),
-    baseSolutionDict_(mesh_.solutionDict())
+    baseSolutionDict_(mesh_.solutionDict()),
+    msg_(NULL)
 {
+    if (master) msg_ = new solverControlMessages(mesh_);
 }
 
 

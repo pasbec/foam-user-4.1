@@ -96,8 +96,9 @@ public:
         //- Construct from mesh and name
         interTrackControl
         (
-            const regionFvMesh& rmesh,
-            const word& name = "interTrack"
+            const regionFvMesh& mesh,
+            const word& name = "interTrack",
+            const bool& master = true
         );
 
     // Destructor

@@ -42,18 +42,20 @@ defineTypeNameAndDebug(interTrackEddyCurrentControl, 0);
 
 interTrackEddyCurrentControl::interTrackEddyCurrentControl
 (
-    const regionDynamicFvMesh& rmesh,
-    const word& name
+    const regionDynamicFvMesh& mesh,
+    const word& name,
+    const bool& master
 )
 :
     solverControl<regionDynamicFvMesh>
     (
-        rmesh,
+        mesh,
         name,
-        rmesh.regionIndex(polyMesh::defaultRegion)
+        master,
+        mesh.regionIndex(polyMesh::defaultRegion)
     ),
-    tramag_(rmesh, name),
-    eddy_(rmesh, name)
+    tramag_(mesh, name, false),
+    eddy_(mesh, name, false)
 {
 }
 

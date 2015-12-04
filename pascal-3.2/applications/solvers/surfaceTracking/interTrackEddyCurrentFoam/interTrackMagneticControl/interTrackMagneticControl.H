@@ -101,8 +101,9 @@ public:
         //- Construct from mesh and name
         interTrackMagneticControl
         (
-            const regionDynamicFvMesh& rmesh,
-            const word& name = "interTrackMagnetic"
+            const regionDynamicFvMesh& mesh,
+            const word& name = "interTrackMagnetic",
+            const bool& master = true
         );
 
     // Destructor

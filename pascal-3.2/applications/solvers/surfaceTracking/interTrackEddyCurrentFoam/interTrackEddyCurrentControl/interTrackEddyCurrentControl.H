@@ -102,7 +102,8 @@ public:
         interTrackEddyCurrentControl
         (
             const regionDynamicFvMesh& rmesh,
-            const word& name = "interTrackEddyCurrent"
+            const word& name = "interTrackEddyCurrent",
+            const bool& master = true
         );
 
     // Destructor

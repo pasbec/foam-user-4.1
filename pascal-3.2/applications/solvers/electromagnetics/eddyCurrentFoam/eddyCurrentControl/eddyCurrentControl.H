@@ -241,8 +241,9 @@ public:
         //- Construct from mesh and name
         eddyCurrentControl
         (
-            const regionFvMesh& rmesh,
-            const word& name = "eddyCurrent"
+            const regionFvMesh& mesh,
+            const word& name = "eddyCurrent",
+            const bool& master = true
         );
 
     // Destructor
