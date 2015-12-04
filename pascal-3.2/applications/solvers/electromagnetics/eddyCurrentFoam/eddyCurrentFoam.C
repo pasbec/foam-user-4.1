@@ -55,18 +55,16 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    runTime++;
+    if (!args.optionFound("overwrite"))
+    {
+        runTime++;
+    }
 
     control.msg().time();
 
 #   include "eddyCurrentAVloop.H"
 
 #   include "eddyCurrentDerivedFields.H"
-
-    if (!args.optionFound("overwrite"))
-    {
-        runTime++;
-    }
 
     runTime.write();
 
