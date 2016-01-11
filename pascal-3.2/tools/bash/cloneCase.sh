@@ -10,6 +10,9 @@ set -x
 fromCase="$1"
 toCase="$2"
 
+[[ -z "$fromCase" || -z "$toCase" ]] && exit 1
+
+
 if [[ ! -d "$toCase" ]]; then
     mkdir $toCase || exit 1
 fi
