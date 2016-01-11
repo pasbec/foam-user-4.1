@@ -41,17 +41,9 @@ cellSet cellSet_geometry_frame_old        remove
 
 # Free
 
-cellSet cellSet_geometry_free_dynamic     new    boxToCell      (-0.03500 -1.00000  0.00000) ( 0.03500  1.00000  0.05000)
-cellSet cellSet_geometry_free_dynamic     delete setToCell      cellSet_geometry_fluid_dynamic
-cellSet cellSet_geometry_free_dynamic_old remove
+cellSet cellSet_geometry_free_dynamic     new    boxToCell      (-0.03500 -1.00000  0.02000) ( 0.03500  1.00000  0.05000)
 
-cellSet cellSet_geometry_free_static      new    setToCell      cellSet_geometry_all
-cellSet cellSet_geometry_free_static      delete setToCell      cellSet_geometry_fluid
-cellSet cellSet_geometry_free_static      delete setToCell      cellSet_geometry_wafer
-cellSet cellSet_geometry_free_static      delete setToCell      cellSet_geometry_substrate
-cellSet cellSet_geometry_free_static      delete setToCell      cellSet_geometry_frame
-cellSet cellSet_geometry_free_static      delete setToCell      cellSet_geometry_free_dynamic
-cellSet cellSet_geometry_free_static_old  remove
+cellSet cellSet_geometry_free_static      new    boxToCell      (-0.03500 -1.00000  0.05000) ( 0.03500  1.00000  0.09000)
 
 cellSet cellSet_geometry_free             new    setToCell      cellSet_geometry_free_dynamic
 cellSet cellSet_geometry_free             add    setToCell      cellSet_geometry_free_static
@@ -124,8 +116,9 @@ cellSet cellSet_region_dynamic            add    setToCell      cellSet_geometry
 cellSet cellSet_region_dynamic_old        remove
 
 cellSet cellSet_region_static             new    setToCell      cellSet_geometry_all
-cellSet cellSet_region_static             delete setToCell      cellSet_region_fluid
-cellSet cellSet_region_static             delete setToCell      cellSet_region_dynamic
+cellSet cellSet_region_static             delete setToCell      cellSet_geometry_fluid_dynamic
+cellSet cellSet_region_static             delete setToCell      cellSet_geometry_frame_dynamic
+cellSet cellSet_region_static             delete setToCell      cellSet_geometry_free_dynamic
 cellSet cellSet_region_static_old         remove
 
 cellSet cellSet_region_conductor          new    setToCell      cellSet_geometry_fluid
