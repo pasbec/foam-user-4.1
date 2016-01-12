@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
         // ==================================================================//
         // Move mesh of dynamic region
         // ==================================================================//
-
+// TODO: WARNING - Make sure we have all the same mesh points on restart!!!
         if (mfUpdate && (mfUpdateCounter > 0))
         {
             // Calculate mesh velocity at dynamic/fluid-interface
