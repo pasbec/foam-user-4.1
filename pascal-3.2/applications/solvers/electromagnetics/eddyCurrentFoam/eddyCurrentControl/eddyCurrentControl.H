@@ -214,13 +214,13 @@ private:
             //- Check convergence state
             inline bool checkConvergence() const
             {
-                return (AVres_ < tol_);
+                return (AVres_ <= tol_);
             };
 
             //- Check sub-convergence state
             inline bool checkSubConvergence() const
             {
-                return (AVres_ < subTol_);
+                return (AVres_ <= subTol_);
             };
 
         //- Helper

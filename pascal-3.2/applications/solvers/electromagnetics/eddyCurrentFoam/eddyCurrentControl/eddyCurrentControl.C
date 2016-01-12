@@ -299,7 +299,7 @@ void eddyCurrentControl::subWrite() const
      && !checkConvergence()
     )
     {
-        Info << "Write current solution" << endl;
+        Info << "Write current solution" << endl << nl;
 
         Time& time = const_cast<Time&>(time_);
 

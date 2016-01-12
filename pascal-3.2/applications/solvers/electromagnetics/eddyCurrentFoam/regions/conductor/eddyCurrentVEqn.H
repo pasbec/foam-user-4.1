@@ -80,14 +80,14 @@
 //         VReEqn -= control.omega() * sigma * fvc::div(AIm);
 //         VImEqn += control.omega() * sigma * fvc::div(ARe);
 
-//         // Restore solution level
+//         // Restore solution level from average
 //         cVRe += VReAverage;
 //         cVIm += VImAverage;
 
         // Solve V-equations
         // NOTE: Currently a deflated solver is necessary
-        // TODO: WARNING if no deflated solver is used!
         //       as both matrices are kept singluar!
+        // TODO: Warning if no deflated solver is used!
         lduSolverPerformance VReEqnPerf = VReEqn.solve(control.Vdict());
         lduSolverPerformance VImEqnPerf = VImEqn.solve(control.Vdict());
 
