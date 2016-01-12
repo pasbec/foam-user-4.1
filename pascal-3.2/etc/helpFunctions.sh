@@ -79,7 +79,7 @@ runApplication ()
     shift $((OPTIND-1))
 
     APP_RUN=$1; shift
-    APP_NAME=${APP_RUN##*/}
+    APP_NAME=$(basename $APP_RUN)
 
     if [ -z $LOG_NAME ] ; then
         if [ -z $LOG_REGION ] ; then
@@ -90,9 +90,14 @@ runApplication ()
     fi
 
     if [ -f $LOG_NAME ] ; then
-        echo "$APP_NAME already run on $PWD: remove log file to run"
+        echo "$APP_NAME already run: remove log file to run"
     else
-        echo "Running $APP_NAME on $PWD"
+        printf "Running $APP_NAME"
+        if [ ! -z $LOG_REGION ]; then
+            printf " for region $LOG_REGION\n"
+        else
+            printf "\n"
+        fi
         $APP_RUN $* > $LOG_NAME 2>&1
         return $?
     fi
@@ -119,7 +124,7 @@ runParallel ()
     shift $((OPTIND-1))
 
     APP_RUN=$1; shift
-    APP_NAME=${APP_RUN##*/}
+    APP_NAME=$(basename $APP_RUN)
 
     if [ -z $LOG_NAME ] ; then
         if [ -z $LOG_REGION ] ; then
@@ -130,9 +135,14 @@ runParallel ()
     fi
 
     if [ -f $LOG_NAME ] ; then
-        echo "$APP_NAME already run on $PWD: remove log file to run"
+        echo "$APP_NAME already run: remove log file to run"
     else
-        echo "Running $APP_NAME in parallel on $PWD using $APP_PROCS processes"
+        printf "Running $APP_NAME in parallel using $APP_PROCS processes"
+        if [ ! -z $LOG_REGION ]; then
+            printf " for region $LOG_REGION\n"
+        else
+            printf "\n"
+        fi
     if [ -z "$WM_MPIRUN_PROG" ]
     then
         mpirunProg=mpirun

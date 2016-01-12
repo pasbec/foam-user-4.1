@@ -99,9 +99,9 @@ cleanTimeDirectoriesParallel ()
 cleanCase ()
 {
     if [[ -z "$1" ]]; then
-        echo "Cleaning $PWD case"
+        echo "Cleaning case"
     else
-        echo "Cleaning $PWD $1"
+        echo "Cleaning region $1"
     fi
 
     cleanPolyMesh "$1"
