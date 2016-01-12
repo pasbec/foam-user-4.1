@@ -38,6 +38,9 @@
         // Loop over components
         for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
         {
+            // Only solve for valid directions
+            if (control.solutionDir()[cmpt] < 1) continue;
+
             // Create component fields
             volScalarField AReCmpt
             (

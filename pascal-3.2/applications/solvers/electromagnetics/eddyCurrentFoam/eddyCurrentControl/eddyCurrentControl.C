@@ -191,10 +191,19 @@ eddyCurrentControl::eddyCurrentControl
     subTol_(1.0),
     subAdict_(Adict_),
     subVdict_(Vdict_),
+    mesh3D_((mesh_[baseRegion_].nGeometricD() == 3)),
+    solDir_(mesh_[baseRegion_].geometricD()),
     AVres_(subTol_-SMALL),
     Ares_(AVres_),
     Vres_(AVres_)
 {
+    if (!mesh3D_)
+    {
+        Vres_ = 0.0;
+
+        solDir_ *= -1;
+    }
+
     // TODO: Check tol_ < 1 ???
     // TODO: Check maxIter_ > 0
     // TODO: Check maxIter_ > minIter_
@@ -262,7 +271,7 @@ const bool& eddyCurrentControl::loop()
     {
         iter_++;
 
-        if (!subLoop() && meshIs3Dimensional())
+        if (!subLoop() && mesh3D_)
         {
             decreaseSubTolerance();
         }
@@ -305,7 +314,8 @@ void eddyCurrentControl::subWrite() const
 
         // TODO: Why is writeNow() not const,
         //       but write() is?
-        time.writeNow();
+        // TODO: This takes to much space for interTrackEddyCurrentFoam! (DISABLED FOR NOW)
+//         time.writeNow();
     }
 }
 

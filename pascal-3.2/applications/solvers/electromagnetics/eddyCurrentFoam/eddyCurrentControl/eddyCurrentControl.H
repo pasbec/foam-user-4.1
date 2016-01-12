@@ -142,6 +142,12 @@ private:
             //- Temporary copy of V-solution dictionary
             mutable dictionary subVdict_;
 
+            //- Is mesh 3D?
+            mutable bool mesh3D_;
+
+            //- Solution direction
+            mutable Vector<label> solDir_;
+
         // Solution residual variables
 
             //- AV-residual
@@ -162,12 +168,6 @@ private:
         void operator=(const eddyCurrentControl&);
 
         //- Inline helper
-
-            //- Check if mesh is 3D
-            inline bool meshIs3Dimensional() const
-            {
-                return (mesh_[baseRegion_].nGeometricD() == 3);
-            };
 
             //- Check if relax factor is valid
             inline bool checkRelax() const
@@ -303,12 +303,13 @@ public:
             //- Mesh geometry is 3D
             bool meshIs3D() const
             {
-                if (!meshIs3Dimensional())
-                {
-                    Vres_ = 0.0;
-                }
+                return mesh3D_;
+            };
 
-                return meshIs3Dimensional();
+            //- Mesh solution direction
+            const Vector<label>& solutionDir() const
+            {
+                return solDir_;
             };
 
             //- Reference to solution tolerance
