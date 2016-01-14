@@ -18,3 +18,9 @@
         pB == 0.5 * physicalConstant::rMu0
             * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
     }
+
+    // Derived fields in conductor region
+    {
+        FL_.mapExtrapolate(control.conductor());
+        pB_.mapExtrapolate(control.conductor());
+    }

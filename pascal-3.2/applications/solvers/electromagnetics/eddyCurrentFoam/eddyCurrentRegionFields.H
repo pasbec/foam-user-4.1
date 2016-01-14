@@ -6,7 +6,9 @@
     setRegionReference(regionI, volVectorField, ARe);                         \
     setRegionReference(regionI, volVectorField, AIm);                         \
     setRegionReference(regionI, volVectorField, VReGrad);                     \
-    setRegionReference(regionI, volVectorField, VImGrad);
+    setRegionReference(regionI, volVectorField, VImGrad);                     \
+    setRegionReference(regionI, volVectorField, FL);                          \
+    setRegionReference(regionI, volScalarField, pB);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -109,3 +111,51 @@
         calculatedFvPatchField<vector>::typeName
     );
     Info << nl;
+
+
+    // Lorentz force
+    infoCreateRegionField(FL);
+    regionVolVectorField FL_
+    (
+        IOobject
+        (
+            "FL",
+            runTime.timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensioned<vector>
+        (
+            word(),
+            dimMass/pow(dimLength,2)/pow(dimTime,2),
+            pTraits<vector>::zero
+        ),
+        calculatedFvPatchField<vector>::typeName
+    );
+    Info << endl;
+
+
+    // Lorentz force
+    infoCreateRegionField(pB);
+    regionVolScalarField pB_
+    (
+        IOobject
+        (
+            "pB",
+            runTime.timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensioned<scalar>
+        (
+            word(),
+            dimMass/dimLength/pow(dimTime,2),
+            pTraits<scalar>::zero
+        ),
+        calculatedFvPatchField<scalar>::typeName
+    );
+    Info << endl;
