@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
 #   include "eddyCurrentDerivedFields.H"
 
-    runTime.write();
+    runTime.writeNow();
 
     control.msg().executionTime();
 
