@@ -176,6 +176,36 @@ class vertices(object):
 
     # ----------------------------------------------------------------------- #
 
+    def copyTranslate(self, par1, verticeLabels, direction):
+
+        if not (type(par1) == int \
+            and type(direction) == list \
+            and len(direction) == 3):
+
+            raise KeyError()
+
+        if type(verticeLabels) == int:
+            verticeLabels = [ verticeLabels ]
+
+        if not type(verticeLabels) == list: raise KeyError()
+
+        for verticeLabel in verticeLabels:
+
+            originPoint = self.points[self.labelIndex[verticeLabel]]
+
+            translatedPoint = \
+                [ originPoint[i] + direction[i] for i in range(3)]
+
+            if len(verticeLabels) == 1:
+                label = par1
+
+            else:
+                label = verticeLabel + par1
+
+            self.set(label, translatedPoint)
+
+    # ----------------------------------------------------------------------- #
+
     def write(self):
 
         for vertice, verticeLabel in enumerate(self.labels):
@@ -184,6 +214,13 @@ class vertices(object):
             for component in self.points[vertice]:
                 wstr += str(float(component)) + " "
             wstr += ")"
+
+        # ------------------------------------------------------------------- #
+
+            wstr += " // # " + str(verticeLabel)
+
+        # ------------------------------------------------------------------- #
+
             self.io.write(wstr)
 
 
@@ -957,6 +994,30 @@ class blocks(object):
 
         self._setNeighbourData(block)
 
+    def copyShiftVerticeLabels(self, shift, blockLabels, verticeLebelShift):
+
+        if not (type(shift) == int \
+            and type(verticeLebelShift) == int):
+
+            raise KeyError()
+
+        if type(blockLabels) == int:
+            blockLabels = [ blockLabels ]
+
+        if not type(blockLabels) == list: raise KeyError()
+
+        for blockLabel in blockLabels:
+
+            originVerticeLables = \
+                self.blockVerticeLabels[self.labelIndex[blockLabel]]
+
+            shiftedVerticeLables = \
+                [ originVerticeLables[l] + verticeLebelShift for l in range(8)]
+
+            label = blockLabel + shift
+
+            self.set(label, shiftedVerticeLables)
+
     # ----------------------------------------------------------------------- #
 
     def write(self):
@@ -1005,6 +1066,10 @@ class blocks(object):
             for grading in self.gradings[block]:
                 wstr += str(grading) + " "
             wstr += ")"
+
+        # ------------------------------------------------------------------- #
+
+            wstr += " // # " + str(blockLabel)
 
             self.io.write(wstr, ind=False)
 
