@@ -14,6 +14,9 @@ cp -r 'constant/polyMesh.org/blockMeshDict.py' 'constant/polyMesh/'
 
 # Run blockMesh
 blockMesh
+rm -f 'constant/polyMesh/cellZones'
+rm -f 'constant/polyMesh/faceZones'
+rm -f 'constant/polyMesh/pointZones'
 
 # Mirror mesh
 cp 'system/mirrorMeshDict.x' 'system/mirrorMeshDict'
