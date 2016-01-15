@@ -28,6 +28,7 @@ mirrorMesh
 surfaceFeatureExtract
 
 # Run snappyHexMesh (needs OpenFOAM 2.2.0 + for featureSnapping)
+cp 'system/snappyHexMeshDict.stage1' 'system/snappyHexMeshDict'
 snappyHexMesh -overwrite
 
 # Remove leftovers from snappyHexMesh

@@ -22,7 +22,10 @@ geo_cos45      = m.cos(45*geo_rad)
 geo_sin45      = m.sin(45*geo_rad)
 
 geo_f001       =  0.25
-geo_f112       =  0.50
+geo_f112       =  1.0 # 0.25
+
+#geo_inflate_radius = 1.08
+geo_inflate_radius = 1.01
 
 # Melt
 
@@ -41,9 +44,9 @@ geo_frame_y    = geo_melt_y + geo_frame_d
 geo_x0         = geo_melt_x - geo_melt_r
 geo_x01        = geo_melt_x - geo_melt_r/2.0
 geo_x001       = geo_x0 + (geo_f001 + (1.0-geo_f001)*geo_cos45)*geo_melt_r/2.0
-geo_x011       = geo_x0 + geo_cos45*geo_melt_r
+geo_x011       = geo_x0 + geo_cos45*geo_melt_r*geo_inflate_radius
 geo_x1         = geo_melt_x
-geo_x112       = geo_x0 + (geo_f112 + (1.0-geo_f112)*geo_cos45)*(geo_melt_r+geo_frame_d/2.0)
+geo_x112       = geo_x0 + (geo_f112 + (1.0-geo_f112)*geo_cos45)*(geo_melt_r+geo_frame_d/2.0-1.0) # -substrate
 geo_x12        = geo_melt_x + geo_frame_d/2.0
 geo_x2         = geo_melt_x + geo_frame_d
 geo_x3         = 150.0
@@ -53,9 +56,9 @@ geo_x3         = 150.0
 geo_y0         = geo_melt_y - geo_melt_r
 geo_y01        = geo_melt_y - geo_melt_r/2.0
 geo_y001       = geo_y0 + (geo_f001 + (1.0-geo_f001)*geo_sin45)*geo_melt_r/2.0
-geo_y011       = geo_y0 + geo_sin45*geo_melt_r
+geo_y011       = geo_y0 + geo_sin45*geo_melt_r*geo_inflate_radius
 geo_y1         = geo_melt_y
-geo_y112       = geo_y0 + (geo_f112 + (1.0-geo_f112)*geo_sin45)*(geo_melt_r+geo_frame_d/2.0)
+geo_y112       = geo_y0 + (geo_f112 + (1.0-geo_f112)*geo_sin45)*(geo_melt_r+geo_frame_d/2.0-1.0) # -substrate
 geo_y12        = geo_melt_y + geo_frame_d/2.0
 geo_y2         = geo_melt_y + geo_frame_d
 geo_y3         = 200.0
@@ -64,14 +67,16 @@ geo_y3         = 200.0
 
 geo_z0         = -60.0
 geo_z1         =  -5.0
-geo_z2         =  -1.0
-geo_z3         =   0.0
-geo_z4         =  20.0
-geo_z5         =  50.0
-geo_z6         =  90.0
-geo_z7         = 140.0
+geo_z2         =   0.0
+geo_z3         =  20.0
+geo_z4         =  50.0
+geo_z5         =  90.0
+geo_z6         = 140.0
 
-n_scale        =   0.1
+# Grading and Distribution
+
+geo_grade_ref = 2.0
+geo_dist_ref = geo_frame_d/2.0
 
 # --------------------------------------------------------------------------- #
 # --- Data ------------------------------------------------------------------ #
@@ -96,29 +101,29 @@ d.vertices.set( 12, [  0.0,      geo_y1,   geo_z0])
 d.vertices.set( 13, [geo_x011, geo_y011,   geo_z0])
 d.vertices.set( 14, [  geo_x1,   geo_y0,   geo_z0])
 d.vertices.set( 15, [  geo_x1,   0.0,      geo_z0])
-d.vertices.set( 16, [ geo_x01,  geo_y12,   geo_z0]) # x0 -> x01
-d.vertices.set( 17, [  0.0,     geo_y12,   geo_z0])
+d.vertices.set( 16, [ geo_x01-geo_melt_r/4.0,  geo_y12-1.0,   geo_z0]) # x0 -> x01 # # -substrate
+d.vertices.set( 17, [  0.0,     geo_y12-1.0,   geo_z0]) # -substrate
 d.vertices.set( 18, [geo_x112, geo_y112,   geo_z0])
-d.vertices.set( 19, [ geo_x12,  geo_y01,   geo_z0]) # y0 -> y01
-d.vertices.set( 20, [ geo_x12,   0.0,      geo_z0])
-d.vertices.set( 21, [  geo_x1,   geo_y2,   geo_z0]) # x0 -> x1
+d.vertices.set( 19, [ geo_x12-1.0,  geo_y01-geo_melt_r/4.0,   geo_z0]) # y0 -> y01 # # -substrate
+d.vertices.set( 20, [ geo_x12-1.0,   0.0,      geo_z0]) # -substrate
+d.vertices.set( 21, [  geo_x1-geo_melt_r/2.0,   geo_y2,   geo_z0]) # x0 -> x1 #
 d.vertices.set( 22, [  0.0,      geo_y2,   geo_z0])
-d.vertices.set( 23, [ geo_x12,   geo_y2,   geo_z0])
-d.vertices.set( 24, [  geo_x2,  geo_y12,   geo_z0])
+d.vertices.set( 23, [ geo_x12-geo_melt_r/4.0-1.0+geo_melt_r/4.0,   geo_y2,   geo_z0]) # # -substrate+shift
+d.vertices.set( 24, [  geo_x2,  geo_y12-geo_melt_r/4.0-1.0+geo_melt_r/4.0,   geo_z0]) # # -substrate+shift
 d.vertices.set( 25, [  geo_x2,   geo_y2,   geo_z0])
-d.vertices.set( 26, [  geo_x2,   geo_y1,   geo_z0]) # y0 -> y1
+d.vertices.set( 26, [  geo_x2,   geo_y1-geo_melt_r/2.0,   geo_z0]) # y0 -> y1 #
 d.vertices.set( 27, [  geo_x2,   0.0,      geo_z0])
-d.vertices.set( 28, [  geo_x1,   geo_y3,   geo_z0]) # x0 -> x1
+d.vertices.set( 28, [  geo_x1-geo_melt_r/2.0,   geo_y3,   geo_z0]) # x0 -> x1 #
 d.vertices.set( 29, [  0.0,      geo_y3,   geo_z0])
-d.vertices.set( 30, [ geo_x12,   geo_y3,   geo_z0]) # x112 -> geo_x12
+d.vertices.set( 30, [ geo_x12-geo_melt_r/4.0-1.0+geo_melt_r/4.0,   geo_y3,   geo_z0]) # x112 -> geo_x12 # # -substrate+shift
 d.vertices.set( 31, [  geo_x2,   geo_y3,   geo_z0])
 d.vertices.set( 32, [  geo_x3,   geo_y2,   geo_z0])
 d.vertices.set( 33, [  geo_x3,   geo_y3,   geo_z0])
-d.vertices.set( 34, [  geo_x3,  geo_y12,   geo_z0]) # y112 -> geo_y12
-d.vertices.set( 35, [  geo_x3,   geo_y1,   geo_z0]) # y0 -> y1
+d.vertices.set( 34, [  geo_x3,  geo_y12-geo_melt_r/4.0-1.0+geo_melt_r/4.0,   geo_z0]) # y112 -> geo_y12 # # -substrate+shift
+d.vertices.set( 35, [  geo_x3,   geo_y1-geo_melt_r/2.0,   geo_z0]) # y0 -> y1 #
 d.vertices.set( 36, [  geo_x3,   0.0,      geo_z0])
 
-baseVertices = [ i for i in range(4)] + [ i+6 for i in range(31)]
+baseVertices = [ i for i in range(4) ] + [ i+6 for i in range(31) ]
 
 d.vertices.copyTranslate(100, baseVertices, [0.0, 0.0, geo_z1-geo_z0])
 d.vertices.copyTranslate(200, baseVertices, [0.0, 0.0, geo_z2-geo_z0])
@@ -126,7 +131,6 @@ d.vertices.copyTranslate(300, baseVertices, [0.0, 0.0, geo_z3-geo_z0])
 d.vertices.copyTranslate(400, baseVertices, [0.0, 0.0, geo_z4-geo_z0])
 d.vertices.copyTranslate(500, baseVertices, [0.0, 0.0, geo_z5-geo_z0])
 d.vertices.copyTranslate(600, baseVertices, [0.0, 0.0, geo_z6-geo_z0])
-d.vertices.copyTranslate(700, baseVertices, [0.0, 0.0, geo_z7-geo_z0])
 
 # Blocks
 
@@ -155,48 +159,43 @@ d.blocks.set( 21, [ 24,  34,  32,  25, 124, 134, 132, 125], zone="background")
 d.blocks.set( 22, [ 26,  35,  34,  24, 126, 135, 134, 124], zone="background")
 d.blocks.set( 23, [ 27,  36,  35,  26, 127, 136, 135, 126], zone="background")
 
-baseBlocks = [ i for i in range(24)]
+baseBlocks = [ i for i in range(24) ]
 
 d.blocks.copyShiftVerticeLabels(100, baseBlocks, 100)
 d.blocks.copyShiftVerticeLabels(200, baseBlocks, 200)
 d.blocks.copyShiftVerticeLabels(300, baseBlocks, 300)
 d.blocks.copyShiftVerticeLabels(400, baseBlocks, 400)
 d.blocks.copyShiftVerticeLabels(500, baseBlocks, 500)
-d.blocks.copyShiftVerticeLabels(600, baseBlocks, 600)
+
+# Gradings
+
+d.blocks.grading.set( 20, [geo_grade_ref, geo_grade_ref, 1.0/geo_grade_ref])
+d.blocks.grading.set(520, [geo_grade_ref, geo_grade_ref,     geo_grade_ref])
 
 # Distributions
 
-#geo_dist_ref0 = 0.5*geo_melt_r
-#geo_dist_ref1 = geo_frame_d
-#geo_dist_ref2 = geo_frame_d/2.0
+d.blocks.distribution.set(  0, "x", max(1, int(m.floor(geo_melt_x/geo_dist_ref))))
+d.blocks.distribution.set( 20, "x", max(1, int(m.floor((geo_x3-geo_x2)/geo_dist_ref/geo_grade_ref))))
 
-geo_dist_ref0 = geo_frame_d/2.0
-geo_dist_ref1 = geo_frame_d/2.0
-geo_dist_ref2 = geo_frame_d/2.0
+d.blocks.distribution.set(  0, "y", max(1, int(m.floor(geo_melt_y/geo_dist_ref))))
+d.blocks.distribution.set( 20, "y", max(1, int(m.floor((geo_y3-geo_y2)/geo_dist_ref/geo_grade_ref))))
 
-d.blocks.distribution.set(  0, "x", max(1, int(m.floor(geo_melt_x/geo_dist_ref0))))
-d.blocks.distribution.set(  0, "y", max(1, int(m.floor(geo_melt_y/geo_dist_ref0))))
-d.blocks.distribution.set(300, "z", max(1, int(m.floor((geo_z4-geo_z3)/geo_dist_ref0))))
-
-d.blocks.distribution.set(  0, "z", max(1, int(m.floor((geo_z1-geo_z0)/geo_dist_ref1))))
-d.blocks.distribution.set(100, "z", max(1, int(m.floor((geo_z2-geo_z1)/geo_dist_ref1))))
-d.blocks.distribution.set(200, "z", max(1, int(m.floor((geo_z3-geo_z2)/geo_dist_ref1))))
-d.blocks.distribution.set(400, "z", max(1, int(m.floor((geo_z5-geo_z4)/geo_dist_ref2))))
-d.blocks.distribution.set(500, "z", max(1, int(m.floor((geo_z6-geo_z5)/geo_dist_ref1))))
-d.blocks.distribution.set(600, "z", max(1, int(m.floor((geo_z7-geo_z6)/geo_dist_ref1))))
-
-d.blocks.distribution.set(20, "y", max(1, int(m.floor((geo_y3-geo_y2)/geo_dist_ref1))))
-d.blocks.distribution.set(20, "x", max(1, int(m.floor((geo_x3-geo_x2)/geo_dist_ref1))))
+d.blocks.distribution.set(  0, "z", max(1, int(m.floor((geo_z1-geo_z0)/geo_dist_ref/geo_grade_ref))))
+d.blocks.distribution.set(100, "z", max(1, int(m.floor((geo_z2-geo_z1)/geo_dist_ref))))
+d.blocks.distribution.set(200, "z", max(1, int(m.floor((geo_z3-geo_z2)/geo_dist_ref))))
+d.blocks.distribution.set(300, "z", max(1, int(m.floor((geo_z4-geo_z3)/geo_dist_ref))))
+d.blocks.distribution.set(400, "z", max(1, int(m.floor((geo_z5-geo_z4)/geo_dist_ref))))
+d.blocks.distribution.set(500, "z", max(1, int(m.floor((geo_z6-geo_z5)/geo_dist_ref/geo_grade_ref))))
 
 ## Boundary faces
 
-#d.boundaryFaces.set(0, "mirror_x", [0, 1, 4, 8, 12, 17], "x-")
-#d.boundaryFaces.set(3, "mirror_y", [0, 3, 7, 11, 16, 23], "y-")
+d.boundaryFaces.set(0, "mirror_x", [0, 1, 4, 8, 12, 17], "x-")
+d.boundaryFaces.set(3, "mirror_y", [0, 3, 7, 11, 16, 23], "y-")
 
-#d.boundaryFaces.set(1, "infinity", [20, 21, 22, 23], "x+")
-#d.boundaryFaces.set(4, "infinity", [17, 18, 19, 20], "y+")
-#d.boundaryFaces.set(5, "infinity", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], "z-")
-#d.boundaryFaces.set(6, "infinity", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], "z+")
+d.boundaryFaces.set(1, "infinity", [20, 21, 22, 23], "x+")
+d.boundaryFaces.set(4, "infinity", [17, 18, 19, 20], "y+")
+d.boundaryFaces.set(5, "infinity", [ i for i in range(24) ], "z-")
+d.boundaryFaces.set(6, "infinity", [ i+500 for i in range(24) ], "z+")
 
 # --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
@@ -217,25 +216,20 @@ if d.subDict("blocks"):
 if d.subDict("edges"):
 
     pass
-    #d.manual("arc", end=" ")
-    #d.manual(str(d.vertices.labelIndex[16]), end=" ")
-    #d.manual(str(d.vertices.labelIndex[18]), end=" ")
-    #d.manual("( 0 0 0 )")
 
 if d.subDict("boundary"):
 
-    pass
-    #if d.boundarySubDict("mirror_x", "patch"):
+    if d.boundarySubDict("mirror_x", "patch"):
 
-        #d.boundaryFaces.write()
+        d.boundaryFaces.write()
 
-    #if d.boundarySubDict("mirror_y", "patch"):
+    if d.boundarySubDict("mirror_y", "patch"):
 
-        #d.boundaryFaces.write()
+        d.boundaryFaces.write()
 
-    #if d.boundarySubDict("infinity", "patch"):
+    if d.boundarySubDict("infinity", "patch"):
 
-        #d.boundaryFaces.write()
+        d.boundaryFaces.write()
 
 if d.subDict("mergePatchPairs"):
 
