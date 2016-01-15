@@ -39,6 +39,11 @@ geo_frame_d    = 10.0
 geo_frame_x    = geo_melt_x + geo_frame_d
 geo_frame_y    = geo_melt_y + geo_frame_d
 
+# Substrate
+
+geo_subs_y     = 79.0
+geo_subs_wafer = geo_subs_y - geo_melt_y
+
 # Geometry x
 
 geo_x0         = geo_melt_x - geo_melt_r
@@ -46,8 +51,8 @@ geo_x01        = geo_melt_x - geo_melt_r/2.0
 geo_x001       = geo_x0 + (geo_f001 + (1.0-geo_f001)*geo_cos45)*geo_melt_r/2.0
 geo_x011       = geo_x0 + geo_cos45*geo_melt_r*geo_inflate_radius
 geo_x1         = geo_melt_x
-geo_x112       = geo_x0 + (geo_f112 + (1.0-geo_f112)*geo_cos45)*(geo_melt_r+geo_frame_d/2.0-1.0) # -substrate
-geo_x12        = geo_melt_x + geo_frame_d/2.0
+geo_x112       = geo_x0 + (geo_f112 + (1.0-geo_f112)*geo_cos45)*(geo_melt_r+geo_subs_wafer)
+geo_x12        = geo_melt_x + geo_subs_wafer
 geo_x2         = geo_melt_x + geo_frame_d
 geo_x3         = 150.0
 
@@ -58,8 +63,8 @@ geo_y01        = geo_melt_y - geo_melt_r/2.0
 geo_y001       = geo_y0 + (geo_f001 + (1.0-geo_f001)*geo_sin45)*geo_melt_r/2.0
 geo_y011       = geo_y0 + geo_sin45*geo_melt_r*geo_inflate_radius
 geo_y1         = geo_melt_y
-geo_y112       = geo_y0 + (geo_f112 + (1.0-geo_f112)*geo_sin45)*(geo_melt_r+geo_frame_d/2.0-1.0) # -substrate
-geo_y12        = geo_melt_y + geo_frame_d/2.0
+geo_y112       = geo_y0 + (geo_f112 + (1.0-geo_f112)*geo_sin45)*(geo_melt_r+geo_subs_wafer)
+geo_y12        = geo_melt_y + geo_subs_wafer
 geo_y2         = geo_melt_y + geo_frame_d
 geo_y3         = 200.0
 
@@ -101,26 +106,26 @@ d.vertices.set( 12, [  0.0,      geo_y1,   geo_z0])
 d.vertices.set( 13, [geo_x011, geo_y011,   geo_z0])
 d.vertices.set( 14, [  geo_x1,   geo_y0,   geo_z0])
 d.vertices.set( 15, [  geo_x1,   0.0,      geo_z0])
-d.vertices.set( 16, [ geo_x01-geo_melt_r/4.0,  geo_y12-1.0,   geo_z0]) # x0 -> x01 # # -substrate
-d.vertices.set( 17, [  0.0,     geo_y12-1.0,   geo_z0]) # -substrate
+d.vertices.set( 16, [ geo_x01,  geo_y12,   geo_z0])
+d.vertices.set( 17, [  0.0,     geo_y12,   geo_z0])
 d.vertices.set( 18, [geo_x112, geo_y112,   geo_z0])
-d.vertices.set( 19, [ geo_x12-1.0,  geo_y01-geo_melt_r/4.0,   geo_z0]) # y0 -> y01 # # -substrate
-d.vertices.set( 20, [ geo_x12-1.0,   0.0,      geo_z0]) # -substrate
-d.vertices.set( 21, [  geo_x1-geo_melt_r/2.0,   geo_y2,   geo_z0]) # x0 -> x1 #
+d.vertices.set( 19, [ geo_x12,  geo_y1-geo_subs_wafer,   geo_z0])
+d.vertices.set( 20, [ geo_x12,   0.0,      geo_z0])
+d.vertices.set( 21, [ geo_x01,   geo_y2,   geo_z0])
 d.vertices.set( 22, [  0.0,      geo_y2,   geo_z0])
-d.vertices.set( 23, [ geo_x12-geo_melt_r/4.0-1.0+geo_melt_r/4.0,   geo_y2,   geo_z0]) # # -substrate+shift
-d.vertices.set( 24, [  geo_x2,  geo_y12-geo_melt_r/4.0-1.0+geo_melt_r/4.0,   geo_z0]) # # -substrate+shift
+d.vertices.set( 23, [ geo_x12,   geo_y2,   geo_z0])
+d.vertices.set( 24, [  geo_x2,  geo_y12,   geo_z0])
 d.vertices.set( 25, [  geo_x2,   geo_y2,   geo_z0])
-d.vertices.set( 26, [  geo_x2,   geo_y1-geo_melt_r/2.0,   geo_z0]) # y0 -> y1 #
+d.vertices.set( 26, [  geo_x2,   geo_y1-geo_subs_wafer,   geo_z0])
 d.vertices.set( 27, [  geo_x2,   0.0,      geo_z0])
-d.vertices.set( 28, [  geo_x1-geo_melt_r/2.0,   geo_y3,   geo_z0]) # x0 -> x1 #
+d.vertices.set( 28, [ geo_x01,   geo_y3,   geo_z0])
 d.vertices.set( 29, [  0.0,      geo_y3,   geo_z0])
-d.vertices.set( 30, [ geo_x12-geo_melt_r/4.0-1.0+geo_melt_r/4.0,   geo_y3,   geo_z0]) # x112 -> geo_x12 # # -substrate+shift
+d.vertices.set( 30, [ geo_x12,   geo_y3,   geo_z0])
 d.vertices.set( 31, [  geo_x2,   geo_y3,   geo_z0])
 d.vertices.set( 32, [  geo_x3,   geo_y2,   geo_z0])
 d.vertices.set( 33, [  geo_x3,   geo_y3,   geo_z0])
-d.vertices.set( 34, [  geo_x3,  geo_y12-geo_melt_r/4.0-1.0+geo_melt_r/4.0,   geo_z0]) # y112 -> geo_y12 # # -substrate+shift
-d.vertices.set( 35, [  geo_x3,   geo_y1-geo_melt_r/2.0,   geo_z0]) # y0 -> y1 #
+d.vertices.set( 34, [  geo_x3,  geo_y12,   geo_z0])
+d.vertices.set( 35, [  geo_x3,   geo_y1-geo_subs_wafer,   geo_z0])
 d.vertices.set( 36, [  geo_x3,   0.0,      geo_z0])
 
 baseVertices = [ i for i in range(4) ] + [ i+6 for i in range(31) ]
