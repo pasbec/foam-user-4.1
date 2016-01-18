@@ -30,6 +30,10 @@ surfaceFeatureExtract
 # Run snappyHexMesh (needs OpenFOAM 2.2.0 + for featureSnapping)
 cp 'system/snappyHexMeshDict.stage1' 'system/snappyHexMeshDict'
 snappyHexMesh -overwrite
+cp 'system/snappyHexMeshDict.stage2' 'system/snappyHexMeshDict'
+snappyHexMesh -overwrite
+cp 'system/snappyHexMeshDict.stage3' 'system/snappyHexMeshDict'
+snappyHexMesh -overwrite
 
 # Remove leftovers from snappyHexMesh
 rm -rf 'constant/cellLevel' \
@@ -38,6 +42,7 @@ rm -rf 'constant/cellLevel' \
         'constant/polyMesh/pointLevel'* \
         'constant/polyMesh/refinementHistory'* \
         'constant/polyMesh/surfaceIndex'* \
+        'constant/polyMesh/level0Edge' \
         > /dev/null 2>&1
 
 # Remove empty patches
