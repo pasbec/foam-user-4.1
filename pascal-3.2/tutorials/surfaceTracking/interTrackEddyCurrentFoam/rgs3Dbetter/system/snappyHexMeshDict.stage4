@@ -26,54 +26,12 @@ debug 0;
 mergeTolerance 1e-7;
 
 // Meshing steps
-castellatedMesh true;
-snap            false;
+castellatedMesh false;
+snap            true;
 addLayers       false;
 
 geometry
 {
-    geometry_free_no_top.stl
-    {
-        type triSurfaceMesh;
-        name geometry_free_no_top;
-    }
-
-    geometry_free.stl
-    {
-        type triSurfaceMesh;
-        name geometry_free;
-    }
-
-    geometry_frame.stl
-    {
-        type triSurfaceMesh;
-        name geometry_frame;
-    }
-
-    geometry_fluid_dynamic.stl
-    {
-        type triSurfaceMesh;
-        name geometry_fluid_dynamic;
-    }
-
-    geometry_fluid_static.stl
-    {
-        type triSurfaceMesh;
-        name geometry_fluid_static;
-    }
-
-    geometry_wafer.stl
-    {
-        type triSurfaceMesh;
-        name geometry_wafer;
-    }
-
-    geometry_substrate.stl
-    {
-        type triSurfaceMesh;
-        name geometry_substrate;
-    }
-
     geometry_coil0.stl
     {
         type triSurfaceMesh;
@@ -126,12 +84,6 @@ castellatedMeshControls
     //   constant/triSurface/mesh.stl mesh
     features
     (
-        {file "geometry_free.eMesh"; level 2;}
-        {file "geometry_frame.eMesh"; level 2;}
-        {file "geometry_fluid_dynamic.eMesh"; level 2;}
-        {file "geometry_fluid_static.eMesh"; level 2;}
-        {file "geometry_wafer.eMesh"; level 2;}
-        {file "geometry_substrate.eMesh"; level 2;}
         {file "geometry_coil0.eMesh"; level 2;}
         {file "geometry_coil1.eMesh"; level 2;}
         {file "geometry_coil2.eMesh"; level 2;}
@@ -142,69 +94,6 @@ castellatedMeshControls
     // The second level is the maximum level.
     refinementSurfaces
     {
-        geometry_free_no_top
-        {
-            level (2 2);
-
-            faceZone free_no_top;
-            faceType internal;
-        }
-
-        geometry_frame
-        {
-            level (2 2);
-
-            cellZone frame;
-            cellZoneInside inside;
-
-            faceZone frame;
-            faceType internal;
-        }
-
-        geometry_fluid_dynamic
-        {
-            level (2 2);
-
-            cellZone fluid_dynamic;
-            cellZoneInside inside;
-
-            faceZone fluid_dynamic;
-            faceType internal;
-        }
-
-        geometry_fluid_static
-        {
-            level (2 2);
-
-            cellZone fluid_static;
-            cellZoneInside inside;
-
-            faceZone fluid_static;
-            faceType internal;
-        }
-
-        geometry_wafer
-        {
-            level (2 2);
-
-            cellZone wafer;
-            cellZoneInside inside;
-
-            faceZone wafer;
-            faceType internal;
-        }
-
-        geometry_substrate
-        {
-            level (2 2);
-
-            cellZone substrate;
-            cellZoneInside inside;
-
-            faceZone substrate;
-            faceType internal;
-        }
-
         geometry_coil0
         {
             level (2 2);
@@ -257,62 +146,6 @@ castellatedMeshControls
     // - outside. Same but cells outside.
     refinementRegions
     {
-        geometry_frame
-        {
-            mode inside;
-            levels ((1e-15 2));
-        }
-
-        geometry_fluid_dynamic
-        {
-            mode inside;
-            levels ((1e-15 2));
-        }
-
-        geometry_fluid_static
-        {
-            mode inside;
-            levels ((1e-15 2));
-        }
-
-        geometry_wafer
-        {
-            mode inside;
-            levels ((1e-15 2));
-        }
-
-        geometry_substrate
-        {
-            mode inside;
-            levels ((1e-15 2));
-        }
-
-        geometry_coil0
-        {
-//             mode inside;
-//             levels ((1e-15 2));
-
-            mode distance;
-            levels ((0.005 2) (0.02 1));
-        }
-
-        geometry_coil1
-        {
-//             mode inside;
-//             levels ((1e-15 2));
-
-            mode distance;
-            levels ((0.005 2) (0.02 1));
-        }
-
-        geometry_coil2
-        {
-//             mode inside;
-//             levels ((1e-15 2));
-
-            mode distance;
-            levels ((0.005 2) (0.02 1));
-        }
     }
 
     // Mesh selection

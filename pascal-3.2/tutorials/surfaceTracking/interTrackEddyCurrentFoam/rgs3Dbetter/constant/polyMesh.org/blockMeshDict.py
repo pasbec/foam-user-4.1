@@ -24,7 +24,8 @@ geo_sin45      = m.sin(45*geo_rad)
 geo_f001       =     0.25
 geo_f112       =   1.0
 
-geo_radius_f   =   1.01
+geo_melt_radius_f   =   1.01
+geo_coil_radius_f   =   1.05
 
 # Melt
 
@@ -65,11 +66,12 @@ geo_x09        = geo_subs_x
 geo_x10        = 150.0
 
 geo_xp09       = geo_x00 + (geo_f001 + (1.0-geo_f001)*geo_cos45)*geo_melt_r/2.0
-geo_xp13       = geo_x00 + geo_cos45*geo_melt_r*geo_radius_f
+geo_xp13       = geo_x00 + geo_cos45*geo_melt_r*geo_melt_radius_f
 geo_xp16       = geo_x01
 geo_xp18       = geo_x00 + (geo_f112 + (1.0-geo_f112)*geo_cos45)*(geo_melt_r+geo_subs_wafer)
-geo_xp67       = geo_x05 + geo_cos45*(geo_coil_r-geo_coil_d/2.0)*geo_radius_f
-geo_xp73       = geo_x05 + geo_cos45*(geo_coil_r+geo_coil_d/2.0)*geo_radius_f
+geo_xp67       = geo_x05 + geo_cos45*(geo_coil_r-geo_coil_d/2.0)*geo_coil_radius_f
+geo_xp73       = geo_x05 + geo_cos45*(geo_coil_r+geo_coil_d/2.0)*geo_coil_radius_f
+geo_xp79       = geo_x05 + geo_cos45*2.0*geo_coil_r*geo_coil_radius_f
 
 # Geometry y
 
@@ -82,14 +84,16 @@ geo_y05        = geo_coil_y - geo_coil_r
 geo_y06        = geo_coil_y - geo_coil_d/2.0
 geo_y07        = geo_coil_y + geo_coil_d/2.0
 geo_y08        = geo_coil_y + geo_coil_r
-geo_y09        = 200.0
+geo_y09        = geo_coil_y + (geo_subs_x - geo_coil_x)
+geo_y10        = 200.0
 
 geo_yp09       = geo_y00 + (geo_f001 + (1.0-geo_f001)*geo_sin45)*geo_melt_r/2.0
-geo_yp13       = geo_y00 + geo_sin45*geo_melt_r*geo_radius_f
+geo_yp13       = geo_y00 + geo_sin45*geo_melt_r*geo_melt_radius_f
 geo_yp18       = geo_y00 + (geo_f112 + (1.0-geo_f112)*geo_sin45)*(geo_melt_r+geo_subs_wafer)
 geo_yp19       = geo_melt_y - geo_subs_wafer
-geo_yp67       = geo_y05 + geo_sin45*(geo_coil_r-geo_coil_d/2.0)*geo_radius_f
-geo_yp73       = geo_y05 + geo_sin45*(geo_coil_r+geo_coil_d/2.0)*geo_radius_f
+geo_yp67       = geo_y05 + geo_sin45*(geo_coil_r-geo_coil_d/2.0)*geo_coil_radius_f
+geo_yp73       = geo_y05 + geo_sin45*(geo_coil_r+geo_coil_d/2.0)*geo_coil_radius_f
+geo_yp79       = geo_y05 + geo_sin45*2.0*geo_coil_r*geo_coil_radius_f
 
 # Geometry z
 
@@ -208,18 +212,27 @@ d.vertices.set( 75, [ geo_xp16,  geo_y08, geo_z00])
 d.vertices.set( 76, [ geo_xp18,  geo_y08, geo_z00])
 d.vertices.set( 77, [  geo_x04,  geo_y08, geo_z00])
 d.vertices.set( 78, [  geo_x05,  geo_y08, geo_z00])
-d.vertices.set( 79, [  geo_x08,  geo_y08, geo_z00])
-d.vertices.set( 80, [  geo_x09,  geo_y08, geo_z00])
-d.vertices.set( 81, [  geo_x10,  geo_y08, geo_z00])
+d.vertices.set( 79, [ geo_xp79, geo_yp79, geo_z00])
+d.vertices.set( 80, [  geo_x09, geo_yp79, geo_z00])
+d.vertices.set( 81, [  geo_x10, geo_yp79, geo_z00])
 
 d.vertices.set( 82, [      0.0,  geo_y09, geo_z00])
 d.vertices.set( 83, [ geo_xp16,  geo_y09, geo_z00])
 d.vertices.set( 84, [ geo_xp18,  geo_y09, geo_z00])
 d.vertices.set( 85, [  geo_x04,  geo_y09, geo_z00])
 d.vertices.set( 86, [  geo_x05,  geo_y09, geo_z00])
-d.vertices.set( 87, [  geo_x08,  geo_y09, geo_z00])
+d.vertices.set( 87, [ geo_xp79,  geo_y09, geo_z00])
 d.vertices.set( 88, [  geo_x09,  geo_y09, geo_z00])
 d.vertices.set( 89, [  geo_x10,  geo_y09, geo_z00])
+
+d.vertices.set( 90, [      0.0,  geo_y10, geo_z00])
+d.vertices.set( 91, [ geo_xp16,  geo_y10, geo_z00])
+d.vertices.set( 92, [ geo_xp18,  geo_y10, geo_z00])
+d.vertices.set( 93, [  geo_x04,  geo_y10, geo_z00])
+d.vertices.set( 94, [  geo_x05,  geo_y10, geo_z00])
+d.vertices.set( 95, [ geo_xp79,  geo_y10, geo_z00])
+d.vertices.set( 96, [  geo_x09,  geo_y10, geo_z00])
+d.vertices.set( 97, [  geo_x10,  geo_y10, geo_z00])
 
 baseVertices = [ i for i in range(4) ] + [ i+6 for i in range(len(d.vertices.labels)-4) ]
 
@@ -319,6 +332,14 @@ d.blocks.set( 67, [ 78,  79,  87,  86, 178, 179, 187, 186], zone="background")
 d.blocks.set( 68, [ 79,  80,  88,  87, 179, 180, 188, 187], zone="background")
 d.blocks.set( 69, [ 80,  81,  89,  88, 180, 181, 189, 188], zone="background")
 
+d.blocks.set( 70, [ 82,  83,  91,  90, 182, 183, 191, 190], zone="background")
+d.blocks.set( 71, [ 83,  84,  92,  91, 183, 184, 192, 191], zone="background")
+d.blocks.set( 72, [ 84,  85,  93,  92, 184, 185, 193, 192], zone="background")
+d.blocks.set( 73, [ 85,  86,  94,  93, 185, 186, 194, 193], zone="background")
+d.blocks.set( 74, [ 86,  87,  95,  94, 186, 187, 195, 194], zone="background")
+d.blocks.set( 75, [ 87,  88,  96,  95, 187, 188, 196, 195], zone="background")
+d.blocks.set( 76, [ 88,  89,  97,  96, 188, 189, 197, 196], zone="background")
+
 baseBlocks = [ i for i in range(len(d.blocks.labels)) ]
 
 d.blocks.copyShiftVerticeLabels(  100, baseBlocks,  100)
@@ -335,18 +356,18 @@ d.blocks.copyShiftVerticeLabels( 1100, baseBlocks, 1100)
 
 # Gradings
 
-d.blocks.grading.set(   69, [geo_grade_ref, geo_grade_ref, 1.0/geo_grade_ref])
-d.blocks.grading.set( 1140, [geo_grade_ref, geo_grade_ref,     geo_grade_ref])
+d.blocks.grading.set(   76, [geo_grade_ref, geo_grade_ref, 1.0/geo_grade_ref])
+d.blocks.grading.set( 1176, [geo_grade_ref, geo_grade_ref,     geo_grade_ref])
 
 # Distributions
 
 d.blocks.distribution.set(    0, "x", max(1, int(m.floor(geo_melt_x/geo_dist_ref))))
 d.blocks.distribution.set(   20, "x", max(1, int(m.floor((geo_x05-geo_x04)/geo_dist_ref))))
-d.blocks.distribution.set(   69, "x", max(1, int(m.floor((geo_x10-geo_x09)/geo_dist_ref/geo_grade_ref))))
+d.blocks.distribution.set(   76, "x", max(1, int(m.floor((geo_x10-geo_x09)/geo_dist_ref/geo_grade_ref))))
 
 d.blocks.distribution.set(    0, "y", max(1, int(m.floor(geo_melt_y/geo_dist_ref))))
 d.blocks.distribution.set(   20, "y", max(1, int(m.floor((geo_y05-geo_y04)/geo_dist_ref))))
-d.blocks.distribution.set(   69, "y", max(1, int(m.floor((geo_y09-geo_y08)/geo_dist_ref/geo_grade_ref))))
+d.blocks.distribution.set(   76, "y", max(1, int(m.floor((geo_y10-geo_y09)/geo_dist_ref/geo_grade_ref))))
 
 d.blocks.distribution.set(    0, "z", max(1, int(m.floor((geo_z01-geo_z00)/geo_dist_ref/geo_grade_ref))))
 d.blocks.distribution.set(  100, "z", max(1, int(m.floor((geo_z02-geo_z01)/geo_dist_ref))))
