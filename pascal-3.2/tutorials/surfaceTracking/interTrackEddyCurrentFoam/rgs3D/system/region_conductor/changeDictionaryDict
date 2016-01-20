@@ -16,6 +16,13 @@ FoamFile
 
 dictionaryReplacement
 {
+    boundary
+    {
+        region_conductor_to_region_space
+        {
+            type            patch;
+        }
+    }
 }
 
 // ************************************************************************* //
