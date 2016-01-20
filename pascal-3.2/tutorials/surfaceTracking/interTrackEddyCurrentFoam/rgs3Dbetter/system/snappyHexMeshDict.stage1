@@ -27,7 +27,7 @@ mergeTolerance 1e-7;
 
 // Meshing steps
 castellatedMesh true;
-snap            false;
+snap            true;
 addLayers       false;
 
 geometry

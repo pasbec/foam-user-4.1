@@ -12,15 +12,15 @@ snapControls
 {
     //- Number of patch smoothing iterations before finding correspondence
     //  to surface
-    nSmoothPatch 1;
+    nSmoothPatch -1;
 
     //- Relative distance for points to be attracted by surface feature point
     //  or edge. True distance is this factor times local
     //  maximum edge length.
-    tolerance 1.0;
+    tolerance 4.0;
 
     //- Number of mesh displacement relaxation iterations.
-    nSolveIter 30;
+    nSolveIter 300;
 
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
@@ -38,7 +38,6 @@ snapControls
         explicitFeatureSnap true;
 
         //- Detect points on multiple surfaces (only for explicitFeatureSnap)
-//         multiRegionFeatureSnap true;
         multiRegionFeatureSnap false;
 }
 
