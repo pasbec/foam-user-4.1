@@ -93,6 +93,11 @@ void eddyCurrentControl::timeReset()
     Ares_ = AVres_;
     Vres_ = AVres_;
 
+    if (!mesh3D_)
+    {
+        Vres_ = 0.0;
+    }
+
 }
 
 void eddyCurrentControl::decreaseSubTolerance() const
