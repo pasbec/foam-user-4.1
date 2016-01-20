@@ -31,9 +31,9 @@ twoDMotion         yes;
 
 solver                      laplace;
 
-// diffusivity                 uniform;
+diffusivity                 uniform;
 // diffusivity                 linear;
-diffusivity                 quadratic;
+// diffusivity                 quadratic;
 
 distancePatches             1(trackedSurface);
 
