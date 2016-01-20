@@ -46,7 +46,7 @@ purgeWrite          0;
 
 cycleWrite          0;
 
-writeFormat         ascii;
+writeFormat         binary; // ascii
 
 // writePrecision      8;
 writePrecision      12;
