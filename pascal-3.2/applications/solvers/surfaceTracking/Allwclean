@@ -3,7 +3,14 @@ cd ${0%/*} || exit 1    # run from this directory
 set -x
 
 wclean all freeSurface || exit 1
-wclean all trackedSurface || exit 1
+wclean all freeSurface.new || exit 1
 
 wclean interTrackFoam || exit 1
+
+wclean all trackedSurface || exit 1
+wclean all trackedSurface.new || exit 1
+
 wclean interTrackMHDFoam || exit 1
+wclean interTrackMHDcoupledFoam || exit 1
+wclean interTrackEddyCurrentFoam || exit 1
+wclean interTrackEddyCurrentFoam.new || exit 1
