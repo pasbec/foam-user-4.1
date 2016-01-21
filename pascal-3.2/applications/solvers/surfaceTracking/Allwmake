@@ -6,11 +6,13 @@ wmake all freeSurface || exit 1
 wmake all freeSurface.new || exit 1
 
 wmake interTrackFoam || exit 1
+wmake interTrackFoam.new || exit 1
 
 wmake all trackedSurface || exit 1
 wmake all trackedSurface.new || exit 1
 
-wmake interTrackMHDFoam || exit 1
-wmake interTrackMHDcoupledFoam || exit 1
 wmake interTrackEddyCurrentFoam || exit 1
 wmake interTrackEddyCurrentFoam.new || exit 1
+
+wmake interTrackMHDFoam || exit 1
+wmake interTrackMHDcoupledFoam || exit 1
