@@ -205,9 +205,9 @@ int main(int argc, char *argv[])
             pointField newPoints = mesh_[control.dynamic()].points();
 
 // TODO/FIXME: Really necessary?
-//             // Correct points for 2D-motion of dynamic region
-//             twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
-//             dynamicTwoDPointCorr.correctPoints(newPoints);
+            // Correct points for 2D-motion of dynamic region
+            twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
+            dynamicTwoDPointCorr.correctPoints(newPoints);
 
             // Use motionSolver to move mesh of dynamic region
             mesh_[control.dynamic()].movePoints(newPoints);
