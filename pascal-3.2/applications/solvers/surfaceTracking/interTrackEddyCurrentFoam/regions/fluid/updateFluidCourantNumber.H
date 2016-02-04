@@ -1,8 +1,4 @@
 
-    // Make fluxes relative
-    fvc::makeRelative(phi,U);
-
-
     // Courant No
 #   include "CourantNo.H"
 
@@ -36,11 +32,3 @@
         CoNum = convectiveCoNum;
         maxCo = min(maxConvectiveCo,convectiveCoNum/(restrictInterfaceCoNum+VSMALL));
     }
-
-
-    // Make fluxes absolute
-    fvc::makeAbsolute(phi,U);
-
-
-//    Info << "[DEBUG]: CoNum = " << CoNum << endl;
-//    Info << "[DEBUG]: maxCo = " << maxCo << endl;
