@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
     // TODO: From here!!!
 
-    // Solver debug flag
+    // TODO: Solver debug flag
     bool debug = true;
 
 #   include "initRegionCourantNo.H"
@@ -173,24 +173,19 @@ int main(int argc, char *argv[])
             interface.moveMeshPointsForOldTrackedSurfDisplacement();
             interface.updateDisplacementDirections();
 
+            // TEST: Make sure phi is correct
+            phi.boundaryField()[interface.aPatchID()] =
+                fvc::meshPhi(U)().boundaryField()[interface.aPatchID()];
+
             // Prediction step for interface points
             interface.predictPoints();
-        }
-
-        // ==================================================================//
-        // Check whether magnetic update is due
-        // ==================================================================//
-
-        {
-            // If magnetic update is due, mfUpdate will be true
-#           include "updateBaseMagneticCheck.H"
         }
 
         // ==================================================================//
         // Move mesh of dynamic region
         // ==================================================================//
 // TODO: WARNING - Make sure we have all the same mesh points on restart!!!
-        if (mfUpdate && (mfUpdateCounter > 0))
+//         if (mfUpdate && (mfUpdateCounter > 0))
         {
             // Calculate mesh velocity at dynamic/fluid-interface
             // in dynamic region from current boundary displacement
@@ -215,10 +210,19 @@ int main(int argc, char *argv[])
         }
 
         // ==================================================================//
+        // Check whether magnetic update is due
+        // ==================================================================//
+
+        {
+            // If magnetic update is due, mfUpdate will be true
+#           include "updateBaseMagneticCheck.H"
+        }
+
+        // ==================================================================//
         // Update mesh points of base region
         // ==================================================================//
 
-        if (mfUpdate && (mfUpdateCounter > 0))
+        if (mfUpdate)
         {
             // Create new point field for base region
             // with current point positions of fluid region
@@ -237,7 +241,7 @@ int main(int argc, char *argv[])
         // Update mesh points of conductor region if magnetic update is due
         // ==================================================================//
 
-        if (mfUpdate && (mfUpdateCounter > 0))
+        if (mfUpdate)
         {
             // Create new point field for conductor region
             // with current points of base region
@@ -310,13 +314,14 @@ int main(int argc, char *argv[])
         // Finish time step and write
         // ==================================================================//
 
-        if (debug)
-        {
-            if (runTime.outputTime())
-            {
-                interface.writeVolA();
-            }
-        }
+        // TODO: Remove or reimplement
+//         if (debug)
+//         {
+//             if (runTime.outputTime())
+//             {
+//                 interface.writeVolA();
+//             }
+//         }
 
         runTime.write();
 

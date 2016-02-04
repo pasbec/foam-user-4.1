@@ -17,8 +17,15 @@
     {
         USolverDict = "U";
 
-        Info << "Relaxing UEqn with factor: " << mesh.solutionDict().relaxationFactor("U") << nl;
-        UEqn.relax(mesh.solutionDict().relaxationFactor("U"));
+        scalar alpha = mesh.solutionDict().relaxationFactor("U");
+
+        if (alpha < 1.0)
+        {
+            Info << "Relaxing U with factor: "
+                << alpha << nl;
+
+            UEqn.relax(alpha);
+        }
     }
 
     if (methodUp == "default")
