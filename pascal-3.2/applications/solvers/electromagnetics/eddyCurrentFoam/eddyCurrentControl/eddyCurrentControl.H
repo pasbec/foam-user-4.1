@@ -44,8 +44,6 @@ SourceFiles
 #include "fixedGradientFvPatchFields.H"
 #include "tangentialMagneticFvPatchFields.H"
 
-// TODO [Low]: checkMinIterations() makes only sense with relTol!?
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -104,17 +102,24 @@ private:
             //- Solution tolerance
             scalar tol_;
 
-            //- Solution tolerance
-            scalar tolScale_;
+            //- Relative solution tolerance
+            scalar relTol_;
 
-            //- Minimum number of iterations
-            int minIter_;
+            //- Outer relative solution tolerance
+            //- for relTol down-scaling
+            scalar outerRelTol_;
 
-            //- Maximum number of iterations
-            int maxIter_;
+            //- Outer maximum number of iterations
+            int outerMaxIter_;
 
             //- Realxation factor
             scalar relax_;
+
+            //- Is mesh 3D?
+            mutable bool mesh3D_;
+
+            //- Solution direction
+            mutable Vector<label> solDir_;
 
         // Solution state variables
 
@@ -133,8 +138,18 @@ private:
             //- Sub-iteration counter
             mutable int subIter_;
 
-            //- Solution tolerance
-            mutable scalar subTol_;
+            //- Sub-iteration relative tolerance
+            mutable scalar subRelTol_;
+
+            //- Sub-iteration outer relative solution
+            //-  tolerance for subRelTol down-scaling
+            mutable scalar subOuterRelTol_;
+
+            //- Sub-iteration relax
+            mutable scalar subRelax_;
+
+            //- Sub-iteration relative tolerance
+            mutable scalar subScale_;
 
             //- Temporary copy of A-solution dictionary
             mutable dictionary subAdict_;
@@ -142,22 +157,28 @@ private:
             //- Temporary copy of V-solution dictionary
             mutable dictionary subVdict_;
 
-            //- Is mesh 3D?
-            mutable bool mesh3D_;
-
-            //- Solution direction
-            mutable Vector<label> solDir_;
-
         // Solution residual variables
 
             //- AV-residual
             mutable scalar AVres_;
+
+            //- Relative residual
+            mutable scalar AVrelRes_;
 
             //- A-residual
             mutable scalar Ares_;
 
             //- V-residual
             mutable scalar Vres_;
+
+            //- Old AV-residual
+            mutable scalar oldAVres_;
+
+            //- Old relative residual
+            mutable scalar oldAVrelRes_;
+
+            //- Old AV-residual switch
+            mutable bool oldAVresSet_;
 
     // Private Member Functions
 
@@ -175,6 +196,12 @@ private:
                 return (relax_ > 0.0) && (relax_ < 1.0);
             };
 
+            //- Check if relax factor is valid
+            inline bool checkSubRelax() const
+            {
+                return (subRelax_ > 0.0) && (subRelax_ < 1.0);
+            };
+
             //- Iteration only initialized?
             inline bool noIter() const
             {
@@ -184,7 +211,7 @@ private:
             //- Is this the first iteration?
             inline bool firstIteration() const
             {
-                return (iter_ == 0);
+                return (iter_ == 0 && subIter_ == 0);
             };
 
             //- Is this the first sub-iteration?
@@ -194,21 +221,9 @@ private:
             };
 
             //- Check minimum iterations state
-            inline bool checkMinIterations() const
-            {
-                return (iter_ >= minIter_);
-            };
-
-            //- Check minimum iterations state
             inline bool checkMaxIterations() const
             {
-                return (iter_ < maxIter_);
-            };
-
-            //- Check convergence state
-            inline void updateResidual() const
-            {
-                AVres_ = returnReduce(max(Ares_, Vres_), maxOp<scalar>());
+                return (iter_ < outerMaxIter_);
             };
 
             //- Check convergence state
@@ -217,10 +232,10 @@ private:
                 return (AVres_ <= tol_);
             };
 
-            //- Check sub-convergence state
+            //- Check relative convergence state
             inline bool checkSubConvergence() const
             {
-                return (AVres_ <= subTol_);
+                return (max(oldAVrelRes_, AVrelRes_) <= subOuterRelTol_);
             };
 
         //- Helper
@@ -228,14 +243,23 @@ private:
             //- Read dictionaries and update data
             void readDictDataIfModified();
 
-            //- Reset for next time step
-            void timeReset();
+            //- Check convergence state
+            void updateResidual() const;
 
-            //- Check sub-convergence state
+            //- Update sub-disctionaries data
+            void resetSubDictionaries() const;
+
+            //- Decrease sub-tolerance
             void decreaseSubTolerance() const;
+
+            //- Decrease sub-scale
+            void decreaseSubScale() const;
 
             //- Check and return sub-loop state
             const bool& subLoop() const;
+
+            //- Reset
+            void reset();
 
 public:
 
@@ -362,9 +386,6 @@ public:
             void setResidualOfV(scalar residual) const;
 
         // Time and database
-
-            //- Commence time database write during sub-iteration
-            void subWrite() const;
 
             //- WriteData member function required by regIOobject
             bool writeData(Ostream&) const

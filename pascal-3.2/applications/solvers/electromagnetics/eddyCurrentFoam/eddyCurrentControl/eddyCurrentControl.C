@@ -62,67 +62,101 @@ void eddyCurrentControl::readDictDataIfModified()
 
         // Update data
         tol_ = AVdict_.lookupOrDefault<scalar>("tolerance", tol_);
-        tolScale_ = AVdict_.lookupOrDefault<scalar>("scale",tolScale_);
-        minIter_ = AVdict_.lookupOrDefault<int>("minIter", minIter_);
-        maxIter_ = AVdict_.lookupOrDefault<int>("maxIter", maxIter_);
+        relTol_ = AVdict_.lookupOrDefault<scalar>("relTol", relTol_);
+        outerRelTol_ = AVdict_.lookupOrDefault<int>("outerRelTol", outerRelTol_);
+        outerMaxIter_ = AVdict_.lookupOrDefault<int>("outerMaxIter", outerMaxIter_);
         relax_ = AVdict_.lookupOrDefault<scalar>("relax", relax_);
 
-        // Update subDict copies
-        subAdict_ = Adict_;
-        subVdict_ = Vdict_;
-        subAdict_.set<scalar>("tolerance", subTol_);
-        subVdict_.set<scalar>("tolerance", subTol_);
+        // Reset sub-dictionaries
+        resetSubDictionaries();
     }
 }
 
-void eddyCurrentControl::timeReset()
+//- Check convergence state
+void eddyCurrentControl::updateResidual() const
 {
-    readDictDataIfModified();
+    if (!oldAVresSet_)
+    {
+        oldAVres_ = AVres_;
+        oldAVrelRes_ = AVrelRes_;
+        oldAVresSet_ = true;
+    }
 
-    stop_ = false;
-    loop_ = false;
-    iter_ = -1;
+    AVres_ = returnReduce(max(Ares_, Vres_), maxOp<scalar>());
+    AVrelRes_ = mag(oldAVres_ - AVres_)/(oldAVres_ + VSMALL);
+};
 
-    subLoop_ = false;
-    subIter_ = -1;
-    subTol_ = 1.0;
+void eddyCurrentControl::resetSubDictionaries() const
+{
+    // Create copy
     subAdict_ = Adict_;
     subVdict_ = Vdict_;
 
-    AVres_ = subTol_-SMALL;
-    Ares_ = AVres_;
-    Vres_ = AVres_;
+    // Override tolerance
+    subAdict_.set<scalar>
+    (
+        "tolerance",
+        min(tol_, Adict_.lookupOrDefault<scalar>("tolerance", tol_))
+    );
+    subVdict_.set<scalar>
+    (
+        "tolerance",
+        min(tol_, Vdict_.lookupOrDefault<scalar>("tolerance", tol_))
+    );
 
-    if (!mesh3D_)
-    {
-        Vres_ = 0.0;
-    }
-
+    // Override relative tolerance
+    subAdict_.set<scalar>("relTol", relTol_);
+    subVdict_.set<scalar>("relTol", relTol_);
 }
 
 void eddyCurrentControl::decreaseSubTolerance() const
 {
-    if ((tol_ <= subTol_) && !firstIteration())
+    // Linear convergence progress
+    scalar x = min(max(AVres_-tol_, 0.0), 1.0);
+
+    // Relative tolerance decrease function (atan, scaled)
+    scalar decRelTol = atan(subScale_ * x) / mathematicalConstant::piByTwo;
+
+    // Relax decrease function (atan)
+    scalar decRelax = atan(10*x) / mathematicalConstant::piByTwo;
+
+    subRelTol_ = relTol_ * decRelTol;
+    subAdict_.set<scalar>("relTol", subRelTol_);
+    subVdict_.set<scalar>("relTol", subRelTol_);
+
+    subRelax_ = relax_ + (1 - relax_) * (1 - decRelax);
+
+//     Info << endl;
+//     Info << "loop_ = " << loop_ << endl;
+//     Info << "iter_ = " << iter_ << endl;
+//     Info << "AVres_ = " << AVres_ << endl;
+//     Info << "AVrelRes_ = " << AVrelRes_ << endl;
+//     Info << "oldAVres_ = " << oldAVres_ << endl;
+//     Info << "oldAVrelRes_ = " << oldAVrelRes_ << endl;
+//
+//     Info << "subLoop_ = " << subLoop_ << endl;
+//     Info << "subIter_ = " << subIter_ << endl;
+//     Info << "subRelTol_ = " << subRelTol_ << endl;
+//     Info << "subScale_ = " << subScale_ << endl;
+//     Info << "subOuterRelTol_ = " << subOuterRelTol_ << endl;
+//     Info << "subRelax_ = " << subRelax_ << endl;
+
+    Info << endl;
+    Info << "Relative tolerance = " << subRelTol_ << " / " << relTol_ << endl;
+    if (checkSubRelax())
     {
-        // Scale sub-tolerance
-        subTol_ *= min(mag(tolScale_), 1.0);
-
-        // If residual is already smaller
-        // adjust sub-tolerance accordingly
-        subTol_ = min(subTol_, AVres_);
-
-        // Make sure sub-tolerance does
-        // not get smaller then tolerance
-        subTol_ = max(subTol_, tol_);
+        Info << "Relax factor = " << subRelax_  << " / " << relax_ << endl;
     }
+    Info << endl;
+}
 
-    if (firstIteration()) Info << nl;
+void eddyCurrentControl::decreaseSubScale() const
+{
+    subScale_ /= 10.0;
 
-    Info << "Tolerance = " << subTol_
-        << " / " << tol_ << endl << nl;
+    subOuterRelTol_ /= 10.0;
 
-    subAdict_.set<scalar>("tolerance", subTol_);
-    subVdict_.set<scalar>("tolerance", subTol_);
+    Info << nl << "Outer relative tolerance = " << subOuterRelTol_ << endl << nl;
 
     subIter_ = 0;
 }
@@ -135,6 +169,46 @@ const bool& eddyCurrentControl::subLoop() const
 
     return subLoop_;
 };
+
+void eddyCurrentControl::reset()
+{
+    readDictDataIfModified();
+
+    stop_ = false;
+    loop_ = false;
+    iter_ = 0;
+
+    subLoop_ = false;
+    subIter_ = -1;
+    subRelTol_ = relTol_;
+    subOuterRelTol_ = outerRelTol_;
+    subRelax_ = relax_;
+    subScale_ = pow(tol_,-1.0);
+    subAdict_ = Adict_;
+    subVdict_ = Vdict_;
+
+    AVres_ = GREAT;
+    AVrelRes_ = GREAT;
+    Ares_ = GREAT;
+    Vres_ = GREAT;
+
+    oldAVres_ = 10*AVres_;
+    oldAVrelRes_ = 10*AVrelRes_;
+    oldAVresSet_ = false;
+
+    if (!mesh3D_)
+    {
+        Vres_ = 0.0;
+
+        subRelTol_ = 0.0;
+
+        solDir_ = -mesh_[baseRegion_].geometricD();
+    }
+
+    // Update subDict copies
+    resetSubDictionaries();
+
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -184,35 +258,32 @@ eddyCurrentControl::eddyCurrentControl
     Adict_(baseSolutionDict_.subDict("solvers").subDict("A")),
     Vdict_(conductorSolutionDict_.subDict("solvers").subDict("V")),
     tol_(AVdict_.lookupOrDefault<scalar>("tolerance", 1e-04)),
-    tolScale_(AVdict_.lookupOrDefault<scalar>("scale", 0.1)),
-    minIter_(AVdict_.lookupOrDefault<int>("minIter", 0)),
-    maxIter_(AVdict_.lookupOrDefault<int>("maxIter", 100)),
+    relTol_(AVdict_.lookupOrDefault<scalar>("relTol", 0.5)),
+    outerRelTol_(AVdict_.lookupOrDefault<scalar>("outerRelTol", 0.05)),
+    outerMaxIter_(AVdict_.lookupOrDefault<int>("outerMaxIter", 100)),
     relax_(AVdict_.lookupOrDefault<scalar>("relax", 1.0)),
-    stop_(false),
-    loop_(false),
-    iter_(-1),
-    subLoop_(false),
-    subIter_(-1),
-    subTol_(1.0),
-    subAdict_(Adict_),
-    subVdict_(Vdict_),
     mesh3D_((mesh_[baseRegion_].nGeometricD() == 3)),
     solDir_(mesh_[baseRegion_].geometricD()),
-    AVres_(subTol_-SMALL),
-    Ares_(AVres_),
-    Vres_(AVres_)
+    stop_(false),
+    loop_(false),
+    iter_(0),
+    subLoop_(false),
+    subIter_(-1),
+    subRelTol_(relTol_),
+    subOuterRelTol_(outerRelTol_),
+    subRelax_(relax_),
+    subScale_(pow(tol_,-1.0)),
+    subAdict_(Adict_),
+    subVdict_(Vdict_),
+    AVres_(GREAT),
+    AVrelRes_(GREAT),
+    Ares_(GREAT),
+    Vres_(GREAT),
+    oldAVres_(10*AVres_),
+    oldAVrelRes_(10*AVrelRes_),
+    oldAVresSet_(false)
 {
-    if (!mesh3D_)
-    {
-        Vres_ = 0.0;
-
-        solDir_ *= -1;
-    }
-
-    // TODO: Check tol_ < 1 ???
-    // TODO: Check maxIter_ > 0
-    // TODO: Check maxIter_ > minIter_
-    // TODO: Check 0 < relax_ <= 1
+    reset();
 }
 
 
@@ -220,14 +291,14 @@ eddyCurrentControl::eddyCurrentControl
 
 void eddyCurrentControl::relax(volVectorField& vf) const
 {
-    if (checkRelax())
+    if (checkSubRelax())
     {
         if (!firstIteration())
         {
             Info << "Relax " << vf.name()
-                << ", Factor = " << relax_ << endl;
+                << " with a factor = " << subRelax_ << endl;
 
-            vf.relax(relax_);
+            vf.relax(subRelax_);
         }
 
         vf.storePrevIter();
@@ -236,16 +307,16 @@ void eddyCurrentControl::relax(volVectorField& vf) const
 
 void eddyCurrentControl::relax(const regionVolVectorField& rvf) const
 {
-    if (checkRelax())
+    if (checkSubRelax())
     {
         if (!firstIteration())
         {
             Info << "Relax " << rvf.name()
-                << " = " << relax_ << endl;
+                << " with a factor = " << subRelax_ << endl;
 
             forAll(rvf.mesh().regionNames(), regionI)
             {
-                rvf[regionI].relax(relax_);
+                rvf[regionI].relax(subRelax_);
             }
         }
 
@@ -259,31 +330,41 @@ void eddyCurrentControl::relax(const regionVolVectorField& rvf) const
 const bool& eddyCurrentControl::loop()
 {
     bool converged = checkConvergence();
-    bool subConverged = checkSubConvergence();
-//     bool iterAboveMin = checkMinIterations(); // TODO: Makes only sense with relTol
     bool iterBelowMax = checkMaxIterations();
 
-    // Update data if last subiteration has converged
-    if (!converged && subConverged)
-    {
-        readDictDataIfModified();
-    }
+//     // Update data if last subiteration has converged
+//     if (!converged && subConverged)
+//     {
+//         readDictDataIfModified();
+//     }
 
     // Loop if not converged and below max iterations
     loop_ = !converged && iterBelowMax;
 
+    // Reset calculation switch for old residual
+    oldAVresSet_ = false;
+
     if (loop_)
     {
-        iter_++;
-
-        if (!subLoop() && mesh3D_)
+        if (!mesh3D_)
         {
+            iter_++;
+        }
+        else
+        {
+            if (!subLoop())
+            {
+                iter_++;
+
+                decreaseSubScale();
+            }
+
             decreaseSubTolerance();
         }
     }
     else
     {
-        timeReset();
+        reset();
     }
 
     return loop_;
@@ -302,26 +383,6 @@ void eddyCurrentControl::setResidualOfV(scalar residual) const
     Vres_ = residual;
 
     updateResidual();
-}
-
-
-void eddyCurrentControl::subWrite() const
-{
-    if
-    (
-        checkSubConvergence()
-     && !checkConvergence()
-    )
-    {
-        Info << "Write current solution" << endl << nl;
-
-        Time& time = const_cast<Time&>(time_);
-
-        // TODO: Why is writeNow() not const,
-        //       but write() is?
-        // TODO: This takes to much space for interTrackEddyCurrentFoam! (DISABLED FOR NOW)
-//         time.writeNow();
-    }
 }
 
 
