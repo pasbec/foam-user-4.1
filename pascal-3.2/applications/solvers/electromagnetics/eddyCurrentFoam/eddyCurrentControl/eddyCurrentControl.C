@@ -63,8 +63,7 @@ void eddyCurrentControl::readDictDataIfModified()
         // Update data
         tol_ = AVdict_.lookupOrDefault<scalar>("tolerance", tol_);
         relTol_ = AVdict_.lookupOrDefault<scalar>("relTol", relTol_);
-        outerRelTol_ = AVdict_.lookupOrDefault<int>("outerRelTol", outerRelTol_);
-        outerMaxIter_ = AVdict_.lookupOrDefault<int>("outerMaxIter", outerMaxIter_);
+        maxIter_ = AVdict_.lookupOrDefault<int>("maxIter", maxIter_);
         relax_ = AVdict_.lookupOrDefault<scalar>("relax", relax_);
 
         // Reset sub-dictionaries
@@ -137,8 +136,8 @@ void eddyCurrentControl::decreaseSubTolerance() const
 //     Info << "subLoop_ = " << subLoop_ << endl;
 //     Info << "subIter_ = " << subIter_ << endl;
 //     Info << "subRelTol_ = " << subRelTol_ << endl;
+//     Info << "subRelTolLim_ = " << subRelTolLim_ << endl;
 //     Info << "subScale_ = " << subScale_ << endl;
-//     Info << "subOuterRelTol_ = " << subOuterRelTol_ << endl;
 //     Info << "subRelax_ = " << subRelax_ << endl;
 
     Info << endl;
@@ -152,11 +151,11 @@ void eddyCurrentControl::decreaseSubTolerance() const
 
 void eddyCurrentControl::decreaseSubScale() const
 {
+    subRelTolLim_ /= 10.0;
+
     subScale_ /= 10.0;
 
-    subOuterRelTol_ /= 10.0;
-
-    Info << nl << "Outer relative tolerance = " << subOuterRelTol_ << endl << nl;
+    Info << nl << "Relative tolerance limit = " << subRelTolLim_ << endl << nl;
 
     subIter_ = 0;
 }
@@ -181,9 +180,9 @@ void eddyCurrentControl::reset()
     subLoop_ = false;
     subIter_ = -1;
     subRelTol_ = relTol_;
-    subOuterRelTol_ = outerRelTol_;
-    subRelax_ = relax_;
+    subRelTolLim_ = relTol_/10.0;
     subScale_ = pow(tol_,-1.0);
+    subRelax_ = relax_;
     subAdict_ = Adict_;
     subVdict_ = Vdict_;
 
@@ -259,8 +258,7 @@ eddyCurrentControl::eddyCurrentControl
     Vdict_(conductorSolutionDict_.subDict("solvers").subDict("V")),
     tol_(AVdict_.lookupOrDefault<scalar>("tolerance", 1e-04)),
     relTol_(AVdict_.lookupOrDefault<scalar>("relTol", 0.5)),
-    outerRelTol_(AVdict_.lookupOrDefault<scalar>("outerRelTol", 0.05)),
-    outerMaxIter_(AVdict_.lookupOrDefault<int>("outerMaxIter", 100)),
+    maxIter_(AVdict_.lookupOrDefault<int>("maxIter", 100)),
     relax_(AVdict_.lookupOrDefault<scalar>("relax", 1.0)),
     mesh3D_((mesh_[baseRegion_].nGeometricD() == 3)),
     solDir_(mesh_[baseRegion_].geometricD()),
@@ -270,9 +268,9 @@ eddyCurrentControl::eddyCurrentControl
     subLoop_(false),
     subIter_(-1),
     subRelTol_(relTol_),
-    subOuterRelTol_(outerRelTol_),
-    subRelax_(relax_),
+    subRelTolLim_(relTol_/10.0),
     subScale_(pow(tol_,-1.0)),
+    subRelax_(relax_),
     subAdict_(Adict_),
     subVdict_(Vdict_),
     AVres_(GREAT),
@@ -332,14 +330,13 @@ const bool& eddyCurrentControl::loop()
     bool converged = checkConvergence();
     bool iterBelowMax = checkMaxIterations();
 
-//     // Update data if last subiteration has converged
-//     if (!converged && subConverged)
-//     {
-//         readDictDataIfModified();
-//     }
-
     // Loop if not converged and below max iterations
     loop_ = !converged && iterBelowMax;
+
+
+    // TODO
+    // Update dict data
+//     readDictDataIfModified();
 
     if (loop_)
     {
