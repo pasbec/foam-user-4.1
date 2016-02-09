@@ -341,11 +341,11 @@ const bool& eddyCurrentControl::loop()
     // Loop if not converged and below max iterations
     loop_ = !converged && iterBelowMax;
 
-    // Reset calculation switch for old residual
-    oldAVresSet_ = false;
-
     if (loop_)
     {
+        // Reset calculation switch for old residual
+        oldAVresSet_ = false;
+
         if (!mesh3D_)
         {
             iter_++;
