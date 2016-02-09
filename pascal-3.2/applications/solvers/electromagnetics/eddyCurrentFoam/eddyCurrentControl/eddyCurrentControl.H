@@ -105,12 +105,8 @@ private:
             //- Relative solution tolerance
             scalar relTol_;
 
-            //- Outer relative solution tolerance
-            //- for relTol down-scaling
-            scalar outerRelTol_;
-
             //- Outer maximum number of iterations
-            int outerMaxIter_;
+            int maxIter_;
 
             //- Realxation factor
             scalar relax_;
@@ -142,15 +138,15 @@ private:
             mutable scalar subRelTol_;
 
             //- Sub-iteration outer relative solution
-            //-  tolerance for subRelTol down-scaling
-            mutable scalar subOuterRelTol_;
-
-            //- Sub-iteration relax
-            mutable scalar subRelax_;
+            //-  tolerance limit for subRelTol down-scaling
+            mutable scalar subRelTolLim_;
 
             //- Sub-iteration relative tolerance
             mutable scalar subScale_;
 
+            //- Sub-iteration relax
+            mutable scalar subRelax_;
+            
             //- Temporary copy of A-solution dictionary
             mutable dictionary subAdict_;
 
@@ -223,7 +219,7 @@ private:
             //- Check minimum iterations state
             inline bool checkMaxIterations() const
             {
-                return (iter_ < outerMaxIter_);
+                return (iter_ < maxIter_);
             };
 
             //- Check convergence state
@@ -235,7 +231,7 @@ private:
             //- Check relative convergence state
             inline bool checkSubConvergence() const
             {
-                return (max(oldAVrelRes_, AVrelRes_) <= subOuterRelTol_);
+                return (max(oldAVrelRes_, AVrelRes_) <= subRelTolLim_);
             };
 
         //- Helper
