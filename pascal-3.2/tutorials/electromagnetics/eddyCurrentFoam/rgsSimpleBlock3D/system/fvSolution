@@ -14,35 +14,17 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-
 solvers
 {
     AV
     {
-        tolerance                1e-04;
-        scale                    0.1;
+        tolerance                1e-4;
+        relTol                   0.5;
 
-//         minIter                  0;
         maxIter                  100;
-
-        relax                    1.0;
     }
 
     A
-//     {
-//         solver                   GaussSeidel;
-//
-//         tolerance                1e-04;
-//         relTol                   0;
-//
-//         minIter                  0;
-//         maxIter                  1000;
-//
-//         preconditioner           none;
-//
-//         nSweeps                  1;
-//     }
     {
         solver                   BiCGStab;
 
@@ -54,41 +36,6 @@ solvers
 
         preconditioner           Cholesky;
     }
-//     {
-//         solver                   GMRES;
-//
-//         tolerance                1e-04;
-//         relTol                   0;
-//
-//         minIter                  0;
-//         maxIter                  300;
-//
-//         preconditioner           Cholesky;
-//
-//         nDirections              5;
-//     }
-//     {
-//         solver                   AMG;
-//         tolerance                1e-04;
-//         relTol                   0;
-//
-//         minIter                  0;
-//         maxIter                  100;
-//
-//         smoother                 ILU; // ILU, GaussSeidel
-//         nPreSweeps               0;
-//         nPostSweeps              2;
-//
-//         coarseningType           AAMG; // AAMG
-//         cycle                    V-cycle; // V-cycle, F-cycle, W-cycle
-//         minCoarseEqns            4;
-//         nMaxLevels               100;
-//         groupSize                2;
-//
-//         norm                     maxNorm; // componentNorm, maxNorm, twoNorm
-//         normComponent            0; // for norm=componentNorm
-//         scale                    on;
-//     }
 }
 
 // ************************************************************************* //

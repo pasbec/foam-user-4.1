@@ -14,39 +14,41 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh      dynamicMotionSolverFvMesh;
+dynamicFvMesh               dynamicMotionSolverFvMesh;
 
-twoDMotion         no;
-
-// ************************************************************************* //
-
-// solver             velocityLaplacian;
-//
-// // diffusivity        inverseDistance 1(trackedSurface);
-// diffusivity        quadratic inverseDistance 1(trackedSurface);
-//
-// frozenDiffusion    no;
+twoDMotion                  no;
 
 // ************************************************************************* //
 
-solver                      laplace;
-// solver                      pseudoSolid;
+solver                      velocityLaplacian;
 
-// diffusivity                 uniform;
-// diffusivity                 linear;
-// diffusivity                 quadratic;
-// distancePatches             1(trackedSurface);
-
-diffusivity                 deformationEnergy;
-diffusivityExponent         2;
+diffusivity                 uniform;
+// diffusivity                 inverseDistance 1(trackedSurface);
+// diffusivity                 quadratic inverseDistance 1(trackedSurface);
 
 frozenDiffusion             no;
 
-pseudoSolid
-{
-    poissonsRatio           0.3;
-    nCorrectors             3;
-    convergenceTolerance    1e-9;
-};
+// ************************************************************************* //
+
+// solver                      laplace;
+// // solver                      pseudoSolid;
+//
+// diffusivity                 uniform;
+// // diffusivity                 linear;
+// // diffusivity                 quadratic;
+// distancePatches             1(trackedSurface);
+//
+// // diffusivity                 deformationEnergy;
+// // diffusivity                 distortionEnergy;
+// // diffusivityExponent         10;
+//
+// frozenDiffusion             no;
+//
+// pseudoSolid
+// {
+//     poissonsRatio           0.3;
+//     nCorrectors             3;
+//     convergenceTolerance    1e-9;
+// };
 
 // ************************************************************************* //

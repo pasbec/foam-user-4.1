@@ -20,7 +20,7 @@ parameters
   "sigma_woodsMetal=1.0e+6;"        // Conductivity of woods metal in [S/m]
   "sigma_copper=5.8e+7;"            // Conductivity of copper in [S/m]
 
-  "coil_rms=12*2020.0;"             // Inductor current rms value in [A]
+  "coil_rms=12*2464.0;"             // Inductor current rms value in [A]
   "coil_x0=0.10750;"                // Inductor center line x position in [m]
   "coil_dz=0.00000;"                // Inductor loop z offset in [m]
   "coil_z0=0.11750;"                // Inductor base z offset in [m]
