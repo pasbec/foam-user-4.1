@@ -18,13 +18,10 @@ solvers
 {
     AV
     {
-        tolerance                1e-04;
-        scale                    0.1;
+        tolerance                1e-4;
+        relTol                   0.5;
 
-//         minIter                  0;
         maxIter                  100;
-
-        relax                    1.0;
     }
 
     A
@@ -47,8 +44,8 @@ Magnetic
     {
         active           on;
         outputCycle      2147483647;
-        timeStepCycle    10;
-        timeCycle        1e+100;
+        timeStepCycle    2147483647;
+        timeCycle        0.05;
     }
 }
 

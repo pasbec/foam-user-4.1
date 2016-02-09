@@ -16,7 +16,7 @@ FoamFile
 
 dynamicFvMesh               dynamicMotionSolverFvMesh;
 
-twoDMotion                  yes;
+twoDMotion                  no;
 
 // ************************************************************************* //
 
@@ -30,12 +30,16 @@ frozenDiffusion             no;
 // ************************************************************************* //
 
 // solver                      laplace;
+// // solver                      pseudoSolid;
 //
 // // diffusivity                 uniform;
-// diffusivity                 linear;
-// // diffusivity                 quadratic;
-//
+// // diffusivity                 linear;
+// diffusivity                 quadratic;
 // distancePatches             1(trackedSurface);
+//
+// // diffusivity                 deformationEnergy;
+// // diffusivity                 deformationEnergy;
+// // diffusivityExponent         10;
 //
 // frozenDiffusion             no;
 //

@@ -81,7 +81,7 @@ PIMPLE
     maxRelVolErr                 1e-03;
 
     maxConvectiveCo              0.3;
-    maxInterfaceCo               1.0;
+    maxInterfaceCo               0.6;
 
     removeSwirl                  -1;
 

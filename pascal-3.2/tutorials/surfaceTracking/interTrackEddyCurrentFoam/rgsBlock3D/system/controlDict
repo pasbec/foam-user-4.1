@@ -16,7 +16,8 @@ FoamFile
 
 // ************************* SIMLUTAITON TIMES ***************************** //
 
-application         interTrackMHDmagFoam;
+application         interTrackEddyCurrentFoam;
+// application         eddyCurrentFoam;
 
 startFrom           latestTime;
 
@@ -28,13 +29,13 @@ endTime             20.0;
 
 // *************************** TIME STEPPING ******************************* //
 
-deltaT              0.0005;
+deltaT              0.001;
 
 adjustTimeStep      yes;
 
 maxCo               0.1;
 
-maxDeltaT           0.0005;
+maxDeltaT           0.001;
 
 // *************************** OUTPUT SETTINGS ***************************** //
 

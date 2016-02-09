@@ -14,29 +14,33 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh      dynamicMotionSolverFvMesh;
+dynamicFvMesh               dynamicMotionSolverFvMesh;
 
-twoDMotion         yes;
+twoDMotion                  no;
 
 // ************************************************************************* //
 
-solver             velocityLaplacian;
+solver                      velocityLaplacian;
 
-diffusivity        uniform;
-// diffusivity        inverseDistance 1(trackedSurface);
-// diffusivity        quadratic inverseDistance 1(trackedSurface);
+diffusivity                 uniform;
+// diffusivity                 inverseDistance 1(trackedSurface);
+// diffusivity                 quadratic inverseDistance 1(trackedSurface);
 
-frozenDiffusion    no;
+frozenDiffusion             no;
 
 // ************************************************************************* //
 
 // solver                      laplace;
+// // solver                      pseudoSolid;
 //
-// // diffusivity                 uniform;
+// diffusivity                 uniform;
 // // diffusivity                 linear;
-// diffusivity                 quadratic;
-//
+// // diffusivity                 quadratic;
 // distancePatches             1(trackedSurface);
+//
+// // diffusivity                 deformationEnergy;
+// // diffusivity                 distortionEnergy;
+// // diffusivityExponent         10;
 //
 // frozenDiffusion             no;
 //

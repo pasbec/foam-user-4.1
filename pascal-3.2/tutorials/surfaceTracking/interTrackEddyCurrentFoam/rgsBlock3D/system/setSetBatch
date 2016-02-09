@@ -168,6 +168,7 @@ cellSet cellSet_region_conductor          new    setToCell      cellSet_geometry
 cellSet cellSet_region_conductor          add    setToCell      cellSet_geometry_wafer
 cellSet cellSet_region_conductor          add    setToCell      cellSet_geometry_frame
 cellSet cellSet_region_conductor          add    setToCell      cellSet_geometry_substrate
+#cellSet cellSet_region_conductor          add    setToCell      cellSet_geometry_free
 cellSet cellSet_region_conductor_old      remove
 
 cellSet cellSet_region_space              new    setToCell      cellSet_geometry_all

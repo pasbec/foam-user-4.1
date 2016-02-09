@@ -16,7 +16,8 @@ FoamFile
 
 // ************************* SIMLUTAITON TIMES ***************************** //
 
-application         interTrackMHDmagFoam;
+application         interTrackEddyCurrentFoam;
+// application         eddyCurrentFoam;
 
 startFrom           latestTime;
 
