@@ -30,10 +30,6 @@
         {
             setRegionScope(control.base());
 
-            // Relax gradient of V
-            control.relax(VReGrad);
-            control.relax(VImGrad);
-
 #           include "eddyCurrentAEqn.H"
         }
 
@@ -47,13 +43,15 @@
             {
                 setRegionScope(control.conductor());
 
+                // Relax A
+                control.relax(ARe);
+                control.relax(AIm);
+
 #               include "eddyCurrentVEqn.H"
             }
 
             // Update gradient of V
             updateGradientV(control.conductor());
-
-            control.subWrite();
         }
     }
 
