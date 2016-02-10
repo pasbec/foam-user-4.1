@@ -12,7 +12,7 @@
 ../../../../src/foamTools/lnInclude
 ../../../../src/regionModel/lnInclude
 
-../trackedSurface/lnInclude
+../trackedSurface.new/lnInclude
 ../../electromagnetics/eddyCurrentFoam/lnInclude
 
 ./regions

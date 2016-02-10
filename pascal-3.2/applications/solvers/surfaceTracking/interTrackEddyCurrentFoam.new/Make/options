@@ -11,7 +11,7 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteArea/lnInclude \
     -I$(FOAM_USER_SRC)/foamTools/lnInclude \
     -I$(FOAM_USER_SRC)/regionModel/lnInclude \
-    -I$(FOAM_USER_APP)/solvers/surfaceTracking/trackedSurface/lnInclude \
+    -I$(FOAM_USER_APP)/solvers/surfaceTracking/trackedSurface.new/lnInclude \
     -I$(FOAM_USER_APP)/solvers/electromagnetics/eddyCurrentFoam/lnInclude \
     -IinterTrackEddyCurrentControl \
     -Iregions \
@@ -32,4 +32,4 @@ EXE_LIBS = \
     -lincompressibleLESModels \
     -lfiniteArea \
     -L$(FOAM_USER_LIBBIN) -lregionModel \
-    -L$(FOAM_USER_LIBBIN) -ltrackedSurface
+    -L$(FOAM_USER_LIBBIN) -lnewTrackedSurface
