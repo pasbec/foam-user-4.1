@@ -87,7 +87,7 @@ git remote add 'sf' 'https://p-be@git.code.sf.net/u/p-be/foam-extend-3.2'
 cd "$HOME/foam/foam-extend-3.2"
 #
 # Template
-cp etc/prefs.sh-EXAMPLE etc/prefs.sh
+cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
 # Bison 2.7
 sed -i "s/#\(export WM_THIRD_PARTY_USE_BISON_27=1\)/\1/g" 'etc/prefs.sh'
 # System qmake
@@ -120,7 +120,7 @@ cd "$HOME/foam/foam-extend-3.2"
 cd "$HOME/foam/pascal-3.2"
 #
 export FE32_FOAM_INST_DIR="$HOME/foam"
-export FE32_FOAM_ETC="$FE31_FOAM_INST_DIR/foam-extend-3.2/etc"
+export FE32_FOAM_ETC="$FE32_FOAM_INST_DIR/foam-extend-3.2/etc"
 export FE32_FOAM_USER_ETC="$HOME/foam/$USER-3.2/etc"
 source "$FE32_FOAM_USER_ETC/bashrc"
 fe32
