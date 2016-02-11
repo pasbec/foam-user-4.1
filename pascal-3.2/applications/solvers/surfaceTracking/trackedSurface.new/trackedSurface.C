@@ -102,6 +102,8 @@ trackedSurface::trackedSurface
     volVectorField& Ub,
     volScalarField& Pb,
     const surfaceScalarField& sfPhi,
+    const uniformDimensionedVectorField g,
+    const twoPhaseMixture& transportModel,
     volScalarField* TbPtr
 )
 :
@@ -120,8 +122,10 @@ trackedSurface::trackedSurface
     rho_(rho),
     U_(Ub),
     p_(Pb),
-    TPtr_(TbPtr),
     phi_(sfPhi),
+    g_(g),
+    transport_(transportModel),
+    TPtr_(TbPtr),
     curTimeIndex_(Ub.mesh().time().timeIndex()),
     twoFluids_
     (
@@ -140,28 +144,29 @@ trackedSurface::trackedSurface
     bPatchID_(-1),
     muFluidA_
     (
-        this->lookup("muFluidA")
+        dimensionedScalar(transportModel.nuModel1().viscosityProperties().lookup("rho"))
+      * dimensionedScalar(transportModel.nuModel1().viscosityProperties().lookup("nu"))
     ),
     muFluidB_
     (
-        this->lookup("muFluidB")
+        dimensionedScalar(transportModel.nuModel2().viscosityProperties().lookup("rho"))
+      * dimensionedScalar(transportModel.nuModel2().viscosityProperties().lookup("nu"))
     ),
     rhoFluidA_
     (
-        this->lookup("rhoFluidA")
+        dimensionedScalar(transportModel.nuModel1().viscosityProperties().lookup("rho"))
     ),
     rhoFluidB_
     (
-        this->lookup("rhoFluidB")
+        dimensionedScalar(transportModel.nuModel2().viscosityProperties().lookup("rho"))
     ),
     kFluidA_("kFluidA", dimThermalConductivity, 0.0),
     kFluidB_("kFluidB", dimThermalConductivity, 0.0),
     CpFluidA_("CpFluidA", dimSpecificHeatCapacity, 0.0),
     CpFluidB_("CpFluidB", dimSpecificHeatCapacity, 0.0),
-    g_(this->lookup("g")),
     cleanInterfaceSurfTension_
     (
-        this->lookup("surfaceTension")
+        dimensionedScalar(transportModel.lookup("sigma"))
     ),
     fixedTrackedSurfacePatches_
     (
@@ -3065,15 +3070,17 @@ bool trackedSurface::MarangoniStress() const
 
 void trackedSurface::updateProperties()
 {
-    muFluidA_ = dimensionedScalar(this->lookup("muFluidA"));
+    muFluidA_ =
+        dimensionedScalar(transport().nuModel1().viscosityProperties().lookup("rho"))
+      * dimensionedScalar(transport().nuModel1().viscosityProperties().lookup("nu"));
 
-    muFluidB_ = dimensionedScalar(this->lookup("muFluidB"));
+    muFluidB_ =
+        dimensionedScalar(transport().nuModel2().viscosityProperties().lookup("rho"))
+      * dimensionedScalar(transport().nuModel2().viscosityProperties().lookup("nu"));
 
-    rhoFluidA_ = dimensionedScalar(this->lookup("rhoFluidA"));
+    rhoFluidA_ = dimensionedScalar(transport().nuModel1().viscosityProperties().lookup("rho"));
 
-    rhoFluidB_ = dimensionedScalar(this->lookup("rhoFluidB"));
-
-    g_ = dimensionedVector(this->lookup("g"));
+    rhoFluidB_ = dimensionedScalar(transport().nuModel2().viscosityProperties().lookup("rho"));
 
     cleanInterfaceSurfTension_ =
         dimensionedScalar(this->lookup("surfaceTension"));

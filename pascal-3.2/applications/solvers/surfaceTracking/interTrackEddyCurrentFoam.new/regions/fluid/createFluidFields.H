@@ -202,7 +202,9 @@
         rho,
         U,
         p,
-        phi
+        phi,
+        g,
+        twoPhaseProperties
     );
     Info << nl;
 

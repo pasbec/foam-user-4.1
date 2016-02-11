@@ -47,6 +47,8 @@ SourceFiles
 #include "faCFD.H"
 #include "IOpatchToPatchInterpolation.H"
 #include "dynamicFvMesh.H"
+#include "twoPhaseMixture.H"
+#include "turbulenceModel.H"
 
 #include "surfactantProperties.H"
 
@@ -77,11 +79,17 @@ class trackedSurface
         //- Reference to pressure field
         volScalarField& p_;
 
-        //- Reference to temperature field
-        volScalarField* TPtr_;
-
         //- Reference to fluid flux field
         const surfaceScalarField& phi_;
+
+        //- Gravitational acceleration
+        const uniformDimensionedVectorField& g_;
+
+        //- Reference to the transportModel
+        const twoPhaseMixture& transport_;
+
+        //- Reference to temperature field
+        volScalarField* TPtr_;
 
         //- Current time index for surface
         label curTimeIndex_;
@@ -131,9 +139,6 @@ class trackedSurface
 
         //- Heat capacity of fluid B
         dimensionedScalar CpFluidB_;
-
-        //- Reference to gravitational acceleration
-        dimensionedVector g_;
 
         //- Surface tension for the clean surface
         dimensionedScalar cleanInterfaceSurfTension_;
@@ -309,6 +314,8 @@ public:
         volVectorField& Ub,
         volScalarField& Pb,
         const surfaceScalarField& phi,
+        const uniformDimensionedVectorField g,
+        const twoPhaseMixture& transportModel,
         volScalarField* TbPtr = NULL
     );
 
@@ -373,6 +380,18 @@ public:
         const surfaceScalarField& phi() const
         {
             return phi_;
+        }
+
+        //- Return reference to gravitational acceleration
+        const dimensionedVector& g() const
+        {
+            return g_;
+        }
+
+        //- Return reference to transport model
+        const twoPhaseMixture& transport() const
+        {
+            return transport_;
         }
 
         //- Return reference to temperature field
@@ -466,12 +485,6 @@ public:
         const dimensionedScalar& CpFluidB() const
         {
             return CpFluidB_;
-        }
-
-        //- Gravity
-        const dimensionedVector& g() const
-        {
-            return g_;
         }
 
         //- Surface tension for clean interface
