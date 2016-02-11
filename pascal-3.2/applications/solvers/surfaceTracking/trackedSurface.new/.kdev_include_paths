@@ -1,8 +1,3 @@
-../../../../.wm_project_dir/src/transportModels
-../../../../.wm_project_dir/src/transportModels/incompressible/lnInclude
-
-../../../../.wm_project_dir/src/turbulenceModels/incompressible/turbulenceModel/lnInclude
-
-../../../../.wm_project_dir/src/finiteArea/lnInclude
+../../../../src/finiteArea.new/lnInclude
 
 ./lnInclude

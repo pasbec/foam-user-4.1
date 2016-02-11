@@ -174,6 +174,24 @@
     Info << nl;
 
 
+//     // Tracked surface
+//     Info << "Create tracked surface for"
+//         << " region " << mesh_[control.fluidA()].name()
+//         << endl;
+//     trackedSurface interface
+//     (
+//         mesh_[control.fluidA()],
+//         rho,
+//         U,
+//         p,
+//         pB_[control.fluidA()],
+//         phi,
+//         g,
+//         twoPhaseProperties,
+//         turbulence
+//     );
+//     Info << nl;
+
     // Tracked surface
     Info << "Create tracked surface for"
         << " region " << mesh_[control.fluidA()].name()
@@ -184,11 +202,7 @@
         rho,
         U,
         p,
-        pB_[control.fluidA()],
-        phi,
-        g,
-        twoPhaseProperties,
-        turbulence
+        phi
     );
     Info << nl;
 
