@@ -1,4 +1,4 @@
 [submodule "foam-extend"]
-	path = foam-extend-3.1
-	url = ssh://git@git.becksteins.de:2222/foam-extend/foam-extend-3.1.git
+	path = foam-extend-3.2
+	url = ssh://git@git.becksteins.de:2222/foam-extend/foam-extend-3.2.git
 	branch = pascal/master

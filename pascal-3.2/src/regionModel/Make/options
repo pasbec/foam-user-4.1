@@ -1,0 +1,15 @@
+EXE_INC = \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/meshMotion/tetMotionSolver/lnInclude \
+    -I$(LIB_SRC)/tetFiniteElement/lnInclude \
+    -I$(FOAM_USER_SRC)/foamTools/lnInclude
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -lmeshTools \
+    -ldynamicMesh \
+    -ltetFiniteElement \
+    -ltetMotionSolver

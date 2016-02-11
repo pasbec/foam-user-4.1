@@ -1,0 +1,62 @@
+### Geometry
+
+# All
+
+cellSet  cellSet_geometry_all             new    boxToCell      (-1 -1 -1) ( 1  1  1)
+
+# Conductor
+
+pointSet pointSet_geometry_conductor      new    surfaceToPoint "constant/triSurface/geometry_conductor.stl" 2e-4 true false
+
+cellSet  cellSet_geometry_conductor       new    pointToCell    pointSet_geometry_conductor all
+faceSet  faceSet_geometry_conductor       new    pointToFace    pointSet_geometry_conductor all
+
+pointSet pointSet_geometry_conductor      remove
+
+# Coil
+
+pointSet pointSet_geometry_coil0          new    surfaceToPoint "constant/triSurface/geometry_coil0.stl" 2e-4 true false
+pointSet pointSet_geometry_coil1          new    surfaceToPoint "constant/triSurface/geometry_coil1.stl" 2e-4 true false
+pointSet pointSet_geometry_coil2          new    surfaceToPoint "constant/triSurface/geometry_coil2.stl" 2e-4 true false
+
+cellSet  cellSet_geometry_coil0           new    pointToCell    pointSet_geometry_coil0 all
+cellSet  cellSet_geometry_coil1           new    pointToCell    pointSet_geometry_coil1 all
+cellSet  cellSet_geometry_coil2           new    pointToCell    pointSet_geometry_coil2 all
+
+cellSet  cellSet_geometry_coil            new    setToCell      cellSet_geometry_coil0
+cellSet  cellSet_geometry_coil            add    setToCell      cellSet_geometry_coil1
+cellSet  cellSet_geometry_coil            add    setToCell      cellSet_geometry_coil2
+cellSet  cellSet_geometry_coil_old        remove
+
+pointSet pointSet_geometry_coil0          remove
+pointSet pointSet_geometry_coil1          remove
+pointSet pointSet_geometry_coil2          remove
+
+# Background
+
+cellSet  cellSet_geometry_background      new    setToCell      cellSet_geometry_all
+cellSet  cellSet_geometry_background      delete setToCell      cellSet_geometry_conductor
+cellSet  cellSet_geometry_background      delete setToCell      cellSet_geometry_coil
+cellSet  cellSet_geometry_background_old  remove
+
+
+
+### Materials
+
+cellSet cellSet_material_conductor        new    setToCell      cellSet_geometry_conductor
+
+cellSet cellSet_material_air              new    setToCell      cellSet_geometry_background
+cellSet cellSet_material_air              add    setToCell      cellSet_geometry_coil
+cellSet cellSet_material_air_old          remove
+
+
+
+### Regions
+
+cellSet cellSet_region_conductor          new    setToCell      cellSet_geometry_conductor
+
+
+
+### End
+
+quit

@@ -1,0 +1,17 @@
+
+regionPolyMesh/regionPolyMesh.C
+regionPolyMesh/regionPolyMeshMapping.C
+regionPolyMesh/makeRegionPolyMeshData.C
+
+regionPointMesh/regionPointMesh.C
+
+regionFvMesh/regionFvMesh.C
+
+regionDynamicFvMesh/regionDynamicFvMesh.C
+regionDynamicFvMesh/regionDynamicFvMeshMapping.C
+
+regionVolFields/regionVolFields.C
+
+regionPointFields/regionPointFields.C
+
+LIB = $(FOAM_USER_LIBBIN)/libregionModel
