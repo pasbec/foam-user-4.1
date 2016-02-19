@@ -224,30 +224,12 @@ int main(int argc, char *argv[])
         // ==================================================================//
         // Move mesh of dynamic region
         // ==================================================================//
-// TODO: WARNING - Make sure we have all the same mesh points on restart!!!
-//         if (mfUpdate && (mfUpdateCounter > 0))
-        {
-            // Calculate mesh velocity at dynamic/fluid-interface
-            // in dynamic region from current boundary displacement
-            // in fluid region
-            mesh_.patchMapMeshVelocityDirectMapped
-            (
-                control.fluidA(),
-                control.dynamic()
-            );
 
-            // Grab current points of dynamic region as new point field
-            pointField newPoints = mesh_[control.dynamic()].points();
+// TODO: WARNING - THEORETICALLY,
+//                 We have to apply point displacement during predictPoints for
+//                 the dynamic region here. But predictPoints is USELESS!!!
+//                 Currently it does NOTHING as (phi == meshPhi)@trackedSurface
 
-// TODO/FIXME: Really necessary?
-            // Correct points for 2D-motion of dynamic region
-            twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
-            dynamicTwoDPointCorr.correctPoints(newPoints);
-
-            // Use motionSolver to move mesh of dynamic region
-            mesh_[control.dynamic()].movePoints(newPoints);
-            mesh_[control.dynamic()].update();
-        }
 
         // ==================================================================//
         // Check whether magnetic update is due
@@ -351,6 +333,33 @@ int main(int argc, char *argv[])
             setRegionScope(control.fluidA());
 
 #           include "solveFluid.H"
+        }
+
+        // ==================================================================//
+        // Move mesh of dynamic region
+        // ==================================================================//
+
+        {
+            // Calculate mesh velocity at dynamic/fluid-interface
+            // in dynamic region from current boundary displacement
+            // in fluid region
+            mesh_.patchMapMeshVelocityDirectMapped
+            (
+                control.fluidA(),
+                control.dynamic()
+            );
+
+            // Grab current points of dynamic region as new point field
+            pointField newPoints = mesh_[control.dynamic()].points();
+
+// TODO/FIXME: Really necessary?
+            // Correct points for 2D-motion of dynamic region
+            twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
+            dynamicTwoDPointCorr.correctPoints(newPoints);
+
+            // Use motionSolver to move mesh of dynamic region
+            mesh_[control.dynamic()].movePoints(newPoints);
+            mesh_[control.dynamic()].update();
         }
 
         // ==================================================================//
