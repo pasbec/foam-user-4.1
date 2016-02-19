@@ -162,6 +162,42 @@ int main(int argc, char *argv[])
 
         control.msg().time();
 
+// // TODO TEST START
+//         const surfaceScalarField& faceDiffusivityFluid =
+//             mesh_[control.fluidA()].lookupObject<surfaceScalarField>("faceDiffusivity");
+//
+//         volScalarField diffusivityFluid =
+//             volScalarField
+//             (
+//                 IOobject
+//                 (
+//                     "diffusivity",
+//                     runTime.timeName(),
+//                     mesh_[control.fluidA()],
+//                     IOobject::NO_READ,
+//                     IOobject::AUTO_WRITE
+//                 ),
+//                 fvc::average(faceDiffusivityFluid)()
+//             );
+//
+//         const surfaceScalarField& faceDiffusivityDynamic =
+//             mesh_[control.dynamic()].lookupObject<surfaceScalarField>("faceDiffusivity");
+//
+//         volScalarField diffusivityDynamic =
+//             volScalarField
+//             (
+//                 IOobject
+//                 (
+//                     "diffusivity",
+//                     runTime.timeName(),
+//                     mesh_[control.dynamic()],
+//                     IOobject::NO_READ,
+//                     IOobject::AUTO_WRITE
+//                 ),
+//                 fvc::average(faceDiffusivityDynamic)()
+//             );
+// // TODO TEST END
+
         // ==================================================================//
         // Move mesh of fluid region and do prediction step
         // ==================================================================//
@@ -173,13 +209,17 @@ int main(int argc, char *argv[])
             interface.moveMeshPointsForOldTrackedSurfDisplacement();
             interface.updateDisplacementDirections();
 
-            // TEST: Make sure phi is correct
+// TODO TEST: Make sure phi is correct
+            // Make sure phi is correct at interface
             phi.boundaryField()[interface.aPatchID()] =
                 fvc::meshPhi(U)().boundaryField()[interface.aPatchID()];
 
             // Prediction step for interface points
             interface.predictPoints();
         }
+
+//         // TODO
+//         runTime.writeNow();
 
         // ==================================================================//
         // Move mesh of dynamic region
@@ -274,6 +314,9 @@ int main(int argc, char *argv[])
         {
             FL_.mapExtrapolate(control.fluidA());
             pB_.mapExtrapolate(control.fluidA());
+// TODO TEST FIXME Extrapolation sometimes fails
+//             FL_.mapCopyInternal(control.fluidA());
+//             pB_.mapCopyInternal(control.fluidA());
         }
 
         // ==================================================================//

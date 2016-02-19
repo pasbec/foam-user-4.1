@@ -23,4 +23,7 @@
     {
         FL_.mapExtrapolate(control.conductor());
         pB_.mapExtrapolate(control.conductor());
+// TODO TEST FIXME Extrapolation sometimes fails
+//         FL_.mapCopyInternal(control.conductor());
+//         pB_.mapCopyInternal(control.conductor());
     }

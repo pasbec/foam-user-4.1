@@ -34,6 +34,8 @@ Description
 
 // TODO: Derived gradient boundary condition for VRe/VIm in conductor region
 
+// TODO: Extrapolation sometimes completely fails
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])

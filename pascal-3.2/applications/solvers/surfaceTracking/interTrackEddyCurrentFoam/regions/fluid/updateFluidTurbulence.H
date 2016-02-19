@@ -6,7 +6,7 @@
     // Update turbulent viscosity
     turbulence->correct();
 
-    
+
     // Make fluxes absolute
     fvc::makeAbsolute(phi,U);
 
