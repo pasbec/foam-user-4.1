@@ -230,6 +230,7 @@ public:
         // Boundary field data processing
 
             //- TODO: Boundary field mapping where possible
+            //- TODO: Parallel?
             void mapBoundaryField(const label& regionI) const
             ;
 //             {
@@ -237,6 +238,7 @@ public:
 //             };
 
             //- TODO FIXME: Boundary field copy from internal field
+            //- TODO: Parallel?
             void copyInternalBoundaryField(const label& regionI) const
             ;
 //             {
@@ -244,6 +246,7 @@ public:
 //             };
 
             //- TODO: Boundary field interpolation
+            //- TODO: Parallel?
             void interpolateBoundaryField(const label& regionI) const
             ;
 //             {
@@ -251,6 +254,7 @@ public:
 //             };
 
             //- TODO: Boundary field extrapolation
+            //- TODO: Parallel?
             void extrapolateBoundaryField(const label& regionI) const
             ;
 //             {
@@ -312,7 +316,7 @@ public:
                 rmap(mesh().regionIndex(regionName));
             };
 
-        // Mapping with patch interpolation
+        // Mapping with patch internal values
 
             //- Map/Interpolate field from default region to all non-default regions
             void mapCopyInternal() const

@@ -385,6 +385,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 
 
 // TODO: Only for calculated- and fixedValue- patchFields
+// TODO: Parallel?
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
@@ -451,6 +452,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::mapBoundaryField
 };
 
 // TODO: Only for calculated- and fixedValue- patchFields
+// TODO: Parallel?
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
@@ -475,6 +477,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::copyInternalBoun
 };
 
 // TODO: Only for calculated- and fixedValue- patchFields
+// TODO: Parallel?
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
