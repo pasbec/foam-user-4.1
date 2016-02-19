@@ -46,11 +46,12 @@ setErrorTrap ()
 {
     setErrorTrapFct ()
     {
-        if [[ "$?" -ne 0 ]]; then
-            echo
+        exitCode="$?"
+        if [[ "$exitCode" -ne 0 ]]; then
             echo 'ERROR: Something went wrong. Please check the log-files!'
-            echo
         fi
+
+        exit "$exitCode"
     }
 
     trap setErrorTrapFct INT TERM EXIT
