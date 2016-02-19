@@ -22,10 +22,11 @@ twoDMotion                  no;
 
 solver                      velocityLaplacian;
 
+// diffusivity                 uniform;
 // diffusivity                 inverseDistance 1(trackedSurface);
-diffusivity                 quadratic inverseDistance 1(trackedSurface);
+diffusivity                 quadratic inversePointDistance 1(trackedSurface);
 
-frozenDiffusion             no;
+frozenDiffusion             yes;
 
 // ************************************************************************* //
 
@@ -38,10 +39,10 @@ frozenDiffusion             no;
 // distancePatches             1(trackedSurface);
 //
 // // diffusivity                 deformationEnergy;
-// // diffusivity                 deformationEnergy;
+// // diffusivity                 distortionEnergy;
 // // diffusivityExponent         10;
 //
-// frozenDiffusion             no;
+// frozenDiffusion             yes;
 //
 // pseudoSolid
 // {
