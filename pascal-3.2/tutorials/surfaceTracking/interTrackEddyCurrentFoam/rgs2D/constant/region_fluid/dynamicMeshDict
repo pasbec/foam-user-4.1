@@ -16,38 +16,39 @@ FoamFile
 
 dynamicFvMesh               dynamicMotionSolverFvMesh;
 
-twoDMotion                  no;
+twoDMotion                  yes;
 
 // ************************************************************************* //
 
-solver                      velocityLaplacian;
-
-// diffusivity                 inverseDistance 1(trackedSurface);
-diffusivity                 quadratic inverseDistance 1(trackedSurface);
-
-frozenDiffusion             no;
-
-// ************************************************************************* //
-
-// solver                      laplace;
-// // solver                      pseudoSolid;
+// solver                      velocityLaplacian;
 //
 // // diffusivity                 uniform;
-// // diffusivity                 linear;
-// diffusivity                 quadratic;
-// distancePatches             1(trackedSurface);
+// // diffusivity                 inverseDistance 1(trackedSurface);
+// diffusivity                 quadratic inversePointDistance 1(trackedSurface);
 //
-// // diffusivity                 deformationEnergy;
-// // diffusivity                 deformationEnergy;
-// // diffusivityExponent         10;
-//
-// frozenDiffusion             no;
-//
-// pseudoSolid
-// {
-//     poissonsRatio           0.3;
-//     nCorrectors             3;
-//     convergenceTolerance    1e-9;
-// };
+// frozenDiffusion             yes;
+
+// ************************************************************************* //
+
+solver                      laplace;
+// solver                      pseudoSolid;
+
+// diffusivity                 uniform;
+// diffusivity                 linear;
+diffusivity                 quadratic;
+distancePatches             1(trackedSurface);
+
+// diffusivity                 deformationEnergy;
+// diffusivity                 distortionEnergy;
+// diffusivityExponent         10;
+
+frozenDiffusion             yes;
+
+pseudoSolid
+{
+    poissonsRatio           0.3;
+    nCorrectors             3;
+    convergenceTolerance    1e-9;
+};
 
 // ************************************************************************* //
