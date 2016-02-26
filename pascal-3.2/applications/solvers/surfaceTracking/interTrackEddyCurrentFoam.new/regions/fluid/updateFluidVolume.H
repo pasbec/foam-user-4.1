@@ -33,11 +33,21 @@
 
         scalar volCorr = curFluidVolumePhase1/iniFluidVolumePhase1;
 
-        scalarField volCorrDeltaH = mesh.C().boundaryField()[aPatchID].component(volCorrByHeight)
-                                    * (1.0 - volCorr);
+        scalarField volCorrDeltaHmag = mesh.C().boundaryField()[aPatchID].component(volCorrByHeight)
+            * (1.0 - volCorr);
+
+        vectorField volCorrDeltaH(volCorrDeltaHmag.size(), vector::zero);
+
+        volCorrDeltaH.replace
+        (
+            volCorrByHeight,
+            volCorrDeltaHmag
+        );
+
+        vectorField nf = mesh.boundary()[aPatchID].nf();
 
         scalarField volCorrPhi = mesh.magSf().boundaryField()[aPatchID]
-                                * volCorrDeltaH
+                                * (volCorrDeltaH & nf)
                                 / runTime.deltaT().value()
                                 + fvc::meshPhi(U)().boundaryField()[aPatchID];
 
