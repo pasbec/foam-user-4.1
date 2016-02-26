@@ -162,42 +162,6 @@ int main(int argc, char *argv[])
 
         control.msg().time();
 
-// // TODO TEST START
-//         const surfaceScalarField& faceDiffusivityFluid =
-//             mesh_[control.fluidA()].lookupObject<surfaceScalarField>("faceDiffusivity");
-//
-//         volScalarField diffusivityFluid =
-//             volScalarField
-//             (
-//                 IOobject
-//                 (
-//                     "diffusivity",
-//                     runTime.timeName(),
-//                     mesh_[control.fluidA()],
-//                     IOobject::NO_READ,
-//                     IOobject::AUTO_WRITE
-//                 ),
-//                 fvc::average(faceDiffusivityFluid)()
-//             );
-//
-//         const surfaceScalarField& faceDiffusivityDynamic =
-//             mesh_[control.dynamic()].lookupObject<surfaceScalarField>("faceDiffusivity");
-//
-//         volScalarField diffusivityDynamic =
-//             volScalarField
-//             (
-//                 IOobject
-//                 (
-//                     "diffusivity",
-//                     runTime.timeName(),
-//                     mesh_[control.dynamic()],
-//                     IOobject::NO_READ,
-//                     IOobject::AUTO_WRITE
-//                 ),
-//                 fvc::average(faceDiffusivityDynamic)()
-//             );
-// // TODO TEST END
-
         // ==================================================================//
         // Move mesh of fluid region and do prediction step
         // ==================================================================//
@@ -217,9 +181,6 @@ int main(int argc, char *argv[])
             // Prediction step for interface points
             interface.predictPoints();
         }
-
-//         // TODO
-//         runTime.writeNow();
 
         // ==================================================================//
         // Move mesh of dynamic region
@@ -252,7 +213,7 @@ int main(int argc, char *argv[])
 
             // Replace point positions of dynamic region in
             // new point field for base region
-            mesh_.rmap(newPoints,control.dynamic());
+            mesh_.rmap(newPoints, control.dynamic());
 
             // Update base mesh
             mesh_[control.base()].movePoints(newPoints);
