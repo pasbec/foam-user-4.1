@@ -314,7 +314,7 @@ public:
         volVectorField& Ub,
         volScalarField& Pb,
         const surfaceScalarField& phi,
-        const uniformDimensionedVectorField g,
+        const uniformDimensionedVectorField& g,
         const twoPhaseMixture& transportModel,
         volScalarField* TbPtr = NULL
     );

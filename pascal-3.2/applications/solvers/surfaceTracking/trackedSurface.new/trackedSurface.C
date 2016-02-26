@@ -102,7 +102,7 @@ trackedSurface::trackedSurface
     volVectorField& Ub,
     volScalarField& Pb,
     const surfaceScalarField& sfPhi,
-    const uniformDimensionedVectorField g,
+    const uniformDimensionedVectorField& g,
     const twoPhaseMixture& transportModel,
     volScalarField* TbPtr
 )
