@@ -162,6 +162,42 @@ int main(int argc, char *argv[])
 
         control.msg().time();
 
+// // TODO TEST START
+//         const surfaceScalarField& faceDiffusivityFluid =
+//             mesh_[control.fluidA()].lookupObject<surfaceScalarField>("faceDiffusivity");
+//
+//         volScalarField diffusivityFluid =
+//             volScalarField
+//             (
+//                 IOobject
+//                 (
+//                     "diffusivity",
+//                     runTime.timeName(),
+//                     mesh_[control.fluidA()],
+//                     IOobject::NO_READ,
+//                     IOobject::AUTO_WRITE
+//                 ),
+//                 fvc::average(faceDiffusivityFluid)()
+//             );
+//
+//         const surfaceScalarField& faceDiffusivityDynamic =
+//             mesh_[control.dynamic()].lookupObject<surfaceScalarField>("faceDiffusivity");
+//
+//         volScalarField diffusivityDynamic =
+//             volScalarField
+//             (
+//                 IOobject
+//                 (
+//                     "diffusivity",
+//                     runTime.timeName(),
+//                     mesh_[control.dynamic()],
+//                     IOobject::NO_READ,
+//                     IOobject::AUTO_WRITE
+//                 ),
+//                 fvc::average(faceDiffusivityDynamic)()
+//             );
+// // TODO TEST END
+
         // ==================================================================//
         // Move mesh of fluid region and do prediction step
         // ==================================================================//
@@ -173,7 +209,8 @@ int main(int argc, char *argv[])
             interface.moveMeshPointsForOldTrackedSurfDisplacement();
             interface.updateDisplacementDirections();
 
-            // TEST: Make sure phi is correct
+// TODO TEST: Make sure phi is correct
+            // Make sure phi is correct at interface
             phi.boundaryField()[interface.aPatchID()] =
                 fvc::meshPhi(U)().boundaryField()[interface.aPatchID()];
 
@@ -181,33 +218,18 @@ int main(int argc, char *argv[])
             interface.predictPoints();
         }
 
+//         // TODO
+//         runTime.writeNow();
+
         // ==================================================================//
         // Move mesh of dynamic region
         // ==================================================================//
-// TODO: WARNING - Make sure we have all the same mesh points on restart!!!
-//         if (mfUpdate && (mfUpdateCounter > 0))
-        {
-            // Calculate mesh velocity at dynamic/fluid-interface
-            // in dynamic region from current boundary displacement
-            // in fluid region
-            mesh_.patchMapMeshVelocityDirectMapped
-            (
-                control.fluidA(),
-                control.dynamic()
-            );
 
-            // Grab current points of dynamic region as new point field
-            pointField newPoints = mesh_[control.dynamic()].points();
+// TODO: WARNING - THEORETICALLY,
+//                 We have to apply point displacement during predictPoints for
+//                 the dynamic region here. But predictPoints is USELESS!!!
+//                 Currently it does NOTHING as (phi == meshPhi)@trackedSurface
 
-// TODO/FIXME: Really necessary?
-            // Correct points for 2D-motion of dynamic region
-            twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
-            dynamicTwoDPointCorr.correctPoints(newPoints);
-
-            // Use motionSolver to move mesh of dynamic region
-            mesh_[control.dynamic()].movePoints(newPoints);
-            mesh_[control.dynamic()].update();
-        }
 
         // ==================================================================//
         // Check whether magnetic update is due
@@ -274,6 +296,9 @@ int main(int argc, char *argv[])
         {
             FL_.mapExtrapolate(control.fluidA());
             pB_.mapExtrapolate(control.fluidA());
+// TODO TEST FIXME Extrapolation sometimes fails
+//             FL_.mapCopyInternal(control.fluidA());
+//             pB_.mapCopyInternal(control.fluidA());
         }
 
         // ==================================================================//
@@ -311,17 +336,43 @@ int main(int argc, char *argv[])
         }
 
         // ==================================================================//
+        // Move mesh of dynamic region
+        // ==================================================================//
+
+        {
+            // Calculate mesh velocity at dynamic/fluid-interface
+            // in dynamic region from current boundary displacement
+            // in fluid region
+            mesh_.patchMapMeshVelocityDirectMapped
+            (
+                control.fluidA(),
+                control.dynamic()
+            );
+
+            // Grab current points of dynamic region as new point field
+            pointField newPoints = mesh_[control.dynamic()].points();
+
+// TODO/FIXME: Really necessary?
+            // Correct points for 2D-motion of dynamic region
+            twoDPointCorrector dynamicTwoDPointCorr(mesh_[control.dynamic()]);
+            dynamicTwoDPointCorr.correctPoints(newPoints);
+
+            // Use motionSolver to move mesh of dynamic region
+            mesh_[control.dynamic()].movePoints(newPoints);
+            mesh_[control.dynamic()].update();
+        }
+
+        // ==================================================================//
         // Finish time step and write
         // ==================================================================//
 
-        // TODO: Remove or reimplement
-//         if (debug)
-//         {
-//             if (runTime.outputTime())
-//             {
-//                 interface.writeVolA();
-//             }
-//         }
+        if (debug)
+        {
+            if (runTime.outputTime())
+            {
+                interface.writeVolA();
+            }
+        }
 
         runTime.write();
 
