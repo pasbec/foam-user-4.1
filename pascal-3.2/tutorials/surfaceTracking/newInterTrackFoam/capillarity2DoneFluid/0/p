@@ -8,36 +8,49 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
-    class       areaScalarField;
+    format      ascii;
+    class       volScalarField;
     location    "0";
-    object      K;
+    object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 -1 0 0 0 0 0];
+dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   nonuniform List<scalar> 
-20
-(≈¶™[í)¿ƒ®√}p∏øh™|ê7∑ø)@Í∑ lµøC9ì5Ø≥øNËVÁO∞ø=@û∫I<™øÄñcÊ6£ø»∞‹WoóøÿœRvâÄøª†í/îÄ?‘Ò˙πUoó?†i{56£?OÜ€M<™?@|¿;O∞?≥?®‹¨≥?fG8 lµ?@v◊ì7∑?kä@|p∏?†õ¿x&d¿);
+internalField   uniform 0;
 
 boundaryField
 {
-    left
+    freeSurfaceShadow
     {
-        type            calculated;
-        value           uniform -7.0406;
+        type            fixedGradient;
+        gradient        uniform 0;
     }
-    right
+    topWall
     {
-        type            calculated;
-        value           uniform -6.8478;
+        type            zeroGradient;
+    }
+    rightWall
+    {
+        type            zeroGradient;
+    }
+    bottomWall
+    {
+        type            zeroGradient;
+    }
+    leftWall
+    {
+        type            zeroGradient;
+    }
+    freeSurface
+    {
+        type            fixedValue;
+        value           uniform 0;
     }
     frontAndBack
     {
         type            empty;
     }
 }
-
 
 // ************************************************************************* //
