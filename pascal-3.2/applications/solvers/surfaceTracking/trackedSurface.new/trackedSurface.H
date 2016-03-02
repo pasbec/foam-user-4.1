@@ -79,6 +79,9 @@ class trackedSurface
         //- Reference to pressure field
         volScalarField& p_;
 
+        //- Reference to external pressure field
+        const volScalarField& pExt_;
+
         //- Reference to fluid flux field
         const surfaceScalarField& phi_;
 
@@ -87,6 +90,9 @@ class trackedSurface
 
         //- Reference to the transportModel
         const twoPhaseMixture& transport_;
+
+        //- Reference to turbulence model
+        const autoPtr<incompressible::turbulenceModel>& turbulence_;
 
         //- Reference to temperature field
         volScalarField* TPtr_;
@@ -229,6 +235,12 @@ class trackedSurface
         //- Fluid indicator
         mutable volScalarField* fluidIndicatorPtr_;
 
+        //- Effiective viscosity value field of fluid A
+        mutable scalarField* muEffFluidAvalPtr_;
+
+        //- Effiective viscosity value field of fluid B
+        mutable scalarField* muEffFluidBvalPtr_;
+
         //- Contact angle
         mutable edgeScalarField* contactAnglePtr_;
 
@@ -260,6 +272,8 @@ class trackedSurface
             void makeSurfaceTension() const;
             void makeSurfactant() const;
             void makeFluidIndicator();
+            void makeMuEffFluidAval() const;
+            void makeMuEffFluidBval() const;
             void makeTemperature() const;
             void makeSurfaceTensionForce() const;
             void makeNGradUn() const;
@@ -313,9 +327,11 @@ public:
         const volScalarField& rho,
         volVectorField& Ub,
         volScalarField& Pb,
+        const volScalarField& PbExt,
         const surfaceScalarField& phi,
         const uniformDimensionedVectorField& g,
         const twoPhaseMixture& transportModel,
+        const autoPtr<incompressible::turbulenceModel>& turbulenceModel,
         volScalarField* TbPtr = NULL
     );
 
@@ -376,6 +392,12 @@ public:
             return p_;
         }
 
+        //- Return reference to external pressure field
+        const volScalarField& pExt() const
+        {
+            return pExt_;
+        }
+
         //- Return reference to flux field
         const surfaceScalarField& phi() const
         {
@@ -392,6 +414,12 @@ public:
         const twoPhaseMixture& transport() const
         {
             return transport_;
+        }
+
+        //- Return reference to turbulence model auto pointer
+        const autoPtr<incompressible::turbulenceModel>& turbulence() const
+        {
+            return turbulence_;
         }
 
         //- Return reference to temperature field
@@ -552,6 +580,18 @@ public:
         //- Return referenct to fluid indicator
         const volScalarField& fluidIndicator();
 
+        //- Return effiective viscosity value field of fluid A
+        scalarField& muEffFluidAval();
+
+        //- Return effiective viscosity value field of fluid A
+        const scalarField& muEffFluidAval() const;
+
+        //- Return effiective viscosity value field of fluid B
+        scalarField& muEffFluidBval();
+
+        //- Return effiective viscosity value field of fluid B
+        const scalarField& muEffFluidBval() const;
+
         //- Return referenct to interface temperature
         areaScalarField& temperature();
 
@@ -590,6 +630,9 @@ public:
 
         //- Update surface boundary conditions
         void updateBoundaryConditions();
+
+        //- Correct effective kinematic viscosity on surface
+        void updateMuEff();
 
         //- Correct surface pressure
         void updatePressure();

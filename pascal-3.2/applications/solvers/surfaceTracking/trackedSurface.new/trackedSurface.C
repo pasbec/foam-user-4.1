@@ -88,6 +88,8 @@ void trackedSurface::clearOut()
     deleteDemandDrivenData(surfaceTensionPtr_);
     deleteDemandDrivenData(surfactantPtr_);
     deleteDemandDrivenData(fluidIndicatorPtr_);
+    deleteDemandDrivenData(muEffFluidAvalPtr_);
+    deleteDemandDrivenData(muEffFluidBvalPtr_);
     deleteDemandDrivenData(contactAnglePtr_);
     deleteDemandDrivenData(temperaturePtr_);
     deleteDemandDrivenData(surfaceTensionForcePtr_);
@@ -101,9 +103,11 @@ trackedSurface::trackedSurface
     const volScalarField& rho,
     volVectorField& Ub,
     volScalarField& Pb,
+    const volScalarField& PbExt,
     const surfaceScalarField& sfPhi,
     const uniformDimensionedVectorField& g,
     const twoPhaseMixture& transportModel,
+    const autoPtr<incompressible::turbulenceModel>& turbulenceModel,
     volScalarField* TbPtr
 )
 :
@@ -122,9 +126,11 @@ trackedSurface::trackedSurface
     rho_(rho),
     U_(Ub),
     p_(Pb),
+    pExt_(PbExt),
     phi_(sfPhi),
     g_(g),
     transport_(transportModel),
+    turbulence_(turbulenceModel),
     TPtr_(TbPtr),
     curTimeIndex_(Ub.mesh().time().timeIndex()),
     twoFluids_
@@ -202,6 +208,8 @@ trackedSurface::trackedSurface
     surfaceTensionPtr_(NULL),
     surfactantPtr_(NULL),
     fluidIndicatorPtr_(NULL),
+    muEffFluidAvalPtr_(NULL),
+    muEffFluidBvalPtr_(NULL),
     contactAnglePtr_(NULL),
     temperaturePtr_(NULL),
     surfaceTensionForcePtr_(NULL),
@@ -1857,10 +1865,26 @@ void trackedSurface::updateBoundaryConditions()
 {
     if (!implicitCoupling_)
     {
+        updateMuEff();
         updateTemperature();
         updateVelocity();
         updateSurfactantConcentration();
         updatePressure();
+    }
+}
+
+
+void trackedSurface::updateMuEff()
+{
+    const volScalarField nuEff = turbulence()->nuEff();
+
+    muEffFluidAval() =
+        nuEff.boundaryField()[aPatchID()] * rhoFluidA().value();
+
+    if(twoFluids())
+    {
+        muEffFluidBval() =
+            nuEff.boundaryField()[bPatchID()] * rhoFluidB().value();
     }
 }
 
@@ -1925,19 +1949,19 @@ void trackedSurface::updateVelocity()
         vectorField UtPB = UPB - nA*(nA & UPB);
 
         vectorField UtFs =
-            muFluidA().value()*DnA*UtPA
-          + muFluidB().value()*DnB*UtPB;
+            muEffFluidAval()*DnA*UtPA
+          + muEffFluidBval()*DnB*UtPB;
 
         // Normal component
         vectorField UnPA = nA*(nA & UPA);
         vectorField UnPB = nA*(nA & UPB);
 
         vectorField UnFs =
-            2*muFluidA().value()*UnPA*DnA
-          + 2*muFluidB().value()*UnPB*DnB;
+            2*muEffFluidAval()*UnPA*DnA
+          + 2*muEffFluidBval()*UnPB*DnB;
 
-        UnFs /= 2*muFluidA().value()*DnA
-          + 2*muFluidB().value()*DnB + VSMALL;
+        UnFs /= 2*muEffFluidAval()*DnA
+          + 2*muEffFluidBval()*DnB + VSMALL;
 
 //         vectorField UnFs =
 //             nA*phi_.boundaryField()[aPatchID()]
@@ -1948,7 +1972,7 @@ void trackedSurface::updateVelocity()
 
 //*******************************************************************
 
-        UtFs -= (muFluidA().value() - muFluidB().value())*
+        UtFs -= (muEffFluidAval() - muEffFluidBval())*
             (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
 
 
@@ -1982,7 +2006,7 @@ void trackedSurface::updateVelocity()
 
         UtFs += tangentialSurfaceTensionForce;
 
-        UtFs /= muFluidA().value()*DnA + muFluidB().value()*DnB + VSMALL;
+        UtFs /= muEffFluidAval()*DnA + muEffFluidBval()*DnB + VSMALL;
 
         Us().internalField() = UnFs + UtFs;
         correctUsBoundaryConditions();
@@ -2020,13 +2044,13 @@ void trackedSurface::updateVelocity()
         updateNGradUn();
 
         vectorField nGradU =
-            muFluidB().value()*(UtPB - UtFs)*DnB // ZT, DnA
+            muEffFluidBval()*(UtPB - UtFs)*DnB // ZT, DnA
           + tangentialSurfaceTensionForce
-          + muFluidA().value()*nA*nGradUn()
-          + (muFluidB().value() - muFluidA().value())
+          + muEffFluidAval()*nA*nGradUn()
+          + (muEffFluidBval() - muEffFluidAval())
            *(fac::grad(Us())().internalField()&nA);
 
-        nGradU /= muFluidA().value() + VSMALL;
+        nGradU /= muEffFluidAval() + VSMALL;
 
 
         if
@@ -2108,14 +2132,14 @@ void trackedSurface::updateVelocity()
 //               - cleanInterfaceSurfTension().value()
 //                *aMesh().faceCurvatures().internalField()*nA;
 
-//             if (muFluidA().value() < SMALL)
+//             if (muEffFluidAval() < SMALL)
 //             {
 //                 tangentialSurfaceTensionForce = vector::zero;
 //             }
         }
 
         vectorField tnGradU =
-            tangentialSurfaceTensionForce/(muFluidA().value() + VSMALL)
+            tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
           - (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
 
         vectorField UtPA =
@@ -2134,7 +2158,7 @@ void trackedSurface::updateVelocity()
 //         scalarField divUs = -nGradUn();
 
         vectorField nGradU =
-            tangentialSurfaceTensionForce/(muFluidA().value() + VSMALL)
+            tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
           + nA*nGradUn()
           - (fac::grad(Us())().internalField()&nA);
 
@@ -2236,15 +2260,15 @@ void trackedSurface::updatePressure()
 //                 U().boundaryField()[aPatchID()]
 //             );
 
-//         pA += 2.0*(muFluidA().value() - muFluidB().value())
+//         pA += 2.0*(muEffFluidAval() - muEffFluidBval())
 //            *(nA&aU.gradient());
 
-        pA += 2.0*(muFluidA().value() - muFluidB().value())*nGradUn();
+        pA += 2.0*(muEffFluidAval() - muEffFluidBval())*nGradUn();
 
-
-
-//         pA -= 2.0*(muFluidA().value() - muFluidB().value())
+//         pA -= 2.0*(muEffFluidAval() - muEffFluidBval())
 //             *fac::div(Us())().internalField();
+
+        pA += pExt().boundaryField()[aPatchID()];
 
         vector R0 = vector::zero;
 
@@ -2307,8 +2331,10 @@ void trackedSurface::updatePressure()
 
 //         scalarField divUs = -nGradUn();
 
-        pA += 2.0*muFluidA().value()*nGradUn();
-//         pA -= 2.0*muFluidA().value()*fac::div(Us())().internalField();
+        pA += 2.0*muEffFluidAval()*nGradUn();
+//         pA -= 2.0*muEffFluidAval()*fac::div(Us())().internalField();
+
+        pA += pExt().boundaryField()[aPatchID()];
 
         p().boundaryField()[aPatchID()] == pA;
     }
@@ -2330,6 +2356,7 @@ void trackedSurface::updatePressure()
             if (patchI != aPatchID())
             {
                 p().boundaryField()[patchI] ==
+                    pExt().boundaryField()[patchI]
                   - rho().boundaryField()[patchI]
                    *(g_.value()&(mesh().C().boundaryField()[patchI] - R0));
             }
@@ -2385,8 +2412,8 @@ void trackedSurface::updatePressure(const scalarField& p0)
             }
         }
 
-        pA += 2.0*(muFluidA().value() - muFluidB().value())*nGradUn();
-//         pA += 2.0*(muFluidA().value() - muFluidB().value())
+        pA += 2.0*(muEffFluidAval() - muEffFluidBval())*nGradUn();
+//         pA += 2.0*(muEffFluidAval() - muEffFluidBval())
 //             *fac::div(Us())().internalField();
 
         vector R0 = vector::zero;
@@ -2450,8 +2477,8 @@ void trackedSurface::updatePressure(const scalarField& p0)
 
 //         scalarField divUs = -nGradUn();
 
-        pA += 2.0*muFluidA().value()*nGradUn();
-//         pA += 2.0*muFluidA().value()*fac::div(Us())().internalField();
+        pA += 2.0*muEffFluidAval()*nGradUn();
+//         pA += 2.0*muEffFluidAval()*fac::div(Us())().internalField();
 
         p().boundaryField()[aPatchID()] == pA;
     }
@@ -2754,7 +2781,7 @@ vector trackedSurface::totalViscousForce() const
         U().boundaryField()[aPatchID()].snGrad();
 
     vectorField viscousForces =
-      - muFluidA().value()*S
+      - muEffFluidAval()*S
        *(
             nGradU
           + (fac::grad(Us())().internalField()&n)
