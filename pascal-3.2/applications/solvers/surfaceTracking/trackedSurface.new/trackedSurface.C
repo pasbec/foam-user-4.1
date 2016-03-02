@@ -93,6 +93,7 @@ void trackedSurface::clearOut()
     deleteDemandDrivenData(contactAnglePtr_);
     deleteDemandDrivenData(temperaturePtr_);
     deleteDemandDrivenData(surfaceTensionForcePtr_);
+    deleteDemandDrivenData(nGradUnPtr_);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
