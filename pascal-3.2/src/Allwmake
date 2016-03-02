@@ -5,3 +5,5 @@ set -x
 wmakeLnInclude foamTools || exit 1
 wmakeLnInclude regionModel || exit 1
 wmake libso regionModel || exit 1
+
+wmake libso finiteArea.new || exit 1
