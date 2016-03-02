@@ -2,5 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
+
+wmake all basic || exit 1
 wmake all electromagnetics || exit 1
 wmake all surfaceTracking || exit 1

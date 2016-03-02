@@ -13,8 +13,6 @@ EXE_INC = \
     -IfvPatchFields/directionMixedMixed \
     -IfvPatchFields/patchDirectionMixedMixed \
     -IfvPatchFields/tangentialMagnetic \
-    -IdeflatedLduSolvers/deflatedPCG \
-    -IdeflatedLduSolvers/deflatedICCG \
     -IeddyCurrentControl \
     -Iregions \
     -Iregions/conductor
@@ -26,4 +24,5 @@ EXE_LIBS = \
     -ldynamicMesh \
     -ldynamicFvMesh \
     -ltetFiniteElement \
+    -L$(FOAM_USER_LIBBIN) -lfoamTools \
     -L$(FOAM_USER_LIBBIN) -lregionModel

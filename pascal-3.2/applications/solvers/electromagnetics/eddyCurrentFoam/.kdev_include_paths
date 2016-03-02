@@ -13,9 +13,6 @@
 ./fvPatchFields/patchDirectionMixedMixed
 ./fvPatchFields/tangentialMagnetic
 
-./deflatedLduSolvers/deflatedPCG
-./deflatedLduSolvers/deflatedICCG
-
 ./eddyCurrentControl
 
 ./regions

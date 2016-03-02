@@ -1,3 +1,0 @@
-adjustBubbleInterface.C
-
-EXE = $(FOAM_USER_APPBIN)/adjustBubbleInterface

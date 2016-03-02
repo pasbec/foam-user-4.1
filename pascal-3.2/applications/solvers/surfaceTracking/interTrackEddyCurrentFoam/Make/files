@@ -5,9 +5,6 @@ fvPatchFields/directionMixedMixed/directionMixedMixedFvPatchFields.C
 fvPatchFields/patchDirectionMixedMixed/patchDirectionMixedMixedFvPatchFields.C
 fvPatchFields/tangentialMagnetic/tangentialMagneticFvPatchFields.C
 
-deflatedLduSolvers/deflatedPCG/deflatedPCG.C
-deflatedLduSolvers/deflatedICCG/deflatedICCG.C
-
 interTrackEddyCurrentFoam.C
 
 EXE = $(FOAM_USER_APPBIN)/interTrackEddyCurrentFoam

@@ -2,5 +2,6 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
+wclean all basic || exit 1
 wclean all electromagnetics || exit 1
 wclean all surfaceTracking || exit 1

@@ -31,5 +31,6 @@ EXE_LIBS = \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
     -L$(FOAM_USER_LIBBIN) -lnewFiniteArea \
+    -L$(FOAM_USER_LIBBIN) -lfoamTools \
     -L$(FOAM_USER_LIBBIN) -lregionModel \
     -L$(FOAM_USER_LIBBIN) -lnewTrackedSurface

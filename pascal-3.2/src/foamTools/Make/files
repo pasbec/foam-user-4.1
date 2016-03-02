@@ -1,0 +1,5 @@
+
+deflatedLduSolvers/deflatedPCG/deflatedPCG.C
+deflatedLduSolvers/deflatedICCG/deflatedICCG.C
+
+LIB = $(FOAM_USER_LIBBIN)/libfoamTools
