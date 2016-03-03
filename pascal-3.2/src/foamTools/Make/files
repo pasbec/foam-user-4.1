@@ -9,6 +9,13 @@ fvPatchFields/correctedFvPatchFields/basicCorrectedFvPatchFields/zeroGradient/ze
 
 fvPatchFields/extrapolated/extrapolatedFvPatchFields.C
 
+fvPatchFields/lookupFixedGradient/lookupFixedGradientFvPatchFields.C
+fvPatchFields/lookupFixedGradient/lookupVectorFixedGradientFvPatchScalarField.C
+
+fvPatchFields/directionMixedMixed/directionMixedMixedFvPatchFields.C
+fvPatchFields/patchDirectionMixedMixed/patchDirectionMixedMixedFvPatchFields.C
+fvPatchFields/tangentialMagnetic/tangentialMagneticFvPatchFields.C
+
 snGradSchemes/patchCorrectedSnGrad/patchCorrectedSnGrads.C
 snGradSchemes/skewModCorrectedSnGrad/skewModCorrectedSnGrads.C
 
