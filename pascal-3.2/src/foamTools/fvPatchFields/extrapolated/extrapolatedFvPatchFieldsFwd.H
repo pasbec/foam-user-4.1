@@ -23,81 +23,29 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "solverControl.H"
-#include "polyMesh.H"
+#ifndef extrapolatedFvPatchFieldsFwd_H
+#define extrapolatedFvPatchFieldsFwd_H
+
+#include "fvPatchField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<class Type> class extrapolatedFvPatchField;
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template <class MESH>
-solverControl<MESH>::solverControl
-(
-    const MESH& mesh,
-    const word& name,
-    const bool& master,
-    const label& regionI0
-)
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            name + "Control",
-            mesh.time().timeName(),
-            "uniform",
-            mesh.time().db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    time_(mesh.time()),
-    mesh_(mesh),
-    master_(master),
-    baseRegionName_(polyMesh::defaultRegion),
-    baseRegion_(regionI0),
-    propDict_
-    (
-        IOdictionary
-        (
-            IOobject
-            (
-                name + "Properties",
-                time_.constant(),
-                time_.db(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE
-            )
-        )
-    ),
-    baseSolutionDict_(mesh_.solutionDict()),
-    msg_(NULL)
-{
-    if (master) msg_ = new solverControlMessages(mesh_);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template <class MESH>
-bool solverControl<MESH>::writeData(Ostream&) const
-{
-    return false;
-}
-
+makePatchTypeFieldTypedefs(extrapolated)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#endif
+
+// ************************************************************************* //
