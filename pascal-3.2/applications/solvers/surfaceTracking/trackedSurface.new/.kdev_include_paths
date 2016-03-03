@@ -5,4 +5,6 @@
 
 ../../../../src/finiteArea.new/lnInclude
 
+../../../../src/foamTools/lnInclude
+
 ./lnInclude
