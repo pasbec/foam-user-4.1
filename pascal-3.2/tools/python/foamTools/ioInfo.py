@@ -52,7 +52,7 @@ def objectHeader(name, cl, time=""):
     r += i(0, '/*--------------------------------*- C++ -*----------------------------------*\\')
     r += i(0, '| =========                 |                                                 |')
     r += i(0, '| \\\\      /  F ield         | foam-extend: Open Source CFD                    |')
-    r += i(0, '|  \\\\    /   O peration     | Version:     3.1                                |')
+    r += i(0, '|  \\\\    /   O peration     | Version:     3.2                                |')
     r += i(0, '|   \\\\  /    A nd           | Web:         http://www.extend-project.de       |')
     r += i(0, '|    \\\\/     M anipulation  |                                                 |')
     r += i(0, '\*---------------------------------------------------------------------------*/')
