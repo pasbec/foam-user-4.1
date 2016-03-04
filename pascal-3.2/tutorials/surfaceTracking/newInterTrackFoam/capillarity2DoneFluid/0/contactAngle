@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
-| \\      /  F ield         | OpenFOAM Extend Project: Open source CFD        |
-|  \\    /   O peration     | Version:  1.6-ext                               |
-|   \\  /    A nd           | Web:      www.extend-project.de                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.2                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       edgeScalarField;
-    location    "0";
     object      contactAngle;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -19,19 +18,17 @@ dimensions      [0 0 0 0 0 0 0];
 
 internalField   uniform 0;
 
-// internalField   uniform (0 0 0);
-
 boundaryField
 {
     left
     {
-        type calculated;
-        value uniform -70;
+        type            calculated;
+        value           uniform -50;
     }
     right
     {
-        type calculated;
-        value uniform -70;
+        type            calculated;
+        value           uniform -50;
     }
     frontAndBack
     {
