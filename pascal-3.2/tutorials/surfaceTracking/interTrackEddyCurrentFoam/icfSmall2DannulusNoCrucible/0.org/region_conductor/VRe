@@ -22,7 +22,7 @@ boundaryField
 {
     axis
     {
-        type            symmetryPlane;
+        type            zeroGradient;
     }
     region_conductor_to_region_space
     {

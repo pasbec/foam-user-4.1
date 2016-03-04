@@ -22,7 +22,8 @@ boundaryField
 {
     axis
     {
-        type            symmetryPlane;
+        type            calculated;
+        value           $internalField;
     }
     trackedSurface
     {

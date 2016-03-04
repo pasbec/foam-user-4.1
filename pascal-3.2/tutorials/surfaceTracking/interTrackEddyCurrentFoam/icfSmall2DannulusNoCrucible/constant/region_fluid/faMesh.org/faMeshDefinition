@@ -18,6 +18,13 @@ polyMeshPatches               1(trackedSurface);
 
 boundary
 {
+    axis
+    {
+        type                  patch;
+        ownerPolyPatch        trackedSurface;
+        neighbourPolyPatch    axis;
+    }
+
     fixedWallSide
     {
         type                  patch;

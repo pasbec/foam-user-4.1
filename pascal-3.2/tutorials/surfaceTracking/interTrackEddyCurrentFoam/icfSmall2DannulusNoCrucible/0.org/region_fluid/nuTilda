@@ -23,7 +23,7 @@ boundaryField
 {
     axis
     {
-        type            symmetryPlane;
+        type            slip;
     }
     trackedSurface
     {

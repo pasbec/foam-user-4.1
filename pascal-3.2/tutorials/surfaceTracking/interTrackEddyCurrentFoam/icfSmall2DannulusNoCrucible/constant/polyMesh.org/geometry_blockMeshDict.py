@@ -199,7 +199,7 @@ if d.subDict("edges"):
 
 if d.subDict("boundary"):
 
-    if d.boundarySubDict("axis", "symmetryPlane"):
+    if d.boundarySubDict("axis", "patch"):
 
         d.boundaryFaces.write()
 

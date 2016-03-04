@@ -22,7 +22,8 @@ boundaryField
 {
     axis
     {
-        type            symmetryPlane;
+        type            fixedGradient;
+        gradient        uniform 0;
     }
     trackedSurface
     {
