@@ -40,7 +40,7 @@ pointNormalsCorrectionPatches 2( left right );
 
 nFreeSurfaceCorrectors 1;
 
-freeSurfaceSmoothing   no;
+smoothing   no;
 
 surfactantProperties
 {

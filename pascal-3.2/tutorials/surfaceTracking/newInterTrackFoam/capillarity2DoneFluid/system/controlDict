@@ -33,9 +33,9 @@ writeInterval       0.05;
 
 cycleWrite          0;
 
-writeFormat         binary;
+writeFormat         ascii;
 
-writeCompression    uncompressed;
+writeCompression    compressed;
 
 timeFormat          general;
 

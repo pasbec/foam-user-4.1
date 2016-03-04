@@ -20,11 +20,11 @@ internalField   uniform 1;
 
 boundaryField
 {
-    freeSurfaceShadow
+    topWall
     {
         type            zeroGradient;
     }
-    bottomWall
+    freeSurfaceShadow
     {
         type            zeroGradient;
     }
@@ -37,6 +37,10 @@ boundaryField
         type            zeroGradient;
     }
     rightWall
+    {
+        type            zeroGradient;
+    }
+    bottomWall
     {
         type            zeroGradient;
     }

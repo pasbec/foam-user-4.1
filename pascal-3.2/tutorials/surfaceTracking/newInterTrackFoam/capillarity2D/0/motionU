@@ -20,21 +20,17 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    freeSurfaceShadow
-    {
-        type            fixedValue;
-        value           uniform (0 0 0);
-    }
     topWall
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
-    rightWall
+    freeSurfaceShadow
     {
-        type            slip;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
-    bottomWall
+    freeSurface
     {
         type            fixedValue;
         value           uniform (0 0 0);
@@ -43,7 +39,11 @@ boundaryField
     {
         type            slip;
     }
-    freeSurface
+    rightWall
+    {
+        type            slip;
+    }
+    bottomWall
     {
         type            fixedValue;
         value           uniform (0 0 0);

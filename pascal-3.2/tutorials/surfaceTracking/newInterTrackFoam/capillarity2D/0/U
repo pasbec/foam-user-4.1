@@ -20,12 +20,21 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
+    topWall
+    {
+        type            slip;
+    }
     freeSurfaceShadow
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
-    topWall
+    freeSurface
+    {
+        type            fixedGradient;
+        gradient        uniform (0 0 0);
+    }
+    leftWall
     {
         type            slip;
     }
@@ -36,15 +45,6 @@ boundaryField
     bottomWall
     {
         type            slip;
-    }
-    leftWall
-    {
-        type            slip;
-    }
-    freeSurface
-    {
-        type            fixedGradient;
-        gradient        uniform (0 0 0);
     }
     frontAndBack
     {
