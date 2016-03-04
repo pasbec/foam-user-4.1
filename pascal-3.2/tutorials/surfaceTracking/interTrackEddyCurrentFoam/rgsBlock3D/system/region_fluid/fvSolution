@@ -64,7 +64,7 @@ solvers
         nPostSweeps              2;
         cacheAgglomeration       on;
         agglomerator             faceAreaPair;
-        nCellsInCoarsestLevel    200;
+        nCellsInCoarsestLevel    500;
         mergeLevels              1;
     }
 }
@@ -100,8 +100,8 @@ PIMPLE
 
 relaxationFactors
 {
-    p                            0.9;
-    U                            0.9;
+    p                            1.0;
+    U                            1.0;
 }
 
 // ************************************************************************* //

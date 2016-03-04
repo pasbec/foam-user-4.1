@@ -22,8 +22,12 @@ ddtSchemes
 gradSchemes
 {
     default             none;
-    grad(Us)            Gauss linear;
-    grad(magSqr(Us))    Gauss linear;
+//     grad(Us)            Gauss linear;
+//     grad(magSqr(Us))    Gauss linear;
+    grad(Us)            edgeLimited Gauss linear 0.5;
+    grad(magSqr(Us))    edgeLimited Gauss linear 0.5;
+//     grad(Us)            faceLimited Gauss linear 0.5;
+//     grad(magSqr(Us))    faceLimited Gauss linear 0.5;
 //     grad(Us)            leastSquares;
 //     grad(magSqr(Us))    leastSquares;
 }

@@ -19,7 +19,7 @@ solvers
     AV
     {
         tolerance                1e-4;
-        relTol                   0.5;
+        relTol                   0.3;
 
         maxIter                  100;
     }
