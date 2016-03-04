@@ -44,7 +44,7 @@ Magnetic
     {
         active           on;
         outputCycle      2147483647;
-        timeStepCycle    2147483647;
+        timeStepCycle    1;
         timeCycle        0.05;
     }
 }

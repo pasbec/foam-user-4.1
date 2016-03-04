@@ -24,8 +24,12 @@ gradSchemes
     default             none;
     grad(Us)            Gauss linear;
     grad(magSqr(Us))    Gauss linear;
+//     grad(Us)            faceLimited Gauss linear 1.0;
+//     grad(magSqr(Us))    faceLimited Gauss linear 1.0;
 //     grad(Us)            leastSquares;
 //     grad(magSqr(Us))    leastSquares;
+//     grad(Us)            faceLimited leastSquares 1.0;
+//     grad(magSqr(Us))    faceLimited leastSquares 1.0;
 }
 
 divSchemes
@@ -44,8 +48,8 @@ laplacianSchemes
 
 interpolationSchemes
 {
-    default             none;
-    interpolate(Us)     linear;
+    default              none;
+    interpolate(Us)      linear;
 }
 
 snGradSchemes
