@@ -1,0 +1,77 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.2                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default                 none;
+}
+
+gradSchemes
+{
+    default                 none;
+    grad(psi)               Gauss linear;
+//     grad(psi)               cellMDLimited Gauss linear 1.0;
+//     grad(psi)               leastSquares;
+//     grad(psi)               Gauss skewCorrected quadraticLinearFit 1.0;
+//     grad(psi)               fourth;
+    snGradCorr(psi)         Gauss linear;
+//     snGradCorr(psi)         cellMDLimited Gauss linear 1.0;
+//     snGradCorr(psi)         leastSquares;
+//     snGradCorr(psi)         Gauss skewCorrected quadraticLinearFit 1.0;
+//     snGradCorr(psi)         fourth;
+}
+
+divSchemes
+{
+    default                 none;
+}
+
+laplacianSchemes
+{
+    default                 none;
+//     laplacian(psiGamma,psi) Gauss linear uncorrected; // linear is not used
+//     laplacian(psiGamma,psi) Gauss linear corrected; // linear is not used
+//     laplacian(psiGamma,psi) Gauss linear limited 0.5; // linear is not used
+//     laplacian(psiGamma,psi) Gauss linear limited 0.3; // linear is not used
+//     laplacian(psiGamma,psi) Gauss linear fourth; // linear is not used
+//     laplacian(psiGamma,psi) Gauss linear skewCorrected 1.0; // linear is not used
+//     laplacian(psiGamma,psi) Gauss linear fourth; // linear is not used
+    laplacian(psiGamma,psi) Gauss linear corrected; // linear is not used
+}
+
+interpolationSchemes
+{
+    default                 none;
+}
+
+snGradSchemes
+{
+    default                 none;
+//     snGrad(psi)             uncorrected;
+    snGrad(psi)             corrected;
+//     snGrad(psi)             skewCorrected 1.0;
+//     snGrad(psi)             fourth;
+//     snGrad(psi)             patchCorrected;
+}
+
+fluxRequired
+{
+    default                 no;
+    psi                     ;
+}
+
+// ************************************************************************* //
