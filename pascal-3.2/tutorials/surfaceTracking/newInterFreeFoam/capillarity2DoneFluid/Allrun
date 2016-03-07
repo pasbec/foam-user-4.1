@@ -2,7 +2,7 @@
 
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-application="newInterTrackFoam"
+application="newInterFreeFoam"
 
 runApplication makeFaMesh
 runApplication $application
