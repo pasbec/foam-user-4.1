@@ -206,6 +206,30 @@ public:
                 return *fields_[mesh().regionIndex(regionName)];
             };
 
+            //- Return const pointer to field of default region
+            const GeometricField<Type, PatchField, GeoMesh>*
+            fieldPtr() const
+            {
+                return fields_
+                [
+                    mesh().regionIndex(polyMesh::defaultRegion)
+                ];
+            };
+
+            //- Return const pointer to field
+            const GeometricField<Type, PatchField, GeoMesh>*
+            fieldPtr(const label& regionI) const
+            {
+                return fields_[regionI];
+            };
+
+            //- Return const pointer to field
+            const GeometricField<Type, PatchField, GeoMesh>*
+            fieldPtr(const word& regionName) const
+            {
+                return fields_[mesh().regionIndex(regionName)];
+            };
+
             //- WriteData member function required by regIOobject
             bool writeData(Ostream&) const
             {
