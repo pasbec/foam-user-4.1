@@ -23,12 +23,12 @@ boundaryField
     left
     {
         type            calculated;
-        value           uniform -50;
+        value           uniform -70;
     }
     right
     {
         type            calculated;
-        value           uniform -50;
+        value           uniform -70;
     }
     frontAndBack
     {
