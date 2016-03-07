@@ -3807,14 +3807,10 @@ void trackedSurface::correctContactLinePointNormals()
                  == wallFvPatch::typeName
                 )
                 {
-                    scalar rotAngle =
-                        average
-                        (
-                            90
-                          - contactAnglePtr_->boundaryField()[patchI]
-                        );
+                    scalarField rotAngles =
+                        90 - contactAnglePtr_->boundaryField()[patchI];
 
-                    rotAngle *= M_PI/180.0;
+                    rotAngles *= M_PI/180.0;
 
                     vectorField ngbN =
                         aMesh().boundary()[patchI].ngbPolyPatchPointNormals();
@@ -3838,12 +3834,16 @@ void trackedSurface::correctContactLinePointNormals()
                     forAll (pointEdges, pointI)
                     {
                         vector rotAx = vector::zero;
+                        vector rotAxis = vector::zero;
 
-                        forAll(pointEdges[pointI], eI)
+                        scalar rotAngle = 0;
+                        scalar rotAngleWsum = 0;
+
+                        forAll(pointEdges[pointI], edgeI)
                         {
                             label curEdge =
                                 aMesh().boundary()[patchI].start()
-                              + pointEdges[pointI][eI];
+                              + pointEdges[pointI][edgeI];
 
                             vector e = edges[curEdge].vec(oldPoints);
 
@@ -3853,6 +3853,13 @@ void trackedSurface::correctContactLinePointNormals()
                             e /= mag(e) + SMALL;
 
                             rotAx += e;
+
+                            // Weight as inverse of edge lengths
+                            scalar rotAngleW = 1.0/mag(e);
+
+                            // Sum up weighted rotation angles and weights
+                            rotAngle += rotAngleW * rotAngles[pointI];
+                            rotAngleWsum += rotAngleW;
                         }
 
                         if (pointEdges[pointI].size() == 1)
@@ -3860,13 +3867,17 @@ void trackedSurface::correctContactLinePointNormals()
 #                           include "addNgbProcessorEdgeTangent.H"
                         }
 
-                        rotationAxis[pointI] = rotAx/(mag(rotAx) + SMALL);
-                    }
+                        rotAxis = rotAx/(mag(rotAx) + SMALL);
 
-                    // Rodrigues' rotation formula
-                    ngbN = ngbN*cos(rotAngle)
-                      + rotationAxis*(rotationAxis & ngbN)*(1 - cos(rotAngle))
-                      + (rotationAxis^ngbN)*sin(rotAngle);
+                        rotAngle /= rotAngleWsum;
+
+                        vector oldNgbNpI = ngbN[pointI];
+
+                        // Rodrigues' rotation formula
+                        ngbN[pointI] = oldNgbNpI*cos(rotAngle)
+                          + rotAxis*(rotAxis & oldNgbNpI)*(1 - cos(rotAngle))
+                          + (rotAxis^oldNgbNpI)*sin(rotAngle);
+                    }
 
                     forAll (patchPoints, pointI)
                     {
