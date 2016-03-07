@@ -23,7 +23,7 @@ boundaryField
     sideWalls
     {
         type            calculated;
-        value           uniform -50;
+        value           uniform -70;
     }
 }
 

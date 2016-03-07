@@ -49,7 +49,7 @@ boundary
         );
     }
 
-    freeSurface
+    trackedSurface
     {
         type patch;
         faces

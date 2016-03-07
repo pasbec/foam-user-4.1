@@ -43,7 +43,7 @@ d.vertices.set(  7, [geo_x2, geo_y2, geo_z2])
 d.blocks.set( 0, [0, 1, 5, 4, 2, 3, 7, 6], [20, 20, 20])
 
 d.boundaryFaces.set(1, "bottomWall", 0, "y-")
-d.boundaryFaces.set(2, "freeSurface", 0, "y+")
+d.boundaryFaces.set(2, "trackedSurface", 0, "y+")
 d.boundaryFaces.set(3, "sideWalls", 0, "x-")
 d.boundaryFaces.set(4, "sideWalls", 0, "x+")
 d.boundaryFaces.set(5, "sideWalls", 0, "z-")
@@ -75,7 +75,7 @@ if d.subDict("boundary"):
 
         d.boundaryFaces.write()
 
-    if d.boundarySubDict("freeSurface", "patch"):
+    if d.boundarySubDict("trackedSurface", "patch"):
 
         d.boundaryFaces.write()
 

@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      freeSurfaceProperties;
+    object      trackedSurfaceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -30,7 +30,7 @@ rhoFluidA rhoFluidA [ 1 -3  0 0 0 0 0 ] 1;
 
 rhoFluidB rhoFluidB [ 1 -3  0 0 0 0 0 ] 0.001;
 
-surfaceTension surfaceTension [ 1 -2 0 0 0 0 0 ] 0.1 ;
+surfaceTension surfaceTension [ 1 0 -2 0 0 0 0 ] 0.1 ;
 
 g g [ 0 1 -2 0 0 0 0 ] ( 0 0 0 ); //( 0 -1 0 ) ;
 
@@ -40,7 +40,7 @@ pointNormalsCorrectionPatches 1( sideWalls );
 
 nFreeSurfaceCorrectors 1;
 
-smoothing   no;
+smoothing   yes;
 
 surfactantProperties
 {

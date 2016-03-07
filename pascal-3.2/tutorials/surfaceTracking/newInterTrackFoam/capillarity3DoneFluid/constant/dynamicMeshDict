@@ -22,7 +22,7 @@ solver laplace;
 
 diffusivity quadratic;
 
-distancePatches 1 (freeSurface);
+distancePatches 1 (trackedSurface);
 
 frozenDiffusion     yes;
 

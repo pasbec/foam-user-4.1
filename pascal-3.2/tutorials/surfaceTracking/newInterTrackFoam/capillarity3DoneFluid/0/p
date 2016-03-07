@@ -20,7 +20,7 @@ internalField   uniform 0;
 
 boundaryField
 {
-    freeSurface
+    trackedSurface
     {
         type            fixedValue;
         value           uniform 0;

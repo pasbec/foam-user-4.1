@@ -15,14 +15,14 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  1( freeSurface );
+polyMeshPatches  1( trackedSurface );
 
 boundary
 {
     sideWalls
     {
         type                patch;
-        ownerPolyPatch      freeSurface;
+        ownerPolyPatch      trackedSurface;
         neighbourPolyPatch  sideWalls;
     }
 }
