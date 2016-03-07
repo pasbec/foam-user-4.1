@@ -34,11 +34,11 @@ surfaceTension surfaceTension [ 1 0 -2 0 0 0 0 ] 0.1 ;
 
 g g [ 0 1 -2 0 0 0 0 ] ( 0 0 0 ); //( 0 -1 0 ) ;
 
-fixedFreeSurfacePatches 0();
+fixedTrackedSurfacePatches 0();
 
 pointNormalsCorrectionPatches 1( sideWalls );
 
-nFreeSurfaceCorrectors 1;
+nTrackedSurfaceCorrectors 1;
 
 smoothing   yes;
 
