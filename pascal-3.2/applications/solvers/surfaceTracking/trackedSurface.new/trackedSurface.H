@@ -67,6 +67,12 @@ class trackedSurface
 {
     // Private data
 
+        //- Prefix for naming
+        word prefix_;
+
+        //- Upper case prefix for naming
+        word Prefix_;
+
         //- Reference to fvMesh
         dynamicFvMesh& mesh_;
 
@@ -79,23 +85,23 @@ class trackedSurface
         //- Reference to pressure field
         volScalarField& p_;
 
-        //- Reference to external pressure field
-        const volScalarField& pExt_;
-
         //- Reference to fluid flux field
         const surfaceScalarField& phi_;
 
-        //- Gravitational acceleration
-        const uniformDimensionedVectorField& g_;
-
-        //- Reference to the transportModel
-        const twoPhaseMixture& transport_;
-
-        //- Reference to turbulence model
-        const autoPtr<incompressible::turbulenceModel>& turbulence_;
-
-        //- Reference to temperature field
+        //- Pointer to temperature field
         volScalarField* TPtr_;
+
+        //- Pointer to gravitational acceleration
+        const uniformDimensionedVectorField* gPtr_;
+
+        //- Pointer to the transportModel
+        const twoPhaseMixture* transportPtr_;
+
+        //- Pointer to turbulence model
+        const incompressible::turbulenceModel* turbulencePtr_;
+
+        //- Pointer to external pressure field
+        const volScalarField* p0Ptr_;
 
         //- Current time index for surface
         label curTimeIndex_;
@@ -145,6 +151,9 @@ class trackedSurface
 
         //- Heat capacity of fluid B
         dimensionedScalar CpFluidB_;
+
+        //- Reference to gravitational acceleration
+        dimensionedVector g_;
 
         //- Surface tension for the clean surface
         dimensionedScalar cleanInterfaceSurfTension_;
@@ -327,12 +336,13 @@ public:
         const volScalarField& rho,
         volVectorField& Ub,
         volScalarField& Pb,
-        const volScalarField& PbExt,
         const surfaceScalarField& phi,
-        const uniformDimensionedVectorField& g,
-        const twoPhaseMixture& transportModel,
-        const autoPtr<incompressible::turbulenceModel>& turbulenceModel,
-        volScalarField* TbPtr = NULL
+        volScalarField* TbPtr = NULL,
+        const uniformDimensionedVectorField* gPtr = NULL,
+        const twoPhaseMixture* transportPtr = NULL,
+        const incompressible::turbulenceModel* turbulencePtr = NULL,
+        const volScalarField* p0Ptr = NULL,
+        word prefix = typeName
     );
 
 
@@ -392,34 +402,10 @@ public:
             return p_;
         }
 
-        //- Return reference to external pressure field
-        const volScalarField& pExt() const
-        {
-            return pExt_;
-        }
-
         //- Return reference to flux field
         const surfaceScalarField& phi() const
         {
             return phi_;
-        }
-
-        //- Return reference to gravitational acceleration
-        const dimensionedVector& g() const
-        {
-            return g_;
-        }
-
-        //- Return reference to transport model
-        const twoPhaseMixture& transport() const
-        {
-            return transport_;
-        }
-
-        //- Return reference to turbulence model auto pointer
-        const autoPtr<incompressible::turbulenceModel>& turbulence() const
-        {
-            return turbulence_;
         }
 
         //- Return reference to temperature field
@@ -432,6 +418,24 @@ public:
         const volScalarField& T() const
         {
             return *TPtr_;
+        }
+
+        //- Return reference to transport model
+        const twoPhaseMixture& transport() const
+        {
+            return *transportPtr_;
+        }
+
+        //- Return reference to turbulence model auto pointer
+        const incompressible::turbulenceModel& turbulence() const
+        {
+            return *turbulencePtr_;
+        }
+
+        //- Return reference to external pressure field
+        const volScalarField& p0() const
+        {
+            return *p0Ptr_;
         }
 
         //- Are there exist two fluid
@@ -513,6 +517,12 @@ public:
         const dimensionedScalar& CpFluidB() const
         {
             return CpFluidB_;
+        }
+
+        //- Gravity
+        const dimensionedVector& g() const
+        {
+            return g_;
         }
 
         //- Surface tension for clean interface

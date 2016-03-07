@@ -12,6 +12,7 @@ EXE_INC = \
     -I$(FOAM_USER_SRC)/foamTools/lnInclude \
     -I$(FOAM_USER_SRC)/regionModel/lnInclude \
     -I$(FOAM_USER_APP)/solvers/surfaceTracking/trackedSurface.new/lnInclude \
+    -I$(FOAM_USER_APP)/solvers/surfaceTracking/include.new \
     -I$(FOAM_USER_APP)/solvers/electromagnetics/eddyCurrentFoam/lnInclude \
     -IinterTrackEddyCurrentControl \
     -Iregions \

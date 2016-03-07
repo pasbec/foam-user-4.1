@@ -26,7 +26,7 @@ Application
     interfaceTrackinFoam
 
 Description
-    Incompressible laminar CFD code for simulation of a single bubble rising 
+    Incompressible laminar CFD code for simulation of a single bubble rising
     in a stil liquid. Interface between fluid phases is tracked using moving
     mesh.
 
@@ -34,7 +34,7 @@ Description
 
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
-#include "freeSurface.H"
+#include "trackedSurface.H"
 #include "patchWave.H"
 #include "wedgePolyPatch.H"
 
@@ -42,6 +42,8 @@ Description
 
 int main(int argc, char *argv[])
 {
+#   include "addTrackedSurfacePrefixOption.H"
+
 #   include "setRootCase.H"
 
 #   include "createTime.H"
@@ -64,7 +66,7 @@ int main(int argc, char *argv[])
 
 #       include "readFreeSurfaceControls.H"
 
-        interface.moveMeshPointsForOldFreeSurfDisplacement();
+        interface.moveMeshPointsForOldTrackedSurfDisplacement();
 
         interface.updateDisplacementDirections();
 
@@ -79,7 +81,7 @@ int main(int argc, char *argv[])
 
             // Update interface bc
             interface.updateBoundaryConditions();
-            
+
             // Make the fluxes relative
             phi -= fvc::meshPhi(rho, U);
 
@@ -156,12 +158,12 @@ int main(int argc, char *argv[])
         }
 
 #       include "volContinuity.H"
-    
+
         Info << "Total surface tension force: "
             << interface.totalSurfaceTensionForce() << endl;
 
         vector totalForce =
-            interface.totalViscousForce() 
+            interface.totalViscousForce()
           + interface.totalPressureForce();
 
         Info << "Total force: " << totalForce << endl;
@@ -173,7 +175,7 @@ int main(int argc, char *argv[])
             << ", average = " << gAverage(K) << endl << flush;
 
 //         dist.internalField() = patchWave(mesh, patchSet, false).distance();
-        
+
         runTime.write();
 
         if (runTime.outputTime())

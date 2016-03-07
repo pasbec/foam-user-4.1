@@ -104,35 +104,38 @@ trackedSurface::trackedSurface
     const volScalarField& rho,
     volVectorField& Ub,
     volScalarField& Pb,
-    const volScalarField& PbExt,
     const surfaceScalarField& sfPhi,
-    const uniformDimensionedVectorField& g,
-    const twoPhaseMixture& transportModel,
-    const autoPtr<incompressible::turbulenceModel>& turbulenceModel,
-    volScalarField* TbPtr
+    volScalarField* TbPtr,
+    const uniformDimensionedVectorField* gPtr,
+    const twoPhaseMixture* transportPtr,
+    const incompressible::turbulenceModel* turbulencePtr,
+    const volScalarField* p0Ptr,
+    word prefix
 )
 :
     IOdictionary
     (
         IOobject
         (
-            "trackedSurfaceProperties",
+            prefix + "Properties",
             Ub.mesh().time().constant(),
             Ub.mesh(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
+    prefix_(prefix),
+    Prefix_(word(toupper(prefix_[0])) + word(prefix_.substr(1))),
     mesh_(m),
     rho_(rho),
     U_(Ub),
     p_(Pb),
-    pExt_(PbExt),
     phi_(sfPhi),
-    g_(g),
-    transport_(transportModel),
-    turbulence_(turbulenceModel),
     TPtr_(TbPtr),
+    gPtr_(gPtr),
+    transportPtr_(transportPtr),
+    turbulencePtr_(turbulencePtr),
+    p0Ptr_(p0Ptr),
     curTimeIndex_(Ub.mesh().time().timeIndex()),
     twoFluids_
     (
@@ -151,33 +154,35 @@ trackedSurface::trackedSurface
     bPatchID_(-1),
     muFluidA_
     (
-        dimensionedScalar(transportModel.nuModel1().viscosityProperties().lookup("rho"))
-      * dimensionedScalar(transportModel.nuModel1().viscosityProperties().lookup("nu"))
+        dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
     ),
     muFluidB_
     (
-        dimensionedScalar(transportModel.nuModel2().viscosityProperties().lookup("rho"))
-      * dimensionedScalar(transportModel.nuModel2().viscosityProperties().lookup("nu"))
+        dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
     ),
     rhoFluidA_
     (
-        dimensionedScalar(transportModel.nuModel1().viscosityProperties().lookup("rho"))
+        dimensionedScalar(word(), dimDensity, 0)
     ),
     rhoFluidB_
     (
-        dimensionedScalar(transportModel.nuModel2().viscosityProperties().lookup("rho"))
+        dimensionedScalar(word(), dimDensity, 0)
     ),
     kFluidA_("kFluidA", dimThermalConductivity, 0.0),
     kFluidB_("kFluidB", dimThermalConductivity, 0.0),
     CpFluidA_("CpFluidA", dimSpecificHeatCapacity, 0.0),
     CpFluidB_("CpFluidB", dimSpecificHeatCapacity, 0.0),
+    g_
+    (
+        dimensionedVector(word(), dimLength/pow(dimTime,2), vector::zero)
+    ),
     cleanInterfaceSurfTension_
     (
-        dimensionedScalar(transportModel.lookup("sigma"))
+        dimensionedScalar(word(), dimMass/pow(dimTime,2), 0)
     ),
     fixedTrackedSurfacePatches_
     (
-        this->lookup("fixedTrackedSurfacePatches")
+        this->lookup("fixed" + Prefix_ + "Patches")
     ),
     pointNormalsCorrectionPatches_
     (
@@ -185,7 +190,7 @@ trackedSurface::trackedSurface
     ),
     nTrackedSurfCorr_
     (
-        readInt(this->lookup("nTrackedSurfaceCorrectors"))
+        readInt(this->lookup("n" + Prefix_ + "Correctors"))
     ),
     smoothing_(false),
     correctPointNormals_(false),
@@ -216,6 +221,11 @@ trackedSurface::trackedSurface
     surfaceTensionForcePtr_(NULL),
     nGradUnPtr_(NULL)
 {
+    Info << "Surface prefix is: " << prefix_ << endl;
+
+    // Init/Update properties
+    updateProperties();
+
     //Read motion direction
     if (!normalMotionDir_)
     {
@@ -247,7 +257,7 @@ trackedSurface::trackedSurface
     // Detect the surface patch
     forAll (mesh().boundary(), patchI)
     {
-        if(mesh().boundary()[patchI].name() == "trackedSurface")
+        if(mesh().boundary()[patchI].name() == prefix_)
         {
             aPatchID_ = patchI;
 
@@ -270,7 +280,7 @@ trackedSurface::trackedSurface
     {
         forAll (mesh().boundary(), patchI)
         {
-            if(mesh().boundary()[patchI].name() == "trackedSurfaceShadow")
+            if(mesh().boundary()[patchI].name() == prefix_ + "Shadow")
             {
                 bPatchID_ = patchI;
 
@@ -402,6 +412,27 @@ trackedSurface::trackedSurface
                 ),
                 aMesh()
             );
+
+//         forAll (aMesh().boundary(), patchI)
+//         {
+//             const faPatch& fap = aMesh().boundary()[patchI];
+//
+//             if (!fap.coupled())
+//             {
+//                 const vectorField& fapC = fap.edgeCentres();
+//
+//                 scalarField& fapContactAngle = contactAnglePtr_->boundaryField()[patchI];
+//
+//                 forAll (fapContactAngle, edgeI)
+//                 {
+// //                     fapContactAngle[edgeI] = 90;
+// //                     fapContactAngle[edgeI] = 110;
+//                     fapContactAngle[edgeI] = 70 + (fapC[edgeI].component(0) * 40) ;
+//                 }
+//             }
+//         }
+//
+//         contactAnglePtr_->write();
     }
 
     // Check if correctPointNormals switch is set
@@ -1870,22 +1901,35 @@ void trackedSurface::updateBoundaryConditions()
         updateTemperature();
         updateVelocity();
         updateSurfactantConcentration();
-        updatePressure();
+        if (p0Ptr_)
+        {
+            updatePressure
+            (
+                p0().boundaryField()[aPatchID()]
+            );
+        }
+        else
+        {
+            updatePressure();
+        }
     }
 }
 
 
 void trackedSurface::updateMuEff()
 {
-    const volScalarField nuEff = turbulence()->nuEff();
-
-    muEffFluidAval() =
-        nuEff.boundaryField()[aPatchID()] * rhoFluidA().value();
-
-    if(twoFluids())
+    if (turbulencePtr_)
     {
-        muEffFluidBval() =
-            nuEff.boundaryField()[bPatchID()] * rhoFluidB().value();
+        const volScalarField nuEff = turbulence().nuEff();
+
+        muEffFluidAval() =
+            nuEff.boundaryField()[aPatchID()] * rhoFluidA().value();
+
+        if(twoFluids())
+        {
+            muEffFluidBval() =
+                nuEff.boundaryField()[bPatchID()] * rhoFluidB().value();
+        }
     }
 }
 
@@ -2269,8 +2313,6 @@ void trackedSurface::updatePressure()
 //         pA -= 2.0*(muEffFluidAval() - muEffFluidBval())
 //             *fac::div(Us())().internalField();
 
-        pA += pExt().boundaryField()[aPatchID()];
-
         vector R0 = vector::zero;
 
         pA -= (rhoFluidA().value() - rhoFluidB().value())*
@@ -2335,8 +2377,6 @@ void trackedSurface::updatePressure()
         pA += 2.0*muEffFluidAval()*nGradUn();
 //         pA -= 2.0*muEffFluidAval()*fac::div(Us())().internalField();
 
-        pA += pExt().boundaryField()[aPatchID()];
-
         p().boundaryField()[aPatchID()] == pA;
     }
 
@@ -2357,7 +2397,6 @@ void trackedSurface::updatePressure()
             if (patchI != aPatchID())
             {
                 p().boundaryField()[patchI] ==
-                    pExt().boundaryField()[patchI]
                   - rho().boundaryField()[patchI]
                    *(g_.value()&(mesh().C().boundaryField()[patchI] - R0));
             }
@@ -3098,20 +3137,49 @@ bool trackedSurface::MarangoniStress() const
 
 void trackedSurface::updateProperties()
 {
-    muFluidA_ =
-        dimensionedScalar(transport().nuModel1().viscosityProperties().lookup("rho"))
-      * dimensionedScalar(transport().nuModel1().viscosityProperties().lookup("nu"));
+    if (transportPtr_)
+    {
+        rhoFluidA_ = dimensionedScalar
+        (
+            transport().nuModel1().viscosityProperties().lookup("rho")
+        );
+        muFluidA_ = rhoFluidA_ * dimensionedScalar
+        (
+            transport().nuModel1().viscosityProperties().lookup("nu")
+        );
 
-    muFluidB_ =
-        dimensionedScalar(transport().nuModel2().viscosityProperties().lookup("rho"))
-      * dimensionedScalar(transport().nuModel2().viscosityProperties().lookup("nu"));
+        rhoFluidB_ = dimensionedScalar
+        (
+            transport().nuModel2().viscosityProperties().lookup("rho")
+        );
+        muFluidB_ = rhoFluidB_ * dimensionedScalar
+        (
+            transport().nuModel2().viscosityProperties().lookup("nu")
+        );
 
-    rhoFluidA_ = dimensionedScalar(transport().nuModel1().viscosityProperties().lookup("rho"));
+        cleanInterfaceSurfTension_ =
+            dimensionedScalar(transport().lookup("sigma"));
+    }
+    else
+    {
+        rhoFluidA_ = dimensionedScalar(this->lookup("rhoFluidA"));
+        muFluidA_ = dimensionedScalar(this->lookup("muFluidA"));
 
-    rhoFluidB_ = dimensionedScalar(transport().nuModel2().viscosityProperties().lookup("rho"));
+        rhoFluidB_ = dimensionedScalar(this->lookup("rhoFluidB"));
+        muFluidB_ = dimensionedScalar(this->lookup("muFluidB"));
 
-    cleanInterfaceSurfTension_ =
-        dimensionedScalar(this->lookup("surfaceTension"));
+        cleanInterfaceSurfTension_ =
+            dimensionedScalar(this->lookup("surfaceTension"));
+    }
+
+    if (gPtr_)
+    {
+        g_ = dimensionedVector(*gPtr_);
+    }
+    else
+    {
+        g_ = dimensionedVector(this->lookup("g"));
+    }
 
     // Check if correctPointNormals switch is set
     if (this->found("correctPointNormals"))
@@ -3143,7 +3211,7 @@ void trackedSurface::writeVTK() const
 {
     aMesh().patch().writeVTK
     (
-        DB().timePath()/"trackedSurface",
+        DB().timePath()/prefix_,
         aMesh().patch(),
         aMesh().patch().points()
     );
@@ -3153,7 +3221,7 @@ void trackedSurface::writeVTK() const
 void trackedSurface::writeVTKControlPoints()
 {
     // Write patch and points into VTK
-    fileName name(DB().timePath()/"trackedSurfaceControlPoints");
+    fileName name(DB().timePath()/prefix_+"ControlPoints");
     OFstream mps(name + ".vtk");
 
     mps << "# vtk DataFile Version 2.0" << nl

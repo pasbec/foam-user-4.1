@@ -3,17 +3,21 @@
     Info << "Create field g for"
         << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
-    uniformDimensionedVectorField g
+    autoPtr<uniformDimensionedVectorField> gPtr
     (
-        IOobject
+        new uniformDimensionedVectorField
         (
-            "g",
-            runTime.constant(),
-            mesh_[control.fluidA()],
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            IOobject
+            (
+                "g",
+                runTime.constant(),
+                mesh_[control.fluidA()],
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
         )
     );
+    uniformDimensionedVectorField& g = gPtr();
 
 
     // Pressure
@@ -118,7 +122,17 @@
     Info << "Create transport model for"
         << " region " << mesh_[control.fluidA()].name()
         << endl;
-    twoPhaseMixture twoPhaseProperties(U, phi, "fluidIndicator");
+//     twoPhaseMixture twoPhaseProperties(U, phi, "fluidIndicator");
+    autoPtr<twoPhaseMixture> twoPhasePropertiesPtr
+    (
+        new twoPhaseMixture
+        (
+            U,
+            phi,
+            "fluidIndicator"
+        )
+    );
+    twoPhaseMixture& twoPhaseProperties = twoPhasePropertiesPtr();
     Info << endl;
 
 
@@ -178,18 +192,29 @@
     Info << "Create tracked surface for"
         << " region " << mesh_[control.fluidA()].name()
         << endl;
+
+    word interfacePrefix;
+
+    if (!args.optionReadIfPresent("prefix", interfacePrefix))
+    {
+        interfacePrefix = trackedSurface::typeName;
+    }
+
     trackedSurface interface
     (
         mesh_[control.fluidA()],
         rho,
         U,
         p,
-        pB_[control.fluidA()],
         phi,
-        g,
-        twoPhaseProperties,
-        turbulence
+        NULL,
+        gPtr.operator->(),
+        twoPhasePropertiesPtr.operator->(),
+        turbulence.operator->(),
+        pB_.fieldPtr(control.fluidA()),
+        interfacePrefix
     );
+
     Info << nl;
 
 

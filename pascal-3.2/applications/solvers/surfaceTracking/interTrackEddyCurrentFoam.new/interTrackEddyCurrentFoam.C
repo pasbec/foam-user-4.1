@@ -88,6 +88,8 @@ Description
 
 int main(int argc, char *argv[])
 {
+#   include "addTrackedSurfacePrefixOption.H"
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createRegionDynamicFvMesh.H"
@@ -294,11 +296,11 @@ int main(int argc, char *argv[])
 
         if (mfUpdate)
         {
-            FL_.mapExtrapolate(control.fluidA());
-            pB_.mapExtrapolate(control.fluidA());
+//             FL_.mapExtrapolate(control.fluidA());
+//             pB_.mapExtrapolate(control.fluidA());
 // TODO TEST FIXME Extrapolation sometimes fails
-//             FL_.mapCopyInternal(control.fluidA());
-//             pB_.mapCopyInternal(control.fluidA());
+            FL_.mapCopyInternal(control.fluidA());
+            pB_.mapCopyInternal(control.fluidA());
         }
 
         // ==================================================================//

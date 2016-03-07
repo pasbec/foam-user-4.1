@@ -46,7 +46,27 @@ volScalarField rho
     dimensionedScalar("0", dimMass/dimVolume, 0)
 );
 
-freeSurface interface(mesh, rho, U, p, phi);
+word interfacePrefix;
+
+if (!args.optionReadIfPresent("prefix", interfacePrefix))
+{
+    interfacePrefix = trackedSurface::typeName;
+}
+
+trackedSurface interface
+(
+    mesh,
+    rho,
+    U,
+    p,
+    phi,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    interfacePrefix
+);
 
 volScalarField* fluidIndicatorPtr = NULL;
 
@@ -89,9 +109,9 @@ fluidIndicator.correctBoundaryConditions();
 
 rho = fluidIndicator
    *(
-        interface.rhoFluidA() 
+        interface.rhoFluidA()
       - interface.rhoFluidB()
-    ) 
+    )
   + interface.rhoFluidB();
 rho.correctBoundaryConditions();
 
@@ -107,9 +127,9 @@ volScalarField mu
     ),
     fluidIndicator
    *(
-        interface.muFluidA() 
+        interface.muFluidA()
       - interface.muFluidB()
-    ) 
+    )
   + interface.muFluidB()
 );
 mu.correctBoundaryConditions();
@@ -147,7 +167,7 @@ areaScalarField K
 K.write();
 // const scalarField& K = interface.aMesh().faceCurvatures().internalField();
 
-// const scalarField X = 
+// const scalarField X =
 //     interface.aMesh().areaCentres().internalField().component(0);
 
 Info << "Free surface curvature: min = " << gMin(K)
