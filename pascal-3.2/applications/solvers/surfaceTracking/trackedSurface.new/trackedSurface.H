@@ -708,6 +708,19 @@ public:
         //- Write VTK trackedSurface control points
         void writeVTKControlPoints();
 
+        //- Write area fields as boundary of corresponding volume fields
+        template<class Type>
+        void
+        writeVol
+        (
+            const label aPatchID,
+            const fvMesh& vMesh,
+            const GeometricField<Type, faPatchField, areaMesh>& af
+        );
+
+        //- Write selected fields as volFields of tracked surface side A
+        void writeVolA();
+
         //- Correct fixed surface patches
         void moveFixedPatches(const vectorField& displacement);
 };

@@ -3285,6 +3285,108 @@ void trackedSurface::writeVTKControlPoints()
 }
 
 
+template<class Type>
+void
+trackedSurface::writeVol
+(
+    const label aPatchID,
+    const fvMesh& vMesh,
+    const GeometricField<Type, faPatchField, areaMesh>& af
+)
+{
+    tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
+    (
+        new GeometricField<Type, fvPatchField, volMesh>
+        (
+            IOobject
+            (
+                "vol" + af.name(),
+                af.instance(),
+                af.db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            vMesh,
+            dimensioned<Type>
+            (
+                "0",
+                af.dimensions(),
+                pTraits<Type>::zero
+            ),
+            fixedValueFvPatchField<Type>::typeName
+        )
+    );
+    GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
+
+    forAll(vMesh.boundaryMesh(), patchI)
+    {
+        vf.boundaryField()[patchI] == pTraits<Type>::zero;
+    }
+
+    vf.boundaryField()[aPatchID] == af;
+
+    vf.write();
+
+    tvf.clear();
+}
+
+
+void trackedSurface::writeVolA()
+{
+    Us().write();
+
+    (fac::div(Us()))().write();
+
+    (fac::grad(Us()))().write();
+
+    aMesh().Le().write();
+
+    (fac::average(aMesh().Le()))().write();
+
+    aMesh().edgeAreaNormals().write();
+
+    aMesh().faceAreaNormals().write();
+
+    aMesh().faceCurvatures().write();
+
+    surfaceTensionGrad()().write();
+
+    // Us
+    writeVol(aPatchID(), mesh(), Us());
+
+    // fac::div(Us())
+    writeVol(aPatchID(), mesh(), (fac::div(Us()))());
+
+    // fac::grad(Us())
+    writeVol(aPatchID(), mesh(), (fac::grad(Us()))());
+
+    // volLeAverage
+    writeVol(aPatchID(), mesh(), (fac::average(aMesh().Le()))());
+
+    // faceAreaNormals
+    writeVol(aPatchID(), mesh(), aMesh().faceAreaNormals());
+
+    // faceCurvatures
+    writeVol(aPatchID(), mesh(), aMesh().faceCurvatures());
+
+    // faceCurvaturesDivNormals
+    writeVol
+    (
+        aPatchID(),
+        mesh(),
+        areaScalarField
+        (
+            "faceCurvaturesDivNormals",
+            -fac::div(aMesh().faceAreaNormals())
+        )
+    );
+
+    // surfaceTensionGrad
+    writeVol(aPatchID(), mesh(), surfaceTensionGrad()());
+}
+
+
 void trackedSurface::correctCurvature()
 {
     // Correct curvature next to fixed patches

@@ -46,6 +46,11 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 
+    // TODO: From here!!!
+
+    // TODO: Solver debug flag
+    bool debug = true;
+
 #   include "createTime.H"
 
 #   include "createDynamicFvMesh.H"
@@ -175,6 +180,14 @@ int main(int argc, char *argv[])
             << ", average = " << gAverage(K) << endl << flush;
 
 //         dist.internalField() = patchWave(mesh, patchSet, false).distance();
+
+        if (debug)
+        {
+            if (runTime.outputTime())
+            {
+                interface.writeVolA();
+            }
+        }
 
         runTime.write();
 
