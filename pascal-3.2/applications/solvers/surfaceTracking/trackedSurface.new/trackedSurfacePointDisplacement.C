@@ -205,12 +205,13 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                  == wallFvPatch::typeName
                 )
                 {
-                    scalar rotAngle =
-                        average
-                        (
-                            90
-                          - contactAnglePtr_->boundaryField()[patchI]
-                        );
+                    scalarField& contactAngle =
+                        contactAnglePtr_->boundaryField()[patchI];
+
+                    scalarField rotAngle = 90 - contactAngle;
+
+//                     rotAngle = average(rotAngle);
+
                     rotAngle *= M_PI/180.0;
 
                     vectorField rotationAxis(N.size(), vector::zero);
@@ -249,10 +250,17 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                     }
                     rotationAxis2 /= mag(rotationAxis2) + SMALL;
 
-                    // Rodrigues' rotation formula
-                    N = N*cos(rotAngle)
-                      + rotationAxis*(rotationAxis & N)*(1 - cos(rotAngle))
-                      + (rotationAxis^N)*sin(rotAngle);
+                    forAll(rotationAxis, edgeI)
+                    {
+                        vector NI = N[edgeI];
+                        scalar rotAngleI = rotAngle[edgeI];
+                        vector rotAxisI = rotationAxis[edgeI];
+
+                        // Rodrigues' rotation formula
+                        N[edgeI] = NI*cos(rotAngleI)
+                          + rotAxisI*(rotAxisI & NI)*(1 - cos(rotAngleI))
+                          + (rotAxisI^NI)*sin(rotAngleI);
+                    }
 
                     N /= mag(N);
 

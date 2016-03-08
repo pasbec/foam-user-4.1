@@ -376,12 +376,6 @@ trackedSurface::trackedSurface
         }
     }
 
-    // Read surface points total displacement if present
-    readTotalDisplacement();
-
-    // Read control points positions if present
-    controlPoints();
-
     // Check if smoothing switch is set
     if (this->found("smoothing"))
     {
@@ -516,10 +510,17 @@ trackedSurface::trackedSurface
         CpFluidB_ = dimensionedScalar(this->lookup("CpFluidB"));
     }
 
+    // Read surface points total displacement if present
+    readTotalDisplacement();
+
+    // Read control points positions if present
+    controlPoints();
+
     // Clear geometry
     aMesh().movePoints();
 
     // Contact angle correction
+    correctFreeContactAngle();
     correctContactLinePointNormals();
 
     // Check if fvcNGradUn switch is set
@@ -819,6 +820,7 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 
     aMesh().movePoints();
 
+    correctFreeContactAngle();
     correctContactLinePointNormals();
 
     if (correctPointNormals_)
@@ -1069,7 +1071,6 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
             mesh().update();
 
             aMesh().movePoints();
-
 
             correctFreeContactAngle();
             correctContactLinePointNormals();
@@ -1576,6 +1577,7 @@ bool trackedSurface::smoothMesh()
 
     aMesh().movePoints();
 
+    correctFreeContactAngle();
     correctContactLinePointNormals();
 
     if (correctPointNormals_)
@@ -1851,6 +1853,7 @@ bool trackedSurface::moveMeshPoints(const scalarField& interfacePhi)
 
     aMesh().movePoints();
 
+    correctFreeContactAngle();
     correctContactLinePointNormals();
 
     if (correctPointNormals_)
@@ -3913,7 +3916,7 @@ void trackedSurface::correctFreeContactAngle()
 
     if (freeContactAngle_)
     {
-        Info << "DEBUG" << endl;
+        Pout << "Correcting free contact angle" << endl;
 
         forAll(aMesh().boundary(), patchI)
         {
@@ -4002,6 +4005,8 @@ void trackedSurface::correctContactLinePointNormals()
                         contactAnglePtr_->boundaryField()[patchI];
 
                     scalarField rotAngle = 90 - contactAngle;
+
+//                     rotAngle = average(rotAngle);
 
                     rotAngle *= M_PI/180.0;
 
