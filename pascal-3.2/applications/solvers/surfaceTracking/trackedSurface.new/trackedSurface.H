@@ -189,6 +189,9 @@ class trackedSurface
         //- Implicit coupling
         Switch implicitCoupling_;
 
+        //- Free contact angle
+        Switch freeContactAngle_;
+
         //- Relative interface deformation limit
         scalar interfaceDeformationLimit_;
 
@@ -317,6 +320,7 @@ class trackedSurface
             vectorField& displacement
         );
         void smoothCurvature();
+        void correctFreeContactAngle();
         void correctContactLinePointNormals();
 
         // Marangoni stress
