@@ -211,13 +211,13 @@ int main(int argc, char *argv[])
             interface.moveMeshPointsForOldTrackedSurfDisplacement();
             interface.updateDisplacementDirections();
 
-// TODO TEST: Make sure phi is correct
-            // Make sure phi is correct at interface
-            phi.boundaryField()[interface.aPatchID()] =
-                fvc::meshPhi(U)().boundaryField()[interface.aPatchID()];
+// // TODO TEST: Make sure phi is correct
+//             // Make sure phi is correct at interface
+//             phi.boundaryField()[interface.aPatchID()] =
+//                 fvc::meshPhi(U)().boundaryField()[interface.aPatchID()];
 
-            // Prediction step for interface points
-            interface.predictPoints();
+//             // Prediction step for interface points
+//             interface.predictPoints();
         }
 
 //         // TODO
@@ -368,15 +368,17 @@ int main(int argc, char *argv[])
         // Finish time step and write
         // ==================================================================//
 
+        runTime.write();
+
         if (debug)
         {
             if (runTime.outputTime())
             {
+                interface.writeVTK();
+                interface.writeVTKControlPoints();
                 interface.writeVolA();
             }
         }
-
-        runTime.write();
 
         control.msg().executionTime();
     }

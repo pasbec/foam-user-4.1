@@ -181,20 +181,16 @@ int main(int argc, char *argv[])
 
 //         dist.internalField() = patchWave(mesh, patchSet, false).distance();
 
+        runTime.write();
+
         if (debug)
         {
             if (runTime.outputTime())
             {
+                interface.writeVTK();
+                interface.writeVTKControlPoints();
                 interface.writeVolA();
             }
-        }
-
-        runTime.write();
-
-        if (runTime.outputTime())
-        {
-            interface.writeVTK();
-            interface.writeVTKControlPoints();
         }
 
         Info << "ExecutionTime = "
