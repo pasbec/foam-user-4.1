@@ -651,9 +651,6 @@ public:
         //- Correct surface pressure
         void updatePressure();
 
-        //- Correct surface pressure
-        void updatePressure(const scalarField& p0);
-
         //- Correct surface velocity
         void updateVelocity();
 
@@ -713,8 +710,6 @@ public:
         void
         writeVol
         (
-            const label aPatchID,
-            const fvMesh& vMesh,
             const GeometricField<Type, faPatchField, areaMesh>& af
         );
 

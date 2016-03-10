@@ -1941,17 +1941,7 @@ void trackedSurface::updateBoundaryConditions()
         updateTemperature();
         updateVelocity();
         updateSurfactantConcentration();
-        if (p0Ptr_)
-        {
-            updatePressure
-            (
-                p0().boundaryField()[aPatchID()]
-            );
-        }
-        else
-        {
-            updatePressure();
-        }
+        updatePressure();
     }
 }
 
@@ -2364,6 +2354,11 @@ void trackedSurface::updatePressure()
                 )
             );
 
+        if (p0Ptr_)
+        {
+            pA += p0().boundaryField()[aPatchID()];
+        }
+
         p().boundaryField()[aPatchID()] == pA;
     }
     else
@@ -2417,148 +2412,10 @@ void trackedSurface::updatePressure()
         pA += 2.0*muEffFluidAval()*nGradUn();
 //         pA -= 2.0*muEffFluidAval()*fac::div(Us())().internalField();
 
-        p().boundaryField()[aPatchID()] == pA;
-    }
-
-
-    // Set modified pressure at patches with fixed apsolute
-    // pressure
-
-    vector R0 = vector::zero;
-
-    for (int patchI=0; patchI < p().boundaryField().size(); patchI++)
-    {
-        if
-        (
-            p().boundaryField()[patchI].type()
-         == fixedValueFvPatchScalarField::typeName
-        )
+        if (p0Ptr_)
         {
-            if (patchI != aPatchID())
-            {
-                p().boundaryField()[patchI] ==
-                  - rho().boundaryField()[patchI]
-                   *(g_.value()&(mesh().C().boundaryField()[patchI] - R0));
-            }
+            pA += p0().boundaryField()[aPatchID()];
         }
-    }
-}
-
-
-void trackedSurface::updatePressure(const scalarField& p0)
-{
-    // Correct pressure boundary condition at the surface
-
-    vectorField nA = mesh().boundary()[aPatchID()].nf();
-
-    if(twoFluids())
-    {
-        scalarField pA =
-            interpolatorBA().faceInterpolate
-            (
-                p().boundaryField()[bPatchID()]
-            );
-
-        const scalarField& K = aMesh().faceCurvatures().internalField();
-
-        Info << "Surface curvature: min = " << gMin(K)
-            << ", max = " << gMax(K)
-            << ", average = " << gAverage(K) << endl << flush;
-
-        if(!MarangoniStress())
-        {
-//             pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
-            pA -= cleanInterfaceSurfTension().value()*K;
-        }
-        else
-        {
-            if (correctCurvature_)
-            {
-                scalarField surfTensionK =
-                    surfaceTension().internalField()*K;
-
-                pA -= surfTensionK;
-            }
-            else
-            {
-                const vectorField& nA =
-                    aMesh().faceAreaNormals().internalField();
-
-                const vectorField& totSurfTensionForce = surfaceTensionForce();
-
-                scalarField surfTensionK = (nA&totSurfTensionForce);
-
-                pA -= surfTensionK;
-            }
-        }
-
-        pA += 2.0*(muEffFluidAval() - muEffFluidBval())*nGradUn();
-//         pA += 2.0*(muEffFluidAval() - muEffFluidBval())
-//             *fac::div(Us())().internalField();
-
-        vector R0 = vector::zero;
-
-        pA -= (rhoFluidA().value() - rhoFluidB().value())*
-            (
-                g_.value()
-              & (
-                    mesh().C().boundaryField()[aPatchID()]
-                  - R0
-                )
-            );
-
-        p().boundaryField()[aPatchID()] == pA;
-    }
-    else
-    {
-        vector R0 = vector::zero;
-
-        scalarField pA = p0
-          - rhoFluidA().value()*
-            (
-                g_.value()
-              & (
-                    mesh().C().boundaryField()[aPatchID()]
-                  - R0
-                )
-            );
-
-        const scalarField& K = aMesh().faceCurvatures().internalField();
-
-        Info << "Surface curvature: min = " << gMin(K)
-            << ", max = " << gMax(K) << ", average = " << gAverage(K)
-            << endl;
-
-        if(!MarangoniStress())
-        {
-//             pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
-            pA -= cleanInterfaceSurfTension().value()*K;
-        }
-        else
-        {
-            if (correctCurvature_)
-            {
-                scalarField surfTensionK =
-                    surfaceTension().internalField()*K;
-
-                pA -= surfTensionK;
-            }
-            else
-            {
-                const vectorField& nA =
-                    aMesh().faceAreaNormals().internalField();
-                const vectorField& totSurfTensionForce = surfaceTensionForce();
-
-                scalarField surfTensionK = (nA&totSurfTensionForce);
-
-                pA -= surfTensionK;
-            }
-        }
-
-//         scalarField divUs = -nGradUn();
-
-        pA += 2.0*muEffFluidAval()*nGradUn();
-//         pA += 2.0*muEffFluidAval()*fac::div(Us())().internalField();
 
         p().boundaryField()[aPatchID()] == pA;
     }
@@ -3292,8 +3149,6 @@ template<class Type>
 void
 trackedSurface::writeVol
 (
-    const label aPatchID,
-    const fvMesh& vMesh,
     const GeometricField<Type, faPatchField, areaMesh>& af
 )
 {
@@ -3304,13 +3159,13 @@ trackedSurface::writeVol
             IOobject
             (
                 "vol" + af.name(),
-                af.instance(),
-                af.db(),
+                DB().timeName(),
+                mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            vMesh,
+            mesh(),
             dimensioned<Type>
             (
                 "0",
@@ -3322,12 +3177,12 @@ trackedSurface::writeVol
     );
     GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
 
-    forAll(vMesh.boundaryMesh(), patchI)
+    forAll(mesh().boundaryMesh(), patchI)
     {
         vf.boundaryField()[patchI] == pTraits<Type>::zero;
     }
 
-    vf.boundaryField()[aPatchID] == af;
+    vf.boundaryField()[aPatchID()] == af;
 
     vf.write();
 
@@ -3356,28 +3211,26 @@ void trackedSurface::writeVolA()
     surfaceTensionGrad()().write();
 
     // Us
-    writeVol(aPatchID(), mesh(), Us());
+    writeVol(Us());
 
     // fac::div(Us())
-    writeVol(aPatchID(), mesh(), (fac::div(Us()))());
+    writeVol((fac::div(Us()))());
 
     // fac::grad(Us())
-    writeVol(aPatchID(), mesh(), (fac::grad(Us()))());
+    writeVol((fac::grad(Us()))());
 
     // volLeAverage
-    writeVol(aPatchID(), mesh(), (fac::average(aMesh().Le()))());
+    writeVol((fac::average(aMesh().Le()))());
 
     // faceAreaNormals
-    writeVol(aPatchID(), mesh(), aMesh().faceAreaNormals());
+    writeVol(aMesh().faceAreaNormals());
 
     // faceCurvatures
-    writeVol(aPatchID(), mesh(), aMesh().faceCurvatures());
+    writeVol(aMesh().faceCurvatures());
 
     // faceCurvaturesDivNormals
     writeVol
     (
-        aPatchID(),
-        mesh(),
         areaScalarField
         (
             "faceCurvaturesDivNormals",
@@ -3386,7 +3239,7 @@ void trackedSurface::writeVolA()
     );
 
     // surfaceTensionGrad
-    writeVol(aPatchID(), mesh(), surfaceTensionGrad()());
+    writeVol(surfaceTensionGrad()());
 }
 
 
