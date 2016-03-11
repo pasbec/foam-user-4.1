@@ -713,6 +713,67 @@ tmp<vectorField> trackedSurface::lsPlanePointAndNormal
 }
 
 
+// tmp<vectorField> trackedSurface::pointDisplacementID(const scalarField& deltaH)
+// {
+//     const pointField& points = aMesh().patch().localPoints();
+//     const labelListList& pointFaces = aMesh().patch().pointFaces();
+//
+//     const vectorField& areaCentres = aMesh().areaCentres().internalField();
+//
+//     controlPoints() = areaCentres;
+//     controlPoints() += facesDisplacementDir()*deltaH;
+//
+//     tmp<vectorField> tdisplacement
+//     (
+//         new vectorField
+//         (
+//             points.size(),
+//             vector::zero
+//         )
+//     );
+//
+//     vectorField& displacement = tdisplacement();
+//
+//
+//     forAll (pointFaces, pointI)
+//     {
+//         scalar weightsSum = 0.0;
+//
+//         const labelList& curPointFaces = pointFaces[pointI];
+//
+//         forAll (curPointFaces, faceI)
+//         {
+//             label curFace = curPointFaces[faceI];
+//
+//             scalar weight = 1.0/mag
+//             (
+//                 points[pointI]
+//               - areaCentres[curFace]
+//             );
+//
+//             displacement[pointI] += weight*areaCentres[curFace];
+//
+//             weightsSum += weight;
+//         }
+//
+//         displacement[pointI] /= weightsSum;
+//
+//         displacement[pointI] -= points[pointI];
+//     }
+//
+//
+//     displacement = pointsDisplacementDir()
+//         * (pointsDisplacementDir()&displacement);
+//
+//     forAll(motionPointsMask(), pointI)
+//     {
+//         displacement[pointI] *= motionPointsMask()[pointI];
+//     }
+//
+//     return tdisplacement;
+// }
+
+
 // tmp<vectorField> trackedSurface::pointDisplacementSM()
 // {
 //     const pointField& points = aMesh().patch().localPoints();

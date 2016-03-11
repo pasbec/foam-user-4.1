@@ -316,6 +316,12 @@ class trackedSurface
             //- Init control points position
             void initControlPointsPosition();
 
+            //- Calculate swept volume correction
+            tmp<scalarField> calcSweptVolCorr(const scalarField& interfacePhi);
+
+            //- Calculate control point deltaH
+            tmp<scalarField> calcDeltaH(const scalarField& sweptVolCorr);
+
             //- Move correctedFvPatchField fvSubMeshes
             void moveCorrectedPatchSubMeshes();
 
@@ -331,6 +337,9 @@ class trackedSurface
             const vector& origin,
             const vector& axis
         ) const;
+
+//         //-
+//         tmp<vectorField> pointDisplacementID(const scalarField& deltaH);
 
         void correctCurvature();
         void correctPointNormals();
@@ -662,16 +671,22 @@ public:
         bool correctPoints();
 
         //- Move only surface points
-        bool movePoints(const scalarField& interfacePHi);
+        bool movePoints(const scalarField& interfacePhi);
 
         //- Move mesh points for old time surface points displacement
         bool moveMeshPointsForOldTrackedSurfDisplacement();
+
+        //- Smoothing interface
+        void smoothing();
 
         //- Smooth surface mesh using Laplacian smoothing
         bool smoothMesh();
 
         //- Move mesh points
-        bool moveMeshPoints(const scalarField& interfacePHi);
+        bool moveMeshPoints(const scalarField& interfacePhi);
+
+        //- Correct fixed surface patches
+        void moveFixedPatches(const vectorField& displacement);
 
         //- Update surface boundary conditions
         void updateBoundaryConditions();
@@ -712,18 +727,6 @@ public:
         //- Calculate total surface tension force
         vector totalSurfaceTensionForce() const;
 
-        //- Calculate surface undulation indicator
-        tmp<scalarField> undulationIndicator();
-
-        //- Smooth surface
-        void smooth();
-
-        //- Chech surface faces flatness
-        tmp<scalarField> checkFaceFlatness();
-
-        //- Smoothing interface
-        void smoothing();
-
         //- Maximal surface tension based Courant number
         scalar maxCourantNumber();
 
@@ -744,9 +747,6 @@ public:
             const word name,
             Field<Type>& f
         );
-
-        //- Correct fixed surface patches
-        void moveFixedPatches(const vectorField& displacement);
 
         // Writing surface data
 

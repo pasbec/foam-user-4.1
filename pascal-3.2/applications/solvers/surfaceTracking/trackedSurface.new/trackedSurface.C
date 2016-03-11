@@ -359,6 +359,142 @@ void trackedSurface::initControlPointsPosition()
     displacement = pointDisplacement(deltaH);
 }
 
+
+tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePhi)
+{
+// // TEST
+//     scalarField& newInterFacePhi = const_cast<scalarField&>(interfacePhi);
+//     for (label i=0; i<3; i++)
+//     {
+// //         smoothField("aPhi", newInterFacePhi);
+//         smoothFieldAlt("aPhi", newInterFacePhi);
+//     }
+
+    tmp<scalarField> tsweptVolCorr
+    (
+        new scalarField
+        (
+            interfacePhi.size(),
+            0
+        )
+    );
+
+    scalarField& sweptVolCorr = tsweptVolCorr();
+
+    sweptVolCorr =
+        interfacePhi
+      - fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
+
+// // TEST
+//     Pout << "------------------------------------------" << endl;
+//     Pout << "gSum(sweptVolCorr) =" << gSum(sweptVolCorr) << endl;
+//     Pout << "------------------------------------------" << endl;
+
+    word ddtScheme
+    (
+        mesh().schemesDict().ddtScheme
+        (
+            "ddt(" + rho().name() + ',' + U().name()+')'
+        )
+    );
+
+    if
+    (
+        ddtScheme
+     == fv::CrankNicolsonDdtScheme<vector>::typeName
+    )
+    {
+        sweptVolCorr *= (1.0/2.0)*DB().deltaT().value();
+    }
+    else if
+    (
+        ddtScheme
+     == fv::EulerDdtScheme<vector>::typeName
+    )
+    {
+        sweptVolCorr *= DB().deltaT().value();
+    }
+    else if
+    (
+        ddtScheme
+     == fv::backwardDdtScheme<vector>::typeName
+    )
+    {
+        if (DB().timeIndex() == 1)
+        {
+            sweptVolCorr *= DB().deltaT().value();
+        }
+        else
+        {
+            sweptVolCorr *= (2.0/3.0)*DB().deltaT().value();
+        }
+    }
+    else
+    {
+        FatalErrorIn("trackedSurface::movePoints()")
+            << "Unsupported temporal differencing scheme : "
+                << ddtScheme
+                << abort(FatalError);
+    }
+
+    return tsweptVolCorr;
+}
+
+
+tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
+{
+    const scalarField& Sf = aMesh().S();
+    const vectorField& Nf = aMesh().faceAreaNormals().internalField();
+
+    tmp<scalarField> tdeltaH
+    (
+        new scalarField
+        (
+            sweptVolCorr.size(),
+            0
+        )
+    );
+
+    scalarField& deltaH = tdeltaH();
+
+    deltaH = sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
+
+// // TEST
+//     for (label i=0; i<20; i++)
+//     {
+//         smoothField("deltaH", deltaH);
+// //         smoothFieldAlt("deltaH", deltaH);
+//     }
+
+    forAll(fixedTrackedSurfacePatches_, patchI)
+    {
+        label fixedPatchID =
+            aMesh().boundary().findPatchID
+            (
+                fixedTrackedSurfacePatches_[patchI]
+            );
+
+        if(fixedPatchID == -1)
+        {
+            FatalErrorIn("trackedSurface::trackedSurface(...)")
+                << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
+                    << " defined in the trackedSurfaceProperties dictionary"
+                    << abort(FatalError);
+        }
+
+        const labelList& eFaces =
+            aMesh().boundary()[fixedPatchID].edgeFaces();
+
+        forAll(eFaces, edgeI)
+        {
+            deltaH[eFaces[edgeI]] *= 2.0;
+        }
+    }
+
+    return tdeltaH;
+}
+
+
 void trackedSurface::moveCorrectedPatchSubMeshes()
 {
     forAll(U().boundaryField(), patchI)
@@ -896,8 +1032,6 @@ bool trackedSurface::correctPoints()
         trackedSurfCorr++
     )
     {
-// // TEST
-//         controlPoints() = aMesh().areaCentres().internalField();
         movePoints(phi_.boundaryField()[aPatchID()]);
 //         moveMeshPoints();
     }
@@ -908,110 +1042,8 @@ bool trackedSurface::correctPoints()
 
 bool trackedSurface::movePoints(const scalarField& interfacePhi)
 {
-
-// // TEST
-//     scalarField& newInterFacePhi = const_cast<scalarField&>(interfacePhi);
-//     for (label i=0; i<3; i++)
-//     {
-// //         smoothField("aPhi", newInterFacePhi);
-//         smoothFieldAlt("aPhi", newInterFacePhi);
-//     }
-
-    pointField newMeshPoints = mesh().allPoints();
-
-    scalarField sweptVolCorr =
-        interfacePhi
-      - fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
-
-// // TEST
-//     Pout << "------------------------------------------" << endl;
-//     Pout << "gSum(sweptVolCorr) =" << gSum(sweptVolCorr) << endl;
-//     Pout << "------------------------------------------" << endl;
-
-    word ddtScheme
-    (
-        mesh().schemesDict().ddtScheme
-        (
-            "ddt(" + rho().name() + ',' + U().name()+')'
-        )
-    );
-
-    if
-    (
-        ddtScheme
-     == fv::CrankNicolsonDdtScheme<vector>::typeName
-    )
-    {
-        sweptVolCorr *= (1.0/2.0)*DB().deltaT().value();
-    }
-    else if
-    (
-        ddtScheme
-     == fv::EulerDdtScheme<vector>::typeName
-    )
-    {
-        sweptVolCorr *= DB().deltaT().value();
-    }
-    else if
-    (
-        ddtScheme
-     == fv::backwardDdtScheme<vector>::typeName
-    )
-    {
-        if (DB().timeIndex() == 1)
-        {
-            sweptVolCorr *= DB().deltaT().value();
-        }
-        else
-        {
-            sweptVolCorr *= (2.0/3.0)*DB().deltaT().value();
-        }
-    }
-    else
-    {
-        FatalErrorIn("trackedSurface::movePoints()")
-            << "Unsupported temporal differencing scheme : "
-                << ddtScheme
-                << abort(FatalError);
-    }
-
-    const scalarField& Sf = aMesh().S();
-    const vectorField& Nf = aMesh().faceAreaNormals().internalField();
-
-    scalarField deltaH =
-        sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
-
-// // TEST
-//     for (label i=0; i<20; i++)
-//     {
-//         smoothField("deltaH", deltaH);
-// //         smoothFieldAlt("deltaH", deltaH);
-//     }
-
-    forAll(fixedTrackedSurfacePatches_, patchI)
-    {
-        label fixedPatchID =
-            aMesh().boundary().findPatchID
-            (
-                fixedTrackedSurfacePatches_[patchI]
-            );
-
-        if(fixedPatchID == -1)
-        {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
-                << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
-                    << " defined in the trackedSurfaceProperties dictionary"
-                    << abort(FatalError);
-        }
-
-        const labelList& eFaces =
-            aMesh().boundary()[fixedPatchID].edgeFaces();
-
-        forAll(eFaces, edgeI)
-        {
-            deltaH[eFaces[edgeI]] *= 2.0;
-        }
-    }
+    scalarField sweptVolCorr = calcSweptVolCorr(interfacePhi);
+    scalarField deltaH = calcDeltaH(sweptVolCorr);
 
     pointField displacement = pointDisplacement(deltaH);
 //     displacement *= 0;
@@ -1025,6 +1057,8 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
     }
 
     // Move only surface points
+
+    pointField newMeshPoints = mesh().allPoints();
 
     const labelList& meshPointsA =
         mesh().boundaryMesh()[aPatchID()].meshPoints();
@@ -1078,7 +1112,6 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
     totalDisplacement() += displacement;
 
     twoDPointCorrector twoDPointCorr(mesh());
-
     twoDPointCorr.correctPoints(newMeshPoints);
 
     mesh().movePoints(newMeshPoints);
@@ -1266,7 +1299,6 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
             }
 
             twoDPointCorrector twoDPointCorr(mesh());
-
             twoDPointCorr.correctPoints(newPoints);
 
             mesh().movePoints(newPoints);
@@ -1297,6 +1329,140 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
     }
 
     return true;
+}
+
+
+void trackedSurface::smoothing()
+{
+    controlPoints() = aMesh().areaCentres().internalField();
+
+    scalarField deltaH = scalarField(aMesh().nFaces(), 0.0);
+
+    pointField displacement = pointDisplacement(deltaH);
+
+    vectorField newMeshPoints = mesh().points();
+
+    const labelList& meshPointsA =
+        mesh().boundaryMesh()[aPatchID()].meshPoints();
+
+    forAll (displacement, pointI)
+    {
+        newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
+    }
+
+    if(twoFluids_)
+    {
+        const labelList& meshPointsB =
+            mesh().boundaryMesh()[bPatchID_].meshPoints();
+
+        pointField displacementB =
+            interpolatorAB().pointInterpolate
+            (
+                displacement
+            );
+
+        forAll (displacementB, pointI)
+        {
+            newMeshPoints[meshPointsB[pointI]] += displacementB[pointI];
+        }
+    }
+
+    // Update total displacement field
+
+//     if(totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
+//     {
+//         FatalErrorIn("trackedSurface::movePoints()")
+//             << "Total displacement of surface points "
+//                 << "from previous time step is not absorbed by the mesh."
+//                 << abort(FatalError);
+//     }
+//     else if (curTimeIndex_ < DB().timeIndex())
+//     {
+//         totalDisplacement() = displacement;
+//
+//         curTimeIndex_ = DB().timeIndex();
+//     }
+//     else
+//     {
+//         totalDisplacement() += displacement;
+//     }
+
+    totalDisplacement() += displacement;
+
+    twoDPointCorrector twoDPointCorr(mesh());
+    twoDPointCorr.correctPoints(newMeshPoints);
+
+    mesh().movePoints(newMeshPoints);
+
+    aMesh().movePoints();
+
+    deltaH = calcDeltaH(-mesh().phi().boundaryField()[aPatchID()]
+        *DB().deltaT().value());
+
+    displacement = pointDisplacement(deltaH);
+
+    newMeshPoints = mesh().points();
+
+    forAll (displacement, pointI)
+    {
+        newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
+    }
+
+    if(twoFluids_)
+    {
+        const labelList& meshPointsB =
+            mesh().boundaryMesh()[bPatchID_].meshPoints();
+
+        pointField displacementB =
+            interpolatorAB().pointInterpolate
+            (
+                displacement
+            );
+
+        forAll (displacementB, pointI)
+        {
+            newMeshPoints[meshPointsB[pointI]] += displacementB[pointI];
+        }
+    }
+
+    // Update total displacement field
+
+//     if(totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
+//     {
+//         FatalErrorIn("trackedSurface::movePoints()")
+//             << "Total displacement of surface points "
+//                 << "from previous time step is not absorbed by the mesh."
+//                 << abort(FatalError);
+//     }
+//     else if (curTimeIndex_ < DB().timeIndex())
+//     {
+//         totalDisplacement() = displacement;
+//
+//         curTimeIndex_ = DB().timeIndex();
+//     }
+//     else
+//     {
+//         totalDisplacement() += displacement;
+//     }
+
+    totalDisplacement() += displacement;
+
+    twoDPointCorr.correctPoints(newMeshPoints);
+
+    mesh().movePoints(newMeshPoints);
+
+    aMesh().movePoints();
+
+    if (correctPointNormals_)
+    {
+        correctPointNormals();
+    }
+
+    if (correctCurvature_)
+    {
+//         correctCurvature();
+        smoothCurvature();
+    }
 }
 
 
@@ -1743,80 +1909,8 @@ bool trackedSurface::smoothMesh()
 
 bool trackedSurface::moveMeshPoints(const scalarField& interfacePhi)
 {
-    scalarField sweptVolCorr =
-        interfacePhi
-      - fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
-
-    word ddtScheme
-    (
-        mesh().schemesDict().ddtScheme
-        (
-            "ddt(" + rho().name() + ',' + U().name()+')'
-        )
-    );
-
-    if
-    (
-        ddtScheme
-     == fv::CrankNicolsonDdtScheme<vector>::typeName
-    )
-    {
-        sweptVolCorr *= (1.0/2.0)*DB().deltaT().value();
-    }
-    else if
-    (
-        ddtScheme
-     == fv::EulerDdtScheme<vector>::typeName
-    )
-    {
-        sweptVolCorr *= DB().deltaT().value();
-    }
-    else if
-    (
-        ddtScheme
-     == fv::backwardDdtScheme<vector>::typeName
-    )
-    {
-        sweptVolCorr *= (2.0/3.0)*DB().deltaT().value();
-    }
-    else
-    {
-        FatalErrorIn("trackedSurface::movePoints()")
-            << "Unsupported temporal differencing scheme : "
-                << ddtScheme
-                << abort(FatalError);
-    }
-
-    const scalarField& Sf = aMesh().S();
-    const vectorField& Nf = aMesh().faceAreaNormals().internalField();
-
-    scalarField deltaH =
-        sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
-
-    forAll(fixedTrackedSurfacePatches_, patchI)
-    {
-        label fixedPatchID =
-            aMesh().boundary().findPatchID
-            (
-                fixedTrackedSurfacePatches_[patchI]
-            );
-
-        if(fixedPatchID == -1)
-        {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
-                << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
-                    << " defined in the trackedSurfaceProperties dictionary"
-                    << abort(FatalError);
-        }
-
-        const labelList& eFaces =
-            aMesh().boundary()[fixedPatchID].edgeFaces();
-
-        forAll(eFaces, edgeI)
-        {
-            deltaH[eFaces[edgeI]] *= 2.0;
-        }
-    }
+    scalarField sweptVolCorr = calcSweptVolCorr(interfacePhi);
+    scalarField deltaH = calcDeltaH(sweptVolCorr);
 
     pointField displacement = pointDisplacement(deltaH);
 
@@ -2949,165 +3043,6 @@ vector trackedSurface::totalSurfaceTensionForce() const
     }
 
     return gSum(surfTensionForces);
-}
-
-
-void trackedSurface::smoothing()
-{
-    controlPoints() = aMesh().areaCentres().internalField();
-
-    scalarField deltaH = scalarField(aMesh().nFaces(), 0.0);
-
-    pointField displacement = pointDisplacement(deltaH);
-
-    vectorField newMeshPoints = mesh().points();
-
-    const labelList& meshPointsA =
-        mesh().boundaryMesh()[aPatchID()].meshPoints();
-
-    forAll (displacement, pointI)
-    {
-        newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
-    }
-
-    if(twoFluids_)
-    {
-        const labelList& meshPointsB =
-            mesh().boundaryMesh()[bPatchID_].meshPoints();
-
-        pointField displacementB =
-            interpolatorAB().pointInterpolate
-            (
-                displacement
-            );
-
-        forAll (displacementB, pointI)
-        {
-            newMeshPoints[meshPointsB[pointI]] += displacementB[pointI];
-        }
-    }
-
-    // Update total displacement field
-
-    if(totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
-    {
-        FatalErrorIn("trackedSurface::movePoints()")
-            << "Total displacement of surface points "
-                << "from previous time step is not absorbed by the mesh."
-                << abort(FatalError);
-    }
-    else if (curTimeIndex_ < DB().timeIndex())
-    {
-        totalDisplacement() = displacement;
-
-        curTimeIndex_ = DB().timeIndex();
-    }
-    else
-    {
-        totalDisplacement() += displacement;
-    }
-
-    twoDPointCorrector twoDPointCorr(mesh());
-    twoDPointCorr.correctPoints(newMeshPoints);
-
-    mesh().movePoints(newMeshPoints);
-
-    aMesh().movePoints();
-
-    const scalarField& Sf = aMesh().S();
-    const vectorField& Nf = aMesh().faceAreaNormals().internalField();
-
-    deltaH =
-       -mesh().phi().boundaryField()[aPatchID()]*DB().deltaT().value()
-       /(Sf*(Nf & facesDisplacementDir()));
-
-    forAll(fixedTrackedSurfacePatches_, patchI)
-    {
-        label fixedPatchID =
-            aMesh().boundary().findPatchID
-            (
-                fixedTrackedSurfacePatches_[patchI]
-            );
-
-        if(fixedPatchID == -1)
-        {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
-                << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
-                    << " defined in the trackedSurfaceProperties dictionary"
-                    << abort(FatalError);
-        }
-
-        const labelList& eFaces =
-            aMesh().boundary()[fixedPatchID].edgeFaces();
-
-        forAll(eFaces, edgeI)
-        {
-            deltaH[eFaces[edgeI]] *= 2.0;
-        }
-    }
-
-    displacement = pointDisplacement(deltaH);
-
-    newMeshPoints = mesh().points();
-
-    forAll (displacement, pointI)
-    {
-        newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
-    }
-
-    if(twoFluids_)
-    {
-        const labelList& meshPointsB =
-            mesh().boundaryMesh()[bPatchID_].meshPoints();
-
-        pointField displacementB =
-            interpolatorAB().pointInterpolate
-            (
-                displacement
-            );
-
-        forAll (displacementB, pointI)
-        {
-            newMeshPoints[meshPointsB[pointI]] += displacementB[pointI];
-        }
-    }
-
-    // Update total displacement field
-
-    if(totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
-    {
-        FatalErrorIn("trackedSurface::movePoints()")
-            << "Total displacement of surface points "
-                << "from previous time step is not absorbed by the mesh."
-                << abort(FatalError);
-    }
-    else if (curTimeIndex_ < DB().timeIndex())
-    {
-        totalDisplacement() = displacement;
-
-        curTimeIndex_ = DB().timeIndex();
-    }
-    else
-    {
-        totalDisplacement() += displacement;
-    }
-
-    twoDPointCorr.correctPoints(newMeshPoints);
-
-    mesh().movePoints(newMeshPoints);
-
-    aMesh().movePoints();
-
-    if (correctPointNormals_)
-    {
-        correctPointNormals();
-    }
-
-    if (correctCurvature_)
-    {
-//         correctCurvature();
-        smoothCurvature();
-    }
 }
 
 
