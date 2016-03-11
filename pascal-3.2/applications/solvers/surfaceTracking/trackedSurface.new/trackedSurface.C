@@ -97,351 +97,11 @@ void trackedSurface::clearOut()
     deleteDemandDrivenData(nGradUnPtr_);
 }
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-trackedSurface::trackedSurface
-(
-    dynamicFvMesh& m,
-    const volScalarField& rho,
-    volVectorField& Ub,
-    volScalarField& Pb,
-    const surfaceScalarField& sfPhi,
-    volScalarField* TbPtr,
-    const uniformDimensionedVectorField* gPtr,
-    const twoPhaseMixture* transportPtr,
-    const incompressible::turbulenceModel* turbulencePtr,
-    const volScalarField* p0Ptr,
-    word prefix
-)
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            prefix + "Properties",
-            Ub.mesh().time().constant(),
-            Ub.mesh(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    prefix_(prefix),
-    Prefix_(word(toupper(prefix_[0])) + word(prefix_.substr(1))),
-    mesh_(m),
-    rho_(rho),
-    U_(Ub),
-    p_(Pb),
-    phi_(sfPhi),
-    TPtr_(TbPtr),
-    gPtr_(gPtr),
-    transportPtr_(transportPtr),
-    turbulencePtr_(turbulencePtr),
-    p0Ptr_(p0Ptr),
-    curTimeIndex_(Ub.mesh().time().timeIndex()),
-    twoFluids_
-    (
-        this->lookup("twoFluids")
-    ),
-    normalMotionDir_
-    (
-        this->lookup("normalMotionDir")
-    ),
-    motionDir_
-    (
-        vector::zero
-    ),
-    cleanInterface_
-    (
-        this->lookup("cleanInterface")
-    ),
-    aPatchID_(-1),
-    bPatchID_(-1),
-    muFluidA_
-    (
-        dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
-    ),
-    muFluidB_
-    (
-        dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
-    ),
-    rhoFluidA_
-    (
-        dimensionedScalar(word(), dimDensity, 0)
-    ),
-    rhoFluidB_
-    (
-        dimensionedScalar(word(), dimDensity, 0)
-    ),
-    kFluidA_
-    (
-        dimensionedScalar(word(), dimThermalConductivity, 0.0)
-    ),
-    kFluidB_
-    (
-        dimensionedScalar(word(), dimThermalConductivity, 0.0)
-    ),
-    CpFluidA_
-    (
-        dimensionedScalar(word(), dimSpecificHeatCapacity, 0.0)
-    ),
-    CpFluidB_
-    (
-        dimensionedScalar(word(), dimSpecificHeatCapacity, 0.0)
-    ),
-    g_
-    (
-        dimensionedVector(word(), dimLength/pow(dimTime,2), vector::zero)
-    ),
-    cleanInterfaceSurfTension_
-    (
-        dimensionedScalar(word(), dimMass/pow(dimTime,2), 0)
-    ),
-    fixedTrackedSurfacePatches_
-    (
-        this->lookup("fixed" + Prefix_ + "Patches")
-    ),
-    pointNormalsCorrectionPatches_
-    (
-        this->lookup("pointNormalsCorrectionPatches")
-    ),
-    nTrackedSurfCorr_
-    (
-        readInt(this->lookup("n" + Prefix_ + "Correctors"))
-    ),
-    smoothing_(false),
-    freecontactAngle_(false),
-    correctPointNormals_(false),
-    correctDisplacement_(false),
-    correctCurvature_(false),
-    curvExtrapOrder_(0),
-    fvcNGradUn_(false),
-    implicitCoupling_(false),
-    interfaceDeformationLimit_(0),
-    interpolatorABPtr_(NULL),
-    interpolatorBAPtr_(NULL),
-    controlPointsPtr_(NULL),
-    motionPointsMaskPtr_(NULL),
-    pointsDisplacementDirPtr_(NULL),
-    facesDisplacementDirPtr_(NULL),
-    totalDisplacementPtr_(NULL),
-    aMeshPtr_(NULL),
-    UsPtr_(NULL),
-    phisPtr_(NULL),
-    surfactConcPtr_(NULL),
-    surfaceTensionPtr_(NULL),
-    surfactantPtr_(NULL),
-    fluidIndicatorPtr_(NULL),
-    muEffFluidAvalPtr_(NULL),
-    muEffFluidBvalPtr_(NULL),
-    contactAnglePtr_(NULL),
-    temperaturePtr_(NULL),
-    surfaceTensionForcePtr_(NULL),
-    nGradUnPtr_(NULL)
-{
-    Info << "Surface prefix is: " << prefix_ << endl;
-
-    // Init properties
-    initProperties();
-
-    // Init motion direction
-    if (!normalMotionDir_)
-    {
-        motionDir_ = vector(this->lookup("motionDir"));
-        motionDir_ /= mag(motionDir_) + SMALL;
-    }
-
-    // Make contact angle if necessary
-    if
-    (
-        IOobject
-        (
-            "contactAngle",
-            DB().timeName(),
-            mesh(),
-            IOobject::MUST_READ
-        ).headerOk()
-     || freecontactAngle_
-    )
-    {
-        makeContactAngle();
-        updateContactAngle();
-        contactAngle().write();
-    }
-
-    initCheckPointNormalsCorrection();
-
-    initCheckSurfacePatches();
-
-    initMotionPointMask();
-
-    // Check Marangoni effect
-    if (TPtr_ && !cleanInterface_)
-    {
-        FatalErrorIn("trackedSurface::trackedSurface(...)")
-            << "Marangoni effect due to both "
-                << "surfactant concentration gradient "
-                << "and temperature gradient is not implemented"
-                << abort(FatalError);
-    }
-
-    // Make surface temperature field
-    if (TPtr_)
-    {
-        makeTemperature();
-    }
-
-    // Init total displacement
-    if
-    (
-        IOobject
-        (
-            "totalDisplacement",
-            DB().timeName(),
-            mesh(),
-            IOobject::MUST_READ
-        ).headerOk()
-    )
-    {
-        makeTotalDisplacement();
-    }
-
-    // Init control points position
-    initControlPointsPosition();
-
-    // Clear geometry
-    aMesh().movePoints();
-
-    // Contact angle correction
-    correctContactLinePointNormals();
-}
-
-
-// * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * * //
-
-trackedSurface::~trackedSurface()
-{
-    clearOut();
-}
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void trackedSurface::initProperties()
 {
     updateProperties();
-}
-
-
-void trackedSurface::updateProperties()
-{
-    if (transportPtr_)
-    {
-        rhoFluidA_ = dimensionedScalar
-        (
-            transport().nuModel1().viscosityProperties().lookup("rho")
-        );
-        muFluidA_ = rhoFluidA_ * dimensionedScalar
-        (
-            transport().nuModel1().viscosityProperties().lookup("nu")
-        );
-
-        rhoFluidB_ = dimensionedScalar
-        (
-            transport().nuModel2().viscosityProperties().lookup("rho")
-        );
-        muFluidB_ = rhoFluidB_ * dimensionedScalar
-        (
-            transport().nuModel2().viscosityProperties().lookup("nu")
-        );
-
-        cleanInterfaceSurfTension_ =
-            dimensionedScalar(transport().lookup("sigma"));
-    }
-    else
-    {
-        rhoFluidA_ = dimensionedScalar(this->lookup("rhoFluidA"));
-        muFluidA_ = dimensionedScalar(this->lookup("muFluidA"));
-
-        rhoFluidB_ = dimensionedScalar(this->lookup("rhoFluidB"));
-        muFluidB_ = dimensionedScalar(this->lookup("muFluidB"));
-
-        cleanInterfaceSurfTension_ =
-            dimensionedScalar(this->lookup("surfaceTension"));
-    }
-
-    if (TPtr_)
-    {
-        kFluidA_ = dimensionedScalar(this->lookup("kFluidA"));
-        kFluidB_ = dimensionedScalar(this->lookup("kFluidB"));
-        CpFluidA_ = dimensionedScalar(this->lookup("CpFluidA"));
-        CpFluidB_ = dimensionedScalar(this->lookup("CpFluidB"));
-    }
-
-    if (gPtr_)
-    {
-        g_ = dimensionedVector(*gPtr_);
-    }
-    else
-    {
-        g_ = dimensionedVector(this->lookup("g"));
-    }
-
-    // Check if smoothing switch is set
-    if (this->found("smoothing"))
-    {
-        smoothing_ = Switch(this->lookup("smoothing"));
-    };
-
-    // Check if freeContactAngle switch is set
-    if (this->found("freeContactAngle"))
-    {
-        freecontactAngle_ = Switch(this->lookup("freeContactAngle"));
-    }
-
-    // Check if correctPointNormals switch is set
-    if (this->found("correctPointNormals"))
-    {
-        correctPointNormals_ = Switch(this->lookup("correctPointNormals"));
-    }
-
-    // Check if correctDisplacement switch is set
-    if (this->found("correctDisplacement"))
-    {
-        correctDisplacement_ = Switch(this->lookup("correctDisplacement"));
-    }
-
-    // Check if correctCurvature switch is set
-    if (this->found("correctCurvature"))
-    {
-        correctCurvature_ = Switch(this->lookup("correctCurvature"));
-    }
-
-    // Check if curvExtrapOrder parameter is set
-    if (this->found("curvExtrapOrder"))
-    {
-        curvExtrapOrder_ = Switch(this->lookup("curvExtrapOrder"));
-    }
-
-    // Check if fvcNGradUn switch is set
-    if (this->found("fvcNGradUn"))
-    {
-        fvcNGradUn_ = Switch(this->lookup("fvcNGradUn"));
-    }
-
-    // Check if implicitCoupling switch is set
-    if (this->found("implicitCoupling"))
-    {
-        implicitCoupling_ = Switch(this->lookup("implicitCoupling"));
-    }
-
-    // Check if interface deformation limit is set
-    if (this->found("interfaceDeformationLimit"))
-    {
-        interfaceDeformationLimit_ =
-            readScalar(this->lookup("interfaceDeformationLimit"));
-
-        Info << "Interface deformation limit: "
-            << interfaceDeformationLimit_ << endl;
-    }
 }
 
 
@@ -699,7 +359,444 @@ void trackedSurface::initControlPointsPosition()
     displacement = pointDisplacement(deltaH);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+void trackedSurface::moveCorrectedPatchSubMeshes()
+{
+    forAll(U().boundaryField(), patchI)
+    {
+        if
+        (
+            (
+                U().boundaryField()[patchI].type()
+                == fixedGradientCorrectedFvPatchField<vector>::typeName
+            )
+        ||
+            (
+                U().boundaryField()[patchI].type()
+                == fixedValueCorrectedFvPatchField<vector>::typeName
+            )
+        ||
+            (
+                U().boundaryField()[patchI].type()
+                == zeroGradientCorrectedFvPatchField<vector>::typeName
+            )
+        )
+        {
+            correctedFvPatchField<vector>& aU =
+                refCast<correctedFvPatchField<vector> >
+                (
+                    U().boundaryField()[patchI]
+                );
+
+            aU.movePatchSubMesh();
+        }
+    }
+
+    forAll(p().boundaryField(), patchI)
+    {
+        if
+        (
+            (
+                p().boundaryField()[patchI].type()
+                == fixedGradientCorrectedFvPatchField<scalar>::typeName
+            )
+        ||
+            (
+                p().boundaryField()[patchI].type()
+                == fixedValueCorrectedFvPatchField<scalar>::typeName
+            )
+        ||
+            (
+                p().boundaryField()[patchI].type()
+                == zeroGradientCorrectedFvPatchField<scalar>::typeName
+            )
+        )
+        {
+            correctedFvPatchField<scalar>& aP =
+                refCast<correctedFvPatchField<scalar> >
+                (
+                    p().boundaryField()[patchI]
+                );
+
+            aP.movePatchSubMesh();
+        }
+    }
+
+    if (TPtr_)
+    {
+        forAll(T().boundaryField(), patchI)
+        {
+            if
+            (
+                (
+                    T().boundaryField()[patchI].type()
+                    == fixedGradientCorrectedFvPatchField<scalar>::typeName
+                )
+            ||
+                (
+                    T().boundaryField()[patchI].type()
+                    == fixedValueCorrectedFvPatchField<scalar>::typeName
+                )
+            ||
+                (
+                    T().boundaryField()[patchI].type()
+                    == zeroGradientCorrectedFvPatchField<scalar>::typeName
+                )
+            )
+            {
+                correctedFvPatchField<scalar>& aT =
+                    refCast<correctedFvPatchField<scalar> >
+                    (
+                        T().boundaryField()[patchI]
+                    );
+
+                aT.movePatchSubMesh();
+            }
+        }
+    }
+}
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+trackedSurface::trackedSurface
+(
+    dynamicFvMesh& m,
+    const volScalarField& rho,
+    volVectorField& Ub,
+    volScalarField& Pb,
+    const surfaceScalarField& sfPhi,
+    volScalarField* TbPtr,
+    const uniformDimensionedVectorField* gPtr,
+    const twoPhaseMixture* transportPtr,
+    const incompressible::turbulenceModel* turbulencePtr,
+    const volScalarField* p0Ptr,
+    word prefix
+)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            prefix + "Properties",
+            Ub.mesh().time().constant(),
+            Ub.mesh(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    prefix_(prefix),
+    Prefix_(word(toupper(prefix_[0])) + word(prefix_.substr(1))),
+    mesh_(m),
+    rho_(rho),
+    U_(Ub),
+    p_(Pb),
+    phi_(sfPhi),
+    TPtr_(TbPtr),
+    gPtr_(gPtr),
+    transportPtr_(transportPtr),
+    turbulencePtr_(turbulencePtr),
+    p0Ptr_(p0Ptr),
+    curTimeIndex_(Ub.mesh().time().timeIndex()),
+    twoFluids_
+    (
+        this->lookup("twoFluids")
+    ),
+    normalMotionDir_
+    (
+        this->lookup("normalMotionDir")
+    ),
+    motionDir_
+    (
+        vector::zero
+    ),
+    cleanInterface_
+    (
+        this->lookup("cleanInterface")
+    ),
+    aPatchID_(-1),
+    bPatchID_(-1),
+    muFluidA_
+    (
+        dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
+    ),
+    muFluidB_
+    (
+        dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
+    ),
+    rhoFluidA_
+    (
+        dimensionedScalar(word(), dimDensity, 0)
+    ),
+    rhoFluidB_
+    (
+        dimensionedScalar(word(), dimDensity, 0)
+    ),
+    kFluidA_
+    (
+        dimensionedScalar(word(), dimThermalConductivity, 0.0)
+    ),
+    kFluidB_
+    (
+        dimensionedScalar(word(), dimThermalConductivity, 0.0)
+    ),
+    CpFluidA_
+    (
+        dimensionedScalar(word(), dimSpecificHeatCapacity, 0.0)
+    ),
+    CpFluidB_
+    (
+        dimensionedScalar(word(), dimSpecificHeatCapacity, 0.0)
+    ),
+    g_
+    (
+        dimensionedVector(word(), dimLength/pow(dimTime,2), vector::zero)
+    ),
+    cleanInterfaceSurfTension_
+    (
+        dimensionedScalar(word(), dimMass/pow(dimTime,2), 0)
+    ),
+    fixedTrackedSurfacePatches_
+    (
+        this->lookup("fixed" + Prefix_ + "Patches")
+    ),
+    pointNormalsCorrectionPatches_
+    (
+        this->lookup("pointNormalsCorrectionPatches")
+    ),
+    nTrackedSurfCorr_
+    (
+        readInt(this->lookup("n" + Prefix_ + "Correctors"))
+    ),
+    smoothing_(false),
+    freecontactAngle_(false),
+    correctPointNormals_(false),
+    correctDisplacement_(false),
+    correctCurvature_(false),
+    curvExtrapOrder_(0),
+    fvcNGradUn_(false),
+    implicitCoupling_(false),
+    interfaceDeformationLimit_(0),
+    interpolatorABPtr_(NULL),
+    interpolatorBAPtr_(NULL),
+    controlPointsPtr_(NULL),
+    motionPointsMaskPtr_(NULL),
+    pointsDisplacementDirPtr_(NULL),
+    facesDisplacementDirPtr_(NULL),
+    totalDisplacementPtr_(NULL),
+    aMeshPtr_(NULL),
+    UsPtr_(NULL),
+    phisPtr_(NULL),
+    surfactConcPtr_(NULL),
+    surfaceTensionPtr_(NULL),
+    surfactantPtr_(NULL),
+    fluidIndicatorPtr_(NULL),
+    muEffFluidAvalPtr_(NULL),
+    muEffFluidBvalPtr_(NULL),
+    contactAnglePtr_(NULL),
+    temperaturePtr_(NULL),
+    surfaceTensionForcePtr_(NULL),
+    nGradUnPtr_(NULL)
+{
+    Info << "Surface prefix is: " << prefix_ << endl;
+
+    // Init properties
+    initProperties();
+
+    // Init motion direction
+    if (!normalMotionDir_)
+    {
+        motionDir_ = vector(this->lookup("motionDir"));
+        motionDir_ /= mag(motionDir_) + SMALL;
+    }
+
+    // Make contact angle if necessary
+    if
+    (
+        IOobject
+        (
+            "contactAngle",
+            DB().timeName(),
+            mesh(),
+            IOobject::MUST_READ
+        ).headerOk()
+     || freecontactAngle_
+    )
+    {
+        makeContactAngle();
+        updateContactAngle();
+        contactAngle().write();
+    }
+
+    initCheckPointNormalsCorrection();
+
+    initCheckSurfacePatches();
+
+    initMotionPointMask();
+
+    // Check Marangoni effect
+    if (TPtr_ && !cleanInterface_)
+    {
+        FatalErrorIn("trackedSurface::trackedSurface(...)")
+            << "Marangoni effect due to both "
+                << "surfactant concentration gradient "
+                << "and temperature gradient is not implemented"
+                << abort(FatalError);
+    }
+
+    // Make surface temperature field
+    if (TPtr_)
+    {
+        makeTemperature();
+    }
+
+    // Init total displacement
+    if
+    (
+        IOobject
+        (
+            "totalDisplacement",
+            DB().timeName(),
+            mesh(),
+            IOobject::MUST_READ
+        ).headerOk()
+    )
+    {
+        makeTotalDisplacement();
+    }
+
+    // Init control points position
+    initControlPointsPosition();
+
+    // Clear geometry
+    aMesh().movePoints();
+
+    // Contact angle correction
+    correctContactLinePointNormals();
+}
+
+
+// * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * * //
+
+trackedSurface::~trackedSurface()
+{
+    clearOut();
+}
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+
+void trackedSurface::updateProperties()
+{
+    if (transportPtr_)
+    {
+        rhoFluidA_ = dimensionedScalar
+        (
+            transport().nuModel1().viscosityProperties().lookup("rho")
+        );
+        muFluidA_ = rhoFluidA_ * dimensionedScalar
+        (
+            transport().nuModel1().viscosityProperties().lookup("nu")
+        );
+
+        rhoFluidB_ = dimensionedScalar
+        (
+            transport().nuModel2().viscosityProperties().lookup("rho")
+        );
+        muFluidB_ = rhoFluidB_ * dimensionedScalar
+        (
+            transport().nuModel2().viscosityProperties().lookup("nu")
+        );
+
+        cleanInterfaceSurfTension_ =
+            dimensionedScalar(transport().lookup("sigma"));
+    }
+    else
+    {
+        rhoFluidA_ = dimensionedScalar(this->lookup("rhoFluidA"));
+        muFluidA_ = dimensionedScalar(this->lookup("muFluidA"));
+
+        rhoFluidB_ = dimensionedScalar(this->lookup("rhoFluidB"));
+        muFluidB_ = dimensionedScalar(this->lookup("muFluidB"));
+
+        cleanInterfaceSurfTension_ =
+            dimensionedScalar(this->lookup("surfaceTension"));
+    }
+
+    if (TPtr_)
+    {
+        kFluidA_ = dimensionedScalar(this->lookup("kFluidA"));
+        kFluidB_ = dimensionedScalar(this->lookup("kFluidB"));
+        CpFluidA_ = dimensionedScalar(this->lookup("CpFluidA"));
+        CpFluidB_ = dimensionedScalar(this->lookup("CpFluidB"));
+    }
+
+    if (gPtr_)
+    {
+        g_ = dimensionedVector(*gPtr_);
+    }
+    else
+    {
+        g_ = dimensionedVector(this->lookup("g"));
+    }
+
+    // Check if smoothing switch is set
+    if (this->found("smoothing"))
+    {
+        smoothing_ = Switch(this->lookup("smoothing"));
+    };
+
+    // Check if freeContactAngle switch is set
+    if (this->found("freeContactAngle"))
+    {
+        freecontactAngle_ = Switch(this->lookup("freeContactAngle"));
+    }
+
+    // Check if correctPointNormals switch is set
+    if (this->found("correctPointNormals"))
+    {
+        correctPointNormals_ = Switch(this->lookup("correctPointNormals"));
+    }
+
+    // Check if correctDisplacement switch is set
+    if (this->found("correctDisplacement"))
+    {
+        correctDisplacement_ = Switch(this->lookup("correctDisplacement"));
+    }
+
+    // Check if correctCurvature switch is set
+    if (this->found("correctCurvature"))
+    {
+        correctCurvature_ = Switch(this->lookup("correctCurvature"));
+    }
+
+    // Check if curvExtrapOrder parameter is set
+    if (this->found("curvExtrapOrder"))
+    {
+        curvExtrapOrder_ = Switch(this->lookup("curvExtrapOrder"));
+    }
+
+    // Check if fvcNGradUn switch is set
+    if (this->found("fvcNGradUn"))
+    {
+        fvcNGradUn_ = Switch(this->lookup("fvcNGradUn"));
+    }
+
+    // Check if implicitCoupling switch is set
+    if (this->found("implicitCoupling"))
+    {
+        implicitCoupling_ = Switch(this->lookup("implicitCoupling"));
+    }
+
+    // Check if interface deformation limit is set
+    if (this->found("interfaceDeformationLimit"))
+    {
+        interfaceDeformationLimit_ =
+            readScalar(this->lookup("interfaceDeformationLimit"));
+
+        Info << "Interface deformation limit: "
+            << interfaceDeformationLimit_ << endl;
+    }
+}
+
 
 void trackedSurface::updateDisplacementDirections()
 {
@@ -1002,66 +1099,7 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
     }
 
     // Move correctedFvPatchField fvSubMeshes
-
-    forAll(U().boundaryField(), patchI)
-    {
-        if
-        (
-            (
-                U().boundaryField()[patchI].type()
-             == fixedGradientCorrectedFvPatchField<vector>::typeName
-            )
-            ||
-            (
-                U().boundaryField()[patchI].type()
-             == fixedValueCorrectedFvPatchField<vector>::typeName
-            )
-            ||
-            (
-                U().boundaryField()[patchI].type()
-             == zeroGradientCorrectedFvPatchField<vector>::typeName
-            )
-        )
-        {
-            correctedFvPatchField<vector>& pU =
-                refCast<correctedFvPatchField<vector> >
-                (
-                    U().boundaryField()[patchI]
-                );
-
-            pU.movePatchSubMesh();
-        }
-    }
-
-    forAll(p().boundaryField(), patchI)
-    {
-        if
-        (
-            (
-                p().boundaryField()[patchI].type()
-             == fixedGradientCorrectedFvPatchField<scalar>::typeName
-            )
-            ||
-            (
-                p().boundaryField()[patchI].type()
-             == fixedValueCorrectedFvPatchField<scalar>::typeName
-            )
-            ||
-            (
-                p().boundaryField()[patchI].type()
-             == zeroGradientCorrectedFvPatchField<scalar>::typeName
-            )
-        )
-        {
-            correctedFvPatchField<scalar>& pP =
-                refCast<correctedFvPatchField<scalar> >
-                (
-                    p().boundaryField()[patchI]
-                );
-
-            pP.movePatchSubMesh();
-        }
-    }
+    moveCorrectedPatchSubMeshes();
 
     return true;
 }
@@ -1254,66 +1292,7 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
 
 
             // Move correctedFvPatchField fvSubMeshes
-
-            forAll(U().boundaryField(), patchI)
-            {
-                if
-                (
-                    (
-                        U().boundaryField()[patchI].type()
-                     == fixedGradientCorrectedFvPatchField<vector>::typeName
-                    )
-                ||
-                    (
-                        U().boundaryField()[patchI].type()
-                     == fixedValueCorrectedFvPatchField<vector>::typeName
-                    )
-                ||
-                    (
-                        U().boundaryField()[patchI].type()
-                     == zeroGradientCorrectedFvPatchField<vector>::typeName
-                    )
-                )
-                {
-                    correctedFvPatchField<vector>& aU =
-                        refCast<correctedFvPatchField<vector> >
-                        (
-                            U().boundaryField()[patchI]
-                        );
-
-                    aU.movePatchSubMesh();
-                }
-            }
-
-            forAll(p().boundaryField(), patchI)
-            {
-                if
-                (
-                    (
-                        p().boundaryField()[patchI].type()
-                     == fixedGradientCorrectedFvPatchField<scalar>::typeName
-                    )
-                ||
-                    (
-                        p().boundaryField()[patchI].type()
-                     == fixedValueCorrectedFvPatchField<scalar>::typeName
-                    )
-                ||
-                    (
-                        p().boundaryField()[patchI].type()
-                     == zeroGradientCorrectedFvPatchField<scalar>::typeName
-                    )
-                )
-                {
-                    correctedFvPatchField<scalar>& aP =
-                        refCast<correctedFvPatchField<scalar> >
-                        (
-                            p().boundaryField()[patchI]
-                        );
-
-                    aP.movePatchSubMesh();
-                }
-            }
+            moveCorrectedPatchSubMeshes();
         }
     }
 
@@ -1756,66 +1735,7 @@ bool trackedSurface::smoothMesh()
     }
 
     // Move correctedFvPatchField fvSubMeshes
-
-    forAll(U().boundaryField(), patchI)
-    {
-        if
-        (
-            (
-                U().boundaryField()[patchI].type()
-             == fixedGradientCorrectedFvPatchField<vector>::typeName
-            )
-         ||
-            (
-                U().boundaryField()[patchI].type()
-             == fixedValueCorrectedFvPatchField<vector>::typeName
-            )
-         ||
-            (
-                U().boundaryField()[patchI].type()
-             == zeroGradientCorrectedFvPatchField<vector>::typeName
-            )
-        )
-        {
-            correctedFvPatchField<vector>& aU =
-                refCast<correctedFvPatchField<vector> >
-                (
-                    U().boundaryField()[patchI]
-                );
-
-            aU.movePatchSubMesh();
-        }
-    }
-
-    forAll(p().boundaryField(), patchI)
-    {
-        if
-        (
-            (
-                p().boundaryField()[patchI].type()
-             == fixedGradientCorrectedFvPatchField<scalar>::typeName
-            )
-         ||
-            (
-                p().boundaryField()[patchI].type()
-             == fixedValueCorrectedFvPatchField<scalar>::typeName
-            )
-         ||
-            (
-                p().boundaryField()[patchI].type()
-             == zeroGradientCorrectedFvPatchField<scalar>::typeName
-            )
-        )
-        {
-            correctedFvPatchField<scalar>& aP =
-                refCast<correctedFvPatchField<scalar> >
-                (
-                    p().boundaryField()[patchI]
-                );
-
-                aP.movePatchSubMesh();
-        }
-    }
+    moveCorrectedPatchSubMeshes();
 
     return true;
 }
@@ -2032,66 +1952,7 @@ bool trackedSurface::moveMeshPoints(const scalarField& interfacePhi)
     }
 
     // Move correctedFvPatchField fvSubMeshes
-
-    forAll(U().boundaryField(), patchI)
-    {
-        if
-        (
-            (
-                U().boundaryField()[patchI].type()
-             == fixedGradientCorrectedFvPatchField<vector>::typeName
-            )
-         ||
-            (
-                U().boundaryField()[patchI].type()
-             == fixedValueCorrectedFvPatchField<vector>::typeName
-            )
-         ||
-            (
-                U().boundaryField()[patchI].type()
-             == zeroGradientCorrectedFvPatchField<vector>::typeName
-            )
-        )
-        {
-            correctedFvPatchField<vector>& aU =
-                refCast<correctedFvPatchField<vector> >
-                (
-                    U().boundaryField()[patchI]
-                );
-
-            aU.movePatchSubMesh();
-        }
-    }
-
-    forAll(p().boundaryField(), patchI)
-    {
-        if
-        (
-            (
-                p().boundaryField()[patchI].type()
-             == fixedGradientCorrectedFvPatchField<scalar>::typeName
-            )
-         ||
-            (
-                p().boundaryField()[patchI].type()
-             == fixedValueCorrectedFvPatchField<scalar>::typeName
-            )
-         ||
-            (
-                p().boundaryField()[patchI].type()
-             == zeroGradientCorrectedFvPatchField<scalar>::typeName
-            )
-        )
-        {
-            correctedFvPatchField<scalar>& aP =
-                refCast<correctedFvPatchField<scalar> >
-                (
-                    p().boundaryField()[patchI]
-                );
-
-                aP.movePatchSubMesh();
-        }
-    }
+    moveCorrectedPatchSubMeshes();
 
     return true;
 }
@@ -4342,7 +4203,6 @@ void trackedSurface::smoothCurvature()
 
     oldK = K;
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

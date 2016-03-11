@@ -316,6 +316,9 @@ class trackedSurface
             //- Init control points position
             void initControlPointsPosition();
 
+            //- Move correctedFvPatchField fvSubMeshes
+            void moveCorrectedPatchSubMeshes();
+
         //- Move control ponts for deltaH and calculate
         //  surface points displacement
         //  for given new control points position
