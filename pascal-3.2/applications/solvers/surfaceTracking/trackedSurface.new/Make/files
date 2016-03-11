@@ -9,6 +9,7 @@ trackedSurface.C
 makeTrackedSurfaceData.C
 trackedSurfacePointDisplacement.C
 trackedSurfaceMoveFixedPatches.C
+trackedSurfaceWrite.C
 
 faMesh.C
 

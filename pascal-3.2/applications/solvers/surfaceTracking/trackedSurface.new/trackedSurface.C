@@ -58,6 +58,7 @@ Description
 
 #include "coordinateSystem.H"
 #include "scalarMatrices.H"
+#include "zeroGradientFaPatchFields.H"
 #include "fixedGradientFaPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -145,7 +146,10 @@ trackedSurface::trackedSurface
     (
         this->lookup("normalMotionDir")
     ),
-    motionDir_(0, 0, 0),
+    motionDir_
+    (
+        vector::zero
+    ),
     cleanInterface_
     (
         this->lookup("cleanInterface")
@@ -168,10 +172,22 @@ trackedSurface::trackedSurface
     (
         dimensionedScalar(word(), dimDensity, 0)
     ),
-    kFluidA_("kFluidA", dimThermalConductivity, 0.0),
-    kFluidB_("kFluidB", dimThermalConductivity, 0.0),
-    CpFluidA_("CpFluidA", dimSpecificHeatCapacity, 0.0),
-    CpFluidB_("CpFluidB", dimSpecificHeatCapacity, 0.0),
+    kFluidA_
+    (
+        dimensionedScalar(word(), dimThermalConductivity, 0.0)
+    ),
+    kFluidB_
+    (
+        dimensionedScalar(word(), dimThermalConductivity, 0.0)
+    ),
+    CpFluidA_
+    (
+        dimensionedScalar(word(), dimSpecificHeatCapacity, 0.0)
+    ),
+    CpFluidB_
+    (
+        dimensionedScalar(word(), dimSpecificHeatCapacity, 0.0)
+    ),
     g_
     (
         dimensionedVector(word(), dimLength/pow(dimTime,2), vector::zero)
@@ -193,13 +209,13 @@ trackedSurface::trackedSurface
         readInt(this->lookup("n" + Prefix_ + "Correctors"))
     ),
     smoothing_(false),
+    freecontactAngle_(false),
     correctPointNormals_(false),
     correctDisplacement_(false),
     correctCurvature_(false),
     curvExtrapOrder_(0),
     fvcNGradUn_(false),
     implicitCoupling_(false),
-    freeContactAngle_(false),
     interfaceDeformationLimit_(0),
     interpolatorABPtr_(NULL),
     interpolatorBAPtr_(NULL),
@@ -224,16 +240,213 @@ trackedSurface::trackedSurface
 {
     Info << "Surface prefix is: " << prefix_ << endl;
 
-    // Init/Update properties
-    updateProperties();
+    // Init properties
+    initProperties();
 
-    //Read motion direction
+    // Init motion direction
     if (!normalMotionDir_)
     {
         motionDir_ = vector(this->lookup("motionDir"));
         motionDir_ /= mag(motionDir_) + SMALL;
     }
 
+    // Make contact angle if necessary
+    if
+    (
+        IOobject
+        (
+            "contactAngle",
+            DB().timeName(),
+            mesh(),
+            IOobject::MUST_READ
+        ).headerOk()
+     || freecontactAngle_
+    )
+    {
+        makeContactAngle();
+        updateContactAngle();
+        contactAngle().write();
+    }
+
+    initCheckPointNormalsCorrection();
+
+    initCheckSurfacePatches();
+
+    initMotionPointMask();
+
+    // Check Marangoni effect
+    if (TPtr_ && !cleanInterface_)
+    {
+        FatalErrorIn("trackedSurface::trackedSurface(...)")
+            << "Marangoni effect due to both "
+                << "surfactant concentration gradient "
+                << "and temperature gradient is not implemented"
+                << abort(FatalError);
+    }
+
+    // Make surface temperature field
+    if (TPtr_)
+    {
+        makeTemperature();
+    }
+
+    // Init total displacement
+    if
+    (
+        IOobject
+        (
+            "totalDisplacement",
+            DB().timeName(),
+            mesh(),
+            IOobject::MUST_READ
+        ).headerOk()
+    )
+    {
+        makeTotalDisplacement();
+    }
+
+    // Init control points position
+    initControlPointsPosition();
+
+    // Clear geometry
+    aMesh().movePoints();
+
+    // Contact angle correction
+    correctContactLinePointNormals();
+}
+
+
+// * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * * //
+
+trackedSurface::~trackedSurface()
+{
+    clearOut();
+}
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void trackedSurface::initProperties()
+{
+    updateProperties();
+}
+
+
+void trackedSurface::updateProperties()
+{
+    if (transportPtr_)
+    {
+        rhoFluidA_ = dimensionedScalar
+        (
+            transport().nuModel1().viscosityProperties().lookup("rho")
+        );
+        muFluidA_ = rhoFluidA_ * dimensionedScalar
+        (
+            transport().nuModel1().viscosityProperties().lookup("nu")
+        );
+
+        rhoFluidB_ = dimensionedScalar
+        (
+            transport().nuModel2().viscosityProperties().lookup("rho")
+        );
+        muFluidB_ = rhoFluidB_ * dimensionedScalar
+        (
+            transport().nuModel2().viscosityProperties().lookup("nu")
+        );
+
+        cleanInterfaceSurfTension_ =
+            dimensionedScalar(transport().lookup("sigma"));
+    }
+    else
+    {
+        rhoFluidA_ = dimensionedScalar(this->lookup("rhoFluidA"));
+        muFluidA_ = dimensionedScalar(this->lookup("muFluidA"));
+
+        rhoFluidB_ = dimensionedScalar(this->lookup("rhoFluidB"));
+        muFluidB_ = dimensionedScalar(this->lookup("muFluidB"));
+
+        cleanInterfaceSurfTension_ =
+            dimensionedScalar(this->lookup("surfaceTension"));
+    }
+
+    if (TPtr_)
+    {
+        kFluidA_ = dimensionedScalar(this->lookup("kFluidA"));
+        kFluidB_ = dimensionedScalar(this->lookup("kFluidB"));
+        CpFluidA_ = dimensionedScalar(this->lookup("CpFluidA"));
+        CpFluidB_ = dimensionedScalar(this->lookup("CpFluidB"));
+    }
+
+    if (gPtr_)
+    {
+        g_ = dimensionedVector(*gPtr_);
+    }
+    else
+    {
+        g_ = dimensionedVector(this->lookup("g"));
+    }
+
+    // Check if smoothing switch is set
+    if (this->found("smoothing"))
+    {
+        smoothing_ = Switch(this->lookup("smoothing"));
+    };
+
+    // Check if freeContactAngle switch is set
+    if (this->found("freeContactAngle"))
+    {
+        freecontactAngle_ = Switch(this->lookup("freeContactAngle"));
+    }
+
+    // Check if correctPointNormals switch is set
+    if (this->found("correctPointNormals"))
+    {
+        correctPointNormals_ = Switch(this->lookup("correctPointNormals"));
+    }
+
+    // Check if correctDisplacement switch is set
+    if (this->found("correctDisplacement"))
+    {
+        correctDisplacement_ = Switch(this->lookup("correctDisplacement"));
+    }
+
+    // Check if correctCurvature switch is set
+    if (this->found("correctCurvature"))
+    {
+        correctCurvature_ = Switch(this->lookup("correctCurvature"));
+    }
+
+    // Check if curvExtrapOrder parameter is set
+    if (this->found("curvExtrapOrder"))
+    {
+        curvExtrapOrder_ = Switch(this->lookup("curvExtrapOrder"));
+    }
+
+    // Check if fvcNGradUn switch is set
+    if (this->found("fvcNGradUn"))
+    {
+        fvcNGradUn_ = Switch(this->lookup("fvcNGradUn"));
+    }
+
+    // Check if implicitCoupling switch is set
+    if (this->found("implicitCoupling"))
+    {
+        implicitCoupling_ = Switch(this->lookup("implicitCoupling"));
+    }
+
+    // Check if interface deformation limit is set
+    if (this->found("interfaceDeformationLimit"))
+    {
+        interfaceDeformationLimit_ =
+            readScalar(this->lookup("interfaceDeformationLimit"));
+
+        Info << "Interface deformation limit: "
+            << interfaceDeformationLimit_ << endl;
+    }
+}
+
+
+void trackedSurface::initCheckPointNormalsCorrection()
+{
     // Set point normal correction patches
     boolList& correction = aMesh().correctPatchPointNormals();
 
@@ -247,7 +460,7 @@ trackedSurface::trackedSurface
         {
             FatalErrorIn
             (
-                "trackedSurface::trackedSurface(...)"
+                "trackedSurface::initPointNormalsCorrection(...)"
             )   << "Patch name for point normals correction does not exist"
                 << abort(FatalError);
         }
@@ -255,6 +468,42 @@ trackedSurface::trackedSurface
         correction[patchID] = true;
     }
 
+    // Check correction for patches with specified contact angle
+    if (contactAnglePtr_)
+    {
+        forAll(aMesh().boundary(), patchI)
+        {
+            label ngbPolyPatchID =
+                aMesh().boundary()[patchI].ngbPolyPatchIndex();
+
+            if (ngbPolyPatchID != -1)
+            {
+                if
+                (
+                    mesh().boundary()[ngbPolyPatchID].type()
+                 == wallFvPatch::typeName
+                )
+                {
+                    if (correction[patchI])
+                    {
+                        FatalErrorIn
+                        (
+                            "trackedSurface::initPointNormalsCorrection(...)"
+                        )   << "Point normal correction is activated for patch "
+                            << aMesh().boundary()[patchI].name() << ". "
+                            << "This is considered fatal as a contact angle is "
+                            << "beeing specified here, too."
+                            << abort(FatalError);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void trackedSurface::initCheckSurfacePatches()
+{
     // Detect the surface patch
     forAll (mesh().boundary(), patchI)
     {
@@ -299,7 +548,11 @@ trackedSurface::trackedSurface
                     << abort(FatalError);
         }
     }
+}
 
+
+void trackedSurface::initMotionPointMask()
+{
     // Mark surface boundary points
     // which belonge to processor patches
     forAll(aMesh().boundary(), patchI)
@@ -375,186 +628,78 @@ trackedSurface::trackedSurface
 //             }
         }
     }
-
-    // Check if smoothing switch is set
-    if (this->found("smoothing"))
-    {
-        smoothing_ = Switch(this->lookup("smoothing"));
-    }
-
-    // Check if freeContactAngle switch is set
-    if (this->found("freeContactAngle"))
-    {
-        freeContactAngle_ = Switch(this->lookup("freeContactAngle"));
-    }
-
-    // Check if contactAngle is defined
-    IOobject contactAngleHeader
-    (
-        "contactAngle",
-        DB().timeName(),
-        mesh(),
-        IOobject::MUST_READ
-    );
-    if (contactAngleHeader.headerOk())
-    {
-        Pout << "Reading contact angle" << endl;
-
-        contactAnglePtr_ =
-            new edgeScalarField
-            (
-                IOobject
-                (
-                    "contactAngle",
-                    DB().timeName(),
-                    mesh(),
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                aMesh()
-            );
-
-//         forAll (aMesh().boundary(), patchI)
-//         {
-//             const faPatch& fap = aMesh().boundary()[patchI];
-//
-//             if (!fap.coupled())
-//             {
-//                 const vectorField& fapC = fap.edgeCentres();
-//
-//                 scalarField& fapContactAngle = contactAnglePtr_->boundaryField()[patchI];
-//
-//                 forAll (fapContactAngle, edgeI)
-//                 {
-// //                     fapContactAngle[edgeI] = 90;
-// //                     fapContactAngle[edgeI] = 110;
-//                     fapContactAngle[edgeI] = 70 + (fapC[edgeI].component(0) * 40) ;
-//                 }
-//             }
-//         }
-//
-//         contactAnglePtr_->write();
-    }
-    else if (freeContactAngle_)
-    {
-        Pout << "Creating contact angle" << endl;
-
-        contactAnglePtr_ =
-            new edgeScalarField
-            (
-                IOobject
-                (
-                    "contactAngle",
-                    DB().timeName(),
-                    mesh(),
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                aMesh(),
-                dimensionedScalar
-                (
-                    word(),
-                    dimless,
-                    0
-                )
-            );
-
-        correctFreeContactAngle();
-
-        contactAnglePtr_->write();
-    }
-
-    // Check if correctPointNormals switch is set
-    if (this->found("correctPointNormals"))
-    {
-        correctPointNormals_ = Switch(this->lookup("correctPointNormals"));
-    }
-
-    // Check if correctDisplacement switch is set
-    if (this->found("correctDisplacement"))
-    {
-        correctDisplacement_ = Switch(this->lookup("correctDisplacement"));
-    }
-
-    // Check if correctCurvature switch is set
-    if (this->found("correctCurvature"))
-    {
-        correctCurvature_ = Switch(this->lookup("correctCurvature"));
-    }
-
-    // Check if curvExtrapOrder parameter is set
-    if (this->found("curvExtrapOrder"))
-    {
-        curvExtrapOrder_ = Switch(this->lookup("curvExtrapOrder"));
-    }
-
-    // Check Marangoni effect
-    if (TPtr_ && !cleanInterface())
-    {
-        FatalErrorIn("trackedSurface::trackedSurface(...)")
-            << "Marangoni effect due to both "
-                << "surfactant concentration gradient "
-                << "and temperature gradient is not implemented"
-                << abort(FatalError);
-    }
-
-    if (TPtr_)
-    {
-        // Read surface temperature field
-        makeTemperature();
-
-        // Read properties
-        kFluidA_ = dimensionedScalar(this->lookup("kFluidA"));
-        kFluidB_ = dimensionedScalar(this->lookup("kFluidB"));
-        CpFluidA_ = dimensionedScalar(this->lookup("CpFluidA"));
-        CpFluidB_ = dimensionedScalar(this->lookup("CpFluidB"));
-    }
-
-    // Read surface points total displacement if present
-    readTotalDisplacement();
-
-    // Read control points positions if present
-    controlPoints();
-
-    // Clear geometry
-    aMesh().movePoints();
-
-    // Contact angle correction
-    correctFreeContactAngle();
-    correctContactLinePointNormals();
-
-    // Check if fvcNGradUn switch is set
-    if (this->found("fvcNGradUn"))
-    {
-        fvcNGradUn_ = Switch(this->lookup("fvcNGradUn"));
-    }
-
-    // Check if implicitCoupling switch is set
-    if (this->found("implicitCoupling"))
-    {
-        implicitCoupling_ = Switch(this->lookup("implicitCoupling"));
-    }
-
-    // Check if interface deformation limit is set
-    if (this->found("interfaceDeformationLimit"))
-    {
-        interfaceDeformationLimit_ =
-            readScalar(this->lookup("interfaceDeformationLimit"));
-
-        Info << "Interface deformation limit: "
-            << interfaceDeformationLimit_ << endl;
-    }
 }
 
 
-// * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * * //
-
-trackedSurface::~trackedSurface()
+void trackedSurface::initControlPointsPosition()
 {
-    clearOut();
+    scalarField deltaH = scalarField(aMesh().nFaces(), 0.0);
+
+    pointField displacement = pointDisplacement(deltaH);
+
+    const faceList& faces = aMesh().faces();
+    const pointField& points = aMesh().points();
+
+
+    pointField newPoints = points + displacement;
+
+    scalarField sweptVol(faces.size(), 0.0);
+
+    forAll(faces, faceI)
+    {
+        sweptVol[faceI] = -faces[faceI].sweptVol(points, newPoints);
+    }
+
+    vectorField faceArea(faces.size(), vector::zero);
+
+    forAll (faceArea, faceI)
+    {
+        faceArea[faceI] = faces[faceI].normal(newPoints);
+    }
+
+    forAll(deltaH, faceI)
+    {
+        deltaH[faceI] = sweptVol[faceI]/
+            ((faceArea[faceI] & facesDisplacementDir()[faceI]) + SMALL);
+
+        if ((faceArea[faceI] & facesDisplacementDir()[faceI]) < SMALL)
+        {
+            FatalErrorIn("trackedSurface::trackedSurface(...)")
+                << "Something is probably wrong with the specified motion direction"
+                    << abort(FatalError);
+
+        }
+    }
+
+    forAll(fixedTrackedSurfacePatches_, patchI)
+    {
+        label fixedPatchID =
+            aMesh().boundary().findPatchID
+            (
+                fixedTrackedSurfacePatches_[patchI]
+            );
+
+        if(fixedPatchID == -1)
+        {
+            FatalErrorIn("trackedSurface::trackedSurface(...)")
+                << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
+                    << " defined in the trackedSurfaceProperties dictionary"
+                    << abort(FatalError);
+        }
+
+        const labelList& eFaces =
+            aMesh().boundary()[fixedPatchID].edgeFaces();
+
+        forAll(eFaces, edgeI)
+        {
+            deltaH[eFaces[edgeI]] *= 2.0;
+        }
+    }
+
+    displacement = pointDisplacement(deltaH);
 }
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void trackedSurface::updateDisplacementDirections()
 {
@@ -654,6 +799,8 @@ bool trackedSurface::correctPoints()
         trackedSurfCorr++
     )
     {
+// // TEST
+//         controlPoints() = aMesh().areaCentres().internalField();
         movePoints(phi_.boundaryField()[aPatchID()]);
 //         moveMeshPoints();
     }
@@ -664,11 +811,25 @@ bool trackedSurface::correctPoints()
 
 bool trackedSurface::movePoints(const scalarField& interfacePhi)
 {
+
+// // TEST
+//     scalarField& newInterFacePhi = const_cast<scalarField&>(interfacePhi);
+//     for (label i=0; i<3; i++)
+//     {
+// //         smoothField("aPhi", newInterFacePhi);
+//         smoothFieldAlt("aPhi", newInterFacePhi);
+//     }
+
     pointField newMeshPoints = mesh().allPoints();
 
     scalarField sweptVolCorr =
         interfacePhi
       - fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
+
+// // TEST
+//     Pout << "------------------------------------------" << endl;
+//     Pout << "gSum(sweptVolCorr) =" << gSum(sweptVolCorr) << endl;
+//     Pout << "------------------------------------------" << endl;
 
     word ddtScheme
     (
@@ -722,6 +883,13 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 
     scalarField deltaH =
         sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
+
+// // TEST
+//     for (label i=0; i<20; i++)
+//     {
+//         smoothField("deltaH", deltaH);
+// //         smoothFieldAlt("deltaH", deltaH);
+//     }
 
     forAll(fixedTrackedSurfacePatches_, patchI)
     {
@@ -820,7 +988,6 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 
     aMesh().movePoints();
 
-    correctFreeContactAngle();
     correctContactLinePointNormals();
 
     if (correctPointNormals_)
@@ -1072,7 +1239,6 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
 
             aMesh().movePoints();
 
-            correctFreeContactAngle();
             correctContactLinePointNormals();
 
             if (correctPointNormals_)
@@ -1577,7 +1743,6 @@ bool trackedSurface::smoothMesh()
 
     aMesh().movePoints();
 
-    correctFreeContactAngle();
     correctContactLinePointNormals();
 
     if (correctPointNormals_)
@@ -1853,7 +2018,6 @@ bool trackedSurface::moveMeshPoints(const scalarField& interfacePhi)
 
     aMesh().movePoints();
 
-    correctFreeContactAngle();
     correctContactLinePointNormals();
 
     if (correctPointNormals_)
@@ -1937,6 +2101,7 @@ void trackedSurface::updateBoundaryConditions()
 {
     if (!implicitCoupling_)
     {
+        updateContactAngle();
         updateMuEff();
         updateTemperature();
         updateVelocity();
@@ -2173,9 +2338,30 @@ void trackedSurface::updateVelocity()
     {
         const vectorField& nA = aMesh().faceAreaNormals().internalField();
 
-        vectorField UnFs =
-            nA*phi_.boundaryField()[aPatchID()]
-           /mesh().boundary()[aPatchID()].magSf();
+// CHANGED: Use velocity to correct interface normal velocity
+        vectorField UPA =
+            U().boundaryField()[aPatchID()].patchInternalField();
+
+        if
+        (
+            U().boundaryField()[aPatchID()].type()
+         == fixedGradientCorrectedFvPatchField<vector>::typeName
+        )
+        {
+            fixedGradientCorrectedFvPatchField<vector>& aU =
+                refCast<fixedGradientCorrectedFvPatchField<vector> >
+                (
+                    U().boundaryField()[aPatchID()]
+                );
+
+            UPA += aU.corrVecGrad();
+        }
+
+        vectorField UnFs = nA*(nA & UPA);
+
+//         vectorField UnFs =
+//             nA*phi_.boundaryField()[aPatchID()]
+//            /mesh().boundary()[aPatchID()].magSf();
 
         // Correct normal component of surface velocity
         Us().internalField() += UnFs - nA*(nA&Us().internalField());
@@ -2533,6 +2719,59 @@ void trackedSurface::updateSurfactantConcentration()
 }
 
 
+void trackedSurface::updateContactAngle()
+{
+    // Correct contact angle acording to
+    // current face normals
+
+    if (freecontactAngle_)
+    {
+        Pout << "Correcting free contact angle" << endl;
+
+        forAll(aMesh().boundary(), patchI)
+        {
+            label ngbPolyPatchID =
+                aMesh().boundary()[patchI].ngbPolyPatchIndex();
+
+            if (ngbPolyPatchID != -1)
+            {
+                if
+                (
+                    mesh().boundary()[ngbPolyPatchID].type()
+                 == wallFvPatch::typeName
+                )
+                {
+                    // Calculate contact angle
+                    scalarField& contactAngle =
+                        contactAnglePtr_->boundaryField()[patchI];
+
+                    const vectorField& nA =
+                        aMesh().faceAreaNormals().internalField();
+
+                    const vectorField ngbNA =
+                        aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
+
+                    const unallocLabelList& edgeFaces =
+                        aMesh().boundary()[patchI].edgeFaces();
+
+                    forAll (edgeFaces, edgeI)
+                    {
+                        label faceI = edgeFaces[edgeI];
+
+                        vector nAI = nA[faceI];
+                        vector ngbNAI = ngbNA[edgeI];
+
+                        contactAngle[edgeI] =
+                            180.0/M_PI
+                            * acos(-ngbNAI&nAI/mag(ngbNAI)/mag(nAI));
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 void trackedSurface::updateTemperature()
 {
     if (TPtr_)
@@ -2650,6 +2889,101 @@ void trackedSurface::updateTemperature()
 }
 
 
+void trackedSurface::updateNGradUn()
+{
+    if (fvcNGradUn_)
+    {
+        Info << "Update normal derivative of normal velocity using fvc"
+            << endl;
+
+        volVectorField phiU = fvc::reconstruct(phi_);
+
+        vectorField nA = mesh().boundary()[aPatchID()].nf();
+
+        scalarField UnP =
+            (nA&phiU.boundaryField()[aPatchID()].patchInternalField());
+
+        scalarField UnFs =
+            phi_.boundaryField()[aPatchID()]
+           /mesh().magSf().boundaryField()[aPatchID()];
+
+        nGradUn() =
+            (UnFs - UnP)*mesh().deltaCoeffs().boundaryField()[aPatchID()];
+
+        bool secondOrderCorrection = true;
+
+        if (secondOrderCorrection)
+        {
+            // Correct normal component of phiU
+            // befor gradient calculation
+            forAll(phiU.boundaryField(), patchI)
+            {
+                vectorField n =
+                    mesh().Sf().boundaryField()[patchI]
+                   /mesh().magSf().boundaryField()[patchI];
+
+                phiU.boundaryField()[patchI] +=
+                    n
+                   *(
+                       (
+                           phi_.boundaryField()[patchI]
+                          /mesh().magSf().boundaryField()[patchI]
+                       )
+                     - (n&phiU.boundaryField()[patchI])
+                    );
+            }
+
+            // Calc gradient
+            tensorField gradPhiUp =
+                fvc::grad(phiU)().boundaryField()[aPatchID()]
+               .patchInternalField();
+
+            nGradUn() = 2*nGradUn() - (nA&(gradPhiUp&nA));
+        }
+    }
+    else
+    {
+        Info << "Update normal derivative of normal velocity using fac"
+            << endl;
+
+        nGradUn() = -fac::div(Us())().internalField();
+
+//         Us().correctBoundaryConditions();
+
+//         areaVectorField UsTmp = Us();
+
+//         vector avgUs = gAverage(UsTmp.internalField());
+//         Pout << avgUs << endl;
+//         UsTmp = dimensionedVector("avgUs", Us().dimensions(), avgUs);
+//         UsTmp.correctBoundaryConditions();
+
+//         edgeVectorField eUs = fac::interpolate(Us());
+//         eUs = dimensionedVector("avgUs", Us().dimensions(), vector(1,0,0));
+
+//         Pout << aMesh().weights().boundaryField() << endl;
+
+
+
+
+//         nGradUn() =
+//            -fac::edgeIntegrate
+//             (
+//                 aMesh().Le() & fac::interpolate(Us())
+//             )
+//           + (fac::edgeIntegrate(aMesh().Le()) & Us());
+
+//         nGradUn() *= 2;
+
+
+
+
+//           + aMesh().faceCurvatures()*(aMesh().faceAreaNormals()&Us());
+    }
+
+//     nGradUn() *= 0;
+}
+
+
 void trackedSurface::correctUsBoundaryConditions()
 {
     forAll(Us().boundaryField(), patchI)
@@ -2754,75 +3088,6 @@ vector trackedSurface::totalSurfaceTensionForce() const
     }
 
     return gSum(surfTensionForces);
-}
-
-
-void trackedSurface::initializeControlPointsPosition()
-{
-    scalarField deltaH = scalarField(aMesh().nFaces(), 0.0);
-
-    pointField displacement = pointDisplacement(deltaH);
-
-    const faceList& faces = aMesh().faces();
-    const pointField& points = aMesh().points();
-
-
-    pointField newPoints = points + displacement;
-
-    scalarField sweptVol(faces.size(), 0.0);
-
-    forAll(faces, faceI)
-    {
-        sweptVol[faceI] = -faces[faceI].sweptVol(points, newPoints);
-    }
-
-    vectorField faceArea(faces.size(), vector::zero);
-
-    forAll (faceArea, faceI)
-    {
-        faceArea[faceI] = faces[faceI].normal(newPoints);
-    }
-
-    forAll(deltaH, faceI)
-    {
-        deltaH[faceI] = sweptVol[faceI]/
-            ((faceArea[faceI] & facesDisplacementDir()[faceI]) + SMALL);
-
-        if ((faceArea[faceI] & facesDisplacementDir()[faceI]) < SMALL)
-        {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
-                << "Something is probably wrong with the specified motion direction"
-                    << abort(FatalError);
-
-        }
-    }
-
-    forAll(fixedTrackedSurfacePatches_, patchI)
-    {
-        label fixedPatchID =
-            aMesh().boundary().findPatchID
-            (
-                fixedTrackedSurfacePatches_[patchI]
-            );
-
-        if(fixedPatchID == -1)
-        {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
-                << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
-                    << " defined in the trackedSurfaceProperties dictionary"
-                    << abort(FatalError);
-        }
-
-        const labelList& eFaces =
-            aMesh().boundary()[fixedPatchID].edgeFaces();
-
-        forAll(eFaces, edgeI)
-        {
-            deltaH[eFaces[edgeI]] *= 2.0;
-        }
-    }
-
-    displacement = pointDisplacement(deltaH);
 }
 
 
@@ -3026,220 +3291,127 @@ scalar trackedSurface::maxCourantNumber()
 }
 
 
-bool trackedSurface::MarangoniStress() const
-{
-    return (!cleanInterface() || TPtr_);
-}
-
-
-void trackedSurface::updateProperties()
-{
-    if (transportPtr_)
-    {
-        rhoFluidA_ = dimensionedScalar
-        (
-            transport().nuModel1().viscosityProperties().lookup("rho")
-        );
-        muFluidA_ = rhoFluidA_ * dimensionedScalar
-        (
-            transport().nuModel1().viscosityProperties().lookup("nu")
-        );
-
-        rhoFluidB_ = dimensionedScalar
-        (
-            transport().nuModel2().viscosityProperties().lookup("rho")
-        );
-        muFluidB_ = rhoFluidB_ * dimensionedScalar
-        (
-            transport().nuModel2().viscosityProperties().lookup("nu")
-        );
-
-        cleanInterfaceSurfTension_ =
-            dimensionedScalar(transport().lookup("sigma"));
-    }
-    else
-    {
-        rhoFluidA_ = dimensionedScalar(this->lookup("rhoFluidA"));
-        muFluidA_ = dimensionedScalar(this->lookup("muFluidA"));
-
-        rhoFluidB_ = dimensionedScalar(this->lookup("rhoFluidB"));
-        muFluidB_ = dimensionedScalar(this->lookup("muFluidB"));
-
-        cleanInterfaceSurfTension_ =
-            dimensionedScalar(this->lookup("surfaceTension"));
-    }
-
-    if (gPtr_)
-    {
-        g_ = dimensionedVector(*gPtr_);
-    }
-    else
-    {
-        g_ = dimensionedVector(this->lookup("g"));
-    }
-
-    // Check if correctPointNormals switch is set
-    if (this->found("correctPointNormals"))
-    {
-        correctPointNormals_ = Switch(this->lookup("correctPointNormals"));
-    }
-
-    // Check if correctDisplacement switch is set
-    if (this->found("correctDisplacement"))
-    {
-        correctDisplacement_ = Switch(this->lookup("correctDisplacement"));
-    }
-
-    // Check if correctCurvature switch is set
-    if (this->found("correctCurvature"))
-    {
-        correctCurvature_ = Switch(this->lookup("correctCurvature"));
-    }
-
-    // Check if curvExtrapOrder parameter is set
-    if (this->found("curvExtrapOrder"))
-    {
-        curvExtrapOrder_ = Switch(this->lookup("curvExtrapOrder"));
-    }
-}
-
-
-void trackedSurface::writeVTK() const
-{
-    aMesh().patch().writeVTK
-    (
-        DB().timePath()/prefix_,
-        aMesh().patch(),
-        aMesh().patch().points()
-    );
-}
-
-
-void trackedSurface::writeVTKControlPoints()
-{
-    // Write patch and points into VTK
-    fileName name(DB().timePath()/prefix_+"ControlPoints");
-    OFstream mps(name + ".vtk");
-
-    mps << "# vtk DataFile Version 2.0" << nl
-        << name << ".vtk" << nl
-        << "ASCII" << nl
-        << "DATASET POLYDATA" << nl
-        << "POINTS " << controlPoints().size() << " float" << nl;
-
-    forAll(controlPoints(), pointI)
-    {
-        mps << controlPoints()[pointI].x() << ' '
-            << controlPoints()[pointI].y() << ' '
-            << controlPoints()[pointI].z() << nl;
-    }
-
-    // Write vertices
-    mps << "VERTICES " << controlPoints().size() << ' '
-        << controlPoints().size()*2 << nl;
-
-    forAll(controlPoints(), pointI)
-    {
-        mps << 1 << ' ' << pointI << nl;
-    }
-}
-
-
 template<class Type>
 void
-trackedSurface::writeVol
+trackedSurface::smoothField
 (
-    const GeometricField<Type, faPatchField, areaMesh>& af
+    const word name,
+    Field<Type>& f
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
+    tmp<GeometricField<Type, faPatchField, areaMesh> > tsf
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        new GeometricField<Type, faPatchField, areaMesh>
         (
             IOobject
             (
-                "vol" + af.name(),
+                name,
                 DB().timeName(),
                 mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            mesh(),
+            aMesh(),
             dimensioned<Type>
             (
-                "0",
-                af.dimensions(),
+                word(),
+                dimless,
                 pTraits<Type>::zero
             ),
-            fixedValueFvPatchField<Type>::typeName
+            zeroGradientFaPatchField<Type>::typeName
         )
     );
-    GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
+    GeometricField<Type, faPatchField, areaMesh>& sf = tsf();
 
-    forAll(mesh().boundaryMesh(), patchI)
-    {
-        vf.boundaryField()[patchI] == pTraits<Type>::zero;
-    }
+    Field<Type>& sfIn = sf.internalField();
 
-    vf.boundaryField()[aPatchID()] == af;
+    sfIn = f;
+    sf.correctBoundaryConditions();
 
-    vf.write();
+    sf = fac::average(fac::interpolate(sf));
+    sf.correctBoundaryConditions();
 
-    tvf.clear();
+    f = sfIn;
+
+    tsf.clear();
 }
 
 
-void trackedSurface::writeVolA()
+template<class Type>
+void
+trackedSurface::smoothFieldAlt
+(
+    const word name,
+    Field<Type>& f
+)
 {
-    Us().write();
-
-    (fac::div(Us()))().write();
-
-    (fac::grad(Us()))().write();
-
-    aMesh().Le().write();
-
-    (fac::average(aMesh().Le()))().write();
-
-    aMesh().edgeAreaNormals().write();
-
-    aMesh().faceAreaNormals().write();
-
-    aMesh().faceCurvatures().write();
-
-    surfaceTensionGrad()().write();
-
-    // Us
-    writeVol(Us());
-
-    // fac::div(Us())
-    writeVol((fac::div(Us()))());
-
-    // fac::grad(Us())
-    writeVol((fac::grad(Us()))());
-
-    // volLeAverage
-    writeVol((fac::average(aMesh().Le()))());
-
-    // faceAreaNormals
-    writeVol(aMesh().faceAreaNormals());
-
-    // faceCurvatures
-    writeVol(aMesh().faceCurvatures());
-
-    // faceCurvaturesDivNormals
-    writeVol
+    tmp<GeometricField<Type, faPatchField, areaMesh> > tsf
     (
-        areaScalarField
+        new GeometricField<Type, faPatchField, areaMesh>
         (
-            "faceCurvaturesDivNormals",
-            -fac::div(aMesh().faceAreaNormals())
+            IOobject
+            (
+                name,
+                DB().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            aMesh(),
+            dimensioned<Type>
+            (
+                word(),
+                dimless,
+                pTraits<Type>::zero
+            ),
+            zeroGradientFaPatchField<Type>::typeName
         )
     );
+    GeometricField<Type, faPatchField, areaMesh>& sf = tsf();
 
-    // surfaceTensionGrad
-    writeVol(surfaceTensionGrad()());
+    Field<Type>& sfIn = sf.internalField();
+
+    sfIn = f;
+    sf.correctBoundaryConditions();
+
+
+
+    tmp<GeometricField<Type, faePatchField, edgeMesh> > tesf
+    (
+        new GeometricField<Type, faePatchField, edgeMesh>
+        (
+            fac::interpolate(sf)
+        )
+    );
+    GeometricField<Type, faePatchField, edgeMesh>& esf = tesf();
+
+    Field<Type>& esfIn = esf.internalField();
+
+
+
+    sf *= 0;
+
+    const unallocLabelList& owner = aMesh().owner();
+    const unallocLabelList& neighbour = aMesh().neighbour();
+
+    scalarField edgeCount(sfIn.size(),0);
+
+    forAll(owner, edgeI)
+    {
+        sfIn[owner[edgeI]] += esfIn[edgeI];
+        sfIn[neighbour[edgeI]] += esfIn[edgeI];
+
+        edgeCount[owner[edgeI]] += 1.0;
+        edgeCount[neighbour[edgeI]] += 1.0;
+    }
+
+    sfIn /= edgeCount;
+    sf.correctBoundaryConditions();
+
+    tesf.clear();
+    tsf.clear();
 }
 
 
@@ -3762,182 +3934,133 @@ void trackedSurface::correctPointNormals()
 }
 
 
-void trackedSurface::correctFreeContactAngle()
-{
-    // Correct contact angle acording to
-    // current face normals
-
-    if (freeContactAngle_)
-    {
-        Pout << "Correcting free contact angle" << endl;
-
-        forAll(aMesh().boundary(), patchI)
-        {
-            label ngbPolyPatchID =
-                aMesh().boundary()[patchI].ngbPolyPatchIndex();
-
-            if (ngbPolyPatchID != -1)
-            {
-                if
-                (
-                    mesh().boundary()[ngbPolyPatchID].type()
-                 == wallFvPatch::typeName
-                )
-                {
-                    scalarField& contactAngle =
-                        contactAnglePtr_->boundaryField()[patchI];
-
-                    const vectorField& nA =
-                        aMesh().faceAreaNormals().internalField();
-
-                    const vectorField ngbNA =
-                        aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
-
-                    const unallocLabelList& edgeFaces =
-                        aMesh().boundary()[patchI].edgeFaces();
-
-                    forAll (edgeFaces, edgeI)
-                    {
-                        label faceI = edgeFaces[edgeI];
-
-                        vector nAI = nA[faceI];
-                        vector ngbNAI = ngbNA[edgeI];
-
-                        contactAngle[edgeI] =
-                            180.0/M_PI
-                            * acos(-ngbNAI&nAI/mag(ngbNAI)/mag(nAI));
-                    }
-                }
-            }
-        }
-    }
-}
-
-
 void trackedSurface::correctContactLinePointNormals()
 {
-    // Correct normals for contact line points
-    // according to specified contact angle
-
-    vectorField& N =
-        const_cast<vectorField&>
-        (
-            aMesh().pointAreaNormals()
-        );
-
-    if (contactAnglePtr_)
+    if (!freecontactAngle_)
     {
-        Pout << "Correcting contact line normals" << endl;
+        // Correct normals for contact line points
+        // according to specified contact angle
 
-        vectorField oldPoints(aMesh().nPoints(), vector::zero);
+        vectorField& N =
+            const_cast<vectorField&>
+            (
+                aMesh().pointAreaNormals()
+            );
 
-        const labelList& meshPoints = aMesh().patch().meshPoints();
-
-        forAll(oldPoints, ptI)
+        if (contactAnglePtr_)
         {
-            oldPoints[ptI] =
-                mesh().oldPoints()[meshPoints[ptI]];
-        }
+            Pout << "Correcting contact line normals" << endl;
 
-#       include "createTangentField.H"
+            vectorField oldPoints(aMesh().nPoints(), vector::zero);
 
-        forAll(aMesh().boundary(), patchI)
-        {
-            label ngbPolyPatchID =
-                aMesh().boundary()[patchI].ngbPolyPatchIndex();
+            const labelList& meshPoints = aMesh().patch().meshPoints();
 
-            if (ngbPolyPatchID != -1)
+            forAll(oldPoints, ptI)
             {
-                if
-                (
-                    mesh().boundary()[ngbPolyPatchID].type()
-                 == wallFvPatch::typeName
-                )
+                oldPoints[ptI] =
+                    mesh().oldPoints()[meshPoints[ptI]];
+            }
+
+#           include "createTangentField.H"
+
+            forAll(aMesh().boundary(), patchI)
+            {
+                label ngbPolyPatchID =
+                    aMesh().boundary()[patchI].ngbPolyPatchIndex();
+
+                if (ngbPolyPatchID != -1)
                 {
-                    scalarField& contactAngle =
-                        contactAnglePtr_->boundaryField()[patchI];
-
-                    scalarField rotAngle = 90 - contactAngle;
-
-//                     rotAngle = average(rotAngle);
-
-                    rotAngle *= M_PI/180.0;
-
-                    vectorField ngbN =
-                        aMesh().boundary()[patchI].ngbPolyPatchPointNormals();
-
-                    const labelList& patchPoints =
-                        aMesh().boundary()[patchI].pointLabels();
-
-                    vectorField pN = vectorField(N, patchPoints);
-
-                    vectorField rotationAxis = (ngbN^pN);
-                    rotationAxis /= mag(rotationAxis) + SMALL;
-
-
-                    // Calc rotation axis using edge vectors
-
-                    const edgeList& edges = aMesh().edges();
-
-                    const labelListList& pointEdges =
-                        aMesh().boundary()[patchI].pointEdges();
-
-                    forAll (pointEdges, pointI)
+                    if
+                    (
+                        mesh().boundary()[ngbPolyPatchID].type()
+                    == wallFvPatch::typeName
+                    )
                     {
-                        vector rotAx = vector::zero;
+                        scalarField& contactAngle =
+                            contactAnglePtr_->boundaryField()[patchI];
 
-                        vector rotAxisI = vector::zero;
-                        scalar rotAngleI = 0;
-                        scalar rotAngleWI = 0;
-                        scalar rotAngleWsumI = 0;
+                        scalarField rotAngle = 90 - contactAngle;
 
-                        forAll(pointEdges[pointI], edgeI)
+    //                     rotAngle = average(rotAngle);
+
+                        rotAngle *= M_PI/180.0;
+
+                        vectorField ngbN =
+                            aMesh().boundary()[patchI].ngbPolyPatchPointNormals();
+
+                        const labelList& patchPoints =
+                            aMesh().boundary()[patchI].pointLabels();
+
+                        vectorField pN = vectorField(N, patchPoints);
+
+                        vectorField rotationAxis = (ngbN^pN);
+                        rotationAxis /= mag(rotationAxis) + SMALL;
+
+
+                        // Calc rotation axis using edge vectors
+
+                        const edgeList& edges = aMesh().edges();
+
+                        const labelListList& pointEdges =
+                            aMesh().boundary()[patchI].pointEdges();
+
+                        forAll (pointEdges, pointI)
                         {
-                            label curEdge = pointEdges[pointI][edgeI];
+                            vector rotAx = vector::zero;
 
-                            label curGlobEdge =
-                                aMesh().boundary()[patchI].start() + curEdge;
+                            vector rotAxisI = vector::zero;
+                            scalar rotAngleI = 0;
+                            scalar rotAngleWI = 0;
+                            scalar rotAngleWsumI = 0;
 
-                            vector e = edges[curGlobEdge].vec(oldPoints);
+                            forAll(pointEdges[pointI], edgeI)
+                            {
+                                label curEdge = pointEdges[pointI][edgeI];
 
-                            e *= (e&rotationAxis[pointI])
-                               /mag(e&rotationAxis[pointI]);
+                                label curGlobEdge =
+                                    aMesh().boundary()[patchI].start() + curEdge;
 
-                            e /= mag(e) + SMALL;
+                                vector e = edges[curGlobEdge].vec(oldPoints);
 
-                            rotAx += e;
+                                e *= (e&rotationAxis[pointI])
+                                /mag(e&rotationAxis[pointI]);
 
-                            // Weight as inverse of edge lengths
-                            rotAngleWI = 1.0/mag(e);
+                                e /= mag(e) + SMALL;
 
-                            // Sum up weighted rotation angles and weights
-                            rotAngleI += rotAngleWI * rotAngle[curEdge];
-                            rotAngleWsumI += rotAngleWI;
+                                rotAx += e;
+
+                                // Weight as inverse of edge lengths
+                                rotAngleWI = 1.0/mag(e);
+
+                                // Sum up weighted rotation angles and weights
+                                rotAngleI += rotAngleWI * rotAngle[curEdge];
+                                rotAngleWsumI += rotAngleWI;
+                            }
+
+                            if (pointEdges[pointI].size() == 1)
+                            {
+#                               include "addNgbProcessorEdgeTangent.H"
+                            }
+
+                            rotAxisI = rotAx/(mag(rotAx) + SMALL);
+
+                            rotAngleI /= rotAngleWsumI;
+
+                            vector oldNgbNI = ngbN[pointI];
+
+                            // Rodrigues' rotation formula
+                            ngbN[pointI] = oldNgbNI*cos(rotAngleI)
+                            + rotAxisI*(rotAxisI & oldNgbNI)*(1 - cos(rotAngleI))
+                            + (rotAxisI^oldNgbNI)*sin(rotAngleI);
                         }
 
-                        if (pointEdges[pointI].size() == 1)
+                        forAll (patchPoints, pointI)
                         {
-#                           include "addNgbProcessorEdgeTangent.H"
+                            N[patchPoints[pointI]] -=
+                                ngbN[pointI]*(ngbN[pointI]&N[patchPoints[pointI]]);
+
+                            N[patchPoints[pointI]] /= mag(N[patchPoints[pointI]]);
                         }
-
-                        rotAxisI = rotAx/(mag(rotAx) + SMALL);
-
-                        rotAngleI /= rotAngleWsumI;
-
-                        vector oldNgbNI = ngbN[pointI];
-
-                        // Rodrigues' rotation formula
-                        ngbN[pointI] = oldNgbNI*cos(rotAngleI)
-                          + rotAxisI*(rotAxisI & oldNgbNI)*(1 - cos(rotAngleI))
-                          + (rotAxisI^oldNgbNI)*sin(rotAngleI);
-                    }
-
-                    forAll (patchPoints, pointI)
-                    {
-                        N[patchPoints[pointI]] -=
-                            ngbN[pointI]*(ngbN[pointI]&N[patchPoints[pointI]]);
-
-                        N[patchPoints[pointI]] /= mag(N[patchPoints[pointI]]);
                     }
                 }
             }
@@ -4218,101 +4341,6 @@ void trackedSurface::smoothCurvature()
     while(counter<2);
 
     oldK = K;
-}
-
-
-void trackedSurface::updateNGradUn()
-{
-    if (fvcNGradUn_)
-    {
-        Info << "Update normal derivative of normal velocity using fvc"
-            << endl;
-
-        volVectorField phiU = fvc::reconstruct(phi_);
-
-        vectorField nA = mesh().boundary()[aPatchID()].nf();
-
-        scalarField UnP =
-            (nA&phiU.boundaryField()[aPatchID()].patchInternalField());
-
-        scalarField UnFs =
-            phi_.boundaryField()[aPatchID()]
-           /mesh().magSf().boundaryField()[aPatchID()];
-
-        nGradUn() =
-            (UnFs - UnP)*mesh().deltaCoeffs().boundaryField()[aPatchID()];
-
-        bool secondOrderCorrection = true;
-
-        if (secondOrderCorrection)
-        {
-            // Correct normal component of phiU
-            // befor gradient calculation
-            forAll(phiU.boundaryField(), patchI)
-            {
-                vectorField n =
-                    mesh().Sf().boundaryField()[patchI]
-                   /mesh().magSf().boundaryField()[patchI];
-
-                phiU.boundaryField()[patchI] +=
-                    n
-                   *(
-                       (
-                           phi_.boundaryField()[patchI]
-                          /mesh().magSf().boundaryField()[patchI]
-                       )
-                     - (n&phiU.boundaryField()[patchI])
-                    );
-            }
-
-            // Calc gradient
-            tensorField gradPhiUp =
-                fvc::grad(phiU)().boundaryField()[aPatchID()]
-               .patchInternalField();
-
-            nGradUn() = 2*nGradUn() - (nA&(gradPhiUp&nA));
-        }
-    }
-    else
-    {
-        Info << "Update normal derivative of normal velocity using fac"
-            << endl;
-
-        nGradUn() = -fac::div(Us())().internalField();
-
-//         Us().correctBoundaryConditions();
-
-//         areaVectorField UsTmp = Us();
-
-//         vector avgUs = gAverage(UsTmp.internalField());
-//         Pout << avgUs << endl;
-//         UsTmp = dimensionedVector("avgUs", Us().dimensions(), avgUs);
-//         UsTmp.correctBoundaryConditions();
-
-//         edgeVectorField eUs = fac::interpolate(Us());
-//         eUs = dimensionedVector("avgUs", Us().dimensions(), vector(1,0,0));
-
-//         Pout << aMesh().weights().boundaryField() << endl;
-
-
-
-
-//         nGradUn() =
-//            -fac::edgeIntegrate
-//             (
-//                 aMesh().Le() & fac::interpolate(Us())
-//             )
-//           + (fac::edgeIntegrate(aMesh().Le()) & Us());
-
-//         nGradUn() *= 2;
-
-
-
-
-//           + aMesh().faceCurvatures()*(aMesh().faceAreaNormals()&Us());
-    }
-
-//     nGradUn() *= 0;
 }
 
 

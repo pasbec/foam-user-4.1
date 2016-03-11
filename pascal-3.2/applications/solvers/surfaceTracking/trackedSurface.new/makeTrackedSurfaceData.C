@@ -261,7 +261,16 @@ void trackedSurface::makeControlPoints()
         IOobject::MUST_READ
     );
 
-    if (controlPointsHeader.headerOk())
+    if
+    (
+        IOobject
+        (
+            "controlPoints",
+            DB().timeName(),
+            mesh(),
+            IOobject::MUST_READ
+        ).headerOk()
+    )
     {
         controlPointsPtr_ =
             new vectorIOField
@@ -291,8 +300,6 @@ void trackedSurface::makeControlPoints()
                 ),
                 aMesh().areaCentres().internalField()
             );
-
-        initializeControlPointsPosition();
     }
 }
 
@@ -417,45 +424,6 @@ void trackedSurface::makeTotalDisplacement()
             << abort(FatalError);
     }
 
-    totalDisplacementPtr_ =
-        new vectorIOField
-        (
-            IOobject
-            (
-                "totalDisplacement",
-                DB().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            vectorField
-            (
-                mesh().boundaryMesh()[aPatchID()].nPoints(),
-                vector::zero
-            )
-        );
-}
-
-
-void trackedSurface::readTotalDisplacement()
-{
-    if (debug)
-    {
-        Info<< "trackedSurface::readTotalDisplacement() : "
-            << "reading total points displacement if present"
-            << endl;
-    }
-
-
-    // It is an error to attempt to recalculate
-    // if the pointer is already set
-    if (totalDisplacementPtr_)
-    {
-        FatalErrorIn("trackedSurface::makeTotalDisplacement()")
-            << "total points displacement already exists"
-            << abort(FatalError);
-    }
-
     if
     (
         IOobject
@@ -463,8 +431,7 @@ void trackedSurface::readTotalDisplacement()
             "totalDisplacement",
             DB().timeName(),
             mesh(),
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
+            IOobject::MUST_READ
         ).headerOk()
     )
     {
@@ -478,6 +445,26 @@ void trackedSurface::readTotalDisplacement()
                     mesh(),
                     IOobject::MUST_READ,
                     IOobject::AUTO_WRITE
+                )
+            );
+    }
+    else
+    {
+        totalDisplacementPtr_ =
+            new vectorIOField
+            (
+                IOobject
+                (
+                    "totalDisplacement",
+                    DB().timeName(),
+                    mesh(),
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                vectorField
+                (
+                    mesh().boundaryMesh()[aPatchID()].nPoints(),
+                    vector::zero
                 )
             );
     }
@@ -931,6 +918,75 @@ void trackedSurface::makeMuEffFluidBval() const
 }
 
 
+void trackedSurface::makeContactAngle()
+{
+    if (debug)
+    {
+        Info<< "trackedSurface::makeContactAngle() : "
+            << "making contact angle field"
+            << endl;
+    }
+
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (contactAnglePtr_)
+    {
+        FatalErrorIn("trackedSurface::makeTemperature()")
+            << "contact angle field already exists"
+            << abort(FatalError);
+    }
+
+    if
+    (
+        IOobject
+        (
+            "contactAngle",
+            DB().timeName(),
+            mesh(),
+            IOobject::MUST_READ
+        ).headerOk()
+    )
+    {
+        contactAnglePtr_ =
+            new edgeScalarField
+            (
+                IOobject
+                (
+                    "contactAngle",
+                    DB().timeName(),
+                    mesh(),
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                aMesh()
+            );
+    }
+    else
+    {
+        contactAnglePtr_ =
+            new edgeScalarField
+            (
+                IOobject
+                (
+                    "contactAngle",
+                    DB().timeName(),
+                    mesh(),
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                aMesh(),
+                dimensionedScalar
+                (
+                    word(),
+                    dimless,
+                    90
+                )
+            );
+    }
+}
+
+
 void trackedSurface::makeTemperature() const
 {
     if (debug)
@@ -1262,6 +1318,27 @@ const scalarField& trackedSurface::muEffFluidBval() const
     }
 
     return *muEffFluidBvalPtr_;
+}
+
+
+edgeScalarField& trackedSurface::contactAngle()
+{
+    if (!contactAnglePtr_)
+    {
+        makeContactAngle();
+    }
+
+    return *contactAnglePtr_;
+}
+
+const edgeScalarField& trackedSurface::contactAngle() const
+{
+    if (!contactAnglePtr_)
+    {
+        makeTemperature();
+    }
+
+    return *contactAnglePtr_;
 }
 
 

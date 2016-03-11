@@ -171,6 +171,9 @@ class trackedSurface
         //- Interface smoothing at the begining of time step
         Switch smoothing_;
 
+        //- Free contact angle
+        Switch freecontactAngle_;
+
         //- Correct dispacement for points next to fixed points
         Switch correctPointNormals_;
 
@@ -188,9 +191,6 @@ class trackedSurface
 
         //- Implicit coupling
         Switch implicitCoupling_;
-
-        //- Free contact angle
-        Switch freeContactAngle_;
 
         //- Relative interface deformation limit
         scalar interfaceDeformationLimit_;
@@ -267,6 +267,12 @@ class trackedSurface
 
     // Private Member Functions
 
+        //- Disallow default bitwise copy construct
+        trackedSurface(const trackedSurface&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const trackedSurface&);
+
         // Make demand-driven data
 
             void makeInterpolators();
@@ -274,7 +280,6 @@ class trackedSurface
             void makeMotionPointsMask();
             void makeDirections();
             void makeTotalDisplacement();
-            void readTotalDisplacement();
             void makeFaMesh() const;
             void makeUs() const;
             void makePhis();
@@ -286,6 +291,7 @@ class trackedSurface
             void makeFluidIndicator();
             void makeMuEffFluidAval() const;
             void makeMuEffFluidBval() const;
+            void makeContactAngle();
             void makeTemperature() const;
             void makeSurfaceTensionForce() const;
             void makeNGradUn() const;
@@ -293,11 +299,22 @@ class trackedSurface
         //- Clear all demand-driven data
         void clearOut();
 
-        //- Disallow default bitwise copy construct
-        trackedSurface(const trackedSurface&);
+        //- Initialization
 
-        //- Disallow default bitwise assignment
-        void operator=(const trackedSurface&);
+            //- Init properties
+            void initProperties();
+
+            //- Init/Check point normals correction
+            void initCheckPointNormalsCorrection();
+
+            //- Init/Check surface patches
+            void initCheckSurfacePatches();
+
+            //- Init motion point mask
+            void initMotionPointMask();
+
+            //- Init control points position
+            void initControlPointsPosition();
 
         //- Move control ponts for deltaH and calculate
         //  surface points displacement
@@ -320,11 +337,13 @@ class trackedSurface
             vectorField& displacement
         );
         void smoothCurvature();
-        void correctFreeContactAngle();
         void correctContactLinePointNormals();
 
         // Marangoni stress
-        bool MarangoniStress() const;
+        bool MarangoniStress() const
+        {
+            return (!cleanInterface_ || TPtr_);
+        }
 
 public:
 
@@ -591,7 +610,7 @@ public:
         //- Return surfactant properties
         const surfactantProperties& surfactant() const;
 
-        //- Return referenct to fluid indicator
+        //- Return reference to fluid indicator
         const volScalarField& fluidIndicator();
 
         //- Return effiective viscosity value field of fluid A
@@ -606,13 +625,19 @@ public:
         //- Return effiective viscosity value field of fluid B
         const scalarField& muEffFluidBval() const;
 
-        //- Return referenct to interface temperature
+        //- Return reference to contact angle
+        edgeScalarField& contactAngle();
+
+        //- Return reference to contact angle
+        const edgeScalarField& contactAngle() const;
+
+        //- Return reference to interface temperature
         areaScalarField& temperature();
 
-        //- Return referenct to interface temperature
+        //- Return reference to interface temperature
         const areaScalarField& temperature() const;
 
-        //- Return referenct to surface tension force
+        //- Return reference to surface tension force
         const areaVectorField& surfaceTensionForce() const;
 
         //- Return normal derivative of normal velicty at the interface
@@ -620,6 +645,9 @@ public:
 
         //- Return normal derivative of normal velicty at the interface
         const scalarField& nGradUn() const;
+
+        //- Update properties
+        void updateProperties();
 
         //- Update control points end displacement directions
         void updateDisplacementDirections();
@@ -648,14 +676,11 @@ public:
         //- Correct effective kinematic viscosity on surface
         void updateMuEff();
 
-        //- Correct surface pressure
-        void updatePressure();
-
         //- Correct surface velocity
         void updateVelocity();
 
-        //- Correct normal derivative of normal velocity
-        void updateNGradUn();
+        //- Correct surface pressure
+        void updatePressure();
 
         //- Update surface flux
         void updateSurfaceFlux();
@@ -663,8 +688,14 @@ public:
         //- Update surface surfactant concentration
         void updateSurfactantConcentration();
 
+        //- Update contact angle
+        void updateContactAngle();
+
         //- Update surface temperature
         void updateTemperature();
+
+        //- Correct normal derivative of normal velocity
+        void updateNGradUn();
 
         //- Correct surface velocity boundary conditions
         void correctUsBoundaryConditions();
@@ -687,37 +718,51 @@ public:
         //- Chech surface faces flatness
         tmp<scalarField> checkFaceFlatness();
 
-        //- Initialize control points position
-        void initializeControlPointsPosition();
-
         //- Smoothing interface
         void smoothing();
 
         //- Maximal surface tension based Courant number
         scalar maxCourantNumber();
 
-        //- Update properties
-        void updateProperties();
-
-        //- Write VTK trackedSurface mesh
-        void writeVTK() const;
-
-        //- Write VTK trackedSurface control points
-        void writeVTKControlPoints();
+        //- Write area fields as boundary of corresponding volume fields
+        template<class Type>
+        void
+        smoothField
+        (
+            const word name,
+            Field<Type>& f
+        );
 
         //- Write area fields as boundary of corresponding volume fields
         template<class Type>
         void
-        writeVol
+        smoothFieldAlt
         (
-            const GeometricField<Type, faPatchField, areaMesh>& af
+            const word name,
+            Field<Type>& f
         );
-
-        //- Write selected fields as volFields of tracked surface side A
-        void writeVolA();
 
         //- Correct fixed surface patches
         void moveFixedPatches(const vectorField& displacement);
+
+        // Writing surface data
+
+            //- Write VTK trackedSurface mesh
+            void writeVTK() const;
+
+            //- Write VTK trackedSurface control points
+            void writeVTKControlPoints();
+
+            //- Write area fields as boundary of corresponding volume fields
+            template<class Type>
+            void
+            writeVol
+            (
+                const GeometricField<Type, faPatchField, areaMesh>& af
+            );
+
+            //- Write selected fields as volFields of tracked surface side A
+            void writeVolA();
 };
 
 
