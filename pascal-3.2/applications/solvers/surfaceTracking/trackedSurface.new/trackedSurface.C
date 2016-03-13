@@ -361,13 +361,20 @@ void trackedSurface::initControlPointsPosition()
 
 tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePhi)
 {
-// // TEST
+// // TEST: Damp spurious oscillation
 //     scalarField& newInterFacePhi = const_cast<scalarField&>(interfacePhi);
 //     for (label i=0; i<3; i++)
 //     {
-// //         smoothField("aPhi", newInterFacePhi);
-//         smoothFieldAlt("aPhi", newInterFacePhi);
+//         smoothField("aPhi", newInterFacePhi);
+// //         smoothFieldAlt("aPhi", newInterFacePhi);
 //     }
+
+    scalarField meshPhi = fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
+
+// // TEST: Volume conservation
+// //     const scalarField& Sf = aMesh().S();
+//     const scalarField& Sf = mesh().magSf().boundaryField()[aPatchID()];
+//     meshPhi -= gAverage(meshPhi)/gSum(Sf) * Sf;
 
     tmp<scalarField> tsweptVolCorr
     (
@@ -380,13 +387,17 @@ tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePh
 
     scalarField& sweptVolCorr = tsweptVolCorr();
 
-    sweptVolCorr =
-        interfacePhi
-      - fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
+    sweptVolCorr = interfacePhi - meshPhi;
 
-// // TEST
+// // TEST: Volume conservation
+//     const scalarField& Sf = aMesh().S();
+//     sweptVolCorr -= gAverage(sweptVolCorr)/gSum(Sf) * Sf;
+
+// // TEST: Volume conservation
 //     Pout << "------------------------------------------" << endl;
-//     Pout << "gSum(sweptVolCorr) =" << gSum(sweptVolCorr) << endl;
+//     Pout << "gSum(flowPhi) = " << gSum(interfacePhi) << endl;
+//     Pout << "gSum(meshPhi) = " << gSum(meshPhi) << endl;
+//     Pout << "gSum(diffPhi) = " << gSum(sweptVolCorr) << endl;
 //     Pout << "------------------------------------------" << endl;
 
     word ddtScheme
@@ -458,7 +469,7 @@ tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
 
     deltaH = sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
 
-// // TEST
+// // TEST: Damp spurious oscillation
 //     for (label i=0; i<20; i++)
 //     {
 //         smoothField("deltaH", deltaH);
@@ -987,14 +998,19 @@ void trackedSurface::updateDisplacementDirections()
         facesDisplacementDir() =
             aMesh().faceAreaNormals().internalField();
 
-        // Correction of control points postion
-        const vectorField& Cf = aMesh().areaCentres().internalField();
-
-        controlPoints() =
-            facesDisplacementDir()
-           *(facesDisplacementDir()&(controlPoints() - Cf))
-          + Cf;
+//         // Correction of control points postion
+//         const vectorField& Cf = aMesh().areaCentres().internalField();
+//
+//         controlPoints() =
+//             facesDisplacementDir()
+//            *(facesDisplacementDir()&(controlPoints() - Cf))
+//           + Cf;
     }
+}
+
+void trackedSurface::updateControlPointsPosition()
+{
+    controlPoints() = aMesh().areaCentres().internalField();
 }
 
 

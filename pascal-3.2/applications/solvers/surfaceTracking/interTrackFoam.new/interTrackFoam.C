@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
         interface.moveMeshPointsForOldTrackedSurfDisplacement();
 
         interface.updateDisplacementDirections();
+        interface.updateControlPointsPosition();
 
 //         interface.predictPoints();
 

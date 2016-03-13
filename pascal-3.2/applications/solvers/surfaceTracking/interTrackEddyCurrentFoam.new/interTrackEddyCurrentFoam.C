@@ -210,6 +210,7 @@ int main(int argc, char *argv[])
             // Move and update mesh of fluid region
             interface.moveMeshPointsForOldTrackedSurfDisplacement();
             interface.updateDisplacementDirections();
+            interface.updateControlPointsPosition();
 
 // // TODO TEST: Make sure phi is correct
 //             // Make sure phi is correct at interface

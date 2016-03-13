@@ -338,7 +338,7 @@ class trackedSurface
             const vector& axis
         ) const;
 
-//         //-
+//         //- Test inverse distance point displacement
 //         tmp<vectorField> pointDisplacementID(const scalarField& deltaH);
 
         void correctCurvature();
@@ -661,8 +661,11 @@ public:
         //- Update properties
         void updateProperties();
 
-        //- Update control points end displacement directions
+        //- Update displacement directions
         void updateDisplacementDirections();
+
+        //- Update control points
+        void updateControlPointsPosition();
 
         //- Predict interface points position
         bool predictPoints();
