@@ -140,8 +140,7 @@ void trackedSurface::initCheckPointNormalsCorrection()
             {
                 if
                 (
-                    mesh().boundary()[ngbPolyPatchID].type()
-                 == wallFvPatch::typeName
+                    isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
                 )
                 {
                     if (correction[patchI])
@@ -2692,8 +2691,7 @@ void trackedSurface::updateContactAngle()
             {
                 if
                 (
-                    mesh().boundary()[ngbPolyPatchID].type()
-                 == wallFvPatch::typeName
+                    isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
                 )
                 {
                     // Calculate contact angle
@@ -3768,8 +3766,7 @@ void trackedSurface::correctContactLinePointNormals()
                 {
                     if
                     (
-                        mesh().boundary()[ngbPolyPatchID].type()
-                    == wallFvPatch::typeName
+                        isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
                     )
                     {
                         scalarField& contactAngle =

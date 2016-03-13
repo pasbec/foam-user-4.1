@@ -201,8 +201,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             {
                 if
                 (
-                    mesh().boundary()[ngbPolyPatchID].type()
-                 == wallFvPatch::typeName
+                    isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
                 )
                 {
                     scalarField& contactAngle =
