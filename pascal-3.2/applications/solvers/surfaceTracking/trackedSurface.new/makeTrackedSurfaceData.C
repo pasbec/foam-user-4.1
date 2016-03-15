@@ -706,38 +706,41 @@ void trackedSurface::makeFaSubPolyMesh() const
             false
         );
 
-// TODO: Fix this!!!
-//       polyBoundaryMesh should be pointer as a
-//       reference is passed to new polyPatch
         // Create one single patch containing all faces
         int nPatches = 1;
         int nFaces = polyFaces.size();
 
-        polyBoundaryMesh aSubPolyBoundaryMesh
-        (
-            IOobject
-            (
-                prefix_+"Sub",
-                DB().timeName(),
-                DB(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            *aSubPolyMeshPtr_,
-            nPatches
-        );
+// // TODO: Fix this!!!
+// //       polyBoundaryMesh should be pointer as a
+// //       reference is passed to new polyPatch???
+//         polyBoundaryMesh aSubPolyBoundaryMesh
+//         (
+//             IOobject
+//             (
+//                 prefix_+"Sub",
+//                 DB().timeName(),
+//                 DB(),
+//                 IOobject::NO_READ,
+//                 IOobject::NO_WRITE
+//             ),
+//             *aSubPolyMeshPtr_,
+//             nPatches
+//         );
 
-        List<polyPatch*> patches(1, NULL);
+        List<polyPatch*> patches(nPatches, NULL);
 
+// TODO: polyPatch needs to be deleted with aSubPolyMeshPtr_!
+//       Otherwise we end with a memory leak each time
+//       aSubPolyMeshPtr_ gets deleted and recreated...
         patches[0] =
             polyPatch::New
             (
-                "patch",              // type
-                "trackedSurface",     // name
-                nFaces,               // size
-                0,                    // start
-                0,                    // index
-                aSubPolyBoundaryMesh  // boundary mesh
+                "patch",                         // type
+                "default",                       // name
+                nFaces,                          // size
+                0,                               // start
+                0,                               // index
+                aSubPolyMeshPtr_->boundaryMesh() // boundary mesh
             ).ptr();
 
         aSubPolyMeshPtr_->addPatches(patches, true);
@@ -772,7 +775,8 @@ void trackedSurface::makeFaSubMesh() const
 //     }
 // 
 //     aSubMeshPtr_ = new faMesh(aSubPolyMesh(), polyFaceLabels);
-    // Use patch first (and only) patch of subPolyMash to construct
+
+    // Use first (and only) patch of subPolyMash to construct
     // finite area sub-mesh
     aSubMeshPtr_ = new faMesh(aSubPolyMesh(), 0);
 
