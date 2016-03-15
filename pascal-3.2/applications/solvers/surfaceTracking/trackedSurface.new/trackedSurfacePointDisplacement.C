@@ -188,10 +188,12 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
         vectorField N =
             aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
 
+        vectorField Nr = N;
+
         const labelList& eFaces =
             aMesh().boundary()[patchI].edgeFaces();
 
-        // Correct N according to specified contact angle
+        // Correct Nr according to specified contact angle
         if (contactAnglePtr_)
         {
             label ngbPolyPatchID =
@@ -256,18 +258,18 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                         vector rotAxisI = rotationAxis[edgeI];
 
                         // Rodrigues' rotation formula
-                        N[edgeI] = NI*cos(rotAngleI)
+                        Nr[edgeI] = NI*cos(rotAngleI)
                           + rotAxisI*(rotAxisI & NI)*(1 - cos(rotAngleI))
                           + (rotAxisI^NI)*sin(rotAngleI);
                     }
 
-                    N /= mag(N);
+                    Nr /= mag(Nr);
 
-                    N = (rotationAxis^N);
+                    Nr = (rotationAxis^Nr);
 
-                    N = (N^rotationAxis2);
+                    Nr = (Nr^rotationAxis2);
 
-                    N /= mag(N);
+                    Nr /= mag(Nr);
                 }
             }
         }
@@ -293,8 +295,15 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             vectorField(controlPoints(), peFaces)
           - peCentres;
 
+//         patchMirrorPoints[patchI] =
+//             peCentres + ((I - 2*N*N)&delta);
+
+        vectorField deltaN = N * (N & delta);
+
+        vectorField deltaNr = Nr / (Nr&N) * mag(deltaN);
+
         patchMirrorPoints[patchI] =
-            peCentres + ((I - 2*N*N)&delta);
+            peCentres + delta + 2*deltaNr;
     }
 
 
