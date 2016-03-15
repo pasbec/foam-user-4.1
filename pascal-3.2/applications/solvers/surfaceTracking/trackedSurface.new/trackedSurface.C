@@ -83,6 +83,8 @@ void trackedSurface::clearOut()
     deleteDemandDrivenData(facesDisplacementDirPtr_);
     deleteDemandDrivenData(totalDisplacementPtr_);
     deleteDemandDrivenData(aMeshPtr_);
+    deleteDemandDrivenData(aSubMeshPtr_);
+    deleteDemandDrivenData(aSubPolyMeshPtr_);
     deleteDemandDrivenData(UsPtr_);
     deleteDemandDrivenData(phisPtr_);
     deleteDemandDrivenData(surfactConcPtr_);
@@ -363,7 +365,7 @@ tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePh
 {
 // // TEST: Damp spurious oscillation
 //     scalarField& newInterFacePhi = const_cast<scalarField&>(interfacePhi);
-//     for (label i=0; i<3; i++)
+//     for (label i=0; i<20; i++)
 //     {
 //         smoothField("aPhi", newInterFacePhi);
 // //         smoothFieldAlt("aPhi", newInterFacePhi);
@@ -729,6 +731,8 @@ trackedSurface::trackedSurface
     facesDisplacementDirPtr_(NULL),
     totalDisplacementPtr_(NULL),
     aMeshPtr_(NULL),
+    aSubPolyMeshPtr_(NULL),
+    aSubMeshPtr_(NULL),
     UsPtr_(NULL),
     phisPtr_(NULL),
     surfactConcPtr_(NULL),
@@ -769,7 +773,7 @@ trackedSurface::trackedSurface
     {
         makeContactAngle();
         updateContactAngle();
-        contactAngle().write();
+//         contactAngle().write();
     }
 
     initCheckPointNormalsCorrection();
@@ -814,6 +818,9 @@ trackedSurface::trackedSurface
 
     // Clear geometry
     aMesh().movePoints();
+
+// TEST: Clear geometry of finite area sub-mesh
+    aSubMesh().movePoints();
 
     // Contact angle correction
     correctContactLinePointNormals();
@@ -1133,6 +1140,15 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 
     aMesh().movePoints();
 
+// TEST: Move poly-mesh for finite area sub-mesh
+    aSubPolyMesh().movePoints
+    (
+        makeFaSubPolyMeshPoints()
+    );
+
+// TEST: Move finite area sub-mesh
+    aSubMesh().movePoints();
+
     correctContactLinePointNormals();
 
     if (correctPointNormals_)
@@ -1323,6 +1339,15 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
             mesh().update();
 
             aMesh().movePoints();
+
+// TEST: Move poly-mesh for finite area sub-mesh
+            aSubPolyMesh().movePoints
+            (
+                makeFaSubPolyMeshPoints()
+            );
+
+// TEST: Move finite area sub-mesh
+            aSubMesh().movePoints();
 
             correctContactLinePointNormals();
 
@@ -2696,8 +2721,6 @@ void trackedSurface::updateContactAngle()
 
     if (freecontactAngle_)
     {
-        Pout << "Correcting free contact angle" << endl;
-
         forAll(aMesh().boundary(), patchI)
         {
             label ngbPolyPatchID =

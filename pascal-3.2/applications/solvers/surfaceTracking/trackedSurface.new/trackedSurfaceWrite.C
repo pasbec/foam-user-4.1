@@ -28,39 +28,6 @@ Description
 
 #include "trackedSurface.H"
 
-#include "volFields.H"
-#include "transformField.H"
-
-#include "emptyFaPatch.H"
-#include "wedgeFaPatch.H"
-#include "wallFvPatch.H"
-
-#include "EulerDdtScheme.H"
-#include "CrankNicolsonDdtScheme.H"
-#include "backwardDdtScheme.H"
-
-#include "tetFemMatrices.H"
-#include "tetPointFields.H"
-#include "faceTetPolyPatch.H"
-#include "tetPolyPatchInterpolation.H"
-#include "fixedValueTetPolyPatchFields.H"
-#include "fixedValuePointPatchFields.H"
-#include "twoDPointCorrector.H"
-
-#include "slipFvPatchFields.H"
-#include "symmetryFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "zeroGradientCorrectedFvPatchFields.H"
-#include "fixedGradientCorrectedFvPatchFields.H"
-#include "fixedValueCorrectedFvPatchFields.H"
-
-#include "primitivePatchInterpolation.H"
-
-#include "coordinateSystem.H"
-#include "scalarMatrices.H"
-#include "zeroGradientFaPatchFields.H"
-#include "fixedGradientFaPatchFields.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -76,36 +43,76 @@ void trackedSurface::writeVTK() const
         aMesh().patch(),
         aMesh().patch().points()
     );
+
+// TEST
+    if (aSubMeshPtr_)
+    {
+        aSubMesh().patch().writeVTK
+        (
+            DB().timePath()/prefix_+word("Sub"),
+            aSubMesh().patch(),
+            aSubMesh().patch().points()
+        );
+    }
 }
 
 
-void trackedSurface::writeVTKControlPoints()
+void trackedSurface::writeVTKpoints
+(
+    const word fieldName,
+    const vectorField& pf
+) const
 {
+    word FieldName =
+        word(toupper(fieldName[0]))
+      + word(fieldName.substr(1));
+
     // Write patch and points into VTK
-    fileName name(DB().timePath()/prefix_+"ControlPoints");
+    fileName name(DB().timePath()/prefix_+FieldName);
     OFstream mps(name + ".vtk");
 
     mps << "# vtk DataFile Version 2.0" << nl
         << name << ".vtk" << nl
         << "ASCII" << nl
         << "DATASET POLYDATA" << nl
-        << "POINTS " << controlPoints().size() << " float" << nl;
+        << "POINTS " << pf.size() << " float" << nl;
 
-    forAll(controlPoints(), pointI)
+    forAll(pf, pointI)
     {
-        mps << controlPoints()[pointI].x() << ' '
-            << controlPoints()[pointI].y() << ' '
-            << controlPoints()[pointI].z() << nl;
+        mps << pf[pointI].x() << ' '
+            << pf[pointI].y() << ' '
+            << pf[pointI].z() << nl;
     }
 
     // Write vertices
-    mps << "VERTICES " << controlPoints().size() << ' '
-        << controlPoints().size()*2 << nl;
+    mps << "VERTICES " << pf.size() << ' '
+        << pf.size()*2 << nl;
 
-    forAll(controlPoints(), pointI)
+    forAll(pf, pointI)
     {
         mps << 1 << ' ' << pointI << nl;
     }
+}
+
+
+void trackedSurface::writeVTKControlPoints()
+{
+    writeVTKpoints
+    (
+        word("ControlPoints"),
+        controlPoints()
+    );
+}
+
+
+// TEST
+void trackedSurface::writeVTKSubMeshPoints()
+{
+    writeVTKpoints
+    (
+        word("SubMeshPoints"),
+        makeFaSubPolyMeshPoints()
+    );
 }
 
 
@@ -114,7 +121,7 @@ void
 trackedSurface::writeVol
 (
     const GeometricField<Type, faPatchField, areaMesh>& af
-)
+) const
 {
     tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
     (

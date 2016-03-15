@@ -26,11 +26,13 @@ License
 
 #include "trackedSurface.H"
 #include "primitivePatchInterpolation.H"
+#include "emptyFaPatch.H"
 #include "wedgeFaPatch.H"
 #include "wallFvPatch.H"
 #include "wedgeFaPatchFields.H"
 #include "slipFaPatchFields.H"
 #include "fixedValueFaPatchFields.H"
+#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -235,7 +237,7 @@ void trackedSurface::makeInterpolators()
 }
 
 
-void trackedSurface::makeControlPoints()
+void trackedSurface::makeControlPoints() const
 {
     if (debug)
     {
@@ -491,6 +493,301 @@ void trackedSurface::makeFaMesh() const
 
     aMeshPtr_ = new faMesh(mesh());
 }
+
+
+// TEST
+tmp<pointField> trackedSurface::makeFaSubPolyMeshPoints() const
+{
+    int nBasePoints = aMesh().nPoints();
+    int nBaseControlPoints = aMesh().nFaces();
+    int nPoints = nBasePoints + nBaseControlPoints;
+
+    const pointField& basePoints = aMesh().points();
+    const pointField& baseControlPoints = controlPoints();
+
+    tmp<pointField> tpoints
+    (
+        new pointField(nPoints)
+    );
+    pointField& points = tpoints();
+
+    // Base vertices
+    forAll(basePoints, basePointI)
+    {
+        label pointI = basePointI;
+
+        points[pointI] = basePoints[pointI];
+    }
+
+    // Base control points
+    forAll(baseControlPoints, baseControlPointI)
+    {
+        label pointI = nBasePoints + baseControlPointI;
+
+        points[pointI] = baseControlPoints[baseControlPointI];
+    }
+
+    return tpoints;
+}
+
+
+// TEST
+void trackedSurface::makeFaSubPolyMesh() const
+{
+    if (debug)
+    {
+        Info<< "trackedSurface::makeFaSubPolyMesh() : "
+            << "making poly-mesh for finite area sub-mesh"
+            << endl;
+    }
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (aSubPolyMeshPtr_)
+    {
+        FatalErrorIn("trackedSurface::makeFaPolyMesh()")
+            << "poly-mesh for finite area sub-mesh already exists"
+            << abort(FatalError);
+    }
+
+
+    // Collect triangulation points
+
+    pointField points = makeFaSubPolyMeshPoints();
+
+    // Calc triangulation
+
+    int nBaseEdges = aMesh().nEdges();
+    int nBaseInternalEdges = aMesh().nInternalEdges();
+
+    int nFaces = nBaseEdges + nBaseInternalEdges;
+    triFaceList faces(nFaces);
+
+    const edgeList& baseEdges = aMesh().edges();
+
+    // Internal triangulation
+    //
+    // - based on lower/upper addressing
+
+        int nBasePoints = aMesh().nPoints();
+        const unallocLabelList& baseOwn = aMesh().owner();
+        const unallocLabelList& baseNei = aMesh().neighbour();
+
+        forAll(baseOwn, baseEdgeI)
+        {
+            edge e = baseEdges[baseEdgeI];
+
+            // Owner side triangle
+            label ownP1 = e.start();
+            label ownP2 = e.end();
+            label ownP3 = nBasePoints + baseOwn[baseEdgeI];
+
+            label ownFaceI = 2*baseEdgeI;
+
+            faces[ownFaceI] = triFace(ownP1, ownP2, ownP3);
+
+            // Neighbour side triangle
+            label neiP1 = e.end();
+            label neiP2 = e.start();
+            label neiP3 = nBasePoints + baseNei[baseEdgeI];
+
+            label neiFaceI = 2*baseEdgeI + 1;
+
+            faces[neiFaceI] = triFace(neiP1, neiP2, neiP3);
+        }
+
+    // Patch boundary triangulation
+    //
+    // - for all non-empty patches
+
+        const faPatchList& basePatches = aMesh().boundary();
+
+        int nBasePatchEdges = 0;
+
+        forAll(basePatches, basePatchI)
+        {
+            const faPatch& basePatch = basePatches[basePatchI];
+
+            if (!isType<emptyFaPatch>(basePatch))
+            {
+                const unallocLabelList& basePatchEdgeFaces =
+                    basePatch.edgeFaces();
+
+                forAll(basePatch, basePatchEdgeI)
+                {
+                    // Start corresponding to current patch
+                    label baseEdgeI = basePatch.start() + basePatchEdgeI;
+
+                    edge e = baseEdges[baseEdgeI];
+
+                    // Patch edge triangle
+                    label pP1 = e.start();
+                    label pP2 = e.end();
+                    label pP3 =
+                        nBasePoints + basePatchEdgeFaces[basePatchEdgeI];
+
+                    label pFaceI =
+                        2*nBaseInternalEdges + nBasePatchEdges++;
+
+                    faces[pFaceI] = triFace(pP1, pP2, pP3);
+                }
+            }
+        }
+
+    // Empty boundary triangulation
+    //
+
+        int nBaseNonEmptyEdges = nBaseInternalEdges + nBasePatchEdges;
+        int nBaseEmptyEdges = nBaseEdges - nBaseNonEmptyEdges;
+
+        labelList::subList baseEmptyOwn
+        (
+            aMesh().edgeOwner(),
+            nBaseEmptyEdges,
+            nBaseNonEmptyEdges
+        );
+
+        forAll(baseEmptyOwn, baseEmptyEdgeI)
+        {
+            // Start after all non-empty edges
+            label baseEdgeI = nBaseNonEmptyEdges + baseEmptyEdgeI;
+
+            edge e = baseEdges[baseEdgeI];
+
+            // Empty edge triangle
+            label eP1 = e.start();
+            label eP2 = e.end();
+            label eP3 = nBasePoints + baseEmptyOwn[baseEmptyEdgeI];
+
+            label eFaceI =
+                2*nBaseInternalEdges + nBasePatchEdges + baseEmptyEdgeI;
+
+            faces[eFaceI] = triFace(eP1, eP2, eP3);
+        }
+
+// Pout << "DEBUG: nBaseEdges = " << nBaseEdges << endl;
+// Pout << "DEBUG: nBaseInternalEdges = " << nBaseInternalEdges << endl;
+// Pout << "DEBUG: nBasePatchEdges = " << nBasePatchEdges << endl;
+// Pout << "DEBUG: nBaseNonEmptyEdges = " << nBaseNonEmptyEdges << endl;
+// Pout << "DEBUG: nBaseEmptyEdges = " << nBaseEmptyEdges << endl;
+// Pout << "DEBUG: aMesh().edgeOwner() = " << aMesh().edgeOwner() << endl;
+// Pout << "DEBUG: baseOwner = " << baseOwn << endl;
+// Pout << "DEBUG: baseEmptyOwn = " << baseEmptyOwn << endl;
+// Pout << "DEBUG: faces = " << faces << endl;
+// Pout << "DEBUG: points = " << points << endl;
+
+// triSurface surface(faces, points);
+// surface.write(DB().timePath()/"surface.stl");
+
+    // Create polyMesh
+    {
+        // Create mesh with points and faces
+        faceList polyFaces(faces.size());
+
+        forAll (polyFaces, faceI)
+        {
+            polyFaces[faceI] = faces[faceI];
+        }
+
+        aSubPolyMeshPtr_ = new polyMesh
+        (
+            IOobject
+            (
+                prefix_+"Sub",
+                DB().timeName(),
+                DB(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            xferCopy(points),
+            xferCopy(polyFaces),
+            xferCopy(labelList(0)),
+            xferCopy(labelList(0)),
+            false
+        );
+
+// TODO: Fix this!!!
+//       polyBoundaryMesh should be pointer as a
+//       reference is passed to new polyPatch
+        // Create one single patch containing all faces
+        int nPatches = 1;
+        int nFaces = polyFaces.size();
+
+        polyBoundaryMesh aSubPolyBoundaryMesh
+        (
+            IOobject
+            (
+                prefix_+"Sub",
+                DB().timeName(),
+                DB(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            *aSubPolyMeshPtr_,
+            nPatches
+        );
+
+        List<polyPatch*> patches(1, NULL);
+
+        patches[0] =
+            polyPatch::New
+            (
+                "patch",              // type
+                "trackedSurface",     // name
+                nFaces,               // size
+                0,                    // start
+                0,                    // index
+                aSubPolyBoundaryMesh  // boundary mesh
+            ).ptr();
+
+        aSubPolyMeshPtr_->addPatches(patches, true);
+    }
+}
+
+
+// TEST
+void trackedSurface::makeFaSubMesh() const
+{
+    if (debug)
+    {
+        Info<< "trackedSurface::makeFaSubMesh() : "
+            << "making finite area sub-mesh"
+            << endl;
+    }
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (aSubMeshPtr_)
+    {
+        FatalErrorIn("trackedSurface::makeFaMesh()")
+            << "finite area sub-mesh already exists"
+            << abort(FatalError);
+    }
+
+//     labelList polyFaceLabels(aSubPolyMesh().faces().size());
+// 
+//     forAll (polyFaceLabels, faceI)
+//     {
+//         polyFaceLabels[faceI] = faceI;
+//     }
+// 
+//     aSubMeshPtr_ = new faMesh(aSubPolyMesh(), polyFaceLabels);
+    // Use patch first (and only) patch of subPolyMash to construct
+    // finite area sub-mesh
+    aSubMeshPtr_ = new faMesh(aSubPolyMesh(), 0);
+
+// Pout << "aSubPolyMesh().points() = " << aSubPolyMesh().allPoints() << endl;
+// Pout << "aSubPolyMesh().points() = " << aSubPolyMesh().points() << endl;
+// Pout << "aSubPolyMesh().edges() = " << aSubPolyMesh().edges() << endl;
+// Pout << "aSubPolyMesh().faces() = " << aSubPolyMesh().faces() << endl;
+// Pout << "aSubPolyMesh().faces() = " << aSubPolyMesh().cells() << endl;
+//
+// Pout << "aSubMesh().points() = " << aSubMeshPtr_->points() << endl;
+// Pout << "aSubMesh().edges() = " << aSubMeshPtr_->edges() << endl;
+// Pout << "aSubMesh().faces() = " << aSubMeshPtr_->faces() << endl;
+// Pout << "aSubMesh().faceCurvatures() = " << aSubMeshPtr_->faceCurvatures() << endl;
+}
+
 
 void trackedSurface::makeUs() const
 {
@@ -1121,6 +1418,17 @@ vectorField& trackedSurface::controlPoints()
 }
 
 
+const vectorField& trackedSurface::controlPoints() const
+{
+    if (!controlPointsPtr_)
+    {
+        makeControlPoints();
+    }
+
+    return *controlPointsPtr_;
+}
+
+
 labelList& trackedSurface::motionPointsMask()
 {
     if (!motionPointsMaskPtr_)
@@ -1183,6 +1491,54 @@ const faMesh& trackedSurface::aMesh() const
     }
 
     return *aMeshPtr_;
+}
+
+
+// TEST
+polyMesh& trackedSurface::aSubPolyMesh()
+{
+    if (!aSubPolyMeshPtr_)
+    {
+        makeFaSubPolyMesh();
+    }
+
+    return *aSubPolyMeshPtr_;
+}
+
+
+// TEST
+const polyMesh& trackedSurface::aSubPolyMesh() const
+{
+    if (!aSubPolyMeshPtr_)
+    {
+        makeFaSubPolyMesh();
+    }
+
+    return *aSubPolyMeshPtr_;
+}
+
+
+// TEST
+faMesh& trackedSurface::aSubMesh()
+{
+    if (!aSubMeshPtr_)
+    {
+        makeFaSubMesh();
+    }
+
+    return *aSubMeshPtr_;
+}
+
+
+// TEST
+const faMesh& trackedSurface::aSubMesh() const
+{
+    if (!aSubMeshPtr_)
+    {
+        makeFaSubMesh();
+    }
+
+    return *aSubMeshPtr_;
 }
 
 areaVectorField& trackedSurface::Us()

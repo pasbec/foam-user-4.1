@@ -229,6 +229,14 @@ class trackedSurface
         //  surface side A faces
         mutable faMesh* aMeshPtr_;
 
+// TEST
+        //- Poly mesh for finite area sub-mesh
+        mutable polyMesh* aSubPolyMeshPtr_;
+
+// TEST
+        //- Finite area sub-mesh
+        mutable faMesh* aSubMeshPtr_;
+
         //- Surface velocity field
         mutable areaVectorField* UsPtr_;
 
@@ -276,11 +284,15 @@ class trackedSurface
         // Make demand-driven data
 
             void makeInterpolators();
-            void makeControlPoints();
+            void makeControlPoints() const;
             void makeMotionPointsMask();
             void makeDirections();
             void makeTotalDisplacement();
             void makeFaMesh() const;
+// TEST
+            tmp<pointField> makeFaSubPolyMeshPoints() const;
+            void makeFaSubPolyMesh() const;
+            void makeFaSubMesh() const;
             void makeUs() const;
             void makePhis();
             void makePhi();
@@ -577,6 +589,9 @@ public:
         //- Return control points
         vectorField& controlPoints();
 
+        //- Return control points
+        const vectorField& controlPoints() const;
+
         //- Return reference to motion points mask field
         labelList& motionPointsMask();
 
@@ -594,6 +609,22 @@ public:
 
         //- Return reference to finite area mesh
         const faMesh& aMesh() const;
+
+// TEST
+        //- Return reference to poly-mesh of finite area sub-mesh
+        polyMesh& aSubPolyMesh();
+
+// TEST
+        //- Return reference to poly-mesh of finite area sub-mesh
+        const polyMesh& aSubPolyMesh() const;
+
+// TEST
+        //- Return reference to finite area sub-mesh
+        faMesh& aSubMesh();
+
+// TEST
+        //- Return reference to finite area sub-mesh
+        const faMesh& aSubMesh() const;
 
         //- Return surface velocity field
         areaVectorField& Us();
@@ -733,7 +764,7 @@ public:
         //- Maximal surface tension based Courant number
         scalar maxCourantNumber();
 
-        //- Write area fields as boundary of corresponding volume fields
+        //-
         template<class Type>
         void
         smoothField
@@ -742,7 +773,7 @@ public:
             Field<Type>& f
         );
 
-        //- Write area fields as boundary of corresponding volume fields
+        //-
         template<class Type>
         void
         smoothFieldAlt
@@ -756,8 +787,19 @@ public:
             //- Write VTK trackedSurface mesh
             void writeVTK() const;
 
+            //- Write VTK point field
+            void writeVTKpoints
+            (
+                const word fieldName,
+                const vectorField& pf
+            ) const;
+
             //- Write VTK trackedSurface control points
             void writeVTKControlPoints();
+
+            //- Write VTK trackedSurface sub-mesh points
+            void writeVTKSubMeshPoints();
+
 
             //- Write area fields as boundary of corresponding volume fields
             template<class Type>
@@ -765,7 +807,7 @@ public:
             writeVol
             (
                 const GeometricField<Type, faPatchField, areaMesh>& af
-            );
+            ) const;
 
             //- Write selected fields as volFields of tracked surface side A
             void writeVolA();
