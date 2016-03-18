@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2005 OpenCFD Ltd.
-     \\/     M anipulation  |
+  \\      /  F ield         | foam-extend: Open Source CFD
+   \\    /   O peration     | Version:     3.2
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "faCFD.H"
+#include "faSubMesh.H"
 #include "IOpatchToPatchInterpolation.H"
 #include "dynamicFvMesh.H"
 #include "twoPhaseMixture.H"
@@ -168,11 +169,15 @@ class trackedSurface
          //- Number of surface correctors
         label nTrackedSurfCorr_;
 
+// TEST: Sub-mesh
+        //- Use sub-mesh
+        Switch useSubMesh_;
+
         //- Interface smoothing at the begining of time step
         Switch smoothing_;
 
         //- Free contact angle
-        Switch freecontactAngle_;
+        Switch freeContactAngle_;
 
         //- Correct dispacement for points next to fixed points
         Switch correctPointNormals_;
@@ -229,13 +234,9 @@ class trackedSurface
         //  surface side A faces
         mutable faMesh* aMeshPtr_;
 
-// TEST
-        //- Poly mesh for finite area sub-mesh
-        mutable polyMesh* aSubPolyMeshPtr_;
-
-// TEST
+// TEST: Sub-mesh
         //- Finite area sub-mesh
-        mutable faMesh* aSubMeshPtr_;
+        mutable faSubMesh* aSubMeshPtr_;
 
         //- Surface velocity field
         mutable areaVectorField* UsPtr_;
@@ -281,7 +282,7 @@ class trackedSurface
         //- Disallow default bitwise assignment
         void operator=(const trackedSurface&);
 
-        // Make demand-driven data
+        // Demand-driven data
 
             void makeInterpolators();
             void makeControlPoints() const;
@@ -289,9 +290,7 @@ class trackedSurface
             void makeDirections();
             void makeTotalDisplacement();
             void makeFaMesh() const;
-// TEST
-            tmp<pointField> makeFaSubPolyMeshPoints() const;
-            void makeFaSubPolyMesh() const;
+// TEST: Sub-mesh
             void makeFaSubMesh() const;
             void makeUs() const;
             void makePhis();
@@ -308,8 +307,8 @@ class trackedSurface
             void makeSurfaceTensionForce() const;
             void makeNGradUn() const;
 
-        //- Clear all demand-driven data
-        void clearOut();
+            //- Clear all demand-driven data
+            void clearOut();
 
         //- Initialization
 
@@ -377,25 +376,25 @@ public:
 
     // Constructors
 
-    trackedSurface
-    (
-        dynamicFvMesh& m,
-        const volScalarField& rho,
-        volVectorField& Ub,
-        volScalarField& Pb,
-        const surfaceScalarField& phi,
-        volScalarField* TbPtr = NULL,
-        const uniformDimensionedVectorField* gPtr = NULL,
-        const twoPhaseMixture* transportPtr = NULL,
-        const incompressible::turbulenceModel* turbulencePtr = NULL,
-        const volScalarField* p0Ptr = NULL,
-        word prefix = typeName
-    );
+        trackedSurface
+        (
+            dynamicFvMesh& m,
+            const volScalarField& rho,
+            volVectorField& Ub,
+            volScalarField& Pb,
+            const surfaceScalarField& phi,
+            volScalarField* TbPtr = NULL,
+            const uniformDimensionedVectorField* gPtr = NULL,
+            const twoPhaseMixture* transportPtr = NULL,
+            const incompressible::turbulenceModel* turbulencePtr = NULL,
+            const volScalarField* p0Ptr = NULL,
+            word prefix = typeName
+        );
 
 
     // Destructor
 
-    ~trackedSurface();
+        ~trackedSurface();
 
 
     // Member Functions
@@ -610,21 +609,27 @@ public:
         //- Return reference to finite area mesh
         const faMesh& aMesh() const;
 
-// TEST
-        //- Return reference to poly-mesh of finite area sub-mesh
-        polyMesh& aSubPolyMesh();
+// TEST: Sub-mesh
+        //- Return reference to sub-mesh
+        faSubMesh& aSubMesh();
 
-// TEST
-        //- Return reference to poly-mesh of finite area sub-mesh
-        const polyMesh& aSubPolyMesh() const;
+// TEST: Sub-mesh
+        //- Return reference to sub-mesh
+        const faSubMesh& aSubMesh() const;
 
-// TEST
-        //- Return reference to finite area sub-mesh
-        faMesh& aSubMesh();
-
-// TEST
-        //- Return reference to finite area sub-mesh
-        const faMesh& aSubMesh() const;
+// TEST: Sub-mesh
+        //- Return reference to curvature
+        const areaScalarField& curvature() const
+        {
+            if(aSubMeshPtr_)
+            {
+                return aSubMesh().faceCurvatures();
+            }
+            else
+            {
+                return aMesh().faceCurvatures();
+            }
+        }
 
         //- Return surface velocity field
         areaVectorField& Us();
@@ -764,6 +769,7 @@ public:
         //- Maximal surface tension based Courant number
         scalar maxCourantNumber();
 
+// TEST: Damp spurious oscillation
         //-
         template<class Type>
         void
@@ -773,6 +779,7 @@ public:
             Field<Type>& f
         );
 
+// TEST: Damp spurious oscillation
         //-
         template<class Type>
         void
@@ -796,9 +803,6 @@ public:
 
             //- Write VTK trackedSurface control points
             void writeVTKControlPoints();
-
-            //- Write VTK trackedSurface sub-mesh points
-            void writeVTKSubMeshPoints();
 
 
             //- Write area fields as boundary of corresponding volume fields

@@ -1,28 +1,25 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2005 OpenCFD Ltd.
-     \\/     M anipulation  |
+  \\      /  F ield         | foam-extend: Open Source CFD
+   \\    /   O peration     | Version:     3.2
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
+    This file is part of foam-extend.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
+    foam-extend is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
+    Free Software Foundation, either version 3 of the License, or (at your
     option) any later version.
 
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    foam-extend is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
-Description
+    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -84,7 +81,6 @@ void trackedSurface::clearOut()
     deleteDemandDrivenData(totalDisplacementPtr_);
     deleteDemandDrivenData(aMeshPtr_);
     deleteDemandDrivenData(aSubMeshPtr_);
-    deleteDemandDrivenData(aSubPolyMeshPtr_);
     deleteDemandDrivenData(UsPtr_);
     deleteDemandDrivenData(phisPtr_);
     deleteDemandDrivenData(surfactConcPtr_);
@@ -662,46 +658,16 @@ trackedSurface::trackedSurface
     ),
     aPatchID_(-1),
     bPatchID_(-1),
-    muFluidA_
-    (
-        dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
-    ),
-    muFluidB_
-    (
-        dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
-    ),
-    rhoFluidA_
-    (
-        dimensionedScalar(word(), dimDensity, 0)
-    ),
-    rhoFluidB_
-    (
-        dimensionedScalar(word(), dimDensity, 0)
-    ),
-    kFluidA_
-    (
-        dimensionedScalar(word(), dimThermalConductivity, 0.0)
-    ),
-    kFluidB_
-    (
-        dimensionedScalar(word(), dimThermalConductivity, 0.0)
-    ),
-    CpFluidA_
-    (
-        dimensionedScalar(word(), dimSpecificHeatCapacity, 0.0)
-    ),
-    CpFluidB_
-    (
-        dimensionedScalar(word(), dimSpecificHeatCapacity, 0.0)
-    ),
-    g_
-    (
-        dimensionedVector(word(), dimLength/pow(dimTime,2), vector::zero)
-    ),
-    cleanInterfaceSurfTension_
-    (
-        dimensionedScalar(word(), dimMass/pow(dimTime,2), 0)
-    ),
+    muFluidA_(word(), dimMass/dimLength/dimTime, 0),
+    muFluidB_(word(), dimMass/dimLength/dimTime, 0),
+    rhoFluidA_(word(), dimDensity, 0),
+    rhoFluidB_(word(), dimDensity, 0),
+    kFluidA_(word(), dimThermalConductivity, 0.0),
+    kFluidB_(word(), dimThermalConductivity, 0.0),
+    CpFluidA_(word(), dimSpecificHeatCapacity, 0.0),
+    CpFluidB_(word(), dimSpecificHeatCapacity, 0.0),
+    g_(word(), dimLength/pow(dimTime,2), vector::zero),
+    cleanInterfaceSurfTension_(word(), dimMass/pow(dimTime,2), 0),
     fixedTrackedSurfacePatches_
     (
         this->lookup("fixed" + Prefix_ + "Patches")
@@ -714,8 +680,9 @@ trackedSurface::trackedSurface
     (
         readInt(this->lookup("n" + Prefix_ + "Correctors"))
     ),
+    useSubMesh_(false),
     smoothing_(false),
-    freecontactAngle_(false),
+    freeContactAngle_(false),
     correctPointNormals_(false),
     correctDisplacement_(false),
     correctCurvature_(false),
@@ -731,7 +698,6 @@ trackedSurface::trackedSurface
     facesDisplacementDirPtr_(NULL),
     totalDisplacementPtr_(NULL),
     aMeshPtr_(NULL),
-    aSubPolyMeshPtr_(NULL),
     aSubMeshPtr_(NULL),
     UsPtr_(NULL),
     phisPtr_(NULL),
@@ -768,12 +734,11 @@ trackedSurface::trackedSurface
             mesh(),
             IOobject::MUST_READ
         ).headerOk()
-     || freecontactAngle_
+     || freeContactAngle_
     )
     {
         makeContactAngle();
         updateContactAngle();
-//         contactAngle().write();
     }
 
     initCheckPointNormalsCorrection();
@@ -819,8 +784,12 @@ trackedSurface::trackedSurface
     // Clear geometry
     aMesh().movePoints();
 
-// TEST: Clear geometry of finite area sub-mesh
-    aSubMesh().movePoints();
+// TEST: Sub-mesh
+    if (useSubMesh_)
+    {
+        makeFaSubMesh();
+        aSubMesh().movePoints();
+    }
 
     // Contact angle correction
     correctContactLinePointNormals();
@@ -897,10 +866,16 @@ void trackedSurface::updateProperties()
         smoothing_ = Switch(this->lookup("smoothing"));
     };
 
+    // Check if sub-mesh switch is set
+    if (this->found("useSubMesh"))
+    {
+        useSubMesh_ = Switch(this->lookup("useSubMesh"));
+    };
+
     // Check if freeContactAngle switch is set
     if (this->found("freeContactAngle"))
     {
-        freecontactAngle_ = Switch(this->lookup("freeContactAngle"));
+        freeContactAngle_ = Switch(this->lookup("freeContactAngle"));
     }
 
     // Check if correctPointNormals switch is set
@@ -1140,14 +1115,11 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 
     aMesh().movePoints();
 
-// TEST: Move poly-mesh for finite area sub-mesh
-    aSubPolyMesh().movePoints
-    (
-        makeFaSubPolyMeshPoints()
-    );
-
-// TEST: Move finite area sub-mesh
-    aSubMesh().movePoints();
+// TEST: Sub-mesh
+    if(aSubMeshPtr_)
+    {
+        aSubMesh().movePoints();
+    }
 
     correctContactLinePointNormals();
 
@@ -1340,14 +1312,11 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
 
             aMesh().movePoints();
 
-// TEST: Move poly-mesh for finite area sub-mesh
-            aSubPolyMesh().movePoints
-            (
-                makeFaSubPolyMeshPoints()
-            );
-
-// TEST: Move finite area sub-mesh
-            aSubMesh().movePoints();
+// TEST: Sub-mesh
+            if(aSubMeshPtr_)
+            {
+                aSubMesh().movePoints();
+            }
 
             correctContactLinePointNormals();
 
@@ -2236,7 +2205,7 @@ void trackedSurface::updateVelocity()
 //             tangentialSurfaceTensionForce =
 //                 surfaceTensionForce
 //               - cleanInterfaceSurfTension().value()
-//                *aMesh().faceCurvatures().internalField()*nA;
+//                *curvature().internalField()*nA;
         }
 
         UtFs += tangentialSurfaceTensionForce;
@@ -2386,7 +2355,7 @@ void trackedSurface::updateVelocity()
 //             tangentialSurfaceTensionForce =
 //                 surfaceTensionForce
 //               - cleanInterfaceSurfTension().value()
-//                *aMesh().faceCurvatures().internalField()*nA;
+//                *curvature().internalField()*nA;
 
 //             if (muEffFluidAval() < SMALL)
 //             {
@@ -2476,7 +2445,7 @@ void trackedSurface::updatePressure()
                 p().boundaryField()[bPatchID()]
             );
 
-        const scalarField& K = aMesh().faceCurvatures().internalField();
+        const scalarField& K = curvature().internalField();
 
         Info << "Surface curvature: min = " << gMin(K)
             << ", max = " << gMax(K)
@@ -2556,7 +2525,7 @@ void trackedSurface::updatePressure()
                 )
             );
 
-        const scalarField& K = aMesh().faceCurvatures().internalField();
+        const scalarField& K = curvature().internalField();
 
         Info << "Surface curvature: min = " << gMin(K)
             << ", max = " << gMax(K) << ", average = " << gAverage(K)
@@ -2719,7 +2688,7 @@ void trackedSurface::updateContactAngle()
     // Correct contact angle acording to
     // current face normals
 
-    if (freecontactAngle_)
+    if (freeContactAngle_)
     {
         forAll(aMesh().boundary(), patchI)
         {
@@ -2969,7 +2938,7 @@ void trackedSurface::updateNGradUn()
 
 
 
-//           + aMesh().faceCurvatures()*(aMesh().faceAreaNormals()&Us());
+//           + curvature()*(aMesh().faceAreaNormals()&Us());
     }
 
 //     nGradUn() *= 0;
@@ -3061,7 +3030,7 @@ vector trackedSurface::totalSurfaceTensionForce() const
 
     const vectorField& n = aMesh().faceAreaNormals().internalField();
 
-    const scalarField& K = aMesh().faceCurvatures().internalField();
+    const scalarField& K = curvature().internalField();
 
     vectorField surfTensionForces(n.size(), vector::zero);
 
@@ -3124,6 +3093,7 @@ scalar trackedSurface::maxCourantNumber()
 }
 
 
+// TEST: Damp spurious oscillation
 template<class Type>
 void
 trackedSurface::smoothField
@@ -3171,6 +3141,7 @@ trackedSurface::smoothField
 }
 
 
+// TEST: Damp spurious oscillation
 template<class Type>
 void
 trackedSurface::smoothFieldAlt
@@ -3255,7 +3226,8 @@ void trackedSurface::correctCurvature()
     areaScalarField& K =
         const_cast<areaScalarField&>
         (
-            aMesh().faceCurvatures()
+// TEST: Sub-mesh
+            curvature()
         );
 
     scalarField& KI = K.internalField();
@@ -3767,9 +3739,11 @@ void trackedSurface::correctPointNormals()
 }
 
 
+// TODO: For steep contact angles, the code sometimes gets a fp exeption. Why?
+// TODO: Is the definition of the contact angle right?
 void trackedSurface::correctContactLinePointNormals()
 {
-    if (!freecontactAngle_)
+    if (!freeContactAngle_)
     {
         // Correct normals for contact line points
         // according to specified contact angle
@@ -4026,7 +4000,8 @@ void trackedSurface::smoothCurvature()
     areaScalarField& oldK =
         const_cast<areaScalarField&>
         (
-            aMesh().faceCurvatures()
+// TEST: Sub-mesh
+            curvature()
         );
 
     areaScalarField K

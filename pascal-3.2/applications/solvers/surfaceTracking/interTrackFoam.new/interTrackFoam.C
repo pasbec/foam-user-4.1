@@ -174,7 +174,9 @@ int main(int argc, char *argv[])
 
         Info << "Total force: " << totalForce << endl;
 
-        K = interface.aMesh().faceCurvatures();
+// TEST: Sub-mesh
+        K = interface.curvature();
+//        K = interface.aMesh().faceCurvatures();
 
         Info << "Free surface curvature: min = " << gMin(K)
             << ", max = " << gMax(K)

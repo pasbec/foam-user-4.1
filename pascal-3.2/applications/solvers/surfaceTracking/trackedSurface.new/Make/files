@@ -6,10 +6,13 @@
 ./numerics/leastSquaresSkewCorrected/leastSquaresSkewCorrected.C
 
 trackedSurface.C
-makeTrackedSurfaceData.C
-trackedSurfacePointDisplacement.C
+trackedSurfaceDemandDrivenData.C
 trackedSurfaceMoveFixedPatches.C
+trackedSurfacePointDisplacement.C
 trackedSurfaceWrite.C
+
+faSubMesh/faSubMesh.C
+faSubMesh/faSubMeshDemandDrivenData.C
 
 faMesh.C
 
