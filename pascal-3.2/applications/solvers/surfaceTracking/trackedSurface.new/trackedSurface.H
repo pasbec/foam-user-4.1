@@ -755,9 +755,6 @@ public:
         //- Correct normal derivative of normal velocity
         void updateNGradUn();
 
-        //- Correct surface velocity boundary conditions
-        void correctUsBoundaryConditions();
-
         //- Calculate total pressure force
         vector totalPressureForce() const;
 

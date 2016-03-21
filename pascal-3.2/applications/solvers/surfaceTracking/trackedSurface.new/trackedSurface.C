@@ -2214,7 +2214,7 @@ void trackedSurface::updateVelocity()
 //            /mesh().boundary()[aPatchID()].magSf();
 
         Us().internalField() += UnFs - nA*(nA&Us().internalField());
-        correctUsBoundaryConditions();
+        Us().correctBoundaryConditions();
 
 //*******************************************************************
 
@@ -2255,7 +2255,7 @@ void trackedSurface::updateVelocity()
         UtFs /= muEffFluidAval()*DnA + muEffFluidBval()*DnB + VSMALL;
 
         Us().internalField() = UnFs + UtFs;
-        correctUsBoundaryConditions();
+        Us().correctBoundaryConditions();
 
         // Store old-time velocity field U()
         U().oldTime();
@@ -2989,51 +2989,6 @@ void trackedSurface::updateNGradUn()
     }
 
 //     nGradUn() *= 0;
-}
-
-
-void trackedSurface::correctUsBoundaryConditions()
-{
-    forAll (Us().boundaryField(), patchI)
-    {
-        if
-        (
-            Us().boundaryField()[patchI].type()
-         == calculatedFaPatchVectorField::typeName
-        )
-        {
-            vectorField& pUs = Us().boundaryField()[patchI];
-
-            pUs = Us().boundaryField()[patchI].patchInternalField();
-
-            label ngbPolyPatchID =
-                aMesh().boundary()[patchI].ngbPolyPatchIndex();
-
-            if (ngbPolyPatchID != -1)
-            {
-                if
-                (
-                    (
-                        U().boundaryField()[ngbPolyPatchID].type()
-                     == slipFvPatchVectorField::typeName
-                    )
-                 ||
-                    (
-                        U().boundaryField()[ngbPolyPatchID].type()
-                     == symmetryFvPatchVectorField::typeName
-                    )
-                )
-                {
-                    vectorField N =
-                        aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
-
-                    pUs -= N*(N&pUs);
-                }
-            }
-        }
-    }
-
-    Us().correctBoundaryConditions();
 }
 
 

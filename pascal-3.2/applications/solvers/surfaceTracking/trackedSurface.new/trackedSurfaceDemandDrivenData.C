@@ -569,8 +569,7 @@ void trackedSurface::makeUs() const
             {
                 if
                 (
-                    mesh().boundary()[ngbPolyPatchID].type()
-                 == wallFvPatch::typeName
+                    isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
                 )
                 {
                     patchFieldTypes[patchI] =
@@ -603,8 +602,7 @@ void trackedSurface::makeUs() const
         {
             if
             (
-                mesh().boundary()[ngbPolyPatchID].type()
-             == wallFvPatch::typeName
+                isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
             )
             {
                 patchFieldTypes[fixedPatchID] =
@@ -651,8 +649,7 @@ void trackedSurface::makeUs() const
         {
             if
             (
-                mesh().boundary()[ngbPolyPatchID].type()
-             == wallFvPatch::typeName
+                isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
             )
             {
                 UsPtr_->boundaryField()[fixedPatchID] == vector::zero;
