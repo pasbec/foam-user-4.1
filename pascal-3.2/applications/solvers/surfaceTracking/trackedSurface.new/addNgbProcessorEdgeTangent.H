@@ -18,7 +18,7 @@
 
         if (edgeFaces[curEdge].size() == 1)
         {
-            forAll(aMesh().boundary(), pI)
+            forAll (aMesh().boundary(), pI)
             {
                 const labelList& curEdges = aMesh().boundary()[pI];
 
@@ -26,7 +26,7 @@
 
                 if (index != -1)
                 {
-                    if 
+                    if
                     (
                         aMesh().boundary()[pI].type()
                      == processorFaPatch::typeName
@@ -43,7 +43,7 @@
 
     if (procPatchID != -1)
     {
-        vector t = 
+        vector t =
             tangent.boundaryField()[procPatchID]
            .patchNeighbourField()()[edgeID];
 
@@ -51,7 +51,7 @@
             /(mag(t&rotationAxis[pointI]) + SMALL);
 
         t /= mag(t) + SMALL;
-        
+
 //         Pout << "--------->" << t << endl;
 
         rotAx += t;

@@ -77,7 +77,7 @@ void trackedSurface::writeVTKpoints
         << "DATASET POLYDATA" << nl
         << "POINTS " << pf.size() << " float" << nl;
 
-    forAll(pf, pointI)
+    forAll (pf, pointI)
     {
         mps << pf[pointI].x() << ' '
             << pf[pointI].y() << ' '
@@ -88,7 +88,7 @@ void trackedSurface::writeVTKpoints
     mps << "VERTICES " << pf.size() << ' '
         << pf.size()*2 << nl;
 
-    forAll(pf, pointI)
+    forAll (pf, pointI)
     {
         mps << 1 << ' ' << pointI << nl;
     }
@@ -138,7 +138,7 @@ trackedSurface::writeVol
     );
     GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
 
-    forAll(mesh().boundaryMesh(), patchI)
+    forAll (mesh().boundaryMesh(), patchI)
     {
         vf.boundaryField()[patchI] == pTraits<Type>::zero;
     }

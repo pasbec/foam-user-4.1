@@ -23,7 +23,7 @@ if (Pstream::parRun())
     {
         if
         (
-            aMesh().boundary()[patchI].type() 
+            aMesh().boundary()[patchI].type()
          == processorFaPatch::typeName
         )
         {
@@ -33,7 +33,7 @@ if (Pstream::parRun())
             const labelList& patchPointLabels =
                 procPatch.pointLabels();
 
-            forAll(patchPointLabels, pointI)
+            forAll (patchPointLabels, pointI)
             {
                 label curPoint = patchPointLabels[pointI];
 
@@ -50,7 +50,7 @@ if (Pstream::parRun())
 
                     if (edgeFaces[curEdge].size() == 1)
                     {
-                        forAll(aMesh().boundary(), pI)
+                        forAll (aMesh().boundary(), pI)
                         {
                             const labelList& curEdges = aMesh().boundary()[pI];
 
@@ -77,19 +77,19 @@ if (Pstream::parRun())
                 {
                     label curEdge =
                         aMesh().boundary()[patchID].start() + edgeID;
-                    
+
                     vector t = edges[curEdge].vec(oldPoints);
                     t /= mag(t) + SMALL;
-                    
-//                     Pout << aMesh().boundary()[patchID].name() << ", " 
+
+//                     Pout << aMesh().boundary()[patchID].name() << ", "
 //                         << t << endl;
 
                     const labelList& curPointFaces = pointFaces[curPoint];
 
-                    forAll(curPointFaces, fI)
+                    forAll (curPointFaces, fI)
                     {
                         tangent.internalField()[curPointFaces[fI]] = t;
-                            
+
                     }
                 }
             }

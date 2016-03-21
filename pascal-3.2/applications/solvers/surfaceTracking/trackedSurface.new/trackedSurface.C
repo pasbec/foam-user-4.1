@@ -108,13 +108,13 @@ void trackedSurface::initCheckPointNormalsCorrection()
     // Set point normal correction patches
     boolList& correction = aMesh().correctPatchPointNormals();
 
-    forAll(pointNormalsCorrectionPatches_, patchI)
+    forAll (pointNormalsCorrectionPatches_, patchI)
     {
         word patchName = pointNormalsCorrectionPatches_[patchI];
 
         label patchID = aMesh().boundary().findPatchID(patchName);
 
-        if(patchID == -1)
+        if (patchID == -1)
         {
             FatalErrorIn
             (
@@ -129,7 +129,7 @@ void trackedSurface::initCheckPointNormalsCorrection()
     // Check correction for patches with specified contact angle
     if (contactAnglePtr_)
     {
-        forAll(aMesh().boundary(), patchI)
+        forAll (aMesh().boundary(), patchI)
         {
             label ngbPolyPatchID =
                 aMesh().boundary()[patchI].ngbPolyPatchIndex();
@@ -164,7 +164,7 @@ void trackedSurface::initCheckSurfacePatches()
     // Detect the surface patch
     forAll (mesh().boundary(), patchI)
     {
-        if(mesh().boundary()[patchI].name() == prefix_)
+        if (mesh().boundary()[patchI].name() == prefix_)
         {
             aPatchID_ = patchI;
 
@@ -173,7 +173,7 @@ void trackedSurface::initCheckSurfacePatches()
         }
     }
 
-    if(aPatchID() == -1)
+    if (aPatchID() == -1)
     {
         FatalErrorIn("trackedSurface::trackedSurface(...)")
             << "Surface patch not defined.  Please make sure that "
@@ -187,7 +187,7 @@ void trackedSurface::initCheckSurfacePatches()
     {
         forAll (mesh().boundary(), patchI)
         {
-            if(mesh().boundary()[patchI].name() == prefix_ + "Shadow")
+            if (mesh().boundary()[patchI].name() == prefix_ + "Shadow")
             {
                 bPatchID_ = patchI;
 
@@ -196,7 +196,7 @@ void trackedSurface::initCheckSurfacePatches()
             }
         }
 
-        if(bPatchID() == -1)
+        if (bPatchID() == -1)
         {
             FatalErrorIn("trackedSurface::trackedSurface(...)")
                 << "Surface shadow patch not defined. "
@@ -212,7 +212,7 @@ void trackedSurface::initMotionPointMask()
 {
     // Mark surface boundary points
     // which belonge to processor patches
-    forAll(aMesh().boundary(), patchI)
+    forAll (aMesh().boundary(), patchI)
     {
         if
         (
@@ -223,7 +223,7 @@ void trackedSurface::initMotionPointMask()
             const labelList& patchPoints =
                 aMesh().boundary()[patchI].pointLabels();
 
-            forAll(patchPoints, pointI)
+            forAll (patchPoints, pointI)
             {
                 motionPointsMask()[patchPoints[pointI]] = -1;
             }
@@ -231,7 +231,7 @@ void trackedSurface::initMotionPointMask()
     }
 
     // Mark fixed surface boundary points
-    forAll(fixedTrackedSurfacePatches_, patchI)
+    forAll (fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
             aMesh().boundary().findPatchID
@@ -239,7 +239,7 @@ void trackedSurface::initMotionPointMask()
                 fixedTrackedSurfacePatches_[patchI]
             );
 
-        if(fixedPatchID == -1)
+        if (fixedPatchID == -1)
         {
             FatalErrorIn("trackedSurface::trackedSurface(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
@@ -250,7 +250,7 @@ void trackedSurface::initMotionPointMask()
         const labelList& patchPoints =
             aMesh().boundary()[fixedPatchID].pointLabels();
 
-        forAll(patchPoints, pointI)
+        forAll (patchPoints, pointI)
         {
             motionPointsMask()[patchPoints[pointI]] = 0;
         }
@@ -258,7 +258,7 @@ void trackedSurface::initMotionPointMask()
 
     // Mark surface boundary point
     // at the axis of 2-D axisymmetic cases
-    forAll(aMesh().boundary(), patchI)
+    forAll (aMesh().boundary(), patchI)
     {
         if
         (
@@ -269,12 +269,12 @@ void trackedSurface::initMotionPointMask()
             const wedgeFaPatch& wedgePatch =
                 refCast<const wedgeFaPatch>(aMesh().boundary()[patchI]);
 
-            forAll(wedgePatch.axisPoints(), pI)
+            forAll (wedgePatch.axisPoints(), pI)
             {
                 motionPointsMask()[wedgePatch.axisPoints()[pI]] = 0;
             }
 
-//             if(wedgePatch.axisPoint() > -1)
+//             if (wedgePatch.axisPoint() > -1)
 //             {
 //                 motionPointsMask()[wedgePatch.axisPoint()] = 0;
 
@@ -302,7 +302,7 @@ void trackedSurface::initControlPointsPosition()
 
     scalarField sweptVol(faces.size(), 0.0);
 
-    forAll(faces, faceI)
+    forAll (faces, faceI)
     {
         sweptVol[faceI] = -faces[faceI].sweptVol(points, newPoints);
     }
@@ -314,7 +314,7 @@ void trackedSurface::initControlPointsPosition()
         faceArea[faceI] = faces[faceI].normal(newPoints);
     }
 
-    forAll(deltaH, faceI)
+    forAll (deltaH, faceI)
     {
         deltaH[faceI] = sweptVol[faceI]/
             ((faceArea[faceI] & facesDisplacementDir()[faceI]) + SMALL);
@@ -328,7 +328,7 @@ void trackedSurface::initControlPointsPosition()
         }
     }
 
-    forAll(fixedTrackedSurfacePatches_, patchI)
+    forAll (fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
             aMesh().boundary().findPatchID
@@ -336,7 +336,7 @@ void trackedSurface::initControlPointsPosition()
                 fixedTrackedSurfacePatches_[patchI]
             );
 
-        if(fixedPatchID == -1)
+        if (fixedPatchID == -1)
         {
             FatalErrorIn("trackedSurface::trackedSurface(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
@@ -347,7 +347,7 @@ void trackedSurface::initControlPointsPosition()
         const labelList& eFaces =
             aMesh().boundary()[fixedPatchID].edgeFaces();
 
-        forAll(eFaces, edgeI)
+        forAll (eFaces, edgeI)
         {
             deltaH[eFaces[edgeI]] *= 2.0;
         }
@@ -474,7 +474,7 @@ tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
 // //         smoothFieldAlt("deltaH", deltaH);
 //     }
 
-    forAll(fixedTrackedSurfacePatches_, patchI)
+    forAll (fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
             aMesh().boundary().findPatchID
@@ -482,7 +482,7 @@ tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
                 fixedTrackedSurfacePatches_[patchI]
             );
 
-        if(fixedPatchID == -1)
+        if (fixedPatchID == -1)
         {
             FatalErrorIn("trackedSurface::trackedSurface(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
@@ -493,7 +493,7 @@ tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
         const labelList& eFaces =
             aMesh().boundary()[fixedPatchID].edgeFaces();
 
-        forAll(eFaces, edgeI)
+        forAll (eFaces, edgeI)
         {
             deltaH[eFaces[edgeI]] *= 2.0;
         }
@@ -505,7 +505,7 @@ tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
 
 void trackedSurface::moveCorrectedPatchSubMeshes()
 {
-    forAll(U().boundaryField(), patchI)
+    forAll (U().boundaryField(), patchI)
     {
         if
         (
@@ -535,7 +535,7 @@ void trackedSurface::moveCorrectedPatchSubMeshes()
         }
     }
 
-    forAll(p().boundaryField(), patchI)
+    forAll (p().boundaryField(), patchI)
     {
         if
         (
@@ -567,7 +567,7 @@ void trackedSurface::moveCorrectedPatchSubMeshes()
 
     if (TPtr_)
     {
-        forAll(T().boundaryField(), patchI)
+        forAll (T().boundaryField(), patchI)
         {
             if
             (
@@ -928,7 +928,7 @@ void trackedSurface::updateProperties()
 
 void trackedSurface::updateDisplacementDirections()
 {
-    if(normalMotionDir())
+    if (normalMotionDir())
     {
         // Update point displacement correction
         pointsDisplacementDir() = aMesh().pointAreaNormals();
@@ -936,9 +936,9 @@ void trackedSurface::updateDisplacementDirections()
         // Correcte point displacement direction
         // at the "centerline" symmetryPlane which represents the axis
         // of an axisymmetric case
-        forAll(aMesh().boundary(), patchI)
+        forAll (aMesh().boundary(), patchI)
         {
-            if(aMesh().boundary()[patchI].type() == wedgeFaPatch::typeName)
+            if (aMesh().boundary()[patchI].type() == wedgeFaPatch::typeName)
             {
                 const wedgeFaPatch& wedgePatch =
                     refCast<const wedgeFaPatch>(aMesh().boundary()[patchI]);
@@ -948,12 +948,12 @@ void trackedSurface::updateDisplacementDirections()
                 label centerLinePatchID =
                     aMesh().boundary().findPatchID("centerline");
 
-                if(centerLinePatchID != -1)
+                if (centerLinePatchID != -1)
                 {
                     const labelList& pointLabels =
                         aMesh().boundary()[centerLinePatchID].pointLabels();
 
-                    forAll(pointLabels, pointI)
+                    forAll (pointLabels, pointI)
                     {
                         vector dir =
                             pointsDisplacementDir()[pointLabels[pointI]];
@@ -1065,7 +1065,7 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
         newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
     }
 
-    if(twoFluids_)
+    if (twoFluids_)
     {
         const labelList& meshPointsB =
             mesh().boundaryMesh()[bPatchID_].meshPoints();
@@ -1088,7 +1088,7 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 
     // Update total displacement field
 
-//     if(totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
+//     if (totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
 //     {
 //         FatalErrorIn("trackedSurface::movePoints()")
 //             << "Total displacement of surface points "
@@ -1116,7 +1116,7 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
     aMesh().movePoints();
 
 // TEST: Sub-mesh
-    if(aSubMeshPtr_)
+    if (aSubMeshPtr_)
     {
         aSubMesh().movePoints();
     }
@@ -1143,7 +1143,7 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 
 bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
 {
-    if(totalDisplacementPtr_)
+    if (totalDisplacementPtr_)
     {
         scalar minCellThickness =
             2*gMin(1.0/mesh().boundary()[aPatchID()].deltaCoeffs());
@@ -1217,7 +1217,7 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
                         totalDisplacement()/DB().deltaT().value()
                     );
 
-                if(twoFluids_)
+                if (twoFluids_)
                 {
                     const labelList& meshPointsB =
                         mesh().boundaryMesh()[bPatchID()].meshPoints();
@@ -1273,7 +1273,7 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
                 motionUaPatch ==
                     totalDisplacement()/DB().deltaT().value();
 
-                if(twoFluids_)
+                if (twoFluids_)
                 {
                     const labelList& meshPointsB =
                         mesh().boundaryMesh()[bPatchID()].meshPoints();
@@ -1313,7 +1313,7 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
             aMesh().movePoints();
 
 // TEST: Sub-mesh
-            if(aSubMeshPtr_)
+            if (aSubMeshPtr_)
             {
                 aSubMesh().movePoints();
             }
@@ -1359,7 +1359,7 @@ void trackedSurface::smoothing()
         newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
     }
 
-    if(twoFluids_)
+    if (twoFluids_)
     {
         const labelList& meshPointsB =
             mesh().boundaryMesh()[bPatchID_].meshPoints();
@@ -1378,7 +1378,7 @@ void trackedSurface::smoothing()
 
     // Update total displacement field
 
-//     if(totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
+//     if (totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
 //     {
 //         FatalErrorIn("trackedSurface::movePoints()")
 //             << "Total displacement of surface points "
@@ -1417,7 +1417,7 @@ void trackedSurface::smoothing()
         newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
     }
 
-    if(twoFluids_)
+    if (twoFluids_)
     {
         const labelList& meshPointsB =
             mesh().boundaryMesh()[bPatchID_].meshPoints();
@@ -1436,7 +1436,7 @@ void trackedSurface::smoothing()
 
     // Update total displacement field
 
-//     if(totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
+//     if (totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
 //     {
 //         FatalErrorIn("trackedSurface::movePoints()")
 //             << "Total displacement of surface points "
@@ -1497,7 +1497,7 @@ bool trackedSurface::smoothMesh()
 
     scalar avgEdgeLength = 0;
 
-    forAll(edges, edgeI)
+    forAll (edges, edgeI)
     {
         avgEdgeLength += edges[edgeI].mag(oldPoints);
     }
@@ -1506,7 +1506,7 @@ bool trackedSurface::smoothMesh()
 
     // Smooth boundary points
 
-    forAll(aMesh().boundary(), patchI)
+    forAll (aMesh().boundary(), patchI)
     {
         const labelList& pPointLabels =
             aMesh().boundary()[patchI].pointLabels();
@@ -1521,7 +1521,7 @@ bool trackedSurface::smoothMesh()
         // Find fixed points
         boolList fixedPoints(pPointLabels.size(), false);
 
-        forAll(fixedPoints, pointI)
+        forAll (fixedPoints, pointI)
         {
             if (pPointEdges[pointI].size() == 1)
             {
@@ -1537,13 +1537,13 @@ bool trackedSurface::smoothMesh()
         {
             counter++;
 
-            forAll(pPointLabels, pointI)
+            forAll (pPointLabels, pointI)
             {
                 if (!fixedPoints[pointI])
                 {
                     vector curNewPoint = vector::zero;
 
-                    forAll(pPointEdges[pointI], eI)
+                    forAll (pPointEdges[pointI], eI)
                     {
                         label curEdgeIndex = pPointEdges[pointI][eI];
 
@@ -1568,7 +1568,7 @@ bool trackedSurface::smoothMesh()
 
                     label nearestPointID = -1;
                     scalar minDist = GREAT;
-                    forAll(pPointLabels, pI)
+                    forAll (pPointLabels, pI)
                     {
                         label curPoint = pPointLabels[pI];
 
@@ -1582,7 +1582,7 @@ bool trackedSurface::smoothMesh()
                     }
 
                     bool foundProjection = false;
-                    forAll(pPointEdges[nearestPointID], edgeI)
+                    forAll (pPointEdges[nearestPointID], edgeI)
                     {
                         label edgeID = pPointEdges[nearestPointID][edgeI];
 
@@ -1651,7 +1651,7 @@ bool trackedSurface::smoothMesh()
 
     boolList fixedPoints(newPoints.size(), false);
 
-    forAll(boundaryPoints, pointI)
+    forAll (boundaryPoints, pointI)
     {
         fixedPoints[boundaryPoints[pointI]] = true;
     }
@@ -1662,7 +1662,7 @@ bool trackedSurface::smoothMesh()
     {
         counter++;
 
-        forAll(newPoints, pointI)
+        forAll (newPoints, pointI)
         {
             if (!fixedPoints[pointI])
             {
@@ -1670,7 +1670,7 @@ bool trackedSurface::smoothMesh()
 
                 scalar sumW = 0;
 
-                forAll(pointEdges[pointI], eI)
+                forAll (pointEdges[pointI], eI)
                 {
                     label curEdgeIndex = pointEdges[pointI][eI];
 
@@ -1697,7 +1697,7 @@ bool trackedSurface::smoothMesh()
 
                 label nearestPointID = -1;
                 scalar minDist = GREAT;
-                forAll(oldPoints, pI)
+                forAll (oldPoints, pI)
                 {
                     scalar dist = mag(curNewPoint - oldPoints[pI]);
 
@@ -1712,7 +1712,7 @@ bool trackedSurface::smoothMesh()
 
                 pointHit ph(curNewPoint);
 
-                forAll(pointFaces[nearestPointID], faceI)
+                forAll (pointFaces[nearestPointID], faceI)
                 {
                     label faceID = pointFaces[nearestPointID][faceI];
 
@@ -1756,7 +1756,7 @@ bool trackedSurface::smoothMesh()
     scalar avgEdge = 0;
     scalar maxEdge = SMALL;
 
-    forAll(edges, edgeI)
+    forAll (edges, edgeI)
     {
         scalar curEdgeLength = edges[edgeI].mag(newPoints);
 
@@ -1827,7 +1827,7 @@ bool trackedSurface::smoothMesh()
                 displacement/DB().deltaT().value()
             );
 
-        if(twoFluids_)
+        if (twoFluids_)
         {
             pointField displacementB =
                 interpolatorAB().pointInterpolate
@@ -1874,7 +1874,7 @@ bool trackedSurface::smoothMesh()
         motionUaPatch ==
             displacement/DB().deltaT().value();
 
-        if(twoFluids_)
+        if (twoFluids_)
         {
             pointField displacementB =
                 interpolatorAB().pointInterpolate
@@ -1971,7 +1971,7 @@ bool trackedSurface::moveMeshPoints(const scalarField& interfacePhi)
                 displacement/DB().deltaT().value()
             );
 
-        if(twoFluids_)
+        if (twoFluids_)
         {
             pointField displacementB =
                 interpolatorAB().pointInterpolate
@@ -2018,7 +2018,7 @@ bool trackedSurface::moveMeshPoints(const scalarField& interfacePhi)
         motionUaPatch ==
             displacement/DB().deltaT().value();
 
-        if(twoFluids_)
+        if (twoFluids_)
         {
             pointField displacementB =
                 interpolatorAB().pointInterpolate
@@ -2084,7 +2084,7 @@ void trackedSurface::updateMuEff()
         muEffFluidAval() =
             nuEff.boundaryField()[aPatchID()] * rhoFluidA().value();
 
-        if(twoFluids())
+        if (twoFluids())
         {
             muEffFluidBval() =
                 nuEff.boundaryField()[bPatchID()] * rhoFluidB().value();
@@ -2095,7 +2095,7 @@ void trackedSurface::updateMuEff()
 
 void trackedSurface::updateVelocity()
 {
-    if(twoFluids())
+    if (twoFluids())
     {
         vectorField nA = mesh().boundary()[aPatchID()].nf();
 
@@ -2182,7 +2182,7 @@ void trackedSurface::updateVelocity()
 
         vectorField tangentialSurfaceTensionForce(nA.size(), vector::zero);
 
-        if(MarangoniStress())
+        if (MarangoniStress())
         {
             Info << "MarangoniStress------------------------" << endl;
 
@@ -2333,7 +2333,7 @@ void trackedSurface::updateVelocity()
 
         vectorField tangentialSurfaceTensionForce(nA.size(), vector::zero);
 
-        if(MarangoniStress())
+        if (MarangoniStress())
         {
             const vectorField& totSurfTensionForce = surfaceTensionForce();
 
@@ -2437,7 +2437,7 @@ void trackedSurface::updatePressure()
 
     vectorField nA = mesh().boundary()[aPatchID()].nf();
 
-    if(twoFluids())
+    if (twoFluids())
     {
         scalarField pA =
             interpolatorBA().faceInterpolate
@@ -2451,7 +2451,7 @@ void trackedSurface::updatePressure()
             << ", max = " << gMax(K)
             << ", average = " << gAverage(K) << endl << flush;
 
-        if(!MarangoniStress())
+        if (!MarangoniStress())
         {
 //             pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
             pA -= cleanInterfaceSurfTension().value()*K;
@@ -2531,7 +2531,7 @@ void trackedSurface::updatePressure()
             << ", max = " << gMax(K) << ", average = " << gAverage(K)
             << endl;
 
-        if(!MarangoniStress())
+        if (!MarangoniStress())
         {
 //             pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
             pA -= cleanInterfaceSurfTension().value()*K;
@@ -2603,7 +2603,7 @@ void trackedSurface::updateSurfaceFlux()
 
 void trackedSurface::updateSurfactantConcentration()
 {
-    if(!cleanInterface())
+    if (!cleanInterface())
     {
         Info << "Correct surfactant concentration" << endl << flush;
 
@@ -2622,7 +2622,7 @@ void trackedSurface::updateSurfactantConcentration()
         );
 
 
-        if(surfactant().soluble())
+        if (surfactant().soluble())
         {
             const scalarField& C =
                 mesh().boundary()[aPatchID()]
@@ -2670,7 +2670,7 @@ void trackedSurface::updateSurfactantConcentration()
            *log(1.0 - surfactantConcentration()
            /surfactant().surfactSaturatedConc());
 
-        if(neg(min(surfaceTension().internalField())))
+        if (neg(min(surfaceTension().internalField())))
         {
             FatalErrorIn
             (
@@ -2690,7 +2690,7 @@ void trackedSurface::updateContactAngle()
 
     if (freeContactAngle_)
     {
-        forAll(aMesh().boundary(), patchI)
+        forAll (aMesh().boundary(), patchI)
         {
             label ngbPolyPatchID =
                 aMesh().boundary()[patchI].ngbPolyPatchIndex();
@@ -2737,7 +2737,7 @@ void trackedSurface::updateTemperature()
 {
     if (TPtr_)
     {
-        if(twoFluids())
+        if (twoFluids())
         {
             // Update fixedValue boundary condition on patch B
 
@@ -2877,7 +2877,7 @@ void trackedSurface::updateNGradUn()
         {
             // Correct normal component of phiU
             // befor gradient calculation
-            forAll(phiU.boundaryField(), patchI)
+            forAll (phiU.boundaryField(), patchI)
             {
                 vectorField n =
                     mesh().Sf().boundaryField()[patchI]
@@ -2947,7 +2947,7 @@ void trackedSurface::updateNGradUn()
 
 void trackedSurface::correctUsBoundaryConditions()
 {
-    forAll(Us().boundaryField(), patchI)
+    forAll (Us().boundaryField(), patchI)
     {
         if
         (
@@ -2962,7 +2962,7 @@ void trackedSurface::correctUsBoundaryConditions()
             label ngbPolyPatchID =
                 aMesh().boundary()[patchI].ngbPolyPatchIndex();
 
-            if(ngbPolyPatchID != -1)
+            if (ngbPolyPatchID != -1)
             {
                 if
                 (
@@ -3034,7 +3034,7 @@ vector trackedSurface::totalSurfaceTensionForce() const
 
     vectorField surfTensionForces(n.size(), vector::zero);
 
-    if(cleanInterface())
+    if (cleanInterface())
     {
         surfTensionForces =
             S*cleanInterfaceSurfTension().value()
@@ -3056,7 +3056,7 @@ scalar trackedSurface::maxCourantNumber()
 {
     scalar CoNum = 0;
 
-    if(cleanInterface())
+    if (cleanInterface())
     {
         const scalarField& dE =aMesh().lPN();
 
@@ -3202,7 +3202,7 @@ trackedSurface::smoothFieldAlt
 
     scalarField edgeCount(sfIn.size(),0);
 
-    forAll(owner, edgeI)
+    forAll (owner, edgeI)
     {
         sfIn[owner[edgeI]] += esfIn[edgeI];
         sfIn[neighbour[edgeI]] += esfIn[edgeI];
@@ -3234,7 +3234,7 @@ void trackedSurface::correctCurvature()
 
     if (curvExtrapOrder_ == 0)
     {
-        forAll(fixedTrackedSurfacePatches_, patchI)
+        forAll (fixedTrackedSurfacePatches_, patchI)
         {
             label fixedPatchID =
                 aMesh().boundary().findPatchID
@@ -3242,7 +3242,7 @@ void trackedSurface::correctCurvature()
                     fixedTrackedSurfacePatches_[patchI]
                 );
 
-            if(fixedPatchID == -1)
+            if (fixedPatchID == -1)
             {
                 FatalErrorIn("trackedSurface::trackedSurface(...)")
                     << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
@@ -3255,7 +3255,7 @@ void trackedSurface::correctCurvature()
 
             const labelListList& fFaces = aMesh().patch().faceFaces();
 
-            forAll(eFaces, edgeI)
+            forAll (eFaces, edgeI)
             {
                 const label& curFace = eFaces[edgeI];
                 const labelList& curFaceFaces = fFaces[curFace];
@@ -3263,7 +3263,7 @@ void trackedSurface::correctCurvature()
                 scalar avrK = 0.0;
                 label counter = 0;
 
-                forAll(curFaceFaces, faceI)
+                forAll (curFaceFaces, faceI)
                 {
                     label index = findIndex(eFaces, curFaceFaces[faceI]);
 
@@ -3291,7 +3291,7 @@ void trackedSurface::correctCurvature()
             areaVectorField gradK = fac::grad(K);
             vectorField& gradKI = gradK.internalField();
 
-            forAll(fixedTrackedSurfacePatches_, patchI)
+            forAll (fixedTrackedSurfacePatches_, patchI)
             {
                 label fixedPatchID =
                     aMesh().boundary().findPatchID
@@ -3299,7 +3299,7 @@ void trackedSurface::correctCurvature()
                         fixedTrackedSurfacePatches_[patchI]
                     );
 
-                if(fixedPatchID == -1)
+                if (fixedPatchID == -1)
                 {
                     FatalErrorIn("trackedSurface::trackedSurface(...)")
                         << "Wrong faPatch name in the fixedTrackedSurfacePatches "
@@ -3315,7 +3315,7 @@ void trackedSurface::correctCurvature()
 
                 const vectorField& fCentres = aMesh().areaCentres();
 
-                forAll(eFaces, edgeI)
+                forAll (eFaces, edgeI)
                 {
                     const label& curFace = eFaces[edgeI];
                     const labelList& curFaceFaces = fFaces[curFace];
@@ -3323,7 +3323,7 @@ void trackedSurface::correctCurvature()
                     scalar avrK = 0.0;
                     label counter = 0;
 
-                    forAll(curFaceFaces, faceI)
+                    forAll (curFaceFaces, faceI)
                     {
                         label index = findIndex(eFaces, curFaceFaces[faceI]);
 
@@ -3382,7 +3382,7 @@ void trackedSurface::correctPointNormals()
 
 
     // Wedge points
-    forAll(aMesh().boundary(), patchI)
+    forAll (aMesh().boundary(), patchI)
     {
         if (aMesh().boundary()[patchI].type() == wedgeFaPatch::typeName)
         {
@@ -3391,12 +3391,12 @@ void trackedSurface::correctPointNormals()
 
             const labelList& patchPoints = wedgePatch.pointLabels();
 
-            forAll(patchPoints, pointI)
+            forAll (patchPoints, pointI)
             {
                 label curPoint = patchPoints[pointI];
 
                 labelHashSet faceSet;
-                forAll(pFaces[curPoint], faceI)
+                forAll (pFaces[curPoint], faceI)
                 {
                     faceSet.insert(pFaces[curPoint][faceI]);
                 }
@@ -3410,7 +3410,7 @@ void trackedSurface::correctPointNormals()
                     const labelList& facePoints = faces[curFaces[i]];
                     for(label j=0; j<facePoints.size(); j++)
                     {
-                        if(!pointSet.found(facePoints[j]))
+                        if (!pointSet.found(facePoints[j]))
                         {
                             pointSet.insert(facePoints[j]);
                         }
@@ -3421,7 +3421,7 @@ void trackedSurface::correctPointNormals()
 
 
                 labelHashSet addPointsSet;
-                forAll(curPoints, pointI)
+                forAll (curPoints, pointI)
                 {
                     label index =
                         findIndex(patchPoints, curPoints[pointI]);
@@ -3469,7 +3469,7 @@ void trackedSurface::correctPointNormals()
                     dir /= mag(dir);
                     coordinateSystem cs("cs", origin, axis, dir);
 
-                    forAll(allPoints, pI)
+                    forAll (allPoints, pI)
                     {
                         allPoints[pI] = cs.localPosition(allPoints[pI]);
                     }
@@ -3529,7 +3529,7 @@ void trackedSurface::correctPointNormals()
 
     // Fixed boundary points
 
-    forAll(fixedTrackedSurfacePatches_, patchI)
+    forAll (fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
             aMesh().boundary().findPatchID
@@ -3537,7 +3537,7 @@ void trackedSurface::correctPointNormals()
                 fixedTrackedSurfacePatches_[patchI]
             );
 
-        if(fixedPatchID == -1)
+        if (fixedPatchID == -1)
         {
             FatalErrorIn("trackedSurface::trackedSurface(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
@@ -3551,30 +3551,30 @@ void trackedSurface::correctPointNormals()
         const labelList& eFaces =
             aMesh().boundary()[fixedPatchID].edgeFaces();
 
-        forAll(pLabels, pointI)
+        forAll (pLabels, pointI)
         {
             label curPoint = pLabels[pointI];
 
             labelHashSet faceSet;
-            forAll(pFaces[curPoint], faceI)
+            forAll (pFaces[curPoint], faceI)
             {
                 faceSet.insert(pFaces[curPoint][faceI]);
             }
 
             labelList curFaces = faceSet.toc();
 
-            forAll(curFaces, faceI)
+            forAll (curFaces, faceI)
             {
                 const labelList& curFaceFaces =
                     fFaces[curFaces[faceI]];
 
-                forAll(curFaceFaces, fI)
+                forAll (curFaceFaces, fI)
                 {
                     label curFaceFace = curFaceFaces[fI];
 
                     label index = findIndex(eFaces, curFaceFace);
 
-                    if( (index==-1) && !faceSet.found(curFaceFace) )
+                    if ( (index==-1) && !faceSet.found(curFaceFace) )
                     {
                         faceSet.insert(curFaceFace);
                     }
@@ -3590,7 +3590,7 @@ void trackedSurface::correctPointNormals()
                 const labelList& fPoints = faces[curFaces[i]];
                 for(label j=0; j<fPoints.size(); j++)
                 {
-                    if(!pointSet.found(fPoints[j]))
+                    if (!pointSet.found(fPoints[j]))
                     {
                         pointSet.insert(fPoints[j]);
                     }
@@ -3618,7 +3618,7 @@ void trackedSurface::correctPointNormals()
             dir /= mag(dir);
             coordinateSystem cs("cs", origin, axis, dir);
 
-            forAll(allPoints, pI)
+            forAll (allPoints, pI)
             {
                 allPoints[pI] = cs.localPosition(allPoints[pI]);
             }
@@ -3757,12 +3757,12 @@ void trackedSurface::correctContactLinePointNormals()
         if (contactAnglePtr_)
         {
             Pout << "Correcting contact line normals" << endl;
-
+            
             vectorField oldPoints(aMesh().nPoints(), vector::zero);
 
             const labelList& meshPoints = aMesh().patch().meshPoints();
 
-            forAll(oldPoints, ptI)
+            forAll (oldPoints, ptI)
             {
                 oldPoints[ptI] =
                     mesh().oldPoints()[meshPoints[ptI]];
@@ -3770,7 +3770,7 @@ void trackedSurface::correctContactLinePointNormals()
 
 #           include "createTangentField.H"
 
-            forAll(aMesh().boundary(), patchI)
+            forAll (aMesh().boundary(), patchI)
             {
                 label ngbPolyPatchID =
                     aMesh().boundary()[patchI].ngbPolyPatchIndex();
@@ -3787,7 +3787,7 @@ void trackedSurface::correctContactLinePointNormals()
 
                         scalarField rotAngle = 90 - contactAngle;
 
-    //                     rotAngle = average(rotAngle);
+//                         rotAngle = average(rotAngle);
 
                         rotAngle *= M_PI/180.0;
 
@@ -3819,7 +3819,7 @@ void trackedSurface::correctContactLinePointNormals()
                             scalar rotAngleWI = 0;
                             scalar rotAngleWsumI = 0;
 
-                            forAll(pointEdges[pointI], edgeI)
+                            forAll (pointEdges[pointI], edgeI)
                             {
                                 label curEdge = pointEdges[pointI][edgeI];
 
@@ -3890,7 +3890,7 @@ void trackedSurface::correctPointDisplacement
     const pointField& points =
         aMesh().patch().localPoints();
 
-    forAll(fixedTrackedSurfacePatches_, patchI)
+    forAll (fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
             aMesh().boundary().findPatchID
@@ -3898,7 +3898,7 @@ void trackedSurface::correctPointDisplacement
                 fixedTrackedSurfacePatches_[patchI]
             );
 
-        if(fixedPatchID == -1)
+        if (fixedPatchID == -1)
         {
             FatalErrorIn("trackedSurface::trackedSurface(...)")
                  << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
@@ -3914,13 +3914,13 @@ void trackedSurface::correctPointDisplacement
 
         labelHashSet pointSet;
 
-        forAll(eFaces, edgeI)
+        forAll (eFaces, edgeI)
         {
             label curFace = eFaces[edgeI];
 
             const labelList& curPoints = faces[curFace];
 
-            forAll(curPoints, pointI)
+            forAll (curPoints, pointI)
             {
                 label curPoint = curPoints[pointI];
                 label index = findIndex(pLabels, curPoint);
@@ -3939,13 +3939,13 @@ void trackedSurface::correctPointDisplacement
 
         labelListList corrPointFaces(corrPoints.size());
 
-        forAll(corrPoints, pointI)
+        forAll (corrPoints, pointI)
         {
             label curPoint = corrPoints[pointI];
 
             labelHashSet faceSet;
 
-            forAll(pFaces[curPoint], faceI)
+            forAll (pFaces[curPoint], faceI)
             {
                 label curFace = pFaces[curPoint][faceI];
 
@@ -3963,7 +3963,7 @@ void trackedSurface::correctPointDisplacement
             corrPointFaces[pointI] = faceSet.toc();
         }
 
-        forAll(corrPoints, pointI)
+        forAll (corrPoints, pointI)
         {
             label curPoint = corrPoints[pointI];
 
@@ -3971,7 +3971,7 @@ void trackedSurface::correctPointDisplacement
 
             const labelList& curPointFaces = corrPointFaces[pointI];
 
-            forAll(curPointFaces, faceI)
+            forAll (curPointFaces, faceI)
             {
                 const face& curFace = faces[curPointFaces[faceI]];
 
@@ -4021,7 +4021,7 @@ void trackedSurface::smoothCurvature()
 
     K.internalField() = oldK.internalField();
 
-    forAll(K.boundaryField(), patchI)
+    forAll (K.boundaryField(), patchI)
     {
         if
         (
@@ -4051,7 +4051,7 @@ void trackedSurface::smoothCurvature()
 
         areaVectorField gradK = fac::grad(K);
 
-        forAll(K.boundaryField(), patchI)
+        forAll (K.boundaryField(), patchI)
         {
             if
             (
@@ -4088,7 +4088,7 @@ void trackedSurface::smoothCurvature()
     scalar minIndicator = GREAT;
     label refFace = -1;
 
-    forAll(indicator, faceI)
+    forAll (indicator, faceI)
     {
         if (mag(indicator[faceI]) < minIndicator)
         {

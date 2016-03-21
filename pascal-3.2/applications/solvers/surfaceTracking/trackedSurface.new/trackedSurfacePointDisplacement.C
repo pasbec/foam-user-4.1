@@ -52,7 +52,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
     if (correctCurvature_)
     {
         // Correct controPoints next to fixed patches
-        forAll(fixedTrackedSurfacePatches_, patchI)
+        forAll (fixedTrackedSurfacePatches_, patchI)
         {
             label fixedPatchID =
                 aMesh().boundary().findPatchID
@@ -60,7 +60,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                     fixedTrackedSurfacePatches_[patchI]
                 );
 
-            if(fixedPatchID == -1)
+            if (fixedPatchID == -1)
             {
                 FatalErrorIn("trackedSurface::trackedSurface(...)")
                     << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
@@ -75,7 +75,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             const vectorField& fCentres =
                 aMesh().areaCentres().internalField();
 
-            forAll(eFaces, edgeI)
+            forAll (eFaces, edgeI)
             {
                 const label& curFace = eFaces[edgeI];
                 const labelList& curFaceFaces = fFaces[curFace];
@@ -83,7 +83,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                 scalar H = 0.0;
                 label counter = 0;
 
-                forAll(curFaceFaces, faceI)
+                forAll (curFaceFaces, faceI)
                 {
                     label index = findIndex(eFaces, curFaceFaces[faceI]);
 
@@ -166,13 +166,13 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
     // Old faMesh points
     vectorField oldPoints(aMesh().nPoints(), vector::zero);
     const labelList& meshPoints = aMesh().patch().meshPoints();
-    forAll(oldPoints, pI)
+    forAll (oldPoints, pI)
     {
         oldPoints[pI] =
             mesh().oldPoints()[meshPoints[pI]];
     }
 
-    forAll(patchMirrorPoints, patchI)
+    forAll (patchMirrorPoints, patchI)
     {
         patchMirrorPoints.set
         (
@@ -224,7 +224,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                     const edgeList::subList patchEdges =
                         aMesh().boundary()[patchI].patchSlice(aMesh().edges());
 
-                    forAll(rotationAxis, edgeI)
+                    forAll (rotationAxis, edgeI)
                     {
                         vector e = patchEdges[edgeI].vec(oldPoints);
 //                         vector e = patchEdges[edgeI].vec(aMesh().points());
@@ -237,7 +237,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                     rotationAxis /= mag(rotationAxis) + SMALL;
 
                     vectorField rotationAxis2 = rotationAxis;
-                    forAll(rotationAxis2, edgeI)
+                    forAll (rotationAxis2, edgeI)
                     {
                         rotationAxis2[edgeI] =
                             (N[edgeI]^facesDisplacementDir()[eFaces[edgeI]]);
@@ -250,7 +250,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                     }
                     rotationAxis2 /= mag(rotationAxis2) + SMALL;
 
-                    forAll(rotationAxis, edgeI)
+                    forAll (rotationAxis, edgeI)
                     {
                         vector NI = N[edgeI];
                         scalar rotAngleI = rotAngle[edgeI];
@@ -284,7 +284,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
         const labelList& pEdges = aMesh().boundary()[patchI];
 
         vectorField peCentres(pEdges.size(), vector::zero);
-        forAll(peCentres, edgeI)
+        forAll (peCentres, edgeI)
         {
             peCentres[edgeI] =
                 edges[pEdges[edgeI]].centre(points);
@@ -329,11 +329,11 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             {
                 label curEdge = curPointEdges[edgeI];
 
-                if(edgeFaces[curEdge].size() == 1)
+                if (edgeFaces[curEdge].size() == 1)
                 {
                     label patchID = -1;
                     label edgeID = -1;
-                    forAll(aMesh().boundary(), patchI)
+                    forAll (aMesh().boundary(), patchI)
                     {
                         const labelList& pEdges =
                             aMesh().boundary()[patchI];
@@ -405,7 +405,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             const wedgeFaPatch& wedgePatch =
                 refCast<const wedgeFaPatch>(aMesh().boundary()[patchI]);
 
-            forAll(wedgePatch.axisPoints(), pI)
+            forAll (wedgePatch.axisPoints(), pI)
             {
                 label axisPoint = wedgePatch.axisPoints()[pI];
 
@@ -421,7 +421,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             }
 
             // ZT, 22-Sep-2014
-//             if(wedgePatch.axisPoint() > -1)
+//             if (wedgePatch.axisPoint() > -1)
 //             {
 //                 label axisPoint = wedgePatch.axisPoint();
 
@@ -455,7 +455,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                 procPatch.pointLabels();
 
             FieldField<Field, vector> lsPoints(patchPointLabels.size());
-            forAll(lsPoints, pointI)
+            forAll (lsPoints, pointI)
             {
                 lsPoints.set(pointI, new vectorField(0, vector::zero));
             }
@@ -463,7 +463,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             const labelList& nonGlobalPatchPoints =
                 procPatch.nonGlobalPatchPoints();
 
-            forAll(nonGlobalPatchPoints, pointI)
+            forAll (nonGlobalPatchPoints, pointI)
             {
                 label curPatchPoint =
                     nonGlobalPatchPoints[pointI];
@@ -475,7 +475,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
 
                 lsPoints[curPatchPoint].setSize(curPointFaces.size());
 
-                forAll(curPointFaces, faceI)
+                forAll (curPointFaces, faceI)
                 {
                     label curFace = curPointFaces[faceI];
 
@@ -486,7 +486,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             }
 
 //             scalar lsPointsSize = 0;
-//             forAll(lsPoints, pointI)
+//             forAll (lsPoints, pointI)
 //             {
 //                 lsPointsSize +=
 //                     2*lsPoints[pointI].size()*sizeof(vector);
@@ -517,7 +517,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                 fromNeighbProc >> ngbLsPoints;
             }
 
-            forAll(nonGlobalPatchPoints, pointI)
+            forAll (nonGlobalPatchPoints, pointI)
             {
                 label curPatchPoint =
                     nonGlobalPatchPoints[pointI];
@@ -535,11 +535,11 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                 );
 
                 label counter = -1;
-                forAll(lsPoints[curPatchPoint], pointI)
+                forAll (lsPoints[curPatchPoint], pointI)
                 {
                     allLsPoints[++counter] = lsPoints[curPatchPoint][pointI];
                 }
-                forAll(ngbLsPoints[curNgbPoint], pointI)
+                forAll (ngbLsPoints[curNgbPoint], pointI)
                 {
                     allLsPoints[++counter] = ngbLsPoints[curNgbPoint][pointI];
                 }
@@ -607,7 +607,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                 label curPoint = spLabels[curSharedPointIndex];
 
                 label nAllPoints = 0;
-                forAll(procLsPoints, procI)
+                forAll (procLsPoints, procI)
                 {
                     nAllPoints += procLsPoints[procI].size();
                 }
@@ -615,9 +615,9 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                 vectorField allPoints(nAllPoints, vector::zero);
 
                 label counter = 0;
-                forAll(procLsPoints, procI)
+                forAll (procLsPoints, procI)
                 {
-                    forAll(procLsPoints[procI], pointI)
+                    forAll (procLsPoints[procI], pointI)
                     {
                         allPoints[counter++] =
                             procLsPoints[procI][pointI];
@@ -772,7 +772,7 @@ tmp<vectorField> trackedSurface::lsPlanePointAndNormal
 //     displacement = pointsDisplacementDir()
 //         * (pointsDisplacementDir()&displacement);
 //
-//     forAll(motionPointsMask(), pointI)
+//     forAll (motionPointsMask(), pointI)
 //     {
 //         displacement[pointI] *= motionPointsMask()[pointI];
 //     }

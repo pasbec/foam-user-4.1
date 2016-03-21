@@ -11,15 +11,15 @@
 
         if (edgeFaces[curEdge].size() == 1)
         {
-            forAll(aMesh().boundary(), patchI)
+            forAll (aMesh().boundary(), patchI)
             {
                 const labelList& curEdges = aMesh().boundary()[patchI];
 
-                forAll(curEdges, eI)
+                forAll (curEdges, eI)
                 {
                     if (curEdges[eI] == curEdge)
                     {
-                        if 
+                        if
                         (
                             aMesh().boundary()[patchI].type()
                          != processorFaPatch::typeName
@@ -37,7 +37,7 @@
 
     if (patchID != -1)
     {
-        vector nE = 
+        vector nE =
             pointNormals[edges[edgeID].start()]
           + pointNormals[edges[edgeID].end()];
 

@@ -11,7 +11,7 @@
 
         if (edgeFaces[curEdge].size() == 1)
         {
-            forAll(aMesh().boundary(), patchI)
+            forAll (aMesh().boundary(), patchI)
             {
                 const labelList& curEdges = aMesh().boundary()[patchI];
 
@@ -19,7 +19,7 @@
 
                 if (index != -1)
                 {
-                    if 
+                    if
                     (
                         aMesh().boundary()[patchI].type()
                      != processorFaPatch::typeName

@@ -47,7 +47,7 @@ void trackedSurface::moveFixedPatches(const vectorField& displacement)
     // Take only displacement at fixed patches
     vectorField delta(aMesh().nPoints(), vector::zero);
 
-    forAll(fixedTrackedSurfacePatches_, patchI)
+    forAll (fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
             aMesh().boundary().findPatchID
@@ -55,7 +55,7 @@ void trackedSurface::moveFixedPatches(const vectorField& displacement)
                 fixedTrackedSurfacePatches_[patchI]
             );
 
-        if(fixedPatchID == -1)
+        if (fixedPatchID == -1)
         {
             FatalErrorIn("trackedSurface::moveFixedPatches(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
@@ -66,7 +66,7 @@ void trackedSurface::moveFixedPatches(const vectorField& displacement)
         const labelList& patchPoints =
             aMesh().boundary()[fixedPatchID].pointLabels();
 
-        forAll(patchPoints, pointI)
+        forAll (patchPoints, pointI)
         {
             delta[patchPoints[pointI]] = displacement[patchPoints[pointI]];
         }
@@ -121,7 +121,7 @@ void trackedSurface::moveFixedPatches(const vectorField& displacement)
                 delta/DB().deltaT().value()
             );
 
-        if(twoFluids_)
+        if (twoFluids_)
         {
             pointField deltaB =
                 interpolatorAB().pointInterpolate
@@ -168,7 +168,7 @@ void trackedSurface::moveFixedPatches(const vectorField& displacement)
         motionUaPatch ==
             delta/DB().deltaT().value();
 
-        if(twoFluids_)
+        if (twoFluids_)
         {
             pointField deltaB =
                 interpolatorAB().pointInterpolate

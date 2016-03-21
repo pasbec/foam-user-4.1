@@ -64,7 +64,7 @@ void trackedSurface::makeInterpolators()
     }
 
 
-    if(aPatchID() == -1)
+    if (aPatchID() == -1)
     {
         FatalErrorIn("trackedSurface::makeInterpolators()")
             << "Surface patch A not defined."
@@ -72,7 +72,7 @@ void trackedSurface::makeInterpolators()
     }
 
 
-    if(bPatchID() == -1)
+    if (bPatchID() == -1)
     {
         FatalErrorIn("trackedSurface::makeInterpolators()")
             << "Surface patch B not defined."
@@ -101,9 +101,9 @@ void trackedSurface::makeInterpolators()
     const scalarField& faceDistBA =
         interpolatorBAPtr_->faceDistanceToIntersection();
 
-    forAll(faceDistBA, faceI)
+    forAll (faceDistBA, faceI)
     {
-        if(mag(faceDistBA[faceI] - GREAT) < SMALL)
+        if (mag(faceDistBA[faceI] - GREAT) < SMALL)
         {
             FatalErrorIn("trackedSurface::makeInterpolators()")
                 << "Error in B-to-A face patchToPatchInterpolation."
@@ -114,9 +114,9 @@ void trackedSurface::makeInterpolators()
     const scalarField& pointDistBA =
         interpolatorBAPtr_->pointDistanceToIntersection();
 
-    forAll(pointDistBA, pointI)
+    forAll (pointDistBA, pointI)
     {
-        if(mag(pointDistBA[pointI] - GREAT) < SMALL)
+        if (mag(pointDistBA[pointI] - GREAT) < SMALL)
         {
             FatalErrorIn("trackedSurface::makeInterpolators()")
                 << "Error in B-to-A point patchToPatchInterpolation."
@@ -145,9 +145,9 @@ void trackedSurface::makeInterpolators()
     const scalarField& faceDistAB =
         interpolatorABPtr_->faceDistanceToIntersection();
 
-    forAll(faceDistAB, faceI)
+    forAll (faceDistAB, faceI)
     {
-        if(mag(faceDistAB[faceI] - GREAT) < SMALL)
+        if (mag(faceDistAB[faceI] - GREAT) < SMALL)
         {
             FatalErrorIn("trackedSurface::makeInterpolators()")
                 << "Error in A-to-B face patchToPatchInterpolation."
@@ -158,9 +158,9 @@ void trackedSurface::makeInterpolators()
     const scalarField& pointDistAB =
         interpolatorABPtr_->pointDistanceToIntersection();
 
-    forAll(pointDistAB, pointI)
+    forAll (pointDistAB, pointI)
     {
-        if(mag(pointDistAB[pointI] - GREAT)<SMALL)
+        if (mag(pointDistAB[pointI] - GREAT)<SMALL)
         {
             FatalErrorIn("trackedSurface::makeInterpolators()")
                 << "Error in A-to-B point patchToPatchInterpolation."
@@ -325,7 +325,7 @@ void trackedSurface::makeMotionPointsMask()
     }
 
 
-    if(aPatchID() == -1)
+    if (aPatchID() == -1)
     {
         FatalErrorIn("trackedSurface::makeMotionPointsMask()")
             << "Surface patch A not defined."
@@ -367,7 +367,7 @@ void trackedSurface::makeDirections()
     }
 
 
-    if(aPatchID() == -1)
+    if (aPatchID() == -1)
     {
         FatalErrorIn("trackedSurface::makeDirections()")
             << "Surface patch A not defined."
@@ -389,9 +389,9 @@ void trackedSurface::makeDirections()
             vector::zero
         );
 
-    if(!normalMotionDir())
+    if (!normalMotionDir())
     {
-        if(mag(motionDir_) < SMALL)
+        if (mag(motionDir_) < SMALL)
         {
             FatalErrorIn("trackedSurface::makeDirections()")
                 << "Zero motion direction"
@@ -549,7 +549,7 @@ void trackedSurface::makeUs() const
         zeroGradientFaPatchVectorField::typeName
     );
 
-    forAll(aMesh().boundary(), patchI)
+    forAll (aMesh().boundary(), patchI)
     {
         if
         (
@@ -580,7 +580,7 @@ void trackedSurface::makeUs() const
         }
     }
 
-    forAll(fixedTrackedSurfacePatches_, patchI)
+    forAll (fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
             aMesh().boundary().findPatchID
@@ -588,7 +588,7 @@ void trackedSurface::makeUs() const
                 fixedTrackedSurfacePatches_[patchI]
             );
 
-        if(fixedPatchID == -1)
+        if (fixedPatchID == -1)
         {
             FatalErrorIn("trackedSurface::trackedSurface(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
@@ -628,7 +628,7 @@ void trackedSurface::makeUs() const
         patchFieldTypes
     );
 
-    forAll(fixedTrackedSurfacePatches_, patchI)
+    forAll (fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
             aMesh().boundary().findPatchID
@@ -636,7 +636,7 @@ void trackedSurface::makeUs() const
                 fixedTrackedSurfacePatches_[patchI]
             );
 
-        if(fixedPatchID == -1)
+        if (fixedPatchID == -1)
         {
             FatalErrorIn("trackedSurface::trackedSurface(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
