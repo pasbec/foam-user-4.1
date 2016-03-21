@@ -516,7 +516,7 @@ void trackedSurface::makeFaSubMesh() const
     aSubMeshPtr_ =
         new faSubMesh
         (
-            "trackedSurfaceSubMesh",
+            prefix_ + "SubMesh",
             aMesh(),
             controlPoints()
         );
