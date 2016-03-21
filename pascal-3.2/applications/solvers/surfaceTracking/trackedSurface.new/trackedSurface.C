@@ -980,13 +980,13 @@ void trackedSurface::updateDisplacementDirections()
         facesDisplacementDir() =
             aMesh().faceAreaNormals().internalField();
 
-//         // Correction of control points postion
-//         const vectorField& Cf = aMesh().areaCentres().internalField();
-//
-//         controlPoints() =
-//             facesDisplacementDir()
-//            *(facesDisplacementDir()&(controlPoints() - Cf))
-//           + Cf;
+        // Correction of control points postion
+        const vectorField& Cf = aMesh().areaCentres().internalField();
+
+        controlPoints() =
+            facesDisplacementDir()
+           *(facesDisplacementDir()&(controlPoints() - Cf))
+          + Cf;
     }
 }
 
@@ -1113,7 +1113,44 @@ bool trackedSurface::movePoints(const scalarField& interfacePhi)
 
     mesh().movePoints(newMeshPoints);
 
-    aMesh().movePoints();
+// TEST: DEBUG | Write displacement and mesh
+    {
+        pointMesh pMesh(mesh());
+
+        pointVectorField displacementField
+        (
+            IOobject
+            (
+                "displacement",
+                DB().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            pMesh,
+            dimensionedVector
+            (
+                word(),
+                dimLength,
+                pTraits<vector>::zero
+            )
+        );
+
+        vectorField& displacementFieldIn =
+            displacementField.internalField();
+
+        forAll (displacement, pointI)
+        {
+            displacementFieldIn[meshPointsA[pointI]] = displacement[pointI];
+        }
+
+        displacementField.write();
+
+        mesh().write();
+    }
+
+// TEST: Use MeshObject
+//     aMesh().movePoints();
 
 // TEST: Sub-mesh
     if (aSubMeshPtr_)
@@ -1310,7 +1347,8 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
 
             mesh().update();
 
-            aMesh().movePoints();
+// TEST: Use MeshObject
+//             aMesh().movePoints();
 
 // TEST: Sub-mesh
             if (aSubMeshPtr_)
@@ -1403,7 +1441,8 @@ void trackedSurface::smoothing()
 
     mesh().movePoints(newMeshPoints);
 
-    aMesh().movePoints();
+// TEST: Use MeshObject
+//     aMesh().movePoints();
 
     deltaH = calcDeltaH(-mesh().phi().boundaryField()[aPatchID()]
         *DB().deltaT().value());
@@ -1460,7 +1499,8 @@ void trackedSurface::smoothing()
 
     mesh().movePoints(newMeshPoints);
 
-    aMesh().movePoints();
+// TEST: Use MeshObject
+//     aMesh().movePoints();
 
     if (correctPointNormals_)
     {
@@ -1895,7 +1935,8 @@ bool trackedSurface::smoothMesh()
 
     mesh().update();
 
-    aMesh().movePoints();
+// TEST: Use MeshObject
+//     aMesh().movePoints();
 
     correctContactLinePointNormals();
 
@@ -2039,7 +2080,8 @@ bool trackedSurface::moveMeshPoints(const scalarField& interfacePhi)
 
     mesh().update();
 
-    aMesh().movePoints();
+// TEST: Use MeshObject
+//     aMesh().movePoints();
 
     correctContactLinePointNormals();
 
@@ -2302,26 +2344,31 @@ void trackedSurface::updateVelocity()
     {
         const vectorField& nA = aMesh().faceAreaNormals().internalField();
 
-// CHANGED: Use velocity to correct interface normal velocity
-        vectorField UPA =
-            U().boundaryField()[aPatchID()].patchInternalField();
+// // TEST: Use velocity to correct interface normal velocity
+//         vectorField UPA =
+//             U().boundaryField()[aPatchID()].patchInternalField();
+//
+//         if
+//         (
+//             U().boundaryField()[aPatchID()].type()
+//          == fixedGradientCorrectedFvPatchField<vector>::typeName
+//         )
+//         {
+//             fixedGradientCorrectedFvPatchField<vector>& aU =
+//                 refCast<fixedGradientCorrectedFvPatchField<vector> >
+//                 (
+//                     U().boundaryField()[aPatchID()]
+//                 );
+//
+//             UPA += aU.corrVecGrad();
+//         }
+//
+//         vectorField UnFs = nA*(nA & UPA);
 
-        if
-        (
-            U().boundaryField()[aPatchID()].type()
-         == fixedGradientCorrectedFvPatchField<vector>::typeName
-        )
-        {
-            fixedGradientCorrectedFvPatchField<vector>& aU =
-                refCast<fixedGradientCorrectedFvPatchField<vector> >
-                (
-                    U().boundaryField()[aPatchID()]
-                );
-
-            UPA += aU.corrVecGrad();
-        }
-
-        vectorField UnFs = nA*(nA & UPA);
+// TEST: Use mesh phi to update normal component of Us
+        vectorField UnFs =
+            nA*fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]
+            /mesh().boundary()[aPatchID()].magSf();
 
 //         vectorField UnFs =
 //             nA*phi_.boundaryField()[aPatchID()]
@@ -3757,7 +3804,7 @@ void trackedSurface::correctContactLinePointNormals()
         if (contactAnglePtr_)
         {
             Pout << "Correcting contact line normals" << endl;
-            
+
             vectorField oldPoints(aMesh().nPoints(), vector::zero);
 
             const labelList& meshPoints = aMesh().patch().meshPoints();

@@ -814,6 +814,9 @@ public:
                 const GeometricField<Type, faPatchField, areaMesh>& af
             ) const;
 
+            //- Write selected fields of tracked surface side A
+            void writeA();
+
             //- Write selected fields as volFields of tracked surface side A
             void writeVolA();
 };

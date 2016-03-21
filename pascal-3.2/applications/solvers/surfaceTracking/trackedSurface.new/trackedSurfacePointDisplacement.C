@@ -49,6 +49,12 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
 
     controlPoints() += facesDisplacementDir()*deltaH;
 
+// TEST: DEBUG | Additional debugging
+    if (debug > 3)
+    {
+        writeVTKControlPoints();
+    }
+
     if (correctCurvature_)
     {
         // Correct controPoints next to fixed patches
@@ -163,14 +169,15 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
     // Mirror control points
     FieldField<Field, vector> patchMirrorPoints(aMesh().boundary().size());
 
-    // Old faMesh points
-    vectorField oldPoints(aMesh().nPoints(), vector::zero);
-    const labelList& meshPoints = aMesh().patch().meshPoints();
-    forAll (oldPoints, pI)
-    {
-        oldPoints[pI] =
-            mesh().oldPoints()[meshPoints[pI]];
-    }
+// TEST: Why oldPoints?
+//     // Old faMesh points
+//     vectorField oldPoints(aMesh().nPoints(), vector::zero);
+//     const labelList& meshPoints = aMesh().patch().meshPoints();
+//     forAll (oldPoints, pI)
+//     {
+//         oldPoints[pI] =
+//             mesh().oldPoints()[meshPoints[pI]];
+//     }
 
     forAll (patchMirrorPoints, patchI)
     {
@@ -226,8 +233,9 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
 
                     forAll (rotationAxis, edgeI)
                     {
-                        vector e = patchEdges[edgeI].vec(oldPoints);
-//                         vector e = patchEdges[edgeI].vec(aMesh().points());
+// TEST: Why oldPoints?
+//                         vector e = patchEdges[edgeI].vec(oldPoints);
+                        vector e = patchEdges[edgeI].vec(aMesh().points());
 
                         // Adjust direction
                         rotationAxis[edgeI] =
@@ -303,6 +311,17 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
 
         patchMirrorPoints[patchI] =
             peCentres + delta + 2*deltaNr;
+
+// TEST: DEBUG | Additional debugging
+        if (debug > 3)
+        {
+            writeVTKpoints
+            (
+                word("MirrorPoints")
+              + word(aMesh().boundary()[patchI].name()),
+                patchMirrorPoints[patchI]
+            );
+        }
     }
 
 
@@ -641,6 +660,36 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
                    /(pointsDisplacementDir()[curPoint]&N);
             }
         }
+    }
+
+// TEST: DEBUG | Additional debugging
+    if (debug > 3)
+    {
+        writeVTKpoints
+        (
+            word("displacement"),
+            displacement
+        );
+
+        const pointField& oldPoints = mesh().allPoints();
+
+        const labelList& meshPoints =
+            mesh().boundaryMesh()[aPatchID()].meshPoints();
+
+        vectorField newPoints(displacement.size(), vector::zero);
+
+        forAll (newPoints, pointI)
+        {
+            newPoints[pointI] =
+                oldPoints[meshPoints[pointI]]
+              + displacement[pointI];
+        }
+
+        writeVTKpoints
+        (
+            word("newMeshPoints"),
+            newPoints
+        );
     }
 
     return tdisplacement;

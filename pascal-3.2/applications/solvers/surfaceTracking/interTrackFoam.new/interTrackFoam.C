@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
             if (runTime.outputTime())
             {
                 interface.writeVTK();
-                interface.writeVTKControlPoints();
+                interface.writeA();
                 interface.writeVolA();
             }
         }
