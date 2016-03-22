@@ -1,4 +1,5 @@
 EXE_INC = \
+    -Iinclude \
     -I$(FOAM_USER_SRC)/foamTools/lnInclude \
     -I$(FOAM_USER_SRC)/finiteArea.new/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \

@@ -67,12 +67,10 @@ int main(int argc, char *argv[])
 
 #       include "readFreeSurfaceControls.H"
 
-        interface.moveMeshPointsForOldTrackedSurfDisplacement();
-
+        interface.updateMesh();
         interface.updateDisplacementDirections();
-        interface.updateControlPointsPosition();
 
-//         interface.predictPoints();
+        interface.predictPoints();
 
         Info<< "\nMax surface Courant Number = "
             << interface.maxCourantNumber() << endl << endl;

@@ -50,8 +50,10 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
     controlPoints() += facesDisplacementDir()*deltaH;
 
 // TEST: DEBUG | Additional debugging
-    if (debug > 3)
+    if (debug > 5)
     {
+        mesh().write();
+
         writeVTKControlPoints();
     }
 
@@ -313,7 +315,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             peCentres + delta + 2*deltaNr;
 
 // TEST: DEBUG | Additional debugging
-        if (debug > 3)
+        if (debug > 5)
         {
             writeVTKpoints
             (
@@ -663,7 +665,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
     }
 
 // TEST: DEBUG | Additional debugging
-    if (debug > 3)
+    if (debug > 5)
     {
         writeVTKpoints
         (
@@ -766,6 +768,126 @@ tmp<vectorField> trackedSurface::lsPlanePointAndNormal
     pointAndNormal()[1] = n0;
 
     return pointAndNormal;
+}
+
+
+void trackedSurface::correctPointDisplacement
+(
+    const scalarField& sweptVolCorr,
+    vectorField& displacement
+)
+{
+    const labelListList& pFaces =
+        aMesh().patch().pointFaces();
+
+    const faceList& faces =
+        aMesh().patch().localFaces();
+
+    const pointField& points =
+        aMesh().patch().localPoints();
+
+    forAll (fixedTrackedSurfacePatches_, patchI)
+    {
+        label fixedPatchID =
+            aMesh().boundary().findPatchID
+            (
+                fixedTrackedSurfacePatches_[patchI]
+            );
+
+        if (fixedPatchID == -1)
+        {
+            FatalErrorIn("trackedSurface::trackedSurface(...)")
+                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
+                    << " defined in the trackedSurfaceProperties dictionary"
+                    << abort(FatalError);
+        }
+
+        const labelList& pLabels =
+            aMesh().boundary()[fixedPatchID].pointLabels();
+
+        const labelList& eFaces =
+            aMesh().boundary()[fixedPatchID].edgeFaces();
+
+        labelHashSet pointSet;
+
+        forAll (eFaces, edgeI)
+        {
+            label curFace = eFaces[edgeI];
+
+            const labelList& curPoints = faces[curFace];
+
+            forAll (curPoints, pointI)
+            {
+                label curPoint = curPoints[pointI];
+                label index = findIndex(pLabels, curPoint);
+
+                if (index == -1)
+                {
+                    if (!pointSet.found(curPoint))
+                    {
+                        pointSet.insert(curPoint);
+                    }
+                }
+            }
+        }
+
+        labelList corrPoints = pointSet.toc();
+
+        labelListList corrPointFaces(corrPoints.size());
+
+        forAll (corrPoints, pointI)
+        {
+            label curPoint = corrPoints[pointI];
+
+            labelHashSet faceSet;
+
+            forAll (pFaces[curPoint], faceI)
+            {
+                label curFace = pFaces[curPoint][faceI];
+
+                label index = findIndex(eFaces, curFace);
+
+                if (index != -1)
+                {
+                    if (!faceSet.found(curFace))
+                    {
+                        faceSet.insert(curFace);
+                    }
+                }
+            }
+
+            corrPointFaces[pointI] = faceSet.toc();
+        }
+
+        forAll (corrPoints, pointI)
+        {
+            label curPoint = corrPoints[pointI];
+
+            scalar curDisp = 0;
+
+            const labelList& curPointFaces = corrPointFaces[pointI];
+
+            forAll (curPointFaces, faceI)
+            {
+                const face& curFace = faces[curPointFaces[faceI]];
+
+                label ptInFace = curFace.which(curPoint);
+                label next = curFace.nextLabel(ptInFace);
+                label prev = curFace.prevLabel(ptInFace);
+
+                vector a = points[next] - points[curPoint];
+                vector b = points[prev] - points[curPoint];
+                const vector& c = pointsDisplacementDir()[curPoint];
+
+                curDisp += 2*sweptVolCorr[curPointFaces[faceI]]/((a^b)&c);
+            }
+
+            curDisp /= curPointFaces.size();
+
+            displacement[curPoint] =
+                curDisp*pointsDisplacementDir()[curPoint];
+        }
+    }
 }
 
 

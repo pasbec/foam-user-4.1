@@ -88,7 +88,7 @@ class trackedSurface
         volScalarField& p_;
 
         //- Reference to fluid flux field
-        const surfaceScalarField& phi_;
+        surfaceScalarField& phi_;
 
         //- Pointer to temperature field
         volScalarField* TPtr_;
@@ -283,7 +283,7 @@ class trackedSurface
         //- Disallow default bitwise assignment
         void operator=(const trackedSurface&);
 
-        // Demand-driven data
+        //- Demand-driven data
 
             void makeInterpolators();
             void makeControlPoints() const;
@@ -328,14 +328,55 @@ class trackedSurface
             //- Init control points position
             void initControlPointsPosition();
 
-            //- Calculate swept volume correction
+        //- Interface move calculations
+
+            //- Calculate swept volume correction for given interface phi
             tmp<scalarField> calcSweptVolCorr(const scalarField& interfacePhi);
 
-            //- Calculate control point deltaH
+            //- Calculate shift of interface control points from swept volume field
             tmp<scalarField> calcDeltaH(const scalarField& sweptVolCorr);
 
-            //- Move correctedFvPatchField fvSubMeshes
+            //- Calculate and add correction for interface control points shift
+            void calcAddDeltaHcorrection(scalarField& deltaH);
+
+            //- Calculate displacement
+            tmp<vectorField> calcDisplacement(const scalarField& interfacePhi);
+
+            //- Calculate new mesh points from interface displacement field
+            tmp<pointField> calcNewMeshPoints(const vectorField& displacement);
+
+            //- Calculate new mesh points from interface phi
+            tmp<pointField> calcNewMeshPoints(const scalarField& interfacePhi);
+
+            //- Calculate new mesh points from negative total displacement field
+            tmp<pointField> calcNewMeshPoints();
+
+        // Interface move operations
+
+            //- Move and update all mesh points with motion solver for
+            //  total displacement and delete total displacement pointer
+            void moveMeshPoints();
+
+            //- Move and update all mesh points with motion solver for
+            //  given displacement field
+            void moveMeshPoints(const pointField& displacement);
+
+            //- Move finite area sub-mesh
+            void moveFaSubMesh();
+
+            //- Move sub-mesh of all correctedFvPatchField of one field
+            template<class Type>
+            void
+            moveCorrectedPatchSubMesh
+            (
+                GeometricField<Type, fvPatchField, volMesh>& vf
+            ) const;
+
+            //- Move sub-meshes of all relevant fields
             void moveCorrectedPatchSubMeshes();
+
+            //- Update all dependencies after point movement
+            void moveUpdate();
 
         //- Move control ponts for deltaH and calculate
         //  surface points displacement
@@ -383,7 +424,7 @@ public:
             const volScalarField& rho,
             volVectorField& Ub,
             volScalarField& Pb,
-            const surfaceScalarField& phi,
+            surfaceScalarField& phi,
             volScalarField* TbPtr = NULL,
             const uniformDimensionedVectorField* gPtr = NULL,
             const twoPhaseMixture* transportPtr = NULL,
@@ -447,6 +488,12 @@ public:
         const volScalarField& p() const
         {
             return p_;
+        }
+
+        //- Return reference to flux field
+        surfaceScalarField& phi()
+        {
+            return phi_;
         }
 
         //- Return reference to flux field
@@ -702,28 +749,25 @@ public:
         void updateDisplacementDirections();
 
         //- Update control points
-        void updateControlPointsPosition();
+        void resetControlPoints();
 
         //- Predict interface points position
-        bool predictPoints();
+        void predictPoints();
 
         //- Correct interface points position
-        bool correctPoints();
+        void correctPoints();
 
         //- Move only surface points
-        bool movePoints(const scalarField& interfacePhi);
+        void movePoints(const scalarField& interfacePhi);
 
-        //- Move mesh points for old time surface points displacement
-        bool moveMeshPointsForOldTrackedSurfDisplacement();
+        //- Move all mesh points from total displacement
+        void updateMesh();
 
         //- Smoothing interface
         void smoothing();
 
         //- Smooth surface mesh using Laplacian smoothing
-        bool smoothMesh();
-
-        //- Move mesh points
-        bool moveMeshPoints(const scalarField& interfacePhi);
+        void smoothMesh();
 
         //- Correct fixed surface patches
         void moveFixedPatches(const vectorField& displacement);
@@ -766,26 +810,6 @@ public:
 
         //- Maximal surface tension based Courant number
         scalar maxCourantNumber();
-
-// TEST: Damp spurious oscillation
-        //-
-        template<class Type>
-        void
-        smoothField
-        (
-            const word name,
-            Field<Type>& f
-        );
-
-// TEST: Damp spurious oscillation
-        //-
-        template<class Type>
-        void
-        smoothFieldAlt
-        (
-            const word name,
-            Field<Type>& f
-        );
 
         // Writing surface data
 

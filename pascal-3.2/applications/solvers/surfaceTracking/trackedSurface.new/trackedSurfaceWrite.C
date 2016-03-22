@@ -172,7 +172,7 @@ void trackedSurface::writeA()
     fac::grad(Us())().write();
 
     // faceCurvaturesDivNormals
-    (-fac::div(aMesh().faceAreaNormals()))().write();
+    (fac::div(aMesh().faceAreaNormals()))().write();
 
     // surfaceTensionGrad
     surfaceTensionGrad()().write();
@@ -335,7 +335,7 @@ void trackedSurface::writeVolA()
     areaScalarField& aPhi = taPhi();
 
     aPhi.internalField() =
-        phi_.boundaryField()[aPatchID()];
+        phi().boundaryField()[aPatchID()];
     aPhi.correctBoundaryConditions();
 
     writeVol(aPhi);

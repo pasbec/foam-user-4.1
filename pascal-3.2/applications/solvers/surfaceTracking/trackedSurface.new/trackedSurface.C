@@ -95,6 +95,7 @@ void trackedSurface::clearOut()
     deleteDemandDrivenData(nGradUnPtr_);
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void trackedSurface::initProperties()
@@ -118,7 +119,7 @@ void trackedSurface::initCheckPointNormalsCorrection()
         {
             FatalErrorIn
             (
-                "trackedSurface::initPointNormalsCorrection(...)"
+                "trackedSurface::initCheckPointNormalsCorrection(...)"
             )   << "Patch name for point normals correction does not exist"
                 << abort(FatalError);
         }
@@ -145,7 +146,7 @@ void trackedSurface::initCheckPointNormalsCorrection()
                     {
                         FatalErrorIn
                         (
-                            "trackedSurface::initPointNormalsCorrection(...)"
+                            "trackedSurface::initCheckPointNormalsCorrection(...)"
                         )   << "Point normal correction is activated for patch "
                             << aMesh().boundary()[patchI].name() << ". "
                             << "This is considered fatal as a contact angle is "
@@ -175,7 +176,7 @@ void trackedSurface::initCheckSurfacePatches()
 
     if (aPatchID() == -1)
     {
-        FatalErrorIn("trackedSurface::trackedSurface(...)")
+        FatalErrorIn("trackedSurface::initCheckSurfacePatches(...)")
             << "Surface patch not defined.  Please make sure that "
                 << " the surface patches is named as trackedSurface"
                 << abort(FatalError);
@@ -198,7 +199,7 @@ void trackedSurface::initCheckSurfacePatches()
 
         if (bPatchID() == -1)
         {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
+            FatalErrorIn("trackedSurface::initCheckSurfacePatches(...)")
                 << "Surface shadow patch not defined. "
                     << "Please make sure that the surface shadow patch "
                     << "is named as trackedSurfaceShadow."
@@ -241,7 +242,7 @@ void trackedSurface::initMotionPointMask()
 
         if (fixedPatchID == -1)
         {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
+            FatalErrorIn("trackedSurface::initMotionPointMask(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
                     << " defined in the trackedSurfaceProperties dictionary"
                     << abort(FatalError);
@@ -292,7 +293,7 @@ void trackedSurface::initControlPointsPosition()
 {
     scalarField deltaH = scalarField(aMesh().nFaces(), 0.0);
 
-    pointField displacement = pointDisplacement(deltaH);
+    vectorField displacement = pointDisplacement(deltaH);
 
     const faceList& faces = aMesh().faces();
     const pointField& points = aMesh().points();
@@ -307,66 +308,38 @@ void trackedSurface::initControlPointsPosition()
         sweptVol[faceI] = -faces[faceI].sweptVol(points, newPoints);
     }
 
-    vectorField faceArea(faces.size(), vector::zero);
+    vectorField faceAreaNormals(faces.size(), vector::zero);
 
-    forAll (faceArea, faceI)
+    forAll (faceAreaNormals, faceI)
     {
-        faceArea[faceI] = faces[faceI].normal(newPoints);
+        faceAreaNormals[faceI] = faces[faceI].normal(newPoints);
     }
 
     forAll (deltaH, faceI)
     {
-        deltaH[faceI] = sweptVol[faceI]/
-            ((faceArea[faceI] & facesDisplacementDir()[faceI]) + SMALL);
+        scalar AnI = faceAreaNormals[faceI] & facesDisplacementDir()[faceI];
 
-        if ((faceArea[faceI] & facesDisplacementDir()[faceI]) < SMALL)
+        deltaH[faceI] = sweptVol[faceI]/ (AnI + SMALL);
+
+        if (AnI < SMALL)
         {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
+            FatalErrorIn("trackedSurface::initControlPointsPosition(...)")
                 << "Something is probably wrong with the specified motion direction"
                     << abort(FatalError);
 
         }
     }
 
-    forAll (fixedTrackedSurfacePatches_, patchI)
-    {
-        label fixedPatchID =
-            aMesh().boundary().findPatchID
-            (
-                fixedTrackedSurfacePatches_[patchI]
-            );
-
-        if (fixedPatchID == -1)
-        {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
-                << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
-                    << " defined in the trackedSurfaceProperties dictionary"
-                    << abort(FatalError);
-        }
-
-        const labelList& eFaces =
-            aMesh().boundary()[fixedPatchID].edgeFaces();
-
-        forAll (eFaces, edgeI)
-        {
-            deltaH[eFaces[edgeI]] *= 2.0;
-        }
-    }
+    calcAddDeltaHcorrection(deltaH);
 
     displacement = pointDisplacement(deltaH);
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePhi)
 {
-// // TEST: Damp spurious oscillation
-//     scalarField& newInterFacePhi = const_cast<scalarField&>(interfacePhi);
-//     for (label i=0; i<20; i++)
-//     {
-//         smoothField("aPhi", newInterFacePhi);
-// //         smoothFieldAlt("aPhi", newInterFacePhi);
-//     }
-
     scalarField meshPhi = fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
 
 // // TEST: Volume conservation
@@ -396,6 +369,18 @@ tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePh
 //     Pout << "gSum(flowPhi) = " << gSum(interfacePhi) << endl;
 //     Pout << "gSum(meshPhi) = " << gSum(meshPhi) << endl;
 //     Pout << "gSum(diffPhi) = " << gSum(sweptVolCorr) << endl;
+//     Pout << "------------------------------------------" << endl;
+//     Pout << "gMax(flowPhi) = " << gMax(interfacePhi) << endl;
+//     Pout << "gMax(meshPhi) = " << gMax(meshPhi) << endl;
+//     Pout << "gMax(diffPhi) = " << gMax(sweptVolCorr) << endl;
+//     Pout << "------------------------------------------" << endl;
+//     Pout << "gMin(flowPhi) = " << gMin(interfacePhi) << endl;
+//     Pout << "gMin(meshPhi) = " << gMin(meshPhi) << endl;
+//     Pout << "gMin(diffPhi) = " << gMin(sweptVolCorr) << endl;
+//     Pout << "------------------------------------------" << endl;
+//     Pout << "gAverage(flowPhi) = " << gAverage(interfacePhi) << endl;
+//     Pout << "gAverage(meshPhi) = " << gAverage(meshPhi) << endl;
+//     Pout << "gAverage(diffPhi) = " << gAverage(sweptVolCorr) << endl;
 //     Pout << "------------------------------------------" << endl;
 
     word ddtScheme
@@ -439,7 +424,7 @@ tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePh
     }
     else
     {
-        FatalErrorIn("trackedSurface::movePoints()")
+        FatalErrorIn("trackedSurface::calcSweptVolCorr()")
             << "Unsupported temporal differencing scheme : "
                 << ddtScheme
                 << abort(FatalError);
@@ -467,13 +452,12 @@ tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
 
     deltaH = sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
 
-// // TEST: Damp spurious oscillation
-//     for (label i=0; i<20; i++)
-//     {
-//         smoothField("deltaH", deltaH);
-// //         smoothFieldAlt("deltaH", deltaH);
-//     }
+    return tdeltaH;
+}
 
+
+void trackedSurface::calcAddDeltaHcorrection(scalarField& deltaH)
+{
     forAll (fixedTrackedSurfacePatches_, patchI)
     {
         label fixedPatchID =
@@ -484,7 +468,7 @@ tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
 
         if (fixedPatchID == -1)
         {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
+            FatalErrorIn("trackedSurface::calcDeltaH(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
                     << " defined in the trackedSurfaceProperties dictionary"
                     << abort(FatalError);
@@ -498,104 +482,318 @@ tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
             deltaH[eFaces[edgeI]] *= 2.0;
         }
     }
+}
 
-    return tdeltaH;
+
+tmp<vectorField> trackedSurface::calcDisplacement(const scalarField& interfacePhi)
+{
+    scalarField sweptVolCorr = calcSweptVolCorr(interfacePhi);
+    scalarField deltaH = calcDeltaH(sweptVolCorr);
+
+    tmp<vectorField> tdisplacement = pointDisplacement(deltaH);
+
+    vectorField& displacement = tdisplacement();
+
+    if (correctDisplacement_)
+    {
+        correctPointDisplacement(sweptVolCorr, displacement);
+    }
+
+    return tdisplacement;
+}
+
+
+tmp<pointField> trackedSurface::calcNewMeshPoints(const vectorField& displacement)
+{
+    tmp<pointField> tnewMeshPoints
+    (
+        new pointField(mesh().allPoints())
+    );
+
+    pointField& newMeshPoints = tnewMeshPoints();
+
+    const labelList& meshPointsA =
+        mesh().boundaryMesh()[aPatchID()].meshPoints();
+
+    forAll (displacement, pointI)
+    {
+        newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
+    }
+
+    if (twoFluids_)
+    {
+        const labelList& meshPointsB =
+            mesh().boundaryMesh()[bPatchID_].meshPoints();
+
+        vectorField displacementB =
+            interpolatorAB().pointInterpolate
+            (
+                displacement
+            );
+
+        forAll (displacementB, pointI)
+        {
+            newMeshPoints[meshPointsB[pointI]] += displacementB[pointI];
+        }
+
+        Pout << gMax(mag(displacement)) << ", "
+            << gMax(mag(displacementB)) << endl;
+    }
+
+    twoDPointCorrector twoDPointCorr(mesh());
+    twoDPointCorr.correctPoints(newMeshPoints);
+
+    return tnewMeshPoints;
+}
+
+
+tmp<pointField> trackedSurface::calcNewMeshPoints(const scalarField& interfacePhi)
+{
+    tmp<vectorField> tdisplacement = calcDisplacement(interfacePhi);
+
+    vectorField& displacement = tdisplacement();
+
+    tmp<pointField> tnewMeshPoints = calcNewMeshPoints(displacement);
+
+    tdisplacement.clear();
+
+    return tnewMeshPoints;
+}
+
+
+tmp<pointField> trackedSurface::calcNewMeshPoints()
+{
+    tmp<pointField> tnewMeshPoints
+    (
+        new pointField(mesh().allPoints())
+    );
+
+    pointField& newMeshPoints = tnewMeshPoints();
+
+    const labelList& meshPointsA =
+        mesh().boundaryMesh()[aPatchID()].meshPoints();
+
+    forAll (totalDisplacement(), pointI)
+    {
+        newMeshPoints[meshPointsA[pointI]] -= totalDisplacement()[pointI];
+    }
+
+    twoDPointCorrector twoDPointCorr(mesh());
+    twoDPointCorr.correctPoints(newMeshPoints);
+
+    return tnewMeshPoints;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void trackedSurface::moveMeshPoints(const pointField& displacement)
+{
+    bool feMotionSolver =
+        mesh().objectRegistry::foundObject<tetPointVectorField>
+        (
+            "motionU"
+        );
+
+    bool fvMotionSolver =
+        mesh().objectRegistry::foundObject<pointVectorField>
+        (
+            "pointMotionU"
+        );
+
+    if (feMotionSolver)
+    {
+        tetPointVectorField& motionU =
+            const_cast<tetPointVectorField&>
+            (
+                mesh().objectRegistry::
+                lookupObject<tetPointVectorField>
+                (
+                    "motionU"
+                )
+            );
+
+        fixedValueTetPolyPatchVectorField& motionUaPatch =
+            refCast<fixedValueTetPolyPatchVectorField>
+            (
+                motionU.boundaryField()[aPatchID()]
+            );
+
+        tetPolyPatchInterpolation tppiAPatch
+        (
+            refCast<const faceTetPolyPatch>
+            (
+                motionUaPatch.patch()
+            )
+        );
+
+        motionUaPatch ==
+            tppiAPatch.pointToPointInterpolate
+            (
+                displacement/DB().deltaT().value()
+            );
+
+        if (twoFluids_)
+        {
+            vectorField displacementB =
+                interpolatorAB().pointInterpolate
+                (
+                    displacement
+                );
+
+            fixedValueTetPolyPatchVectorField& motionUbPatch =
+                refCast<fixedValueTetPolyPatchVectorField>
+                (
+                    motionU.boundaryField()[bPatchID()]
+                );
+
+            tetPolyPatchInterpolation tppiBPatch
+            (
+                refCast<const faceTetPolyPatch>(motionUbPatch.patch())
+            );
+
+            motionUbPatch ==
+                tppiBPatch.pointToPointInterpolate
+                (
+                    displacement/DB().deltaT().value()
+                );
+        }
+    }
+    else if (fvMotionSolver)
+    {
+        pointVectorField& motionU =
+            const_cast<pointVectorField&>
+            (
+                mesh().objectRegistry::
+                lookupObject<pointVectorField>
+                (
+                    "pointMotionU"
+                )
+            );
+
+        fixedValuePointPatchVectorField& motionUaPatch =
+            refCast<fixedValuePointPatchVectorField>
+            (
+                motionU.boundaryField()[aPatchID()]
+            );
+
+        motionUaPatch ==
+            displacement/DB().deltaT().value();
+
+        if (twoFluids_)
+        {
+            vectorField displacementB =
+                interpolatorAB().pointInterpolate
+                (
+                    displacement
+                );
+
+            fixedValuePointPatchVectorField& motionUbPatch =
+                refCast<fixedValuePointPatchVectorField>
+                (
+                    motionU.boundaryField()[bPatchID()]
+                );
+
+            motionUbPatch ==
+                displacementB/DB().deltaT().value();
+        }
+    }
+
+    mesh().update();
+}
+
+
+void trackedSurface::moveMeshPoints()
+{
+    moveMeshPoints(totalDisplacement());
+
+    deleteDemandDrivenData(totalDisplacementPtr_);
+}
+
+
+// TEST: Sub-mesh
+void trackedSurface::moveFaSubMesh()
+{
+    if (aSubMeshPtr_)
+    {
+        aSubMesh().movePoints();
+    }
+}
+
+
+template<class Type>
+void
+trackedSurface::moveCorrectedPatchSubMesh
+(
+    GeometricField<Type, fvPatchField, volMesh>& vf
+) const
+{
+    forAll (vf.boundaryField(), patchI)
+    {
+        if
+        (
+            (
+                vf.boundaryField()[patchI].type()
+                == fixedGradientCorrectedFvPatchField<Type>::typeName
+            )
+        ||
+            (
+                vf.boundaryField()[patchI].type()
+                == fixedValueCorrectedFvPatchField<Type>::typeName
+            )
+        ||
+            (
+                vf.boundaryField()[patchI].type()
+                == zeroGradientCorrectedFvPatchField<Type>::typeName
+            )
+        )
+        {
+            correctedFvPatchField<Type>& vfA =
+                refCast<correctedFvPatchField<Type> >
+                (
+                    vf.boundaryField()[patchI]
+                );
+
+            vfA.movePatchSubMesh();
+        }
+    }
 }
 
 
 void trackedSurface::moveCorrectedPatchSubMeshes()
 {
-    forAll (U().boundaryField(), patchI)
-    {
-        if
-        (
-            (
-                U().boundaryField()[patchI].type()
-                == fixedGradientCorrectedFvPatchField<vector>::typeName
-            )
-        ||
-            (
-                U().boundaryField()[patchI].type()
-                == fixedValueCorrectedFvPatchField<vector>::typeName
-            )
-        ||
-            (
-                U().boundaryField()[patchI].type()
-                == zeroGradientCorrectedFvPatchField<vector>::typeName
-            )
-        )
-        {
-            correctedFvPatchField<vector>& aU =
-                refCast<correctedFvPatchField<vector> >
-                (
-                    U().boundaryField()[patchI]
-                );
+    moveCorrectedPatchSubMesh(U());
 
-            aU.movePatchSubMesh();
-        }
-    }
-
-    forAll (p().boundaryField(), patchI)
-    {
-        if
-        (
-            (
-                p().boundaryField()[patchI].type()
-                == fixedGradientCorrectedFvPatchField<scalar>::typeName
-            )
-        ||
-            (
-                p().boundaryField()[patchI].type()
-                == fixedValueCorrectedFvPatchField<scalar>::typeName
-            )
-        ||
-            (
-                p().boundaryField()[patchI].type()
-                == zeroGradientCorrectedFvPatchField<scalar>::typeName
-            )
-        )
-        {
-            correctedFvPatchField<scalar>& aP =
-                refCast<correctedFvPatchField<scalar> >
-                (
-                    p().boundaryField()[patchI]
-                );
-
-            aP.movePatchSubMesh();
-        }
-    }
+    moveCorrectedPatchSubMesh(p());
 
     if (TPtr_)
     {
-        forAll (T().boundaryField(), patchI)
-        {
-            if
-            (
-                (
-                    T().boundaryField()[patchI].type()
-                    == fixedGradientCorrectedFvPatchField<scalar>::typeName
-                )
-            ||
-                (
-                    T().boundaryField()[patchI].type()
-                    == fixedValueCorrectedFvPatchField<scalar>::typeName
-                )
-            ||
-                (
-                    T().boundaryField()[patchI].type()
-                    == zeroGradientCorrectedFvPatchField<scalar>::typeName
-                )
-            )
-            {
-                correctedFvPatchField<scalar>& aT =
-                    refCast<correctedFvPatchField<scalar> >
-                    (
-                        T().boundaryField()[patchI]
-                    );
+        moveCorrectedPatchSubMesh(T());
+    }
+}
 
-                aT.movePatchSubMesh();
-            }
-        }
+void trackedSurface::moveUpdate()
+{
+    // Move faSubMesh
+    moveFaSubMesh();
+
+    // Move correctedFvPatchFields
+    moveCorrectedPatchSubMeshes();
+
+// TODO
+    correctContactLinePointNormals();
+
+// TODO
+    if (correctPointNormals_)
+    {
+        correctPointNormals();
+    }
+
+// TODO
+    if (correctCurvature_)
+    {
+//             correctCurvature();
+        smoothCurvature();
     }
 }
 
@@ -607,7 +805,7 @@ trackedSurface::trackedSurface
     const volScalarField& rho,
     volVectorField& Ub,
     volScalarField& Pb,
-    const surfaceScalarField& sfPhi,
+    surfaceScalarField& sfPhi,
     volScalarField* TbPtr,
     const uniformDimensionedVectorField* gPtr,
     const twoPhaseMixture* transportPtr,
@@ -990,37 +1188,55 @@ void trackedSurface::updateDisplacementDirections()
     }
 }
 
-void trackedSurface::updateControlPointsPosition()
+void trackedSurface::resetControlPoints()
 {
     controlPoints() = aMesh().areaCentres().internalField();
 }
 
 
-bool trackedSurface::predictPoints()
+void trackedSurface::predictPoints()
 {
+
+    // Reset control points
+    resetControlPoints();
+
     // Smooth interface
+    smoothing();
 
-    if (smoothing_)
-    {
-        smoothing();
-    }
-
-    for
-    (
-        int trackedSurfCorr=0;
-        trackedSurfCorr<nTrackedSurfCorr_;
-        trackedSurfCorr++
-    )
-    {
-        movePoints(phi_.boundaryField()[aPatchID()]);
-//         moveMeshPoints();
-    }
-
-    return true;
+// TEST
+//     movePoints
+//     (
+//         phi_.boundaryField()[aPatchID()]
+//       + fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]
+//     );
+//     scalarField sweptVolCorr =
+//         calcSweptVolCorr
+//         (
+//             // At last time step phiA was meshPhiA
+//             // In order to predict the new interface we will
+//             // set sweptVolCorr to 2*phiA as:
+//             //   2*phiA - meshPhiA
+//             // = 2*phiA - phiA
+//             // =   phiA
+// //            2.0*phi().boundaryField()[aPatchID()]
+//             -phi().boundaryField()[aPatchID()]
+//         );
+//
+//     scalarField deltaH = calcDeltaH(sweptVolCorr);
+//
+//     vectorField displacement = pointDisplacement(deltaH);
+//
+//     moveMeshPoints(displacement);
+//
+//     mesh().resetMotion();
+//
+// //     // Now we set phiA = meshPhiA
+// //     phi().boundaryField()[aPatchID()] =
+// //         fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
 }
 
 
-bool trackedSurface::correctPoints()
+void trackedSurface::correctPoints()
 {
     for
     (
@@ -1029,156 +1245,27 @@ bool trackedSurface::correctPoints()
         trackedSurfCorr++
     )
     {
-        movePoints(phi_.boundaryField()[aPatchID()]);
-//         moveMeshPoints();
+        movePoints(phi().boundaryField()[aPatchID()]);
     }
-
-    return true;
 }
 
 
-bool trackedSurface::movePoints(const scalarField& interfacePhi)
+void trackedSurface::movePoints(const scalarField& interfacePhi)
 {
-    scalarField sweptVolCorr = calcSweptVolCorr(interfacePhi);
-    scalarField deltaH = calcDeltaH(sweptVolCorr);
 
-    pointField displacement = pointDisplacement(deltaH);
-//     displacement *= 0;
-
-//     Pout << gMax(mag(displacement)) << endl;
-
-    if (correctDisplacement_)
-    {
-//         Pout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-        correctPointDisplacement(sweptVolCorr, displacement);
-    }
-
-    // Move only surface points
-
-    pointField newMeshPoints = mesh().allPoints();
-
-    const labelList& meshPointsA =
-        mesh().boundaryMesh()[aPatchID()].meshPoints();
-
-    forAll (displacement, pointI)
-    {
-        newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
-    }
-
-    if (twoFluids_)
-    {
-        const labelList& meshPointsB =
-            mesh().boundaryMesh()[bPatchID_].meshPoints();
-
-        pointField displacementB =
-            interpolatorAB().pointInterpolate
-            (
-                displacement
-            );
-
-        forAll (displacementB, pointI)
-        {
-            newMeshPoints[meshPointsB[pointI]] += displacementB[pointI];
-        }
-
-        Pout << gMax(mag(displacement)) << ", "
-            << gMax(mag(displacementB)) << endl;
-    }
-
-
-    // Update total displacement field
-
-//     if (totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
-//     {
-//         FatalErrorIn("trackedSurface::movePoints()")
-//             << "Total displacement of surface points "
-//                 << "from previous time step is not absorbed by the mesh."
-//                 << abort(FatalError);
-//     }
-//     else if (curTimeIndex_ < DB().timeIndex())
-//     {
-//         totalDisplacement() = displacement;
-
-//         curTimeIndex_ = DB().timeIndex();
-//     }
-//     else
-//     {
-//         totalDisplacement() += displacement;
-//     }
+    vectorField displacement = calcDisplacement(interfacePhi);
 
     totalDisplacement() += displacement;
 
-    twoDPointCorrector twoDPointCorr(mesh());
-    twoDPointCorr.correctPoints(newMeshPoints);
+    pointField newMeshPoints = calcNewMeshPoints(displacement);
 
     mesh().movePoints(newMeshPoints);
 
-// TEST: DEBUG | Write displacement and mesh
-    {
-        pointMesh pMesh(mesh());
-
-        pointVectorField displacementField
-        (
-            IOobject
-            (
-                "displacement",
-                DB().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            pMesh,
-            dimensionedVector
-            (
-                word(),
-                dimLength,
-                pTraits<vector>::zero
-            )
-        );
-
-        vectorField& displacementFieldIn =
-            displacementField.internalField();
-
-        forAll (displacement, pointI)
-        {
-            displacementFieldIn[meshPointsA[pointI]] = displacement[pointI];
-        }
-
-        displacementField.write();
-
-        mesh().write();
-    }
-
-// TEST: Use MeshObject
-//     aMesh().movePoints();
-
-// TEST: Sub-mesh
-    if (aSubMeshPtr_)
-    {
-        aSubMesh().movePoints();
-    }
-
-    correctContactLinePointNormals();
-
-    if (correctPointNormals_)
-    {
-        correctPointNormals();
-    }
-
-    if (correctCurvature_)
-    {
-//         correctCurvature();
-        smoothCurvature();
-    }
-
-    // Move correctedFvPatchField fvSubMeshes
-    moveCorrectedPatchSubMeshes();
-
-    return true;
+    moveUpdate();
 }
 
 
-bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
+void trackedSurface::updateMesh()
 {
     if (totalDisplacementPtr_)
     {
@@ -1197,325 +1284,97 @@ bool trackedSurface::moveMeshPointsForOldTrackedSurfDisplacement()
         {
             Info << "Moving whole mesh" << endl;
 
-            pointField newPoints = mesh().allPoints();
+            pointField newMeshPoints = calcNewMeshPoints();
 
-            const labelList& meshPointsA =
-                mesh().boundaryMesh()[aPatchID()].meshPoints();
+            mesh().movePoints(newMeshPoints);
 
-            forAll (totalDisplacement(), pointI)
-            {
-                newPoints[meshPointsA[pointI]] -= totalDisplacement()[pointI];
-            }
+            moveMeshPoints();
 
-
-            // Check mesh motion solver type
-
-            bool feMotionSolver =
-                mesh().objectRegistry::foundObject<tetPointVectorField>
-                (
-                    "motionU"
-                );
-
-            bool fvMotionSolver =
-                mesh().objectRegistry::foundObject<pointVectorField>
-                (
-                    "pointMotionU"
-                );
-
-            if (feMotionSolver)
-            {
-                tetPointVectorField& motionU =
-                    const_cast<tetPointVectorField&>
-                    (
-                        mesh().objectRegistry::
-                        lookupObject<tetPointVectorField>
-                        (
-                            "motionU"
-                        )
-                    );
-
-                fixedValueTetPolyPatchVectorField& motionUaPatch =
-                    refCast<fixedValueTetPolyPatchVectorField>
-                    (
-                        motionU.boundaryField()[aPatchID()]
-                    );
-
-                tetPolyPatchInterpolation tppiAPatch
-                    (
-                        refCast<const faceTetPolyPatch>
-                        (
-                            motionUaPatch.patch()
-                        )
-                    );
-
-                motionUaPatch ==
-                    tppiAPatch.pointToPointInterpolate
-                    (
-                        totalDisplacement()/DB().deltaT().value()
-                    );
-
-                if (twoFluids_)
-                {
-                    const labelList& meshPointsB =
-                        mesh().boundaryMesh()[bPatchID()].meshPoints();
-
-                    pointField totDisplacementB =
-                        interpolatorAB().pointInterpolate
-                        (
-                            totalDisplacement()
-                        );
-
-                    forAll (totDisplacementB, pointI)
-                    {
-                        newPoints[meshPointsB[pointI]] -=
-                            totDisplacementB[pointI];
-                    }
-
-                    fixedValueTetPolyPatchVectorField& motionUbPatch =
-                        refCast<fixedValueTetPolyPatchVectorField>
-                        (
-                            motionU.boundaryField()[bPatchID()]
-                        );
-
-                    tetPolyPatchInterpolation tppiBPatch
-                    (
-                        refCast<const faceTetPolyPatch>(motionUbPatch.patch())
-                    );
-
-                    motionUbPatch ==
-                        tppiBPatch.pointToPointInterpolate
-                        (
-                            totDisplacementB/DB().deltaT().value()
-                        );
-                }
-            }
-            else if (fvMotionSolver)
-            {
-                pointVectorField& motionU =
-                    const_cast<pointVectorField&>
-                    (
-                        mesh().objectRegistry::
-                        lookupObject<pointVectorField>
-                        (
-                            "pointMotionU"
-                        )
-                    );
-
-                fixedValuePointPatchVectorField& motionUaPatch =
-                    refCast<fixedValuePointPatchVectorField>
-                    (
-                        motionU.boundaryField()[aPatchID()]
-                    );
-
-                motionUaPatch ==
-                    totalDisplacement()/DB().deltaT().value();
-
-                if (twoFluids_)
-                {
-                    const labelList& meshPointsB =
-                        mesh().boundaryMesh()[bPatchID()].meshPoints();
-
-                    pointField totDisplacementB =
-                        interpolatorAB().pointInterpolate
-                        (
-                            totalDisplacement()
-                        );
-
-                    forAll (totDisplacementB, pointI)
-                    {
-                        newPoints[meshPointsB[pointI]] -=
-                            totDisplacementB[pointI];
-                    }
-
-                    fixedValuePointPatchVectorField& motionUbPatch =
-                        refCast<fixedValuePointPatchVectorField>
-                        (
-                            motionU.boundaryField()[bPatchID()]
-                        );
-
-                    motionUbPatch ==
-                        totDisplacementB/DB().deltaT().value();
-                }
-            }
-
-            twoDPointCorrector twoDPointCorr(mesh());
-            twoDPointCorr.correctPoints(newPoints);
-
-            mesh().movePoints(newPoints);
-
-            deleteDemandDrivenData(totalDisplacementPtr_);
-
-            mesh().update();
-
-// TEST: Use MeshObject
-//             aMesh().movePoints();
-
-// TEST: Sub-mesh
-            if (aSubMeshPtr_)
-            {
-                aSubMesh().movePoints();
-            }
-
-            correctContactLinePointNormals();
-
-            if (correctPointNormals_)
-            {
-                correctPointNormals();
-            }
-
-            if (correctCurvature_)
-            {
-//             correctCurvature();
-                smoothCurvature();
-            }
-
-
-            // Move correctedFvPatchField fvSubMeshes
-            moveCorrectedPatchSubMeshes();
+            moveUpdate();
         }
     }
-
-    return true;
 }
 
 
 void trackedSurface::smoothing()
 {
-    controlPoints() = aMesh().areaCentres().internalField();
-
-    scalarField deltaH = scalarField(aMesh().nFaces(), 0.0);
-
-    pointField displacement = pointDisplacement(deltaH);
-
-    vectorField newMeshPoints = mesh().points();
-
-    const labelList& meshPointsA =
-        mesh().boundaryMesh()[aPatchID()].meshPoints();
-
-    forAll (displacement, pointI)
+    if (smoothing_)
     {
-        newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
-    }
+    // Reset control points
 
-    if (twoFluids_)
-    {
-        const labelList& meshPointsB =
-            mesh().boundaryMesh()[bPatchID_].meshPoints();
+        controlPoints() = aMesh().areaCentres().internalField();
 
-        pointField displacementB =
-            interpolatorAB().pointInterpolate
-            (
-                displacement
-            );
 
-        forAll (displacementB, pointI)
-        {
-            newMeshPoints[meshPointsB[pointI]] += displacementB[pointI];
-        }
-    }
+    // Smoothing step 1
 
-    // Update total displacement field
+        scalarField deltaH = scalarField(controlPoints().size(), 0.0);
 
-//     if (totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
-//     {
-//         FatalErrorIn("trackedSurface::movePoints()")
-//             << "Total displacement of surface points "
-//                 << "from previous time step is not absorbed by the mesh."
-//                 << abort(FatalError);
-//     }
-//     else if (curTimeIndex_ < DB().timeIndex())
-//     {
-//         totalDisplacement() = displacement;
-//
-//         curTimeIndex_ = DB().timeIndex();
-//     }
-//     else
-//     {
-//         totalDisplacement() += displacement;
-//     }
+        vectorField displacement = pointDisplacement(deltaH);
 
-    totalDisplacement() += displacement;
+        totalDisplacement() += displacement;
 
-    twoDPointCorrector twoDPointCorr(mesh());
-    twoDPointCorr.correctPoints(newMeshPoints);
+        vectorField newMeshPoints = calcNewMeshPoints(displacement);
 
-    mesh().movePoints(newMeshPoints);
+        mesh().movePoints(newMeshPoints);
 
-// TEST: Use MeshObject
-//     aMesh().movePoints();
 
-    deltaH = calcDeltaH(-mesh().phi().boundaryField()[aPatchID()]
-        *DB().deltaT().value());
+    // Smoothing step 2
 
-    displacement = pointDisplacement(deltaH);
+        deltaH = calcDeltaH(-mesh().phi().boundaryField()[aPatchID()]
+            *DB().deltaT().value());
 
-    newMeshPoints = mesh().points();
+        displacement = pointDisplacement(deltaH);
 
-    forAll (displacement, pointI)
-    {
-        newMeshPoints[meshPointsA[pointI]] += displacement[pointI];
-    }
+        totalDisplacement() += displacement;
 
-    if (twoFluids_)
-    {
-        const labelList& meshPointsB =
-            mesh().boundaryMesh()[bPatchID_].meshPoints();
+        newMeshPoints = calcNewMeshPoints(displacement);
 
-        pointField displacementB =
-            interpolatorAB().pointInterpolate
-            (
-                displacement
-            );
+        mesh().movePoints(newMeshPoints);
 
-        forAll (displacementB, pointI)
-        {
-            newMeshPoints[meshPointsB[pointI]] += displacementB[pointI];
-        }
-    }
+    // Update all dependencies after point movement
 
-    // Update total displacement field
-
-//     if (totalDisplacementPtr_ && (curTimeIndex_ < DB().timeIndex()))
-//     {
-//         FatalErrorIn("trackedSurface::movePoints()")
-//             << "Total displacement of surface points "
-//                 << "from previous time step is not absorbed by the mesh."
-//                 << abort(FatalError);
-//     }
-//     else if (curTimeIndex_ < DB().timeIndex())
-//     {
-//         totalDisplacement() = displacement;
-//
-//         curTimeIndex_ = DB().timeIndex();
-//     }
-//     else
-//     {
-//         totalDisplacement() += displacement;
-//     }
-
-    totalDisplacement() += displacement;
-
-    twoDPointCorr.correctPoints(newMeshPoints);
-
-    mesh().movePoints(newMeshPoints);
-
-// TEST: Use MeshObject
-//     aMesh().movePoints();
-
-    if (correctPointNormals_)
-    {
-        correctPointNormals();
-    }
-
-    if (correctCurvature_)
-    {
-//         correctCurvature();
-        smoothCurvature();
+        moveUpdate();
     }
 }
 
 
-bool trackedSurface::smoothMesh()
+void trackedSurface::moveFixedPatches(const vectorField& displacement)
+{
+    // Take only displacement at fixed patches
+    vectorField delta(aMesh().nPoints(), vector::zero);
+
+    forAll (fixedTrackedSurfacePatches_, patchI)
+    {
+        label fixedPatchID =
+            aMesh().boundary().findPatchID
+            (
+                fixedTrackedSurfacePatches_[patchI]
+            );
+
+        if (fixedPatchID == -1)
+        {
+            FatalErrorIn("trackedSurface::moveFixedPatches(...)")
+                << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
+                    << " defined in the trackedSurfaceProperties dictionary"
+                    << abort(FatalError);
+        }
+
+        const labelList& patchPoints =
+            aMesh().boundary()[fixedPatchID].pointLabels();
+
+        forAll (patchPoints, pointI)
+        {
+            delta[patchPoints[pointI]] = displacement[patchPoints[pointI]];
+        }
+    }
+
+    moveMeshPoints(delta);
+
+    moveUpdate();
+}
+
+
+void trackedSurface::smoothMesh()
 {
     const vectorField& oldPoints = aMesh().patch().localPoints();
 
@@ -1570,7 +1429,7 @@ bool trackedSurface::smoothMesh()
         }
 
 
-        // Performe smoothing
+        // Perform smoothing
         scalarField residual(pPointLabels.size(), 0);
         label counter = 0;
         do
@@ -1817,289 +1676,12 @@ bool trackedSurface::smoothMesh()
     Info << "Edge length, min: " << minEdge
         << ", max: " << maxEdge << ", avg: " << avgEdge << endl;
 
+
     vectorField displacement = newPoints - oldPoints;
 
-    //-- Set mesh motion boundary conditions
+    moveMeshPoints(displacement);
 
-    // Check mesh motion solver type
-
-    bool feMotionSolver =
-        mesh().objectRegistry::foundObject<tetPointVectorField>
-        (
-            "motionU"
-        );
-
-    bool fvMotionSolver =
-        mesh().objectRegistry::foundObject<pointVectorField>
-        (
-            "pointMotionU"
-        );
-
-    if (feMotionSolver)
-    {
-        tetPointVectorField& motionU =
-            const_cast<tetPointVectorField&>
-            (
-                mesh().objectRegistry::
-                lookupObject<tetPointVectorField>
-                (
-                    "motionU"
-                )
-            );
-
-        fixedValueTetPolyPatchVectorField& motionUaPatch =
-            refCast<fixedValueTetPolyPatchVectorField>
-            (
-                motionU.boundaryField()[aPatchID()]
-            );
-
-        tetPolyPatchInterpolation tppiAPatch
-        (
-            refCast<const faceTetPolyPatch>
-            (
-                motionUaPatch.patch()
-            )
-        );
-
-        motionUaPatch ==
-            tppiAPatch.pointToPointInterpolate
-            (
-                displacement/DB().deltaT().value()
-            );
-
-        if (twoFluids_)
-        {
-            pointField displacementB =
-                interpolatorAB().pointInterpolate
-                (
-                    displacement
-                );
-
-            fixedValueTetPolyPatchVectorField& motionUbPatch =
-                refCast<fixedValueTetPolyPatchVectorField>
-                (
-                    motionU.boundaryField()[bPatchID()]
-                );
-
-            tetPolyPatchInterpolation tppiBPatch
-            (
-                refCast<const faceTetPolyPatch>(motionUbPatch.patch())
-            );
-
-            motionUbPatch ==
-                tppiBPatch.pointToPointInterpolate
-                (
-                    displacement/DB().deltaT().value()
-                );
-        }
-    }
-    else if (fvMotionSolver)
-    {
-        pointVectorField& motionU =
-            const_cast<pointVectorField&>
-            (
-                mesh().objectRegistry::
-                lookupObject<pointVectorField>
-                (
-                    "pointMotionU"
-                )
-            );
-
-        fixedValuePointPatchVectorField& motionUaPatch =
-            refCast<fixedValuePointPatchVectorField>
-            (
-                motionU.boundaryField()[aPatchID()]
-            );
-
-        motionUaPatch ==
-            displacement/DB().deltaT().value();
-
-        if (twoFluids_)
-        {
-            pointField displacementB =
-                interpolatorAB().pointInterpolate
-                (
-                    displacement
-                );
-
-            fixedValuePointPatchVectorField& motionUbPatch =
-                refCast<fixedValuePointPatchVectorField>
-                (
-                    motionU.boundaryField()[bPatchID()]
-                );
-
-            motionUbPatch ==
-                displacementB/DB().deltaT().value();
-        }
-    }
-
-    mesh().update();
-
-// TEST: Use MeshObject
-//     aMesh().movePoints();
-
-    correctContactLinePointNormals();
-
-    if (correctPointNormals_)
-    {
-        correctPointNormals();
-    }
-
-    if (correctCurvature_)
-    {
-        smoothCurvature();
-    }
-
-    // Move correctedFvPatchField fvSubMeshes
-    moveCorrectedPatchSubMeshes();
-
-    return true;
-}
-
-
-bool trackedSurface::moveMeshPoints(const scalarField& interfacePhi)
-{
-    scalarField sweptVolCorr = calcSweptVolCorr(interfacePhi);
-    scalarField deltaH = calcDeltaH(sweptVolCorr);
-
-    pointField displacement = pointDisplacement(deltaH);
-
-    //-- Set mesh motion boundary conditions
-
-    // Check mesh motion solver type
-
-    bool feMotionSolver =
-        mesh().objectRegistry::foundObject<tetPointVectorField>
-        (
-            "motionU"
-        );
-
-    bool fvMotionSolver =
-        mesh().objectRegistry::foundObject<pointVectorField>
-        (
-            "pointMotionU"
-        );
-
-    if (feMotionSolver)
-    {
-        tetPointVectorField& motionU =
-            const_cast<tetPointVectorField&>
-            (
-                mesh().objectRegistry::
-                lookupObject<tetPointVectorField>
-                (
-                    "motionU"
-                )
-            );
-
-        fixedValueTetPolyPatchVectorField& motionUaPatch =
-            refCast<fixedValueTetPolyPatchVectorField>
-            (
-                motionU.boundaryField()[aPatchID()]
-            );
-
-        tetPolyPatchInterpolation tppiAPatch
-        (
-            refCast<const faceTetPolyPatch>
-            (
-                motionUaPatch.patch()
-            )
-        );
-
-        motionUaPatch ==
-            tppiAPatch.pointToPointInterpolate
-            (
-                displacement/DB().deltaT().value()
-            );
-
-        if (twoFluids_)
-        {
-            pointField displacementB =
-                interpolatorAB().pointInterpolate
-                (
-                    displacement
-                );
-
-            fixedValueTetPolyPatchVectorField& motionUbPatch =
-                refCast<fixedValueTetPolyPatchVectorField>
-                (
-                    motionU.boundaryField()[bPatchID()]
-                );
-
-            tetPolyPatchInterpolation tppiBPatch
-            (
-                refCast<const faceTetPolyPatch>(motionUbPatch.patch())
-            );
-
-            motionUbPatch ==
-                tppiBPatch.pointToPointInterpolate
-                (
-                    displacement/DB().deltaT().value()
-                );
-        }
-    }
-    else if (fvMotionSolver)
-    {
-        pointVectorField& motionU =
-            const_cast<pointVectorField&>
-            (
-                mesh().objectRegistry::
-                lookupObject<pointVectorField>
-                (
-                    "pointMotionU"
-                )
-            );
-
-        fixedValuePointPatchVectorField& motionUaPatch =
-            refCast<fixedValuePointPatchVectorField>
-            (
-                motionU.boundaryField()[aPatchID()]
-            );
-
-        motionUaPatch ==
-            displacement/DB().deltaT().value();
-
-        if (twoFluids_)
-        {
-            pointField displacementB =
-                interpolatorAB().pointInterpolate
-                (
-                    displacement
-                );
-
-            fixedValuePointPatchVectorField& motionUbPatch =
-                refCast<fixedValuePointPatchVectorField>
-                (
-                    motionU.boundaryField()[bPatchID()]
-                );
-
-            motionUbPatch ==
-                displacementB/DB().deltaT().value();
-        }
-    }
-
-    mesh().update();
-
-// TEST: Use MeshObject
-//     aMesh().movePoints();
-
-    correctContactLinePointNormals();
-
-    if (correctPointNormals_)
-    {
-        correctPointNormals();
-    }
-
-    if (correctCurvature_)
-    {
-//         correctCurvature();
-        smoothCurvature();
-    }
-
-    // Move correctedFvPatchField fvSubMeshes
-    moveCorrectedPatchSubMeshes();
-
-    return true;
+    moveUpdate();
 }
 
 
@@ -2368,11 +1950,11 @@ void trackedSurface::updateVelocity()
 // TEST: Use mesh phi to update normal component of Us
         vectorField UnFs =
             nA*fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]
-            /mesh().boundary()[aPatchID()].magSf();
+          / mesh().boundary()[aPatchID()].magSf();
 
 //         vectorField UnFs =
-//             nA*phi_.boundaryField()[aPatchID()]
-//            /mesh().boundary()[aPatchID()].magSf();
+//             nA*phi().boundaryField()[aPatchID()]
+//           / mesh().boundary()[aPatchID()].magSf();
 
         // Correct normal component of surface velocity
         Us().internalField() += UnFs - nA*(nA&Us().internalField());
@@ -3095,132 +2677,6 @@ scalar trackedSurface::maxCourantNumber()
 }
 
 
-// TEST: Damp spurious oscillation
-template<class Type>
-void
-trackedSurface::smoothField
-(
-    const word name,
-    Field<Type>& f
-)
-{
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tsf
-    (
-        new GeometricField<Type, faPatchField, areaMesh>
-        (
-            IOobject
-            (
-                name,
-                DB().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            aMesh(),
-            dimensioned<Type>
-            (
-                word(),
-                dimless,
-                pTraits<Type>::zero
-            ),
-            zeroGradientFaPatchField<Type>::typeName
-        )
-    );
-    GeometricField<Type, faPatchField, areaMesh>& sf = tsf();
-
-    Field<Type>& sfIn = sf.internalField();
-
-    sfIn = f;
-    sf.correctBoundaryConditions();
-
-    sf = fac::average(fac::interpolate(sf));
-    sf.correctBoundaryConditions();
-
-    f = sfIn;
-
-    tsf.clear();
-}
-
-
-// TEST: Damp spurious oscillation
-template<class Type>
-void
-trackedSurface::smoothFieldAlt
-(
-    const word name,
-    Field<Type>& f
-)
-{
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tsf
-    (
-        new GeometricField<Type, faPatchField, areaMesh>
-        (
-            IOobject
-            (
-                name,
-                DB().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            aMesh(),
-            dimensioned<Type>
-            (
-                word(),
-                dimless,
-                pTraits<Type>::zero
-            ),
-            zeroGradientFaPatchField<Type>::typeName
-        )
-    );
-    GeometricField<Type, faPatchField, areaMesh>& sf = tsf();
-
-    Field<Type>& sfIn = sf.internalField();
-
-    sfIn = f;
-    sf.correctBoundaryConditions();
-
-
-
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tesf
-    (
-        new GeometricField<Type, faePatchField, edgeMesh>
-        (
-            fac::interpolate(sf)
-        )
-    );
-    GeometricField<Type, faePatchField, edgeMesh>& esf = tesf();
-
-    Field<Type>& esfIn = esf.internalField();
-
-
-
-    sf *= 0;
-
-    const unallocLabelList& owner = aMesh().owner();
-    const unallocLabelList& neighbour = aMesh().neighbour();
-
-    scalarField edgeCount(sfIn.size(),0);
-
-    forAll (owner, edgeI)
-    {
-        sfIn[owner[edgeI]] += esfIn[edgeI];
-        sfIn[neighbour[edgeI]] += esfIn[edgeI];
-
-        edgeCount[owner[edgeI]] += 1.0;
-        edgeCount[neighbour[edgeI]] += 1.0;
-    }
-
-    sfIn /= edgeCount;
-    sf.correctBoundaryConditions();
-
-    tesf.clear();
-    tsf.clear();
-}
-
-
 void trackedSurface::correctCurvature()
 {
     // Correct curvature next to fixed patches
@@ -3877,126 +3333,6 @@ void trackedSurface::correctContactLinePointNormals()
 }
 
 
-void trackedSurface::correctPointDisplacement
-(
-    const scalarField& sweptVolCorr,
-    vectorField& displacement
-)
-{
-    const labelListList& pFaces =
-        aMesh().patch().pointFaces();
-
-    const faceList& faces =
-        aMesh().patch().localFaces();
-
-    const pointField& points =
-        aMesh().patch().localPoints();
-
-    forAll (fixedTrackedSurfacePatches_, patchI)
-    {
-        label fixedPatchID =
-            aMesh().boundary().findPatchID
-            (
-                fixedTrackedSurfacePatches_[patchI]
-            );
-
-        if (fixedPatchID == -1)
-        {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
-                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
-                    << " defined in the trackedSurfaceProperties dictionary"
-                    << abort(FatalError);
-        }
-
-        const labelList& pLabels =
-            aMesh().boundary()[fixedPatchID].pointLabels();
-
-        const labelList& eFaces =
-            aMesh().boundary()[fixedPatchID].edgeFaces();
-
-        labelHashSet pointSet;
-
-        forAll (eFaces, edgeI)
-        {
-            label curFace = eFaces[edgeI];
-
-            const labelList& curPoints = faces[curFace];
-
-            forAll (curPoints, pointI)
-            {
-                label curPoint = curPoints[pointI];
-                label index = findIndex(pLabels, curPoint);
-
-                if (index == -1)
-                {
-                    if (!pointSet.found(curPoint))
-                    {
-                        pointSet.insert(curPoint);
-                    }
-                }
-            }
-        }
-
-        labelList corrPoints = pointSet.toc();
-
-        labelListList corrPointFaces(corrPoints.size());
-
-        forAll (corrPoints, pointI)
-        {
-            label curPoint = corrPoints[pointI];
-
-            labelHashSet faceSet;
-
-            forAll (pFaces[curPoint], faceI)
-            {
-                label curFace = pFaces[curPoint][faceI];
-
-                label index = findIndex(eFaces, curFace);
-
-                if (index != -1)
-                {
-                    if (!faceSet.found(curFace))
-                    {
-                        faceSet.insert(curFace);
-                    }
-                }
-            }
-
-            corrPointFaces[pointI] = faceSet.toc();
-        }
-
-        forAll (corrPoints, pointI)
-        {
-            label curPoint = corrPoints[pointI];
-
-            scalar curDisp = 0;
-
-            const labelList& curPointFaces = corrPointFaces[pointI];
-
-            forAll (curPointFaces, faceI)
-            {
-                const face& curFace = faces[curPointFaces[faceI]];
-
-                label ptInFace = curFace.which(curPoint);
-                label next = curFace.nextLabel(ptInFace);
-                label prev = curFace.prevLabel(ptInFace);
-
-                vector a = points[next] - points[curPoint];
-                vector b = points[prev] - points[curPoint];
-                const vector& c = pointsDisplacementDir()[curPoint];
-
-                curDisp += 2*sweptVolCorr[curPointFaces[faceI]]/((a^b)&c);
-            }
-
-            curDisp /= curPointFaces.size();
-
-            displacement[curPoint] =
-                curDisp*pointsDisplacementDir()[curPoint];
-        }
-    }
-}
-
-
 void trackedSurface::smoothCurvature()
 {
     areaScalarField& oldK =
@@ -4151,6 +3487,7 @@ void trackedSurface::smoothCurvature()
 
     oldK = K;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

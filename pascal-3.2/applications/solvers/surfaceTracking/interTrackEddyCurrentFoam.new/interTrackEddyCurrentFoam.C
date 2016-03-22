@@ -208,21 +208,11 @@ int main(int argc, char *argv[])
             setRegionScope(control.fluidA());
 
             // Move and update mesh of fluid region
-            interface.moveMeshPointsForOldTrackedSurfDisplacement();
+            interface.updateMesh();
             interface.updateDisplacementDirections();
-            interface.updateControlPointsPosition();
 
-// // TODO TEST: Make sure phi is correct
-//             // Make sure phi is correct at interface
-//             phi.boundaryField()[interface.aPatchID()] =
-//                 fvc::meshPhi(U)().boundaryField()[interface.aPatchID()];
-
-//             // Prediction step for interface points
-//             interface.predictPoints();
+            interface.predictPoints();
         }
-
-//         // TODO
-//         runTime.writeNow();
 
         // ==================================================================//
         // Move mesh of dynamic region

@@ -7,7 +7,6 @@
 
 trackedSurface.C
 trackedSurfaceDemandDrivenData.C
-trackedSurfaceMoveFixedPatches.C
 trackedSurfacePointDisplacement.C
 trackedSurfaceWrite.C
 
