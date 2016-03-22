@@ -25,14 +25,13 @@ License
 
 
 #include "trackedSurface.H"
-#include "primitivePatchInterpolation.H"
-#include "emptyFaPatch.H"
-#include "wedgeFaPatch.H"
+
 #include "wallFvPatch.H"
-#include "PstreamCombineReduceOps.H"
+
+#include "wedgeFaPatch.H"
+
 #include "coordinateSystem.H"
 #include "scalarMatrices.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

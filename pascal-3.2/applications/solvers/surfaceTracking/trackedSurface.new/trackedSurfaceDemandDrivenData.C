@@ -24,14 +24,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "trackedSurface.H"
-#include "primitivePatchInterpolation.H"
-#include "emptyFaPatch.H"
-#include "wedgeFaPatch.H"
+
 #include "wallFvPatch.H"
+
 #include "wedgeFaPatchFields.H"
 #include "slipFaPatchFields.H"
 #include "fixedValueFaPatchFields.H"
-#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1442,47 +1440,6 @@ const areaVectorField& trackedSurface::surfaceTensionForce() const
     }
 
     return *surfaceTensionForcePtr_;
-}
-
-tmp<areaVectorField> trackedSurface::surfaceTensionGrad()
-{
-    tmp<areaVectorField> tgrad
-    (
-        new areaVectorField
-        (
-            IOobject
-            (
-                "surfaceTensionGrad",
-                DB().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            aMesh(),
-            dimensionedVector("ZERO", dimForce/sqr(dimLength), vector::zero)
-        )
-    );
-
-    if (!cleanInterface())
-    {
-        tgrad() =
-            (-fac::grad(surfactantConcentration())*
-            surfactant().surfactR()*surfactant().surfactT()/
-            (1.0 - surfactantConcentration()/
-            surfactant().surfactSaturatedConc()))();
-    }
-
-    if (TPtr_)
-    {
-        dimensionedScalar thermalCoeff
-        (
-            this->lookup("thermalCoeff")
-        );
-
-        tgrad() = thermalCoeff*fac::grad(temperature());
-    }
-
-    return tgrad;
 }
 
 

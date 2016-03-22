@@ -1,0 +1,982 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | foam-extend: Open Source CFD
+   \\    /   O peration     | Version:     3.2
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
+-------------------------------------------------------------------------------
+License
+    This file is part of foam-extend.
+
+    foam-extend is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation, either version 3 of the License, or (at your
+    option) any later version.
+
+    foam-extend is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "trackedSurface.H"
+
+#include "wallFvPatch.H"
+
+#include "fixedGradientFvPatchFields.H"
+#include "fixedValueFvPatchFields.H"
+
+#include "fixedGradientCorrectedFvPatchFields.H"
+#include "fixedValueCorrectedFvPatchFields.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+tmp<areaVectorField> trackedSurface::calcSurfaceTensionGrad()
+{
+    tmp<areaVectorField> tgrad
+    (
+        new areaVectorField
+        (
+            IOobject
+            (
+                "surfaceTensionGrad",
+                DB().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            aMesh(),
+            dimensionedVector("ZERO", dimForce/sqr(dimLength), vector::zero)
+        )
+    );
+
+    if (!cleanInterface())
+    {
+        tgrad() =
+            (-fac::grad(surfactantConcentration())*
+            surfactant().surfactR()*surfactant().surfactT()/
+            (1.0 - surfactantConcentration()/
+            surfactant().surfactSaturatedConc()))();
+    }
+
+    if (TPtr_)
+    {
+        dimensionedScalar thermalCoeff
+        (
+            this->lookup("thermalCoeff")
+        );
+
+        tgrad() = thermalCoeff*fac::grad(temperature());
+    }
+
+    return tgrad;
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void trackedSurface::updateBoundaryConditions()
+{
+    if (!implicitCoupling_)
+    {
+        updateContactAngle();
+        updateMuEff();
+        updateTemperature();
+        updateVelocity();
+        updateSurfactantConcentration();
+        updatePressure();
+    }
+}
+
+
+void trackedSurface::updateMuEff()
+{
+    if (turbulencePtr_)
+    {
+        const volScalarField nuEff = turbulence().nuEff();
+
+        muEffFluidAval() =
+            nuEff.boundaryField()[aPatchID()] * rhoFluidA().value();
+
+        if (twoFluids())
+        {
+            muEffFluidBval() =
+                nuEff.boundaryField()[bPatchID()] * rhoFluidB().value();
+        }
+    }
+}
+
+
+void trackedSurface::updateVelocity()
+{
+    if (twoFluids())
+    {
+        vectorField nA = mesh().boundary()[aPatchID()].nf();
+
+        vectorField nB = mesh().boundary()[bPatchID()].nf();
+
+        scalarField DnB = interpolatorBA().faceInterpolate
+        (
+            mesh().boundary()[bPatchID()].deltaCoeffs()
+        );
+
+        scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
+
+
+        vectorField UPA =
+            U().boundaryField()[aPatchID()].patchInternalField();
+
+        if
+        (
+            U().boundaryField()[aPatchID()].type()
+         == fixedGradientCorrectedFvPatchField<vector>::typeName
+        )
+        {
+            fixedGradientCorrectedFvPatchField<vector>& aU =
+                refCast<fixedGradientCorrectedFvPatchField<vector> >
+                (
+                    U().boundaryField()[aPatchID()]
+                );
+
+            UPA += aU.corrVecGrad();
+        }
+
+        vectorField UtPA = UPA - nA*(nA & UPA);
+
+
+        vectorField UPB = interpolatorBA().faceInterpolate
+        (
+            U().boundaryField()[bPatchID()].patchInternalField()
+        );
+
+        if
+        (
+            U().boundaryField()[bPatchID()].type()
+         == fixedValueCorrectedFvPatchField<vector>::typeName
+        )
+        {
+            fixedValueCorrectedFvPatchField<vector>& bU =
+                refCast<fixedValueCorrectedFvPatchField<vector> >
+                (
+                    U().boundaryField()[bPatchID()]
+                );
+
+            UPB += interpolatorBA().faceInterpolate(bU.corrVecGrad());
+        }
+
+        vectorField UtPB = UPB - nA*(nA & UPB);
+
+        vectorField UtFs =
+            muEffFluidAval()*DnA*UtPA
+          + muEffFluidBval()*DnB*UtPB;
+
+        // Normal component
+        vectorField UnPA = nA*(nA & UPA);
+        vectorField UnPB = nA*(nA & UPB);
+
+        vectorField UnFs =
+            2*muEffFluidAval()*UnPA*DnA
+          + 2*muEffFluidBval()*UnPB*DnB;
+
+        UnFs /= 2*muEffFluidAval()*DnA
+          + 2*muEffFluidBval()*DnB + VSMALL;
+
+//         vectorField UnFs =
+//             nA*phi().boundaryField()[aPatchID()]
+//            /mesh().boundary()[aPatchID()].magSf();
+
+        Us().internalField() += UnFs - nA*(nA&Us().internalField());
+        Us().correctBoundaryConditions();
+
+//*******************************************************************
+
+        UtFs -= (muEffFluidAval() - muEffFluidBval())*
+            (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
+
+
+        vectorField tangentialSurfaceTensionForce(nA.size(), vector::zero);
+
+        if (MarangoniStress())
+        {
+            Info << "MarangoniStress------------------------" << endl;
+
+            const vectorField& totSurfTensionForce = surfaceTensionForce();
+
+            tangentialSurfaceTensionForce = ((I-nA*nA)&totSurfTensionForce);
+
+//             tangentialSurfaceTensionForce =
+//                 calcSurfaceTensionGrad()().internalField();
+        }
+        else
+        {
+//             vectorField surfaceTensionForce =
+//                 cleanInterfaceSurfTension().value()
+//                *fac::edgeIntegrate
+//                 (
+//                     aMesh().Le()*aMesh().edgeLengthCorrection()
+//                 )().internalField();
+
+//             tangentialSurfaceTensionForce =
+//                 surfaceTensionForce
+//               - cleanInterfaceSurfTension().value()
+//                *curvature().internalField()*nA;
+        }
+
+        UtFs += tangentialSurfaceTensionForce;
+
+        UtFs /= muEffFluidAval()*DnA + muEffFluidBval()*DnB + VSMALL;
+
+        Us().internalField() = UnFs + UtFs;
+        Us().correctBoundaryConditions();
+
+        // Store old-time velocity field U()
+        U().oldTime();
+
+        U().boundaryField()[bPatchID()] ==
+            interpolatorAB().faceInterpolate(UtFs)
+          + nB*fvc::meshPhi(rho(),U())().boundaryField()[bPatchID()]/
+            mesh().boundary()[bPatchID()].magSf();
+
+        if
+        (
+            p().boundaryField()[bPatchID()].type()
+         == fixedGradientFvPatchField<scalar>::typeName
+        )
+        {
+            fixedGradientFvPatchField<scalar>& pB =
+                refCast<fixedGradientFvPatchField<scalar> >
+                (
+                    p().boundaryField()[bPatchID()]
+                );
+
+            pB.gradient() =
+               - rhoFluidB().value()
+                *(
+                     nB&fvc::ddt(U())().boundaryField()[bPatchID()]
+                 );
+        }
+
+
+        // Update fixedGradient boundary condition on patch A
+
+        updateNGradUn();
+
+        vectorField nGradU =
+            muEffFluidBval()*(UtPB - UtFs)*DnB // ZT, DnA
+          + tangentialSurfaceTensionForce
+          + muEffFluidAval()*nA*nGradUn()
+          + (muEffFluidBval() - muEffFluidAval())
+           *(fac::grad(Us())().internalField()&nA);
+
+        nGradU /= muEffFluidAval() + VSMALL;
+
+
+        if
+        (
+            U().boundaryField()[aPatchID()].type()
+         == fixedGradientCorrectedFvPatchField<vector>::typeName
+        )
+        {
+            fixedGradientCorrectedFvPatchField<vector>& aU =
+                refCast<fixedGradientCorrectedFvPatchField<vector> >
+                (
+                    U().boundaryField()[aPatchID()]
+                );
+
+            aU.gradient() = nGradU;
+        }
+        else if
+        (
+            U().boundaryField()[aPatchID()].type()
+         == fixedGradientFvPatchField<vector>::typeName
+        )
+        {
+            fixedGradientFvPatchField<vector>& aU =
+                refCast<fixedGradientFvPatchField<vector> >
+                (
+                    U().boundaryField()[aPatchID()]
+                );
+
+            aU.gradient() = nGradU;
+        }
+        else
+        {
+            FatalErrorIn("trackedSurface::updateVelocity()")
+                << "Bounary condition on " << U().name()
+                    <<  " for trackedSurface patch is "
+                    << U().boundaryField()[aPatchID()].type()
+                    << ", instead "
+                    << fixedGradientCorrectedFvPatchField<vector>::typeName
+                    << " or "
+                    << fixedGradientFvPatchField<vector>::typeName
+                    << abort(FatalError);
+        }
+    }
+    else
+    {
+        const vectorField& nA = aMesh().faceAreaNormals().internalField();
+
+// // TEST: Use velocity to correct interface normal velocity
+//         vectorField UPA =
+//             U().boundaryField()[aPatchID()].patchInternalField();
+//
+//         if
+//         (
+//             U().boundaryField()[aPatchID()].type()
+//          == fixedGradientCorrectedFvPatchField<vector>::typeName
+//         )
+//         {
+//             fixedGradientCorrectedFvPatchField<vector>& aU =
+//                 refCast<fixedGradientCorrectedFvPatchField<vector> >
+//                 (
+//                     U().boundaryField()[aPatchID()]
+//                 );
+//
+//             UPA += aU.corrVecGrad();
+//         }
+//
+//         vectorField UnFs = nA*(nA & UPA);
+
+// TEST: Use mesh phi to update normal component of Us
+        vectorField UnFs =
+            nA*fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]
+          / mesh().boundary()[aPatchID()].magSf();
+
+//         vectorField UnFs =
+//             nA*phi().boundaryField()[aPatchID()]
+//           / mesh().boundary()[aPatchID()].magSf();
+
+        // Correct normal component of surface velocity
+        Us().internalField() += UnFs - nA*(nA&Us().internalField());
+        Us().correctBoundaryConditions();
+
+        vectorField tangentialSurfaceTensionForce(nA.size(), vector::zero);
+
+        if (MarangoniStress())
+        {
+            const vectorField& totSurfTensionForce = surfaceTensionForce();
+
+            tangentialSurfaceTensionForce =
+                ((I-nA*nA)&totSurfTensionForce);
+
+//             tangentialSurfaceTensionForce =
+//                 calcSurfaceTensionGrad()().internalField();
+        }
+        else
+        {
+//             vectorField surfaceTensionForce =
+//                 cleanInterfaceSurfTension().value()
+//                *fac::edgeIntegrate
+//                 (
+//                     aMesh().Le()*aMesh().edgeLengthCorrection()
+//                 )().internalField();
+
+//             tangentialSurfaceTensionForce =
+//                 surfaceTensionForce
+//               - cleanInterfaceSurfTension().value()
+//                *curvature().internalField()*nA;
+
+//             if (muEffFluidAval() < SMALL)
+//             {
+//                 tangentialSurfaceTensionForce = vector::zero;
+//             }
+        }
+
+        vectorField tnGradU =
+            tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
+          - (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
+
+        vectorField UtPA =
+            U().boundaryField()[aPatchID()].patchInternalField();
+        UtPA -= nA*(nA & UtPA);
+
+        scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
+
+        vectorField UtFs = UtPA + tnGradU/DnA;
+
+        Us().internalField() = UtFs + UnFs;
+        Us().correctBoundaryConditions();
+
+        updateNGradUn();
+
+//         scalarField divUs = -nGradUn();
+
+        vectorField nGradU =
+            tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
+          + nA*nGradUn()
+          - (fac::grad(Us())().internalField()&nA);
+
+        if
+        (
+            U().boundaryField()[aPatchID()].type()
+         == fixedGradientCorrectedFvPatchField<vector>::typeName
+        )
+        {
+            fixedGradientCorrectedFvPatchField<vector>& aU =
+                refCast<fixedGradientCorrectedFvPatchField<vector> >
+                (
+                    U().boundaryField()[aPatchID()]
+                );
+
+            aU.gradient() = nGradU;
+        }
+        else if
+        (
+            U().boundaryField()[aPatchID()].type()
+         == fixedGradientFvPatchField<vector>::typeName
+        )
+        {
+            fixedGradientFvPatchField<vector>& aU =
+                refCast<fixedGradientFvPatchField<vector> >
+                (
+                    U().boundaryField()[aPatchID()]
+                );
+
+            aU.gradient() = nGradU;
+        }
+        else
+        {
+            FatalErrorIn("trackedSurface::updateVelocity()")
+                << "Bounary condition on " << U().name()
+                    <<  " for trackedSurface patch is "
+                    << U().boundaryField()[aPatchID()].type()
+                    << ", instead "
+                    << fixedGradientCorrectedFvPatchField<vector>::typeName
+                    << " or "
+                    << fixedGradientFvPatchField<vector>::typeName
+                    << abort(FatalError);
+        }
+    }
+}
+
+
+void trackedSurface::updatePressure()
+{
+    // Correct pressure boundary condition at the surface
+
+    vectorField nA = mesh().boundary()[aPatchID()].nf();
+
+    if (twoFluids())
+    {
+        scalarField pA =
+            interpolatorBA().faceInterpolate
+            (
+                p().boundaryField()[bPatchID()]
+            );
+
+        const scalarField& K = curvature().internalField();
+
+        Info << "Surface curvature: min = " << gMin(K)
+            << ", max = " << gMax(K)
+            << ", average = " << gAverage(K) << endl << flush;
+
+        if (!MarangoniStress())
+        {
+//             pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
+            pA -= cleanInterfaceSurfTension().value()*K;
+        }
+        else
+        {
+            if (correctCurvature_)
+            {
+                scalarField surfTensionK =
+                    surfaceTension().internalField()*K;
+
+                pA -= surfTensionK;
+            }
+            else
+            {
+                const vectorField& nA =
+                    aMesh().faceAreaNormals().internalField();
+
+                const vectorField& totSurfTensionForce = surfaceTensionForce();
+
+                scalarField surfTensionK = (nA&totSurfTensionForce);
+
+                pA -= surfTensionK;
+            }
+        }
+
+
+//         fixedGradientFvPatchField<vector>& aU =
+//             refCast<fixedGradientFvPatchField<vector> >
+//             (
+//                 U().boundaryField()[aPatchID()]
+//             );
+
+//         pA += 2.0*(muEffFluidAval() - muEffFluidBval())
+//            *(nA&aU.gradient());
+
+        pA += 2.0*(muEffFluidAval() - muEffFluidBval())*nGradUn();
+
+//         pA -= 2.0*(muEffFluidAval() - muEffFluidBval())
+//             *fac::div(Us())().internalField();
+
+        vector R0 = vector::zero;
+
+        pA -= (rhoFluidA().value() - rhoFluidB().value())*
+            (
+                g_.value()
+              & (
+                    mesh().C().boundaryField()[aPatchID()]
+                  - R0
+                )
+            );
+
+        if (p0Ptr_)
+        {
+            pA += p0().boundaryField()[aPatchID()];
+        }
+
+        p().boundaryField()[aPatchID()] == pA;
+    }
+    else
+    {
+        vector R0 = vector::zero;
+
+        scalarField pA =
+          - rhoFluidA().value()*
+            (
+                g_.value()
+              & (
+                    mesh().C().boundaryField()[aPatchID()]
+                  - R0
+                )
+            );
+
+        const scalarField& K = curvature().internalField();
+
+        Info << "Surface curvature: min = " << gMin(K)
+            << ", max = " << gMax(K) << ", average = " << gAverage(K)
+            << endl;
+
+        if (!MarangoniStress())
+        {
+//             pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
+            pA -= cleanInterfaceSurfTension().value()*K;
+        }
+        else
+        {
+            if (correctCurvature_)
+            {
+                scalarField surfTensionK =
+                    surfaceTension().internalField()*K;
+
+                pA -= surfTensionK;
+            }
+            else
+            {
+                const vectorField& nA =
+                    aMesh().faceAreaNormals().internalField();
+                const vectorField& totSurfTensionForce = surfaceTensionForce();
+
+                scalarField surfTensionK = (nA&totSurfTensionForce);
+
+                pA -= surfTensionK;
+            }
+        }
+
+//         scalarField divUs = -nGradUn();
+
+        pA += 2.0*muEffFluidAval()*nGradUn();
+//         pA -= 2.0*muEffFluidAval()*fac::div(Us())().internalField();
+
+        if (p0Ptr_)
+        {
+            pA += p0().boundaryField()[aPatchID()];
+        }
+
+        p().boundaryField()[aPatchID()] == pA;
+    }
+
+
+    // Set modified pressure at patches with fixed apsolute
+    // pressure
+
+    vector R0 = vector::zero;
+
+    for (int patchI=0; patchI < p().boundaryField().size(); patchI++)
+    {
+        if
+        (
+            p().boundaryField()[patchI].type()
+         == fixedValueFvPatchScalarField::typeName
+        )
+        {
+            if (patchI != aPatchID())
+            {
+                p().boundaryField()[patchI] ==
+                  - rho().boundaryField()[patchI]
+                   *(g_.value()&(mesh().C().boundaryField()[patchI] - R0));
+            }
+        }
+    }
+}
+
+
+void trackedSurface::updateSurfaceFlux()
+{
+    Phis() = fac::interpolate(Us()) & aMesh().Le();
+}
+
+
+void trackedSurface::updateSurfactantConcentration()
+{
+    if (!cleanInterface())
+    {
+        Info << "Correct surfactant concentration" << endl << flush;
+
+        updateSurfaceFlux();
+
+        // Crate and solve the surfactanta transport equation
+        faScalarMatrix CsEqn
+        (
+            fam::ddt(surfactantConcentration())
+          + fam::div(Phis(), surfactantConcentration())
+          - fam::laplacian
+            (
+                surfactant().surfactDiffusion(),
+                surfactantConcentration()
+            )
+        );
+
+
+        if (surfactant().soluble())
+        {
+            const scalarField& C =
+                mesh().boundary()[aPatchID()]
+               .lookupPatchField<volScalarField, scalar>("C");
+
+            areaScalarField Cb
+            (
+                IOobject
+                (
+                    "Cb",
+                    DB().timeName(),
+                    mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                aMesh(),
+                dimensioned<scalar>("Cb", dimMoles/dimVolume, 0),
+                zeroGradientFaPatchScalarField::typeName
+            );
+
+            Cb.internalField() = C;
+            Cb.correctBoundaryConditions();
+
+            CsEqn +=
+                fam::Sp
+                (
+                    surfactant().surfactAdsorptionCoeff()*Cb
+                  + surfactant().surfactAdsorptionCoeff()
+                   *surfactant().surfactDesorptionCoeff(),
+                    surfactantConcentration()
+                )
+              - surfactant().surfactAdsorptionCoeff()
+               *Cb*surfactant().surfactSaturatedConc();
+        }
+
+        CsEqn.solve();
+
+        Info << "Correct surface tension" << endl;
+
+        surfaceTension() =
+            cleanInterfaceSurfTension()
+          + surfactant().surfactR()
+           *surfactant().surfactT()
+           *surfactant().surfactSaturatedConc()
+           *log(1.0 - surfactantConcentration()
+           /surfactant().surfactSaturatedConc());
+
+        if (neg(min(surfaceTension().internalField())))
+        {
+            FatalErrorIn
+            (
+                "void trackedSurface::correctSurfactantConcentration()"
+            )
+                << "Surface tension is negative"
+                    << abort(FatalError);
+        }
+
+        deleteDemandDrivenData(surfaceTensionForcePtr_);
+    }
+}
+
+
+void trackedSurface::updateContactAngle()
+{
+    // Correct contact angle acording to
+    // current face normals
+
+    if (freeContactAngle_)
+    {
+        forAll (aMesh().boundary(), patchI)
+        {
+            label ngbPolyPatchID =
+                aMesh().boundary()[patchI].ngbPolyPatchIndex();
+
+            if (ngbPolyPatchID != -1)
+            {
+                if
+                (
+                    isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
+                )
+                {
+                    // Calculate contact angle
+                    scalarField& contactAngle =
+                        contactAnglePtr_->boundaryField()[patchI];
+
+                    const vectorField& nA =
+                        aMesh().faceAreaNormals().internalField();
+
+                    const vectorField ngbNA =
+                        aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
+
+                    const unallocLabelList& edgeFaces =
+                        aMesh().boundary()[patchI].edgeFaces();
+
+                    forAll (edgeFaces, edgeI)
+                    {
+                        label faceI = edgeFaces[edgeI];
+
+                        vector nAI = nA[faceI];
+                        vector ngbNAI = ngbNA[edgeI];
+
+                        contactAngle[edgeI] =
+                            180.0/M_PI
+                            * acos(-ngbNAI&nAI/mag(ngbNAI)/mag(nAI));
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void trackedSurface::updateTemperature()
+{
+    if (TPtr_)
+    {
+        if (twoFluids())
+        {
+            // Update fixedValue boundary condition on patch B
+
+            if
+            (
+                T().boundaryField()[bPatchID()].type()
+             == fixedValueFvPatchField<scalar>::typeName
+            )
+            {
+                T().boundaryField()[bPatchID()] ==
+                    interpolatorAB().faceInterpolate
+                    (
+                        T().boundaryField()[aPatchID()]
+                    );
+            }
+            else
+            {
+                FatalErrorIn("trackedSurface::updateTemperature()")
+                    << "Bounary condition on " << T().name()
+                    <<  " for trackedSurfaceShadow patch is "
+                    << T().boundaryField()[bPatchID()].type()
+                    << ", instead "
+                    << fixedValueFvPatchField<scalar>::typeName
+                    << abort(FatalError);
+            }
+
+
+            // Update fixedGradient boundary condition on patch A
+
+            scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
+
+            scalarField TPB = interpolatorBA().faceInterpolate
+            (
+                T().boundaryField()[bPatchID()].patchInternalField()
+            );
+
+            const scalarField& TFs =
+                T().boundaryField()[aPatchID()];
+
+            scalarField nGradT = kFluidB().value()*(TPB - TFs)*DnA;
+            nGradT /= kFluidA().value() + VSMALL;
+
+            if
+            (
+                T().boundaryField()[aPatchID()].type()
+             == fixedGradientFvPatchField<scalar>::typeName
+            )
+            {
+                fixedGradientFvPatchField<scalar>& aT =
+                    refCast<fixedGradientFvPatchField<scalar> >
+                    (
+                        T().boundaryField()[aPatchID()]
+                    );
+
+                aT.gradient() = nGradT;
+            }
+            else
+            {
+                FatalErrorIn("trackedSurface::updateTemperature()")
+                    << "Bounary condition on " << T().name()
+                    <<  " for trackedSurface patch is "
+                    << T().boundaryField()[aPatchID()].type()
+                    << ", instead "
+                    << fixedGradientFvPatchField<scalar>::typeName
+                    << abort(FatalError);
+            }
+        }
+        else
+        {
+            if
+            (
+                T().boundaryField()[aPatchID()].type()
+             != zeroGradientFvPatchField<scalar>::typeName
+            )
+            {
+                FatalErrorIn("trackedSurface::updateTemperature()")
+                    << "Bounary condition on " << T().name()
+                    <<  " for trackedSurface patch is "
+                    << T().boundaryField()[aPatchID()].type()
+                    << ", instead "
+                    << zeroGradientFvPatchField<scalar>::typeName
+                    << abort(FatalError);
+            }
+        }
+
+
+        // Update surface tension
+
+        temperature().internalField() =
+            T().boundaryField()[aPatchID()];
+        temperature().correctBoundaryConditions();
+
+        // Correct surface tension
+        dimensionedScalar thermalCoeff
+        (
+            this->lookup("thermalCoeff")
+        );
+
+        dimensionedScalar refTemperature
+        (
+            this->lookup("refTemperature")
+        );
+
+        surfaceTension() =
+            cleanInterfaceSurfTension()
+          + thermalCoeff*(temperature() - refTemperature);
+
+        deleteDemandDrivenData(surfaceTensionForcePtr_);
+    }
+}
+
+
+void trackedSurface::updateNGradUn()
+{
+    if (fvcNGradUn_)
+    {
+        Info << "Update normal derivative of normal velocity using fvc"
+            << endl;
+
+        volVectorField phiU = fvc::reconstruct(phi());
+
+        vectorField nA = mesh().boundary()[aPatchID()].nf();
+
+        scalarField UnP =
+            (nA&phiU.boundaryField()[aPatchID()].patchInternalField());
+
+        scalarField UnFs =
+            phi().boundaryField()[aPatchID()]
+           /mesh().magSf().boundaryField()[aPatchID()];
+
+        nGradUn() =
+            (UnFs - UnP)*mesh().deltaCoeffs().boundaryField()[aPatchID()];
+
+        bool secondOrderCorrection = true;
+
+        if (secondOrderCorrection)
+        {
+            // Correct normal component of phiU
+            // before gradient calculation
+            forAll (phiU.boundaryField(), patchI)
+            {
+                vectorField n =
+                    mesh().Sf().boundaryField()[patchI]
+                   /mesh().magSf().boundaryField()[patchI];
+
+                phiU.boundaryField()[patchI] +=
+                    n
+                   *(
+                       (
+                           phi().boundaryField()[patchI]
+                          /mesh().magSf().boundaryField()[patchI]
+                       )
+                     - (n&phiU.boundaryField()[patchI])
+                    );
+            }
+
+            // Calc gradient
+            tensorField gradPhiUp =
+                fvc::grad(phiU)().boundaryField()[aPatchID()]
+               .patchInternalField();
+
+            nGradUn() = 2*nGradUn() - (nA&(gradPhiUp&nA));
+        }
+    }
+    else
+    {
+        Info << "Update normal derivative of normal velocity using fac"
+            << endl;
+
+        nGradUn() = -fac::div(Us())().internalField();
+
+//         Us().correctBoundaryConditions();
+
+//         areaVectorField UsTmp = Us();
+
+//         vector avgUs = gAverage(UsTmp.internalField());
+//         Pout << avgUs << endl;
+//         UsTmp = dimensionedVector("avgUs", Us().dimensions(), avgUs);
+//         UsTmp.correctBoundaryConditions();
+
+//         edgeVectorField eUs = fac::interpolate(Us());
+//         eUs = dimensionedVector("avgUs", Us().dimensions(), vector(1,0,0));
+
+//         Pout << aMesh().weights().boundaryField() << endl;
+
+
+
+
+//         nGradUn() =
+//            -fac::edgeIntegrate
+//             (
+//                 aMesh().Le() & fac::interpolate(Us())
+//             )
+//           + (fac::edgeIntegrate(aMesh().Le()) & Us());
+
+//         nGradUn() *= 2;
+
+
+
+
+//           + curvature()*(aMesh().faceAreaNormals()&Us());
+    }
+
+//     nGradUn() *= 0;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// ************************************************************************* //

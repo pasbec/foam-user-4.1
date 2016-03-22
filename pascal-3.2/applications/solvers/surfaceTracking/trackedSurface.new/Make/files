@@ -6,6 +6,7 @@
 ./numerics/leastSquaresSkewCorrected/leastSquaresSkewCorrected.C
 
 trackedSurface.C
+trackedSurfaceBoundaryConditions.C
 trackedSurfaceDemandDrivenData.C
 trackedSurfacePointDisplacement.C
 trackedSurfaceWrite.C

@@ -41,17 +41,14 @@ SourceFiles
 #define trackedSurface_H
 
 
-#include "fvCFD.H"
 #include "IOdictionary.H"
-#include "volFieldsFwd.H"
-#include "surfaceFieldsFwd.H"
+#include "fvCFD.H"
 #include "faCFD.H"
 #include "faSubMesh.H"
 #include "IOpatchToPatchInterpolation.H"
 #include "dynamicFvMesh.H"
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
-
 #include "surfactantProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -74,6 +71,13 @@ class trackedSurface
 
         //- Upper case prefix for naming
         word Prefix_;
+
+// TEST: Volume conservation
+        //-
+        scalar oldVolA_;
+
+        //-
+        scalar curVolA_;
 
         //- Reference to fvMesh
         dynamicFvMesh& mesh_;
@@ -351,7 +355,7 @@ class trackedSurface
             //- Calculate new mesh points from negative total displacement field
             tmp<pointField> calcNewMeshPoints();
 
-        // Interface move operations
+        //- Interface move operations
 
             //- Move and update all mesh points with motion solver for
             //  total displacement and delete total displacement pointer
@@ -378,18 +382,26 @@ class trackedSurface
             //- Update all dependencies after point movement
             void moveUpdate();
 
-        //- Move control ponts for deltaH and calculate
-        //  surface points displacement
-        //  for given new control points position
-        tmp<vectorField> pointDisplacement(const scalarField& deltaH);
+        //- Boundary calculations
 
-        // Calc least sqare plane point and normal
-        tmp<vectorField> lsPlanePointAndNormal
-        (
-            const vectorField& points,
-            const vector& origin,
-            const vector& axis
-        ) const;
+            //- Calculate surface tension gradient due to
+            //  concentration OR temperature field
+            tmp<areaVectorField> calcSurfaceTensionGrad();
+
+        //- Point displacment calculation
+
+            //- Move control ponts for deltaH and calculate
+            //  surface points displacement
+            //  for given new control points position
+            tmp<vectorField> pointDisplacement(const scalarField& deltaH);
+
+            // Calc least sqare plane point and normal
+            tmp<vectorField> lsPlanePointAndNormal
+            (
+                const vectorField& points,
+                const vector& origin,
+                const vector& axis
+            ) const;
 
 //         //- Test inverse distance point displacement
 //         tmp<vectorField> pointDisplacementID(const scalarField& deltaH);
@@ -441,96 +453,99 @@ public:
 
     // Member Functions
 
+        //- Database
 
-        //- Return reference to fvMesh
-        dynamicFvMesh& mesh()
-        {
-            return mesh_;
-        }
+            //- Return reference to DB
+            const Time& DB() const
+            {
+                return U_.mesh().time();
+            }
 
-        //- Return reference to fvMesh
-        const dynamicFvMesh& mesh() const
-        {
-            return mesh_;
-        }
+            //- Return reference to fvMesh
+            dynamicFvMesh& mesh()
+            {
+                return mesh_;
+            }
 
-        //- Return reference to DB
-        const Time& DB() const
-        {
-            return U_.mesh().time();
-        }
+            //- Return reference to fvMesh
+            const dynamicFvMesh& mesh() const
+            {
+                return mesh_;
+            }
 
-        //- Return reference to velocity field
-        const volScalarField& rho() const
-        {
-            return rho_;
-        }
+        //- Related fields
 
-        //- Return reference to velocity field
-        volVectorField& U()
-        {
-            return U_;
-        }
+            //- Return reference to velocity field
+            const volScalarField& rho() const
+            {
+                return rho_;
+            }
 
-        //- Return reference to velocity field
-        const volVectorField& U() const
-        {
-            return U_;
-        }
+            //- Return reference to velocity field
+            volVectorField& U()
+            {
+                return U_;
+            }
 
-        //- Return reference to pressure field
-        volScalarField& p()
-        {
-            return p_;
-        }
+            //- Return reference to velocity field
+            const volVectorField& U() const
+            {
+                return U_;
+            }
 
-        //- Return reference to pressure field
-        const volScalarField& p() const
-        {
-            return p_;
-        }
+            //- Return reference to pressure field
+            volScalarField& p()
+            {
+                return p_;
+            }
 
-        //- Return reference to flux field
-        surfaceScalarField& phi()
-        {
-            return phi_;
-        }
+            //- Return reference to pressure field
+            const volScalarField& p() const
+            {
+                return p_;
+            }
 
-        //- Return reference to flux field
-        const surfaceScalarField& phi() const
-        {
-            return phi_;
-        }
+            //- Return reference to flux field
+            surfaceScalarField& phi()
+            {
+                return phi_;
+            }
 
-        //- Return reference to temperature field
-        volScalarField& T()
-        {
-            return *TPtr_;
-        }
+            //- Return reference to flux field
+            const surfaceScalarField& phi() const
+            {
+                return phi_;
+            }
 
-        //- Return reference to temperature field
-        const volScalarField& T() const
-        {
-            return *TPtr_;
-        }
+            //- Return reference to temperature field
+            volScalarField& T()
+            {
+                return *TPtr_;
+            }
 
-        //- Return reference to transport model
-        const twoPhaseMixture& transport() const
-        {
-            return *transportPtr_;
-        }
+            //- Return reference to temperature field
+            const volScalarField& T() const
+            {
+                return *TPtr_;
+            }
 
-        //- Return reference to turbulence model auto pointer
-        const incompressible::turbulenceModel& turbulence() const
-        {
-            return *turbulencePtr_;
-        }
+            //- Return reference to transport model
+            const twoPhaseMixture& transport() const
+            {
+                return *transportPtr_;
+            }
 
-        //- Return reference to external pressure field
-        const volScalarField& p0() const
-        {
-            return *p0Ptr_;
-        }
+            //- Return reference to turbulence model auto pointer
+            const incompressible::turbulenceModel& turbulence() const
+            {
+                return *turbulencePtr_;
+            }
+
+            //- Return reference to external pressure field
+            const volScalarField& p0() const
+            {
+                return *p0Ptr_;
+            }
 
         //- Are there exist two fluid
         //  in the surface model
@@ -700,9 +715,6 @@ public:
         //- Return surface tension field
         const areaScalarField& surfaceTension() const;
 
-        //- Return surface tension gradient
-        tmp<areaVectorField> surfaceTensionGrad();
-
         //- Return surfactant properties
         const surfactantProperties& surfactant() const;
 
@@ -763,14 +775,14 @@ public:
         //- Move all mesh points from total displacement
         void updateMesh();
 
+        //- Correct fixed surface patches
+        void moveFixedPatches(const vectorField& displacement);
+
         //- Smoothing interface
         void smoothing();
 
         //- Smooth surface mesh using Laplacian smoothing
         void smoothMesh();
-
-        //- Correct fixed surface patches
-        void moveFixedPatches(const vectorField& displacement);
 
         //- Update surface boundary conditions
         void updateBoundaryConditions();
@@ -811,7 +823,7 @@ public:
         //- Maximal surface tension based Courant number
         scalar maxCourantNumber();
 
-        // Writing surface data
+        //- Writing
 
             //- Write VTK trackedSurface mesh
             void writeVTK() const;

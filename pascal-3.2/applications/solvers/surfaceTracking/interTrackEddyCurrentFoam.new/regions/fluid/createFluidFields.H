@@ -104,18 +104,42 @@
     Info << "Create field fluidIndicator for"
         << " region " << mesh_[control.fluidA()].name()
         << nl << endl;
-    volScalarField fluidIndicator
-    (
-        IOobject
+    volScalarField* fluidIndicatorPtr = NULL;
+// TODO: Think about this...
+//     if(args.options().found("parallel"))
+//     {
+        fluidIndicatorPtr = new volScalarField
         (
-            "fluidIndicator",
-            runTime.timeName(),
-            mesh_[control.fluidA()],
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_[control.fluidA()]
-    );
+            IOobject
+            (
+                "fluidIndicator",
+                runTime.timeName(),
+                mesh_[control.fluidA()],
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh_[control.fluidA()]
+        );
+//     }
+// TODO: Think about this...
+//     else
+//     {
+//         fluidIndicatorPtr = new volScalarField
+//         (
+//             IOobject
+//             (
+//                 "fluidIndicator",
+//                 runTime.timeName(),
+//                 mesh_[control.fluidA()],
+//                 IOobject::NO_READ,
+//                 IOobject::AUTO_WRITE
+//             ),
+//             interface.fluidIndicator()
+//         );
+//         fluidIndicatorPtr->write();
+//     }
+    volScalarField& fluidIndicator = *fluidIndicatorPtr;
+    fluidIndicator.correctBoundaryConditions();
 
 
     // Transport model

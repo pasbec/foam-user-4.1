@@ -175,7 +175,7 @@ void trackedSurface::writeA()
     (fac::div(aMesh().faceAreaNormals()))().write();
 
     // surfaceTensionGrad
-    surfaceTensionGrad()().write();
+    calcSurfaceTensionGrad()().write();
 }
 
 
@@ -207,7 +207,7 @@ void trackedSurface::writeVolA()
     );
 
     // surfaceTensionGrad
-    writeVol(surfaceTensionGrad()());
+    writeVol(calcSurfaceTensionGrad()());
 
     // H
     tmp<areaVectorField> tH
