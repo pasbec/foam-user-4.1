@@ -205,8 +205,6 @@ public:
                     calcSubPolyMeshPoints()
                 );
 
-// TEST: Use MeshObject
-//                 return subAreaMesh().movePoints();
                 return true;
             }
 

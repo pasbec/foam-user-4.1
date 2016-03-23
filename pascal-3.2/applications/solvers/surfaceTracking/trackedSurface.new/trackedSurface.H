@@ -334,6 +334,10 @@ class trackedSurface
 
         //- Interface move calculations
 
+// TEST: Volume conservation
+            //- Correct interface phi for domain volume conservation
+            void correctInterfacePhi(scalarField& interfacePhi);
+
             //- Calculate swept volume correction for given interface phi
             tmp<scalarField> calcSweptVolCorr(const scalarField& interfacePhi);
 
@@ -395,7 +399,7 @@ class trackedSurface
             //  for given new control points position
             tmp<vectorField> pointDisplacement(const scalarField& deltaH);
 
-            // Calc least sqare plane point and normal
+            //- Calc least sqare plane point and normal
             tmp<vectorField> lsPlanePointAndNormal
             (
                 const vectorField& points,
@@ -403,24 +407,23 @@ class trackedSurface
                 const vector& axis
             ) const;
 
-//         //- Test inverse distance point displacement
-//         tmp<vectorField> pointDisplacementID(const scalarField& deltaH);
+            //- Point displacement correction
+            //  (currently only for fixed patches)
+            void correctPointDisplacement
+            (
+                const scalarField& sweptVolCorr,
+                vectorField& displacement
+            );
 
+//             //- Test inverse distance point displacement
+//             tmp<vectorField> pointDisplacementID(const scalarField& deltaH);
+
+
+// TODO
         void correctCurvature();
         void correctPointNormals();
-        void correctPointDisplacement
-        (
-            const scalarField& sweptVolCorr,
-            vectorField& displacement
-        );
         void smoothCurvature();
         void correctContactLinePointNormals();
-
-        // Marangoni stress
-        bool MarangoniStress() const
-        {
-            return (!cleanInterface_ || TPtr_);
-        }
 
 public:
 
@@ -638,6 +641,12 @@ public:
         const dimensionedScalar& cleanInterfaceSurfTension() const
         {
             return cleanInterfaceSurfTension_;
+        }
+
+        // Marangoni stress
+        bool MarangoniStress() const
+        {
+            return (!cleanInterface_ || TPtr_);
         }
 
         //- Return reference to interpolator from surface side A to

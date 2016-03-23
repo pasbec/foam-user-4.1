@@ -335,12 +335,20 @@ void trackedSurface::initControlPointsPosition()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePhi)
-{
-    scalarField meshPhi = fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
-
 // TEST: Volume conservation
-// TODO: Check in parallel
+// TODO: Check this implementation in parallel
+// TODO: Add switch for volume correction
+// TODO: Improve implementation of "curVolA_" and "oldVolA_"
+void trackedSurface::correctInterfacePhi(scalarField& interfacePhi)
+{
+    if (debug)
+    {
+        Info << "trackedSurface::correctInterfacePhi() : "
+            << "Correct interface phi to account"
+                << " for domain volume changes."
+                << endl;
+    }
+
     scalar phiAsumPatchesNotAB = 0.0;
 
     forAll (phi().boundaryField(), patchI)
@@ -364,22 +372,18 @@ tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePh
         }
     }
 
-// TODO: Shift once per time step or never?
-//       May it is better to write initial volume to some file
-//       to keep it during restarts...
-//     oldVolA_ = curVolA_;
-// TODO: Check in parallel
     curVolA_ =  fvc::domainIntegrate(fluidIndicator()).value();
 
     scalar phiAsumDomain =
         (curVolA_ - oldVolA_) / DB().deltaT().value();
 
-    const scalarField& Sf = aMesh().S();
+// TODO: Think about best weights for distributing the volume correction.
+    const scalarField& weights = aMesh().S();
+//     const scalarField weights = mag(interfacePhi);
 
-// TODO: Check in parallel
     scalarField domainPhi
     (
-        Sf * (phiAsumDomain - phiAsumPatchesNotAB) / gSum(Sf)
+        weights * (phiAsumDomain - phiAsumPatchesNotAB) / gSum(weights)
     );
 
     scalar volDiffDomainRel =
@@ -387,35 +391,35 @@ tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePh
       * DB().deltaT().value()
       / oldVolA_;
 
-    Pout << "------------------------------------------" << endl;
-    Pout << "phiAsumPatchesNotAB = " << phiAsumPatchesNotAB << endl;
-    Pout << "------------------------------------------" << endl;
-    Pout << "phiAsumDomain = " << phiAsumDomain << endl;
-    Pout << "------------------------------------------" << endl;
-    Pout << "volDiffDomainRel = " << 100*volDiffDomainRel << " %"  << endl;
-    Pout << "------------------------------------------" << endl;
-    Pout << "gAverage(interfacePhi) = " << gAverage(interfacePhi) << endl;
-    Pout << "gAverage(meshPhi) = " << gAverage(meshPhi) << endl;
-    Pout << "gAverage(domainPhi) = " << gAverage(domainPhi) << endl;
-    Pout << "------------------------------------------" << endl;
+    if (debug > 1)
+    {
+        Info << "trackedSurface::correctInterfacePhi() : "
+            << "Statistics:" << endl
+                << "  phiAsumPatchesNotAB = " << phiAsumPatchesNotAB << endl
+                << "  phiAsumDomain = " << phiAsumDomain << endl
+                << "  volDiffDomainRel = " << 100*volDiffDomainRel << " %"
+                << endl;
+    }
 
 
+// TODO: How to inject domainPhi best? Just adding it to meshPhi
+//       dramatically decreases the convergence behaviour. Thus, in
+//       the current implementation, phi is corrected, directly.
+    interfacePhi -= domainPhi;
+}
+
+tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePhi)
+{
     tmp<scalarField> tsweptVolCorr
     (
         new scalarField
         (
-            interfacePhi.size(),
-            0
+            interfacePhi
+          - fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]
         )
     );
 
     scalarField& sweptVolCorr = tsweptVolCorr();
-
-// TODO: How to inject domainPhi best? Just adding it to meshPhi
-//       dramatically decreases the convergence behaviour
-//     sweptVolCorr = interfacePhi - meshPhi - domainPhi;
-    const_cast<scalarField&>(interfacePhi) -= domainPhi;
-    sweptVolCorr = interfacePhi - meshPhi;
 
     word ddtScheme
     (
@@ -485,6 +489,8 @@ tmp<scalarField> trackedSurface::calcDeltaH(const scalarField& sweptVolCorr)
     scalarField& deltaH = tdeltaH();
 
     deltaH = sweptVolCorr/(Sf*(Nf & facesDisplacementDir()));
+
+    calcAddDeltaHcorrection(deltaH);
 
     return tdeltaH;
 }
@@ -1247,41 +1253,16 @@ void trackedSurface::predictPoints()
     // Smooth interface
     smoothing();
 
-// TEST
-//     movePoints
-//     (
-//         phi().boundaryField()[aPatchID()]
-//       + fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]
-//     );
-//     scalarField sweptVolCorr =
-//         calcSweptVolCorr
-//         (
-//             // At last time step phiA was meshPhiA
-//             // In order to predict the new interface we will
-//             // set sweptVolCorr to 2*phiA as:
-//             //   2*phiA - meshPhiA
-//             // = 2*phiA - phiA
-//             // =   phiA
-// //            2.0*phi().boundaryField()[aPatchID()]
-//             -phi().boundaryField()[aPatchID()]
-//         );
-//
-//     scalarField deltaH = calcDeltaH(sweptVolCorr);
-//
-//     vectorField displacement = pointDisplacement(deltaH);
-//
-//     moveMeshPoints(displacement);
-//
-//     mesh().resetMotion();
-//
-// //     // Now we set phiA = meshPhiA
-// //     phi().boundaryField()[aPatchID()] =
-// //         fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()];
+//    smoothMesh();
 }
 
 
 void trackedSurface::correctPoints()
 {
+    scalarField& interfacePhi = phi().boundaryField()[aPatchID()];
+
+    correctInterfacePhi(interfacePhi);
+
     for
     (
         int trackedSurfCorr=0;
@@ -1289,7 +1270,7 @@ void trackedSurface::correctPoints()
         trackedSurfCorr++
     )
     {
-        movePoints(phi().boundaryField()[aPatchID()]);
+        movePoints(interfacePhi);
     }
 }
 
