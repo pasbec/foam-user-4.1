@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 
         runTime++;
 
-        control.msg().time();
+        control.msg().timeIs();
 
         // ==================================================================//
         // Move mesh of fluid region and do prediction step

@@ -14,7 +14,7 @@
 
     // Control class
     Info << "Create control" << nl << endl;
-    interTrackEddyCurrentControl control(mesh_);
+    interTrackEddyCurrentControl control(args, runTime, mesh_);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

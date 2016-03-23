@@ -35,17 +35,86 @@ SourceFiles
 #ifndef solverControl_H
 #define solverControl_H
 
+#include "argList.H"
 #include "foamTime.H"
 #include "IOdictionary.H"
+#include "solution.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define setControlScope(name)                                                \
+# define createControl(NAME, MESH)                                            \
                                                                               \
-    name##Control& name = control.name();                                     \
-    name##Control& control = name;
+    NAME##Control control(MESH);
+
+# define createControlAndData(NAME, MESH)                                     \
+                                                                              \
+    NAME##Control control(MESH);                                              \
+    NAME##Control::storage& data = control.data();
+
+# define setControlScope(NAME)                                                \
+                                                                              \
+    NAME##Control& NAME = control.NAME();                                     \
+    NAME##Control& control = NAME;
+
+# define setControlScopeWithData(NAME)                                        \
+                                                                              \
+    NAME##Control& NAME = control.NAME();                                     \
+    NAME##Control& control = NAME;                                            \
+    NAME##Control::storage& data = control.data();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define solverControlStorage_add(TYPE, DATA)                                 \
+                                                                              \
+    private: TYPE* DATA##Ptr_;                                                \
+    private: void create_##DATA();                                            \
+    public: TYPE& DATA()                                                      \
+    {                                                                         \
+        if (!DATA##Ptr_)                                                      \
+        {                                                                     \
+            create_##DATA();                                                  \
+        }                                                                     \
+                                                                              \
+        if (!DATA##Ptr_)                                                      \
+        {                                                                     \
+            FatalErrorIn(control().type() + "::storage::" + #DATA + "()")     \
+                << "Pointer for "                                             \
+                    << #DATA                                                  \
+                    << " is still unallocated after creation"                 \
+                    << abort(FatalError);                                     \
+        }                                                                     \
+                                                                              \
+        return *DATA##Ptr_;                                                   \
+    }
+
+# define solverControlStorage_info(DATA)                                      \
+                                                                              \
+    Info << "Create "                                                         \
+        << #DATA                                                              \
+        << " for region " << mesh().name()                                    \
+        << endl;                                                              \
+                                                                              \
+    if (DATA##Ptr_)                                                           \
+    {                                                                         \
+        FatalErrorIn(control().type() + "::storage::create_##DATA()")         \
+            << "Pointer for "                                                 \
+                << #DATA                                                      \
+                << " is already allocated before creation"                    \
+                << abort(FatalError);                                         \
+    }
+
+# define solverControlStorage_assert(DATA, REQUIRE)                           \
+                                                                              \
+    if (!REQUIRE##Ptr_)                                                       \
+    {                                                                         \
+        FatalErrorIn(control().type() + "::storage::create_##DATA()")         \
+            << "In order to allocate the pointer for "                        \
+                << #DATA                                                      \
+                << " it is necessary to allocate the pointer for "            \
+                << #REQUIRE                                                   \
+                << ", first"                                                  \
+                << abort(FatalError);                                         \
+    }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,96 +130,196 @@ class solverControl
 :
     public IOdictionary
 {
-public:
+protected:
 
-    // Message class
-    class solverControlMessages
-    {
-    private:
+    // Protected Nested Classes
 
-        // Private Data
+        //- Messages
+        class messages
+        {
+        private:
 
-            // Basic
+            // Private Data
+
+                //- Reference to args
+                const argList& args_;
 
                 //- Reference to time
                 const Time& time_;
 
-                //- Reference to region mesh
+                //- Reference to mesh
                 const MESH& mesh_;
 
-        // Private Member Functions
+            // Private Member Functions
 
-            //- Disallow default bitwise copy construct
-            solverControlMessages(const solverControlMessages&);
+                //- Disallow default bitwise copy construct
+                messages(const messages&);
 
-            //- Disallow default bitwise assignment
-            void operator=(const solverControlMessages&);
+                //- Disallow default bitwise assignment
+                void operator=(const messages&);
 
+        public:
 
+            // Constructors
 
-    public:
+                //- Construct from mesh
+                messages
+                (
+                    const argList& args,
+                    const Time& time,
+                    const MESH& mesh
+                )
+                :
+                args_(args),
+                time_(time),
+                mesh_(mesh)
+                {};
 
-        // Constructors
+            // Member Functions
 
-            //- Construct from mesh
-            solverControlMessages(const MESH& mesh)
-            :
-            time_(mesh.time()),
-            mesh_(mesh)
-            {};
+                //- Reference to args
+                const argList& args()
+                {
+                    return args_;
+                };
 
-        // Member Functions
+                //- Reference to time
+                const Time& time()
+                {
+                    return time_;
+                };
 
-            //- Info about starting time loop
-            void startTimeLoop() const
-            {
-                Info << nl << "Starting time loop"
-                    << nl << endl;
-            }
+                //- Return reference to mesh
+                const MESH& mesh() const
+                {
+                    return mesh_;
+                }
 
-            //- Info about current time step
-            void timeStep() const
-            {
-                Info << "Time step = "
-                    << time_.timeIndex()
-                    << nl << endl;
-            };
+                //- Info about starting time loop
+                void startTimeLoop() const
+                {
+                    Info << nl << "Starting time loop"
+                        << nl << endl;
+                }
 
-            //- Print current time
-            void time() const
-            {
-                Info << "Time = "
-                    << time_.value()
-                    << nl << endl;
-            };
+                //- Info about current time step
+                void timeStep() const
+                {
+                    Info << "Time step = "
+                        << mesh().time().timeIndex()
+                        << nl << endl;
+                };
 
-            //- Print execution time
-            void executionTime() const
-            {
-                Info << "ExecutionTime = "
-                    << scalar(time_.elapsedCpuTime()) << " s"
-                    << nl << endl << endl;
-            };
+                //- Print current time
+                void timeIs() const
+                {
+                    Info << "Time = "
+                        << mesh().time().value()
+                        << nl << endl;
+                };
 
-            //- Print end statement
-            void end() const
-            {
-                Info << "End" << nl << endl;
-            };
+                //- Print execution time
+                void executionTime() const
+                {
+                    Info << "ExecutionTime = "
+                        << scalar(mesh().time().elapsedCpuTime()) << " s"
+                        << nl << endl << endl;
+                };
 
-    };
+                //- Print end statement
+                void end() const
+                {
+                    Info << "End" << nl << endl;
+                };
 
-protected:
+        };
+
+        //- Storage
+        class storage
+        {
+        private:
+
+            // Private Data
+
+                //- Reference to args
+                const argList& args_;
+
+                //- Reference to time
+                Time& time_;
+
+                //- Reference to mesh
+                MESH& mesh_;
+
+            // Private Member Functions
+
+                //- Disallow default bitwise copy construct
+                storage(const storage&);
+
+                //- Disallow default bitwise assignment
+                void operator=(const storage&);
+
+                //- Initialize data sequence
+                virtual void init() {};
+
+        public:
+
+            // Constructors
+
+                //- Construct from mesh
+                storage
+                (
+                    const argList& args,
+                    Time& time,
+                    MESH& mesh
+                )
+                :
+                args_(args),
+                time_(time),
+                mesh_(mesh)
+                {};
+
+            // Destructor
+
+                virtual ~storage()
+                {
+                };
+
+            // Member Functions
+
+                //- Reference to args
+                const argList& args()
+                {
+                    return args_;
+                };
+
+                //- Reference to time
+                Time& time()
+                {
+                    return time_;
+                };
+
+                //- Return reference to mesh
+                MESH& mesh()
+                {
+                    return mesh_;
+                }
+        };
 
     // Protected Data
 
-        // Basic
+        //- Messages
+        messages* msgPtr_;
+
+        //- Basic
+
+            //- Reference to args
+            const argList& args_;
 
             //- Reference to time
-            const Time& time_;
+            Time& time_;
 
-            //- Reference to region mesh
-            const MESH& mesh_;
+            //- Reference to mesh
+            MESH& mesh_;
 
             //- Master control
             const bool master_;
@@ -164,15 +333,10 @@ protected:
             //- Properties dictionary
             IOdictionary propDict_;
 
-        // Dictionaries
+        //- Dictionaries
 
-            //- Solution dictionary (of base region)
-            IOdictionary& baseSolutionDict_;
-
-        // Master control
-
-            //- Message
-            solverControlMessages* msg_;
+            //- Solution dictionary of base region
+            solution& baseSolutionDict_;
 
     // Protected Member Functions
 
@@ -207,7 +371,9 @@ public:
         //- Construct from mesh and name
         solverControl
         (
-            const MESH& mesh,
+            const argList args,
+            Time& time,
+            MESH& mesh,
             const word& name = "solver",
             const bool& master = true,
             const label& regionI0 = -1
@@ -217,23 +383,46 @@ public:
 
         virtual ~solverControl()
         {
-            if (master_) delete msg_;
+            if (master_) delete msgPtr_;
         };
 
     // Member Functions
 
-        // Basic
+        //- Messages
+        const messages& msg() const
+        {
+            errorIfNotMaster();
 
-            //- Reference to mesh
-            const Time& time() const
+            return *msgPtr_;
+        };
+
+        //- Storage
+        virtual storage& data() = 0;
+
+        //- Basic
+
+            //- Reference to args
+            const argList& args()
+            {
+                return args_;
+            };
+
+            //- Reference to time
+            Time& time()
             {
                 return time_;
             };
 
             //- Reference to mesh
-            const MESH& mesh() const
+            MESH& mesh()
             {
                 return mesh_;
+            };
+
+            //- Is this master control?
+            const bool& master() const
+            {
+                return master_;
             };
 
             //- Reference properties dictionary
@@ -242,17 +431,7 @@ public:
                 return propDict_;
             };
 
-        // Master control
-
-            //- Message
-            const solverControlMessages& msg() const
-            {
-                errorIfNotMaster();
-
-                return *msg_;
-            };
-
-        // Properties
+        //- Properties
 
             //- Reference to base region name
             const word& baseName() const
@@ -266,7 +445,7 @@ public:
                 return baseRegion_;
             };
 
-        // Time and database
+        //- Time and database
 
             //- WriteData member function required by regIOobject
             bool writeData(Ostream&) const;

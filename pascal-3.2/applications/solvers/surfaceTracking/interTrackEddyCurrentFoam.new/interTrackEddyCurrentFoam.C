@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 
         runTime++;
 
-        control.msg().time();
+        control.msg().timeIs();
 
 // // TODO TEST START
 //         const surfaceScalarField& faceDiffusivityFluid =

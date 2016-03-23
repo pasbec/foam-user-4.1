@@ -22,26 +22,29 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    interTrackMagneticControl
+    interTrackControl
 
 Description
     ...
 
 SourceFiles
-    interTrackMagneticControl.C
+    interTrackControl.C
+    interTrackControlStorage.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackMagneticControl_H
-#define interTrackMagneticControl_H
+#ifndef interTrackControl_H
+#define interTrackControl_H
 
-#include "PstreamReduceOps.H"
-#include "mathematicalConstants.H"
-#include "physicalConstants.H"
 #include "solverControl.H"
-#include "regionModelling.H"
 
-#include "interTrackControl.H"
+#include "fvCFD.H"
+#include "dynamicFvMesh.H"
+#include "trackedSurface.H"
+
+// #include "PstreamReduceOps.H"
+// #include "mathematicalConstants.H"
+// #include "physicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,31 +52,89 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class interTrackMagneticControl Declaration
+                       Class interTrackControl Declaration
 \*---------------------------------------------------------------------------*/
 
-class interTrackMagneticControl
+class interTrackControl
 :
-    public solverControl<regionDynamicFvMesh>
+    public solverControl<dynamicFvMesh>
 {
+public:
+
+    // Public Nested Classes
+
+        //- Storage
+        struct storage
+        :
+            solverControl<dynamicFvMesh>::storage
+        {
+        private:
+
+            // Private Data
+
+                //- Reference to control
+                interTrackControl& control_;
+
+            // Private Member Functions
+
+                //- Disallow default bitwise copy construct
+                storage(const storage&);
+
+                //- Disallow default bitwise assignment
+                void operator=(const storage&);
+
+                //- Return reference to control
+                interTrackControl& control()
+                {
+                    return control_;
+                }
+
+                //- Initialize data sequence
+                void init();
+
+            // Macro-generated data entries with accessors
+
+                //- Pressure
+                solverControlStorage_add(volScalarField, p);
+
+                //- Velocity
+                solverControlStorage_add(volVectorField, U);
+
+                //- Face flux
+                solverControlStorage_add(surfaceScalarField, phi);
+
+                //- Density
+                solverControlStorage_add(volScalarField, rho);
+
+                //- Dynamic viscosity
+                solverControlStorage_add(volScalarField, mu);
+
+                //- Fluid indicator
+                solverControlStorage_add(volScalarField, fluidIndicator);
+
+                //- Tracked surface
+                solverControlStorage_add(trackedSurface, interface);
+
+        public:
+
+            // Constructor
+
+                //- Construct from control
+                storage(interTrackControl& control);
+        };
+
 private:
 
     // Private Data
 
         //- Storage
+        storage* storagePtr_;
 
         //- Controls
 
-            //- Interface-tracking specific controls
-            mutable interTrackControl track_;
-
         //- Properties
 
-            //- Name of dynamic region
-            word dynamicRegionName_;
-
-            //- Label of dynamic region
-            label dynamicRegion_;
+        //- Dictionaries
 
         //- Solution properties
 
@@ -84,10 +145,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        interTrackMagneticControl(const interTrackMagneticControl&);
+        interTrackControl(const interTrackControl&);
 
         //- Disallow default bitwise assignment
-        void operator=(const interTrackMagneticControl&);
+        void operator=(const interTrackControl&);
 
         //- Inline helper
 
@@ -96,67 +157,40 @@ private:
 public:
 
     // Runtime type information
-    TypeName("interTrackMagneticControl");
+    TypeName("interTrackControl");
 
     // Constructors
 
         //- Construct from mesh and name
-        interTrackMagneticControl
+        interTrackControl
         (
             const argList& args,
             Time& time,
-            regionDynamicFvMesh& mesh,
-            const word& name = "interTrackMagnetic",
+            dynamicFvMesh& mesh,
+            const word& name = "interTrack",
             const bool& master = true
         );
 
     // Destructor
 
-        virtual ~interTrackMagneticControl() {};
+        virtual ~interTrackControl()
+        {
+            if (master()) delete storagePtr_;
+        };
 
     // Member Functions
 
         //- Storage
         virtual storage& data()
         {
-            notImplemented(type() + "::data()");
-            storage* storagePtr_ = NULL;
             return *storagePtr_;
         };
 
         //- Controls
 
-            //- Reference to interface-tracking control
-            interTrackControl& interTrack() const
-            {
-                return track_;
-            };
-
         //- Properties
 
-            //- Reference to fluidA region name
-            const word& fluidAname() const
-            {
-                return track_.fluidAname();
-            };
-
-            //- Reference to fluidA region ID
-            const label& fluidA() const
-            {
-                return track_.fluidA();
-            };
-
-            //- Reference to fluidA region name
-            const word& dynamicName() const
-            {
-                return dynamicRegionName_;
-            };
-
-            //- Reference to fluidA region ID
-            const label& dynamic() const
-            {
-                return dynamicRegion_;
-            };
+        //- Dictionaries
 
         //- Solution properties
 
@@ -180,7 +214,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interTrackMagneticControl.C"
+#   include "interTrackControl.C"
+#   include "interTrackControlStorage.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

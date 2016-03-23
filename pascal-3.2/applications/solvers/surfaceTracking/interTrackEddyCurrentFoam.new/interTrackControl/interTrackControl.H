@@ -58,9 +58,11 @@ private:
 
     // Private Data
 
-        // Controls
+        //- Storage
 
-        // Properties
+        //- Controls
+
+        //- Properties
 
             //- Name of fluidA region
             word fluidAregionName_;
@@ -68,11 +70,11 @@ private:
             //- Label of fluidA region
             label fluidAregion_;
 
-        // Solution properties
+        //- Solution properties
 
-        // Solution state variables
+        //- Solution state variables
 
-        // Solution residual variables
+        //- Solution residual variables
 
     // Private Member Functions
 
@@ -96,7 +98,9 @@ public:
         //- Construct from mesh and name
         interTrackControl
         (
-            const regionFvMesh& mesh,
+            const argList& args,
+            Time& time,
+            regionFvMesh& mesh,
             const word& name = "interTrack",
             const bool& master = true
         );
@@ -107,9 +111,17 @@ public:
 
     // Member Functions
 
-        // Controls
+        //- Storage
+        virtual storage& data()
+        {
+            notImplemented(type() + "::data()");
+            storage* storagePtr_ = NULL;
+            return *storagePtr_;
+        };
 
-        // Properties
+        //- Controls
+
+        //- Properties
 
             //- Reference to fluidA region name
             const word& fluidAname() const
@@ -123,13 +135,13 @@ public:
                 return fluidAregion_;
             };
 
-        // Solution properties
+        //- Solution properties
 
-        // Solution state variables
+        //- Solution state variables
 
-        // Solution residual variables
+        //- Solution residual variables
 
-        // Time and database
+        //- Time and database
 
             //- WriteData member function required by regIOobject
             bool writeData(Ostream&) const

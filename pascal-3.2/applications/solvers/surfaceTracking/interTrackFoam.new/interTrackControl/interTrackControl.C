@@ -44,25 +44,17 @@ interTrackControl::interTrackControl
 (
     const argList& args,
     Time& time,
-    regionFvMesh& mesh,
+    dynamicFvMesh& mesh,
     const word& name,
     const bool& master
 )
 :
-    solverControl<regionFvMesh>
+    solverControl<dynamicFvMesh>
     (
-        args, time, mesh, name, master,
-        mesh.regionIndex(polyMesh::defaultRegion)
-    ),
-    fluidAregionName_
-    (
-        word(propDict_.subDict("regions").lookup("fluidA"))
-    ),
-    fluidAregion_
-    (
-        mesh_.regionIndex(fluidAregionName_)
+        args, time, mesh, name, master
     )
 {
+    if (master) storagePtr_ = new storage(*this);
 }
 
 

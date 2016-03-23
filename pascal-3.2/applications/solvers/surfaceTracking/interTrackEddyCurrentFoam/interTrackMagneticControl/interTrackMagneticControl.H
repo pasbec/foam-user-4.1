@@ -60,12 +60,14 @@ private:
 
     // Private Data
 
-        // Controls
+        //- Storage
+
+        //- Controls
 
             //- Interface-tracking specific controls
             mutable interTrackControl track_;
 
-        // Properties
+        //- Properties
 
             //- Name of dynamic region
             word dynamicRegionName_;
@@ -73,11 +75,11 @@ private:
             //- Label of dynamic region
             label dynamicRegion_;
 
-        // Solution properties
+        //- Solution properties
 
-        // Solution state variables
+        //- Solution state variables
 
-        // Solution residual variables
+        //- Solution residual variables
 
     // Private Member Functions
 
@@ -93,7 +95,7 @@ private:
 
 public:
 
-    //- Runtime type information
+    // Runtime type information
     TypeName("interTrackMagneticControl");
 
     // Constructors
@@ -101,7 +103,9 @@ public:
         //- Construct from mesh and name
         interTrackMagneticControl
         (
-            const regionDynamicFvMesh& mesh,
+            const argList& args,
+            Time& time,
+            regionDynamicFvMesh& mesh,
             const word& name = "interTrackMagnetic",
             const bool& master = true
         );
@@ -112,7 +116,15 @@ public:
 
     // Member Functions
 
-        // Controls
+        //- Storage
+        virtual storage& data()
+        {
+            notImplemented(type() + "::data()");
+            storage* storagePtr_ = NULL;
+            return *storagePtr_;
+        };
+
+        //- Controls
 
             //- Reference to interface-tracking control
             interTrackControl& interTrack() const
@@ -120,7 +132,7 @@ public:
                 return track_;
             };
 
-        // Properties
+        //- Properties
 
             //- Reference to fluidA region name
             const word& fluidAname() const
@@ -146,13 +158,13 @@ public:
                 return dynamicRegion_;
             };
 
-        // Solution properties
+        //- Solution properties
 
-        // Solution state variables
+        //- Solution state variables
 
-        // Solution residual variables
+        //- Solution residual variables
 
-        // Time and database
+        //- Time and database
 
             //- WriteData member function required by regIOobject
             bool writeData(Ostream&) const

@@ -14,7 +14,7 @@
 
     // Control class
     Info << "Create control" << nl << endl;
-    eddyCurrentControl control(mesh_);
+    eddyCurrentControl control(args, runTime, mesh_);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

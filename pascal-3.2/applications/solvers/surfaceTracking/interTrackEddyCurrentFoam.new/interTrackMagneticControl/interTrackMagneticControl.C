@@ -42,19 +42,19 @@ defineTypeNameAndDebug(interTrackMagneticControl, 0);
 
 interTrackMagneticControl::interTrackMagneticControl
 (
-    const regionDynamicFvMesh& mesh,
+    const argList& args,
+    Time& time,
+    regionDynamicFvMesh& mesh,
     const word& name,
     const bool& master
 )
 :
     solverControl<regionDynamicFvMesh>
     (
-        mesh,
-        name,
-        master,
+        args, time, mesh, name, master,
         mesh.regionIndex(polyMesh::defaultRegion)
     ),
-    track_(mesh, name, false),
+    track_(args, time, mesh, name, false),
     dynamicRegionName_
     (
         word(propDict_.subDict("regions").lookup("dynamic"))

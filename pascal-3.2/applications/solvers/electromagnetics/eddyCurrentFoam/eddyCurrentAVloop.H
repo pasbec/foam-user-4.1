@@ -17,15 +17,15 @@
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    // Init gradient of V in first iteration
+    if (control.meshIs3D() )
+    {
+        updateGradientV(control.conductor());
+    }
+
     // AV iterations
     while (control.loop())
     {
-        // Init gradient of V in first iteration
-        if (control.meshIs3D() && control.firstIter())
-        {
-            updateGradientV(control.conductor());
-        }
-
         // Solve for A in base region
         {
             setRegionScope(control.base());

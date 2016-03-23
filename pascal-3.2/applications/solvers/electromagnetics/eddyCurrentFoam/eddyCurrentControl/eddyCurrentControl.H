@@ -61,9 +61,11 @@ private:
 
     // Private Data
 
-        // Controls
+        //- Storage
 
-        // Properties
+        //- Controls
+
+        //- Properties
 
             //- Name of conducting region
             word conductorRegionName_;
@@ -83,10 +85,10 @@ private:
             //- Cyclic velocity based on frequency
             dimensionedScalar omega_;
 
-        // Dictionaries
+        //- Dictionaries
 
             //-Solution dictionary of conducting region
-            IOdictionary& conductorSolutionDict_;
+            solution& conductorSolutionDict_;
 
             //- AV-solution dictionary
             dictionary AVdict_;
@@ -97,7 +99,7 @@ private:
             //- V-solution dictionary
             dictionary Vdict_;
 
-        // Solution properties
+        //- Solution properties
 
             //- Solution tolerance
             scalar tol_;
@@ -117,7 +119,7 @@ private:
             //- Solution direction
             mutable Vector<label> solDir_;
 
-        // Solution state variables
+        //- Solution state variables
 
             //- Stop state
             mutable bool stop_;
@@ -146,14 +148,14 @@ private:
 
             //- Sub-iteration relax
             mutable scalar subRelax_;
-            
+
             //- Temporary copy of A-solution dictionary
             mutable dictionary subAdict_;
 
             //- Temporary copy of V-solution dictionary
             mutable dictionary subVdict_;
 
-        // Solution residual variables
+        //- Solution residual variables
 
             //- AV-residual
             mutable scalar AVres_;
@@ -259,7 +261,7 @@ private:
 
 public:
 
-    //- Runtime type information
+    // Runtime type information
     TypeName("eddyCurrentControl");
 
     // Constructors
@@ -267,7 +269,9 @@ public:
         //- Construct from mesh and name
         eddyCurrentControl
         (
-            const regionFvMesh& mesh,
+            const argList& args,
+            Time& time,
+            regionFvMesh& mesh,
             const word& name = "eddyCurrent",
             const bool& master = true
         );
@@ -278,9 +282,17 @@ public:
 
     // Member Functions
 
-        // Controls
+        //- Storage
+        virtual storage& data()
+        {
+            notImplemented(type() + "::data()");
+            storage* storagePtr_ = NULL;
+            return *storagePtr_;
+        };
 
-        // Properties
+        //- Controls
+
+        //- Properties
 
             //- Reference to conductor region name
             const word& conductorName() const
@@ -318,7 +330,7 @@ public:
                 return omega_;
             };
 
-        // Solution properties
+        //- Solution properties
 
             //- Mesh geometry is 3D
             bool meshIs3D() const
@@ -338,7 +350,7 @@ public:
                 return tol_;
             };
 
-        // Solution state variables
+        //- Solution state variables
 
             //- Reference to temporary A-solution dictionary
             const dictionary& Adict() const
@@ -373,7 +385,7 @@ public:
             //- Check, set and return loop state
             const bool& loop();
 
-        // Solution residual variables
+        //- Solution residual variables
 
             //- Set A-residual
             void setResidualOfA(scalar residual) const;
@@ -381,7 +393,7 @@ public:
             //- Set V-residual
             void setResidualOfV(scalar residual) const;
 
-        // Time and database
+        //- Time and database
 
             //- WriteData member function required by regIOobject
             bool writeData(Ostream&) const

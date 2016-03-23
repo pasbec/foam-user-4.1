@@ -33,8 +33,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -42,7 +40,9 @@ namespace Foam
 template <class MESH>
 solverControl<MESH>::solverControl
 (
-    const MESH& mesh,
+    const argList args,
+    Time& time,
+    MESH& mesh,
     const word& name,
     const bool& master,
     const label& regionI0
@@ -60,7 +60,9 @@ solverControl<MESH>::solverControl
             IOobject::NO_WRITE
         )
     ),
-    time_(mesh.time()),
+    msgPtr_(NULL),
+    args_(args),
+    time_(time),
     mesh_(mesh),
     master_(master),
     baseRegionName_(polyMesh::defaultRegion),
@@ -79,10 +81,15 @@ solverControl<MESH>::solverControl
             )
         )
     ),
-    baseSolutionDict_(mesh_.solutionDict()),
-    msg_(NULL)
+    baseSolutionDict_
+    (
+        const_cast<solution&>
+        (
+            dynamicCast<const solution&>(mesh_.solutionDict())
+        )
+    )
 {
-    if (master) msg_ = new solverControlMessages(mesh_);
+    if (master_) msgPtr_ = new messages(args_, time_, mesh_);
 }
 
 

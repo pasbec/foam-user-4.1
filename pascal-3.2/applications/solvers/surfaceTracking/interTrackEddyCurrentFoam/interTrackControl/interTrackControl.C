@@ -42,16 +42,16 @@ defineTypeNameAndDebug(interTrackControl, 0);
 
 interTrackControl::interTrackControl
 (
-    const regionFvMesh& mesh,
+    const argList& args,
+    Time& time,
+    regionFvMesh& mesh,
     const word& name,
     const bool& master
 )
 :
     solverControl<regionFvMesh>
     (
-        mesh,
-        name,
-        master,
+        args, time, mesh, name, master,
         mesh.regionIndex(polyMesh::defaultRegion)
     ),
     fluidAregionName_

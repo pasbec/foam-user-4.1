@@ -33,6 +33,12 @@ Description
 #include "trackedSurface.H"
 #include "patchWave.H"
 #include "wedgePolyPatch.H"
+#include "interTrackControl.H"
+
+#ifndef namespaceFoam
+#define namespaceFoam
+    using namespace Foam;
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,27 +47,39 @@ int main(int argc, char *argv[])
 #   include "addTrackedSurfacePrefixOption.H"
 
 #   include "setRootCase.H"
-
-    // TODO: From here!!!
-
-    // TODO: Solver debug flag
-    bool debug = true;
-
 #   include "createTime.H"
-
 #   include "createDynamicFvMesh.H"
 
-#   include "createFields.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//     createControl(interTrack, mesh);
+//     createControlAndData(interTrack, mesh);
+    interTrackControl control(args, runTime, mesh);
+    interTrackControl::storage& data = control.data();
+
+    volScalarField& p = data.p();
+    volVectorField& U = data.U();
+    surfaceScalarField& phi = data.phi();
+    volScalarField& rho = data.rho();
+    volScalarField& mu = data.mu();
+    volScalarField& fluidIndicator = data.fluidIndicator();
+    trackedSurface& interface = data.interface();
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// TODO: From here!!!
+#   include "interTrackFoamFields.H"
 
 #   include "initContinuityErrs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info << "\nStarting time loop\n" << endl;
+    control.msg().startTimeLoop();
 
+// TODO while(control.loop())
     for (runTime++; !runTime.end(); runTime++)
     {
-        Info << "Time = " << runTime.value() << endl << endl;
+        control.msg().timeIs();
 
 #       include "readPISOControls.H"
 
@@ -180,22 +198,21 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-        if (debug)
+        if
+        (
+            control.debug
+         && runTime.outputTime()
+        )
         {
-            if (runTime.outputTime())
-            {
-                interface.writeVTK();
-                interface.writeA();
-                interface.writeVolA();
-            }
+            interface.writeVTK();
+            interface.writeA();
+            interface.writeVolA();
         }
 
-        Info << "ExecutionTime = "
-            << scalar(runTime.elapsedCpuTime())
-            << " s\n" << endl << endl;
+        control.msg().executionTime();
     }
 
-    Info << "End\n" << endl;
+    control.msg().end();
 
     return(0);
 }
