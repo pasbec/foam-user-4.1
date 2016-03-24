@@ -27,9 +27,10 @@ feClear ()
     local fe32_foam_etc="$FE32_FOAM_ETC"
     local fe32_foam_user_etc="$FE32_FOAM_USER_ETC"
 
+    # Clear environment
     env_unsetRegex WM_.*
     env_unsetRegex FOAM_.*
-
+    env_removeAll 'foam'
     env_removeAll 'foam-extend'
 
     # Restore keys
