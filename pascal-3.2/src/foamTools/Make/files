@@ -1,4 +1,10 @@
 
+solutionControl/solutionData/solutionData.C
+solutionControl/solutionControl/solutionControl.C
+solutionControl/simpleControl/simpleControl.C
+solutionControl/pimpleControl/pimpleControl.C
+solutionControl/pisoControl/pisoControl.C
+
 deflatedLduSolvers/deflatedPCG/deflatedPCG.C
 deflatedLduSolvers/deflatedICCG/deflatedICCG.C
 
