@@ -35,6 +35,9 @@ Description
 #include "wedgePolyPatch.H"
 #include "interTrackControl.H"
 
+// TEST TODO
+#include "solutionData.H"
+
 #ifndef namespaceFoam
 #define namespaceFoam
     using namespace Foam;
@@ -55,15 +58,18 @@ int main(int argc, char *argv[])
 //     createControl(interTrack, mesh);
 //     createControlAndData(interTrack, mesh);
     interTrackControl control(args, runTime, mesh);
-    interTrackControl::storage& data = control.data();
+    interTrackControl::storage& storage = control.data();
 
-    volScalarField& p = data.p();
-    volVectorField& U = data.U();
-    surfaceScalarField& phi = data.phi();
-    volScalarField& rho = data.rho();
-    volScalarField& mu = data.mu();
-    volScalarField& fluidIndicator = data.fluidIndicator();
-    trackedSurface& interface = data.interface();
+    volScalarField& p = storage.p();
+    volVectorField& U = storage.U();
+    surfaceScalarField& phi = storage.phi();
+    volScalarField& rho = storage.rho();
+    volScalarField& mu = storage.mu();
+    volScalarField& fluidIndicator = storage.fluidIndicator();
+    trackedSurface& interface = storage.interface();
+
+// TEST TODO
+    solutionData spData(mesh);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -115,7 +121,11 @@ int main(int argc, char *argv[])
               - fvm::laplacian(mu, U)
             );
 
-            solve(UEqn == -fvc::grad(p));
+// TEST TODO
+            spData.setSolverPerformance("U", solve(UEqn == -fvc::grad(p)));
+Info << "spData.solverPerformanceDict() = " << spData.solverPerformanceDict() << endl;
+//             solve(UEqn == -fvc::grad(p));
+
 
             // --- PISO loop
             for (int i=0; i<nCorr; i++)

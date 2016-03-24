@@ -183,6 +183,14 @@ public:
         //- Storage
         virtual storage& data()
         {
+            if (!storagePtr_)
+            {
+                FatalErrorIn(type() + "::data()")
+                    << "Storage pointer is not allocated. "
+                        << "Most likely, this is not the master control."
+                        << abort(FatalError);
+            }
+
             return *storagePtr_;
         };
 
