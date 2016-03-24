@@ -92,15 +92,31 @@ public:
             template<class spType>
             void setSolverPerformance
             (
-                const word& fieldName,
-                const spType&
+                const word& name,
+                const spType& sp
             ) const;
 
-            //- Add/set the solverPerformance entry using its fieldName
+            //- Add/set the solverPerformance entry using its name
             template<class spType>
             void setSolverPerformance
             (
-                const spType&
+                const spType& sp
+            ) const;
+
+// TEST TODO: Move/Wrap these templates to/in solutionControl
+            //- Solve tmp<matrix> and store solverPerformance in database
+            template<class matrixType>
+            void solve
+            (
+                const tmp<matrixType>& tm
+            ) const;
+
+// TEST TODO: Move/Wrap these templates to/in solutionControl
+            //- Solve matrix and store solverPerformance in database
+            template<class matrixType>
+            void solve
+            (
+                matrixType& m
             ) const;
 };
 

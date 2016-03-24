@@ -122,9 +122,9 @@ int main(int argc, char *argv[])
             );
 
 // TEST TODO
-            spData.setSolverPerformance("U", solve(UEqn == -fvc::grad(p)));
-Info << "spData.solverPerformanceDict() = " << spData.solverPerformanceDict() << endl;
 //             solve(UEqn == -fvc::grad(p));
+//             spData.setSolverPerformance("U", solve(UEqn == -fvc::grad(p)));
+            spData.solve(UEqn == -fvc::grad(p));
 
 
             // --- PISO loop
@@ -158,7 +158,9 @@ Info << "spData.solverPerformanceDict() = " << spData.solverPerformanceDict() <<
 #                   include "setReference.H"
 
 //                     pEqn.setReference(pRefCell, pRefValue);
-                    pEqn.solve();
+// TEST TODO
+//                     pEqn.solve();
+                    spData.solve(pEqn);
 
                     if (nonOrth == nNonOrthCorr)
                     {
@@ -183,6 +185,9 @@ Info << "spData.solverPerformanceDict() = " << spData.solverPerformanceDict() <<
 #           include "checkResidual.H"
 
             AU = UEqn.A();
+
+// TEST TODO
+Info << "spData.solverPerformanceDict() = " << spData.solverPerformanceDict() << endl;
         }
 
 #       include "volContinuity.H"

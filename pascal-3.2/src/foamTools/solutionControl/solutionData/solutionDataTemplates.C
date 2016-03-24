@@ -31,7 +31,7 @@ License
 template<class spType>
 void Foam::solutionData::setSolverPerformance
 (
-    const word& fieldName,
+    const word& name,
     const spType& sp
 ) const
 {
@@ -47,13 +47,13 @@ void Foam::solutionData::setSolverPerformance
     }
     else
     {
-        dict.readIfPresent(fieldName, fieldSpDicts);
+        dict.readIfPresent(name, fieldSpDicts);
     }
 
     dictionary newSpDict;
     {
         newSpDict.add("solverName", sp.solverName());
-        newSpDict.add("fieldName", fieldName);
+        newSpDict.add("name", name);
         newSpDict.add("initialResidual", sp.initialResidual());
         newSpDict.add("finalResidual", sp.finalResidual());
         newSpDict.add("nIterations", sp.nIterations());
@@ -67,7 +67,7 @@ void Foam::solutionData::setSolverPerformance
         newSpDict
     );
 
-    dict.set(fieldName, fieldSpDicts);
+    dict.set(name, fieldSpDicts);
 }
 
 
@@ -77,7 +77,41 @@ void Foam::solutionData::setSolverPerformance
     const spType& sp
 ) const
 {
-    setSolverPerformance(sp.fieldName(), sp);
+    setSolverPerformance(sp.name(), sp);
+}
+
+
+// TEST TODO: Move/Wrap these templates to/in solutionControl
+template<class matrixType>
+void Foam::solutionData::solve
+(
+    const tmp<matrixType>& tm
+) const
+{
+    matrixType& m = *tm.ptr();
+
+    setSolverPerformance
+    (
+        m.psi().name(),
+        m.solve()
+    );
+
+    tm.clear();
+}
+
+
+// TEST TODO: Move/Wrap these templates to/in solutionControl
+template<class matrixType>
+void Foam::solutionData::solve
+(
+    matrixType& m
+) const
+{
+    setSolverPerformance
+    (
+        m.psi().name(),
+        m.solve()
+    );
 }
 
 
