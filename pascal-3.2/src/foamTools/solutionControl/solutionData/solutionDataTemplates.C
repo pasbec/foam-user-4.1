@@ -77,7 +77,7 @@ void Foam::solutionData::setSolverPerformance
     const spType& sp
 ) const
 {
-    setSolverPerformance(sp.name(), sp);
+    setSolverPerformance(sp.fieldName(), sp);
 }
 
 
