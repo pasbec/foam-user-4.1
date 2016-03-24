@@ -53,7 +53,7 @@ void Foam::solutionData::setSolverPerformance
     dictionary newSpDict;
     {
         newSpDict.add("solverName", sp.solverName());
-        newSpDict.add("name", name);
+        newSpDict.add("fieldName", name);
         newSpDict.add("initialResidual", sp.initialResidual());
         newSpDict.add("finalResidual", sp.finalResidual());
         newSpDict.add("nIterations", sp.nIterations());
