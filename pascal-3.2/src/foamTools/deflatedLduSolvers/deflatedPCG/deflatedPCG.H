@@ -28,6 +28,9 @@ Description
     Preconditioned conjugate gradient solver for symmetric lduMatrices
     using a run-time selectable preconditioner.
 
+    Matrix deflation wass added. This solver only works for singular matrices
+    like derived from Laplacian with only Neumann-BC and WITHOUT reference set.
+
 SourceFiles
     deflatedPCG.C
 

@@ -29,6 +29,9 @@ Description
     preconditioned CG solver PCG but with the choice of preconditioner
     pre-selected.
 
+    Matrix deflation wass added. This solver only works for singular matrices
+    like derived from Laplacian with only Neumann-BC and WITHOUT reference set.
+
 Deprecated
     This solver is present for backward-compatibility and the PCG solver
     should be used for preference.
