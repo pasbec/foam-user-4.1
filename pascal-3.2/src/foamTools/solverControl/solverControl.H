@@ -49,18 +49,18 @@ SourceFiles
 # define createControlAndData(NAME, MESH)                                     \
                                                                               \
     NAME##Control control(MESH);                                              \
-    NAME##Control::storage& data = control.data();
+    NAME##Control::storage& storage = control.data();
 
 # define setControlScope(NAME)                                                \
                                                                               \
     NAME##Control& NAME = control.NAME();                                     \
     NAME##Control& control = NAME;
 
-# define setControlScopeWithData(NAME)                                        \
+# define setControlScopeWithStorage(NAME)                                     \
                                                                               \
     NAME##Control& NAME = control.NAME();                                     \
     NAME##Control& control = NAME;                                            \
-    NAME##Control::storage& data = control.data();
+    NAME##Control::storage& storage = control.data();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
