@@ -141,10 +141,13 @@ private:
 
         // Evolution
 
-            //- Time step setting routine
+            //- Set Courant Number
             virtual bool setCoNum(scalar& CoNum) const;
 
-            //- Post write
+            //- Pre write sequence
+            virtual void writePre() const;
+
+            //- Post write sequence
             virtual void writePost() const;
 
 public:

@@ -108,9 +108,10 @@ void solverManager<MESH>::applyDeltaT() const
     
         if (!CoNumSet)
         {
-            FatalErrorIn("solverManager::run()")
-                << "A Courant Number needs to be calculated if run() is "
-                    << "beeing used. Utilize the virtual function "
+            FatalErrorIn("solverManager::applyDeltaT()")
+                << "A Courant Number needs to be calculated if "
+                    << "solverManager::setDeltaT(scalar& deltaT) "
+                    << "is not beeing used. Utilize the virtual function "
                     << "setCoNum(scalar& newCoNum) to set it. The "
                     << "return value needs to be true."
                     << abort(FatalError);

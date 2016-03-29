@@ -184,23 +184,6 @@ volScalarField AU
 
 #       include "volContinuity.H"
 
-        Info << "Total surface tension force: "
-            << interface.totalSurfaceTensionForce() << endl;
-
-        vector totalForce =
-            interface.totalViscousForce()
-          + interface.totalPressureForce();
-
-        Info << "Total force: " << totalForce << endl;
-
-// TEST: Sub-mesh
-        const areaScalarField& K = interface.curvature();
-//        const areaScalarField& K = interface.aMesh().faceCurvatures();
-
-        Info << "Free surface curvature: min = " << gMin(K)
-            << ", max = " << gMax(K)
-            << ", average = " << gAverage(K) << endl << flush;
-
         manager.write();
     }
 

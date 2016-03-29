@@ -88,6 +88,34 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
 }
 
 
+void interTrackManager::writePre() const
+{
+// TODO: Use const
+    trackedSurface& interface = data().interface();
+
+        vector totalSurfaceTensionForce =
+             interface.totalSurfaceTensionForce();
+
+        vector totalForce =
+            interface.totalViscousForce()
+          + interface.totalPressureForce();
+
+        Info << "Surface tension force: "
+            << totalSurfaceTensionForce << endl;
+        Info << "Surface total force: "
+            << totalForce << endl;
+
+// TODO TEST: Sub-mesh
+        const areaScalarField& K = interface.curvature();
+//        const areaScalarField& K = interface.aMesh().faceCurvatures();
+
+        Info << "Surface curvature min: " << gMin(K)
+            << " max: " << gMax(K)
+            << " average: " << gAverage(K)
+            << endl;
+}
+
+
 void interTrackManager::writePost() const
 {
     const Time& runTime = this->time();
