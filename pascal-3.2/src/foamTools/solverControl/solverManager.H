@@ -128,6 +128,20 @@ namespace Foam
 template <class MESH>
 class solverManager
 {
+public:
+
+    // Public structs
+
+        //- Time controls
+        struct timeControls
+        {
+            bool adjustTimeStep;
+            scalar maxCo;
+            scalar maxDeltaT;
+            scalar CoNum;
+        };
+
+
 protected:
 
     // Protected Nested Classes
@@ -319,6 +333,63 @@ protected:
 
     // Protected Data
 
+    // Protected Member Functions
+
+        // Evolution
+
+            //- Set time step width
+            //  A return value of true means active
+            virtual bool setDeltaT(scalar& deltaT) const
+            {
+                return false;
+            };
+
+            //- Set time controls
+            //  A return value of true means active
+            virtual bool setControls(timeControls& tc) const
+            {
+                return false;
+            };
+
+            //- Set Courant Number
+            //  A return value of true means active
+            virtual bool setCoNum(scalar& CoNum) const
+            {
+                return false;
+            };
+
+            //- Pre loop sequence
+            virtual void timePre() const {};
+
+            //- Post loop sequence
+            virtual void timePost() const {};
+
+            //- Pre loop sequence
+            virtual void loopPre() const {};
+
+            //- Post loop sequence
+            virtual void loopPost() const {};
+
+            //- Pre run sequence
+            virtual void runPre() const {};
+
+            //- Post run sequence
+            virtual void runPost() const {};
+
+            //- Pre write sequence
+            virtual void writePre() const {};
+
+            //- Post write sequence
+            virtual void writePost() const {};
+
+
+private:
+
+    // Private Data
+
+        //- Time controls
+        mutable timeControls* timeControlsPtr_;
+
         //- Messages
         messages* msgPtr_;
 
@@ -354,7 +425,22 @@ protected:
 
         // Evolution
 
-    // Protected Member Functions
+            //- Pre runTime phase?
+            mutable bool prePhase_;
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        solverManager(const solverManager&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const solverManager&);
+
+        //- Pre runTime phase
+        bool& prePhase() const
+        {
+            return prePhase_;
+        };
 
         //- Error if not master manager
         void errorIfNotMaster() const
@@ -370,55 +456,15 @@ protected:
 
         // Evolution
 
-            //- Courant-number calculation
-            //  Needs to return true if the Courant number is beeing set
-            virtual bool calcCoNum(scalar& CoNum) const
-            {
-                return false;
-            };
-
-            //- Pre run sequence
-            virtual void runPre() const {};
-
-            //- Post run sequence
-            virtual void runPost() const {};
-
-            //- Pre write sequence
-            virtual void writePre() const {};
-
-            //- Post write sequence
-            virtual void writePost() const {};
-
-private:
-
-    // Private Data
-
-        // Evolution
-
-            //- Pre time-loop state
-            mutable bool preRunTime_;
-
-            //- Courant Number
-            mutable scalar CoNum_;
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        solverManager(const solverManager&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const solverManager&);
-
-        // Evolution
-
-            //- Refenrence to pre time-loop state
-            bool& preRunTime() const
-            {
-                return preRunTime_;
-            };
+            //- Read time controls
+            void readControls(timeControls& tc) const;
 
             //- Time step setting
-            bool setDeltaT() const;
+            void calcDeltaT(scalar& deltaT) const;
+
+            //- Time step application
+            void applyDeltaT() const;
+
 
 public:
 
@@ -438,10 +484,22 @@ public:
 
         virtual ~solverManager()
         {
-            if (master_) delete msgPtr_;
+            if (master_)
+            {
+                delete msgPtr_;
+                delete timeControlsPtr_;
+            }
         };
 
     // Member Functions
+
+        //- Time controls
+        const timeControls& controls() const
+        {
+            errorIfNotMaster();
+
+            return *timeControlsPtr_;
+        }
 
         //- Messages
         const messages& msg() const
@@ -473,6 +531,12 @@ public:
             {
                 return time_;
             };
+
+            //- Refrence to controlDict
+            const dictionary& controlDict() const
+            {
+                return time_.controlDict();
+            }
 
             //- Const reference to mesh
             const MESH& mesh() const
@@ -522,13 +586,10 @@ public:
 
         // Evolution
 
-            //- Return current Courant Number
-            const scalar& CoNum() const
-            {
-                return CoNum_;
-            };
+            //- Main time loop wrapper
+            bool loop() const;
 
-            //- Main time run loop wrapper
+            //- Main time run wrapper
             bool run() const;
 
             //- Main time write wrapper

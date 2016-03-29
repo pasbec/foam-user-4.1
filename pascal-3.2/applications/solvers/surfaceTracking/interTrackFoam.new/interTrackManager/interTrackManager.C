@@ -37,7 +37,7 @@ defineTypeNameAndDebug(interTrackManager, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool interTrackManager::calcCoNum(scalar& CourantNumber) const
+bool interTrackManager::setCoNum(scalar& CourantNumber) const
 {
     CourantNumber = 0.0;
 

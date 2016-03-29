@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "solverManager.H"
+#include "dimensionSet.H"
 #include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -31,55 +32,96 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template <class MESH>
-bool solverManager<MESH>::setDeltaT() const
+void solverManager<MESH>::readControls
+(
+    timeControls& tc
+) const
 {
     errorIfNotMaster();
 
+    tc.adjustTimeStep =
+        controlDict().lookupOrDefault("adjustTimeStep", false);
+
+    tc.maxCo =
+        controlDict().lookupOrDefault("maxCo", scalar(1.0));
+
+    tc.maxDeltaT =
+        controlDict().lookupOrDefault("maxDeltaT", scalar(GREAT));
+}
+
+
+template <class MESH>
+void solverManager<MESH>::calcDeltaT
+(
+    scalar& deltaT
+) const
+{
+    errorIfNotMaster();
+
+    timeControls& tc = const_cast<timeControls&>(controls());
+
     Time& runTime = const_cast<Time&>(time());
 
-    const dictionary& controlDict = runTime.controlDict();
-
-    Switch adjustTimeStep
-    (
-        controlDict.lookup("adjustTimeStep")
-    );
-
-    if (adjustTimeStep)
+    if (tc.adjustTimeStep)
     {
-        scalar maxCo
-        (
-            readScalar(controlDict.lookup("maxCo"))
-        );
 
-        scalar maxDeltaT =
-            controlDict.lookupOrDefault<scalar>("maxDeltaT", GREAT);
-
-        scalar maxDeltaTFact = maxCo/(CoNum() + SMALL);
+        scalar maxDeltaTFact = tc.maxCo/(tc.CoNum + SMALL);
         scalar deltaTFact =
             min(min(maxDeltaTFact, 1.0 + 0.1*maxDeltaTFact), 1.2);
 
-        runTime.setDeltaT
-        (
+        deltaT =
             min
             (
                 deltaTFact * runTime.deltaT().value(),
-                maxDeltaT
-            )
-        );
-
-        msg().timeDeltaT();
-
-        return true;
+                tc.maxDeltaT
+            );
     }
-    else
+}
+
+
+template <class MESH>
+void solverManager<MESH>::applyDeltaT() const
+{
+    errorIfNotMaster();
+
+    timeControls& tc = const_cast<timeControls&>(controls());
+
+    Time& runTime = const_cast<Time&>(time());
+
+    scalar deltaT = GREAT;
+
+    bool deltaTset = setDeltaT(deltaT);
+
+    if (!deltaTset)
     {
-        return false;
+        bool controlsSet = setControls(tc);
+    
+        if (!controlsSet)
+        {
+            readControls(tc);
+        }
+    
+        bool CoNumSet = setCoNum(tc.CoNum);
+    
+        if (!CoNumSet)
+        {
+            FatalErrorIn("solverManager::run()")
+                << "A Courant Number needs to be calculated if run() is "
+                    << "beeing used. Utilize the virtual function "
+                    << "setCoNum(scalar& newCoNum) to set it. The "
+                    << "return value needs to be true."
+                    << abort(FatalError);
+        }
+    
+        calcDeltaT(deltaT);
     }
+
+    runTime.setDeltaT(deltaT);
+
+    msg().timeDeltaT();
 }
 
 
@@ -96,6 +138,7 @@ solverManager<MESH>::solverManager
     const label& regionI0
 )
 :
+    timeControlsPtr_(NULL),
     msgPtr_(NULL),
     args_(args),
     time_(time),
@@ -124,14 +167,58 @@ solverManager<MESH>::solverManager
             dynamicCast<const solution&>(mesh_.solutionDict())
         )
     ),
-    preRunTime_(true),
-    CoNum_(0.0)
+    prePhase_(true)
 {
-    if (master_) msgPtr_ = new messages(args_, time_, mesh_);
+    if (master_)
+    {
+        timeControlsPtr_ = new timeControls();
+        {
+            readControls(*timeControlsPtr_);
+            timeControlsPtr_->CoNum = 0.0;
+        }
+
+        msgPtr_ = new messages(args_, time_, mesh_);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template <class MESH>
+bool solverManager<MESH>::loop() const
+{
+    errorIfNotMaster();
+
+    Time& runTime = const_cast<Time&>(time());
+
+    if (prePhase())
+    {
+        timePre();
+
+        msg().startTimeLoop();
+
+        prePhase() = false;
+    }
+
+    loopPre();
+
+    if (runTime.loop())
+    {
+        msg().timeIs();
+
+        loopPost();
+
+        return true;
+    }
+    else
+    {
+        timePost();
+
+        msg().end();
+
+        return false;
+    }
+}
 
 template <class MESH>
 bool solverManager<MESH>::run() const
@@ -140,29 +227,20 @@ bool solverManager<MESH>::run() const
 
     Time& runTime = const_cast<Time&>(time());
 
-    if (preRunTime())
+    if (prePhase())
     {
+        timePre();
+
         msg().startTimeLoop();
 
-        preRunTime() = false;
+        prePhase() = false;
     }
+
+    runPre();
 
     if (runTime.run())
     {
-        runPre();
-
-        bool CoNumSet = calcCoNum(CoNum_);
-
-        if (!CoNumSet)
-        {
-            FatalErrorIn("solverManager::run()")
-                << "A Courant Number needs to be calculated for run(). "
-                << "Use the virtual function calcCoNum(scalar& CoNum) to "
-                << "calulate it, which finally needs to return true."
-                << abort(FatalError);
-        }
-
-        setDeltaT();
+        applyDeltaT();
 
         runTime++;
 
@@ -174,6 +252,8 @@ bool solverManager<MESH>::run() const
     }
     else
     {
+        timePost();
+
         msg().end();
 
         return false;

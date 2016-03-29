@@ -142,7 +142,7 @@ private:
         // Evolution
 
             //- Time step setting routine
-            virtual bool calcCoNum(scalar& CoNum) const;
+            virtual bool setCoNum(scalar& CoNum) const;
 
             //- Post write
             virtual void writePost() const;
