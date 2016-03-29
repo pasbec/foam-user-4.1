@@ -13,7 +13,8 @@ EXE_INC = \
     -I$(FOAM_USER_SRC)/regionModel/lnInclude \
     -I$(FOAM_USER_APP)/solvers/surfaceTracking/trackedSurface.new/lnInclude \
     -I$(FOAM_USER_APP)/solvers/surfaceTracking/include.new \
-    -IinterTrackControl
+    -IinterTrackManager \
+    -Iinclude
 
 EXE_LIBS = \
     -lfiniteVolume \

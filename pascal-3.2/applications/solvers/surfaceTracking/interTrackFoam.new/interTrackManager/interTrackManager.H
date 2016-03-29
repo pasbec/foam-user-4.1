@@ -22,29 +22,27 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    interTrackControl
+    interTrackManager
 
 Description
     ...
 
 SourceFiles
-    interTrackControl.C
-    interTrackControlStorage.C
+    interTrackManager.C
+    interTrackManagerStorage.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackControl_H
-#define interTrackControl_H
+#ifndef interTrackManager_H
+#define interTrackManager_H
 
-#include "solverControl.H"
+#include "solverManager.H"
 
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
 #include "trackedSurface.H"
 
-// #include "PstreamReduceOps.H"
-// #include "mathematicalConstants.H"
-// #include "physicalConstants.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,12 +50,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class interTrackControl Declaration
+                       Class interTrackManager Declaration
 \*---------------------------------------------------------------------------*/
 
-class interTrackControl
+class interTrackManager
 :
-    public solverControl<dynamicFvMesh>
+    public solverManager<dynamicFvMesh>
 {
 public:
 
@@ -66,14 +64,14 @@ public:
         //- Storage
         struct storage
         :
-            solverControl<dynamicFvMesh>::storage
+            solverManager<dynamicFvMesh>::storage
         {
         private:
 
             // Private Data
 
-                //- Reference to control
-                interTrackControl& control_;
+                //- Reference to solver manager
+                interTrackManager& manager_;
 
             // Private Member Functions
 
@@ -83,10 +81,10 @@ public:
                 //- Disallow default bitwise assignment
                 void operator=(const storage&);
 
-                //- Return reference to control
-                interTrackControl& control()
+                //- Return reference to solver manager
+                interTrackManager& manager()
                 {
-                    return control_;
+                    return manager_;
                 }
 
                 //- Initialize data sequence
@@ -95,32 +93,32 @@ public:
             // Macro-generated data entries with accessors
 
                 //- Pressure
-                solverControlStorage_add(volScalarField, p);
+                solverManagerStorage_add(volScalarField, p);
 
                 //- Velocity
-                solverControlStorage_add(volVectorField, U);
+                solverManagerStorage_add(volVectorField, U);
 
                 //- Face flux
-                solverControlStorage_add(surfaceScalarField, phi);
+                solverManagerStorage_add(surfaceScalarField, phi);
 
                 //- Density
-                solverControlStorage_add(volScalarField, rho);
+                solverManagerStorage_add(volScalarField, rho);
 
                 //- Dynamic viscosity
-                solverControlStorage_add(volScalarField, mu);
+                solverManagerStorage_add(volScalarField, mu);
 
                 //- Fluid indicator
-                solverControlStorage_add(volScalarField, fluidIndicator);
+                solverManagerStorage_add(volScalarField, fluidIndicator);
 
                 //- Tracked surface
-                solverControlStorage_add(trackedSurface, interface);
+                solverManagerStorage_add(trackedSurface, interface);
 
         public:
 
             // Constructor
 
-                //- Construct from control
-                storage(interTrackControl& control);
+                //- Construct from manager
+                storage(interTrackManager& manager);
         };
 
 private:
@@ -128,41 +126,35 @@ private:
     // Private Data
 
         //- Storage
-        storage* storagePtr_;
+        mutable storage* storagePtr_;
 
-        //- Controls
-
-        //- Properties
-
-        //- Dictionaries
-
-        //- Solution properties
-
-        //- Solution state variables
-
-        //- Solution residual variables
+        //- Solution control
+        mutable pimpleControl pimple_;
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        interTrackControl(const interTrackControl&);
+        interTrackManager(const interTrackManager&);
 
         //- Disallow default bitwise assignment
-        void operator=(const interTrackControl&);
+        void operator=(const interTrackManager&);
 
-        //- Inline helper
+        // Evolution
 
-        //- Helper
+            //- Time step setting routine
+            virtual bool calcCoNum(scalar& CoNum) const;
+
+            //- Post write
+            virtual void writePost() const;
 
 public:
 
     // Runtime type information
-    TypeName("interTrackControl");
+    TypeName("interTrackManager");
 
-    // Constructors
+    // Constructor
 
-        //- Construct from mesh and name
-        interTrackControl
+        interTrackManager
         (
             const argList& args,
             Time& time,
@@ -173,46 +165,32 @@ public:
 
     // Destructor
 
-        virtual ~interTrackControl()
+        virtual ~interTrackManager()
         {
-            if (master()) delete storagePtr_;
+            if (this->master()) delete storagePtr_;
         };
 
     // Member Functions
 
         //- Storage
-        virtual storage& data()
+        virtual storage& data() const
         {
             if (!storagePtr_)
             {
                 FatalErrorIn(type() + "::data()")
                     << "Storage pointer is not allocated. "
-                        << "Most likely, this is not the master control."
+                        << "Most likely, this is not the master manager."
                         << abort(FatalError);
             }
 
             return *storagePtr_;
         };
 
-        //- Controls
-
-        //- Properties
-
-        //- Dictionaries
-
-        //- Solution properties
-
-        //- Solution state variables
-
-        //- Solution residual variables
-
-        //- Time and database
-
-            //- WriteData member function required by regIOobject
-            bool writeData(Ostream&) const
-            {
-                return false;
-            };
+        //- Solution control
+        pimpleControl& pimple() const
+        {
+            return pimple_;
+        };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -222,8 +200,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interTrackControl.C"
-#   include "interTrackControlStorage.C"
+#   include "interTrackManager.C"
+#   include "interTrackManagerStorage.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

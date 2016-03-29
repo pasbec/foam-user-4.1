@@ -31,12 +31,7 @@ Description
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
 #include "trackedSurface.H"
-#include "patchWave.H"
-#include "wedgePolyPatch.H"
-#include "interTrackControl.H"
-
-// TEST TODO
-#include "solutionData.H"
+#include "interTrackManager.H"
 
 #ifndef namespaceFoam
 #define namespaceFoam
@@ -55,81 +50,77 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//     createControl(interTrack, mesh);
-//     createControlAndData(interTrack, mesh);
-    interTrackControl control(args, runTime, mesh);
-    interTrackControl::storage& storage = control.data();
+    interTrackManager manager(args, runTime, mesh);
 
-    volScalarField& p = storage.p();
-    volVectorField& U = storage.U();
-    surfaceScalarField& phi = storage.phi();
-    volScalarField& rho = storage.rho();
-    volScalarField& mu = storage.mu();
-    volScalarField& fluidIndicator = storage.fluidIndicator();
-    trackedSurface& interface = storage.interface();
+    pimpleControl& pimple = manager.pimple();
 
-// TEST TODO
-    solutionData spData(mesh);
+    interTrackManager::storage& data = manager.data();
+
+    volScalarField& p = data.p();
+    volVectorField& U = data.U();
+    surfaceScalarField& phi = data.phi();
+    volScalarField& rho = data.rho();
+    volScalarField& mu = data.mu();
+    volScalarField& fluidIndicator = data.fluidIndicator();
+    trackedSurface& interface = data.interface();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// TODO: From here!!!
-#   include "interTrackFoamFields.H"
+// TODO
+
+#   include "createSf.H"
+
+// Read interpolators if present
+if (interface.twoFluids())
+{
+    interface.interpolatorAB();
+}
+
+
+#   include "setRefCell.H"
+
+volScalarField AU
+(
+    IOobject
+    (
+        "AU",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("AU", dimDensity/dimTime, 0)
+);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #   include "initContinuityErrs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    control.msg().startTimeLoop();
-
-// TODO while(control.loop())
-    for (runTime++; !runTime.end(); runTime++)
+    while (manager.run())
     {
-        control.msg().timeIs();
-
-#       include "readPISOControls.H"
-
-#       include "readFreeSurfaceControls.H"
-
         interface.updateMesh();
         interface.updateDisplacementDirections();
 
         interface.predictPoints();
 
-        Info<< "\nMax surface Courant Number = "
-            << interface.maxCourantNumber() << endl << endl;
-
-        for (int corr=0; corr<nOuterCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        while (pimple.loop())
         {
-            p.storePrevIter();
-
             // Update interface bc
             interface.updateBoundaryConditions();
 
             // Make the fluxes relative
-            phi -= fvc::meshPhi(rho, U);
+            fvc::makeRelative(phi,U);
 
-#           include "CourantNo.H"
+#           include "interTrackUEqn.H"
 
-            fvVectorMatrix UEqn
-            (
-//                 fvm::ddt(U)
-//               + fvm::div(phi, U, "div(phi,U)")
-//               - fvm::laplacian(nu, U)
-                fvm::ddt(rho, U)
-              + fvm::div(fvc::interpolate(rho)*phi, U, "div(phi,U)")
-              - fvm::laplacian(mu, U)
-            );
-
-// TEST TODO
-//             solve(UEqn == -fvc::grad(p));
-//             spData.setSolverPerformance("U", solve(UEqn == -fvc::grad(p)));
-            spData.solve(UEqn == -fvc::grad(p));
-
-
-            // --- PISO loop
-            for (int i=0; i<nCorr; i++)
+             // --- Pressure corrector PISO loop
+            while (pimple.correct())
             {
+// TODO
 //                 volScalarField rUA = 1.0/UEqn.A();
 //                 U = rUA*UEqn.H();
 //                 phi = (fvc::interpolate(U) & mesh.Sf());
@@ -139,6 +130,8 @@ int main(int argc, char *argv[])
 
                 U = HU/AU;
 
+// TODO: Port this from OpenFOAM 3.0.x
+                bool ddtPhiCorr = false;
 #               include "calcPhi.H"
 
 // #               include "correctPhiAtInterface.H"
@@ -146,7 +139,7 @@ int main(int argc, char *argv[])
 #               include "scalePhi.H"
 
                 // Non-orthogonal pressure corrector loop
-                for (label nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+                while (pimple.correctNonOrthogonal())
                 {
                     fvScalarMatrix pEqn
                     (
@@ -156,13 +149,17 @@ int main(int argc, char *argv[])
                     );
 
 #                   include "setReference.H"
-
 //                     pEqn.setReference(pRefCell, pRefValue);
-// TEST TODO
-//                     pEqn.solve();
-                    spData.solve(pEqn);
 
-                    if (nonOrth == nNonOrthCorr)
+                    pEqn.solve
+                    (
+                        mesh.solutionDict().solverDict
+                        (
+                            p.select(pimple.finalInnerIter())
+                        )
+                    );
+
+                    if (pimple.finalNonOrthogonalIter())
                     {
                         phi -= pEqn.flux();
                     }
@@ -182,12 +179,7 @@ int main(int argc, char *argv[])
 
 #           include "updateSf.H"
 
-#           include "checkResidual.H"
-
             AU = UEqn.A();
-
-// TEST TODO
-Info << "spData.solverPerformanceDict() = " << spData.solverPerformanceDict() << endl;
         }
 
 #       include "volContinuity.H"
@@ -202,32 +194,15 @@ Info << "spData.solverPerformanceDict() = " << spData.solverPerformanceDict() <<
         Info << "Total force: " << totalForce << endl;
 
 // TEST: Sub-mesh
-        K = interface.curvature();
-//        K = interface.aMesh().faceCurvatures();
+        const areaScalarField& K = interface.curvature();
+//        const areaScalarField& K = interface.aMesh().faceCurvatures();
 
         Info << "Free surface curvature: min = " << gMin(K)
             << ", max = " << gMax(K)
             << ", average = " << gAverage(K) << endl << flush;
 
-//         dist.internalField() = patchWave(mesh, patchSet, false).distance();
-
-        runTime.write();
-
-        if
-        (
-            control.debug
-         && runTime.outputTime()
-        )
-        {
-            interface.writeVTK();
-            interface.writeA();
-            interface.writeVolA();
-        }
-
-        control.msg().executionTime();
+        manager.write();
     }
-
-    control.msg().end();
 
     return(0);
 }

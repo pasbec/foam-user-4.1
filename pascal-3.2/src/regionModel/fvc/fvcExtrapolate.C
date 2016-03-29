@@ -77,7 +77,7 @@ extrapolate
             IOobject
             (
                 vf.name(),
-                mesh.instance(),
+                mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,

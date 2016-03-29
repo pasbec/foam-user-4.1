@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackControl.H"
+#include "interTrackManager.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -32,112 +32,112 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void interTrackControl::storage::create_p()
+void interTrackManager::storage::create_p()
 {
-    solverControlStorage_info(p);
+    solverManagerStorage_info(p);
 
     pPtr_ = new volScalarField
     (
         IOobject
         (
             "p",
-            time().timeName(),
-            mesh(),
+            manager().time().timeName(),
+            manager().mesh(),
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh()
+        manager().mesh()
     );
 }
 
 
-void interTrackControl::storage::create_U()
+void interTrackManager::storage::create_U()
 {
-    solverControlStorage_info(U);
+    solverManagerStorage_info(U);
 
     UPtr_ = new volVectorField
     (
         IOobject
         (
             "U",
-            time().timeName(),
-            mesh(),
+            manager().time().timeName(),
+            manager().mesh(),
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh()
+        manager().mesh()
     );
 }
 
 
-void interTrackControl::storage::create_phi()
+void interTrackManager::storage::create_phi()
 {
-    solverControlStorage_info(phi);
+    solverManagerStorage_info(phi);
 
-    solverControlStorage_assert(phi, U);
+    solverManagerStorage_assert(phi, U);
 
     phiPtr_ = new surfaceScalarField
     (
         IOobject
         (
             "phi",
-            time().timeName(),
-            mesh(),
+            manager().time().timeName(),
+            manager().mesh(),
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        linearInterpolate(U()) & mesh().Sf()
+        linearInterpolate(U()) & manager().mesh().Sf()
     );
 
     phiPtr_->oldTime();
 }
 
 
-void interTrackControl::storage::create_rho()
+void interTrackManager::storage::create_rho()
 {
-    solverControlStorage_info(rho);
+    solverManagerStorage_info(rho);
 
     rhoPtr_ = new volScalarField
     (
         IOobject
         (
             "rho",
-            time().timeName(),
-            mesh(),
+            manager().time().timeName(),
+            manager().mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        mesh(),
+        manager().mesh(),
         dimensionedScalar(word(), dimDensity, 0)
     );
 }
 
 
-void interTrackControl::storage::create_mu()
+void interTrackManager::storage::create_mu()
 {
-    solverControlStorage_info(mu);
+    solverManagerStorage_info(mu);
 
     muPtr_ = new volScalarField
     (
         IOobject
         (
             "mu",
-            time().timeName(),
-            mesh(),
+            manager().time().timeName(),
+            manager().mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        mesh(),
+        manager().mesh(),
         dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
     );
 }
 
 
-void interTrackControl::storage::create_fluidIndicator()
+void interTrackManager::storage::create_fluidIndicator()
 {
-    solverControlStorage_info(fluidIndicator);
+    solverManagerStorage_info(fluidIndicator);
 
-    solverControlStorage_assert(fluidIndicator, interface);
+    solverManagerStorage_assert(fluidIndicator, interface);
 
     if(args().options().found("parallel"))
     {
@@ -146,12 +146,12 @@ void interTrackControl::storage::create_fluidIndicator()
             IOobject
             (
                 "fluidIndicator",
-                time().timeName(),
-                mesh(),
+                manager().time().timeName(),
+                manager().mesh(),
                 IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
-            mesh()
+            manager().mesh()
         );
     }
     else
@@ -161,8 +161,8 @@ void interTrackControl::storage::create_fluidIndicator()
             IOobject
             (
                 "fluidIndicator",
-                time().timeName(),
-                mesh(),
+                manager().time().timeName(),
+                manager().mesh(),
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),
@@ -175,14 +175,14 @@ void interTrackControl::storage::create_fluidIndicator()
 }
 
 
-void interTrackControl::storage::create_interface()
+void interTrackManager::storage::create_interface()
 {
-    solverControlStorage_info(interface);
+    solverManagerStorage_info(interface);
 
-    solverControlStorage_assert(interface, p);
-    solverControlStorage_assert(interface, U);
-    solverControlStorage_assert(interface, phi);
-    solverControlStorage_assert(interface, rho);
+    solverManagerStorage_assert(interface, p);
+    solverManagerStorage_assert(interface, U);
+    solverManagerStorage_assert(interface, phi);
+    solverManagerStorage_assert(interface, rho);
 
     word interfacePrefix;
 
@@ -193,7 +193,7 @@ void interTrackControl::storage::create_interface()
 
     interfacePtr_ = new trackedSurface
     (
-        mesh(),
+        manager().mesh(),
         rho(),
         U(),
         p(),
@@ -210,7 +210,7 @@ void interTrackControl::storage::create_interface()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void interTrackControl::storage::init()
+void interTrackManager::storage::init()
 {
     p();
     U();
@@ -253,13 +253,13 @@ void interTrackControl::storage::init()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-interTrackControl::storage::storage(interTrackControl& control)
+interTrackManager::storage::storage(interTrackManager& manager)
 :
-    solverControl<dynamicFvMesh>::storage
+    solverManager<dynamicFvMesh>::storage
     (
-        control.args(), control.time(), control.mesh()
+        manager.args(), manager.time(), manager.mesh()
     ),
-    control_(control),
+    manager_(manager),
     pPtr_(NULL),
     UPtr_(NULL),
     phiPtr_(NULL),

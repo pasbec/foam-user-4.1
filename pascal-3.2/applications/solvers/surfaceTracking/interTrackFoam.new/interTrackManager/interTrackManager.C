@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackControl.H"
+#include "interTrackManager.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -32,15 +32,85 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(interTrackControl, 0);
+defineTypeNameAndDebug(interTrackManager, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+bool interTrackManager::calcCoNum(scalar& CourantNumber) const
+{
+    CourantNumber = 0.0;
+
+    const Time& runTime = this->time();
+    const fvMesh& mesh = this->mesh();
+
+    tmp<surfaceScalarField> tphi(data().phi());
+    surfaceScalarField& phi = tphi();
+
+    // Convective Courant Number
+    {
+        if (mesh.moving())
+        {
+            const volVectorField& U = data().U();
+
+            // Make fluxes relative
+            phi -= fvc::meshPhi(U);
+        }
+
+#       include "CourantNo.H"
+
+        CourantNumber = max(CourantNumber, CoNum);
+    }
+
+    // Mesh Courant Number
+    {
+#       include "meshCourantNo.H"
+
+        CourantNumber = max(CourantNumber, meshCoNum);
+    }
+
+    // Interface Courant Number
+    {
+// TODO: Use const
+        trackedSurface& interface = data().interface();
+
+        scalar interfaceCoNum = interface.maxCourantNumber();
+
+        Info << "Surface Courant Number max: "
+            << interface.maxCourantNumber() << endl;
+
+        CourantNumber = max(CourantNumber, interfaceCoNum);
+    }
+
+    tphi.clear();
+
+    return true;
+}
+
+
+void interTrackManager::writePost() const
+{
+    const Time& runTime = this->time();
+
+// TODO: Use const
+    trackedSurface& interface = data().interface();
+
+    if
+    (
+        debug
+     && runTime.outputTime()
+    )
+    {
+        interface.writeVTK();
+        interface.writeA();
+        interface.writeVolA();
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-interTrackControl::interTrackControl
+interTrackManager::interTrackManager
 (
     const argList& args,
     Time& time,
@@ -49,10 +119,12 @@ interTrackControl::interTrackControl
     const bool& master
 )
 :
-    solverControl<dynamicFvMesh>
+    solverManager<dynamicFvMesh>
     (
         args, time, mesh, name, master
-    )
+    ),
+    storagePtr_(NULL),
+    pimple_(mesh)
 {
     if (master) storagePtr_ = new storage(*this);
 }

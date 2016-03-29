@@ -22,49 +22,49 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    solverControl
+    solverManager
 
 Description
     ...
 
 SourceFiles
-    solverControl.C
+    solverManager.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solverControl_H
-#define solverControl_H
+#ifndef solverManager_H
+#define solverManager_H
 
 #include "argList.H"
 #include "foamTime.H"
-#include "IOdictionary.H"
+#include "dictionary.H"
 #include "solution.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define createControl(NAME, MESH)                                            \
+# define createManager(NAME, MESH)                                            \
                                                                               \
-    NAME##Control control(MESH);
+    NAME##Manager manager(MESH);
 
-# define createControlAndData(NAME, MESH)                                     \
+# define createManagerAndData(NAME, MESH)                                     \
                                                                               \
-    NAME##Control control(MESH);                                              \
-    NAME##Control::storage& storage = control.data();
+    NAME##Manager manager(MESH);                                              \
+    NAME##Manager::storage& data = manager.data();
 
-# define setControlScope(NAME)                                                \
+# define setManagerScope(NAME)                                                \
                                                                               \
-    NAME##Control& NAME = control.NAME();                                     \
-    NAME##Control& control = NAME;
+    NAME##Manager& NAME = manager.NAME();                                     \
+    NAME##Manager& manager = NAME;
 
-# define setControlScopeWithStorage(NAME)                                     \
+# define setManagerScopeAndData(NAME)                                         \
                                                                               \
-    NAME##Control& NAME = control.NAME();                                     \
-    NAME##Control& control = NAME;                                            \
-    NAME##Control::storage& storage = control.data();
+    NAME##Manager& NAME = manager.NAME();                                     \
+    NAME##Manager& manager = NAME;                                            \
+    NAME##Manager::storage& data = manager.data();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverControlStorage_add(TYPE, DATA)                                 \
+# define solverManagerStorage_add(TYPE, DATA)                                 \
                                                                               \
     private: TYPE* DATA##Ptr_;                                                \
     private: void create_##DATA();                                            \
@@ -77,7 +77,7 @@ SourceFiles
                                                                               \
         if (!DATA##Ptr_)                                                      \
         {                                                                     \
-            FatalErrorIn(control().type() + "::storage::" + #DATA + "()")     \
+            FatalErrorIn(manager().type() + "::storage::" + #DATA + "()")     \
                 << "Pointer for "                                             \
                     << #DATA                                                  \
                     << " is still unallocated after creation"                 \
@@ -87,7 +87,7 @@ SourceFiles
         return *DATA##Ptr_;                                                   \
     }
 
-# define solverControlStorage_info(DATA)                                      \
+# define solverManagerStorage_info(DATA)                                      \
                                                                               \
     Info << "Create "                                                         \
         << #DATA                                                              \
@@ -96,18 +96,18 @@ SourceFiles
                                                                               \
     if (DATA##Ptr_)                                                           \
     {                                                                         \
-        FatalErrorIn(control().type() + "::storage::create_##DATA()")         \
+        FatalErrorIn(manager().type() + "::storage::create_##DATA()")         \
             << "Pointer for "                                                 \
                 << #DATA                                                      \
                 << " is already allocated before creation"                    \
                 << abort(FatalError);                                         \
     }
 
-# define solverControlStorage_assert(DATA, REQUIRE)                           \
+# define solverManagerStorage_assert(DATA, REQUIRE)                           \
                                                                               \
     if (!REQUIRE##Ptr_)                                                       \
     {                                                                         \
-        FatalErrorIn(control().type() + "::storage::create_##DATA()")         \
+        FatalErrorIn(manager().type() + "::storage::create_##DATA()")         \
             << "In order to allocate the pointer for "                        \
                 << #DATA                                                      \
                 << " it is necessary to allocate the pointer for "            \
@@ -122,13 +122,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class solverControl Declaration
+                       Class solverManager Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MESH>
-class solverControl
-:
-    public IOdictionary
+class solverManager
 {
 protected:
 
@@ -196,6 +194,12 @@ protected:
                 }
 
                 //- Info about starting time loop
+                void newLine() const
+                {
+                    Info << nl;
+                }
+
+                //- Info about starting time loop
                 void startTimeLoop() const
                 {
                     Info << nl << "Starting time loop"
@@ -207,7 +211,15 @@ protected:
                 {
                     Info << "Time step = "
                         << mesh().time().timeIndex()
-                        << nl << endl;
+                        << endl;
+                };
+
+                //- Print current time step width
+                void timeDeltaT() const
+                {
+                    Info << "deltaT = "
+                        <<  mesh().time().deltaT().value()
+                        << endl;
                 };
 
                 //- Print current time
@@ -215,7 +227,7 @@ protected:
                 {
                     Info << "Time = "
                         << mesh().time().value()
-                        << nl << endl;
+                        << endl;
                 };
 
                 //- Print execution time
@@ -223,7 +235,7 @@ protected:
                 {
                     Info << "ExecutionTime = "
                         << scalar(mesh().time().elapsedCpuTime()) << " s"
-                        << nl << endl << endl;
+                        << endl;
                 };
 
                 //- Print end statement
@@ -259,7 +271,7 @@ protected:
                 void operator=(const storage&);
 
                 //- Initialize data sequence
-                virtual void init() {};
+                virtual void init() = 0;
 
         public:
 
@@ -310,7 +322,7 @@ protected:
         //- Messages
         messages* msgPtr_;
 
-        //- Basic
+        // Basic
 
             //- Reference to args
             const argList& args_;
@@ -321,55 +333,98 @@ protected:
             //- Reference to mesh
             MESH& mesh_;
 
-            //- Master control
+            //- Master manager
             const bool master_;
 
-            //- Name of base region
-            const word baseRegionName_;
-
-            //- Label of base region
-            const label baseRegion_;
-
             //- Properties dictionary
-            IOdictionary propDict_;
+            IOdictionary properties_;
 
-        //- Dictionaries
+        // Regions
 
-            //- Solution dictionary of base region
-            solution& baseSolutionDict_;
+            // Default region
+
+                //- Label of base region
+                const label baseRegion_;
+
+                //- Name of base region
+                const word baseRegionName_;
+
+                //- Solution dictionary of base region
+                solution& baseSolutionDict_;
+
+        // Evolution
 
     // Protected Member Functions
 
-        //- Error if not master control
+        //- Error if not master manager
         void errorIfNotMaster() const
         {
             if (!master_)
             {
-                FatalErrorIn("solverControl::msg()")
-                    << "This solverControl instantiation is NOT"
-                    << " the master control."
+                FatalErrorIn("solverManager::msg()")
+                    << "This solverManager instantiation is NOT"
+                    << " the master manager."
                     << abort(FatalError);
             }
         };
+
+        // Evolution
+
+            //- Courant-number calculation
+            //  Needs to return true if the Courant number is beeing set
+            virtual bool calcCoNum(scalar& CoNum) const
+            {
+                return false;
+            };
+
+            //- Pre run sequence
+            virtual void runPre() const {};
+
+            //- Post run sequence
+            virtual void runPost() const {};
+
+            //- Pre write sequence
+            virtual void writePre() const {};
+
+            //- Post write sequence
+            virtual void writePost() const {};
 
 private:
 
     // Private Data
 
+        // Evolution
+
+            //- Pre time-loop state
+            mutable bool preRunTime_;
+
+            //- Courant Number
+            mutable scalar CoNum_;
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverControl(const solverControl&);
+        solverManager(const solverManager&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverControl&);
+        void operator=(const solverManager&);
+
+        // Evolution
+
+            //- Refenrence to pre time-loop state
+            bool& preRunTime() const
+            {
+                return preRunTime_;
+            };
+
+            //- Time step setting
+            bool setDeltaT() const;
 
 public:
 
-    // Constructors
+    // Constructor
 
-        //- Construct from mesh and name
-        solverControl
+        solverManager
         (
             const argList args,
             Time& time,
@@ -381,7 +436,7 @@ public:
 
     // Destructor
 
-        virtual ~solverControl()
+        virtual ~solverManager()
         {
             if (master_) delete msgPtr_;
         };
@@ -397,14 +452,20 @@ public:
         };
 
         //- Storage
-        virtual storage& data() = 0;
+        virtual storage& data() const = 0;
 
-        //- Basic
+        // Basic
 
             //- Reference to args
             const argList& args()
             {
                 return args_;
+            };
+
+            //- Const reference to time
+            const Time& time() const
+            {
+                return time_;
             };
 
             //- Reference to time
@@ -413,13 +474,19 @@ public:
                 return time_;
             };
 
+            //- Const reference to mesh
+            const MESH& mesh() const
+            {
+                return mesh_;
+            };
+
             //- Reference to mesh
             MESH& mesh()
             {
                 return mesh_;
             };
 
-            //- Is this master control?
+            //- Is this the master manager?
             const bool& master() const
             {
                 return master_;
@@ -428,27 +495,44 @@ public:
             //- Reference properties dictionary
             const IOdictionary& properties() const
             {
-                return propDict_;
+                return properties_;
             };
 
-        //- Properties
+        // Regions
 
-            //- Reference to base region name
-            const word& baseName() const
+            // Default region
+
+                //- Reference to base region ID
+                const label& base() const
+                {
+                    return baseRegion_;
+                };
+
+                //- Reference to base region name
+                const word& baseName() const
+                {
+                    return baseRegionName_;
+                };
+
+                //- Reference to solution dictionary of base region
+                const solution& baseSolutionDict() const
+                {
+                    return baseSolutionDict_;
+                };
+
+        // Evolution
+
+            //- Return current Courant Number
+            const scalar& CoNum() const
             {
-                return baseRegionName_;
+                return CoNum_;
             };
 
-            //- Reference to base region ID
-            const label& base() const
-            {
-                return baseRegion_;
-            };
+            //- Main time run loop wrapper
+            bool run() const;
 
-        //- Time and database
-
-            //- WriteData member function required by regIOobject
-            bool writeData(Ostream&) const;
+            //- Main time write wrapper
+            void write() const;
 
 };
 
@@ -459,7 +543,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "solverControl.C"
+#   include "solverManager.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

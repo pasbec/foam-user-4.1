@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "solverControl.H"
+#include "solverManager.H"
 #include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -35,10 +35,58 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+template <class MESH>
+bool solverManager<MESH>::setDeltaT() const
+{
+    errorIfNotMaster();
+
+    Time& runTime = const_cast<Time&>(time());
+
+    const dictionary& controlDict = runTime.controlDict();
+
+    Switch adjustTimeStep
+    (
+        controlDict.lookup("adjustTimeStep")
+    );
+
+    if (adjustTimeStep)
+    {
+        scalar maxCo
+        (
+            readScalar(controlDict.lookup("maxCo"))
+        );
+
+        scalar maxDeltaT =
+            controlDict.lookupOrDefault<scalar>("maxDeltaT", GREAT);
+
+        scalar maxDeltaTFact = maxCo/(CoNum() + SMALL);
+        scalar deltaTFact =
+            min(min(maxDeltaTFact, 1.0 + 0.1*maxDeltaTFact), 1.2);
+
+        runTime.setDeltaT
+        (
+            min
+            (
+                deltaTFact * runTime.deltaT().value(),
+                maxDeltaT
+            )
+        );
+
+        msg().timeDeltaT();
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class MESH>
-solverControl<MESH>::solverControl
+solverManager<MESH>::solverManager
 (
     const argList args,
     Time& time,
@@ -48,26 +96,12 @@ solverControl<MESH>::solverControl
     const label& regionI0
 )
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            name + "Control",
-            mesh.time().timeName(),
-            "uniform",
-            mesh.time().db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        )
-    ),
     msgPtr_(NULL),
     args_(args),
     time_(time),
     mesh_(mesh),
     master_(master),
-    baseRegionName_(polyMesh::defaultRegion),
-    baseRegion_(regionI0),
-    propDict_
+    properties_
     (
         IOdictionary
         (
@@ -81,13 +115,17 @@ solverControl<MESH>::solverControl
             )
         )
     ),
+    baseRegion_(regionI0),
+    baseRegionName_(polyMesh::defaultRegion),
     baseSolutionDict_
     (
         const_cast<solution&>
         (
             dynamicCast<const solution&>(mesh_.solutionDict())
         )
-    )
+    ),
+    preRunTime_(true),
+    CoNum_(0.0)
 {
     if (master_) msgPtr_ = new messages(args_, time_, mesh_);
 }
@@ -96,9 +134,67 @@ solverControl<MESH>::solverControl
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template <class MESH>
-bool solverControl<MESH>::writeData(Ostream&) const
+bool solverManager<MESH>::run() const
 {
-    return false;
+    errorIfNotMaster();
+
+    Time& runTime = const_cast<Time&>(time());
+
+    if (preRunTime())
+    {
+        msg().startTimeLoop();
+
+        preRunTime() = false;
+    }
+
+    if (runTime.run())
+    {
+        runPre();
+
+        bool CoNumSet = calcCoNum(CoNum_);
+
+        if (!CoNumSet)
+        {
+            FatalErrorIn("solverManager::run()")
+                << "A Courant Number needs to be calculated for run(). "
+                << "Use the virtual function calcCoNum(scalar& CoNum) to "
+                << "calulate it, which finally needs to return true."
+                << abort(FatalError);
+        }
+
+        setDeltaT();
+
+        runTime++;
+
+        msg().timeIs();
+
+        runPost();
+
+        return true;
+    }
+    else
+    {
+        msg().end();
+
+        return false;
+    }
+}
+
+
+template <class MESH>
+void solverManager<MESH>::write() const
+{
+    errorIfNotMaster();
+
+    {
+        writePre();
+
+        time().write();
+
+        writePost();
+
+        msg().executionTime();
+    }
 }
 
 
