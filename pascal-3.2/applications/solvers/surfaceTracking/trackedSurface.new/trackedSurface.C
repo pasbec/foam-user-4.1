@@ -114,7 +114,7 @@ void trackedSurface::initCheckPointNormalsCorrection()
         {
             FatalErrorIn
             (
-                "trackedSurface::initCheckPointNormalsCorrection(...)"
+                "trackedSurface::initCheckPointNormalsCorrection(...) : "
             )   << "Patch name for point normals correction does not exist"
                 << abort(FatalError);
         }
@@ -141,7 +141,7 @@ void trackedSurface::initCheckPointNormalsCorrection()
                     {
                         FatalErrorIn
                         (
-                            "trackedSurface::initCheckPointNormalsCorrection(...)"
+                            "trackedSurface::initCheckPointNormalsCorrection(...) : "
                         )   << "Point normal correction is activated for patch "
                             << aMesh().boundary()[patchI].name() << ". "
                             << "This is considered fatal as a contact angle is "
@@ -164,14 +164,14 @@ void trackedSurface::initCheckSurfacePatches()
         {
             aPatchID_ = patchI;
 
-            Info<< "Found surface patch. ID: " << aPatchID_
+            Info << "Found surface patch. ID: " << aPatchID_
                 << endl;
         }
     }
 
     if (aPatchID() == -1)
     {
-        FatalErrorIn("trackedSurface::initCheckSurfacePatches(...)")
+        FatalErrorIn("trackedSurface::initCheckSurfacePatches(...) : ")
             << "Surface patch not defined.  Please make sure that "
                 << " the surface patches is named as trackedSurface"
                 << abort(FatalError);
@@ -187,14 +187,14 @@ void trackedSurface::initCheckSurfacePatches()
             {
                 bPatchID_ = patchI;
 
-                Info<< "Found surface shadow patch. ID: "
+                Info << "Found surface shadow patch. ID: "
                     << bPatchID_ << endl;
             }
         }
 
         if (bPatchID() == -1)
         {
-            FatalErrorIn("trackedSurface::initCheckSurfacePatches(...)")
+            FatalErrorIn("trackedSurface::initCheckSurfacePatches(...) : ")
                 << "Surface shadow patch not defined. "
                     << "Please make sure that the surface shadow patch "
                     << "is named as trackedSurfaceShadow."
@@ -237,7 +237,7 @@ void trackedSurface::initMotionPointMask()
 
         if (fixedPatchID == -1)
         {
-            FatalErrorIn("trackedSurface::initMotionPointMask(...)")
+            FatalErrorIn("trackedSurface::initMotionPointMask(...) : ")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
                     << " defined in the trackedSurfaceProperties dictionary"
                     << abort(FatalError);
@@ -511,7 +511,7 @@ void trackedSurface::calcAddDeltaHcorrection(scalarField& deltaH)
 
         if (fixedPatchID == -1)
         {
-            FatalErrorIn("trackedSurface::calcDeltaH(...)")
+            FatalErrorIn("trackedSurface::calcDeltaH(...) : ")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
                     << " defined in the trackedSurfaceProperties dictionary"
                     << abort(FatalError);
@@ -759,6 +759,13 @@ void trackedSurface::moveFaSubMesh()
 {
     if (aSubMeshPtr_)
     {
+        if (debug)
+        {
+            Info << "trackedSurface::moveFaSubMesh() : "
+                << "Moving/Updating triangulated sub-mesh."
+                    << endl;
+        }
+
         aSubMesh().movePoints();
     }
 }
@@ -1006,7 +1013,7 @@ trackedSurface::trackedSurface
     // Check Marangoni effect
     if (TPtr_ && !cleanInterface_)
     {
-        FatalErrorIn("trackedSurface::trackedSurface(...)")
+        FatalErrorIn("trackedSurface::trackedSurface(...) : ")
             << "Marangoni effect due to both "
                 << "surfactant concentration gradient "
                 << "and temperature gradient is not implemented"
@@ -1043,6 +1050,13 @@ trackedSurface::trackedSurface
 // TEST: Sub-mesh
     if (useSubMesh_)
     {
+        if (debug)
+        {
+            Info << "trackedSurface::trackedSurface(...) : "
+                << "Creating and activating triangulated sub-mesh."
+                    << endl;
+        }
+
         makeFaSubMesh();
         aSubMesh().movePoints();
     }
@@ -1349,7 +1363,7 @@ void trackedSurface::moveFixedPatches(const vectorField& displacement)
 
         if (fixedPatchID == -1)
         {
-            FatalErrorIn("trackedSurface::moveFixedPatches(...)")
+            FatalErrorIn("trackedSurface::moveFixedPatches(...): ")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
                     << " defined in the trackedSurfaceProperties dictionary"
                     << abort(FatalError);
@@ -1422,6 +1436,7 @@ void trackedSurface::smoothing()
 }
 
 
+// TODO
 void trackedSurface::smoothMesh()
 {
     const vectorField& oldPoints = aMesh().patch().localPoints();
@@ -1570,7 +1585,7 @@ void trackedSurface::smoothMesh()
 
                     if (!foundProjection)
                     {
-                        FatalErrorIn("trackedSurface::smoothMesh()")
+                        FatalErrorIn("trackedSurface::smoothMesh() : ")
                             << "Could not project patch point to surface"
                                 << abort(FatalError);
                     }
@@ -1676,7 +1691,7 @@ void trackedSurface::smoothMesh()
                 {
                     Info << counter << ", " << pointI << endl;
 
-                    FatalErrorIn("trackedSurface::smoothMesh()")
+                    FatalErrorIn("trackedSurface::smoothMesh() : ")
                         << "Could not project point to surface"
                             << abort(FatalError);
                 }
@@ -2379,7 +2394,12 @@ void trackedSurface::correctContactLinePointNormals()
 
         if (contactAnglePtr_)
         {
-            Pout << "Correcting contact line normals" << endl;
+            if (debug)
+            {
+                Info << "trackedSurface::correctContactLinePointNormals() : "
+                    << "Correcting contact line normals."
+                        << endl;
+            }
 
             vectorField oldPoints(aMesh().nPoints(), vector::zero);
 

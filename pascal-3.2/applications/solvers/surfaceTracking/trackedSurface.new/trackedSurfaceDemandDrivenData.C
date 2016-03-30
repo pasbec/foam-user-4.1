@@ -42,8 +42,8 @@ void trackedSurface::makeInterpolators()
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeInterpolators() : "
-            << "making pathc to patch interpolator"
+        Info << "trackedSurface::makeInterpolators() : "
+            << "Making patch to patch interpolator."
             << endl;
     }
 
@@ -57,7 +57,7 @@ void trackedSurface::makeInterpolators()
     )
     {
         FatalErrorIn("trackedSurface::makeInterpolators()")
-            << "patch to patch interpolators already exists"
+            << "Patch to patch interpolators already exists."
                 << abort(FatalError);
     }
 
@@ -166,8 +166,12 @@ void trackedSurface::makeInterpolators()
         }
     }
 
-
-    Info << "\nCheck A-to-B and B-to-A interpolators" << endl;
+    if (debug)
+    {
+        Info << "trackedSurface::makeInterpolators() : "
+            << "Checking A-to-B and B-to-A interpolators."
+            << endl;
+    }
 
     scalar maxDist = max
     (
@@ -195,9 +199,13 @@ void trackedSurface::makeInterpolators()
         )
     );
 
-    Info << "A-to-B interpolation error, face: " << maxDist
-        << ", point: " << maxDistPt << endl;
-
+    if (debug)
+    {
+        Info << "trackedSurface::makeInterpolators() : "
+            << "A-to-B interpolation error, face: " << maxDist
+            << ", point: " << maxDistPt
+            << endl;
+    }
 
     maxDist = max
     (
@@ -229,8 +237,13 @@ void trackedSurface::makeInterpolators()
         )
     );
 
-    Info << "B-to-A interpolation error, face: " << maxDist
-        << ", point: " << maxDistPt << endl;
+    if (debug)
+    {
+        Info << "trackedSurface::makeInterpolators() : "
+            << "B-to-A interpolation error, face: " << maxDist
+            << ", point: "
+            << maxDistPt << endl;
+    }
 }
 
 
@@ -238,8 +251,8 @@ void trackedSurface::makeControlPoints() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeControlPoints() : "
-            << "making control points"
+        Info << "trackedSurface::makeControlPoints() : "
+            << "Making control points."
             << endl;
     }
 
@@ -247,8 +260,8 @@ void trackedSurface::makeControlPoints() const
     // if the pointer is already set
     if (controlPointsPtr_)
     {
-        FatalErrorIn("trackedSurface::makeInterpolators()")
-            << "patch to patch interpolators already exists"
+        FatalErrorIn("trackedSurface::makeControlPoints() : ")
+            << "Control points already exist."
             << abort(FatalError);
     }
 
@@ -307,8 +320,8 @@ void trackedSurface::makeMotionPointsMask()
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeMotionPointsMask() : "
-            << "making motion points mask"
+        Info << "trackedSurface::makeMotionPointsMask() : "
+            << "Making motion points mask."
             << endl;
     }
 
@@ -318,7 +331,7 @@ void trackedSurface::makeMotionPointsMask()
     if (motionPointsMaskPtr_)
     {
         FatalErrorIn("trackedSurface::motionPointsMask()")
-            << "motion points mask already exists"
+            << "Motion points mask already exists"
             << abort(FatalError);
     }
 
@@ -343,9 +356,9 @@ void trackedSurface::makeDirections()
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeDirections() : "
-            << "making displacement directions for points and "
-            << "control points"
+        Info << "trackedSurface::makeDirections() : "
+            << "Making displacement directions for points and "
+            << "control points."
             << endl;
     }
 
@@ -359,8 +372,8 @@ void trackedSurface::makeDirections()
     )
     {
         FatalErrorIn("trackedSurface::makeDirections()")
-            << "points and control points displacement directions "
-            << "already exists"
+            << "Points and control points displacement directions "
+            << "already exists."
             << abort(FatalError);
     }
 
@@ -408,8 +421,8 @@ void trackedSurface::makeTotalDisplacement()
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeTotalDisplacement() : "
-            << "making zero total points displacement"
+        Info << "trackedSurface::makeTotalDisplacement() : "
+            << "Making zero total points displacement."
             << endl;
     }
 
@@ -419,7 +432,7 @@ void trackedSurface::makeTotalDisplacement()
     if (totalDisplacementPtr_)
     {
         FatalErrorIn("trackedSurface::makeTotalDisplacement()")
-            << "total points displacement already exists"
+            << "Total points displacement field already exists."
             << abort(FatalError);
     }
 
@@ -474,8 +487,8 @@ void trackedSurface::makeFaMesh() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeFaMesh() : "
-            << "making finite area mesh"
+        Info << "trackedSurface::makeFaMesh() : "
+            << "Making finite area mesh."
             << endl;
     }
 
@@ -484,7 +497,7 @@ void trackedSurface::makeFaMesh() const
     if (aMeshPtr_)
     {
         FatalErrorIn("trackedSurface::makeFaMesh()")
-            << "finite area mesh already exists"
+            << "Finite area mesh already exists."
             << abort(FatalError);
     }
 
@@ -497,8 +510,8 @@ void trackedSurface::makeFaSubMesh() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeFaSubMesh() : "
-            << "making finite area sub-mesh"
+        Info << "trackedSurface::makeFaSubMesh() : "
+            << "Making finite area sub-mesh"
             << endl;
     }
 
@@ -507,7 +520,7 @@ void trackedSurface::makeFaSubMesh() const
     if (aSubMeshPtr_)
     {
         FatalErrorIn("trackedSurface::makeFaSubMesh()")
-            << "finite area sub-mesh already exists"
+            << "Finite area sub-mesh already exists."
             << abort(FatalError);
     }
 
@@ -525,8 +538,8 @@ void trackedSurface::makeUs() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeUs() : "
-            << "making surface velocity field"
+        Info << "trackedSurface::makeUs() : "
+            << "Making surface velocity field."
             << endl;
     }
 
@@ -536,7 +549,7 @@ void trackedSurface::makeUs() const
     if (UsPtr_)
     {
         FatalErrorIn("trackedSurface::makeUs()")
-            << "surface velocity field already exists"
+            << "Surface velocity field already exists."
             << abort(FatalError);
     }
 
@@ -587,9 +600,9 @@ void trackedSurface::makeUs() const
 
         if (fixedPatchID == -1)
         {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
+            FatalErrorIn("trackedSurface::makeUs(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
-                    << " defined in the trackedSurfaceProperties dictionary"
+                    << " defined in the trackedSurfaceProperties dictionary."
                     << abort(FatalError);
         }
 
@@ -634,9 +647,9 @@ void trackedSurface::makeUs() const
 
         if (fixedPatchID == -1)
         {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
+            FatalErrorIn("trackedSurface::makeUs(...)")
                 << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
-                    << " defined in the trackedSurfaceProperties dictionary"
+                    << " defined in the trackedSurfaceProperties dictionary."
                     << abort(FatalError);
         }
 
@@ -662,8 +675,8 @@ void trackedSurface::makePhis()
 {
     if (debug)
     {
-        Info<< "trackedSurface::makePhis() : "
-            << "making surface fluid flux"
+        Info << "trackedSurface::makePhis() : "
+            << "Making surface fluid flux."
             << endl;
     }
 
@@ -673,7 +686,7 @@ void trackedSurface::makePhis()
     if (phisPtr_)
     {
         FatalErrorIn("trackedSurface::makePhis()")
-            << "surface fluid flux already exists"
+            << "Surface fluid flux already exists."
             << abort(FatalError);
     }
 
@@ -697,8 +710,8 @@ void trackedSurface::makeSurfactConc() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeSurfactConc() : "
-            << "making surface surfactant concentration field"
+        Info << "trackedSurface::makeSurfactConc() : "
+            << "Making surface surfactant concentration field."
             << endl;
     }
 
@@ -708,7 +721,7 @@ void trackedSurface::makeSurfactConc() const
     if (surfactConcPtr_)
     {
         FatalErrorIn("trackedSurface::makeSurfaceConc()")
-            << "surface surfactant concentratio field already exists"
+            << "Surface surfactant concentration field already exists."
             << abort(FatalError);
     }
 
@@ -731,8 +744,8 @@ void trackedSurface::makeSurfaceTension() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeSurfaceTension() : "
-            << "making surface tension field"
+        Info << "trackedSurface::makeSurfaceTension() : "
+            << "Making surface tension field."
             << endl;
     }
 
@@ -742,7 +755,7 @@ void trackedSurface::makeSurfaceTension() const
     if (surfaceTensionPtr_)
     {
         FatalErrorIn("trackedSurface::makeSurfaceTension()")
-            << "surface tension field already exists"
+            << "Surface tension field already exists"
             << abort(FatalError);
     }
 
@@ -799,8 +812,8 @@ void trackedSurface::makeSurfactant() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeSurfactant() : "
-            << "making surfactant properties"
+        Info << "trackedSurface::makeSurfactant() : "
+            << "Making surfactant properties."
             << endl;
     }
 
@@ -810,7 +823,7 @@ void trackedSurface::makeSurfactant() const
     if (surfactantPtr_)
     {
         FatalErrorIn("trackedSurface::makeSurfactant()")
-            << "surfactant properties already exists"
+            << "Surfactant properties already exists."
             << abort(FatalError);
     }
 
@@ -826,8 +839,8 @@ void trackedSurface::makeFluidIndicator()
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeFluidIndicator() : "
-            << "making fluid indicator"
+        Info << "trackedSurface::makeFluidIndicator() : "
+            << "Making fluid indicator."
             << endl;
     }
 
@@ -837,7 +850,7 @@ void trackedSurface::makeFluidIndicator()
     if (fluidIndicatorPtr_)
     {
         FatalErrorIn("trackedSurface::makeFluidIndicator()")
-            << "fluid indicator already exists"
+            << "Fluid indicator already exists."
             << abort(FatalError);
     }
 
@@ -896,8 +909,8 @@ void trackedSurface::makeMuEffFluidAval() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeMuEffFluidAval() : "
-            << "Making makeMuEffFluidAval"
+        Info << "trackedSurface::makeMuEffFluidAval() : "
+            << "Making viscosity field muEffFluidAval."
             << endl;
     }
 
@@ -906,7 +919,7 @@ void trackedSurface::makeMuEffFluidAval() const
     if (muEffFluidAvalPtr_)
     {
         FatalErrorIn("trackedSurface::makeMuEffFluidAval()")
-            << "makeMuEffFluidAval already exists"
+            << "Viscosity field muEffFluidAval already exists."
             << abort(FatalError);
     }
 
@@ -922,8 +935,8 @@ void trackedSurface::makeMuEffFluidBval() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeMuEffFluidBval() : "
-            << "Making makeMuEffFluidBval"
+        Info << "trackedSurface::makeMuEffFluidBval() : "
+            << "Making viscosity field muEffFluidBval."
             << endl;
     }
 
@@ -932,7 +945,7 @@ void trackedSurface::makeMuEffFluidBval() const
     if (muEffFluidBvalPtr_)
     {
         FatalErrorIn("trackedSurface::makeMuEffFluidBval()")
-            << "makeMuEffFluidBval already exists"
+            << "Viscosity field muEffFluidBval already exists."
             << abort(FatalError);
     }
 
@@ -948,8 +961,8 @@ void trackedSurface::makeContactAngle()
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeContactAngle() : "
-            << "making contact angle field"
+        Info << "trackedSurface::makeContactAngle() : "
+            << "Making contact angle field."
             << endl;
     }
 
@@ -959,7 +972,7 @@ void trackedSurface::makeContactAngle()
     if (contactAnglePtr_)
     {
         FatalErrorIn("trackedSurface::makeTemperature()")
-            << "contact angle field already exists"
+            << "Contact angle field already exists."
             << abort(FatalError);
     }
 
@@ -1017,8 +1030,8 @@ void trackedSurface::makeTemperature() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeTemperature() : "
-            << "making surface temparature field"
+        Info << "trackedSurface::makeTemperature() : "
+            << "Making surface temparature field."
             << endl;
     }
 
@@ -1028,7 +1041,7 @@ void trackedSurface::makeTemperature() const
     if (temperaturePtr_)
     {
         FatalErrorIn("trackedSurface::makeTemperature()")
-            << "surface temperature field already exists"
+            << "Surface temperature field already exists."
             << abort(FatalError);
     }
 
@@ -1050,8 +1063,8 @@ void trackedSurface::makeSurfaceTensionForce() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeSurfaceTensionForce() : "
-            << "making surface tension force field"
+        Info << "trackedSurface::makeSurfaceTensionForce() : "
+            << "Making surface tension force field."
             << endl;
     }
 
@@ -1061,7 +1074,7 @@ void trackedSurface::makeSurfaceTensionForce() const
     if (surfaceTensionForcePtr_)
     {
         FatalErrorIn("trackedSurface::makeSurfaceTensionForce()")
-            << "surface tension force field already exists"
+            << "Surface tension force field already exists."
             << abort(FatalError);
     }
 
@@ -1088,8 +1101,8 @@ void trackedSurface::makeNGradUn() const
 {
     if (debug)
     {
-        Info<< "trackedSurface::makeNGradUn() : "
-            << "making surface normal derivative of normal velocity"
+        Info << "trackedSurface::makeNGradUn() : "
+            << "Making surface normal derivative of normal velocity."
             << endl;
     }
 
@@ -1099,8 +1112,8 @@ void trackedSurface::makeNGradUn() const
     if (nGradUnPtr_)
     {
         FatalErrorIn("trackedSurface::makeNGradUn()")
-            << "surface normal derivative of normal velocity "
-                << "field already exists"
+            << "Surface normal derivative of normal velocity "
+                << "field already exists."
                 << abort(FatalError);
     }
 

@@ -69,7 +69,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
 
             if (fixedPatchID == -1)
             {
-                FatalErrorIn("trackedSurface::trackedSurface(...)")
+                FatalErrorIn("trackedSurface::trackedSurface(...) : ")
                     << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
                         << " defined in the trackedSurfaceProperties dictionary"
                         << abort(FatalError);
@@ -795,7 +795,7 @@ void trackedSurface::correctPointDisplacement
 
         if (fixedPatchID == -1)
         {
-            FatalErrorIn("trackedSurface::trackedSurface(...)")
+            FatalErrorIn("trackedSurface::correctPointDisplacement(...) : ")
                  << "Wrong faPatch name in the fixedTrackedSurfacePatches list"
                     << " defined in the trackedSurfaceProperties dictionary"
                     << abort(FatalError);

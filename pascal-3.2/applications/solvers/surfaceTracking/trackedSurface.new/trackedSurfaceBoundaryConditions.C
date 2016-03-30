@@ -207,8 +207,6 @@ void trackedSurface::updateVelocity()
 
         if (MarangoniStress())
         {
-            Info << "MarangoniStress------------------------" << endl;
-
             const vectorField& totSurfTensionForce = surfaceTensionForce();
 
             tangentialSurfaceTensionForce = ((I-nA*nA)&totSurfTensionForce);
@@ -475,9 +473,14 @@ void trackedSurface::updatePressure()
 
         const scalarField& K = curvature().internalField();
 
-        Info << "Surface curvature: min = " << gMin(K)
-            << ", max = " << gMax(K)
-            << ", average = " << gAverage(K) << endl << flush;
+        if (debug)
+        {
+            Info << "trackedSurface::updatePressure() : "
+                << "Surface curvature: min = " << gMin(K)
+                << ", max = " << gMax(K)
+                << ", average = " << gAverage(K)
+                << endl;
+        }
 
         if (!MarangoniStress())
         {
@@ -555,9 +558,14 @@ void trackedSurface::updatePressure()
 
         const scalarField& K = curvature().internalField();
 
-        Info << "Surface curvature: min = " << gMin(K)
-            << ", max = " << gMax(K) << ", average = " << gAverage(K)
-            << endl;
+        if (debug)
+        {
+            Info << "trackedSurface::updatePressure() : "
+                << "Surface curvature: min = " << gMin(K)
+                << ", max = " << gMax(K)
+                << ", average = " << gAverage(K)
+                << endl;
+        }
 
         if (!MarangoniStress())
         {
@@ -633,7 +641,12 @@ void trackedSurface::updateSurfactantConcentration()
 {
     if (!cleanInterface())
     {
-        Info << "Correct surfactant concentration" << endl << flush;
+        if (debug)
+        {
+            Info << "trackedSurface::updateSurfactantConcentration() : "
+                << "Correct surfactant concentration."
+                << endl;
+        }
 
         updateSurfaceFlux();
 
@@ -688,7 +701,12 @@ void trackedSurface::updateSurfactantConcentration()
 
         CsEqn.solve();
 
-        Info << "Correct surface tension" << endl;
+        if (debug)
+        {
+            Info << "trackedSurface::updateSurfactantConcentration() : "
+                << "Correct surface tension."
+                << endl;
+        }
 
         surfaceTension() =
             cleanInterfaceSurfTension()
@@ -700,11 +718,8 @@ void trackedSurface::updateSurfactantConcentration()
 
         if (neg(min(surfaceTension().internalField())))
         {
-            FatalErrorIn
-            (
-                "void trackedSurface::correctSurfactantConcentration()"
-            )
-                << "Surface tension is negative"
+            FatalErrorIn("trackedSurface::correctSurfactantConcentration()")
+                << "Surface tension is negative."
                     << abort(FatalError);
         }
 
@@ -884,8 +899,12 @@ void trackedSurface::updateNGradUn()
 {
     if (fvcNGradUn_)
     {
-        Info << "Update normal derivative of normal velocity using fvc"
-            << endl;
+        if (debug)
+        {
+            Info << "trackedSurface::updateNGradUn() : "
+                << "Update normal derivative of normal velocity using fvc."
+                << endl;
+        }
 
         volVectorField phiU = fvc::reconstruct(phi());
 
@@ -934,8 +953,12 @@ void trackedSurface::updateNGradUn()
     }
     else
     {
-        Info << "Update normal derivative of normal velocity using fac"
-            << endl;
+        if (debug)
+        {
+            Info << "trackedSurface::updateNGradUn() : "
+                << "Update normal derivative of normal velocity using fac."
+                << endl;
+        }
 
         nGradUn() = -fac::div(Us())().internalField();
 
