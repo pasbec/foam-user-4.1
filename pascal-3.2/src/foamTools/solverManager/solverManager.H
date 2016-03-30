@@ -39,6 +39,7 @@ SourceFiles
 #include "foamTime.H"
 #include "dictionary.H"
 #include "solution.H"
+#include "solutionControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,28 +65,80 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+# define solverManagerStorage_new(MANAGER)                                    \
+                                                                              \
+    private: storage(const storage&);                                         \
+                                                                              \
+    private: void operator=(const storage&);                                  \
+                                                                              \
+    public: storage(const MANAGER& manager)                                   \
+    :                                                                         \
+        solverManager<dynamicFvMesh>::storage                                 \
+        (                                                                     \
+            manager.args(), manager.time(), manager.mesh(),                   \
+            manager.typeName + word("Storage")                                \
+        )                                                                     \
+    {                                                                         \
+        init();                                                               \
+    };                                                                        \
+                                                                              \
+    public: virtual ~storage() {};                                            \
+                                                                              \
+    public: virtual void init() const;
+
 # define solverManagerStorage_add(TYPE, DATA)                                 \
                                                                               \
-    private: TYPE* DATA##Ptr_;                                                \
-    private: void create_##DATA();                                            \
-    public: TYPE& DATA()                                                      \
+    private: mutable autoPtr<TYPE> DATA##Ptr_;                                \
+                                                                              \
+    private: void create_##DATA(const word init = "default") const;           \
+                                                                              \
+    public: inline bool DATA##IsEmpty() const                                 \
     {                                                                         \
-        if (!DATA##Ptr_)                                                      \
+        return DATA##Ptr_.empty();                                            \
+    };                                                                        \
+                                                                              \
+    public: inline bool DATA##IsValid() const                                 \
+    {                                                                         \
+        return DATA##Ptr_.valid();                                            \
+    };                                                                        \
+                                                                              \
+    public: TYPE& DATA(const word init = "default") const                     \
+    {                                                                         \
+        if (DATA##IsEmpty())                                                  \
         {                                                                     \
-            create_##DATA();                                                  \
+            create_##DATA(init);                                              \
         }                                                                     \
                                                                               \
-        if (!DATA##Ptr_)                                                      \
+        if (DATA##IsEmpty())                                                  \
         {                                                                     \
-            FatalErrorIn(manager().type() + "::storage::" + #DATA + "()")     \
+            FatalErrorIn(typeName + #DATA + "()")                             \
                 << "Pointer for "                                             \
                     << #DATA                                                  \
                     << " is still unallocated after creation"                 \
                     << abort(FatalError);                                     \
         }                                                                     \
                                                                               \
-        return *DATA##Ptr_;                                                   \
-    }
+        return DATA##Ptr_();                                                  \
+    };                                                                        \
+                                                                              \
+    public: TYPE* DATA##Ptr(const word init = "default") const                \
+    {                                                                         \
+        if (DATA##IsEmpty())                                                  \
+        {                                                                     \
+            create_##DATA(init);                                              \
+        }                                                                     \
+                                                                              \
+        if (DATA##IsEmpty())                                                  \
+        {                                                                     \
+            FatalErrorIn(typeName + #DATA + "()")                             \
+                << "Pointer for "                                             \
+                    << #DATA                                                  \
+                    << " is still unallocated after creation"                 \
+                    << abort(FatalError);                                     \
+        }                                                                     \
+                                                                              \
+        return DATA##Ptr_.operator->();                                       \
+    };
 
 # define solverManagerStorage_info(DATA)                                      \
                                                                               \
@@ -94,9 +147,9 @@ SourceFiles
         << " for region " << mesh().name()                                    \
         << endl;                                                              \
                                                                               \
-    if (DATA##Ptr_)                                                           \
+    if (!DATA##IsEmpty())                                                     \
     {                                                                         \
-        FatalErrorIn(manager().type() + "::storage::create_##DATA()")         \
+        FatalErrorIn(typeName + "::create_" + #DATA + "()")                   \
             << "Pointer for "                                                 \
                 << #DATA                                                      \
                 << " is already allocated before creation"                    \
@@ -105,9 +158,9 @@ SourceFiles
 
 # define solverManagerStorage_assert(DATA, REQUIRE)                           \
                                                                               \
-    if (!REQUIRE##Ptr_)                                                       \
+    if (!REQUIRE##IsValid())                                                  \
     {                                                                         \
-        FatalErrorIn(manager().type() + "::storage::create_##DATA()")         \
+        FatalErrorIn(typeName + "::create_" + #DATA + "()")                   \
             << "In order to allocate the pointer for "                        \
                 << #DATA                                                      \
                 << " it is necessary to allocate the pointer for "            \
@@ -132,8 +185,8 @@ public:
 
     // Public structs
 
-        //- Time controls
-        struct timeControls
+//         //- Time parameters
+        struct parameters
         {
             bool adjustTimeStep;
             scalar maxCo;
@@ -170,11 +223,11 @@ protected:
                 //- Disallow default bitwise assignment
                 void operator=(const messages&);
 
+
         public:
 
-            // Constructors
+            // Constructor
 
-                //- Construct from mesh
                 messages
                 (
                     const argList& args,
@@ -186,6 +239,10 @@ protected:
                 time_(time),
                 mesh_(mesh)
                 {};
+
+            // Destructor
+
+                ~messages() {};
 
             // Member Functions
 
@@ -216,8 +273,8 @@ protected:
                 //- Info about starting time loop
                 void startTimeLoop() const
                 {
-                    Info << nl << "Starting time loop"
-                        << nl << endl;
+                    Info << "Starting time loop"
+                        << endl;
                 }
 
                 //- Info about current time step
@@ -284,51 +341,54 @@ protected:
                 //- Disallow default bitwise assignment
                 void operator=(const storage&);
 
-                //- Initialize data sequence
-                virtual void init() = 0;
 
         public:
 
-            // Constructors
+            const word typeName;
+
+            // Constructor
 
                 //- Construct from mesh
                 storage
                 (
                     const argList& args,
                     Time& time,
-                    MESH& mesh
+                    MESH& mesh,
+                    const word& name
                 )
                 :
                 args_(args),
                 time_(time),
-                mesh_(mesh)
+                mesh_(mesh),
+                typeName(name)
                 {};
 
             // Destructor
 
-                virtual ~storage()
-                {
-                };
+                virtual ~storage() {};
 
             // Member Functions
 
                 //- Reference to args
-                const argList& args()
+                const argList& args() const
                 {
                     return args_;
                 };
 
                 //- Reference to time
-                Time& time()
+                Time& time() const
                 {
                     return time_;
                 };
 
                 //- Return reference to mesh
-                MESH& mesh()
+                MESH& mesh() const
                 {
                     return mesh_;
                 }
+
+                //- Initialize data
+                virtual void init() const = 0;
         };
 
     // Protected Data
@@ -344,9 +404,9 @@ protected:
                 return false;
             };
 
-            //- Set time controls
+            //- Set time parameters
             //  A return value of true means active
-            virtual bool setControls(timeControls& tc) const
+            virtual bool setParameters(parameters& tp) const
             {
                 return false;
             };
@@ -387,11 +447,11 @@ private:
 
     // Private Data
 
-        //- Time controls
-        mutable timeControls* timeControlsPtr_;
+        //- Time parameters
+        mutable parameters* paramPtr_;
 
         //- Messages
-        messages* msgPtr_;
+        mutable messages* msgPtr_;
 
         // Basic
 
@@ -456,8 +516,8 @@ private:
 
         // Evolution
 
-            //- Read time controls
-            void readControls(timeControls& tc) const;
+            //- Read time parameters
+            void readParameters(parameters& tc) const;
 
             //- Time step setting
             void calcDeltaT(scalar& deltaT) const;
@@ -486,19 +546,19 @@ public:
         {
             if (master_)
             {
+                delete paramPtr_;
                 delete msgPtr_;
-                delete timeControlsPtr_;
             }
         };
 
     // Member Functions
 
-        //- Time controls
-        const timeControls& controls() const
+        //- Time parameters
+        const parameters& param() const
         {
             errorIfNotMaster();
 
-            return *timeControlsPtr_;
+            return *paramPtr_;
         }
 
         //- Messages
@@ -509,25 +569,22 @@ public:
             return *msgPtr_;
         };
 
+        //- Control
+        virtual solutionControl& control() const = 0;
+
         //- Storage
         virtual storage& data() const = 0;
 
         // Basic
 
             //- Reference to args
-            const argList& args()
+            const argList& args() const
             {
                 return args_;
             };
 
-            //- Const reference to time
-            const Time& time() const
-            {
-                return time_;
-            };
-
             //- Reference to time
-            Time& time()
+            Time& time() const
             {
                 return time_;
             };
@@ -538,14 +595,8 @@ public:
                 return time_.controlDict();
             }
 
-            //- Const reference to mesh
-            const MESH& mesh() const
-            {
-                return mesh_;
-            };
-
             //- Reference to mesh
-            MESH& mesh()
+            MESH& mesh() const
             {
                 return mesh_;
             };
@@ -585,6 +636,9 @@ public:
                 };
 
         // Evolution
+
+            //- Initialize solver manager
+            void init() const;
 
             //- Main time loop wrapper
             bool loop() const;

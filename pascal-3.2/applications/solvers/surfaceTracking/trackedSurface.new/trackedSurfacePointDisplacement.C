@@ -49,7 +49,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
     controlPoints() += facesDisplacementDir()*deltaH;
 
 // TEST: DEBUG | Additional debugging
-    if (debug > 5)
+    if (debug > 2)
     {
         mesh().write();
 
@@ -314,7 +314,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
             peCentres + delta + 2*deltaNr;
 
 // TEST: DEBUG | Additional debugging
-        if (debug > 5)
+        if (debug > 2)
         {
             writeVTKpoints
             (
@@ -664,7 +664,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
     }
 
 // TEST: DEBUG | Additional debugging
-    if (debug > 5)
+    if (debug > 2)
     {
         writeVTKpoints
         (

@@ -325,31 +325,31 @@ void trackedSurface::updateVelocity()
     {
         const vectorField& nA = aMesh().faceAreaNormals().internalField();
 
-// TEST: Use velocity to correct interface normal velocity
-        vectorField UPA =
-            U().boundaryField()[aPatchID()].patchInternalField();
+// // TEST: Use velocity to correct interface normal velocity
+//         vectorField UPA =
+//             U().boundaryField()[aPatchID()].patchInternalField();
+//
+//         if
+//         (
+//             U().boundaryField()[aPatchID()].type()
+//          == fixedGradientCorrectedFvPatchField<vector>::typeName
+//         )
+//         {
+//             fixedGradientCorrectedFvPatchField<vector>& aU =
+//                 refCast<fixedGradientCorrectedFvPatchField<vector> >
+//                 (
+//                     U().boundaryField()[aPatchID()]
+//                 );
+//
+//             UPA += aU.corrVecGrad();
+//         }
+//
+//         vectorField UnFs = nA*(nA & UPA);
 
-        if
-        (
-            U().boundaryField()[aPatchID()].type()
-         == fixedGradientCorrectedFvPatchField<vector>::typeName
-        )
-        {
-            fixedGradientCorrectedFvPatchField<vector>& aU =
-                refCast<fixedGradientCorrectedFvPatchField<vector> >
-                (
-                    U().boundaryField()[aPatchID()]
-                );
-
-            UPA += aU.corrVecGrad();
-        }
-
-        vectorField UnFs = nA*(nA & UPA);
-
-// // TEST: Use mesh phi to update normal component of Us
-//         vectorField UnFs =
-//             nA*fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]
-//           / mesh().boundary()[aPatchID()].magSf();
+// TEST: Use mesh phi to update normal component of Us
+        vectorField UnFs =
+            nA*fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]
+          / mesh().boundary()[aPatchID()].magSf();
 
 //         vectorField UnFs =
 //             nA*phi().boundaryField()[aPatchID()]

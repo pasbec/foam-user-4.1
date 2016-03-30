@@ -35,20 +35,20 @@ namespace Foam
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template <class MESH>
-void solverManager<MESH>::readControls
+void solverManager<MESH>::readParameters
 (
-    timeControls& tc
+    parameters& tp
 ) const
 {
     errorIfNotMaster();
 
-    tc.adjustTimeStep =
+    tp.adjustTimeStep =
         controlDict().lookupOrDefault("adjustTimeStep", false);
 
-    tc.maxCo =
+    tp.maxCo =
         controlDict().lookupOrDefault("maxCo", scalar(1.0));
 
-    tc.maxDeltaT =
+    tp.maxDeltaT =
         controlDict().lookupOrDefault("maxDeltaT", scalar(GREAT));
 }
 
@@ -61,14 +61,14 @@ void solverManager<MESH>::calcDeltaT
 {
     errorIfNotMaster();
 
-    timeControls& tc = const_cast<timeControls&>(controls());
+    parameters& tp = const_cast<parameters&>(param());
 
     Time& runTime = const_cast<Time&>(time());
 
-    if (tc.adjustTimeStep)
+    if (tp.adjustTimeStep)
     {
 
-        scalar maxDeltaTFact = tc.maxCo/(tc.CoNum + SMALL);
+        scalar maxDeltaTFact = tp.maxCo/(tp.CoNum + SMALL);
         scalar deltaTFact =
             min(min(maxDeltaTFact, 1.0 + 0.1*maxDeltaTFact), 1.2);
 
@@ -76,7 +76,7 @@ void solverManager<MESH>::calcDeltaT
             min
             (
                 deltaTFact * runTime.deltaT().value(),
-                tc.maxDeltaT
+                tp.maxDeltaT
             );
     }
 }
@@ -87,7 +87,7 @@ void solverManager<MESH>::applyDeltaT() const
 {
     errorIfNotMaster();
 
-    timeControls& tc = const_cast<timeControls&>(controls());
+    parameters& tp = const_cast<parameters&>(param());
 
     Time& runTime = const_cast<Time&>(time());
 
@@ -97,15 +97,15 @@ void solverManager<MESH>::applyDeltaT() const
 
     if (!deltaTset)
     {
-        bool controlsSet = setControls(tc);
-    
-        if (!controlsSet)
+        bool parametersSet = setParameters(tp);
+
+        if (!parametersSet)
         {
-            readControls(tc);
+            readParameters(tp);
         }
-    
-        bool CoNumSet = setCoNum(tc.CoNum);
-    
+
+        bool CoNumSet = setCoNum(tp.CoNum);
+
         if (!CoNumSet)
         {
             FatalErrorIn("solverManager::applyDeltaT()")
@@ -116,7 +116,9 @@ void solverManager<MESH>::applyDeltaT() const
                     << "return value needs to be true."
                     << abort(FatalError);
         }
-    
+
+        msg().newLine();
+
         calcDeltaT(deltaT);
     }
 
@@ -139,7 +141,7 @@ solverManager<MESH>::solverManager
     const label& regionI0
 )
 :
-    timeControlsPtr_(NULL),
+    paramPtr_(NULL),
     msgPtr_(NULL),
     args_(args),
     time_(time),
@@ -172,10 +174,10 @@ solverManager<MESH>::solverManager
 {
     if (master_)
     {
-        timeControlsPtr_ = new timeControls();
+        paramPtr_ = new parameters();
         {
-            readControls(*timeControlsPtr_);
-            timeControlsPtr_->CoNum = 0.0;
+            readParameters(*paramPtr_);
+            paramPtr_->CoNum = 0.0;
         }
 
         msgPtr_ = new messages(args_, time_, mesh_);
@@ -184,6 +186,26 @@ solverManager<MESH>::solverManager
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template <class MESH>
+void solverManager<MESH>::init() const
+{
+    errorIfNotMaster();
+
+//     if (master_)
+//     {
+//         paramPtr_ = new parameters();
+//         {
+//             readParameters(*paramPtr_);
+//             paramPtr_->CoNum = 0.0;
+//         }
+//
+//         msgPtr_ = new messages(args_, time_, mesh_);
+//     }
+//
+//     data().init();
+}
+
 
 template <class MESH>
 bool solverManager<MESH>::loop() const
@@ -196,9 +218,16 @@ bool solverManager<MESH>::loop() const
     {
         timePre();
 
+        msg().newLine();
         msg().startTimeLoop();
+        msg().newLine();
 
         prePhase() = false;
+    }
+    else
+    {
+        msg().executionTime();
+        msg().newLine();
     }
 
     loopPre();
@@ -206,6 +235,7 @@ bool solverManager<MESH>::loop() const
     if (runTime.loop())
     {
         msg().timeIs();
+        msg().newLine();
 
         loopPost();
 
@@ -232,9 +262,16 @@ bool solverManager<MESH>::run() const
     {
         timePre();
 
+        msg().newLine();
         msg().startTimeLoop();
+        msg().newLine();
 
         prePhase() = false;
+    }
+    else
+    {
+        msg().executionTime();
+        msg().newLine();
     }
 
     runPre();
@@ -246,6 +283,7 @@ bool solverManager<MESH>::run() const
         runTime++;
 
         msg().timeIs();
+        msg().newLine();
 
         runPost();
 
@@ -267,15 +305,11 @@ void solverManager<MESH>::write() const
 {
     errorIfNotMaster();
 
-    {
-        writePre();
+    writePre();
 
-        time().write();
+    time().write();
 
-        writePost();
-
-        msg().executionTime();
-    }
+    writePost();
 }
 
 

@@ -341,71 +341,74 @@ void trackedSurface::initControlPointsPosition()
 // TODO: Improve implementation of "curVolA_" and "oldVolA_"
 void trackedSurface::correctInterfacePhi(scalarField& interfacePhi)
 {
-    if (debug)
+    if(correctVolume_)
     {
-        Info << "trackedSurface::correctInterfacePhi() : "
-            << "Correct interface phi to account"
-                << " for domain volume changes."
-                << endl;
-    }
-
-    scalar phiAsumPatchesNotAB = 0.0;
-
-    forAll (phi().boundaryField(), patchI)
-    {
-        const fvsPatchScalarField& phip = phi().boundaryField()[patchI];
-        const fvPatchScalarField& fip = fluidIndicator().boundaryField()[patchI];
-
-        if (patchI != aPatchID())
+        if (debug)
         {
-            if
-            (
-                (twoFluids() && patchI != bPatchID())
-             && !twoFluids()
-            )
+            Info << "trackedSurface::correctInterfacePhi() : "
+                << "Correct interface phi to account"
+                    << " for domain volume changes."
+                    << endl;
+        }
+
+        scalar phiAsumPatchesNotAB = 0.0;
+
+        forAll (phi().boundaryField(), patchI)
+        {
+            const fvsPatchScalarField& phip = phi().boundaryField()[patchI];
+            const fvPatchScalarField& fip = fluidIndicator().boundaryField()[patchI];
+
+            if (patchI != aPatchID())
             {
-                forAll (phip, faceI)
+                if
+                (
+                    (twoFluids() && patchI != bPatchID())
+                && !twoFluids()
+                )
                 {
-                    phiAsumPatchesNotAB += fip[faceI] * phip[faceI];
+                    forAll (phip, faceI)
+                    {
+                        phiAsumPatchesNotAB += fip[faceI] * phip[faceI];
+                    }
                 }
             }
         }
-    }
 
-    curVolA_ =  fvc::domainIntegrate(fluidIndicator()).value();
+        curVolA_ =  fvc::domainIntegrate(fluidIndicator()).value();
 
-    scalar phiAsumDomain =
-        (curVolA_ - oldVolA_) / DB().deltaT().value();
+        scalar phiAsumDomain =
+            (curVolA_ - oldVolA_) / DB().deltaT().value();
 
 // TODO: Think about best weights for distributing the volume correction.
-    const scalarField& weights = aMesh().S();
-//     const scalarField weights = mag(interfacePhi);
+        const scalarField& weights = aMesh().S();
+//         const scalarField weights = mag(interfacePhi);
 
-    scalarField domainPhi
-    (
-        weights * (phiAsumDomain - phiAsumPatchesNotAB) / gSum(weights)
-    );
+        scalarField domainPhi
+        (
+            weights * (phiAsumDomain - phiAsumPatchesNotAB) / gSum(weights)
+        );
 
-    scalar volDiffDomainRel =
-        (phiAsumDomain - phiAsumPatchesNotAB)
-      * DB().deltaT().value()
-      / oldVolA_;
+        scalar volDiffDomainRel =
+            (phiAsumDomain - phiAsumPatchesNotAB)
+        * DB().deltaT().value()
+        / oldVolA_;
 
-    if (debug > 1)
-    {
-        Info << "trackedSurface::correctInterfacePhi() : "
-            << "Statistics:" << endl
-                << "  phiAsumPatchesNotAB = " << phiAsumPatchesNotAB << endl
-                << "  phiAsumDomain = " << phiAsumDomain << endl
-                << "  volDiffDomainRel = " << 100*volDiffDomainRel << " %"
-                << endl;
-    }
+        if (debug > 1)
+        {
+            Info << "trackedSurface::correctInterfacePhi() : "
+                << "Statistics:" << endl
+                    << "  phiAsumPatchesNotAB = " << phiAsumPatchesNotAB << endl
+                    << "  phiAsumDomain = " << phiAsumDomain << endl
+                    << "  volDiffDomainRel = " << 100*volDiffDomainRel << " %"
+                    << endl;
+        }
 
 
 // TODO: How to inject domainPhi best? Just adding it to meshPhi
 //       dramatically decreases the convergence behaviour. Thus, in
 //       the current implementation, phi is corrected, directly.
-    interfacePhi -= domainPhi;
+        interfacePhi -= domainPhi;
+    }
 }
 
 tmp<scalarField> trackedSurface::calcSweptVolCorr(const scalarField& interfacePhi)
@@ -924,6 +927,8 @@ trackedSurface::trackedSurface
         readInt(this->lookup("n" + Prefix_ + "Correctors"))
     ),
     useSubMesh_(false),
+    correctVolume_(false),
+    resetControlPoints_(false),
     smoothing_(false),
     freeContactAngle_(false),
     correctPointNormals_(false),
@@ -955,7 +960,10 @@ trackedSurface::trackedSurface
     surfaceTensionForcePtr_(NULL),
     nGradUnPtr_(NULL)
 {
-    Info << "Surface prefix is: " << prefix_ << endl;
+    if (debug)
+    {
+        Info << "Surface prefix is: " << prefix_ << endl;
+    }
 
     // Init properties
     initProperties();
@@ -1108,16 +1116,28 @@ void trackedSurface::updateProperties()
         g_ = dimensionedVector(this->lookup("g"));
     }
 
-    // Check if smoothing switch is set
-    if (this->found("smoothing"))
-    {
-        smoothing_ = Switch(this->lookup("smoothing"));
-    };
-
     // Check if sub-mesh switch is set
     if (this->found("useSubMesh"))
     {
         useSubMesh_ = Switch(this->lookup("useSubMesh"));
+    };
+
+    // Check if volume correction switch is set
+    if (this->found("correctVolume"))
+    {
+        correctVolume_ = Switch(this->lookup("correctVolume"));
+    };
+
+    // Check if reset control points switch is set
+    if (this->found("resetControlPoints"))
+    {
+        resetControlPoints_ = Switch(this->lookup("resetControlPoints"));
+    };
+
+    // Check if smoothing switch is set
+    if (this->found("smoothing"))
+    {
+        smoothing_ = Switch(this->lookup("smoothing"));
     };
 
     // Check if freeContactAngle switch is set
@@ -1239,12 +1259,6 @@ void trackedSurface::updateDisplacementDirections()
 }
 
 
-void trackedSurface::resetControlPoints()
-{
-    controlPoints() = aMesh().areaCentres().internalField();
-}
-
-
 void trackedSurface::predictPoints()
 {
     // Reset control points
@@ -1356,13 +1370,23 @@ void trackedSurface::moveFixedPatches(const vectorField& displacement)
 }
 
 
+void trackedSurface::resetControlPoints()
+{
+    if (resetControlPoints_)
+    {
+        controlPoints() = aMesh().areaCentres().internalField();
+    }
+}
+
+
 void trackedSurface::smoothing()
 {
     if (smoothing_)
     {
     // Reset control points
 
-        controlPoints() = aMesh().areaCentres().internalField();
+        resetControlPoints_ = true;
+        resetControlPoints();
 
 
     // Smoothing step 1

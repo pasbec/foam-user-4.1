@@ -178,6 +178,13 @@ class trackedSurface
         //- Use sub-mesh
         Switch useSubMesh_;
 
+// TEST: Volume conservation
+        //- Apply correction to flux to conserve total volume
+        Switch correctVolume_;
+
+        //- Reset control points at the begining of time step
+        Switch resetControlPoints_;
+
         //- Interface smoothing at the begining of time step
         Switch smoothing_;
 
@@ -769,9 +776,6 @@ public:
         //- Update displacement directions
         void updateDisplacementDirections();
 
-        //- Update control points
-        void resetControlPoints();
-
         //- Predict interface points position
         void predictPoints();
 
@@ -786,6 +790,9 @@ public:
 
         //- Correct fixed surface patches
         void moveFixedPatches(const vectorField& displacement);
+
+        //- Reset control points
+        void resetControlPoints();
 
         //- Smoothing interface
         void smoothing();
