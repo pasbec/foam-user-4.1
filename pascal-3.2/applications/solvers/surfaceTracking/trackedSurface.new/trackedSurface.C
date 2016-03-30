@@ -164,8 +164,12 @@ void trackedSurface::initCheckSurfacePatches()
         {
             aPatchID_ = patchI;
 
-            Info << "Found surface patch. ID: " << aPatchID_
-                << endl;
+            if (debug)
+            {
+                Info << "trackedSurface::initCheckSurfacePatches() : "
+                    << "Found surface patch. ID: " << aPatchID_
+                    << endl;
+            }
         }
     }
 
@@ -187,8 +191,12 @@ void trackedSurface::initCheckSurfacePatches()
             {
                 bPatchID_ = patchI;
 
-                Info << "Found surface shadow patch. ID: "
-                    << bPatchID_ << endl;
+                if (debug)
+                {
+                    Info << "trackedSurface::initCheckSurfacePatches() : "
+                        << "Found surface shadow patch. ID: " << bPatchID_
+                        << endl;
+                }
             }
         }
 
@@ -1202,8 +1210,12 @@ void trackedSurface::updateProperties()
         interfaceDeformationLimit_ =
             readScalar(this->lookup("interfaceDeformationLimit"));
 
-        Info << "Interface deformation limit: "
-            << interfaceDeformationLimit_ << endl;
+        if (debug)
+        {
+            Info << "trackedSurface::updateProperties() : "
+                << "Interface deformation limit: "
+                << interfaceDeformationLimit_ << endl;
+        }
     }
 }
 
@@ -1248,7 +1260,8 @@ void trackedSurface::updateDisplacementDirections()
                 }
                 else
                 {
-                    Info << "Warning: centerline polyPatch does not exist. "
+                    Info  << "trackedSurface::updateDisplacementDirections() : "
+                        << "Warning: centerline polyPatch does not exist. "
                         << "Surface points displacement directions "
                         << "will not be corrected at the axis (centerline)"
                         << endl;
@@ -1327,14 +1340,24 @@ void trackedSurface::updateMesh()
         scalar maxInterfaceDeformation =
             gMax(mag(totalDisplacement()))/minCellThickness;
 
-        Info << "Maximal relative interface deformation: "
-            << maxInterfaceDeformation << endl;
+        if (debug)
+        {
+            Info << "trackedSurface::updateMesh() : "
+                << "Maximal relative interface deformation: "
+                << maxInterfaceDeformation
+                << endl;
+        }
 
 
         // Move whole mesh only if interface deformation limit is exceeded
         if (maxInterfaceDeformation > interfaceDeformationLimit_)
         {
-            Info << "Moving whole mesh" << endl;
+            if (debug)
+            {
+                Info << "trackedSurface::updateMesh() : "
+                    << "Moving whole mesh."
+                    << endl;
+            }
 
             pointField newMeshPoints = calcNewMeshPoints();
 
