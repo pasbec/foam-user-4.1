@@ -52,48 +52,26 @@ int main(int argc, char *argv[])
 
     interTrackManager manager(args, runTime, mesh);
 
+    manager.init();
+
     pimpleControl& pimple = manager.pimple();
 
     interTrackManager::storage& data = manager.data();
 
+    uniformDimensionedVectorField& g = data.g();
     volScalarField& p = data.p();
     volVectorField& U = data.U();
     surfaceScalarField& phi = data.phi();
     volScalarField& rho = data.rho();
     volScalarField& mu = data.mu();
-    volScalarField& fluidIndicator = data.fluidIndicator();
+    volVectorField& F = data.F();
     trackedSurface& interface = data.interface();
+    volScalarField& fluidIndicator = data.fluidIndicator();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// TODO
-
-#   include "createSf.H"
-
-// Read interpolators if present
-if (interface.twoFluids())
-{
-    interface.interpolatorAB();
-}
-
-
+// TODO: Two fluids
 #   include "setRefCell.H"
-
-volScalarField AU
-(
-    IOobject
-    (
-        "AU",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedScalar("AU", dimDensity/dimTime, 0)
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #   include "initContinuityErrs.H"
 
@@ -120,70 +98,25 @@ volScalarField AU
              // --- Pressure corrector PISO loop
             while (pimple.correct())
             {
-// TODO
-//                 volScalarField rUA = 1.0/UEqn.A();
-//                 U = rUA*UEqn.H();
-//                 phi = (fvc::interpolate(U) & mesh.Sf());
-
-                volScalarField AU = UEqn.A();
-                volVectorField HU = UEqn.H();
-
-                U = HU/AU;
-
-// TODO: Port this from OpenFOAM 3.0.x
-                bool ddtPhiCorr = false;
-#               include "calcPhi.H"
-
-// #               include "correctPhiAtInterface.H"
-
-#               include "scalePhi.H"
-
-                // Non-orthogonal pressure corrector loop
-                while (pimple.correctNonOrthogonal())
-                {
-                    fvScalarMatrix pEqn
-                    (
-//                         fvm::laplacian(rUA, p) == fvc::div(phi)
-                        fvm::laplacian(1.0/fvc::interpolate(AU), p)
-                     == fvc::div(phi)
-                    );
-
-#                   include "setReference.H"
-//                     pEqn.setReference(pRefCell, pRefValue);
-
-                    pEqn.solve
-                    (
-                        mesh.solutionDict().solverDict
-                        (
-                            p.select(pimple.finalInnerIter())
-                        )
-                    );
-
-                    if (pimple.finalNonOrthogonalIter())
-                    {
-                        phi -= pEqn.flux();
-                    }
-                }
-
-#               include "continuityErrs.H"
-
-                // Momentum corrector
-                U -= fvc::grad(p)/AU;
-//                 U -= rUA*fvc::grad(p);
-                U.correctBoundaryConditions();
+#               include "interTrackpEqn.H"
             }
 
             interface.correctPoints();
 
+            if (pimple.turbCorr())
+            {
+// TODO: Turbulence
+            }
+
+// TODO: Move to manager function called something like
+//       pimpleSurfaceStatistics
 #           include "freeSurfaceContinuityErrs.H"
-
-#           include "updateSf.H"
-
-            AU = UEqn.A();
         }
 
 #       include "volContinuity.H"
 
+// TODO: Move to surface info from writePre to manager
+//       function called something like timeSurfaceStatistics
         manager.write();
     }
 

@@ -151,10 +151,11 @@ interTrackManager::interTrackManager
     (
         args, time, mesh, name, master
     ),
-    storagePtr_(NULL),
-    pimple_(mesh)
+    controlPtr_(NULL),
+    storagePtr_(NULL)
 {
-    if (master) storagePtr_ = new storage(*this);
+// TODO FIXME: Why do I need this???
+    storagePtr_ = new storage(*this);
 }
 
 

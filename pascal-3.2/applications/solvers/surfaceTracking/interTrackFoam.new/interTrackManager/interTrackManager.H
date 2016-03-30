@@ -37,12 +37,9 @@ SourceFiles
 #define interTrackManager_H
 
 #include "solverManager.H"
-
-#include "fvCFD.H"
 #include "dynamicFvMesh.H"
-#include "trackedSurface.H"
-
 #include "pimpleControl.H"
+#include "trackedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,33 +61,19 @@ public:
         //- Storage
         struct storage
         :
-            solverManager<dynamicFvMesh>::storage
+            public solverManager<dynamicFvMesh>::storage
         {
         private:
 
-            // Private Data
+            // Create basic class members and functions
 
-                //- Reference to solver manager
-                interTrackManager& manager_;
+                //- Gravitational acceleration field
+                solverManagerStorage_new(interTrackManager);
 
-            // Private Member Functions
+            // Create class members and functions for storage elements
 
-                //- Disallow default bitwise copy construct
-                storage(const storage&);
-
-                //- Disallow default bitwise assignment
-                void operator=(const storage&);
-
-                //- Return reference to solver manager
-                interTrackManager& manager()
-                {
-                    return manager_;
-                }
-
-                //- Initialize data sequence
-                void init();
-
-            // Macro-generated data entries with accessors
+                //- Gravitational acceleration field
+                solverManagerStorage_add(uniformDimensionedVectorField, g);
 
                 //- Pressure
                 solverManagerStorage_add(volScalarField, p);
@@ -107,29 +90,25 @@ public:
                 //- Dynamic viscosity
                 solverManagerStorage_add(volScalarField, mu);
 
+                //- Volume force
+                solverManagerStorage_add(volVectorField, F);
+
                 //- Fluid indicator
                 solverManagerStorage_add(volScalarField, fluidIndicator);
 
                 //- Tracked surface
                 solverManagerStorage_add(trackedSurface, interface);
-
-        public:
-
-            // Constructor
-
-                //- Construct from manager
-                storage(interTrackManager& manager);
         };
 
 private:
 
     // Private Data
 
+        //- Control
+        mutable pimpleControl* controlPtr_;
+
         //- Storage
         mutable storage* storagePtr_;
-
-        //- Solution control
-        mutable pimpleControl pimple_;
 
     // Private Member Functions
 
@@ -170,29 +149,39 @@ public:
 
         virtual ~interTrackManager()
         {
-            if (this->master()) delete storagePtr_;
+            delete controlPtr_;
+            delete storagePtr_;
         };
 
     // Member Functions
 
+        //- Control
+        virtual pimpleControl& control() const
+        {
+            if (!controlPtr_)
+            {
+                controlPtr_ = new pimpleControl(this->mesh());
+            }
+
+            return *controlPtr_;
+        };
+
         //- Storage
         virtual storage& data() const
         {
-            if (!storagePtr_)
-            {
-                FatalErrorIn(type() + "::data()")
-                    << "Storage pointer is not allocated. "
-                        << "Most likely, this is not the master manager."
-                        << abort(FatalError);
-            }
+// // TODO FIXME: Why is this not working?
+//             if (!storagePtr_)
+//             {
+//                 storagePtr_ = new storage(*this);
+//             }
 
             return *storagePtr_;
         };
 
-        //- Solution control
+        //- Pimple control
         pimpleControl& pimple() const
         {
-            return pimple_;
+            return control();
         };
 };
 

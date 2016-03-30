@@ -427,8 +427,8 @@ class trackedSurface
 
 public:
 
-    // Declare name of the class and it's debug switch
-    ClassName("trackedSurface");
+    // Runtime type information
+    TypeName("trackedSurface");
 
 
     // Constructors

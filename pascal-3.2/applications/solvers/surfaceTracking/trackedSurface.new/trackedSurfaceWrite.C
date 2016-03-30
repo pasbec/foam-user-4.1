@@ -34,7 +34,6 @@ namespace Foam
 
 void trackedSurface::writeVTK() const
 {
-    Info << "Write VTK data of trackedSurface" << endl;
 // TODO: Region name! Use DB().timePath()/region_name if
 //       a region other than region0 is used!
 
@@ -64,8 +63,6 @@ void trackedSurface::writeVTKpoints
     const vectorField& pf
 ) const
 {
-    Info << "Write VTK data of " << fieldName << endl;
-
     word FieldName =
         word(toupper(fieldName[0]))
       + word(fieldName.substr(1));

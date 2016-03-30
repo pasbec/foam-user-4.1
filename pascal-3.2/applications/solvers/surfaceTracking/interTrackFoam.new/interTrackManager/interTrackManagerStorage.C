@@ -32,108 +32,194 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void interTrackManager::storage::create_p()
+void interTrackManager::storage::create_g(const word init) const
+{
+    solverManagerStorage_info(g);
+
+    gPtr_.set
+    (
+        new uniformDimensionedVectorField
+        (
+            IOobject
+            (
+                "g",
+                this->time().constant(),
+                this->mesh(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    );
+}
+
+
+void interTrackManager::storage::create_p(const word init) const
 {
     solverManagerStorage_info(p);
 
-    pPtr_ = new volScalarField
+    pPtr_.set
     (
-        IOobject
+        new volScalarField
         (
-            "p",
-            manager().time().timeName(),
-            manager().mesh(),
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        manager().mesh()
+            IOobject
+            (
+                "p",
+                this->time().timeName(),
+                this->mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            this->mesh()
+        )
     );
 }
 
 
-void interTrackManager::storage::create_U()
+void interTrackManager::storage::create_U(const word init) const
 {
     solverManagerStorage_info(U);
 
-    UPtr_ = new volVectorField
+    UPtr_.set
     (
-        IOobject
+        new volVectorField
         (
-            "U",
-            manager().time().timeName(),
-            manager().mesh(),
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        manager().mesh()
+            IOobject
+            (
+                "U",
+                this->time().timeName(),
+                this->mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            this->mesh()
+        )
     );
 }
 
 
-void interTrackManager::storage::create_phi()
+void interTrackManager::storage::create_phi(const word init) const
 {
     solverManagerStorage_info(phi);
 
     solverManagerStorage_assert(phi, U);
 
-    phiPtr_ = new surfaceScalarField
+    phiPtr_.set
     (
-        IOobject
+        new surfaceScalarField
         (
-            "phi",
-            manager().time().timeName(),
-            manager().mesh(),
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        linearInterpolate(U()) & manager().mesh().Sf()
+            IOobject
+            (
+                "phi",
+                this->time().timeName(),
+                this->mesh(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            linearInterpolate(U()) & this->mesh().Sf()
+        )
     );
 
     phiPtr_->oldTime();
 }
 
 
-void interTrackManager::storage::create_rho()
+void interTrackManager::storage::create_rho(const word init) const
 {
     solverManagerStorage_info(rho);
 
-    rhoPtr_ = new volScalarField
+    rhoPtr_.set
     (
-        IOobject
+        new volScalarField
         (
-            "rho",
-            manager().time().timeName(),
-            manager().mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        manager().mesh(),
-        dimensionedScalar(word(), dimDensity, 0)
+            IOobject
+            (
+                "rho",
+                this->time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            this->mesh(),
+            dimensionedScalar(word(), dimDensity, 0)
+        )
     );
 }
 
 
-void interTrackManager::storage::create_mu()
+void interTrackManager::storage::create_mu(const word init) const
 {
     solverManagerStorage_info(mu);
 
-    muPtr_ = new volScalarField
+    muPtr_.set
     (
-        IOobject
+        new volScalarField
         (
-            "mu",
-            manager().time().timeName(),
-            manager().mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        manager().mesh(),
-        dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
+            IOobject
+            (
+                "mu",
+                this->time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            this->mesh(),
+            dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
+        )
     );
 }
 
 
-void interTrackManager::storage::create_fluidIndicator()
+void interTrackManager::storage::create_F(const word init) const
+{
+    solverManagerStorage_info(F);
+
+    if (init == "default")
+    {
+        FPtr_.set
+        (
+            new volVectorField
+            (
+                IOobject
+                (
+                    "F",
+                    this->time().timeName(),
+                    this->mesh(),
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                this->mesh()
+            )
+        );
+    }
+    else if (init == "calculated")
+    {
+        FPtr_.set
+        (
+            new volVectorField
+            (
+                IOobject
+                (
+                    "F",
+                    this->time().timeName(),
+                    this->mesh(),
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                this->mesh(),
+                dimensionedVector
+                (
+                    "F",
+                    dimMass/pow(dimLength,2)/pow(dimTime,2),
+                    pTraits<vector>::zero
+                ),
+                calculatedFvPatchVectorField::typeName
+            )
+        );
+    }
+}
+
+
+void interTrackManager::storage::create_fluidIndicator(const word init) const
 {
     solverManagerStorage_info(fluidIndicator);
 
@@ -141,32 +227,38 @@ void interTrackManager::storage::create_fluidIndicator()
 
     if(args().options().found("parallel"))
     {
-        fluidIndicatorPtr_ = new volScalarField
+        fluidIndicatorPtr_.set
         (
-            IOobject
+            new volScalarField
             (
-                "fluidIndicator",
-                manager().time().timeName(),
-                manager().mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            manager().mesh()
+                IOobject
+                (
+                    "fluidIndicator",
+                    this->time().timeName(),
+                    this->mesh(),
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                this->mesh()
+            )
         );
     }
     else
     {
-        fluidIndicatorPtr_ = new volScalarField
+        fluidIndicatorPtr_.set
         (
-            IOobject
+            new volScalarField
             (
-                "fluidIndicator",
-                manager().time().timeName(),
-                manager().mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            interface().fluidIndicator()
+                IOobject
+                (
+                    "fluidIndicator",
+                    this->time().timeName(),
+                    this->mesh(),
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                interface().fluidIndicator()
+            )
         );
     }
 
@@ -175,7 +267,7 @@ void interTrackManager::storage::create_fluidIndicator()
 }
 
 
-void interTrackManager::storage::create_interface()
+void interTrackManager::storage::create_interface(const word init) const
 {
     solverManagerStorage_info(interface);
 
@@ -191,31 +283,38 @@ void interTrackManager::storage::create_interface()
         interfacePrefix = trackedSurface::typeName;
     }
 
-    interfacePtr_ = new trackedSurface
+// TODO: Add more constructors and simplify
+    interfacePtr_.set
     (
-        manager().mesh(),
-        rho(),
-        U(),
-        p(),
-        phi(),
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        interfacePrefix
+        new trackedSurface
+        (
+            this->mesh(),
+            rho(),
+            U(),
+            p(),
+            phi(),
+            NULL,
+            gPtr(),
+            NULL,
+            NULL,
+            NULL,
+            interfacePrefix
+        )
     );
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void interTrackManager::storage::init()
+void interTrackManager::storage::init() const
 {
+    g();
     p();
     U();
     phi();
     rho();
+    mu();
+    F("calculated");
 
     // To create the interface we need rho first
     interface();
@@ -249,30 +348,6 @@ void interTrackManager::storage::init()
         mu().correctBoundaryConditions();
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-interTrackManager::storage::storage(interTrackManager& manager)
-:
-    solverManager<dynamicFvMesh>::storage
-    (
-        manager.args(), manager.time(), manager.mesh()
-    ),
-    manager_(manager),
-    pPtr_(NULL),
-    UPtr_(NULL),
-    phiPtr_(NULL),
-    rhoPtr_(NULL),
-    muPtr_(NULL),
-    fluidIndicatorPtr_(NULL),
-    interfacePtr_(NULL)
-{
-    init();
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
