@@ -68,6 +68,8 @@ bool Foam::interTrackControl::criteriaSatisfied()
         if (fieldI != -1)
         {
             const List<dictionary> sp(iter().stream());
+//             const scalar residual =
+//                 readScalar(sp.last().lookup("initialResidual"));
 
             checked = true;
 
@@ -77,16 +79,28 @@ bool Foam::interTrackControl::criteriaSatisfied()
                     readScalar(sp.first().lookup("initialResidual"));
             }
 
+// TODO TEST: Find better way?
             // no further checks till third iteration
             if (corr_ < 3)
             {
-                return false;
+                achieved = false;
+                continue;
             }
 
-            label lastIniI = max(0,sp.size() - 1 - nCorrPISO_*nNonOrthCorr_);
-            const scalar residual = readScalar(sp[lastIniI].lookup("initialResidual"));
-
+            label lastResI = sp.size()-1;
+            if (variableName == "p")
+            {
+                lastResI = max(0,(sp.size()-1) - nCorrPISO_*nNonOrthCorr_);
+            }
+            else
+            {
+                lastResI = max(0,(sp.size()-1) - (nCorrPISO_-1));
+            }
+            const scalar residual =
+                readScalar(sp[lastResI].lookup("initialResidual"));
+//
             const bool absCheck = residual < residualControl_[fieldI].absTol;
+
             bool relCheck = false;
 
             scalar relative = 0.0;
