@@ -12,7 +12,9 @@
 //       - fvc::div(nuEff()*dev(T(fvc::grad(U))))
     );
 
-    if (pimple.momentumPredictor())
+    UEqn.relax();
+
+    if (control.momentumPredictor())
     {
         solve(UEqn == -fvc::grad(p));
     }

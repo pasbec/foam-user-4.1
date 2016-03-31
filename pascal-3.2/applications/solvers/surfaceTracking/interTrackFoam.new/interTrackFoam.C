@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
     manager.init();
 
-    pimpleControl& pimple = manager.pimple();
+    interTrackControl& control = manager.control();
 
     interTrackManager::storage& data = manager.data();
 
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
         interface.predictPoints();
 
         // --- Pressure-velocity PIMPLE corrector loop
-        while (pimple.loop())
+        while (control.loop())
         {
             // Update interface bc
             interface.updateBoundaryConditions();
@@ -96,14 +96,14 @@ int main(int argc, char *argv[])
 #           include "interTrackUEqn.H"
 
              // --- Pressure corrector PISO loop
-            while (pimple.correct())
+            while (control.correct())
             {
 #               include "interTrackpEqn.H"
             }
 
             interface.correctPoints();
 
-            if (pimple.turbCorr())
+            if (control.turbCorr())
             {
 // TODO: Turbulence
             }

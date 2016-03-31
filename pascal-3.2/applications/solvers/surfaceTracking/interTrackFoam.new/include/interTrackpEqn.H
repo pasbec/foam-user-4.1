@@ -14,7 +14,7 @@
 // #       include "scalePhi.H"
 
         // Non-orthogonal pressure corrector loop
-        while (pimple.correctNonOrthogonal())
+        while (control.correctNonOrthogonal())
         {
             fvScalarMatrix pEqn
             (
@@ -28,15 +28,17 @@
             (
                 mesh.solutionDict().solverDict
                 (
-                    p.select(pimple.finalInnerIter())
+                    p.select(control.finalInnerIter())
                 )
             );
 
-            if (pimple.finalNonOrthogonalIter())
+            if (control.finalNonOrthogonalIter())
             {
                 phi -= pEqn.flux();
             }
         }
+
+        p.relax();
 
 #       include "continuityErrs.H"
 

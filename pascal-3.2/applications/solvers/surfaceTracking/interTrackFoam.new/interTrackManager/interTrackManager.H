@@ -38,7 +38,7 @@ SourceFiles
 
 #include "solverManager.H"
 #include "dynamicFvMesh.H"
-#include "pimpleControl.H"
+#include "interTrackControl.H"
 #include "trackedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -105,7 +105,7 @@ private:
     // Private Data
 
         //- Control
-        mutable pimpleControl* controlPtr_;
+        mutable interTrackControl* controlPtr_;
 
         //- Storage
         mutable storage* storagePtr_;
@@ -156,11 +156,11 @@ public:
     // Member Functions
 
         //- Control
-        virtual pimpleControl& control() const
+        virtual interTrackControl& control() const
         {
             if (!controlPtr_)
             {
-                controlPtr_ = new pimpleControl(this->mesh());
+                controlPtr_ = new interTrackControl(this->mesh());
             }
 
             return *controlPtr_;
@@ -179,7 +179,7 @@ public:
         };
 
         //- Pimple control
-        pimpleControl& pimple() const
+        interTrackControl& pimple() const
         {
             return control();
         };
