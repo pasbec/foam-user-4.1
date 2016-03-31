@@ -37,8 +37,12 @@ SourceFiles
 #define interTrackManager_H
 
 #include "solverManager.H"
+
+#include "fvCFD.H"
 #include "dynamicFvMesh.H"
 #include "interTrackControl.H"
+#include "twoPhaseMixture.H"
+#include "turbulenceModel.H"
 #include "trackedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,16 +67,13 @@ public:
         :
             public solverManager<dynamicFvMesh>::storage
         {
-        private:
+            // Create constructor, destructor and init
 
-            // Create basic class members and functions
-
-                //- Gravitational acceleration field
                 solverManagerStorage_new(interTrackManager);
 
-            // Create class members and functions for storage elements
+            // Add class members and functions for storage elements
 
-                //- Gravitational acceleration field
+                //- Gravitational acceleration
                 solverManagerStorage_add(uniformDimensionedVectorField, g);
 
                 //- Pressure
@@ -84,17 +85,23 @@ public:
                 //- Face flux
                 solverManagerStorage_add(surfaceScalarField, phi);
 
+                //- Volume force
+                solverManagerStorage_add(volVectorField, F);
+
                 //- Density
                 solverManagerStorage_add(volScalarField, rho);
 
                 //- Dynamic viscosity
                 solverManagerStorage_add(volScalarField, mu);
 
-                //- Volume force
-                solverManagerStorage_add(volVectorField, F);
-
                 //- Fluid indicator
                 solverManagerStorage_add(volScalarField, fluidIndicator);
+
+                //- Transport model
+                solverManagerStorage_add(twoPhaseMixture, transport);
+
+                //- Turbulence model
+                solverManagerStorage_add(incompressible::turbulenceModel, turbulence);
 
                 //- Tracked surface
                 solverManagerStorage_add(trackedSurface, interface);
@@ -176,12 +183,6 @@ public:
 //             }
 
             return *storagePtr_;
-        };
-
-        //- Pimple control
-        interTrackControl& pimple() const
-        {
-            return control();
         };
 };
 

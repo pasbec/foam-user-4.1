@@ -47,21 +47,25 @@ SourceFiles
                                                                               \
     NAME##Manager manager(MESH);
 
+
 # define createManagerAndData(NAME, MESH)                                     \
                                                                               \
     NAME##Manager manager(MESH);                                              \
     NAME##Manager::storage& data = manager.data();
+
 
 # define setManagerScope(NAME)                                                \
                                                                               \
     NAME##Manager& NAME = manager.NAME();                                     \
     NAME##Manager& manager = NAME;
 
+
 # define setManagerScopeAndData(NAME)                                         \
                                                                               \
     NAME##Manager& NAME = manager.NAME();                                     \
     NAME##Manager& manager = NAME;                                            \
     NAME##Manager::storage& data = manager.data();
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,11 +88,54 @@ SourceFiles
                                                                               \
     public: virtual ~storage() {};                                            \
                                                                               \
-    public: virtual void init() const;
+    public: virtual void init(const word init = "default") const;
+
 
 # define solverManagerStorage_add(TYPE, DATA)                                 \
                                                                               \
     private: mutable autoPtr<TYPE> DATA##Ptr_;                                \
+                                                                              \
+    private: mutable autoPtr<bool> make_##DATA##Ptr_;                         \
+                                                                              \
+    private: void make_##DATA(const word init = "default") const              \
+    {                                                                         \
+        if (DATA##Ptr_.empty())                                               \
+        {                                                                     \
+            if (make_##DATA##Ptr_.empty())                                    \
+            {                                                                 \
+                make_##DATA##Ptr_.set(new bool);                              \
+                                                                              \
+                Info << "Create " << #DATA                                    \
+                    << " for region " << mesh().name()                        \
+                    << endl;                                                  \
+                                                                              \
+                create_##DATA(init);                                          \
+                                                                              \
+                make_##DATA##Ptr_.clear();                                    \
+            }                                                                 \
+            else                                                              \
+            {                                                                 \
+                FatalErrorIn(typeName + "::" + #DATA + "()")                  \
+                    << "Pointer for "                                         \
+                        << #DATA                                              \
+                        << " is part of a circular reference."                \
+                        << " Check all occurances in storage!"                \
+                        << abort(FatalError);                                 \
+            }                                                                 \
+        }                                                                     \
+                                                                              \
+        if (DATA##Ptr_.empty())                                               \
+        {                                                                     \
+            FatalErrorIn(typeName + "::" + #DATA + "()")                      \
+                << "Pointer for "                                             \
+                    << #DATA                                                  \
+                    << " is still unallocated after creation."                \
+                    << " Make sure the data member " << #DATA << "Ptr_ "      \
+                    << " is set correctly in its create-function: "           \
+                    << "create_" << #DATA << "(const word init = 'default')!" \
+                    << abort(FatalError);                                     \
+        }                                                                     \
+    }                                                                         \
                                                                               \
     private: void create_##DATA(const word init = "default") const;           \
                                                                               \
@@ -104,70 +151,18 @@ SourceFiles
                                                                               \
     public: TYPE& DATA(const word init = "default") const                     \
     {                                                                         \
-        if (DATA##IsEmpty())                                                  \
-        {                                                                     \
-            create_##DATA(init);                                              \
-        }                                                                     \
-                                                                              \
-        if (DATA##IsEmpty())                                                  \
-        {                                                                     \
-            FatalErrorIn(typeName + #DATA + "()")                             \
-                << "Pointer for "                                             \
-                    << #DATA                                                  \
-                    << " is still unallocated after creation"                 \
-                    << abort(FatalError);                                     \
-        }                                                                     \
+        make_##DATA(init);                                                    \
                                                                               \
         return DATA##Ptr_();                                                  \
     };                                                                        \
                                                                               \
     public: TYPE* DATA##Ptr(const word init = "default") const                \
     {                                                                         \
-        if (DATA##IsEmpty())                                                  \
-        {                                                                     \
-            create_##DATA(init);                                              \
-        }                                                                     \
-                                                                              \
-        if (DATA##IsEmpty())                                                  \
-        {                                                                     \
-            FatalErrorIn(typeName + #DATA + "()")                             \
-                << "Pointer for "                                             \
-                    << #DATA                                                  \
-                    << " is still unallocated after creation"                 \
-                    << abort(FatalError);                                     \
-        }                                                                     \
+        make_##DATA(init);                                                    \
                                                                               \
         return DATA##Ptr_.operator->();                                       \
     };
 
-# define solverManagerStorage_info(DATA)                                      \
-                                                                              \
-    Info << "Create "                                                         \
-        << #DATA                                                              \
-        << " for region " << mesh().name()                                    \
-        << endl;                                                              \
-                                                                              \
-    if (!DATA##IsEmpty())                                                     \
-    {                                                                         \
-        FatalErrorIn(typeName + "::create_" + #DATA + "()")                   \
-            << "Pointer for "                                                 \
-                << #DATA                                                      \
-                << " is already allocated before creation"                    \
-                << abort(FatalError);                                         \
-    }
-
-# define solverManagerStorage_assert(DATA, REQUIRE)                           \
-                                                                              \
-    if (!REQUIRE##IsValid())                                                  \
-    {                                                                         \
-        FatalErrorIn(typeName + "::create_" + #DATA + "()")                   \
-            << "In order to allocate the pointer for "                        \
-                << #DATA                                                      \
-                << " it is necessary to allocate the pointer for "            \
-                << #REQUIRE                                                   \
-                << ", first"                                                  \
-                << abort(FatalError);                                         \
-    }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -388,7 +383,7 @@ protected:
                 }
 
                 //- Initialize data
-                virtual void init() const = 0;
+                virtual void init(const word init) const = 0;
         };
 
     // Protected Data

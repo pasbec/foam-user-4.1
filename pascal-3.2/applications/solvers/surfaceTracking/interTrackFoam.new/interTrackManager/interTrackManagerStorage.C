@@ -34,8 +34,6 @@ namespace Foam
 
 void interTrackManager::storage::create_g(const word init) const
 {
-    solverManagerStorage_info(g);
-
     gPtr_.set
     (
         new uniformDimensionedVectorField
@@ -55,8 +53,6 @@ void interTrackManager::storage::create_g(const word init) const
 
 void interTrackManager::storage::create_p(const word init) const
 {
-    solverManagerStorage_info(p);
-
     pPtr_.set
     (
         new volScalarField
@@ -77,8 +73,6 @@ void interTrackManager::storage::create_p(const word init) const
 
 void interTrackManager::storage::create_U(const word init) const
 {
-    solverManagerStorage_info(U);
-
     UPtr_.set
     (
         new volVectorField
@@ -99,10 +93,6 @@ void interTrackManager::storage::create_U(const word init) const
 
 void interTrackManager::storage::create_phi(const word init) const
 {
-    solverManagerStorage_info(phi);
-
-    solverManagerStorage_assert(phi, U);
-
     phiPtr_.set
     (
         new surfaceScalarField
@@ -125,8 +115,6 @@ void interTrackManager::storage::create_phi(const word init) const
 
 void interTrackManager::storage::create_rho(const word init) const
 {
-    solverManagerStorage_info(rho);
-
     rhoPtr_.set
     (
         new volScalarField
@@ -148,8 +136,6 @@ void interTrackManager::storage::create_rho(const word init) const
 
 void interTrackManager::storage::create_mu(const word init) const
 {
-    solverManagerStorage_info(mu);
-
     muPtr_.set
     (
         new volScalarField
@@ -171,8 +157,6 @@ void interTrackManager::storage::create_mu(const word init) const
 
 void interTrackManager::storage::create_F(const word init) const
 {
-    solverManagerStorage_info(F);
-
     if (init == "default")
     {
         FPtr_.set
@@ -221,61 +205,54 @@ void interTrackManager::storage::create_F(const word init) const
 
 void interTrackManager::storage::create_fluidIndicator(const word init) const
 {
-    solverManagerStorage_info(fluidIndicator);
-
-    solverManagerStorage_assert(fluidIndicator, interface);
-
-    if(args().options().found("parallel"))
-    {
-        fluidIndicatorPtr_.set
+    fluidIndicatorPtr_.set
+    (
+        new volScalarField
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "fluidIndicator",
-                    this->time().timeName(),
-                    this->mesh(),
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                this->mesh()
-            )
-        );
-    }
-    else
-    {
-        fluidIndicatorPtr_.set
-        (
-            new volScalarField
-            (
-                IOobject
-                (
-                    "fluidIndicator",
-                    this->time().timeName(),
-                    this->mesh(),
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                interface().fluidIndicator()
-            )
-        );
-    }
+                "fluidIndicator",
+                this->time().timeName(),
+                this->mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            this->mesh()
+        )
+    );
+}
 
-    fluidIndicatorPtr_->correctBoundaryConditions();
-    fluidIndicatorPtr_->write();
+
+void interTrackManager::storage::create_transport(const word init) const
+{
+    transportPtr_.set
+    (
+        new twoPhaseMixture
+        (
+            U(),
+            phi(),
+            fluidIndicator().name()
+        )
+    );
+}
+
+
+void interTrackManager::storage::create_turbulence(const word init) const
+{
+    turbulencePtr_ =
+    (
+        incompressible::turbulenceModel::New
+        (
+            U(),
+            phi(),
+            transport()
+        )
+    );
 }
 
 
 void interTrackManager::storage::create_interface(const word init) const
 {
-    solverManagerStorage_info(interface);
-
-    solverManagerStorage_assert(interface, p);
-    solverManagerStorage_assert(interface, U);
-    solverManagerStorage_assert(interface, phi);
-    solverManagerStorage_assert(interface, rho);
-
     word interfacePrefix;
 
     if (!args().optionReadIfPresent("prefix", interfacePrefix))
@@ -295,8 +272,8 @@ void interTrackManager::storage::create_interface(const word init) const
             phi(),
             NULL,
             gPtr(),
-            NULL,
-            NULL,
+            transportPtr(),
+            turbulencePtr(),
             NULL,
             interfacePrefix
         )
@@ -306,7 +283,7 @@ void interTrackManager::storage::create_interface(const word init) const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void interTrackManager::storage::init() const
+void interTrackManager::storage::init(const word init) const
 {
     g();
     p();
@@ -316,37 +293,45 @@ void interTrackManager::storage::init() const
     mu();
     F("calculated");
 
-    // To create the interface we need rho first
-    interface();
-
-    // The fluid indicator may be created from interface
     fluidIndicator();
 
-    // The density rho is derived from the fluid indicator
-    // and the interface density values
-    {
-        rho() = fluidIndicator()
-           *(
-                interface().rhoFluidA()
-              - interface().rhoFluidB()
-            )
-          + interface().rhoFluidB();
+    transport();
 
+    turbulence();
+
+    // Init density from transport (viscosity) model
+    {
+        dimensionedScalar rho1
+        (
+            transport().nuModel1().viscosityProperties().lookup("rho")
+        );
+
+        dimensionedScalar rho2
+        (
+            transport().nuModel2().viscosityProperties().lookup("rho")
+        );
+
+        rho() = fluidIndicator()*(rho1 - rho2) + rho2;
         rho().correctBoundaryConditions();
     }
 
-    // The viscosity mu is derived from the fluid indicator
-    // and the interface viscosity values
+    // Init (dynamic) viscosity from transport (viscosity) model and density
     {
-        mu() = fluidIndicator()
-           *(
-                interface().muFluidA()
-              - interface().muFluidB()
-            )
-          + interface().muFluidB();
+        dimensionedScalar nu1
+        (
+            transport().nuModel1().viscosityProperties().lookup("nu")
+        );
 
+        dimensionedScalar nu2
+        (
+            transport().nuModel2().viscosityProperties().lookup("nu")
+        );
+
+        mu() = (fluidIndicator()*(nu1 -nu2) + nu2) * rho();
         mu().correctBoundaryConditions();
     }
+
+    interface();
 }
 
 

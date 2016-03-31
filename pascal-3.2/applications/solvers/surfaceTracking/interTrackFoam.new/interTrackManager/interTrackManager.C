@@ -154,7 +154,8 @@ interTrackManager::interTrackManager
     controlPtr_(NULL),
     storagePtr_(NULL)
 {
-// TODO FIXME: Why do I need this???
+// TODO FIXME: Why do I need this???#
+// Should go to data()
     storagePtr_ = new storage(*this);
 }
 

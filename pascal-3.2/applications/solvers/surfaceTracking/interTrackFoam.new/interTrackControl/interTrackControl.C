@@ -33,18 +33,6 @@ defineTypeNameAndDebug(Foam::interTrackControl, 0);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::interTrackControl::read()
-{
-    solutionControl::read(false);
-
-    // Read solution controls
-    const dictionary& pimpleDict = dict();
-    nCorrPIMPLE_ = pimpleDict.lookupOrDefault<label>("nOuterCorrectors", 1);
-    nCorrPISO_ = pimpleDict.lookupOrDefault<label>("nCorrectors", 1);
-    turbOnFinalIterOnly_ =
-        pimpleDict.lookupOrDefault<Switch>("turbOnFinalIterOnly", true);
-}
-
 
 bool Foam::interTrackControl::criteriaSatisfied()
 {
@@ -68,8 +56,20 @@ bool Foam::interTrackControl::criteriaSatisfied()
         if (fieldI != -1)
         {
             const List<dictionary> sp(iter().stream());
-//             const scalar residual =
-//                 readScalar(sp.last().lookup("initialResidual"));
+
+            // use either stored residual or read from dict
+            scalar residual = GREAT;
+            if (residualStorage_[fieldI].stored)
+            {
+                residual = residualStorage_[fieldI].residual;
+
+                residualStorage_[fieldI].stored = false;
+            }
+            else
+            {
+                residual = readScalar(sp.last().lookup("initialResidual"));
+            }
+
 
             checked = true;
 
@@ -79,28 +79,7 @@ bool Foam::interTrackControl::criteriaSatisfied()
                     readScalar(sp.first().lookup("initialResidual"));
             }
 
-// TODO TEST: Find better way?
-            // no further checks till third iteration
-            if (corr_ < 3)
-            {
-                achieved = false;
-                continue;
-            }
-
-            label lastResI = sp.size()-1;
-            if (variableName == "p")
-            {
-                lastResI = max(0,(sp.size()-1) - nCorrPISO_*nNonOrthCorr_);
-            }
-            else
-            {
-                lastResI = max(0,(sp.size()-1) - (nCorrPISO_-1));
-            }
-            const scalar residual =
-                readScalar(sp[lastResI].lookup("initialResidual"));
-//
             const bool absCheck = residual < residualControl_[fieldI].absTol;
-
             bool relCheck = false;
 
             scalar relative = 0.0;
@@ -141,42 +120,14 @@ bool Foam::interTrackControl::criteriaSatisfied()
 
 Foam::interTrackControl::interTrackControl(fvMesh& mesh, const word& dictName)
 :
-    solutionControl(mesh, dictName),
-    nCorrPIMPLE_(0),
-    nCorrPISO_(0),
-    corrPISO_(0),
-    turbOnFinalIterOnly_(true),
-    converged_(false)
+    pimpleControl(mesh, dictName),
+    residualStorage_(residualControl_.size())
 {
-    read();
-
-    if (nCorrPIMPLE_ > 1)
+    // init residual storage
+    forAll(residualStorage_, fieldI)
     {
-        Info<< nl;
-        if (residualControl_.empty())
-        {
-            Info<< algorithmName_ << ": no residual control data found. "
-                << "Calculations will employ " << nCorrPIMPLE_
-                << " corrector loops" << nl << endl;
-        }
-        else
-        {
-            Info<< algorithmName_ << ": max iterations = " << nCorrPIMPLE_
-                << endl;
-            forAll(residualControl_, i)
-            {
-                Info<< "    field " << residualControl_[i].name << token::TAB
-                    << ": relTol " << residualControl_[i].relTol
-                    << ", tolerance " << residualControl_[i].absTol
-                    << nl;
-            }
-            Info<< endl;
-        }
-    }
-    else
-    {
-        Info<< nl << algorithmName_ << ": Operating solver in PISO mode" << nl
-            << endl;
+        residualStorage_[fieldI].stored = false;
+        residualStorage_[fieldI].residual = GREAT;
     }
 }
 
@@ -189,69 +140,89 @@ Foam::interTrackControl::~interTrackControl()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::interTrackControl::loop()
+void Foam::interTrackControl::storeResiduals(const word& name)
 {
-    read();
-
-    corr_++;
-
-    if (debug)
+    const dictionary& solverDict = mesh_.solverPerformanceDict();
+    forAllConstIter(dictionary, solverDict, iter)
     {
-        Info<< algorithmName_ << " loop: corr = " << corr_ << endl;
-    }
+        const word& variableName = iter().keyword();
 
-    if (corr_ == nCorrPIMPLE_ + 1)
-    {
-        if ((!residualControl_.empty()) && (nCorrPIMPLE_ != 1))
+        // find field name
+        if (variableName == name)
         {
-            Info<< algorithmName_ << ": not converged within "
-                << nCorrPIMPLE_ << " iterations" << endl;
-        }
+            const label fieldI = applyToField(variableName);
+            if (fieldI != -1)
+            {
+                const List<dictionary> sp(iter().stream());
 
-        corr_ = 0;
-        mesh_.data::remove("finalIteration");
-        return false;
-    }
+                // store current residual
+                residualStorage_[fieldI].residual =
+                    readScalar(sp.last().lookup("initialResidual"));
 
-    bool completed = false;
-    if (converged_ || criteriaSatisfied())
-    {
-        if (converged_)
-        {
-            Info<< algorithmName_ << ": converged in " << corr_ - 1
-                << " iterations" << endl;
+                // indicate that the residual has been stored
+                residualStorage_[fieldI].stored = true;
 
-            mesh_.data::remove("finalIteration");
-            corr_ = 0;
-            converged_ = false;
+                if (debug)
+                {
+                    Info<< algorithmName_ << " loop:" << endl;
 
-            completed = true;
-        }
-        else
-        {
-            Info<< algorithmName_ << ": iteration " << corr_ << endl;
-            storePrevIterFields();
+                    Info<< "    " << variableName
+                        << " PIMPLE iter " << corr_
+                        << ": storing res = "
+                        << residualStorage_[fieldI].residual
+                        << endl;
+                }
+            }
 
-            mesh_.data::add("finalIteration", true);
-            converged_ = true;
+            break;
         }
     }
-    else
+}
+
+
+void Foam::interTrackControl::skipZeroNonOrtho(const word& name)
+{
+    // skip if this is the final non-orthogonal iteration
+    if (!finalNonOrthogonalIter())
     {
-        if (finalIter())
+        int nIter = -1;
+
+        const dictionary& solverDict = mesh_.solverPerformanceDict();
+        forAllConstIter(dictionary, solverDict, iter)
         {
-            mesh_.data::add("finalIteration", true);
+            const word& variableName = iter().keyword();
+
+            // find field name
+            if (variableName == name)
+            {
+                const label fieldI = applyToField(variableName);
+                if (fieldI != -1)
+                {
+                    const List<dictionary> sp(iter().stream());
+
+                    nIter = readInt(sp.last().lookup("nIterations"));
+                }
+
+                break;
+            }
         }
 
-        if (corr_ <= nCorrPIMPLE_)
+        if (nIter == 0)
         {
-            Info<< algorithmName_ << ": iteration " << corr_ << endl;
-            storePrevIterFields();
-            completed = false;
+            if (debug)
+            {
+                Info<< "    " << name
+                    << " PIMPLE iter " << corr_
+                    << ": nIter = "
+                    << nIter
+                    << ", skipping further non-orthogonal correctors"
+                    << endl;
+            }
+
+            // stop non-orthognal correction after next (final) iteration
+            corrNonOrtho_ = nNonOrthCorr_;
         }
     }
-
-    return !completed;
 }
 
 

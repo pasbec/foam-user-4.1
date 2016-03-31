@@ -1,7 +1,12 @@
     {
-        volScalarField rUA = 1.0/UEqn.A();
+        volScalarField rUA = 1.0/UEqn().A();
 
-        U = rUA*UEqn.H();
+        U = rUA*UEqn().H();
+
+        if (control.nCorrPISO() == 1)
+        {
+            UEqn.clear();
+        }
 
         phi = (fvc::interpolate(U) & mesh.Sf());
 
@@ -21,7 +26,8 @@
                 fvm::laplacian(rUA, p) == fvc::div(phi)
             );
 
-#           include "setReference.H"
+// TODO: Two fluids
+// #           include "setReference.H"
 //             pEqn.setReference(pRefCell, pRefValue);
 
             pEqn.solve
@@ -36,6 +42,18 @@
             {
                 phi -= pEqn.flux();
             }
+
+            // Manually store residuls after first
+            // non-orthogonal iteration
+            if (control.firstInnerIter())
+            {
+                control.storeResiduals(p.name());
+            }
+
+            // Stop non-orthogonal correction after the next (final)
+            // iteration, if the last number of solution iterations
+            // was "0" for the named field
+            control.skipZeroNonOrtho(p.name());
         }
 
         p.relax();

@@ -25,18 +25,14 @@ Class
     Foam::interTrackControl
 
 Description
-    PIMPLE control class to supply convergence information/checks for
-    the PIMPLE loop.
-
-    May also be used to for PISO-based algorithms as PISO controls are a
-    sub-set of PIMPLE controls.
+    Specialization of the pimpleControl class for interTrackFoam.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef interTrackControl_H
 #define interTrackControl_H
 
-#include "solutionControl.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,8 +45,19 @@ namespace Foam
 
 class interTrackControl
 :
-    public solutionControl
+    public pimpleControl
 {
+public:
+
+    struct residualStorage
+    {
+        bool stored;
+        scalar residual;
+    };
+
+
+private:
+
     // Private member functions
 
         //- Disallow default bitwise copy construct
@@ -64,28 +71,10 @@ protected:
 
     // Protected data
 
-        // Solution controls
-
-            //- Maximum number of PIMPLE correctors
-            label nCorrPIMPLE_;
-
-            //- Maximum number of PISO correctors
-            label nCorrPISO_;
-
-            //- Current PISO corrector
-            label corrPISO_;
-
-            //- Flag to indicate whether to only solve turbulence on final iter
-            bool turbOnFinalIterOnly_;
-
-            //- Converged flag
-            bool converged_;
-
+        //- List of stored residuals per field
+        List<residualStorage> residualStorage_;
 
     // Protected Member Functions
-
-        //- Read controls from fvSolution dictionary
-        virtual void read();
 
         //- Return true if all convergence checks are satisfied
         virtual bool criteriaSatisfied();
@@ -109,40 +98,20 @@ public:
 
     // Member Functions
 
-        // Access
-
-            //- Maximum number of PIMPLE correctors
-            inline label nCorrPIMPLE() const;
-
-            //- Maximum number of PISO correctors
-            inline label nCorrPISO() const;
-
-            //- Current PISO corrector index
-            inline label corrPISO() const;
-
-
         // Solution control
 
-            //- PIMPLE loop
-            virtual bool loop();
-
-            //- Pressure corrector loop
-            inline bool correct();
-
-            //- Helper function to identify when to store the intial residuals
-            inline bool storeInitialResiduals() const;
-
-            //- Helper function to identify first PIMPLE (outer) iteration
-            inline bool firstIter() const;
-
-            //- Helper function to identify final PIMPLE (outer) iteration
-            inline bool finalIter() const;
-
             //- Helper function to identify final inner iteration
-            inline bool finalInnerIter() const;
+            inline bool firstInnerIter() const;
 
-            //- Helper function to identify whether to solve for turbulence
-            inline bool turbCorr() const;
+        // Evolution
+
+            //- Manually store current residuals for the named field
+            void storeResiduals(const word& name);
+
+            // Stop non-orthogonal correction after the next (final)
+            // iteration, if the last number of solution iterations
+            // was "0" for the named field
+            void skipZeroNonOrtho(const word& name);
 };
 
 

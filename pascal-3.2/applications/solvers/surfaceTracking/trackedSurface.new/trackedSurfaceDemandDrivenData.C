@@ -834,7 +834,9 @@ void trackedSurface::makeSurfactant() const
     surfactantPtr_ = new surfactantProperties(surfactProp);
 }
 
-
+// TODO: How to deal with the problem, that we need the fluidindicator
+//       to get to the interface:
+//       fluidIndicator -> transportModel -> turbulenceModel -> interface
 void trackedSurface::makeFluidIndicator()
 {
     if (debug)

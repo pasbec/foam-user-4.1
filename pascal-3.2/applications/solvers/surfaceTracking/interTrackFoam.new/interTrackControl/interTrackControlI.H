@@ -25,77 +25,11 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::interTrackControl::nCorrPIMPLE() const
-{
-    return nCorrPIMPLE_;
-}
-
-
-inline Foam::label Foam::interTrackControl::nCorrPISO() const
-{
-    return nCorrPISO_;
-}
-
-
-inline Foam::label Foam::interTrackControl::corrPISO() const
-{
-    return corrPISO_;
-}
-
-
-inline bool Foam::interTrackControl::correct()
-{
-    corrPISO_++;
-
-    if (debug)
-    {
-        Info<< algorithmName_ << " correct: corrPISO = " << corrPISO_ << endl;
-    }
-
-    if (corrPISO_ <= nCorrPISO_)
-    {
-        return true;
-    }
-    else
-    {
-        corrPISO_ = 0;
-        return false;
-    }
-}
-
-
-inline bool Foam::interTrackControl::storeInitialResiduals() const
-{
-    // Start from second PIMPLE iteration
-    return (corr_ == 2) && (corrPISO_ == 0) && (corrNonOrtho_ == 0);
-}
-
-
-inline bool Foam::interTrackControl::firstIter() const
-{
-    return corr_ == 1;
-}
-
-
-inline bool Foam::interTrackControl::finalIter() const
-{
-    return converged_ || (corr_ == nCorrPIMPLE_);
-}
-
-
-inline bool Foam::interTrackControl::finalInnerIter() const
+inline bool Foam::interTrackControl::firstInnerIter() const
 {
     return
-       finalIter()
-    && corrPISO_ == nCorrPISO_
-    && corrNonOrtho_ == nNonOrthCorr_ + 1;
+       corrPISO_ == 1
+    && corrNonOrtho_ == 1;
 }
-
-
-inline bool Foam::interTrackControl::turbCorr() const
-{
-    return !turbOnFinalIterOnly_ || finalIter();
-}
-
 
 // ************************************************************************* //

@@ -28,9 +28,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "dynamicFvMesh.H"
-#include "trackedSurface.H"
 #include "interTrackManager.H"
 
 #ifndef namespaceFoam
@@ -65,13 +62,16 @@ int main(int argc, char *argv[])
     volScalarField& rho = data.rho();
     volScalarField& mu = data.mu();
     volVectorField& F = data.F();
-    trackedSurface& interface = data.interface();
     volScalarField& fluidIndicator = data.fluidIndicator();
+    twoPhaseMixture& transport = data.transport();
+    incompressible::turbulenceModel& turbulence = data.turbulence();
+    trackedSurface& interface = data.interface();
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // TODO: Two fluids
-#   include "setRefCell.H"
+// #   include "setRefCell.H"
 
 #   include "initContinuityErrs.H"
 
@@ -105,11 +105,12 @@ int main(int argc, char *argv[])
 
             if (control.turbCorr())
             {
-// TODO: Turbulence
+                transport.correct();
+                turbulence.correct();
             }
 
 // TODO: Move to manager function called something like
-//       pimpleSurfaceStatistics
+//       loopSurfaceStatistics
 #           include "freeSurfaceContinuityErrs.H"
         }
 
