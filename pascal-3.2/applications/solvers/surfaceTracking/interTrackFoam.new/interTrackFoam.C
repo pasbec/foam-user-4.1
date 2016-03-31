@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
             // Update interface bc
             interface.updateBoundaryConditions();
 
-            // Make the fluxes relative
+            // Make the fluxes relative to the mesh motion
             fvc::makeRelative(phi,U);
 
 #           include "interTrackUEqn.H"
@@ -99,15 +99,27 @@ int main(int argc, char *argv[])
             while (control.correct())
             {
 #               include "interTrackpEqn.H"
+
+                // Make the fluxes relative to the mesh motion
+                fvc::makeRelative(phi, U);
             }
 
+            // Make the fluxes absolute
+            fvc::makeAbsolute(phi, U);
+
             interface.correctPoints();
+
+            // Make the fluxes relative to the mesh motion
+            fvc::makeRelative(phi, U);
 
             if (control.turbCorr())
             {
                 transport.correct();
                 turbulence.correct();
             }
+
+            // Make the fluxes absolute
+            fvc::makeAbsolute(phi, U);
 
 // TODO: Move to manager function called something like
 //       loopSurfaceStatistics
