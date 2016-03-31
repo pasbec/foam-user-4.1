@@ -62,7 +62,6 @@ bool Foam::interTrackControl::criteriaSatisfied()
             if (residualStorage_[fieldI].stored)
             {
                 residual = residualStorage_[fieldI].residual;
-
                 residualStorage_[fieldI].stored = false;
             }
             else

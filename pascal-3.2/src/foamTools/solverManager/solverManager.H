@@ -35,6 +35,7 @@ SourceFiles
 #ifndef solverManager_H
 #define solverManager_H
 
+#include "autoPtr.H"
 #include "argList.H"
 #include "foamTime.H"
 #include "dictionary.H"
@@ -230,9 +231,7 @@ protected:
                     const MESH& mesh
                 )
                 :
-                args_(args),
-                time_(time),
-                mesh_(mesh)
+                    args_(args), time_(time), mesh_(mesh)
                 {};
 
             // Destructor
@@ -241,75 +240,56 @@ protected:
 
             // Member Functions
 
-                //- Reference to args
-                const argList& args()
-                {
-                    return args_;
-                };
-
-                //- Reference to time
-                const Time& time()
-                {
-                    return time_;
-                };
-
-                //- Return reference to mesh
-                const MESH& mesh() const
-                {
-                    return mesh_;
-                }
-
                 //- Info about starting time loop
-                void newLine() const
+                inline void newLine() const
                 {
                     Info << nl;
                 }
 
                 //- Info about starting time loop
-                void startTimeLoop() const
+                inline void startTimeLoop() const
                 {
                     Info << "Starting time loop"
                         << endl;
                 }
 
                 //- Info about current time step
-                void timeStep() const
+                inline void timeStep() const
                 {
                     Info << "Time step = "
-                        << mesh().time().timeIndex()
+                        << time_.timeIndex()
                         << endl;
                 };
 
                 //- Print current time step width
-                void timeDeltaT() const
+                inline void timeDeltaT() const
                 {
                     Info << "deltaT = "
-                        <<  mesh().time().deltaT().value()
+                        <<  time_.deltaT().value()
                         << endl;
                 };
 
                 //- Print current time
-                void timeIs() const
+                inline void timeIs() const
                 {
                     Info << "Time = "
-                        << mesh().time().value()
+                        << time_.value()
                         << endl;
                 };
 
                 //- Print execution time
-                void executionTime() const
+                inline void executionTime() const
                 {
                     Info << "ExecutionTime = "
-                        << scalar(mesh().time().elapsedCpuTime()) << " s"
+                        << scalar(time_.elapsedCpuTime()) << " s"
                         << endl;
                 };
 
                 //- Print end statement
-                void end() const
+                inline void end() const
                 {
                     Info << "End" << nl << endl;
                 };
-
         };
 
         //- Storage
@@ -352,10 +332,8 @@ protected:
                     const word& name
                 )
                 :
-                args_(args),
-                time_(time),
-                mesh_(mesh),
-                typeName(name)
+                    args_(args), time_(time), mesh_(mesh),
+                    typeName(name)
                 {};
 
             // Destructor
@@ -365,19 +343,19 @@ protected:
             // Member Functions
 
                 //- Reference to args
-                const argList& args() const
+                inline const argList& args() const
                 {
                     return args_;
                 };
 
                 //- Reference to time
-                Time& time() const
+                inline Time& time() const
                 {
                     return time_;
                 };
 
                 //- Return reference to mesh
-                MESH& mesh() const
+                inline MESH& mesh() const
                 {
                     return mesh_;
                 }
@@ -443,10 +421,10 @@ private:
     // Private Data
 
         //- Time parameters
-        mutable parameters* paramPtr_;
+        mutable autoPtr<parameters> paramPtr_;
 
         //- Messages
-        mutable messages* msgPtr_;
+        mutable autoPtr<messages> msgPtr_;
 
         // Basic
 
@@ -459,7 +437,7 @@ private:
             //- Reference to mesh
             MESH& mesh_;
 
-            //- Master manager
+            //- Master manager?
             const bool master_;
 
             //- Properties dictionary
@@ -491,25 +469,18 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const solverManager&);
 
-        //- Pre runTime phase
-        bool& prePhase() const
-        {
-            return prePhase_;
-        };
+        // Basic
 
-        //- Error if not master manager
-        void errorIfNotMaster() const
-        {
-            if (!master_)
-            {
-                FatalErrorIn("solverManager::msg()")
-                    << "This solverManager instantiation is NOT"
-                    << " the master manager."
-                    << abort(FatalError);
-            }
-        };
+            //- Error if not master manager
+            void errorIfNotMaster() const;
 
         // Evolution
+
+            //- Pre runTime phase?
+            inline bool& prePhase() const
+            {
+                return prePhase_;
+            };
 
             //- Read time parameters
             void readParameters(parameters& tc) const;
@@ -537,32 +508,15 @@ public:
 
     // Destructor
 
-        virtual ~solverManager()
-        {
-            if (master_)
-            {
-                delete paramPtr_;
-                delete msgPtr_;
-            }
-        };
+        virtual ~solverManager() {};
 
     // Member Functions
 
         //- Time parameters
-        const parameters& param() const
-        {
-            errorIfNotMaster();
-
-            return *paramPtr_;
-        }
+        const parameters& param() const;
 
         //- Messages
-        const messages& msg() const
-        {
-            errorIfNotMaster();
-
-            return *msgPtr_;
-        };
+        const messages& msg() const;
 
         //- Control
         virtual solutionControl& control() const = 0;
@@ -573,37 +527,37 @@ public:
         // Basic
 
             //- Reference to args
-            const argList& args() const
+            inline const argList& args() const
             {
                 return args_;
             };
 
             //- Reference to time
-            Time& time() const
+            inline Time& time() const
             {
                 return time_;
             };
 
             //- Refrence to controlDict
-            const dictionary& controlDict() const
+            inline const dictionary& controlDict() const
             {
                 return time_.controlDict();
             }
 
             //- Reference to mesh
-            MESH& mesh() const
+            inline MESH& mesh() const
             {
                 return mesh_;
             };
 
             //- Is this the master manager?
-            const bool& master() const
+            inline const bool& master() const
             {
                 return master_;
             };
 
             //- Reference properties dictionary
-            const IOdictionary& properties() const
+            inline const IOdictionary& properties() const
             {
                 return properties_;
             };
@@ -613,19 +567,19 @@ public:
             // Default region
 
                 //- Reference to base region ID
-                const label& base() const
+                inline const label& base() const
                 {
                     return baseRegion_;
                 };
 
                 //- Reference to base region name
-                const word& baseName() const
+                inline const word& baseName() const
                 {
                     return baseRegionName_;
                 };
 
                 //- Reference to solution dictionary of base region
-                const solution& baseSolutionDict() const
+                inline const solution& baseSolutionDict() const
                 {
                     return baseSolutionDict_;
                 };

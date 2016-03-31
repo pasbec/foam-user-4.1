@@ -35,6 +35,19 @@ namespace Foam
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template <class MESH>
+void solverManager<MESH>::errorIfNotMaster() const
+{
+    if (!master())
+    {
+        FatalErrorIn("solverManager::msg()")
+            << "This solverManager instantiation is NOT"
+            << " the master manager."
+            << abort(FatalError);
+    }
+}
+
+
+template <class MESH>
 void solverManager<MESH>::readParameters
 (
     parameters& tp
@@ -171,39 +184,50 @@ solverManager<MESH>::solverManager
         )
     ),
     prePhase_(true)
-{
-    if (master_)
-    {
-        paramPtr_ = new parameters();
-        {
-            readParameters(*paramPtr_);
-            paramPtr_->CoNum = 0.0;
-        }
-
-        msgPtr_ = new messages(args_, time_, mesh_);
-    }
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template <class MESH>
-void solverManager<MESH>::init() const
+const typename solverManager<MESH>::parameters& solverManager<MESH>::param() const
 {
     errorIfNotMaster();
 
-//     if (master_)
-//     {
-//         paramPtr_ = new parameters();
-//         {
-//             readParameters(*paramPtr_);
-//             paramPtr_->CoNum = 0.0;
-//         }
-//
-//         msgPtr_ = new messages(args_, time_, mesh_);
-//     }
-//
-//     data().init();
+    if (paramPtr_.empty())
+    {
+        paramPtr_.set(new parameters());
+        {
+            readParameters(paramPtr_());
+            paramPtr_->CoNum = 0.0;
+        }
+    }
+
+    return paramPtr_();
+}
+
+
+template <class MESH>
+const typename solverManager<MESH>::messages& solverManager<MESH>::msg() const
+{
+    errorIfNotMaster();
+
+    if (msgPtr_.empty())
+    {
+        msgPtr_.set
+        (
+            new messages(args(), time(), mesh())
+        );
+    }
+
+    return msgPtr_();
+}
+
+
+template <class MESH>
+void solverManager<MESH>::init() const
+{
+    errorIfNotMaster();
 }
 
 

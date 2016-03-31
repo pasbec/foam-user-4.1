@@ -112,10 +112,10 @@ private:
     // Private Data
 
         //- Control
-        mutable interTrackControl* controlPtr_;
+        mutable autoPtr<interTrackControl> controlPtr_;
 
         //- Storage
-        mutable storage* storagePtr_;
+        mutable autoPtr<storage> storagePtr_;
 
     // Private Member Functions
 
@@ -154,36 +154,15 @@ public:
 
     // Destructor
 
-        virtual ~interTrackManager()
-        {
-            delete controlPtr_;
-            delete storagePtr_;
-        };
+        virtual ~interTrackManager() {};
 
     // Member Functions
 
         //- Control
-        virtual interTrackControl& control() const
-        {
-            if (!controlPtr_)
-            {
-                controlPtr_ = new interTrackControl(this->mesh());
-            }
-
-            return *controlPtr_;
-        };
+        virtual interTrackControl& control() const;
 
         //- Storage
-        virtual storage& data() const
-        {
-// // TODO FIXME: Why is this not working?
-//             if (!storagePtr_)
-//             {
-//                 storagePtr_ = new storage(*this);
-//             }
-
-            return *storagePtr_;
-        };
+        virtual storage& data() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

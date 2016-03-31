@@ -1,15 +1,18 @@
 
+    tmp<volScalarField> muEff = rho * turbulence.nuEff();
+    muEff().rename("muEff");
+
     tmp<fvVectorMatrix> UEqn
     (
         fvm::ddt(rho, U)
       + fvm::div(fvc::interpolate(rho)*phi, U, "div(phi,U)")
-//       - fvm::laplacian(mu, U)
-// TODO: Turbulence
-      + rho*turbulence.divDevReff(U)
-// TODO: Check the way turbulence is introduced in the U-equation
-//       - fvm::laplacian(nuEff(), U)
-//       - fvc::div(nuEff()*dev(T(fvc::grad(U))))
+      - fvm::laplacian(muEff(), U)
+      - fvc::div(muEff()*dev(fvc::grad(U)().T()))
+//       - (fvc::grad(U) & fvc::grad(muEff()))
+      - F
     );
+
+    muEff.clear();
 
     UEqn().relax();
 

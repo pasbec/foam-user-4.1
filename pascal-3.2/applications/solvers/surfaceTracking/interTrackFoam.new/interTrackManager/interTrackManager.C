@@ -150,17 +150,36 @@ interTrackManager::interTrackManager
     solverManager<dynamicFvMesh>
     (
         args, time, mesh, name, master
-    ),
-    controlPtr_(NULL),
-    storagePtr_(NULL)
+    )
 {
-// TODO FIXME: Why do I need this???#
+// TODO FIXME: Why do I need this???
 // Should go to data()
-    storagePtr_ = new storage(*this);
+    storagePtr_.set(new storage(*this));
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+interTrackControl& interTrackManager::control() const
+{
+    if (controlPtr_.empty())
+    {
+        controlPtr_.set(new interTrackControl(this->mesh()));
+    }
+
+    return controlPtr_();
+}
+
+interTrackManager::storage& interTrackManager::data() const
+{
+// // TODO FIXME: Why is this not working?
+//     if (storagePtr_.empty())
+//     {
+//         storagePtr_.set(new storage(*this));
+//     }
+
+    return storagePtr_();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

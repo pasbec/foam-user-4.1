@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "interTrackManager.H"
+#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -128,7 +129,8 @@ void interTrackManager::storage::create_rho(const word init) const
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar(word(), dimDensity, 0)
+            dimensionedScalar(word(), dimDensity, 0),
+            zeroGradientFvPatchScalarField::typeName
         )
     );
 }
@@ -149,7 +151,8 @@ void interTrackManager::storage::create_mu(const word init) const
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar(word(), dimMass/dimLength/dimTime, 0)
+            dimensionedScalar(word(), dimMass/dimLength/dimTime, 0),
+            zeroGradientFvPatchScalarField::typeName
         )
     );
 }
@@ -297,32 +300,23 @@ void interTrackManager::storage::init(const word init) const
 
     transport();
 
-    turbulence();
-
     // Init density from transport (viscosity) model
     {
-        dimensionedScalar rho1
-        (
-            transport().nuModel1().viscosityProperties().lookup("rho")
-        );
-
-        dimensionedScalar rho2
-        (
-            transport().nuModel2().viscosityProperties().lookup("rho")
-        );
+        dimensionedScalar rho1 = transport().rho1();
+        dimensionedScalar rho2 = transport().rho2();
 
         rho() = fluidIndicator()*(rho1 - rho2) + rho2;
         rho().correctBoundaryConditions();
     }
 
+// TODO: Is this really necessary?
     // Init (dynamic) viscosity from transport (viscosity) model and density
     {
-        dimensionedScalar nu1
+        dimensionedScalar nu1 = dimensionedScalar
         (
             transport().nuModel1().viscosityProperties().lookup("nu")
         );
-
-        dimensionedScalar nu2
+        dimensionedScalar nu2 = dimensionedScalar
         (
             transport().nuModel2().viscosityProperties().lookup("nu")
         );
@@ -330,6 +324,8 @@ void interTrackManager::storage::init(const word init) const
         mu() = (fluidIndicator()*(nu1 -nu2) + nu2) * rho();
         mu().correctBoundaryConditions();
     }
+
+    turbulence();
 
     interface();
 }

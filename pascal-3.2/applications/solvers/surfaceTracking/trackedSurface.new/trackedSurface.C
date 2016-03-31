@@ -1088,19 +1088,14 @@ void trackedSurface::updateProperties()
 {
     if (transportPtr_)
     {
-        rhoFluidA_ = dimensionedScalar
-        (
-            transport().nuModel1().viscosityProperties().lookup("rho")
-        );
+
+        rhoFluidA_ = transport().rho1();
         muFluidA_ = rhoFluidA_ * dimensionedScalar
         (
             transport().nuModel1().viscosityProperties().lookup("nu")
         );
 
-        rhoFluidB_ = dimensionedScalar
-        (
-            transport().nuModel2().viscosityProperties().lookup("rho")
-        );
+        rhoFluidB_ = transport().rho2();
         muFluidB_ = rhoFluidB_ * dimensionedScalar
         (
             transport().nuModel2().viscosityProperties().lookup("nu")
