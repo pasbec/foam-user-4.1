@@ -60,10 +60,19 @@ class interTrackManager
 {
 public:
 
+//     // Public Data Types
+//
+//         enum forceStates
+//         {
+//             DISABLE,
+//             READ,
+//             CALCULATE
+//         };
+
     // Public Nested Classes
 
         //- Storage
-        struct storage
+        class storage
         :
             public solverManager<dynamicFvMesh>::storage
         {
@@ -106,6 +115,10 @@ public:
                 //- Tracked surface
                 solverManagerStorage_add(trackedSurface, interface);
         };
+
+//     // Static Data
+//
+//         static Switch force;
 
 private:
 

@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 
     interTrackManager manager(args, runTime, mesh);
 
+// TODO: Use this?
     manager.init();
 
     interTrackControl& control = manager.control();
@@ -79,16 +80,15 @@ int main(int argc, char *argv[])
 
     while (manager.run())
     {
-        interface.updateMesh();
+        interface.updateMesh(); // abs phi
         interface.updateDisplacementDirections();
 
-        interface.predictPoints();
+        interface.predictPoints(); // abs phi
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (control.loop())
         {
-            // Update interface bc
-            interface.updateBoundaryConditions();
+            interface.updateBoundaryConditions(); // rel phi
 
             // Make the fluxes relative to the mesh motion
             fvc::makeRelative(phi,U);
@@ -104,14 +104,6 @@ int main(int argc, char *argv[])
                 fvc::makeRelative(phi, U);
             }
 
-            // Make the fluxes absolute
-            fvc::makeAbsolute(phi, U);
-
-            interface.correctPoints();
-
-            // Make the fluxes relative to the mesh motion
-            fvc::makeRelative(phi, U);
-
             if (control.turbCorr())
             {
                 transport.correct();
@@ -120,6 +112,8 @@ int main(int argc, char *argv[])
 
             // Make the fluxes absolute
             fvc::makeAbsolute(phi, U);
+
+            interface.correctPoints(); // abs phi
 
 // TODO: Move to manager function called something like
 //       loopSurfaceStatistics

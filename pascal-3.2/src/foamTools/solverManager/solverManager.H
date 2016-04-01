@@ -498,7 +498,7 @@ public:
 
         solverManager
         (
-            const argList args,
+            const argList& args,
             Time& time,
             MESH& mesh,
             const word& name = "solver",

@@ -151,11 +151,7 @@ interTrackManager::interTrackManager
     (
         args, time, mesh, name, master
     )
-{
-// TODO FIXME: Why do I need this???
-// Should go to data()
-    storagePtr_.set(new storage(*this));
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -172,11 +168,10 @@ interTrackControl& interTrackManager::control() const
 
 interTrackManager::storage& interTrackManager::data() const
 {
-// // TODO FIXME: Why is this not working?
-//     if (storagePtr_.empty())
-//     {
-//         storagePtr_.set(new storage(*this));
-//     }
+    if (storagePtr_.empty())
+    {
+        storagePtr_.set(new interTrackManager::storage(*this));
+    }
 
     return storagePtr_();
 }

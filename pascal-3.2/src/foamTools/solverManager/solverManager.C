@@ -146,7 +146,7 @@ void solverManager<MESH>::applyDeltaT() const
 template <class MESH>
 solverManager<MESH>::solverManager
 (
-    const argList args,
+    const argList& args,
     Time& time,
     MESH& mesh,
     const word& name,
