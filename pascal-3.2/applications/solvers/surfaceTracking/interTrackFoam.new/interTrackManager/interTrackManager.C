@@ -44,14 +44,14 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
     const Time& runTime = this->time();
     const fvMesh& mesh = this->mesh();
 
-    tmp<surfaceScalarField> tphi(data().phi());
+    tmp<surfaceScalarField> tphi(defaultRegion().storage().phi());
     surfaceScalarField& phi = tphi();
 
     // Convective Courant Number
     {
         if (mesh.moving())
         {
-            const volVectorField& U = data().U();
+            const volVectorField& U = defaultRegion().storage().U();
 
             // Make fluxes relative
             phi -= fvc::meshPhi(U);
@@ -72,7 +72,7 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
     // Interface Courant Number
     {
 // TODO: Use const
-        trackedSurface& interface = data().interface();
+        trackedSurface& interface = defaultRegion().storage().interface();
 
         scalar interfaceCoNum = interface.maxCourantNumber();
 
@@ -91,7 +91,7 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
 void interTrackManager::writePre() const
 {
 // TODO: Use const
-    trackedSurface& interface = data().interface();
+    trackedSurface& interface = defaultRegion().storage().interface();
 
         vector totalSurfaceTensionForce =
              interface.totalSurfaceTensionForce();
@@ -121,7 +121,7 @@ void interTrackManager::writePost() const
     const Time& runTime = this->time();
 
 // TODO: Use const
-    trackedSurface& interface = data().interface();
+    trackedSurface& interface = defaultRegion().storage().interface();
 
     if
     (
@@ -156,24 +156,14 @@ interTrackManager::interTrackManager
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-interTrackControl& interTrackManager::control() const
+interTrackManager::Control& interTrackManager::control() const
 {
     if (controlPtr_.empty())
     {
-        controlPtr_.set(new interTrackControl(this->mesh()));
+        controlPtr_.set(new interTrackManager::Control(this->mesh()));
     }
 
     return controlPtr_();
-}
-
-interTrackManager::storage& interTrackManager::data() const
-{
-    if (storagePtr_.empty())
-    {
-        storagePtr_.set(new interTrackManager::storage(*this));
-    }
-
-    return storagePtr_();
 }
 
 

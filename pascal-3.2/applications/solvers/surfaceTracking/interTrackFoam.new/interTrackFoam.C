@@ -54,19 +54,20 @@ int main(int argc, char *argv[])
 
     interTrackControl& control = manager.control();
 
-    interTrackManager::storage& data = manager.data();
+    interTrackManager::DefaultRegion::Storage& storage =
+        manager.defaultRegion().storage();
 
-    uniformDimensionedVectorField& g = data.g();
-    volScalarField& p = data.p();
-    volVectorField& U = data.U();
-    surfaceScalarField& phi = data.phi();
-    volScalarField& rho = data.rho();
-    volScalarField& mu = data.mu();
-    volVectorField& F = data.F();
-    volScalarField& fluidIndicator = data.fluidIndicator();
-    twoPhaseMixture& transport = data.transport();
-    incompressible::turbulenceModel& turbulence = data.turbulence();
-    trackedSurface& interface = data.interface();
+    uniformDimensionedVectorField& g = storage.g();
+    volScalarField& p = storage.p();
+    volVectorField& U = storage.U();
+    surfaceScalarField& phi = storage.phi();
+    volScalarField& rho = storage.rho();
+    volScalarField& mu = storage.mu();
+    volVectorField& F = storage.F();
+    volScalarField& fluidIndicator = storage.fluidIndicator();
+    twoPhaseMixture& transport = storage.transport();
+    incompressible::turbulenceModel& turbulence = storage.turbulence();
+    trackedSurface& interface = storage.interface();
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

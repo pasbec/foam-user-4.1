@@ -35,24 +35,23 @@ SourceFiles
 #ifndef solverManager_H
 #define solverManager_H
 
+#include "solverManagerMessages.H"
+#include "solverManagerRegions.H"
+#include "solverManagerStorage.H"
+
 #include "autoPtr.H"
 #include "argList.H"
 #include "foamTime.H"
-#include "dictionary.H"
-#include "solution.H"
+#include "IOdictionary.H"
 #include "solutionControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// TODO: Create sub-class for region related stuff
+
 # define createManager(NAME, MESH)                                            \
                                                                               \
     NAME##Manager manager(MESH);
-
-
-# define createManagerAndData(NAME, MESH)                                     \
-                                                                              \
-    NAME##Manager manager(MESH);                                              \
-    NAME##Manager::storage& data = manager.data();
 
 
 # define setManagerScope(NAME)                                                \
@@ -61,107 +60,77 @@ SourceFiles
     NAME##Manager& manager = NAME;
 
 
-# define setManagerScopeAndData(NAME)                                         \
-                                                                              \
-    NAME##Manager& NAME = manager.NAME();                                     \
-    NAME##Manager& manager = NAME;                                            \
-    NAME##Manager::storage& data = manager.data();
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerStorage_new(MANAGER)                                    \
+# define solverManagerNestedClass_new(MANAGER, TYPE, NAME)                   \
                                                                               \
-    private: storage(const storage&);                                         \
-                                                                              \
-    private: void operator=(const storage&);                                  \
-                                                                              \
-    public: storage(const MANAGER& manager)                                   \
+    public: class NAME                                                        \
     :                                                                         \
-        solverManager<dynamicFvMesh>::storage                                 \
-        (                                                                     \
-            manager.args(), manager.time(), manager.mesh(),                   \
-            manager.typeName + word("Storage")                                \
-        )                                                                     \
+        public solverManager<MANAGER::Mesh>::TYPE                             \
     {                                                                         \
-        init();                                                               \
-    };                                                                        \
                                                                               \
-    public: virtual ~storage() {};                                            \
+        private: const MANAGER& manager_;                                     \
                                                                               \
-    public: virtual void init(const word init = "default") const;
+        private: NAME(const NAME&);                                           \
+                                                                              \
+        private: void operator=(const NAME&);                                 \
+                                                                              \
+        protected: inline const MANAGER& manager() const                      \
+        {                                                                     \
+            return manager_;                                                  \
+        };                                                                    \
+                                                                              \
+        protected: inline const IOdictionary& properties() const              \
+        {                                                                     \
+            return manager_.properties();                                     \
+        };                                                                    \
+                                                                              \
+        public: NAME(const MANAGER& manager)                                  \
+        :                                                                     \
+            solverManager<MANAGER::Mesh>::TYPE                                \
+            (                                                                 \
+                manager.args(), manager.time(), manager.mesh()                \
+            ),                                                                \
+            manager_(manager)                                                 \
+        {                                                                     \
+            init();                                                           \
+        };                                                                    \
+                                                                              \
+        public: virtual ~NAME() {};
 
 
-# define solverManagerStorage_add(TYPE, DATA)                                 \
+# define solverManagerNestedClass_add(TYPE, ITEM)                             \
                                                                               \
-    private: mutable autoPtr<TYPE> DATA##Ptr_;                                \
+    private: mutable autoPtr<TYPE> ITEM##Ptr_;                                \
                                                                               \
-    private: mutable autoPtr<bool> make_##DATA##Ptr_;                         \
-                                                                              \
-    private: void make_##DATA(const word init = "default") const              \
+    public: TYPE& ITEM() const                                                \
     {                                                                         \
-        if (DATA##Ptr_.empty())                                               \
+        if (ITEM##Ptr_.empty())                                               \
         {                                                                     \
-            if (make_##DATA##Ptr_.empty())                                    \
-            {                                                                 \
-                make_##DATA##Ptr_.set(new bool);                              \
-                                                                              \
-                Info << "Create " << #DATA                                    \
-                    << " for region " << mesh().name()                        \
-                    << endl;                                                  \
-                                                                              \
-                create_##DATA(init);                                          \
-                                                                              \
-                make_##DATA##Ptr_.clear();                                    \
-            }                                                                 \
-            else                                                              \
-            {                                                                 \
-                FatalErrorIn(typeName + "::" + #DATA + "()")                  \
-                    << "Pointer for "                                         \
-                        << #DATA                                              \
-                        << " is part of a circular reference."                \
-                        << " Check all occurances in storage!"                \
-                        << abort(FatalError);                                 \
-            }                                                                 \
+            ITEM##Ptr_.set(new TYPE(this->manager()));                        \
         }                                                                     \
                                                                               \
-        if (DATA##Ptr_.empty())                                               \
+        return ITEM##Ptr_();                                                  \
+    }
+
+
+# define solverManagerNestedClass_addVirtual(TYPE, ITEM)                      \
+                                                                              \
+    private: mutable autoPtr<TYPE> ITEM##Ptr_;                                \
+                                                                              \
+    public: virtual TYPE& ITEM() const                                        \
+    {                                                                         \
+        if (ITEM##Ptr_.empty())                                               \
         {                                                                     \
-            FatalErrorIn(typeName + "::" + #DATA + "()")                      \
-                << "Pointer for "                                             \
-                    << #DATA                                                  \
-                    << " is still unallocated after creation."                \
-                    << " Make sure the data member " << #DATA << "Ptr_ "      \
-                    << " is set correctly in its create-function: "           \
-                    << "create_" << #DATA << "(const word init = 'default')!" \
-                    << abort(FatalError);                                     \
+            ITEM##Ptr_.set(new TYPE(this->manager()));                        \
         }                                                                     \
-    }                                                                         \
                                                                               \
-    private: void create_##DATA(const word init = "default") const;           \
+        return ITEM##Ptr_();                                                  \
+    }
+
+
+# define solverManagerNestedClass_end()                                       \
                                                                               \
-    public: inline bool DATA##IsEmpty() const                                 \
-    {                                                                         \
-        return DATA##Ptr_.empty();                                            \
-    };                                                                        \
-                                                                              \
-    public: inline bool DATA##IsValid() const                                 \
-    {                                                                         \
-        return DATA##Ptr_.valid();                                            \
-    };                                                                        \
-                                                                              \
-    public: TYPE& DATA(const word init = "default") const                     \
-    {                                                                         \
-        make_##DATA(init);                                                    \
-                                                                              \
-        return DATA##Ptr_();                                                  \
-    };                                                                        \
-                                                                              \
-    public: TYPE* DATA##Ptr(const word init = "default") const                \
-    {                                                                         \
-        make_##DATA(init);                                                    \
-                                                                              \
-        return DATA##Ptr_.operator->();                                       \
     };
 
 
@@ -179,9 +148,20 @@ class solverManager
 {
 public:
 
-    // Public structs
+    // Public typedefs
 
-//         //- Time parameters
+        typedef MESH Mesh;
+
+        typedef solverManagerMessages<MESH> Messages;
+        typedef solverManagerRegions<MESH> Regions;
+        typedef solverManagerRegion<MESH> Region;
+        typedef solutionControl Control;
+        typedef solverManagerStorage<MESH> Storage;
+
+    // Public Structs
+
+// TODO: Rename
+        //- Time parameters
         struct parameters
         {
             bool adjustTimeStep;
@@ -192,179 +172,6 @@ public:
 
 
 protected:
-
-    // Protected Nested Classes
-
-        //- Messages
-        class messages
-        {
-        private:
-
-            // Private Data
-
-                //- Reference to args
-                const argList& args_;
-
-                //- Reference to time
-                const Time& time_;
-
-                //- Reference to mesh
-                const MESH& mesh_;
-
-            // Private Member Functions
-
-                //- Disallow default bitwise copy construct
-                messages(const messages&);
-
-                //- Disallow default bitwise assignment
-                void operator=(const messages&);
-
-
-        public:
-
-            // Constructor
-
-                messages
-                (
-                    const argList& args,
-                    const Time& time,
-                    const MESH& mesh
-                )
-                :
-                    args_(args), time_(time), mesh_(mesh)
-                {};
-
-            // Destructor
-
-                ~messages() {};
-
-            // Member Functions
-
-                //- Info about starting time loop
-                inline void newLine() const
-                {
-                    Info << nl;
-                }
-
-                //- Info about starting time loop
-                inline void startTimeLoop() const
-                {
-                    Info << "Starting time loop"
-                        << endl;
-                }
-
-                //- Info about current time step
-                inline void timeStep() const
-                {
-                    Info << "Time step = "
-                        << time_.timeIndex()
-                        << endl;
-                };
-
-                //- Print current time step width
-                inline void timeDeltaT() const
-                {
-                    Info << "deltaT = "
-                        <<  time_.deltaT().value()
-                        << endl;
-                };
-
-                //- Print current time
-                inline void timeIs() const
-                {
-                    Info << "Time = "
-                        << time_.value()
-                        << endl;
-                };
-
-                //- Print execution time
-                inline void executionTime() const
-                {
-                    Info << "ExecutionTime = "
-                        << scalar(time_.elapsedCpuTime()) << " s"
-                        << endl;
-                };
-
-                //- Print end statement
-                inline void end() const
-                {
-                    Info << "End" << nl << endl;
-                };
-        };
-
-        //- Storage
-        class storage
-        {
-        private:
-
-            // Private Data
-
-                //- Reference to args
-                const argList& args_;
-
-                //- Reference to time
-                Time& time_;
-
-                //- Reference to mesh
-                MESH& mesh_;
-
-            // Private Member Functions
-
-                //- Disallow default bitwise copy construct
-                storage(const storage&);
-
-                //- Disallow default bitwise assignment
-                void operator=(const storage&);
-
-
-        public:
-
-            const word typeName;
-
-            // Constructor
-
-                //- Construct from mesh
-                storage
-                (
-                    const argList& args,
-                    Time& time,
-                    MESH& mesh,
-                    const word& name
-                )
-                :
-                    args_(args), time_(time), mesh_(mesh),
-                    typeName(name)
-                {};
-
-            // Destructor
-
-                virtual ~storage() {};
-
-            // Member Functions
-
-                //- Reference to args
-                inline const argList& args() const
-                {
-                    return args_;
-                };
-
-                //- Reference to time
-                inline Time& time() const
-                {
-                    return time_;
-                };
-
-                //- Return reference to mesh
-                inline MESH& mesh() const
-                {
-                    return mesh_;
-                }
-
-                //- Initialize data
-                virtual void init(const word init) const = 0;
-        };
-
-    // Protected Data
 
     // Protected Member Functions
 
@@ -424,7 +231,7 @@ private:
         mutable autoPtr<parameters> paramPtr_;
 
         //- Messages
-        mutable autoPtr<messages> msgPtr_;
+        mutable autoPtr<Messages> msgPtr_;
 
         // Basic
 
@@ -442,19 +249,6 @@ private:
 
             //- Properties dictionary
             IOdictionary properties_;
-
-        // Regions
-
-            // Default region
-
-                //- Label of base region
-                const label baseRegion_;
-
-                //- Name of base region
-                const word baseRegionName_;
-
-                //- Solution dictionary of base region
-                solution& baseSolutionDict_;
 
         // Evolution
 
@@ -501,9 +295,8 @@ public:
             const argList& args,
             Time& time,
             MESH& mesh,
-            const word& name = "solver",
-            const bool& master = true,
-            const label& regionI0 = -1
+            const word& prefix,
+            const bool& master = true
         );
 
     // Destructor
@@ -516,13 +309,22 @@ public:
         const parameters& param() const;
 
         //- Messages
-        const messages& msg() const;
+        const Messages& msg() const;
+
+        // Regions
+
+            //- All regions
+            virtual Regions& regions() const = 0;
+
+            //- Default region
+            virtual Region& defaultRegion() const = 0;
 
         //- Control
-        virtual solutionControl& control() const = 0;
+        virtual Control& control() const = 0;
 
         //- Storage
-        virtual storage& data() const = 0;
+        virtual Storage& storage() const = 0;
+
 
         // Basic
 
@@ -561,28 +363,6 @@ public:
             {
                 return properties_;
             };
-
-        // Regions
-
-            // Default region
-
-                //- Reference to base region ID
-                inline const label& base() const
-                {
-                    return baseRegion_;
-                };
-
-                //- Reference to base region name
-                inline const word& baseName() const
-                {
-                    return baseRegionName_;
-                };
-
-                //- Reference to solution dictionary of base region
-                inline const solution& baseSolutionDict() const
-                {
-                    return baseSolutionDict_;
-                };
 
         // Evolution
 

@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     interTrackManager.C
-    interTrackManagerStorage.C
+    interTrackManagerDefaultRegionStorage.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -60,27 +60,37 @@ class interTrackManager
 {
 public:
 
-//     // Public Data Types
+    // Public typedefs
+
+        typedef interTrackControl Control;
+
+//     // Public Strutcs
 //
-//         enum forceStates
+//         struct forceData
 //         {
-//             DISABLE,
-//             READ,
-//             CALCULATE
+//             Switch enabled;
+//             word init;
+//             word name;
+//
+//             forceData()
+//             :
+//                 enabled(false),
+//                 init("default"),
+//                 name("F")
+//             {};
 //         };
 
     // Public Nested Classes
 
-        //- Storage
-        class storage
-        :
-            public solverManager<dynamicFvMesh>::storage
-        {
-            // Create constructor, destructor and init
+        //- Default region
+        solverManagerRegion_new(interTrackManager, DefaultRegion);
 
-                solverManagerStorage_new(interTrackManager);
+            //- Control
+// TODO: Constructor for control only takes one parameter: mesh
+            solverManagerRegion_addControl(interTrackControl);
 
-            // Add class members and functions for storage elements
+            //- Storage class
+            solverManagerStorage_new(interTrackManager, Storage);
 
                 //- Gravitational acceleration
                 solverManagerStorage_add(uniformDimensionedVectorField, g);
@@ -114,7 +124,20 @@ public:
 
                 //- Tracked surface
                 solverManagerStorage_add(trackedSurface, interface);
-        };
+
+            solverManagerStorage_end();
+
+            solverManagerRegion_addStorage();
+
+        solverManagerRegion_end();
+
+        //- Regions
+        solverManagerRegions_new(interTrackManager, Regions);
+
+            //- Default region
+            solverManagerRegions_addDefaultRegion(DefaultRegion);
+
+        solverManagerRegions_end();
 
 //     // Static Data
 //
@@ -124,11 +147,14 @@ private:
 
     // Private Data
 
+        //- Regions
+        mutable autoPtr<Regions> regionsPtr_;
+
         //- Control
-        mutable autoPtr<interTrackControl> controlPtr_;
+        mutable autoPtr<Control> controlPtr_;
 
         //- Storage
-        mutable autoPtr<storage> storagePtr_;
+        mutable autoPtr<Storage> storagePtr_;
 
     // Private Member Functions
 
@@ -161,7 +187,7 @@ public:
             const argList& args,
             Time& time,
             dynamicFvMesh& mesh,
-            const word& name = "interTrack",
+            const word& prefix = "interTrack",
             const bool& master = true
         );
 
@@ -171,11 +197,32 @@ public:
 
     // Member Functions
 
+        // Regions
+            //- All regions
+            virtual Regions& regions() const
+            {
+                if (regionsPtr_.empty())
+                {
+                    regionsPtr_.set(new Regions(*this));
+                }
+
+                return regionsPtr_();
+            };
+
+            //- Default region
+            virtual DefaultRegion& defaultRegion() const
+            {
+                return regions().defaultRegion();
+            };
+
         //- Control
-        virtual interTrackControl& control() const;
+        virtual Control& control() const;
 
         //- Storage
-        virtual storage& data() const;
+        virtual DefaultRegion::Storage& storage() const
+        {
+            return defaultRegion().storage();
+        };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -186,7 +233,7 @@ public:
 
 #ifdef NoRepository
 #   include "interTrackManager.C"
-#   include "interTrackManagerStorage.C"
+#   include "interTrackManagerDefaultRegionStorage.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

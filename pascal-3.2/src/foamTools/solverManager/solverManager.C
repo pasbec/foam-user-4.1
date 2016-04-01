@@ -149,9 +149,8 @@ solverManager<MESH>::solverManager
     const argList& args,
     Time& time,
     MESH& mesh,
-    const word& name,
-    const bool& master,
-    const label& regionI0
+    const word& prefix,
+    const bool& master
 )
 :
     paramPtr_(NULL),
@@ -166,7 +165,7 @@ solverManager<MESH>::solverManager
         (
             IOobject
             (
-                name + "Properties",
+                prefix + "Properties",
                 time_.constant(),
                 time_.db(),
                 IOobject::READ_IF_PRESENT,
@@ -174,17 +173,10 @@ solverManager<MESH>::solverManager
             )
         )
     ),
-    baseRegion_(regionI0),
-    baseRegionName_(polyMesh::defaultRegion),
-    baseSolutionDict_
-    (
-        const_cast<solution&>
-        (
-            dynamicCast<const solution&>(mesh_.solutionDict())
-        )
-    ),
     prePhase_(true)
-{}
+{
+
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -208,7 +200,7 @@ const typename solverManager<MESH>::parameters& solverManager<MESH>::param() con
 
 
 template <class MESH>
-const typename solverManager<MESH>::messages& solverManager<MESH>::msg() const
+const typename solverManager<MESH>::Messages& solverManager<MESH>::msg() const
 {
     errorIfNotMaster();
 
@@ -216,7 +208,7 @@ const typename solverManager<MESH>::messages& solverManager<MESH>::msg() const
     {
         msgPtr_.set
         (
-            new messages(args(), time(), mesh())
+            new Messages(args(), time(), mesh())
         );
     }
 
