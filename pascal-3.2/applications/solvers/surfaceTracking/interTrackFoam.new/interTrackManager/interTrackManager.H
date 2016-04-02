@@ -66,8 +66,7 @@ public:
         solverManagerRegion_new(interTrackManager, DefaultRegion);
 
             //- Control
-// TODO: Constructor for control only takes one parameter: mesh
-            solverManagerRegion_addControl(interTrackControl);
+            solverManagerRegion_addControl(interTrackControl, this->mesh());
 
             //- Storage class
             solverManagerStorage_new(interTrackManager, Storage);

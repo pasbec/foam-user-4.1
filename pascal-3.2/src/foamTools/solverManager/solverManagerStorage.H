@@ -32,13 +32,8 @@ Description
 #ifndef solverManagerStorage_H
 #define solverManagerStorage_H
 
-#include "autoPtr.H"
-#include "argList.H"
-#include "foamTime.H"
-#include "IOdictionary.H"
-#include "solutionControl.H"
-
 #include "solverManager.H"
+#include "solverManagerBaseNested.H"
 
 // TODO: Macro new for regionMeshes where mesh is the mesh of one region:
 //       Storage should be based on MeshType
@@ -65,10 +60,19 @@ Description
 
 # define solverManagerStorage_new(MANAGER, NAME)                              \
                                                                               \
-    solverManagerNestedClass_new(MANAGER, Storage, NAME)                      \
+    solverManagerBaseNested_new(Storage, solverManagerStorage, MANAGER, NAME) \
                                                                               \
     protected: virtual void init(const word& init = "default") const;
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define solverManagerStorage_end()                                           \
+                                                                              \
+    solverManagerBaseNested_end()
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define solverManagerStorage_add(TYPE, DATA)                                 \
                                                                               \
@@ -99,7 +103,7 @@ Description
         else                                                                  \
         {                                                                     \
             FatalErrorIn                                                      \
-            (manager_.type() + "Storage::enable_" + #DATA + "()")             \
+            (this->manager().type() + "Storage::enable_"+#DATA+"()")          \
                 << "The storage item "                                        \
                     << #DATA                                                  \
                     << " is already disabled!"                                \
@@ -114,7 +118,7 @@ Description
             if (DATA##Ptr_.valid())                                           \
             {                                                                 \
                 FatalErrorIn                                                  \
-                (manager_.type() + "Storage::disable_" + #DATA + "()")        \
+                (this->manager().type() + "Storage::disable_"+#DATA+"()")     \
                     << "The storage item "                                    \
                         << #DATA                                              \
                         << " is still allocated and cannot be disabled."      \
@@ -150,7 +154,7 @@ Description
                 else                                                          \
                 {                                                             \
                     FatalErrorIn                                              \
-                    (manager_.type() + "Storage::create_" + #DATA + "()")     \
+                    (this->manager().type() + "Storage::create_"+#DATA+"()")  \
                         << "Pointer for "                                     \
                             << #DATA                                          \
                             << " is part of a circular reference."            \
@@ -162,7 +166,7 @@ Description
             if (DATA##Ptr_.empty())                                           \
             {                                                                 \
                 FatalErrorIn                                                  \
-                (manager_.type() + "Storage::create_" + #DATA + "()")         \
+                (this->manager().type() + "Storage::create_"+#DATA+"()")      \
                     << "Pointer for "                                         \
                         << #DATA                                              \
                         << " is still unallocated after creation."            \
@@ -175,7 +179,7 @@ Description
         else                                                                  \
         {                                                                     \
             FatalErrorIn                                                      \
-            (manager_.type() + "Storage::create_" + #DATA + "()")             \
+            (this->manager().type() + "Storage::create_"+#DATA+"()")          \
                 << "The storage item "                                        \
                     << #DATA                                                  \
                     << " is globally disabled and cannot be used."            \
@@ -221,7 +225,7 @@ Description
         if (!DATA##Optional_)                                                 \
         {                                                                     \
             FatalErrorIn                                                      \
-            (manager_.type() + "Storage::switch_" + #DATA + "()")             \
+            (this->manager().type() + "Storage::switch_"+#DATA+"()")          \
                         << "Storage element "                                 \
                             << #DATA                                          \
                             << " is mandatory and cannot be disabled."        \
@@ -306,11 +310,6 @@ Description
     };
 
 
-# define solverManagerStorage_end()                                           \
-                                                                              \
-    solverManagerNestedClass_end()
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -320,29 +319,21 @@ namespace Foam
                        Class solverManagerStorage Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MESH>
+template <class MANAGER>
 class solverManagerStorage
+:
+    public solverManagerBaseNested<MANAGER>
 {
 public:
 
     // Public typedefs
 
-        typedef MESH Mesh;
-        typedef typename MESH::Mesh MeshType;
+        typedef MANAGER Manager;
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename ManagerMesh::Mesh ThisMesh;
 
 
 private:
-
-    // Private Data
-
-        //- Reference to args
-        const argList& args_;
-
-        //- Reference to time
-        Time& time_;
-
-        //- Reference to mesh
-        MESH& mesh_;
 
     // Private Member Functions
 
@@ -353,45 +344,13 @@ private:
         void operator=(const solverManagerStorage&);
 
 
-protected:
-
-    // Protected Member Functions
-
-        //- Reference to args
-        inline const argList& args() const
-        {
-            return args_;
-        };
-
-        //- Reference to time
-        inline Time& time() const
-        {
-            return time_;
-        };
-
-        //- Return reference to mesh
-        inline MESH& mesh() const
-        {
-            return mesh_;
-        }
-
-        //- Initialize data
-        virtual void init(const word& init) const = 0;
-
-
 public:
 
     // Constructor
 
-        //- Construct from mesh
-        solverManagerStorage
-        (
-            const argList& args,
-            Time& time,
-            MESH& mesh
-        )
+        solverManagerStorage(const MANAGER& manager)
         :
-            args_(args), time_(time), mesh_(mesh)
+            solverManagerBaseNested<MANAGER>(manager)
         {};
 
     // Destructor

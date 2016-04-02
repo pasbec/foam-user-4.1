@@ -148,7 +148,7 @@ solverManager<MESH>::solverManager
 (
     const argList& args,
     Time& time,
-    Mesh& mesh,
+    ManagerMesh& mesh,
     const word& prefix,
     const bool& master
 )

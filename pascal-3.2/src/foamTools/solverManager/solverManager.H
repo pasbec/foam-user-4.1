@@ -35,15 +35,17 @@ SourceFiles
 #ifndef solverManager_H
 #define solverManager_H
 
-#include "solverManagerMessages.H"
-#include "solverManagerRegions.H"
-#include "solverManagerStorage.H"
-
 #include "autoPtr.H"
 #include "argList.H"
 #include "foamTime.H"
 #include "IOdictionary.H"
 #include "solutionControl.H"
+
+#include "solverManagerMessages.H"
+#include "solverManagerBaseNested.H"
+#include "solverManagerRegions.H"
+#include "solverManagerRegion.H"
+#include "solverManagerStorage.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,7 +68,7 @@ SourceFiles
                                                                               \
     public: class NAME                                                        \
     :                                                                         \
-        public solverManager<MANAGER::Mesh>::TYPE                             \
+        public solverManager<MANAGER::ManagerMesh>::TYPE                      \
     {                                                                         \
         private: NAME(const NAME&);                                           \
                                                                               \
@@ -122,7 +124,7 @@ SourceFiles
                                                                               \
         public: NAME(const MANAGER& manager)                                  \
         :                                                                     \
-            solverManager<MANAGER::Mesh>::TYPE                                \
+            solverManager<MANAGER::ManagerMesh>::TYPE                         \
             (                                                                 \
                 manager.args(), manager.time(), manager.mesh()                \
             ),                                                                \
@@ -217,18 +219,19 @@ public:
 
     // Public typedefs
 
-        typedef MESH Mesh;
-        typedef typename MESH::Mesh MeshType;
-
-// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
-//       Region and Storage should be based on MeshType
-//       with a template specification for dydnamicFvMesh
+        typedef solverManager Manager;
+        typedef MESH ManagerMesh;
+        typedef typename MESH::Mesh ThisMesh;
 
         typedef solverManagerMessages<MESH> Messages;
-        typedef solverManagerRegions<MESH> Regions;
-        typedef solverManagerRegion<MESH> Region;
         typedef solutionControl Control;
-        typedef solverManagerStorage<MESH> Storage;
+
+    // Public Nested Classes
+
+        class Regions {};
+        class Region {};
+        class Storage {};
+        class Item {};
 
     // Public Structs
 
@@ -270,13 +273,13 @@ protected:
                 return false;
             };
 
-            //- Pre loop sequence
+            //- Init sequence
             virtual void init() const {};
 
-            //- Read loop sequence
+            //- Read sequence
             virtual void read() const {};
 
-            //- Post loop sequence
+            //- Finalize sequence
             virtual void finalize() const {};
 
             //- Pre write sequence
@@ -305,7 +308,7 @@ private:
             Time& time_;
 
             //- Reference to mesh
-            Mesh& mesh_;
+            ManagerMesh& mesh_;
 
             //- Master manager?
             const bool master_;
@@ -357,7 +360,7 @@ public:
         (
             const argList& args,
             Time& time,
-            Mesh& mesh,
+            ManagerMesh& mesh,
             const word& prefix,
             const bool& master = true
         );
@@ -392,7 +395,7 @@ public:
             };
 
             //- Reference to mesh
-            inline Mesh& mesh() const
+            inline ManagerMesh& mesh() const
             {
                 return mesh_;
             };

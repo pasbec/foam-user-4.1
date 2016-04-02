@@ -32,38 +32,37 @@ Description
 #ifndef solverManagerRegions_H
 #define solverManagerRegions_H
 
-#include "autoPtr.H"
-#include "argList.H"
-#include "foamTime.H"
-#include "IOdictionary.H"
-#include "solutionControl.H"
-#include "dynamicFvMesh.H"
-
 #include "solverManager.H"
+#include "solverManagerBaseNested.H"
 #include "solverManagerRegion.H"
+#include "solverManagerStorage.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define solverManagerRegions_new(MANAGER, NAME)                              \
                                                                               \
-    solverManagerNestedClass_new(MANAGER, Regions, NAME)                      \
+    solverManagerBaseNested_new(Regions, solverManagerRegions, MANAGER, NAME) \
                                                                               \
     protected: virtual void init(const word& init = "default") const {};
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define solverManagerRegions_end()                                           \
+                                                                              \
+    solverManagerBaseNested_end()
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 # define solverManagerRegions_addDefaultRegion(TYPE)                          \
                                                                               \
-    solverManagerNestedClass_addVirtual(TYPE, defaultRegion)
+    solverManagerBaseNested_addVirtualPmanager(TYPE, defaultRegion)
 
 
 # define solverManagerRegions_addRegion(TYPE, REGION)                         \
                                                                               \
-    solverManagerNestedClass_addVirtual(TYPE, REGION)
-
-
-# define solverManagerRegions_end()                                           \
-                                                                              \
-    solverManagerNestedClass_end()
+    solverManagerBaseNested_addVirtualPmanager(TYPE, REGION)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -75,37 +74,25 @@ namespace Foam
                        Class solverManagerRegions Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MESH>
+template <class MANAGER>
 class solverManagerRegions
+:
+    public solverManagerBaseNested<MANAGER>
 {
 public:
 
     // Public typedefs
 
-        typedef MESH Mesh;
-        typedef typename MESH::Mesh MeshType;
+        typedef MANAGER Manager;
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename ManagerMesh::Mesh ThisMesh;
 
-// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
-//       Region and Storage should be based on MeshType
-//       with a template specification for dydnamicFvMesh
-
-        typedef solverManagerRegion<MESH> Region;
+        typedef solverManagerRegion<MANAGER> Region;
         typedef solutionControl Control;
-        typedef solverManagerStorage<MESH> Storage;
+        typedef solverManagerStorage<MANAGER> Storage;
 
 
 private:
-
-    // Private Data
-
-        //- Reference to args
-        const argList& args_;
-
-        //- Reference to time
-        const Time& time_;
-
-        //- Reference to mesh
-        const Mesh& mesh_;
 
     // Private Member Functions
 
@@ -116,44 +103,13 @@ private:
         void operator=(const solverManagerRegions&);
 
 
-protected:
-
-    // Protected Member Functions
-
-        //- Reference to args
-        inline const argList& args() const
-        {
-            return args_;
-        };
-
-        //- Reference to time
-        inline Time& time() const
-        {
-            return time_;
-        };
-
-        //- Return reference to mesh
-        inline Mesh& mesh() const
-        {
-            return mesh_;
-        }
-
-        //- Initialize data
-        virtual void init(const word& init) const = 0;
-
-
 public:
 
     // Constructor
 
-        solverManagerRegions
-        (
-            const argList& args,
-            const Time& time,
-            const Mesh& mesh
-        )
+        solverManagerRegions(const MANAGER& manager)
         :
-            args_(args), time_(time), mesh_(mesh)
+            solverManagerBaseNested<MANAGER>(manager)
         {};
 
     // Destructor
@@ -162,8 +118,10 @@ public:
 
     // Member Functions
 
-        //- Default region
-        virtual Region& defaultRegion() const = 0;
+        // Regions
+
+            //- Default region
+            virtual Region& defaultRegion() const = 0;
 };
 
 

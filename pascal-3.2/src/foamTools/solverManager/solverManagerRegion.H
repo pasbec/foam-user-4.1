@@ -32,13 +32,8 @@ Description
 #ifndef solverManagerRegion_H
 #define solverManagerRegion_H
 
-#include "autoPtr.H"
-#include "argList.H"
-#include "foamTime.H"
-#include "IOdictionary.H"
-#include "solutionControl.H"
-
 #include "solverManager.H"
+#include "solverManagerBaseNested.H"
 #include "solverManagerStorage.H"
 
 // TODO: Macro new for regionMeshes where mesh is the mesh of one region:
@@ -55,36 +50,30 @@ Description
 
 # define solverManagerRegion_new(MANAGER, NAME)                               \
                                                                               \
-    solverManagerNestedClass_new(MANAGER, Region, NAME)                       \
+    solverManagerBaseNested_new(Region, solverManagerRegion, MANAGER, NAME)   \
                                                                               \
     protected: virtual void init(const word& init = "default") const {};
 
 
-# define solverManagerRegion_addControl(TYPE)                                 \
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define solverManagerRegion_end()                                            \
+                                                                              \
+    solverManagerBaseNested_end()
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define solverManagerRegion_addControl(TYPE, MESH)                           \
                                                                               \
     public: typedef TYPE Control;                                             \
                                                                               \
-    private: mutable autoPtr<Control> controlPtr_;                            \
-                                                                              \
-    public: virtual Control& control() const                                  \
-    {                                                                         \
-        if (controlPtr_.empty())                                              \
-        {                                                                     \
-            controlPtr_.set(new Control(this->mesh()));                       \
-        }                                                                     \
-                                                                              \
-        return controlPtr_();                                                 \
-    }
+    solverManagerBaseNested_addVirtualItemP1(Control, control, MESH)
 
 
 # define solverManagerRegion_addStorage(TYPE)                                 \
                                                                               \
-    solverManagerNestedClass_addVirtual(Storage, storage)
-
-
-# define solverManagerRegion_end()                                            \
-                                                                              \
-    solverManagerNestedClass_end()
+    solverManagerBaseNested_addVirtualPmanager(Storage, storage)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -96,36 +85,29 @@ namespace Foam
                        Class solverManagerRegion Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MESH>
+template <class MANAGER>
 class solverManagerRegion
+:
+    public solverManagerBaseNested<MANAGER>
 {
 public:
 
     // Public typedefs
 
-        typedef MESH Mesh;
-        typedef typename MESH::Mesh MeshType;
-
-// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
-//       Storage should be based on MeshType
-//       with a template specification for dydnamicFvMesh
+        typedef MANAGER Manager;
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename ManagerMesh::Mesh ThisMesh;
 
         typedef solutionControl Control;
-        typedef solverManagerStorage<MESH> Storage;
+        typedef solverManagerStorage<MANAGER> Storage;
 
 
 private:
 
-    // Private Data
-
-        //- Reference to args
-        const argList& args_;
-
-        //- Reference to time
-        Time& time_;
-
-        //- Reference to mesh
-        MESH& mesh_;
+//     // Private Data
+//
+//         //- Reference to mesh
+//         ThisMesh& mesh_;
 
     // Private Member Functions
 
@@ -138,42 +120,53 @@ private:
 
 protected:
 
-    // Protected Member Functions
+//     // Protected Member Functions
+//
+//         // Basic
+//
+//             //- Return reference to mesh
+//             ThisMesh& mesh() const
+//             {
+//                 return mesh_;
+//             }
 
-        //- Reference to args
-        inline const argList& args() const
-        {
-            return args_;
-        };
-
-        //- Reference to time
-        inline Time& time() const
-        {
-            return time_;
-        };
-
-        //- Return reference to mesh
-        inline MESH& mesh() const
-        {
-            return mesh_;
-        }
-
-        //- Initialize data
-        virtual void init(const word& init) const = 0;
+//             //- Reference to settings dictionary for named region
+//             const dictionary& settingsRegionDict
+//             (
+//                 const word& region = ????????
+//             ) const
+//             {
+//                 return manager_.settingsRegionDict(region);
+//             };
+//
+//             //- Reference to storage dictionary for named region
+//             const dictionary& storageRegionDict
+//             (
+//                 const word& region = ????????
+//             ) const
+//             {
+//                 return manager_.storageRegionDict(region);
+//             };
+//
+//             //- Reference to dictionary of named item of storage
+//             bool storageItemDict
+//             (
+//                 const word& item,
+//                 dictionary& dict,
+//                 const word& region = ????????
+//             ) const
+//             {
+//                 return manager_.storageItemDict(item, dict, region);
+//             };
 
 
 public:
 
     // Constructor
 
-        solverManagerRegion
-        (
-            const argList& args,
-            Time& time,
-            MESH& mesh
-        )
+        solverManagerRegion(const MANAGER& manager)
         :
-            args_(args), time_(time), mesh_(mesh)
+            solverManagerBaseNested<MANAGER>(manager)
         {};
 
     // Destructor
