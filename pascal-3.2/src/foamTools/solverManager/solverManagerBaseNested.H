@@ -36,7 +36,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerBaseNested_new(BASEPARENT, PARENT, MANAGER, NAME)       \
+# define smBaseNested_new(BASEPARENT, PARENT, MANAGER, NAME)                  \
                                                                               \
     public: class NAME                                                        \
     :                                                                         \
@@ -63,37 +63,37 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerBaseNested_end()                                        \
+# define smBaseNested_end()                                                   \
                                                                               \
     };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerBaseNested_setItemP1(TYPE, ITEM, P1)                    \
+# define smBaseNested_setItem_P1(TYPE, ITEM, P1)                              \
                                                                               \
                 ITEM##Ptr_.set(new TYPE(P1));
 
-# define solverManagerBaseNested_setItemP2(TYPE, ITEM, P1,P2)                 \
+# define smBaseNested_setItem_P2(TYPE, ITEM, P1,P2)                           \
                                                                               \
                 ITEM##Ptr_.set(new TYPE(P1,P2));
 
-# define solverManagerBaseNested_setItemP3(TYPE, ITEM, P1,P2,P3)              \
+# define smBaseNested_setItem_P3(TYPE, ITEM, P1,P2,P3)                        \
                                                                               \
                 ITEM##Ptr_.set(new TYPE(P1,P2,P3));
 
-# define solverManagerBaseNested_setItemP4(TYPE, ITEM, P1,P2,P3,P4)           \
+# define smBaseNested_setItem_P4(TYPE, ITEM, P1,P2,P3,P4)                     \
                                                                               \
                 ITEM##Ptr_.set(new TYPE(P1,P2,P3,P4));
 
-# define solverManagerBaseNested_setItemP5(TYPE, ITEM, P1,P2,P3,P4,P5)        \
+# define smBaseNested_setItem_P5(TYPE, ITEM, P1,P2,P3,P4,P5)                  \
                                                                               \
                 ITEM##Ptr_.set(new TYPE(P1,P2,P3,P4,P5));
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerBaseNested_addItemModP1(TYPE, ITEM, MOD, P1)            \
+# define smBaseNested_addModItem_P1(TYPE, ITEM, MOD, P1)                      \
                                                                               \
         private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
                                                                               \
@@ -101,13 +101,13 @@ Description
         {                                                                     \
             if (ITEM##Ptr_.empty())                                           \
             {                                                                 \
-                solverManagerBaseNested_setItemP1(TYPE, ITEM, P1);            \
+                smBaseNested_setItem_P1(TYPE, ITEM, P1)                       \
             }                                                                 \
                                                                               \
             return ITEM##Ptr_();                                              \
-        }
+        };
 
-# define solverManagerBaseNested_addItemModP2(TYPE, ITEM, MOD, P1,P2)         \
+# define smBaseNested_addModItem_P2(TYPE, ITEM, MOD, P1,P2)                   \
                                                                               \
         private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
                                                                               \
@@ -115,13 +115,13 @@ Description
         {                                                                     \
             if (ITEM##Ptr_.empty())                                           \
             {                                                                 \
-                solverManagerBaseNested_setItemP2(TYPE, ITEM, P1,P2);         \
+                smBaseNested_setItem_P2(TYPE, ITEM, P1,P2)                    \
             }                                                                 \
                                                                               \
             return ITEM##Ptr_();                                              \
-        }
+        };
 
-# define solverManagerBaseNested_addItemModP3(TYPE, ITEM, MOD, P1,P2,P3)      \
+# define smBaseNested_addModItem_P3(TYPE, ITEM, MOD, P1,P2,P3)                \
                                                                               \
         private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
                                                                               \
@@ -129,13 +129,13 @@ Description
         {                                                                     \
             if (ITEM##Ptr_.empty())                                           \
             {                                                                 \
-                solverManagerBaseNested_setItemP3(TYPE, ITEM, P1,P2,P3);      \
+                smBaseNested_setItem_P3(TYPE, ITEM, P1,P2,P3)                 \
             }                                                                 \
                                                                               \
             return ITEM##Ptr_();                                              \
-        }
+        };
 
-# define solverManagerBaseNested_addItemModP4(TYPE, ITEM, MOD, P1,P2,P3,P4)   \
+# define smBaseNested_addModItem_P4(TYPE, ITEM, MOD, P1,P2,P3,P4)             \
                                                                               \
         private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
                                                                               \
@@ -143,13 +143,13 @@ Description
         {                                                                     \
             if (ITEM##Ptr_.empty())                                           \
             {                                                                 \
-                solverManagerBaseNested_setItemP4(TYPE, ITEM, P1,P2,P3,P4);   \
+                smBaseNested_setItem_P4(TYPE, ITEM, P1,P2,P3,P4)              \
             }                                                                 \
                                                                               \
             return ITEM##Ptr_();                                              \
-        }
+        };
 
-# define solverManagerBaseNested_addItemModP5(TYPE, ITEM, MOD, P1,P2,P3,P4,P5)\
+# define smBaseNested_addModItem_P5(TYPE, ITEM, MOD, P1,P2,P3,P4,P5)          \
                                                                               \
         private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
                                                                               \
@@ -157,152 +157,103 @@ Description
         {                                                                     \
             if (ITEM##Ptr_.empty())                                           \
             {                                                                 \
-                solverManagerBaseNested_setItemP5(TYPE, ITEM, P1,P2,P3,P4,P5);\
+                smBaseNested_setItem_P5(TYPE, ITEM, P1,P2,P3,P4,P5)           \
             }                                                                 \
                                                                               \
             return ITEM##Ptr_();                                              \
-        }
+        };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerBaseNested_addItemP1(TYPE, ITEM, P1)                    \
+# define smBaseNested_addItem_P1(TYPE, ITEM, P1)                              \
                                                                               \
-        solverManagerBaseNested_addItemModP1                                  \
-        (TYPE, ITEM, , P1);
+        smBaseNested_addModItem_P1(TYPE, ITEM, , P1)
 
-# define solverManagerBaseNested_addItemP2(TYPE, ITEM, P1,P2)                 \
+# define smBaseNested_addItem_P2(TYPE, ITEM, P1,P2)                           \
                                                                               \
-        solverManagerBaseNested_addItemModP2                                  \
-        (TYPE, ITEM, , P1,P2);
+        smBaseNested_addModItem_P2(TYPE, ITEM, , P1,P2)
 
-# define solverManagerBaseNested_addItemP3(TYPE, ITEM, P1,P2,P3)              \
+# define smBaseNested_addItem_P3(TYPE, ITEM, P1,P2,P3)                        \
                                                                               \
-        solverManagerBaseNested_addItemModP3                                  \
-        (TYPE, ITEM, , P1,P2,P3);
+        smBaseNested_addModItem_P3(TYPE, ITEM, , P1,P2,P3)
 
-# define solverManagerBaseNested_addItemP4(TYPE, ITEM, P1,P2,P3,P4)           \
+# define smBaseNested_addItem_P4(TYPE, ITEM, P1,P2,P3,P4)                     \
                                                                               \
-        solverManagerBaseNested_addItemModP4                                  \
-        (TYPE, ITEM, , P1,P2,P3,P4);
+        smBaseNested_addModItem_P4(TYPE, ITEM, , P1,P2,P3,P4)
 
-# define solverManagerBaseNested_addItemP5(TYPE, ITEM, P1,P2,P3,P4,P5)        \
+# define smBaseNested_addItem_P5(TYPE, ITEM, P1,P2,P3,P4,P5)                  \
                                                                               \
-        solverManagerBaseNested_addItemModP5                                  \
-        (TYPE, ITEM, , P1,P2,P3,P4,P5);
+        smBaseNested_addModItem_P5(TYPE, ITEM, , P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerBaseNested_addVirtualItemP1(TYPE, ITEM, P1)             \
+# define smBaseNested_addVirtualItem_P1(TYPE, ITEM, P1)                       \
                                                                               \
-        solverManagerBaseNested_addItemModP1                                  \
-        (TYPE, ITEM, virtual, P1);
+        smBaseNested_addModItem_P1(TYPE, ITEM, virtual, P1)
 
-# define solverManagerBaseNested_addVirtualItemP2(TYPE, ITEM, P1,P2)          \
+# define smBaseNested_addVirtualItem_P2(TYPE, ITEM, P1,P2)                    \
                                                                               \
-        solverManagerBaseNested_addItemModP2                                  \
-        (TYPE, ITEM, virtual, P1,P2);
+        smBaseNested_addModItem_P2(TYPE, ITEM, virtual, P1,P2)
 
-# define solverManagerBaseNested_addVirtualItemP3(TYPE, ITEM, P1,P2,P3)       \
+# define smBaseNested_addVirtualItem_P3(TYPE, ITEM, P1,P2,P3)                 \
                                                                               \
-        solverManagerBaseNested_addItemModP3                                  \
-        (TYPE, ITEM, virtual, P1,P2,P3);
+        smBaseNested_addModItem_P3(TYPE, ITEM, virtual, P1,P2,P3)
 
-# define solverManagerBaseNested_addVirtualItemP4(TYPE, ITEM, P1,P2,P3,P4)    \
+# define smBaseNested_addVirtualItem_P4(TYPE, ITEM, P1,P2,P3,P4)              \
                                                                               \
-        solverManagerBaseNested_addItemModP4                                  \
-        (TYPE, ITEM, virtual, P1,P2,P3,P4);
+        smBaseNested_addModItem_P4(TYPE, ITEM, virtual, P1,P2,P3,P4)
 
-# define solverManagerBaseNested_addVirtualItemP5(TYPE, ITEM, P1,P2,P3,P4,P5) \
+# define smBaseNested_addVirtualItem_P5(TYPE, ITEM, P1,P2,P3,P4,P5)           \
                                                                               \
-        solverManagerBaseNested_addItemModP5                                  \
-        (TYPE, ITEM, virtual, P1,P2,P3,P4,P5);
+        smBaseNested_addModItem_P5(TYPE, ITEM, virtual, P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerBaseNested_addConstItemP1(TYPE, ITEM, P1)               \
+# define smBaseNested_addConstItem_P1(TYPE, ITEM, P1)                         \
                                                                               \
-        solverManagerBaseNested_addItemModP1                                  \
-        (TYPE, ITEM, const, P1);
+        smBaseNested_addModItem_P1(TYPE, ITEM, const, P1)
 
-# define solverManagerBaseNested_addConstItemP2(TYPE, ITEM, P1,P2)            \
+# define smBaseNested_addConstItem_P2(TYPE, ITEM, P1,P2)                      \
                                                                               \
-        solverManagerBaseNested_addItemModP2                                  \
-        (TYPE, ITEM, const, P1,P2);
+        smBaseNested_addModItem_P2(TYPE, ITEM, const, P1,P2)
 
-# define solverManagerBaseNested_addConstItemP3(TYPE, ITEM, P1,P2,P3)         \
+# define smBaseNested_addConstItem_P3(TYPE, ITEM, P1,P2,P3)                   \
                                                                               \
-        solverManagerBaseNested_addItemModP3                                  \
-        (TYPE, ITEM, const, P1,P2,P3);
+        smBaseNested_addModItem_P3(TYPE, ITEM, const, P1,P2,P3)
 
-# define solverManagerBaseNested_addConstItemP4(TYPE, ITEM, P1,P2,P3,P4)      \
+# define smBaseNested_addConstItem_P4(TYPE, ITEM, P1,P2,P3,P4)                \
                                                                               \
-        solverManagerBaseNested_addItemModP4                                  \
-        (TYPE, ITEM, const, P1,P2,P3,P4);
+        smBaseNested_addModItem_P4(TYPE, ITEM, const, P1,P2,P3,P4)
 
-# define solverManagerBaseNested_addConstItemP5(TYPE, ITEM, P1,P2,P3,P4,P5)   \
+# define smBaseNested_addConstItem_P5(TYPE, ITEM, P1,P2,P3,P4,P5)             \
                                                                               \
-        solverManagerBaseNested_addItemModP5                                  \
-        (TYPE, ITEM, const, P1,P2,P3,P4,P5);
+        smBaseNested_addModItem_P5(TYPE, ITEM, const, P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerBaseNested_addVirtualConstItemP1                        \
-(TYPE, ITEM, P1)                                                              \
+# define smBaseNested_addVirtualConstItem_P1(TYPE, ITEM, P1)                  \
                                                                               \
-        solverManagerBaseNested_addItemModP1                                  \
-        (TYPE, ITEM, virtual const, P1);
+        smBaseNested_addModItem_P1(TYPE, ITEM, virtual const, P1)
 
-# define solverManagerBaseNested_addVirtualConstItemP2                        \
-(TYPE, ITEM, P1,P2)                                                           \
+# define smBaseNested_addVirtualConstItem_P2(TYPE, ITEM, P1,P2)               \
                                                                               \
-        solverManagerBaseNested_addItemModP2                                  \
-        (TYPE, ITEM, virtual const, P1,P2);
+        smBaseNested_addModItem_P2(TYPE, ITEM, virtual const, P1,P2)
 
-# define solverManagerBaseNested_addVirtualConstItemP3                        \
-(TYPE, ITEM, P1,P2,P3)                                                        \
+# define smBaseNested_addVirtualConstItem_P3(TYPE, ITEM, P1,P2,P3)            \
                                                                               \
-        solverManagerBaseNested_addItemModP3                                  \
-        (TYPE, ITEM, virtual const, P1,P2,P3);
+        smBaseNested_addModItem_P3(TYPE, ITEM, virtual const, P1,P2,P3)
 
-# define solverManagerBaseNested_addVirtualConstItemP4                        \
-(TYPE, ITEM, P1,P2,P3,P4)                                                     \
+# define smBaseNested_addVirtualConstItem_P4(TYPE, ITEM, P1,P2,P3,P4)         \
                                                                               \
-        solverManagerBaseNested_addItemModP4                                  \
-        (TYPE, ITEM, virtual const, P1,P2,P3,P4);
+        smBaseNested_addModItem_P4(TYPE, ITEM, virtual const, P1,P2,P3,P4)
 
-# define solverManagerBaseNested_addVirtualConstItemP5                        \
-(TYPE, ITEM, P1,P2,P3,P4,P5)                                                  \
+# define smBaseNested_addVirtualConstItem_P5(TYPE, ITEM, P1,P2,P3,P4,P5)      \
                                                                               \
-        solverManagerBaseNested_addItemModP5                                  \
-        (TYPE, ITEM, virtual const, P1,P2,P3,P4,P5);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-
-# define solverManagerBaseNested_addPmanager(TYPE, ITEM)                      \
-                                                                              \
-        solverManagerBaseNested_addItemP1                                     \
-        (TYPE, ITEM, this->manager())
-
-# define solverManagerBaseNested_addVirtualPmanager(TYPE, ITEM)               \
-                                                                              \
-        solverManagerBaseNested_addVirtualItemP1                              \
-        (TYPE, ITEM, this->manager())
-
-# define solverManagerBaseNested_addConstPmanager(TYPE, ITEM)                 \
-                                                                              \
-        solverManagerBaseNested_addConstItemP1                                \
-        (TYPE, ITEM, this->manager())
-
-# define solverManagerBaseNested_addVirtualConstPmanager(TYPE, ITEM)          \
-                                                                              \
-        solverManagerBaseNested_addVirtualConstItemP1                         \
-        (TYPE, ITEM, this->manager())
+        smBaseNested_addModItem_P5(TYPE, ITEM, virtual const, P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -44,36 +44,38 @@ Description
 //       and storageItemDict(...) instead of polyMesh::defaultRegion as default
 //       parameter for the region word
 
-// TODO: Constructor for control currently only takes one parameter: mesh
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerRegion_new(MANAGER, NAME)                               \
+# define smRegion_new(MANAGER, NAME)                                          \
                                                                               \
-    solverManagerBaseNested_new(Region, solverManagerRegion, MANAGER, NAME)   \
+    smBaseNested_new(Region, solverManagerRegion, MANAGER, NAME)              \
                                                                               \
     protected: virtual void init(const word& init = "default") const {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerRegion_end()                                            \
+# define smRegion_end()                                                       \
                                                                               \
-    solverManagerBaseNested_end()
+    smBaseNested_end()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerRegion_addControl(TYPE, MESH)                           \
+# define smRegion_addSettings()                                               \
+                                                                              \
+    smBaseNested_addVirtualItem_P1(Settings, settings, )
+
+# define smRegion_addControl_mesh(TYPE)                                       \
                                                                               \
     public: typedef TYPE Control;                                             \
                                                                               \
-    solverManagerBaseNested_addVirtualItemP1(Control, control, MESH)
+    smBaseNested_addVirtualItem_P1(Control, control, this->mesh())
 
 
-# define solverManagerRegion_addStorage(TYPE)                                 \
+# define smRegion_addStorage_manager()                                        \
                                                                               \
-    solverManagerBaseNested_addVirtualPmanager(Storage, storage)
+    smBaseNested_addVirtualItem_P1(Storage, storage, this->manager())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

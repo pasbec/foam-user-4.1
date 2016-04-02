@@ -185,9 +185,27 @@ void interTrackManager::init() const
     {
         const dictionary& settingsDict = this->settingsRegionDict();
 
+        DefaultRegion::Settings& settings =
+            regions().defaultRegion().settings();
+
+// TODO: Probably its better to use a hash table for Settings?
+// TODO: Read this settings based on Region class? -> init(), read(), ...
+        settings.UpCoupled = settingsDict.lookupOrDefault("UpCoupled", false);
+        settings.UpPredictorForce = settingsDict.lookupOrDefault("UpPredictorForce", false);
+
 //         scalar test; readScalar(settingsDict.lookup("test"));
 //         scalar test2; settingsDict.lookupOrDefault("test2", 0.0);
     }
+}
+
+
+void interTrackManager::read() const
+{
+}
+
+
+void interTrackManager::finalize() const
+{
 }
 
 

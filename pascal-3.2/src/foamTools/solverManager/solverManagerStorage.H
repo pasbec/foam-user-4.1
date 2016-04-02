@@ -58,23 +58,23 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerStorage_new(MANAGER, NAME)                              \
+# define smStorage_new(MANAGER, NAME)                                         \
                                                                               \
-    solverManagerBaseNested_new(Storage, solverManagerStorage, MANAGER, NAME) \
+    smBaseNested_new(Storage, solverManagerStorage, MANAGER, NAME)            \
                                                                               \
     protected: virtual void init(const word& init = "default") const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerStorage_end()                                           \
+# define smStorage_end()                                                      \
                                                                               \
-    solverManagerBaseNested_end()
+    smBaseNested_end()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerStorage_add(TYPE, DATA)                                 \
+# define smStorage_add(TYPE, DATA)                                            \
                                                                               \
     private: mutable autoPtr<TYPE> DATA##Ptr_;                                \
                                                                               \

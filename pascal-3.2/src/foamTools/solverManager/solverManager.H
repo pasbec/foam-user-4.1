@@ -49,158 +49,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// TODO: Remake these macros
-
-# define createManager(NAME, MESH)                                            \
-                                                                              \
-    NAME##Manager manager(MESH);
-
-
-# define setManagerScope(NAME)                                                \
-                                                                              \
-    NAME##Manager& NAME = manager.NAME();                                     \
-    NAME##Manager& manager = NAME;
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define solverManagerNestedClass_new(MANAGER, TYPE, NAME)                    \
-                                                                              \
-    public: class NAME                                                        \
-    :                                                                         \
-        public solverManager<MANAGER::ManagerMesh>::TYPE                      \
-    {                                                                         \
-        private: NAME(const NAME&);                                           \
-                                                                              \
-        private: void operator=(const NAME&);                                 \
-                                                                              \
-        private: const MANAGER& manager_;                                     \
-                                                                              \
-        protected: inline const MANAGER& manager() const                      \
-        {                                                                     \
-            return manager_;                                                  \
-        };                                                                    \
-                                                                              \
-        protected: inline const dictionary& propertiesDict() const            \
-        {                                                                     \
-            return manager_.propertiesDict();                                 \
-        };                                                                    \
-                                                                              \
-        protected: inline const dictionary& settingsDict() const              \
-        {                                                                     \
-            return manager_.settingsDict();                                   \
-        };                                                                    \
-                                                                              \
-        protected: virtual const dictionary& settingsRegionDict               \
-        (                                                                     \
-            const word& region = polyMesh::defaultRegion                      \
-        ) const                                                               \
-        {                                                                     \
-            return manager_.settingsRegionDict(region);                       \
-        };                                                                    \
-                                                                              \
-        protected: inline const dictionary& storageDict() const               \
-        {                                                                     \
-            return manager_.storageDict();                                    \
-        };                                                                    \
-                                                                              \
-        protected: virtual const dictionary& storageRegionDict                \
-        (                                                                     \
-            const word& region = polyMesh::defaultRegion                      \
-        ) const                                                               \
-        {                                                                     \
-            return manager_.storageRegionDict(region);                        \
-        };                                                                    \
-                                                                              \
-        protected: virtual bool storageItemDict                               \
-        (                                                                     \
-            const word& item,                                                 \
-            dictionary& dict,                                                 \
-            const word& region = polyMesh::defaultRegion                      \
-        ) const                                                               \
-        {                                                                     \
-            return manager_.storageItemDict(item, dict, region);              \
-        };                                                                    \
-                                                                              \
-        public: NAME(const MANAGER& manager)                                  \
-        :                                                                     \
-            solverManager<MANAGER::ManagerMesh>::TYPE                         \
-            (                                                                 \
-                manager.args(), manager.time(), manager.mesh()                \
-            ),                                                                \
-            manager_(manager)                                                 \
-        {                                                                     \
-            init();                                                           \
-        };                                                                    \
-                                                                              \
-        public: virtual ~NAME() {};
-
-
-# define solverManagerNestedClass_add(TYPE, ITEM)                             \
-                                                                              \
-        private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
-                                                                              \
-        public: TYPE& ITEM() const                                            \
-        {                                                                     \
-            if (ITEM##Ptr_.empty())                                           \
-            {                                                                 \
-                ITEM##Ptr_.set(new TYPE(this->manager()));                    \
-            }                                                                 \
-                                                                              \
-            return ITEM##Ptr_();                                              \
-        }
-
-
-# define solverManagerNestedClass_addVirtual(TYPE, ITEM)                      \
-                                                                              \
-        private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
-                                                                              \
-        public: virtual TYPE& ITEM() const                                    \
-        {                                                                     \
-            if (ITEM##Ptr_.empty())                                           \
-            {                                                                 \
-                ITEM##Ptr_.set(new TYPE(this->manager()));                    \
-            }                                                                 \
-                                                                              \
-            return ITEM##Ptr_();                                              \
-        }
-
-
-# define solverManagerNestedClass_end()                                       \
-                                                                              \
-    };
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define solverManager_add(TYPE, ITEM)                                        \
-                                                                              \
-        private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
-                                                                              \
-        public: TYPE& ITEM() const                                            \
-        {                                                                     \
-            if (ITEM##Ptr_.empty())                                           \
-            {                                                                 \
-                ITEM##Ptr_.set(new TYPE(*this));                              \
-            }                                                                 \
-                                                                              \
-            return ITEM##Ptr_();                                              \
-        }
-
-
-# define solverManager_addVirtual(TYPE, ITEM)                                 \
-                                                                              \
-        private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
-                                                                              \
-        public: virtual TYPE& ITEM() const                                    \
-        {                                                                     \
-            if (ITEM##Ptr_.empty())                                           \
-            {                                                                 \
-                ITEM##Ptr_.set(new TYPE(*this));                              \
-            }                                                                 \
-                                                                              \
-            return ITEM##Ptr_();                                              \
-        }
+// TODO: Remake setManagerScope, ...
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -235,7 +84,9 @@ public:
 
     // Public Structs
 
-// TODO: Rename
+// TODO: Add global settings
+
+// TODO: Rename parameters
         //- Time parameters
         struct parameters
         {
@@ -274,13 +125,13 @@ protected:
             };
 
             //- Init sequence
-            virtual void init() const {};
+            virtual void init() const = 0;
 
             //- Read sequence
-            virtual void read() const {};
+            virtual void read() const = 0;
 
             //- Finalize sequence
-            virtual void finalize() const {};
+            virtual void finalize() const = 0;
 
             //- Pre write sequence
             virtual void writePre() const {};

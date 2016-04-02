@@ -62,64 +62,74 @@ public:
 
     // Public Nested Classes
 
+// TODO: Move DefaultRegion declaration into Regions?
         //- Default region
-        solverManagerRegion_new(interTrackManager, DefaultRegion);
+        smRegion_new(interTrackManager, DefaultRegion);
+
+// TODO: Probably its better to use a hash table for Settings?
+// TODO: Read this settings based on Region class? -> init(), read(), ...
+            //- Settings
+            public: struct Settings
+            {
+                Switch UpCoupled;
+                Switch UpPredictorForce;
+            };
+            smRegion_addSettings();
 
             //- Control
-            solverManagerRegion_addControl(interTrackControl, this->mesh());
+            smRegion_addControl_mesh(interTrackControl);
 
-            //- Storage class
-            solverManagerStorage_new(interTrackManager, Storage);
+            //- Storage
+            smStorage_new(interTrackManager, Storage);
 
                 //- Gravitational acceleration
-                solverManagerStorage_add(uniformDimensionedVectorField, g);
+                smStorage_add(uniformDimensionedVectorField, g);
 
                 //- Pressure
-                solverManagerStorage_add(volScalarField, p);
+                smStorage_add(volScalarField, p);
 
                 //- Velocity
-                solverManagerStorage_add(volVectorField, U);
+                smStorage_add(volVectorField, U);
 
                 //- Face flux
-                solverManagerStorage_add(surfaceScalarField, phi);
+                smStorage_add(surfaceScalarField, phi);
 
                 //- Volume force
-                solverManagerStorage_add(volVectorField, F);
+                smStorage_add(volVectorField, F);
 
                 //- Density
-                solverManagerStorage_add(volScalarField, rho);
+                smStorage_add(volScalarField, rho);
 
                 //- Dynamic viscosity
-                solverManagerStorage_add(volScalarField, mu);
+                smStorage_add(volScalarField, mu);
 
                 //- Fluid indicator
-                solverManagerStorage_add(volScalarField, fluidIndicator);
+                smStorage_add(volScalarField, fluidIndicator);
 
                 //- Transport model
-                solverManagerStorage_add(twoPhaseMixture, transport);
+                smStorage_add(twoPhaseMixture, transport);
 
                 //- Turbulence model
-                solverManagerStorage_add(incompressible::turbulenceModel, turbulence);
+                smStorage_add(incompressible::turbulenceModel, turbulence);
 
                 //- Tracked surface
-                solverManagerStorage_add(trackedSurface, interface);
+                smStorage_add(trackedSurface, interface);
 
-            solverManagerStorage_end();
+            smStorage_end();
+            smRegion_addStorage_manager();
 
-            solverManagerRegion_addStorage();
-
-        solverManagerRegion_end();
+        smRegion_end();
 
         //- Regions
-        solverManagerRegions_new(interTrackManager, Regions);
+        smRegions_new(interTrackManager, Regions);
 
             //- Default region
-            solverManagerRegions_addDefaultRegion(DefaultRegion);
+            smRegions_addDefaultRegion_manager(DefaultRegion);
 
-        solverManagerRegions_end();
+        smRegions_end();
 
-    // Add virtual regions function
-    solverManager_addVirtual(Regions, regions);
+        //- Virtual regions function
+        smBaseNested_addVirtualItem_P1(Regions, regions, *this);
 
 
 private:
@@ -136,6 +146,15 @@ private:
 
             //- Set Courant Number
             virtual bool setCoNum(scalar& CoNum) const;
+
+            //- Init sequence
+            virtual void init() const;
+
+            //- Read sequence
+            virtual void read() const;
+
+            //- Finalize sequence
+            virtual void finalize() const;
 
             //- Pre write sequence
             virtual void writePre() const;
@@ -164,9 +183,6 @@ public:
         virtual ~interTrackManager() {};
 
     // Member Functions
-
-        //- Read
-        virtual void init() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

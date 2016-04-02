@@ -39,30 +39,30 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerRegions_new(MANAGER, NAME)                              \
+# define smRegions_new(MANAGER, NAME)                                         \
                                                                               \
-    solverManagerBaseNested_new(Regions, solverManagerRegions, MANAGER, NAME) \
+    smBaseNested_new(Regions, solverManagerRegions, MANAGER, NAME)            \
                                                                               \
     protected: virtual void init(const word& init = "default") const {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerRegions_end()                                           \
+# define smRegions_end()                                                      \
                                                                               \
-    solverManagerBaseNested_end()
+    smBaseNested_end()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerRegions_addDefaultRegion(TYPE)                          \
+# define smRegions_addDefaultRegion_manager(TYPE)                             \
                                                                               \
-    solverManagerBaseNested_addVirtualPmanager(TYPE, defaultRegion)
+    smBaseNested_addVirtualItem_P1(TYPE, defaultRegion, this->manager())
 
 
-# define solverManagerRegions_addRegion(TYPE, REGION)                         \
+# define smRegions_addRegion_manager(TYPE, REGION)                            \
                                                                               \
-    solverManagerBaseNested_addVirtualPmanager(TYPE, REGION)
+    smBaseNested_addVirtualItem_P1(TYPE, REGION, this->manager())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
