@@ -271,22 +271,13 @@ protected:
             };
 
             //- Pre loop sequence
-            virtual void timePre() const {};
+            virtual void init() const {};
+
+            //- Read loop sequence
+            virtual void read() const {};
 
             //- Post loop sequence
-            virtual void timePost() const {};
-
-            //- Pre loop sequence
-            virtual void loopPre() const {};
-
-            //- Post loop sequence
-            virtual void loopPost() const {};
-
-            //- Pre run sequence
-            virtual void runPre() const {};
-
-            //- Post run sequence
-            virtual void runPost() const {};
+            virtual void finalize() const {};
 
             //- Pre write sequence
             virtual void writePre() const {};
@@ -457,9 +448,6 @@ public:
             ) const;
 
         // Evolution
-
-            //- Read
-            virtual void read() const = 0;;
 
             //- Main time loop wrapper
             bool loop() const;

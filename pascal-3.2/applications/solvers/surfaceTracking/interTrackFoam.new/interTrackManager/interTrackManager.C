@@ -162,7 +162,7 @@ interTrackManager::interTrackManager
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void interTrackManager::read() const
+void interTrackManager::init() const
 {
     // Global settings
     {

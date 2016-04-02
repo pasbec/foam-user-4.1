@@ -271,11 +271,9 @@ bool solverManager<MESH>::loop() const
 
     Time& runTime = const_cast<Time&>(time());
 
-    read();
-
     if (prePhase())
     {
-        timePre();
+        init();
 
         msg().newLine();
         msg().startTimeLoop();
@@ -295,20 +293,18 @@ bool solverManager<MESH>::loop() const
         msg().newLine();
     }
 
-    loopPre();
-
     if (runTime.loop())
     {
+        read();
+
         msg().timeIs();
         msg().newLine();
-
-        loopPost();
 
         return true;
     }
     else
     {
-        timePost();
+        finalize();
 
         msg().end();
 
@@ -323,11 +319,9 @@ bool solverManager<MESH>::run() const
 
     Time& runTime = const_cast<Time&>(time());
 
-    read();
-
     if (prePhase())
     {
-        timePre();
+        init();
 
         msg().newLine();
         msg().startTimeLoop();
@@ -347,10 +341,10 @@ bool solverManager<MESH>::run() const
         msg().newLine();
     }
 
-    runPre();
-
     if (runTime.run())
     {
+        read();
+
         applyDeltaT();
 
         runTime++;
@@ -358,13 +352,11 @@ bool solverManager<MESH>::run() const
         msg().timeIs();
         msg().newLine();
 
-        runPost();
-
         return true;
     }
     else
     {
-        timePost();
+        finalize();
 
         msg().end();
 

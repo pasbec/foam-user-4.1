@@ -167,7 +167,7 @@ public:
     // Member Functions
 
         //- Read
-        virtual void read() const;
+        virtual void init() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
