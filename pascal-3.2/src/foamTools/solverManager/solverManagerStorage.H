@@ -40,83 +40,51 @@ Description
 
 #include "solverManager.H"
 
+// TODO TODO TODO TODO :
+//       Move all 'intelligent' code in class "Item"
+//       and use only macro to get all items in
+//       the Storage namespace e.g.:
+//
+//         autoPtr<Item> pItemPtr_;
+//
+//       And then take the macros only for:
+//
+//         p() => pItemPtr->get(),
+//         pPtr() => pItemPtr_->Ptr(),
+//         is_p() => pItemPtr.is(), ...
+//
+// TODO: Rename modules to storage or similar??? This is a shitty name...
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define solverManagerStorage_new(MANAGER, NAME)                              \
                                                                               \
     solverManagerNestedClass_new(MANAGER, Storage, NAME)                      \
                                                                               \
-    protected: virtual void init(const word init = "default") const;
+    protected: virtual void init(const word& init = "default") const;
 
 
 # define solverManagerStorage_add(TYPE, DATA)                                 \
                                                                               \
     private: mutable autoPtr<TYPE> DATA##Ptr_;                                \
                                                                               \
+    private: mutable Switch DATA##Optional_;                                  \
+                                                                              \
     private: mutable Switch DATA##Locked_;                                    \
                                                                               \
     private: mutable Switch DATA##Disabled_;                                  \
                                                                               \
-    private: void make_##DATA(const word init = "default") const              \
+    private: inline void mandatory_##DATA() const                             \
     {                                                                         \
-        if (!DATA##Disabled_)                                                 \
-        {                                                                     \
-            if (DATA##Ptr_.empty())                                           \
-            {                                                                 \
-                if (!DATA##Locked_)                                           \
-                {                                                             \
-                    DATA##Locked_ = true;                                     \
+        DATA##Optional_ = false;                                              \
+    };                                                                        \
                                                                               \
-                    Info << "Create " << #DATA                                \
-                        << " for region " << mesh().name()                    \
-                        << endl;                                              \
+    private: inline void optional_##DATA() const                              \
+    {                                                                         \
+        DATA##Optional_ = true;                                               \
+    };                                                                        \
                                                                               \
-                    create_##DATA(init);                                      \
-                                                                              \
-                    DATA##Locked_ = false;                                    \
-                }                                                             \
-                else                                                          \
-                {                                                             \
-                    FatalErrorIn                                              \
-                    (manager_.type() + "Storage::make_" + #DATA + "()")       \
-                        << "Pointer for "                                     \
-                            << #DATA                                          \
-                            << " is part of a circular reference."            \
-                            << " Check all occurances in storage!"            \
-                            << abort(FatalError);                             \
-                }                                                             \
-            }                                                                 \
-                                                                              \
-            if (DATA##Ptr_.empty())                                           \
-            {                                                                 \
-                FatalErrorIn                                                  \
-                (manager_.type() + "Storage::make_" + #DATA + "()")           \
-                    << "Pointer for "                                         \
-                        << #DATA                                              \
-                        << " is still unallocated after creation."            \
-                        << " Make sure the data member " << #DATA << "Ptr_ "  \
-                        << " is set correctly in its create-function: "       \
-                        << "create_" << #DATA                                 \
-                        << "(const word init = 'default')!"                   \
-                        << abort(FatalError);                                 \
-            }                                                                 \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-            FatalErrorIn                                                      \
-            (manager_.type() + "Storage::make_" + #DATA + "()")               \
-                << "The storage item "                                        \
-                    << #DATA                                                  \
-                    << " is globally disabled and cannot be used."            \
-                    << " Check your storage settings!"                        \
-                    << abort(FatalError);                                     \
-                                                                              \
-        }                                                                     \
-    }                                                                         \
-                                                                              \
-    private: void create_##DATA(const word init = "default") const;           \
-                                                                              \
-    public: void DATA##Enable() const                                         \
+    private: void enable_##DATA() const                                       \
     {                                                                         \
         if (DATA##Disabled_)                                                  \
         {                                                                     \
@@ -125,7 +93,7 @@ Description
         else                                                                  \
         {                                                                     \
             FatalErrorIn                                                      \
-            (manager_.type() + "Storage::" + #DATA + "Enable()")              \
+            (manager_.type() + "Storage::enable_" + #DATA + "()")             \
                 << "The storage item "                                        \
                     << #DATA                                                  \
                     << " is already disabled!"                                \
@@ -133,14 +101,14 @@ Description
         }                                                                     \
     };                                                                        \
                                                                               \
-    public: void DATA##Disable() const                                        \
+    private: void disable_##DATA() const                                      \
     {                                                                         \
         if (!DATA##Disabled_)                                                 \
         {                                                                     \
             if (DATA##Ptr_.valid())                                           \
             {                                                                 \
                 FatalErrorIn                                                  \
-                (manager_.type() + "Storage::" + #DATA + "Disable()")         \
+                (manager_.type() + "Storage::disable_" + #DATA + "()")        \
                     << "The storage item "                                    \
                         << #DATA                                              \
                         << " is still allocated and cannot be disabled."      \
@@ -155,26 +123,169 @@ Description
         }                                                                     \
     };                                                                        \
                                                                               \
-    public: inline bool DATA##IsEmpty() const                                 \
+    private: void create_##DATA(const word& init = "default") const           \
+    {                                                                         \
+        if (!DATA##Disabled_)                                                 \
+        {                                                                     \
+            if (DATA##Ptr_.empty())                                           \
+            {                                                                 \
+                if (!DATA##Locked_)                                           \
+                {                                                             \
+                    DATA##Locked_ = true;                                     \
+                                                                              \
+                    Info << "Create " << #DATA                                \
+                        << " for region " << mesh().name()                    \
+                        << endl;                                              \
+                                                                              \
+                    init_##DATA(init);                                        \
+                                                                              \
+                    DATA##Locked_ = false;                                    \
+                }                                                             \
+                else                                                          \
+                {                                                             \
+                    FatalErrorIn                                              \
+                    (manager_.type() + "Storage::create_" + #DATA + "()")     \
+                        << "Pointer for "                                     \
+                            << #DATA                                          \
+                            << " is part of a circular reference."            \
+                            << " Check all occurances in storage!"            \
+                            << abort(FatalError);                             \
+                }                                                             \
+            }                                                                 \
+                                                                              \
+            if (DATA##Ptr_.empty())                                           \
+            {                                                                 \
+                FatalErrorIn                                                  \
+                (manager_.type() + "Storage::create_" + #DATA + "()")         \
+                    << "Pointer for "                                         \
+                        << #DATA                                              \
+                        << " is still unallocated after creation."            \
+                        << " Make sure the data member " << #DATA << "Ptr_ "  \
+                        << " is set correctly in its init-function: "         \
+                        << "init_" << #DATA << "(const word& init)!"          \
+                        << abort(FatalError);                                 \
+            }                                                                 \
+        }                                                                     \
+        else                                                                  \
+        {                                                                     \
+            FatalErrorIn                                                      \
+            (manager_.type() + "Storage::create_" + #DATA + "()")             \
+                << "The storage item "                                        \
+                    << #DATA                                                  \
+                    << " is globally disabled and cannot be used."            \
+                    << " Check your storage settings!"                        \
+                    << abort(FatalError);                                     \
+                                                                              \
+        }                                                                     \
+    };                                                                        \
+                                                                              \
+    private: bool dict_##DATA                                                 \
+    (                                                                         \
+        dictionary& dict,                                                     \
+        const word& name = #DATA                                              \
+    ) const                                                                   \
+    {                                                                         \
+        return modules(name, dict, !DATA##Optional_);                         \
+    };                                                                        \
+                                                                              \
+    private: bool switch_##DATA                                               \
+    (                                                                         \
+        dictionary& dict,                                                     \
+        const word& name = #DATA                                              \
+    ) const                                                                   \
+    {                                                                         \
+        disable_##DATA();                                                     \
+                                                                              \
+        if (dict_##DATA(dict, name))                                          \
+        {                                                                     \
+            enable_##DATA();                                                  \
+                                                                              \
+            return true;                                                      \
+        }                                                                     \
+                                                                              \
+        if (!DATA##Optional_)                                                 \
+        {                                                                     \
+            FatalErrorIn                                                      \
+            (manager_.type() + "Storage::switch_" + #DATA + "()")             \
+                        << "Storage element "                                 \
+                            << #DATA                                          \
+                            << " is mandatory and cannot be disabled."        \
+                            << " Check settings in storage and properties!"   \
+                            << abort(FatalError);                             \
+        }                                                                     \
+        else                                                                  \
+        {                                                                     \
+            Info << "Disable " << #DATA                                       \
+                << " for region " << mesh().name()                            \
+                << endl;                                                      \
+        }                                                                     \
+                                                                              \
+        return false;                                                         \
+    };                                                                        \
+                                                                              \
+    private: bool make_##DATA(const word& name = #DATA) const                 \
+    {                                                                         \
+        word init = "";                                                       \
+                                                                              \
+        dictionary dict;                                                      \
+        if (switch_##DATA(dict, name))                                        \
+        {                                                                     \
+            init = dict.lookupOrDefault("init", word("default"));             \
+                                                                              \
+            create_##DATA(init);                                              \
+                                                                              \
+            return true;                                                      \
+        }                                                                     \
+                                                                              \
+        return false;                                                         \
+    };                                                                        \
+                                                                              \
+    private: bool makeMandatory_##DATA(const word& name = #DATA) const        \
+    {                                                                         \
+         mandatory_##DATA();                                                  \
+                                                                              \
+         return make_##DATA(name);                                            \
+    };                                                                        \
+                                                                              \
+    private: bool makeOptional_##DATA(const word& name = #DATA) const         \
+    {                                                                         \
+         optional_##DATA();                                                   \
+                                                                              \
+         return make_##DATA(name);                                            \
+    };                                                                        \
+                                                                              \
+    private: void init_##DATA(const word& init = "default") const;            \
+                                                                              \
+    public: inline bool is_##DATA() const                                     \
+    {                                                                         \
+        return !DATA##Disabled_;                                              \
+    };                                                                        \
+                                                                              \
+    public: inline bool isNot_##DATA() const                                  \
+    {                                                                         \
+        return DATA##Disabled_;                                               \
+    };                                                                        \
+                                                                              \
+    public: inline bool isEmpty_##DATA() const                                \
     {                                                                         \
         return DATA##Ptr_.empty();                                            \
     };                                                                        \
                                                                               \
-    public: inline bool DATA##IsValid() const                                 \
+    public: inline bool isValid_##DATA() const                                \
     {                                                                         \
         return DATA##Ptr_.valid();                                            \
     };                                                                        \
                                                                               \
-    public: TYPE& DATA(const word init = "default") const                     \
+    public: TYPE& DATA(const word& init = "default") const                    \
     {                                                                         \
-        make_##DATA(init);                                                    \
+        create_##DATA(init);                                                  \
                                                                               \
         return DATA##Ptr_();                                                  \
     };                                                                        \
                                                                               \
-    public: TYPE* DATA##Ptr(const word init = "default") const                \
+    public: TYPE* DATA##Ptr(const word& init = "default") const               \
     {                                                                         \
-        make_##DATA(init);                                                    \
+        create_##DATA(init);                                                  \
                                                                               \
         return DATA##Ptr_.operator->();                                       \
     };
@@ -249,7 +360,7 @@ protected:
         }
 
         //- Initialize data
-        virtual void init(const word init) const = 0;
+        virtual void init(const word& init) const = 0;
 
 
 public:

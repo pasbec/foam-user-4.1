@@ -156,16 +156,6 @@ interTrackManager::interTrackManager
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-interTrackManager::Control& interTrackManager::control() const
-{
-    if (controlPtr_.empty())
-    {
-        controlPtr_.set(new interTrackManager::Control(this->mesh()));
-    }
-
-    return controlPtr_();
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

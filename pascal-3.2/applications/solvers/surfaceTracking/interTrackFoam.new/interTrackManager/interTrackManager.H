@@ -60,10 +60,6 @@ class interTrackManager
 {
 public:
 
-    // Public typedefs
-
-        typedef interTrackControl Control;
-
 //     // Public Strutcs
 //
 //         struct forceData
@@ -143,18 +139,13 @@ public:
 //
 //         static Switch force;
 
+
 private:
 
     // Private Data
 
         //- Regions
         mutable autoPtr<Regions> regionsPtr_;
-
-        //- Control
-        mutable autoPtr<Control> controlPtr_;
-
-        //- Storage
-        mutable autoPtr<Storage> storagePtr_;
 
     // Private Member Functions
 
@@ -196,7 +187,7 @@ public:
         virtual ~interTrackManager() {};
 
     // Member Functions
-
+// TODO: Put all of these functions in macros
         // Regions
             //- All regions
             virtual Regions& regions() const
@@ -216,7 +207,10 @@ public:
             };
 
         //- Control
-        virtual Control& control() const;
+        virtual DefaultRegion::Control& control() const
+        {
+            return defaultRegion().control();
+        };
 
         //- Storage
         virtual DefaultRegion::Storage& storage() const

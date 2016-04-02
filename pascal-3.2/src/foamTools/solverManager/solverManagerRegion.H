@@ -49,7 +49,7 @@ Description
                                                                               \
     solverManagerNestedClass_new(MANAGER, Region, NAME)                       \
                                                                               \
-    protected: virtual void init(const word init = "default") const {};
+    protected: virtual void init(const word& init = "default") const {};
 
 
 // TODO: Constructor for control only takes one parameter: mesh
@@ -147,7 +147,7 @@ protected:
         }
 
         //- Initialize data
-        virtual void init(const word init) const = 0;
+        virtual void init(const word& init) const = 0;
 
 
 public:

@@ -217,13 +217,6 @@ const typename solverManager<MESH>::Messages& solverManager<MESH>::msg() const
 
 
 template <class MESH>
-void solverManager<MESH>::init() const
-{
-    errorIfNotMaster();
-}
-
-
-template <class MESH>
 bool solverManager<MESH>::loop() const
 {
     errorIfNotMaster();
@@ -242,6 +235,12 @@ bool solverManager<MESH>::loop() const
     }
     else
     {
+        writePre();
+
+        time().write();
+
+        writePost();
+
         msg().executionTime();
         msg().newLine();
     }
@@ -286,6 +285,12 @@ bool solverManager<MESH>::run() const
     }
     else
     {
+        writePre();
+
+        time().write();
+
+        writePost();
+
         msg().executionTime();
         msg().newLine();
     }
@@ -313,19 +318,6 @@ bool solverManager<MESH>::run() const
 
         return false;
     }
-}
-
-
-template <class MESH>
-void solverManager<MESH>::write() const
-{
-    errorIfNotMaster();
-
-    writePre();
-
-    time().write();
-
-    writePost();
 }
 
 

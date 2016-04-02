@@ -33,7 +33,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void interTrackManager::DefaultRegion::Storage::create_g(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_g(const word& init) const
 {
     gPtr_.set
     (
@@ -52,7 +52,7 @@ void interTrackManager::DefaultRegion::Storage::create_g(const word init) const
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_p(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_p(const word& init) const
 {
     pPtr_.set
     (
@@ -72,7 +72,7 @@ void interTrackManager::DefaultRegion::Storage::create_p(const word init) const
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_U(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_U(const word& init) const
 {
     UPtr_.set
     (
@@ -92,7 +92,7 @@ void interTrackManager::DefaultRegion::Storage::create_U(const word init) const
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_phi(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_phi(const word& init) const
 {
     phiPtr_.set
     (
@@ -114,7 +114,7 @@ void interTrackManager::DefaultRegion::Storage::create_phi(const word init) cons
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_rho(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_rho(const word& init) const
 {
     rhoPtr_.set
     (
@@ -136,7 +136,7 @@ void interTrackManager::DefaultRegion::Storage::create_rho(const word init) cons
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_mu(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_mu(const word& init) const
 {
     muPtr_.set
     (
@@ -158,7 +158,7 @@ void interTrackManager::DefaultRegion::Storage::create_mu(const word init) const
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_F(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_F(const word& init) const
 {
     if (init == "default")
     {
@@ -206,7 +206,7 @@ void interTrackManager::DefaultRegion::Storage::create_F(const word init) const
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_fluidIndicator(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_fluidIndicator(const word& init) const
 {
     fluidIndicatorPtr_.set
     (
@@ -226,7 +226,7 @@ void interTrackManager::DefaultRegion::Storage::create_fluidIndicator(const word
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_transport(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_transport(const word& init) const
 {
     transportPtr_.set
     (
@@ -240,7 +240,7 @@ void interTrackManager::DefaultRegion::Storage::create_transport(const word init
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_turbulence(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_turbulence(const word& init) const
 {
     turbulencePtr_ =
     (
@@ -254,7 +254,7 @@ void interTrackManager::DefaultRegion::Storage::create_turbulence(const word ini
 }
 
 
-void interTrackManager::DefaultRegion::Storage::create_interface(const word init) const
+void interTrackManager::DefaultRegion::Storage::init_interface(const word& init) const
 {
     word interfacePrefix;
 
@@ -263,7 +263,15 @@ void interTrackManager::DefaultRegion::Storage::create_interface(const word init
         interfacePrefix = trackedSurface::typeName;
     }
 
+    // Include turbulence only if it is activated
+    incompressible::turbulenceModel* turbPtr = NULL;
+    if(is_turbulence())
+    {
+        turbPtr = turbulencePtr();
+    }
+
 // TODO: Add more constructors and simplify
+//       Make it use real rho and mu fields!
     interfacePtr_.set
     (
         new trackedSurface
@@ -276,7 +284,7 @@ void interTrackManager::DefaultRegion::Storage::create_interface(const word init
             NULL,
             gPtr(),
             transportPtr(),
-            turbulencePtr(),
+            turbPtr,
             NULL,
             interfacePrefix
         )
@@ -284,27 +292,17 @@ void interTrackManager::DefaultRegion::Storage::create_interface(const word init
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init(const word init) const
+void interTrackManager::DefaultRegion::Storage::init(const word& init) const
 {
-    g();
-    p();
-    U();
-    phi();
-    rho();
-    mu();
-
-//     if (properties().found("force"))
-//     {
-        F("calculated");
-//     }
-//     else
-//     {
-//         FDisable();
-//     }
-
-    fluidIndicator();
-
-    transport();
+    make_g();
+    make_p();
+    make_U();
+    make_phi();
+    make_rho();
+    make_mu();
+    makeOptional_F();
+    make_fluidIndicator();
+    make_transport();
 
     // Init density from transport (viscosity) model
     {
@@ -315,7 +313,6 @@ void interTrackManager::DefaultRegion::Storage::init(const word init) const
         rho().correctBoundaryConditions();
     }
 
-// TODO: Is this really necessary?
     // Init (dynamic) viscosity from transport (viscosity) model and density
     {
         dimensionedScalar nu1 = dimensionedScalar
@@ -331,9 +328,8 @@ void interTrackManager::DefaultRegion::Storage::init(const word init) const
         mu().correctBoundaryConditions();
     }
 
-    turbulence();
-
-    interface();
+    makeOptional_turbulence();
+    make_interface();
 }
 
 

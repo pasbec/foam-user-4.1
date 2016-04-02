@@ -1,18 +1,27 @@
 
-    tmp<volScalarField> muEff = rho * turbulence.nuEff();
-    muEff().rename("muEff");
+    tmp<volScalarField> tmu = mu;
+
+    if(storage.is_turbulence())
+    {
+        tmu() += rho * storage.turbulence().nut();
+        tmu().rename("muEff");
+    }
 
     tmp<fvVectorMatrix> UEqn
     (
         fvm::ddt(rho, U)
       + fvm::div(fvc::interpolate(rho)*phi, U, "div(phi,U)")
-      - fvm::laplacian(muEff(), U)
-      - fvc::div(muEff()*dev(fvc::grad(U)().T()))
-//       - (fvc::grad(U) & fvc::grad(muEff()))
-      - F
+      - fvm::laplacian(tmu(), U)
+      - fvc::div(tmu()*dev(fvc::grad(U)().T()))
+//       - (fvc::grad(U) & fvc::grad(tmu()))
     );
 
-    muEff.clear();
+    tmu.clear();
+
+    if(storage.is_F())
+    {
+        UEqn() -= storage.F();
+    }
 
     UEqn().relax();
 

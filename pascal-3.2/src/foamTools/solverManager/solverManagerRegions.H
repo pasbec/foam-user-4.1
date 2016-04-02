@@ -48,7 +48,7 @@ Description
                                                                               \
     solverManagerNestedClass_new(MANAGER, Regions, NAME)                      \
                                                                               \
-    protected: virtual void init(const word init = "default") const {};
+    protected: virtual void init(const word& init = "default") const {};
 
 
 # define solverManagerRegions_addDefaultRegion(TYPE)                          \
@@ -134,7 +134,7 @@ protected:
         }
 
         //- Initialize data
-        virtual void init(const word init) const = 0;
+        virtual void init(const word& init) const = 0;
 
 
 public:
@@ -161,7 +161,7 @@ public:
         virtual Region& defaultRegion() const = 0;
 };
 
-
+// TODO: This should actually got to Region? Test with regionMeshes
 template <>
 class solverManagerRegions<dynamicFvMesh>
 {
@@ -221,7 +221,7 @@ protected:
         }
 
         //- Initialize data
-        virtual void init(const word init) const = 0;
+        virtual void init(const word& init) const = 0;
 
 
 public:

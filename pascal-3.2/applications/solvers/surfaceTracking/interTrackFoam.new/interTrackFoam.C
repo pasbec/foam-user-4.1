@@ -49,24 +49,16 @@ int main(int argc, char *argv[])
 
     interTrackManager manager(args, runTime, mesh);
 
-// TODO: Use this?
-    manager.init();
-
     interTrackControl& control = manager.control();
 
     interTrackManager::DefaultRegion::Storage& storage =
         manager.defaultRegion().storage();
 
-    uniformDimensionedVectorField& g = storage.g();
     volScalarField& p = storage.p();
     volVectorField& U = storage.U();
     surfaceScalarField& phi = storage.phi();
     volScalarField& rho = storage.rho();
     volScalarField& mu = storage.mu();
-    volVectorField& F = storage.F();
-    volScalarField& fluidIndicator = storage.fluidIndicator();
-    twoPhaseMixture& transport = storage.transport();
-    incompressible::turbulenceModel& turbulence = storage.turbulence();
     trackedSurface& interface = storage.interface();
 
 
@@ -105,10 +97,13 @@ int main(int argc, char *argv[])
                 fvc::makeRelative(phi, U);
             }
 
-            if (control.turbCorr())
+            if
+            (
+                control.turbCorr()
+             && storage.is_turbulence()
+            )
             {
-                transport.correct();
-                turbulence.correct();
+                storage.turbulence().correct();
             }
 
             // Make the fluxes absolute
@@ -125,7 +120,6 @@ int main(int argc, char *argv[])
 
 // TODO: Move to surface info from writePre to manager
 //       function called something like timeSurfaceStatistics
-        manager.write();
     }
 
     return(0);

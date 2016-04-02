@@ -47,7 +47,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// TODO: Create sub-class for region related stuff
+// TODO: Remake these macros
 
 # define createManager(NAME, MESH)                                            \
                                                                               \
@@ -62,7 +62,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define solverManagerNestedClass_new(MANAGER, TYPE, NAME)                   \
+# define solverManagerNestedClass_new(MANAGER, TYPE, NAME)                    \
                                                                               \
     public: class NAME                                                        \
     :                                                                         \
@@ -80,9 +80,24 @@ SourceFiles
             return manager_;                                                  \
         };                                                                    \
                                                                               \
-        protected: inline const IOdictionary& properties() const              \
+        protected: inline const dictionary& properties() const                \
         {                                                                     \
             return manager_.properties();                                     \
+        };                                                                    \
+                                                                              \
+        protected: inline const dictionary& modules() const                   \
+        {                                                                     \
+            return manager_.modules();                                        \
+        };                                                                    \
+                                                                              \
+        protected: inline bool modules                                        \
+        (                                                                     \
+            const word& module,                                               \
+            dictionary& dict,                                                 \
+            const Switch& negate = false                                      \
+        ) const                                                               \
+        {                                                                     \
+            return manager_.modules(module, dict, negate);                    \
         };                                                                    \
                                                                               \
         public: NAME(const MANAGER& manager)                                  \
@@ -101,32 +116,32 @@ SourceFiles
 
 # define solverManagerNestedClass_add(TYPE, ITEM)                             \
                                                                               \
-    private: mutable autoPtr<TYPE> ITEM##Ptr_;                                \
+        private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
                                                                               \
-    public: TYPE& ITEM() const                                                \
-    {                                                                         \
-        if (ITEM##Ptr_.empty())                                               \
+        public: TYPE& ITEM() const                                            \
         {                                                                     \
-            ITEM##Ptr_.set(new TYPE(this->manager()));                        \
-        }                                                                     \
+            if (ITEM##Ptr_.empty())                                           \
+            {                                                                 \
+                ITEM##Ptr_.set(new TYPE(this->manager()));                    \
+            }                                                                 \
                                                                               \
-        return ITEM##Ptr_();                                                  \
-    }
+            return ITEM##Ptr_();                                              \
+        }
 
 
 # define solverManagerNestedClass_addVirtual(TYPE, ITEM)                      \
                                                                               \
-    private: mutable autoPtr<TYPE> ITEM##Ptr_;                                \
+        private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
                                                                               \
-    public: virtual TYPE& ITEM() const                                        \
-    {                                                                         \
-        if (ITEM##Ptr_.empty())                                               \
+        public: virtual TYPE& ITEM() const                                    \
         {                                                                     \
-            ITEM##Ptr_.set(new TYPE(this->manager()));                        \
-        }                                                                     \
+            if (ITEM##Ptr_.empty())                                           \
+            {                                                                 \
+                ITEM##Ptr_.set(new TYPE(this->manager()));                    \
+            }                                                                 \
                                                                               \
-        return ITEM##Ptr_();                                                  \
-    }
+            return ITEM##Ptr_();                                              \
+        }
 
 
 # define solverManagerNestedClass_end()                                       \
@@ -359,25 +374,57 @@ public:
             };
 
             //- Reference properties dictionary
-            inline const IOdictionary& properties() const
+            inline const dictionary& properties() const
             {
                 return properties_;
             };
 
-        // Evolution
+            //- Reference modules sub-dictionary
+            inline const dictionary& modules() const
+            {
+                return properties_.subDict("modules");
+            };
 
-            //- Initialize solver manager
-            void init() const;
+// TODO: Move to C-file
+            //- Reference to named module sub-dictionary
+            bool modules
+            (
+                const word& module,
+                dictionary& dict,
+                const Switch& negate = false
+            ) const
+            {
+                if
+                (
+                    modules().found(module)
+                 && modules().isDict(module)
+                )
+                {
+                    dict = modules().subDict(module);
+
+                    Switch enabled;
+                    if (dict.readIfPresent("enabled", enabled))
+                    {
+                        return enabled;
+                    }
+                }
+
+                if (!negate)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            };
+        // Evolution
 
             //- Main time loop wrapper
             bool loop() const;
 
             //- Main time run wrapper
             bool run() const;
-
-            //- Main time write wrapper
-            void write() const;
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
