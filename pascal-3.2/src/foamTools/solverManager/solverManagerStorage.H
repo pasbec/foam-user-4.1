@@ -44,6 +44,10 @@ Description
 //       Storage should be based on MeshType
 //       with a template specification for dydnamicFvMesh
 
+// TODO: Use mesh().name() for the virtual functions settingsRegionDict(...), storageRegionDict(...)
+//       and storageItemDict(...) instead of polyMesh::defaultRegion as default
+//       parameter for the region word
+
 // TODO TODO TODO TODO :
 //       Move all 'intelligent' code in class "Item"
 //       and use only macro to get all items in

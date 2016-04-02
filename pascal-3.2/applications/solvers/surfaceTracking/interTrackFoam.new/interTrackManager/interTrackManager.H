@@ -163,6 +163,11 @@ public:
     // Destructor
 
         virtual ~interTrackManager() {};
+
+    // Member Functions
+
+        //- Read
+        virtual void read() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

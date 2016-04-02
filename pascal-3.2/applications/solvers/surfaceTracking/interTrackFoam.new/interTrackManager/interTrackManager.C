@@ -162,6 +162,34 @@ interTrackManager::interTrackManager
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void interTrackManager::read() const
+{
+    // Global settings
+    {
+        const dictionary& settingsDict = this->settingsDict();
+
+        debug = settingsDict.lookupOrDefault<int>("debug", debug());
+
+//         if (debug)
+//         {
+// // TODO: Add TypeNames/debugSwitches for Regions and Storage.
+//         How can they be accessed/set even if they are private?
+//             Regions::debug = debug;
+//             DefaultRegion::debug = debug;
+//             DefaultRegion::Control::debug = debug;
+//             DefaultRegion::Storage::debug = debug;
+//         }
+    }
+
+    // Default region's settings
+    {
+        const dictionary& settingsDict = this->settingsRegionDict();
+
+//         scalar test; readScalar(settingsDict.lookup("test"));
+//         scalar test2; settingsDict.lookupOrDefault("test2", 0.0);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

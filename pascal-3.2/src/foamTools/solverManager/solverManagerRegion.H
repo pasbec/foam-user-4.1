@@ -45,7 +45,7 @@ Description
 //       Here and in storage MeshType should be used for all "mesh"-references
 //       with a template specification for dydnamicFvMesh
 
-// TODO: Use mesh().name() for the virtual functions storageRegionDict(...)
+// TODO: Use mesh().name() for the virtual functions settingsRegionDict(...), storageRegionDict(...)
 //       and storageItemDict(...) instead of polyMesh::defaultRegion as default
 //       parameter for the region word
 

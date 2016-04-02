@@ -168,15 +168,13 @@ solverManager<MESH>::solverManager
                 prefix + "Properties",
                 time_.constant(),
                 time_.db(),
-                IOobject::READ_IF_PRESENT,
+                IOobject::MUST_READ,
                 IOobject::NO_WRITE
             )
         )
     ),
     prePhase_(true)
-{
-
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -214,6 +212,16 @@ const typename solverManager<MESH>::Messages& solverManager<MESH>::msg() const
 
     return msgPtr_();
 }
+
+
+template <class MESH>
+const dictionary& solverManager<MESH>::settingsRegionDict
+(
+    const word& region
+) const
+{
+    return settingsDict().subDict(region);
+};
 
 
 template <class MESH>
@@ -262,6 +270,8 @@ bool solverManager<MESH>::loop() const
     errorIfNotMaster();
 
     Time& runTime = const_cast<Time&>(time());
+
+    read();
 
     if (prePhase())
     {
@@ -312,6 +322,8 @@ bool solverManager<MESH>::run() const
     errorIfNotMaster();
 
     Time& runTime = const_cast<Time&>(time());
+
+    read();
 
     if (prePhase())
     {

@@ -89,6 +89,14 @@ SourceFiles
             return manager_.settingsDict();                                   \
         };                                                                    \
                                                                               \
+        protected: virtual const dictionary& settingsRegionDict               \
+        (                                                                     \
+            const word& region = polyMesh::defaultRegion                      \
+        ) const                                                               \
+        {                                                                     \
+            return manager_.settingsRegionDict(region);                       \
+        };                                                                    \
+                                                                              \
         protected: inline const dictionary& storageDict() const               \
         {                                                                     \
             return manager_.storageDict();                                    \
@@ -378,7 +386,6 @@ public:
         //- Regions
         virtual Regions& regions() const = 0;
 
-
         // Basic
 
             //- Reference to args
@@ -423,6 +430,12 @@ public:
                 return propertiesDict_.subDict("settings");
             };
 
+            //- Reference to settings dictionary for named region
+            const dictionary& settingsRegionDict
+            (
+                const word& region = polyMesh::defaultRegion
+            ) const;
+
             //- Reference to storage dictionary
             inline const dictionary& storageDict() const
             {
@@ -444,6 +457,9 @@ public:
             ) const;
 
         // Evolution
+
+            //- Read
+            virtual void read() const = 0;;
 
             //- Main time loop wrapper
             bool loop() const;
