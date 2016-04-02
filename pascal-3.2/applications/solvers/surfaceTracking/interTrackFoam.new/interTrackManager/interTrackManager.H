@@ -60,22 +60,6 @@ class interTrackManager
 {
 public:
 
-//     // Public Strutcs
-//
-//         struct forceData
-//         {
-//             Switch enabled;
-//             word init;
-//             word name;
-//
-//             forceData()
-//             :
-//                 enabled(false),
-//                 init("default"),
-//                 name("F")
-//             {};
-//         };
-
     // Public Nested Classes
 
         //- Default region
@@ -135,17 +119,11 @@ public:
 
         solverManagerRegions_end();
 
-//     // Static Data
-//
-//         static Switch force;
+    // Add virtual regions function
+    solverManager_addVirtual(Regions, regions);
 
 
 private:
-
-    // Private Data
-
-        //- Regions
-        mutable autoPtr<Regions> regionsPtr_;
 
     // Private Member Functions
 
@@ -185,38 +163,6 @@ public:
     // Destructor
 
         virtual ~interTrackManager() {};
-
-    // Member Functions
-// TODO: Put all of these functions in macros
-        // Regions
-            //- All regions
-            virtual Regions& regions() const
-            {
-                if (regionsPtr_.empty())
-                {
-                    regionsPtr_.set(new Regions(*this));
-                }
-
-                return regionsPtr_();
-            };
-
-            //- Default region
-            virtual DefaultRegion& defaultRegion() const
-            {
-                return regions().defaultRegion();
-            };
-
-        //- Control
-        virtual DefaultRegion::Control& control() const
-        {
-            return defaultRegion().control();
-        };
-
-        //- Storage
-        virtual DefaultRegion::Storage& storage() const
-        {
-            return defaultRegion().storage();
-        };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -49,10 +49,11 @@ int main(int argc, char *argv[])
 
     interTrackManager manager(args, runTime, mesh);
 
-    interTrackControl& control = manager.control();
+    interTrackManager::DefaultRegion::Control& control =
+        manager.regions().defaultRegion().control();
 
     interTrackManager::DefaultRegion::Storage& storage =
-        manager.defaultRegion().storage();
+        manager.regions().defaultRegion().storage();
 
     volScalarField& p = storage.p();
     volVectorField& U = storage.U();

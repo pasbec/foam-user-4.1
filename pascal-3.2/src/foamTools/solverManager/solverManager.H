@@ -68,36 +68,48 @@ SourceFiles
     :                                                                         \
         public solverManager<MANAGER::Mesh>::TYPE                             \
     {                                                                         \
-                                                                              \
-        private: const MANAGER& manager_;                                     \
-                                                                              \
         private: NAME(const NAME&);                                           \
                                                                               \
         private: void operator=(const NAME&);                                 \
+                                                                              \
+        private: const MANAGER& manager_;                                     \
                                                                               \
         protected: inline const MANAGER& manager() const                      \
         {                                                                     \
             return manager_;                                                  \
         };                                                                    \
                                                                               \
-        protected: inline const dictionary& properties() const                \
+        protected: inline const dictionary& propertiesDict() const            \
         {                                                                     \
-            return manager_.properties();                                     \
+            return manager_.propertiesDict();                                 \
         };                                                                    \
                                                                               \
-        protected: inline const dictionary& modules() const                   \
+        protected: inline const dictionary& settingsDict() const              \
         {                                                                     \
-            return manager_.modules();                                        \
+            return manager_.settingsDict();                                   \
         };                                                                    \
                                                                               \
-        protected: inline bool modules                                        \
+        protected: inline const dictionary& storageDict() const               \
+        {                                                                     \
+            return manager_.storageDict();                                    \
+        };                                                                    \
+                                                                              \
+        protected: virtual const dictionary& storageRegionDict                \
         (                                                                     \
-            const word& module,                                               \
-            dictionary& dict,                                                 \
-            const Switch& negate = false                                      \
+            const word& region = polyMesh::defaultRegion                      \
         ) const                                                               \
         {                                                                     \
-            return manager_.modules(module, dict, negate);                    \
+            return manager_.storageRegionDict(region);                        \
+        };                                                                    \
+                                                                              \
+        protected: virtual bool storageItemDict                               \
+        (                                                                     \
+            const word& item,                                                 \
+            dictionary& dict,                                                 \
+            const word& region = polyMesh::defaultRegion                      \
+        ) const                                                               \
+        {                                                                     \
+            return manager_.storageItemDict(item, dict, region);              \
         };                                                                    \
                                                                               \
         public: NAME(const MANAGER& manager)                                  \
@@ -151,6 +163,38 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+# define solverManager_add(TYPE, ITEM)                                        \
+                                                                              \
+        private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
+                                                                              \
+        public: TYPE& ITEM() const                                            \
+        {                                                                     \
+            if (ITEM##Ptr_.empty())                                           \
+            {                                                                 \
+                ITEM##Ptr_.set(new TYPE(*this));                              \
+            }                                                                 \
+                                                                              \
+            return ITEM##Ptr_();                                              \
+        }
+
+
+# define solverManager_addVirtual(TYPE, ITEM)                                 \
+                                                                              \
+        private: mutable autoPtr<TYPE> ITEM##Ptr_;                            \
+                                                                              \
+        public: virtual TYPE& ITEM() const                                    \
+        {                                                                     \
+            if (ITEM##Ptr_.empty())                                           \
+            {                                                                 \
+                ITEM##Ptr_.set(new TYPE(*this));                              \
+            }                                                                 \
+                                                                              \
+            return ITEM##Ptr_();                                              \
+        }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
@@ -166,6 +210,11 @@ public:
     // Public typedefs
 
         typedef MESH Mesh;
+        typedef typename MESH::Mesh MeshType;
+
+// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
+//       Region and Storage should be based on MeshType
+//       with a template specification for dydnamicFvMesh
 
         typedef solverManagerMessages<MESH> Messages;
         typedef solverManagerRegions<MESH> Regions;
@@ -257,13 +306,13 @@ private:
             Time& time_;
 
             //- Reference to mesh
-            MESH& mesh_;
+            Mesh& mesh_;
 
             //- Master manager?
             const bool master_;
 
             //- Properties dictionary
-            IOdictionary properties_;
+            IOdictionary propertiesDict_;
 
         // Evolution
 
@@ -309,7 +358,7 @@ public:
         (
             const argList& args,
             Time& time,
-            MESH& mesh,
+            Mesh& mesh,
             const word& prefix,
             const bool& master = true
         );
@@ -326,19 +375,8 @@ public:
         //- Messages
         const Messages& msg() const;
 
-        // Regions
-
-            //- All regions
-            virtual Regions& regions() const = 0;
-
-            //- Default region
-            virtual Region& defaultRegion() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Storage
-        virtual Storage& storage() const = 0;
+        //- Regions
+        virtual Regions& regions() const = 0;
 
 
         // Basic
@@ -355,14 +393,8 @@ public:
                 return time_;
             };
 
-            //- Refrence to controlDict
-            inline const dictionary& controlDict() const
-            {
-                return time_.controlDict();
-            }
-
             //- Reference to mesh
-            inline MESH& mesh() const
+            inline Mesh& mesh() const
             {
                 return mesh_;
             };
@@ -373,51 +405,44 @@ public:
                 return master_;
             };
 
-            //- Reference properties dictionary
-            inline const dictionary& properties() const
+            //- Refrence to control dictionary
+            inline const dictionary& controlDict() const
             {
-                return properties_;
+                return time_.controlDict();
+            }
+
+            //- Reference to properties dictionary
+            inline const dictionary& propertiesDict() const
+            {
+                return propertiesDict_;
             };
 
-            //- Reference modules sub-dictionary
-            inline const dictionary& modules() const
+            //- Reference to settings dictionary
+            inline const dictionary& settingsDict() const
             {
-                return properties_.subDict("modules");
+                return propertiesDict_.subDict("settings");
             };
 
-// TODO: Move to C-file
-            //- Reference to named module sub-dictionary
-            bool modules
+            //- Reference to storage dictionary
+            inline const dictionary& storageDict() const
+            {
+                return propertiesDict_.subDict("storage");
+            };
+
+            //- Reference to storage dictionary for named region
+            const dictionary& storageRegionDict
             (
-                const word& module,
+                const word& region = polyMesh::defaultRegion
+            ) const;
+
+            //- Reference to dictionary of named item of storage
+            bool storageItemDict
+            (
+                const word& item,
                 dictionary& dict,
-                const Switch& negate = false
-            ) const
-            {
-                if
-                (
-                    modules().found(module)
-                 && modules().isDict(module)
-                )
-                {
-                    dict = modules().subDict(module);
+                const word& region = polyMesh::defaultRegion
+            ) const;
 
-                    Switch enabled;
-                    if (dict.readIfPresent("enabled", enabled))
-                    {
-                        return enabled;
-                    }
-                }
-
-                if (!negate)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            };
         // Evolution
 
             //- Main time loop wrapper

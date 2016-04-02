@@ -41,9 +41,17 @@ Description
 #include "solverManager.H"
 #include "solverManagerStorage.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
+//       Here and in storage MeshType should be used for all "mesh"-references
+//       with a template specification for dydnamicFvMesh
 
-// TODO: Macro new for regionMeshes where mesh is the mesh of one region
+// TODO: Use mesh().name() for the virtual functions storageRegionDict(...)
+//       and storageItemDict(...) instead of polyMesh::defaultRegion as default
+//       parameter for the region word
+
+// TODO: Constructor for control currently only takes one parameter: mesh
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define solverManagerRegion_new(MANAGER, NAME)                               \
                                                                               \
@@ -52,7 +60,6 @@ Description
     protected: virtual void init(const word& init = "default") const {};
 
 
-// TODO: Constructor for control only takes one parameter: mesh
 # define solverManagerRegion_addControl(TYPE)                                 \
                                                                               \
     public: typedef TYPE Control;                                             \
@@ -97,6 +104,11 @@ public:
     // Public typedefs
 
         typedef MESH Mesh;
+        typedef typename MESH::Mesh MeshType;
+
+// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
+//       Storage should be based on MeshType
+//       with a template specification for dydnamicFvMesh
 
         typedef solutionControl Control;
         typedef solverManagerStorage<MESH> Storage;

@@ -40,6 +40,10 @@ Description
 
 #include "solverManager.H"
 
+// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
+//       Storage should be based on MeshType
+//       with a template specification for dydnamicFvMesh
+
 // TODO TODO TODO TODO :
 //       Move all 'intelligent' code in class "Item"
 //       and use only macro to get all items in
@@ -52,8 +56,6 @@ Description
 //         p() => pItemPtr->get(),
 //         pPtr() => pItemPtr_->Ptr(),
 //         is_p() => pItemPtr.is(), ...
-//
-// TODO: Rename modules to storage or similar??? This is a shitty name...
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -185,7 +187,16 @@ Description
         const word& name = #DATA                                              \
     ) const                                                                   \
     {                                                                         \
-        return modules(name, dict, !DATA##Optional_);                         \
+        bool isValid = storageItemDict(name, dict);                           \
+                                                                              \
+        if (!DATA##Optional_)                                                 \
+        {                                                                     \
+            return !isValid;                                                  \
+        }                                                                     \
+        else                                                                  \
+        {                                                                     \
+            return isValid;                                                   \
+        }                                                                     \
     };                                                                        \
                                                                               \
     private: bool switch_##DATA                                               \
@@ -313,6 +324,7 @@ public:
     // Public typedefs
 
         typedef MESH Mesh;
+        typedef typename MESH::Mesh MeshType;
 
 
 private:

@@ -83,6 +83,11 @@ public:
     // Public typedefs
 
         typedef MESH Mesh;
+        typedef typename MESH::Mesh MeshType;
+
+// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
+//       Region and Storage should be based on MeshType
+//       with a template specification for dydnamicFvMesh
 
         typedef solverManagerRegion<MESH> Region;
         typedef solutionControl Control;
@@ -100,7 +105,7 @@ private:
         const Time& time_;
 
         //- Reference to mesh
-        const MESH& mesh_;
+        const Mesh& mesh_;
 
     // Private Member Functions
 
@@ -128,7 +133,7 @@ protected:
         };
 
         //- Return reference to mesh
-        inline MESH& mesh() const
+        inline Mesh& mesh() const
         {
             return mesh_;
         }
@@ -145,7 +150,7 @@ public:
         (
             const argList& args,
             const Time& time,
-            const MESH& mesh
+            const Mesh& mesh
         )
         :
             args_(args), time_(time), mesh_(mesh)
@@ -161,92 +166,6 @@ public:
         virtual Region& defaultRegion() const = 0;
 };
 
-// TODO: This should actually got to Region? Test with regionMeshes
-template <>
-class solverManagerRegions<dynamicFvMesh>
-{
-public:
-
-    // Public typedefs
-
-        typedef dynamicFvMesh Mesh;
-
-        typedef solverManagerRegion<dynamicFvMesh> Region;
-        typedef solutionControl Control;
-        typedef solverManagerStorage<dynamicFvMesh> Storage;
-
-
-private:
-
-    // Private Data
-
-        //- Reference to args
-        const argList& args_;
-
-        //- Reference to time
-        Time& time_;
-
-        //- Reference to mesh
-        dynamicFvMesh& mesh_;
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        solverManagerRegions(const solverManagerRegions&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const solverManagerRegions&);
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Reference to args
-        inline const argList& args() const
-        {
-            return args_;
-        };
-
-        //- Reference to time
-        inline Time& time() const
-        {
-            return time_;
-        };
-
-        //- Return reference to mesh
-        inline dynamicFvMesh& mesh() const
-        {
-            return mesh_;
-        }
-
-        //- Initialize data
-        virtual void init(const word& init) const = 0;
-
-
-public:
-
-    // Constructor
-
-        solverManagerRegions
-        (
-            const argList& args,
-            Time& time,
-            dynamicFvMesh& mesh
-        )
-        :
-            args_(args), time_(time), mesh_(mesh)
-        {};
-
-    // Destructor
-
-        virtual ~solverManagerRegions() {};
-
-    // Member Functions
-
-        //- Default region
-        virtual Region& defaultRegion() const = 0;
-};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -47,6 +47,14 @@ namespace Foam
 template <class MESH>
 class solverManagerMessages
 {
+public:
+
+    // Public typedefs
+
+        typedef MESH Mesh;
+        typedef typename MESH::Mesh MeshType;
+
+
 private:
 
     // Private Data
@@ -58,7 +66,7 @@ private:
         const Time& time_;
 
         //- Reference to mesh
-        const MESH& mesh_;
+        const Mesh& mesh_;
 
     // Private Member Functions
 
@@ -77,7 +85,7 @@ public:
         (
             const argList& args,
             const Time& time,
-            const MESH& mesh
+            const Mesh& mesh
         )
         :
             args_(args), time_(time), mesh_(mesh)

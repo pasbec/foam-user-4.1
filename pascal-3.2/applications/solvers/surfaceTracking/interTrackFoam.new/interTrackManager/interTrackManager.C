@@ -44,14 +44,16 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
     const Time& runTime = this->time();
     const fvMesh& mesh = this->mesh();
 
-    tmp<surfaceScalarField> tphi(defaultRegion().storage().phi());
+    DefaultRegion::Storage& storage = regions().defaultRegion().storage();
+
+    tmp<surfaceScalarField> tphi(storage.phi());
     surfaceScalarField& phi = tphi();
 
     // Convective Courant Number
     {
         if (mesh.moving())
         {
-            const volVectorField& U = defaultRegion().storage().U();
+            const volVectorField& U = storage.U();
 
             // Make fluxes relative
             phi -= fvc::meshPhi(U);
@@ -72,7 +74,7 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
     // Interface Courant Number
     {
 // TODO: Use const
-        trackedSurface& interface = defaultRegion().storage().interface();
+        trackedSurface& interface = storage.interface();
 
         scalar interfaceCoNum = interface.maxCourantNumber();
 
@@ -90,8 +92,10 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
 
 void interTrackManager::writePre() const
 {
+    DefaultRegion::Storage& storage = regions().defaultRegion().storage();
+
 // TODO: Use const
-    trackedSurface& interface = defaultRegion().storage().interface();
+    trackedSurface& interface = storage.interface();
 
         vector totalSurfaceTensionForce =
              interface.totalSurfaceTensionForce();
@@ -120,8 +124,10 @@ void interTrackManager::writePost() const
 {
     const Time& runTime = this->time();
 
+    DefaultRegion::Storage& storage = regions().defaultRegion().storage();
+
 // TODO: Use const
-    trackedSurface& interface = defaultRegion().storage().interface();
+    trackedSurface& interface = storage.interface();
 
     if
     (
