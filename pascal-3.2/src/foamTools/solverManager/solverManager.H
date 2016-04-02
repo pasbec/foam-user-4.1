@@ -36,6 +36,7 @@ SourceFiles
 #define solverManager_H
 
 #include "autoPtr.H"
+#include "HashPtrTable.H"
 #include "argList.H"
 #include "foamTime.H"
 #include "IOdictionary.H"
@@ -46,6 +47,7 @@ SourceFiles
 #include "solverManagerRegions.H"
 #include "solverManagerRegion.H"
 #include "solverManagerStorage.H"
+#include "solverManagerSettings.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,16 +77,314 @@ public:
         typedef solverManagerMessages<MESH> Messages;
         typedef solutionControl Control;
 
+    //- Forward declarations
+
+        class Settings;
+        class Storage;
+        class Region;
+        class Regions;
+
+
+private:
+
+    // Private Nested Classes
+
+        //- Read
+        class Read
+        {
+            friend class Settings;
+            friend class Storage;
+            friend class Region;
+            friend class Regions;
+
+
+        private:
+
+            // Private Member functions
+
+                //- Init sequence
+                virtual void read() const = 0;
+
+
+        public:
+
+            // Constructor
+
+                Read() {};
+
+            // Destructor
+
+                virtual ~Read() {};
+        };
+
+
+        //- Init
+        class Init
+        {
+            friend class Settings;
+            friend class Storage;
+            friend class Region;
+            friend class Regions;
+
+
+        private:
+
+            // Private Data
+
+                //- Initalized?
+                const bool initialized_;
+
+            // Private Member functions
+
+                //- Init sequence
+                virtual void init() const = 0;
+
+
+        protected:
+
+            // Protected Member Functions
+
+                //- Check init wrapper
+                bool checkInit() const
+                {
+                    if (!initialized_)
+                    {
+                        init();
+
+                        bool& initialized =
+                            const_cast<bool&>(initialized_);
+                        initialized = true;
+                    }
+
+                    return initialized_;
+                }
+
+
+        public:
+
+            // Constructor
+
+                Init() : initialized_(false) {};
+
+            // Destructor
+
+                virtual ~Init() {};
+
+            // Member Functions
+
+                //- Initialized?
+                inline bool initialized() const
+                {
+                    return initialized_;
+                }
+        };
+
+
+public:
+
     // Public Nested Classes
 
-        class Regions {};
-        class Region {};
-        class Storage {};
-        class Item {};
+        //- Settings
+        class Settings : public Read, public Init
+        {
+        private:
+
+            // Private Member functions
+
+                //- Init sequence
+                void init() const {};
+
+
+        public:
+
+            // Constructor
+
+                Settings() : Read(), Init() {};
+
+            // Destructor
+
+                virtual ~Settings() {};
+
+            // Member Functions
+
+// TODO: Add Settings dictionary
+//                 //- Settings
+//                 virtual const dictionary& dict() const = 0;
+        };
+
+
+// TODO: Items
+//         //- Item
+//         class Item
+//         {
+//         };
+
+
+        //- Storage
+        class Storage : public Read, public Init
+        {
+        public:
+
+            // Public typedefs
+
+// TODO: Items
+//                 typedef typename solverManager<MESH>::Item Item;
+
+
+        private:
+
+            // Private Member functions
+
+                //- Read sequence
+                void read() const {};
+
+
+        public:
+
+            // Constructor
+
+                Storage() : Read(), Init() {};
+
+            // Destructor
+
+                virtual ~Storage() {};
+        };
+
+
+        //- Region
+        class Region : public Read, public Init
+        {
+            //- Friends
+            friend class Regions;
+
+        public:
+
+            // Public typedefs
+
+                typedef typename solverManager<MESH>::Control Control;
+                typedef typename solverManager<MESH>::Settings Settings;
+                typedef typename solverManager<MESH>::Storage Storage;
+
+
+        private:
+
+            // Private Member functions
+
+                //- Read sequence
+                void read() const
+                {
+                    settings().read();
+                };
+
+                //- Init sequence
+                void init() const
+                {
+                    read();
+                    storage().checkInit();
+                };
+
+
+        public:
+
+            // Constructor
+
+                Region() : Read(), Init()  {};
+
+            // Destructor
+
+                virtual ~Region() {};
+
+            // Member Functions
+
+                //- Control
+                virtual Control& control() const = 0;
+
+                //- Settings
+                virtual Settings& settings() const = 0;
+
+                //- Storage
+                virtual Storage& storage() const = 0;
+        };
+
+
+        //- Regions
+        class Regions : public Read, public Init
+        {
+            //- Friends
+            friend class solverManager<MESH>;
+
+
+        public:
+
+            // Public typedefs
+
+                typedef typename solverManager<MESH>::Settings Settings;
+                typedef typename solverManager<MESH>::Region Region;
+                typedef HashPtrTable<Region> RegionHashTable;
+
+
+        private:
+
+            // Private Data
+
+                //- Hash table
+                mutable autoPtr<RegionHashTable> regions_;
+
+            // Private Member Functions
+
+                //- Read all regions in hash table
+                virtual void read() const
+                {
+// TODO: Read Settings
+                    forAllConstIter(typename RegionHashTable, regions(), iter)
+                    {
+                        iter()->read();
+                    }
+                };
+
+                //- Init all regions in hash table
+                virtual void init() const
+                {
+                    read();
+
+                    forAllConstIter(typename RegionHashTable, regions(), iter)
+                    {
+                        iter()->checkInit();
+                    }
+                };
+
+
+        protected:
+
+                //- Hash table
+                inline RegionHashTable& regions() const
+                {
+                    if (regions_.empty())
+                    {
+                        regions_.set(new RegionHashTable());
+                    }
+
+                    return regions_();
+                };
+
+
+        public:
+
+            // Constructor
+
+                Regions() : Read(), Init() {};
+
+            // Destructor
+
+                virtual ~Regions() {};
+
+            // Member Functions
+
+                //- Default region
+                virtual Region& defaultRegion() const = 0;
+        };
 
     // Public Structs
-
-// TODO: Add global settings
 
 // TODO: Rename parameters
         //- Time parameters
@@ -124,26 +424,22 @@ protected:
                 return false;
             };
 
-            //- Init sequence
-            virtual void init() const = 0;
+// TODO: Make private and call corresponding functions in Regions
+            //- Next sequence
+            virtual void next() const = 0;
 
-            //- Read sequence
-            virtual void read() const = 0;
+            //- Write sequence
+            virtual void write() const = 0;
 
             //- Finalize sequence
             virtual void finalize() const = 0;
-
-            //- Pre write sequence
-            virtual void writePre() const {};
-
-            //- Post write sequence
-            virtual void writePost() const {};
 
 
 private:
 
     // Private Data
 
+// TODO: Rename
         //- Time parameters
         mutable autoPtr<parameters> paramPtr_;
 
@@ -193,6 +489,7 @@ private:
                 return prePhase_;
             };
 
+// TODO: Rename
             //- Read time parameters
             void readParameters(parameters& tc) const;
 
@@ -201,6 +498,12 @@ private:
 
             //- Time step application
             void applyDeltaT() const;
+
+            //- Read sequence
+            void read() const;
+
+            //- Init sequence
+            void init() const;
 
 
 public:
@@ -222,11 +525,16 @@ public:
 
     // Member Functions
 
+// TODO: Rename
         //- Time parameters
         const parameters& param() const;
 
+// TODO: Rename msg to messages()
         //- Messages
         const Messages& msg() const;
+
+        //- Settings
+        virtual Settings& settings() const = 0;
 
         //- Regions
         virtual Regions& regions() const = 0;
@@ -269,23 +577,27 @@ public:
                 return propertiesDict_;
             };
 
-            //- Reference to settings dictionary
             inline const dictionary& settingsDict() const
             {
                 return propertiesDict_.subDict("settings");
             };
-
-            //- Reference to settings dictionary for named region
-            const dictionary& settingsRegionDict
-            (
-                const word& region = polyMesh::defaultRegion
-            ) const;
 
             //- Reference to storage dictionary
             inline const dictionary& storageDict() const
             {
                 return propertiesDict_.subDict("storage");
             };
+
+// TODO: Move all these basic functions in the marked block in their
+// |     corresponding nested classes
+// |     starting with solverManagerBaseNested. Rename
+// v     solverManagerBaseNested to ?????
+            //- Reference to settings dictionary
+            //- Reference to settings dictionary for named region
+            const dictionary& settingsRegionDict
+            (
+                const word& region = polyMesh::defaultRegion
+            ) const;
 
             //- Reference to storage dictionary for named region
             const dictionary& storageRegionDict
@@ -300,6 +612,9 @@ public:
                 dictionary& dict,
                 const word& region = polyMesh::defaultRegion
             ) const;
+// ^
+// |
+// |
 
         // Evolution
 

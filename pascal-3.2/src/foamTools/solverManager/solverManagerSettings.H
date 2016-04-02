@@ -22,60 +22,33 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    solverManagerRegions
+    solverManagerSettings
 
 Description
     ...
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solverManagerRegions_H
-#define solverManagerRegions_H
+#ifndef solverManagerSettings_H
+#define solverManagerSettings_H
 
 #include "solverManager.H"
 #include "solverManagerBaseNested.H"
-#include "solverManagerRegion.H"
-#include "solverManagerStorage.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smRegions_new(MANAGER, NAME)                                         \
+# define smSettings_new(MANAGER, NAME)                                        \
                                                                               \
-    smBaseNested_new(Regions, solverManagerRegions, MANAGER, NAME)
+    smBaseNested_new(Settings, solverManagerSettings, MANAGER, NAME)          \
+                                                                              \
+    private: virtual void read() const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smRegions_end()                                                      \
+# define smSettings_end()                                                     \
                                                                               \
     smBaseNested_end()
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define smRegions_addRegion_manager(TYPE, NAME)                              \
-                                                                              \
-        private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
-                                                                              \
-        public: virtual TYPE& NAME() const                                    \
-        {                                                                     \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                smBaseNested_setItem_P1(TYPE, NAME, this->manager())          \
-                                                                              \
-                regions().insert                                              \
-                (                                                             \
-                    NAME##Ptr_->mesh().name(),                                \
-                    NAME##Ptr_.operator->()                                   \
-                );                                                            \
-            }                                                                 \
-                                                                              \
-            return NAME##Ptr_();                                              \
-        };
-
-# define smRegions_addDefaultRegion_manager(TYPE)                             \
-                                                                              \
-        smRegions_addRegion_manager(TYPE, defaultRegion)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -84,11 +57,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerRegions Declaration
+                       Class solverManagerSettings Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER>
-class solverManagerRegions
+class solverManagerSettings
 :
     public solverManagerBaseNested<MANAGER>
 {
@@ -100,32 +73,33 @@ public:
         typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename ManagerMesh::Mesh ThisMesh;
 
+// TODO: Items
+
 
 private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverManagerRegions(const solverManagerRegions&);
+        solverManagerSettings(const solverManagerSettings&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverManagerRegions&);
+        void operator=(const solverManagerSettings&);
 
 
 public:
 
     // Constructor
 
-        solverManagerRegions(const MANAGER& manager)
+        solverManagerSettings(const MANAGER& manager)
         :
             solverManagerBaseNested<MANAGER>(manager)
         {};
 
     // Destructor
 
-        virtual ~solverManagerRegions() {};
+        virtual ~solverManagerSettings() {};
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

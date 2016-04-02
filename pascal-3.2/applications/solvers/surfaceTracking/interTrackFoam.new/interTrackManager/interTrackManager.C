@@ -37,6 +37,18 @@ defineTypeNameAndDebug(interTrackManager, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void interTrackManager::Settings::read() const
+{
+// TODO: Add Settings dictionary
+    const dictionary& settingsDict = this->settingsDict();
+
+    debug = settingsDict.lookupOrDefault<int>("debug", 0);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
 bool interTrackManager::setCoNum(scalar& CourantNumber) const
 {
     CourantNumber = 0.0;
@@ -90,7 +102,7 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
 }
 
 
-void interTrackManager::writePre() const
+void interTrackManager::next() const
 {
     DefaultRegion::Storage& storage = regions().defaultRegion().storage();
 
@@ -120,25 +132,24 @@ void interTrackManager::writePre() const
 }
 
 
-void interTrackManager::writePost() const
+void interTrackManager::write() const
 {
-    const Time& runTime = this->time();
-
     DefaultRegion::Storage& storage = regions().defaultRegion().storage();
 
 // TODO: Use const
     trackedSurface& interface = storage.interface();
 
-    if
-    (
-        debug
-     && runTime.outputTime()
-    )
+    if (debug)
     {
         interface.writeVTK();
         interface.writeA();
         interface.writeVolA();
     }
+}
+
+
+void interTrackManager::finalize() const
+{
 }
 
 
@@ -158,55 +169,6 @@ interTrackManager::interTrackManager
         args, time, mesh, name, master
     )
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void interTrackManager::init() const
-{
-    // Global settings
-    {
-        const dictionary& settingsDict = this->settingsDict();
-
-        debug = settingsDict.lookupOrDefault<int>("debug", debug());
-
-//         if (debug)
-//         {
-// // TODO: Add TypeNames/debugSwitches for Regions and Storage.
-//         How can they be accessed/set even if they are private?
-//             Regions::debug = debug;
-//             DefaultRegion::debug = debug;
-//             DefaultRegion::Control::debug = debug;
-//             DefaultRegion::Storage::debug = debug;
-//         }
-    }
-
-    // Default region's settings
-    {
-        const dictionary& settingsDict = this->settingsRegionDict();
-
-        DefaultRegion::Settings& settings =
-            regions().defaultRegion().settings();
-
-// TODO: Probably its better to use a hash table for Settings?
-// TODO: Read this settings based on Region class? -> init(), read(), ...
-        settings.UpCoupled = settingsDict.lookupOrDefault("UpCoupled", false);
-        settings.UpPredictorForce = settingsDict.lookupOrDefault("UpPredictorForce", false);
-
-//         scalar test; readScalar(settingsDict.lookup("test"));
-//         scalar test2; settingsDict.lookupOrDefault("test2", 0.0);
-    }
-}
-
-
-void interTrackManager::read() const
-{
-}
-
-
-void interTrackManager::finalize() const
-{
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

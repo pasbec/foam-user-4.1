@@ -48,9 +48,7 @@ Description
 
 # define smRegion_new(MANAGER, NAME)                                          \
                                                                               \
-    smBaseNested_new(Region, solverManagerRegion, MANAGER, NAME)              \
-                                                                              \
-    protected: virtual void init(const word& init = "default") const {};
+    smBaseNested_new(Region, solverManagerRegion, MANAGER, NAME)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,15 +60,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smRegion_addSettings()                                               \
-                                                                              \
-    smBaseNested_addVirtualItem_P1(Settings, settings, )
-
 # define smRegion_addControl_mesh(TYPE)                                       \
                                                                               \
     public: typedef TYPE Control;                                             \
                                                                               \
-    smBaseNested_addVirtualItem_P1(Control, control, this->mesh())
+    smBaseNested_addModItemNoInit_P1(Control, control, virtual, this->mesh())
+
+
+# define smRegion_addSettings_manager()                                       \
+                                                                              \
+    smBaseNested_addVirtualItem_P1(Settings, settings, this->manager())
 
 
 # define smRegion_addStorage_manager()                                        \
@@ -174,14 +173,6 @@ public:
     // Destructor
 
         virtual ~solverManagerRegion() {};
-
-    // Member Functions
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Storage
-        virtual Storage& storage() const = 0;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

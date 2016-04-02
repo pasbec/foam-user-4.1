@@ -141,6 +141,21 @@ void solverManager<MESH>::applyDeltaT() const
 }
 
 
+template <class MESH>
+void solverManager<MESH>::read() const
+{
+    regions().read();
+}
+
+
+template <class MESH>
+void solverManager<MESH>::init() const
+{
+    read();
+    regions().init();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class MESH>
@@ -283,11 +298,14 @@ bool solverManager<MESH>::loop() const
     }
     else
     {
-        writePre();
+        next();
 
         time().write();
 
-        writePost();
+        if (time().outputTime())
+        {
+            write();
+        }
 
         msg().executionTime();
         msg().newLine();
@@ -331,11 +349,14 @@ bool solverManager<MESH>::run() const
     }
     else
     {
-        writePre();
+        next();
 
         time().write();
 
-        writePost();
+        if (time().outputTime())
+        {
+            write();
+        }
 
         msg().executionTime();
         msg().newLine();

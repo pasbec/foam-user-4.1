@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     interTrackManager.C
-    interTrackManagerDefaultRegionStorage.C
+    interTrackManagerDefaultRegion.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -62,22 +62,29 @@ public:
 
     // Public Nested Classes
 
-// TODO: Move DefaultRegion declaration into Regions?
+        //- Settings
+        smSettings_new(interTrackManager, Settings);
+
+            mutable Switch debug;
+
+        smSettings_end();
+        smManager_addSettings_this();
+
+
         //- Default region
         smRegion_new(interTrackManager, DefaultRegion);
 
-// TODO: Probably its better to use a hash table for Settings?
-// TODO: Read this settings based on Region class? -> init(), read(), ...
-            //- Settings
-            public: struct Settings
-            {
-                Switch UpCoupled;
-                Switch UpPredictorForce;
-            };
-            smRegion_addSettings();
-
             //- Control
             smRegion_addControl_mesh(interTrackControl);
+
+            //- Settings
+            smSettings_new(interTrackManager, Settings);
+
+                mutable Switch UpCoupled;
+                mutable Switch UpPredictorForce;
+
+            smSettings_end();
+            smRegion_addSettings_manager();
 
             //- Storage
             smStorage_new(interTrackManager, Storage);
@@ -120,6 +127,7 @@ public:
 
         smRegion_end();
 
+
         //- Regions
         smRegions_new(interTrackManager, Regions);
 
@@ -127,9 +135,7 @@ public:
             smRegions_addDefaultRegion_manager(DefaultRegion);
 
         smRegions_end();
-
-        //- Virtual regions function
-        smBaseNested_addVirtualItem_P1(Regions, regions, *this);
+        smManager_addRegions_this();
 
 
 private:
@@ -147,20 +153,15 @@ private:
             //- Set Courant Number
             virtual bool setCoNum(scalar& CoNum) const;
 
-            //- Init sequence
-            virtual void init() const;
+            //- Next sequence
+            virtual void next() const;
 
-            //- Read sequence
-            virtual void read() const;
+            //- Write sequence
+            virtual void write() const;
 
             //- Finalize sequence
             virtual void finalize() const;
 
-            //- Pre write sequence
-            virtual void writePre() const;
-
-            //- Post write sequence
-            virtual void writePost() const;
 
 public:
 
@@ -193,7 +194,7 @@ public:
 
 #ifdef NoRepository
 #   include "interTrackManager.C"
-#   include "interTrackManagerDefaultRegionStorage.C"
+#   include "interTrackManagerDefaultRegion.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

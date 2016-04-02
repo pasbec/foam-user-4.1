@@ -33,6 +33,17 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+
+void interTrackManager::DefaultRegion::Settings::read() const
+{
+// TODO: Add Settings dictionary
+    const dictionary& settingsDict = this->settingsRegionDict();
+
+    UpCoupled = settingsDict.lookupOrDefault("UpCoupled", false);
+    UpPredictorForce = settingsDict.lookupOrDefault("UpPredictorForce", false);
+}
+
+
 void interTrackManager::DefaultRegion::Storage::init_g(const word& init) const
 {
     gPtr_.set
@@ -292,7 +303,7 @@ void interTrackManager::DefaultRegion::Storage::init_interface(const word& init)
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init() const
 {
     make_g();
     make_p();
