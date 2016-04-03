@@ -39,7 +39,7 @@ void solverManager<MESH>::errorIfNotMaster() const
 {
     if (!master())
     {
-        FatalErrorIn("solverManager::msg()")
+        FatalErrorIn("solverManager::messages()")
             << "This solverManager instantiation is NOT"
             << " the master manager."
             << abort(FatalError);
@@ -130,29 +130,14 @@ void solverManager<MESH>::applyDeltaT() const
                     << abort(FatalError);
         }
 
-        msg().newLine();
+        messages().newLine();
 
         calcDeltaT(deltaT);
     }
 
     runTime.setDeltaT(deltaT);
 
-    msg().timeDeltaT();
-}
-
-
-template <class MESH>
-void solverManager<MESH>::read() const
-{
-    regions().read();
-}
-
-
-template <class MESH>
-void solverManager<MESH>::init() const
-{
-    read();
-    regions().init();
+    messages().timeDeltaT();
 }
 
 
@@ -213,7 +198,7 @@ const typename solverManager<MESH>::parameters& solverManager<MESH>::param() con
 
 
 template <class MESH>
-const typename solverManager<MESH>::Messages& solverManager<MESH>::msg() const
+const typename solverManager<MESH>::Messages& solverManager<MESH>::messages() const
 {
     errorIfNotMaster();
 
@@ -280,6 +265,22 @@ bool solverManager<MESH>::storageItemDict
 
 
 template <class MESH>
+void solverManager<MESH>::read() const
+{
+    settings().read();
+    regions().read();
+}
+
+
+template <class MESH>
+void solverManager<MESH>::init() const
+{
+    read();
+    regions().init();
+}
+
+
+template <class MESH>
 bool solverManager<MESH>::loop() const
 {
     errorIfNotMaster();
@@ -290,9 +291,9 @@ bool solverManager<MESH>::loop() const
     {
         init();
 
-        msg().newLine();
-        msg().startTimeLoop();
-        msg().newLine();
+        messages().newLine();
+        messages().startTimeLoop();
+        messages().newLine();
 
         prePhase() = false;
     }
@@ -307,16 +308,16 @@ bool solverManager<MESH>::loop() const
             write();
         }
 
-        msg().executionTime();
-        msg().newLine();
+        messages().executionTime();
+        messages().newLine();
     }
 
     if (runTime.loop())
     {
         read();
 
-        msg().timeIs();
-        msg().newLine();
+        messages().timeIs();
+        messages().newLine();
 
         return true;
     }
@@ -324,11 +325,12 @@ bool solverManager<MESH>::loop() const
     {
         finalize();
 
-        msg().end();
+        messages().end();
 
         return false;
     }
 }
+
 
 template <class MESH>
 bool solverManager<MESH>::run() const
@@ -341,9 +343,9 @@ bool solverManager<MESH>::run() const
     {
         init();
 
-        msg().newLine();
-        msg().startTimeLoop();
-        msg().newLine();
+        messages().newLine();
+        messages().startTimeLoop();
+        messages().newLine();
 
         prePhase() = false;
     }
@@ -358,8 +360,8 @@ bool solverManager<MESH>::run() const
             write();
         }
 
-        msg().executionTime();
-        msg().newLine();
+        messages().executionTime();
+        messages().newLine();
     }
 
     if (runTime.run())
@@ -370,8 +372,8 @@ bool solverManager<MESH>::run() const
 
         runTime++;
 
-        msg().timeIs();
-        msg().newLine();
+        messages().timeIs();
+        messages().newLine();
 
         return true;
     }
@@ -379,7 +381,7 @@ bool solverManager<MESH>::run() const
     {
         finalize();
 
-        msg().end();
+        messages().end();
 
         return false;
     }

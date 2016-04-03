@@ -92,6 +92,7 @@ private:
         //- Read
         class Read
         {
+            friend class solverManager<MESH>;
             friend class Settings;
             friend class Storage;
             friend class Region;
@@ -318,7 +319,6 @@ public:
 
             // Public typedefs
 
-                typedef typename solverManager<MESH>::Settings Settings;
                 typedef typename solverManager<MESH>::Region Region;
                 typedef HashPtrTable<Region> RegionHashTable;
 
@@ -335,7 +335,6 @@ public:
                 //- Read all regions in hash table
                 virtual void read() const
                 {
-// TODO: Read Settings
                     forAllConstIter(typename RegionHashTable, regions(), iter)
                     {
                         iter()->read();
@@ -386,7 +385,7 @@ public:
 
     // Public Structs
 
-// TODO: Rename parameters
+// TODO: Rename
         //- Time parameters
         struct parameters
         {
@@ -395,44 +394,6 @@ public:
             scalar maxDeltaT;
             scalar CoNum;
         };
-
-
-protected:
-
-    // Protected Member Functions
-
-        // Evolution
-
-            //- Set time step width
-            //  A return value of true means active
-            virtual bool setDeltaT(scalar& deltaT) const
-            {
-                return false;
-            };
-
-            //- Set time parameters
-            //  A return value of true means active
-            virtual bool setParameters(parameters& tp) const
-            {
-                return false;
-            };
-
-            //- Set Courant Number
-            //  A return value of true means active
-            virtual bool setCoNum(scalar& CoNum) const
-            {
-                return false;
-            };
-
-// TODO: Make private and call corresponding functions in Regions
-            //- Next sequence
-            virtual void next() const = 0;
-
-            //- Write sequence
-            virtual void write() const = 0;
-
-            //- Finalize sequence
-            virtual void finalize() const = 0;
 
 
 private:
@@ -499,11 +460,42 @@ private:
             //- Time step application
             void applyDeltaT() const;
 
-            //- Read sequence
-            void read() const;
 
-            //- Init sequence
-            void init() const;
+protected:
+
+    // Protected Member Functions
+
+        // Evolution
+
+            //- Set time step width
+            //  A return value of true means active
+            virtual bool setDeltaT(scalar& deltaT) const
+            {
+                return false;
+            };
+
+            //- Set time parameters
+            //  A return value of true means active
+            virtual bool setParameters(parameters& tp) const
+            {
+                return false;
+            };
+
+            //- Set Courant Number
+            //  A return value of true means active
+            virtual bool setCoNum(scalar& CoNum) const
+            {
+                return false;
+            };
+
+            //- Next sequence
+            virtual void next() const = 0;
+
+            //- Write sequence
+            virtual void write() const = 0;
+
+            //- Finalize sequence
+            virtual void finalize() const = 0;
 
 
 public:
@@ -529,9 +521,9 @@ public:
         //- Time parameters
         const parameters& param() const;
 
-// TODO: Rename msg to messages()
+
         //- Messages
-        const Messages& msg() const;
+        const Messages& messages() const;
 
         //- Settings
         virtual Settings& settings() const = 0;
@@ -617,6 +609,12 @@ public:
 // |
 
         // Evolution
+
+            //- Read sequence
+            void read() const;
+
+            //- Init sequence
+            void init() const;
 
             //- Main time loop wrapper
             bool loop() const;
