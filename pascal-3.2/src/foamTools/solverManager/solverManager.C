@@ -50,19 +50,33 @@ void solverManager<MESH>::errorIfNotMaster() const
 template <class MESH>
 void solverManager<MESH>::readParameters
 (
-    parameters& tp
+    Parameters& parameters
 ) const
 {
     errorIfNotMaster();
 
-    tp.adjustTimeStep =
+    readTimeParameters(parameters.time);
+}
+
+
+template <class MESH>
+void solverManager<MESH>::readTimeParameters
+(
+    TimeParameters& timePar
+) const
+{
+    errorIfNotMaster();
+
+    timePar.adjustTimeStep =
         controlDict().lookupOrDefault("adjustTimeStep", false);
 
-    tp.maxCo =
+    timePar.maxCo =
         controlDict().lookupOrDefault("maxCo", scalar(1.0));
 
-    tp.maxDeltaT =
+    timePar.maxDeltaT =
         controlDict().lookupOrDefault("maxDeltaT", scalar(GREAT));
+
+    timePar.CoNum = 0.0;
 }
 
 
@@ -74,14 +88,15 @@ void solverManager<MESH>::calcDeltaT
 {
     errorIfNotMaster();
 
-    parameters& tp = const_cast<parameters&>(param());
+    Parameters& par = const_cast<Parameters&>(parameters());
+    TimeParameters& timePar = par.time;
 
     Time& runTime = const_cast<Time&>(time());
 
-    if (tp.adjustTimeStep)
+    if (timePar.adjustTimeStep)
     {
 
-        scalar maxDeltaTFact = tp.maxCo/(tp.CoNum + SMALL);
+        scalar maxDeltaTFact = timePar.maxCo/(timePar.CoNum + SMALL);
         scalar deltaTFact =
             min(min(maxDeltaTFact, 1.0 + 0.1*maxDeltaTFact), 1.2);
 
@@ -89,7 +104,7 @@ void solverManager<MESH>::calcDeltaT
             min
             (
                 deltaTFact * runTime.deltaT().value(),
-                tp.maxDeltaT
+                timePar.maxDeltaT
             );
     }
 }
@@ -100,7 +115,8 @@ void solverManager<MESH>::applyDeltaT() const
 {
     errorIfNotMaster();
 
-    parameters& tp = const_cast<parameters&>(param());
+    Parameters& par = const_cast<Parameters&>(parameters());
+    TimeParameters& timePar = par.time;
 
     Time& runTime = const_cast<Time&>(time());
 
@@ -110,14 +126,14 @@ void solverManager<MESH>::applyDeltaT() const
 
     if (!deltaTset)
     {
-        bool parametersSet = setParameters(tp);
+        bool parametersSet = setTimeParameters(timePar);
 
         if (!parametersSet)
         {
-            readParameters(tp);
+            readTimeParameters(timePar);
         }
 
-        bool CoNumSet = setCoNum(tp.CoNum);
+        bool CoNumSet = setCoNum(timePar.CoNum);
 
         if (!CoNumSet)
         {
@@ -153,8 +169,8 @@ solverManager<MESH>::solverManager
     const bool& master
 )
 :
-    paramPtr_(NULL),
-    msgPtr_(NULL),
+    parametersPtr_(NULL),
+    messagesPtr_(NULL),
     args_(args),
     time_(time),
     mesh_(mesh),
@@ -180,20 +196,19 @@ solverManager<MESH>::solverManager
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template <class MESH>
-const typename solverManager<MESH>::parameters& solverManager<MESH>::param() const
+const typename solverManager<MESH>::Parameters& solverManager<MESH>::parameters() const
 {
     errorIfNotMaster();
 
-    if (paramPtr_.empty())
+    if (parametersPtr_.empty())
     {
-        paramPtr_.set(new parameters());
+        parametersPtr_.set(new Parameters());
         {
-            readParameters(paramPtr_());
-            paramPtr_->CoNum = 0.0;
+            readParameters(parametersPtr_());
         }
     }
 
-    return paramPtr_();
+    return parametersPtr_();
 }
 
 
@@ -202,15 +217,15 @@ const typename solverManager<MESH>::Messages& solverManager<MESH>::messages() co
 {
     errorIfNotMaster();
 
-    if (msgPtr_.empty())
+    if (messagesPtr_.empty())
     {
-        msgPtr_.set
+        messagesPtr_.set
         (
             new Messages(args(), time(), mesh())
         );
     }
 
-    return msgPtr_();
+    return messagesPtr_();
 }
 
 

@@ -383,17 +383,36 @@ public:
                 virtual Region& defaultRegion() const = 0;
         };
 
-    // Public Structs
 
-// TODO: Rename
-        //- Time parameters
-        struct parameters
+public:
+
+    // Private Nested Classes
+
+        //- Parameters
+        class Parameters
         {
-            bool adjustTimeStep;
-            scalar maxCo;
-            scalar maxDeltaT;
-            scalar CoNum;
+        public:
+
+            // Public structs
+
+                //- Time parameters
+                struct Time
+                {
+                    bool adjustTimeStep;
+                    scalar maxCo;
+                    scalar maxDeltaT;
+                    scalar CoNum;
+                };
+
+            // Data
+
+                //- Time parameters
+                Time time;
         };
+
+    // Public typedefs
+
+        typedef typename Parameters::Time TimeParameters;
 
 
 private:
@@ -401,11 +420,11 @@ private:
     // Private Data
 
 // TODO: Rename
-        //- Time parameters
-        mutable autoPtr<parameters> paramPtr_;
+        //- Parameters
+        mutable autoPtr<Parameters> parametersPtr_;
 
         //- Messages
-        mutable autoPtr<Messages> msgPtr_;
+        mutable autoPtr<Messages> messagesPtr_;
 
         // Basic
 
@@ -450,9 +469,11 @@ private:
                 return prePhase_;
             };
 
-// TODO: Rename
+            //- Read parameters
+            void readParameters(Parameters& par) const;
+
             //- Read time parameters
-            void readParameters(parameters& tc) const;
+            void readTimeParameters(TimeParameters& timePar) const;
 
             //- Time step setting
             void calcDeltaT(scalar& deltaT) const;
@@ -476,7 +497,7 @@ protected:
 
             //- Set time parameters
             //  A return value of true means active
-            virtual bool setParameters(parameters& tp) const
+            virtual bool setTimeParameters(TimeParameters& timePar) const
             {
                 return false;
             };
@@ -517,10 +538,8 @@ public:
 
     // Member Functions
 
-// TODO: Rename
-        //- Time parameters
-        const parameters& param() const;
-
+        //- Parameters
+        const Parameters& parameters() const;
 
         //- Messages
         const Messages& messages() const;
