@@ -18,7 +18,11 @@
 
     tmu.clear();
 
-    if(storage.is_F())
+    if
+    (
+        storage.is_F()
+     && settings.UpDirectForce
+    )
     {
         UEqn() -= storage.F();
     }
@@ -27,5 +31,23 @@
 
     if (control.momentumPredictor())
     {
-        solve(UEqn() == -fvc::grad(p));
+        if
+        (
+            storage.is_F()
+        && !settings.UpDirectForce
+        )
+        {
+            solve
+            (
+                UEqn == fvc::reconstruct
+                (
+                    - ( fvc::snGrad(p) * mesh.magSf() )
+                    + ( fvc::interpolate(storage.F()) & mesh.Sf() )
+                )
+            );
+        }
+        else
+        {
+            solve(UEqn() == -fvc::grad(p));
+        }
     }

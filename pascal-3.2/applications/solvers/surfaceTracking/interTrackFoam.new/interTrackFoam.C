@@ -49,6 +49,11 @@ int main(int argc, char *argv[])
 
     interTrackManager manager(args, runTime, mesh);
 
+    interTrackManager::Settings& global = manager.settings();
+
+    interTrackManager::DefaultRegion::Settings& settings =
+        manager.regions().defaultRegion().settings();
+
     interTrackManager::DefaultRegion::Control& control =
         manager.regions().defaultRegion().control();
 
@@ -68,6 +73,7 @@ int main(int argc, char *argv[])
 // TODO: Two fluids
 // #   include "setRefCell.H"
 
+// TODO: Continuity errors into manager?
 #   include "initContinuityErrs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -87,15 +93,12 @@ int main(int argc, char *argv[])
             // Make the fluxes relative to the mesh motion
             fvc::makeRelative(phi,U);
 
-#           include "interTrackUEqn.H"
+#           include "UEqn.H"
 
              // --- Pressure corrector PISO loop
             while (control.correct())
             {
-#               include "interTrackpEqn.H"
-
-                // Make the fluxes relative to the mesh motion
-                fvc::makeRelative(phi, U);
+#               include "pEqn.H"
             }
 
             if

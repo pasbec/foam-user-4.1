@@ -40,7 +40,7 @@ void interTrackManager::DefaultRegion::Settings::read() const
     const dictionary& settingsDict = this->settingsRegionDict();
 
     UpCoupled = settingsDict.lookupOrDefault("UpCoupled", false);
-    UpPredictorForce = settingsDict.lookupOrDefault("UpPredictorForce", false);
+    UpDirectForce = settingsDict.lookupOrDefault("UpDirectForce", false);
 }
 
 

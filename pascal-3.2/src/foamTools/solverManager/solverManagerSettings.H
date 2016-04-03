@@ -41,7 +41,9 @@ Description
                                                                               \
     smBaseNested_new(Settings, solverManagerSettings, MANAGER, NAME)          \
                                                                               \
-    private: virtual void read() const;
+    private: virtual void read() const;                                       \
+                                                                              \
+    public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

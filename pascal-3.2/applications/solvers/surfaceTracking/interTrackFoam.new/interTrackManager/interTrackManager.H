@@ -81,7 +81,7 @@ public:
             smSettings_new(interTrackManager, Settings);
 
                 mutable Switch UpCoupled;
-                mutable Switch UpPredictorForce;
+                mutable Switch UpDirectForce;
 
             smSettings_end();
             smRegion_addSettings_manager();
