@@ -32,16 +32,7 @@ Description
 #ifndef solverManagerStorage_H
 #define solverManagerStorage_H
 
-#include "solverManager.H"
-#include "solverManagerWrapper.H"
-
-// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
-//       Storage should be based on MeshType
-//       with a template specification for dydnamicFvMesh
-
-// TODO: Use mesh().name() for the virtual functions settingsRegionDict(...), storageRegionDict(...)
-//       and storageItemDict(...) instead of polyMesh::defaultRegion as default
-//       parameter for the region word
+#include "solverManagerRegion.H"
 
 // TODO TODO TODO TODO :
 //       Move all 'intelligent' code in class "Item"
@@ -58,23 +49,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smStorage_new(MANAGER, NAME)                                         \
+# define SM_STORAGE_NEW(MANAGER)                                              \
                                                                               \
-    smWrapper_new(Storage, solverManagerStorage, MANAGER, NAME)               \
+    SM_WRAPPER_NEW(Storage, MANAGER, Storage)                                 \
                                                                               \
     private: virtual void init() const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smStorage_end()                                                      \
-                                                                              \
-    smWrapper_end()
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define smStorage_add(TYPE, NAME)                                            \
+# define SM_STORAGE_MEMBER_ADD(TYPE, NAME)                                    \
                                                                               \
     private: mutable autoPtr<TYPE> NAME##Ptr_;                                \
                                                                               \
@@ -195,7 +179,7 @@ Description
         const word& name = #NAME                                              \
     ) const                                                                   \
     {                                                                         \
-        bool isValid = storageItemDict(name, dict);                           \
+        bool isValid = itemDict(name, dict);                                  \
                                                                               \
         if (!NAME##Optional_)                                                 \
         {                                                                     \
@@ -312,6 +296,14 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+# define SM_STORAGE_ADD()                                                     \
+                                                                              \
+    SM_WRAPPER_END()                                                          \
+    SM_REGION_STORAGE_ADD()
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
@@ -319,19 +311,22 @@ namespace Foam
                        Class solverManagerStorage Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH>
+template <class MANAGER>
 class solverManagerStorage
 :
-    public solverManagerWrapper<MANAGER, MESH>
+    public solverManagerRegion<MANAGER>
 {
 public:
 
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef MESH Mesh;
+        typedef typename MANAGER::Storage Base;
 
-// TODO: Items
+        typedef solverManagerRegion<MANAGER> Wrapper;
+
+        typedef typename Wrapper::ManagerMesh ManagerMesh;
+        typedef typename Wrapper::Mesh Mesh;
 
 
 private:
@@ -344,23 +339,56 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const solverManagerStorage&);
 
-
 public:
 
     // Constructor
 
         solverManagerStorage(const Manager& manager, Mesh& mesh)
         :
-            solverManagerWrapper<Manager, Mesh>
-            (
-                manager,
-                mesh
-            )
+            Wrapper(manager, mesh)
         {};
 
     // Destructor
 
         virtual ~solverManagerStorage() {};
+
+    // Member Functions
+
+        // Basic
+
+            //- Reference to dictionary
+            inline const dictionary& dict() const
+            {
+                return this->Wrapper::storageDict();
+            };
+
+
+            //- Read dictionary of named item in storage (if present)
+            bool itemDict
+            (
+                const word& name,
+                dictionary& itemDict
+            ) const
+            {
+                if
+                (
+                    dict().found(name)
+                 && dict().isDict(name)
+                )
+                {
+                    itemDict = dict().subDict(name);
+
+                    Switch enabled;
+
+                    if (itemDict.readIfPresent("enabled", enabled))
+                    {
+                        return enabled;
+                    }
+                }
+
+                return false;
+            };
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

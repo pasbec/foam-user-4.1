@@ -230,59 +230,9 @@ const typename solverManager<MESH>::Messages& solverManager<MESH>::messages() co
 
 
 template <class MESH>
-const dictionary& solverManager<MESH>::settingsRegionDict
-(
-    const word& region
-) const
-{
-    return settingsDict().subDict(region);
-};
-
-
-template <class MESH>
-const dictionary& solverManager<MESH>::storageRegionDict
-(
-    const word& region
-) const
-{
-    return storageDict().subDict(region);
-};
-
-
-template <class MESH>
-bool solverManager<MESH>::storageItemDict
-(
-    const word& item,
-    dictionary& dict,
-    const word& region
-) const
-{
-    const dictionary& regionDict = storageRegionDict(region);
-
-    if
-    (
-        regionDict.found(item)
-     && regionDict.isDict(item)
-    )
-    {
-        dict = regionDict.subDict(item);
-
-        Switch enabled;
-
-        if (dict.readIfPresent("enabled", enabled))
-        {
-            return enabled;
-        }
-    }
-
-    return false;
-}
-
-
-template <class MESH>
 void solverManager<MESH>::read() const
 {
-    settings().read();
+    globalSettings().read();
     regions().read();
 }
 

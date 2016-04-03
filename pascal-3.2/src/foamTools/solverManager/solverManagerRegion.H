@@ -32,49 +32,46 @@ Description
 #ifndef solverManagerRegion_H
 #define solverManagerRegion_H
 
-#include "solverManager.H"
 #include "solverManagerWrapper.H"
-#include "solverManagerStorage.H"
-
-// TODO: Macro new for regionMeshes where mesh is the mesh of one region:
-//       Here and in storage MeshType should be used for all "mesh"-references
-//       with a template specification for dydnamicFvMesh
-
-// TODO: Use mesh().name() for the virtual functions settingsRegionDict(...), storageRegionDict(...)
-//       and storageItemDict(...) instead of polyMesh::defaultRegion as default
-//       parameter for the region word
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smRegion_new(MANAGER, NAME)                                          \
+# define SM_REGION_NEW(MANAGER, NAME)                                         \
                                                                               \
-    smWrapper_new(Region, solverManagerRegion, MANAGER, NAME)
+    SM_WRAPPER_NEW(Region, MANAGER, NAME)
+
+# define SM_DEFAULTREGION_NEW(MANAGER)                                        \
+                                                                              \
+    SM_REGION_NEW(MANAGER, DefaultRegion)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smRegion_end()                                                       \
+# define SM_REGION_CONTROL_ADD(TYPE)                                          \
                                                                               \
-    smWrapper_end()
+        public: typedef TYPE Control;                                         \
+                                                                              \
+        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P1(                                  \
+            Control, control, virtual, this->mesh())
+
+
+# define SM_REGION_SETTINGS_ADD()                                             \
+                                                                              \
+        SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                     \
+            Settings, settings, this->manager(), this->mesh())
+
+
+# define SM_REGION_STORAGE_ADD()                                              \
+                                                                              \
+        SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                     \
+            Storage, storage, this->manager(), this->mesh())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smRegion_addControl(TYPE)                                            \
+# define SM_REGION_END()                                                      \
                                                                               \
-    public: typedef TYPE Control;                                             \
-                                                                              \
-    smWrapper_addModItemNoInit_P1(Control, control, virtual, this->mesh())
-
-
-# define smRegion_addSettings()                                               \
-                                                                              \
-    smWrapper_addVirtualItem_P2(Settings, settings, this->manager(), this->mesh())\
-
-
-# define smRegion_addStorage()                                                \
-                                                                              \
-    smWrapper_addVirtualItem_P2(Storage, storage, this->manager(), this->mesh())
+    SM_WRAPPER_END()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -86,28 +83,25 @@ namespace Foam
                        Class solverManagerRegion Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH>
+template <class MANAGER>
 class solverManagerRegion
 :
-    public solverManagerWrapper<MANAGER, MESH>
+    public solverManagerWrapper<MANAGER, typename MANAGER::Mesh>
 {
 public:
 
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef MESH Mesh;
+        typedef typename MANAGER::Region Base;
 
-//         typedef solutionControl Control;
-//         typedef solverManagerStorage<MANAGER> Storage;
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename MANAGER::Mesh Mesh;
+
+        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
 
 private:
-
-//     // Private Data
-//
-//         //- Reference to mesh
-//         ThisMesh& mesh_;
 
     // Private Member Functions
 
@@ -118,64 +112,40 @@ private:
         void operator=(const solverManagerRegion&);
 
 
-protected:
-
-//     // Protected Member Functions
-//
-//         // Basic
-//
-//             //- Return reference to mesh
-//             ThisMesh& mesh() const
-//             {
-//                 return mesh_;
-//             }
-
-//             //- Reference to settings dictionary for named region
-//             const dictionary& settingsRegionDict
-//             (
-//                 const word& region = ????????
-//             ) const
-//             {
-//                 return manager_.settingsRegionDict(region);
-//             };
-//
-//             //- Reference to storage dictionary for named region
-//             const dictionary& storageRegionDict
-//             (
-//                 const word& region = ????????
-//             ) const
-//             {
-//                 return manager_.storageRegionDict(region);
-//             };
-//
-//             //- Reference to dictionary of named item of storage
-//             bool storageItemDict
-//             (
-//                 const word& item,
-//                 dictionary& dict,
-//                 const word& region = ????????
-//             ) const
-//             {
-//                 return manager_.storageItemDict(item, dict, region);
-//             };
-
-
 public:
 
     // Constructor
 
         solverManagerRegion(const Manager& manager, Mesh& mesh)
         :
-            solverManagerWrapper<Manager, Mesh>
-            (
-                manager,
-                mesh
-            )
+            Wrapper(manager, mesh)
         {};
 
     // Destructor
 
         virtual ~solverManagerRegion() {};
+
+    // Member Functions
+
+        // Basic
+
+            //- Reference to settings dictionary
+            inline const dictionary& settingsDict() const
+            {
+                return this->Wrapper::settingsDict().subDict
+                (
+                    this->Wrapper::mesh().name()
+                );
+            };
+
+            //- Reference to storage dictionary
+            inline const dictionary& storageDict() const
+            {
+                return this->Wrapper::storageDict().subDict
+                (
+                    this->Wrapper::mesh().name()
+                );
+            };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

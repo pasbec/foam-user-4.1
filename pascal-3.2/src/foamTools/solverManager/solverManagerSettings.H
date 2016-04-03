@@ -32,14 +32,13 @@ Description
 #ifndef solverManagerSettings_H
 #define solverManagerSettings_H
 
-#include "solverManager.H"
-#include "solverManagerWrapper.H"
+#include "solverManagerRegion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define sm_settings_new(MANAGER, NAME)                                       \
+# define SM_SETTINGS_NEW(MANAGER)                                             \
                                                                               \
-    smWrapper_new(Settings, solverManagerSettings, MANAGER, NAME)             \
+    SM_WRAPPER_NEW(Settings, MANAGER, Settings)                               \
                                                                               \
     private: virtual void read() const;                                       \
                                                                               \
@@ -48,9 +47,17 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define sm_settings_end()                                                    \
+# define SM_SETTINGS_MEMBER_ADD(TYPE, NAME)                                   \
                                                                               \
-    smWrapper_end()
+        public: mutable TYPE NAME;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define SM_SETTINGS_ADD()                                                    \
+                                                                              \
+    SM_WRAPPER_END()                                                          \
+    SM_REGION_SETTINGS_ADD()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,19 +69,22 @@ namespace Foam
                        Class solverManagerSettings Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH>
+template <class MANAGER>
 class solverManagerSettings
 :
-    public solverManagerWrapper<MANAGER, MESH>
+    public solverManagerRegion<MANAGER>
 {
 public:
 
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef MESH Mesh;
+        typedef typename MANAGER::Settings Base;
 
-// TODO: Items
+        typedef solverManagerRegion<MANAGER> Wrapper;
+
+        typedef typename Wrapper::ManagerMesh ManagerMesh;
+        typedef typename Wrapper::Mesh Mesh;
 
 
 private:
@@ -94,16 +104,22 @@ public:
 
         solverManagerSettings(const Manager& manager, Mesh& mesh)
         :
-            solverManagerWrapper<Manager, Mesh>
-            (
-                manager,
-                mesh
-            )
+            Wrapper(manager, mesh)
         {};
 
     // Destructor
 
         virtual ~solverManagerSettings() {};
+
+    // Member Functions
+
+        // Basic
+
+            //- Reference to dictionary
+            inline const dictionary& dict() const
+            {
+                return this->Wrapper::settingsDict();
+            };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -22,60 +22,42 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    solverManagerRegions
+    solverManagerGlobalSettings
 
 Description
     ...
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solverManagerRegions_H
-#define solverManagerRegions_H
+#ifndef solverManagerGlobalSettings_H
+#define solverManagerGlobalSettings_H
 
 #include "solverManagerWrapper.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONS_NEW(MANAGER)                                              \
+# define SM_GLOBALSETTINGS_NEW(MANAGER)                                       \
                                                                               \
-    SM_WRAPPER_NEW(Regions, MANAGER, Regions)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_REGIONS_REGION_ADD(TYPE, NAME, PMESH)                             \
+    SM_WRAPPER_NEW(GlobalSettings, MANAGER, GlobalSettings)                   \
                                                                               \
-        private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
+    private: virtual void read() const;                                       \
                                                                               \
-        public: virtual TYPE& NAME() const                                    \
-        {                                                                     \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                SM_WRAPPER_MEMBER_SETINIT_P2(                                 \
-                    TYPE, NAME, this->manager(), PMESH)                       \
-                                                                              \
-                this->Base::regions().insert                                  \
-                (                                                             \
-                    NAME##Ptr_->mesh().name(),                                \
-                    NAME##Ptr_.operator->()                                   \
-                );                                                            \
-            }                                                                 \
-                                                                              \
-            return NAME##Ptr_();                                              \
-        };
-
-# define SM_REGIONS_DEFAULTREGION_ADD(PMESH)                                  \
-                                                                              \
-        SM_REGIONS_REGION_ADD(DefaultRegion, defaultRegion, PMESH)
+    public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONS_ADD()                                                     \
+# define SM_GLOBALSETTINGS_MEMBER_ADD(TYPE, NAME)                             \
+                                                                              \
+        public: mutable TYPE NAME;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define SM_GLOBALSETTINGS_ADD()                                              \
                                                                               \
     SM_WRAPPER_END()                                                          \
-    SM_ADD_REGIONS()
+    SM_ADD_GLOBALSETTINGS()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -84,11 +66,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerRegions Declaration
+                       Class solverManagerGlobalSettings Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER>
-class solverManagerRegions
+class solverManagerGlobalSettings
 :
     public solverManagerWrapper<MANAGER, typename MANAGER::ManagerMesh>
 {
@@ -97,7 +79,7 @@ public:
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::Regions Base;
+        typedef typename MANAGER::GlobalSettings Base;
 
         typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename MANAGER::ManagerMesh Mesh;
@@ -110,26 +92,39 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverManagerRegions(const solverManagerRegions&);
+        solverManagerGlobalSettings(const solverManagerGlobalSettings&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverManagerRegions&);
+        void operator=(const solverManagerGlobalSettings&);
 
 
 public:
 
     // Constructor
 
-        solverManagerRegions(const Manager& manager, Mesh& mesh)
+        solverManagerGlobalSettings(const Manager& manager, Mesh& mesh)
         :
-            Wrapper(manager, mesh)
+            solverManagerWrapper<Manager, Mesh>
+            (
+                manager,
+                mesh
+            )
         {};
 
     // Destructor
 
-        virtual ~solverManagerRegions() {};
-};
+        virtual ~solverManagerGlobalSettings() {};
 
+    // Member Functions
+
+        // Basic
+
+            //- Reference to dictionary
+            inline const dictionary& dict() const
+            {
+                return this->Wrapper::settingsDict();
+            };
+};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -62,80 +62,80 @@ public:
 
     // Public Nested Classes
 
-        //- Settings
-        sm_settings_new(interTrackManager, Settings);
+        //- Global Settings
+        SM_GLOBALSETTINGS_NEW(interTrackManager);
 
-            mutable Switch debug;
+            //- Debug switch
+            SM_GLOBALSETTINGS_MEMBER_ADD(Switch, debug);
 
-        sm_settings_end();
-        sm_addSettings();
+        SM_GLOBALSETTINGS_ADD();
 
 
         //- Default region
-        smRegion_new(interTrackManager, DefaultRegion);
+        SM_DEFAULTREGION_NEW(interTrackManager);
 
             //- Control
-            smRegion_addControl(interTrackControl);
+            SM_REGION_CONTROL_ADD(interTrackControl);
 
             //- Settings
-            sm_settings_new(interTrackManager, Settings);
+            SM_SETTINGS_NEW(interTrackManager);
 
-                mutable Switch UpCoupled;
-                mutable Switch UpDirectForce;
+                //- Coupled solution of U and p
+                SM_SETTINGS_MEMBER_ADD(Switch, UpCoupled);
 
-            sm_settings_end();
-            smRegion_addSettings();
+                //- Directly inject volume force F in U-equation
+                SM_SETTINGS_MEMBER_ADD(Switch, UpDirectForce);
+
+            SM_SETTINGS_ADD();
 
             //- Storage
-            smStorage_new(interTrackManager, Storage);
+            SM_STORAGE_NEW(interTrackManager);
 
                 //- Gravitational acceleration
-                smStorage_add(uniformDimensionedVectorField, g);
+                SM_STORAGE_MEMBER_ADD(uniformDimensionedVectorField, g);
 
                 //- Pressure
-                smStorage_add(volScalarField, p);
+                SM_STORAGE_MEMBER_ADD(volScalarField, p);
 
                 //- Velocity
-                smStorage_add(volVectorField, U);
+                SM_STORAGE_MEMBER_ADD(volVectorField, U);
 
                 //- Face flux
-                smStorage_add(surfaceScalarField, phi);
+                SM_STORAGE_MEMBER_ADD(surfaceScalarField, phi);
 
                 //- Volume force
-                smStorage_add(volVectorField, F);
+                SM_STORAGE_MEMBER_ADD(volVectorField, F);
 
                 //- Density
-                smStorage_add(volScalarField, rho);
+                SM_STORAGE_MEMBER_ADD(volScalarField, rho);
 
                 //- Dynamic viscosity
-                smStorage_add(volScalarField, mu);
+                SM_STORAGE_MEMBER_ADD(volScalarField, mu);
 
                 //- Fluid indicator
-                smStorage_add(volScalarField, fluidIndicator);
+                SM_STORAGE_MEMBER_ADD(volScalarField, fluidIndicator);
 
                 //- Transport model
-                smStorage_add(twoPhaseMixture, transport);
+                SM_STORAGE_MEMBER_ADD(twoPhaseMixture, transport);
 
                 //- Turbulence model
-                smStorage_add(incompressible::turbulenceModel, turbulence);
+                SM_STORAGE_MEMBER_ADD(incompressible::turbulenceModel, turbulence);
 
                 //- Tracked surface
-                smStorage_add(trackedSurface, interface);
+                SM_STORAGE_MEMBER_ADD(trackedSurface, interface);
 
-            smStorage_end();
-            smRegion_addStorage();
+            SM_STORAGE_ADD();
 
-        smRegion_end();
+        SM_REGION_END();
 
 
         //- Regions
-        smRegions_new(interTrackManager, Regions);
+        SM_REGIONS_NEW(interTrackManager);
 
             //- Default region
-            smRegions_addDefaultRegion_manager(DefaultRegion);
+            SM_REGIONS_DEFAULTREGION_ADD(this->mesh());
 
-        smRegions_end();
-        sm_addRegions();
+        SM_REGIONS_ADD();
 
 
 private:

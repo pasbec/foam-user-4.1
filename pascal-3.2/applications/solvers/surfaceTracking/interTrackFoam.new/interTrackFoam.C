@@ -48,17 +48,10 @@ int main(int argc, char *argv[])
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     interTrackManager manager(args, runTime, mesh);
-
-    interTrackManager::Settings& global = manager.settings();
-
-    interTrackManager::DefaultRegion::Settings& settings =
-        manager.regions().defaultRegion().settings();
-
-    interTrackManager::DefaultRegion::Control& control =
-        manager.regions().defaultRegion().control();
-
-    interTrackManager::DefaultRegion::Storage& storage =
-        manager.regions().defaultRegion().storage();
+    interTrackManager::GlobalSettings& globalSettings = manager.globalSettings();
+    interTrackManager::Settings& settings = manager.settings();
+    interTrackManager::Control& control = manager.control();
+    interTrackManager::Storage& storage = manager.storage();
 
     volScalarField& p = storage.p();
     volVectorField& U = storage.U();

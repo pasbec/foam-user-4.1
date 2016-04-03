@@ -32,7 +32,8 @@ Description
 #ifndef solverManagerMessages_H
 #define solverManagerMessages_H
 
-#include "solverManager.H"
+#include "argList.H"
+#include "foamTime.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

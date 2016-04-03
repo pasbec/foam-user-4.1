@@ -32,32 +32,29 @@ Description
 #ifndef solverManagerWrapper_H
 #define solverManagerWrapper_H
 
-#include "solverManager.H"
-
-// TODO: Get the correct mesh in the Wrapper! Therefor I have to change:
-//       public: typedef typename MANAGER::ManagerMesh Mesh;
-//       But ONLY FOR REGION, SETTINGS, and STORAGE of Regions!!!
+#include "argList.H"
+#include "foamTime.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_new(BASE, WRAPPER, MANAGER, NAME)                          \
+# define SM_WRAPPER_NEW(BASE, MANAGER, NAME)                                  \
                                                                               \
     public: class NAME                                                        \
     :                                                                         \
-        public solverManager<MANAGER::ManagerMesh>::BASE,                     \
-        public WRAPPER<MANAGER, typename MANAGER::ManagerMesh>                \
+        public solverManager##BASE<MANAGER>,                                  \
+        public solverManager<ManagerMesh>::BASE                               \
     {                                                                         \
         friend class MANAGER;                                                 \
                                                                               \
         public: typedef MANAGER Manager;                                      \
-        public: typedef typename MANAGER::ManagerMesh ManagerMesh;            \
-        public: typedef typename MANAGER::ManagerMesh Mesh;                   \
+        public: typedef solverManager##BASE<MANAGER> Wrapper;                 \
                                                                               \
         public: typedef typename solverManager<ManagerMesh>::BASE Base;       \
-        public: typedef WRAPPER<Manager, ManagerMesh> Wrapper;                \
+        public: typedef typename Wrapper::ManagerMesh ManagerMesh;            \
+        public: typedef typename Wrapper::Mesh Mesh;                          \
                                                                               \
         private: NAME(const NAME&);                                           \
-                                                                              \
         private: void operator=(const NAME&);                                 \
                                                                               \
         public: NAME                                                          \
@@ -66,8 +63,8 @@ Description
             Mesh& mesh                                                        \
         )                                                                     \
         :                                                                     \
-            Base(),                                                           \
-            Wrapper(manager, mesh)                                            \
+            Wrapper(manager, mesh),                                           \
+            Base()                                                            \
         {};                                                                   \
                                                                               \
         public: virtual ~NAME() {};
@@ -75,37 +72,37 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_end()                                                      \
+# define SM_WRAPPER_END()                                                     \
                                                                               \
     };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_setItem_P1(TYPE, NAME, P1)                                 \
+# define SM_WRAPPER_MEMBER_SET_P1(TYPE, NAME, P1)                             \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1));
 
-# define smWrapper_setItem_P2(TYPE, NAME, P1,P2)                              \
+# define SM_WRAPPER_MEMBER_SET_P2(TYPE, NAME, P1,P2)                          \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1,P2));
 
-# define smWrapper_setItem_P3(TYPE, NAME, P1,P2,P3)                           \
+# define SM_WRAPPER_MEMBER_SET_P3(TYPE, NAME, P1,P2,P3)                       \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1,P2,P3));
 
-# define smWrapper_setItem_P4(TYPE, NAME, P1,P2,P3,P4)                        \
+# define SM_WRAPPER_MEMBER_SET_P4(TYPE, NAME, P1,P2,P3,P4)                    \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1,P2,P3,P4));
 
-# define smWrapper_setItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                     \
+# define SM_WRAPPER_MEMBER_SET_P5(TYPE, NAME, P1,P2,P3,P4,P5)                 \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1,P2,P3,P4,P5));
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_addModItemNoInit_P1(TYPE, NAME, MOD, P1)                   \
+# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P1(TYPE, NAME, MOD, P1)             \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -113,13 +110,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setItem_P1(TYPE, NAME, P1)                          \
+                SM_WRAPPER_MEMBER_SET_P1(TYPE, NAME, P1)                      \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smWrapper_addModItemNoInit_P2(TYPE, NAME, MOD, P1,P2)                \
+# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P2(TYPE, NAME, MOD, P1,P2)          \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -127,13 +124,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setItem_P2(TYPE, NAME, P1,P2)                       \
+                SM_WRAPPER_MEMBER_SET_P2(TYPE, NAME, P1,P2)                   \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smWrapper_addModItemNoInit_P3(TYPE, NAME, MOD, P1,P2,P3)             \
+# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P3(TYPE, NAME, MOD, P1,P2,P3)       \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -141,13 +138,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setItem_P3(TYPE, NAME, P1,P2,P3)                    \
+                SM_WRAPPER_MEMBER_SET_P3(TYPE, NAME, P1,P2,P3)                \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smWrapper_addModItemNoInit_P4(TYPE, NAME, MOD, P1,P2,P3,P4)          \
+# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P4(TYPE, NAME, MOD, P1,P2,P3,P4)    \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -155,13 +152,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setItem_P4(TYPE, NAME, P1,P2,P3,P4)                 \
+                SM_WRAPPER_MEMBER_SET_P4(TYPE, NAME, P1,P2,P3,P4)             \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smWrapper_addModItemNoInit_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5)       \
+# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5) \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -169,7 +166,7 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)              \
+                SM_WRAPPER_MEMBER_SET_P5(TYPE, NAME, P1,P2,P3,P4,P5)          \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
@@ -178,40 +175,40 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_setInitItem_P1(TYPE, NAME, P1)                             \
+# define SM_WRAPPER_MEMBER_SETINIT_P1(TYPE, NAME, P1)                         \
                                                                               \
-    smWrapper_setItem_P1(TYPE, NAME, P1);                                     \
+    SM_WRAPPER_MEMBER_SET_P1(TYPE, NAME, P1);                                 \
                                                                               \
                 NAME##Ptr_->checkInit();
 
-# define smWrapper_setInitItem_P2(TYPE, NAME, P1,P2)                          \
+# define SM_WRAPPER_MEMBER_SETINIT_P2(TYPE, NAME, P1,P2)                      \
                                                                               \
-    smWrapper_setItem_P2(TYPE, NAME, P1,P2);                                  \
-                                                                              \
-                NAME##Ptr_->checkInit();
-
-# define smWrapper_setInitItem_P3(TYPE, NAME, P1,P2,P3)                       \
-                                                                              \
-    smWrapper_setItem_P3(TYPE, NAME, P1,P2,P3);                               \
+    SM_WRAPPER_MEMBER_SET_P2(TYPE, NAME, P1,P2);                              \
                                                                               \
                 NAME##Ptr_->checkInit();
 
-# define smWrapper_setInitItem_P4(TYPE, NAME, P1,P2,P3,P4)                    \
+# define SM_WRAPPER_MEMBER_SETINIT_P3(TYPE, NAME, P1,P2,P3)                   \
                                                                               \
-    smWrapper_setItem_P4(TYPE, NAME, P1,P2,P3,P4);                            \
-                                                                              \
-                NAME##Ptr_->checkInit();
-
-# define smWrapper_setInitItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                 \
-                                                                              \
-    smWrapper_setItem_P5(TYPE, NAME, P1,P2,P3,P4,P5);                         \
+    SM_WRAPPER_MEMBER_SET_P3(TYPE, NAME, P1,P2,P3);                           \
                                                                               \
                 NAME##Ptr_->checkInit();
 
+# define SM_WRAPPER_MEMBER_SETINIT_P4(TYPE, NAME, P1,P2,P3,P4)                \
+                                                                              \
+    SM_WRAPPER_MEMBER_SET_P4(TYPE, NAME, P1,P2,P3,P4);                        \
+                                                                              \
+                NAME##Ptr_->checkInit();
+
+# define SM_WRAPPER_MEMBER_SETINIT_P5(TYPE, NAME, P1,P2,P3,P4,P5)             \
+                                                                              \
+    SM_WRAPPER_MEMBER_SET_P5(TYPE, NAME, P1,P2,P3,P4,P5);                     \
+                                                                              \
+                NAME##Ptr_->checkInit();
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_addModItem_P1(TYPE, NAME, MOD, P1)                         \
+# define SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, MOD, P1)                    \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -219,13 +216,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setInitItem_P1(TYPE, NAME, P1)                      \
+                SM_WRAPPER_MEMBER_SETINIT_P1(TYPE, NAME, P1)                  \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smWrapper_addModItem_P2(TYPE, NAME, MOD, P1,P2)                      \
+# define SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, MOD, P1,P2)                 \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -233,13 +230,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setInitItem_P2(TYPE, NAME, P1,P2)                   \
+                SM_WRAPPER_MEMBER_SETINIT_P2(TYPE, NAME, P1,P2)               \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smWrapper_addModItem_P3(TYPE, NAME, MOD, P1,P2,P3)                   \
+# define SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, MOD, P1,P2,P3)              \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -247,13 +244,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setInitItem_P3(TYPE, NAME, P1,P2,P3)                \
+                SM_WRAPPER_MEMBER_SETINIT_P3(TYPE, NAME, P1,P2,P3)            \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smWrapper_addModItem_P4(TYPE, NAME, MOD, P1,P2,P3,P4)                \
+# define SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, MOD, P1,P2,P3,P4)           \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -261,13 +258,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setInitItem_P4(TYPE, NAME, P1,P2,P3,P4)             \
+                SM_WRAPPER_MEMBER_SETINIT_P4(TYPE, NAME, P1,P2,P3,P4)         \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smWrapper_addModItem_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5)             \
+# define SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5)        \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -275,7 +272,7 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setInitItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)          \
+                SM_WRAPPER_MEMBER_SETINIT_P5(TYPE, NAME, P1,P2,P3,P4,P5)        \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
@@ -284,105 +281,127 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_addItem_P1(TYPE, NAME, P1)                                 \
+# define SM_WRAPPER_MEMBER_ADD_P1(TYPE, NAME, P1)                             \
                                                                               \
-    smWrapper_addModItem_P1(TYPE, NAME, , P1)
+    SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, , P1)
 
-# define smWrapper_addItem_P2(TYPE, NAME, P1,P2)                              \
+# define SM_WRAPPER_MEMBER_ADD_P2(TYPE, NAME, P1,P2)                          \
                                                                               \
-    smWrapper_addModItem_P2(TYPE, NAME, , P1,P2)
+    SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, , P1,P2)
 
-# define smWrapper_addItem_P3(TYPE, NAME, P1,P2,P3)                           \
+# define SM_WRAPPER_MEMBER_ADD_P3(TYPE, NAME, P1,P2,P3)                       \
                                                                               \
-    smWrapper_addModItem_P3(TYPE, NAME, , P1,P2,P3)
+    SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, , P1,P2,P3)
 
-# define smWrapper_addItem_P4(TYPE, NAME, P1,P2,P3,P4)                        \
+# define SM_WRAPPER_MEMBER_ADD_P4(TYPE, NAME, P1,P2,P3,P4)                    \
                                                                               \
-    smWrapper_addModItem_P4(TYPE, NAME, , P1,P2,P3,P4)
+    SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, , P1,P2,P3,P4)
 
-# define smWrapper_addItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                     \
+# define SM_WRAPPER_MEMBER_ADD_P5(TYPE, NAME, P1,P2,P3,P4,P5)                 \
                                                                               \
-    smWrapper_addModItem_P5(TYPE, NAME, , P1,P2,P3,P4,P5)
+    SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, , P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_addVirtualItem_P1(TYPE, NAME, P1)                          \
+# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P1(TYPE, NAME, P1)                     \
                                                                               \
-    smWrapper_addModItem_P1(TYPE, NAME, virtual, P1)
+    SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, virtual, P1)
 
-# define smWrapper_addVirtualItem_P2(TYPE, NAME, P1,P2)                       \
+# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(TYPE, NAME, P1,P2)                  \
                                                                               \
-    smWrapper_addModItem_P2(TYPE, NAME, virtual, P1,P2)
+    SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, virtual, P1,P2)
 
-# define smWrapper_addVirtualItem_P3(TYPE, NAME, P1,P2,P3)                    \
+# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P3(TYPE, NAME, P1,P2,P3)               \
                                                                               \
-    smWrapper_addModItem_P3(TYPE, NAME, virtual, P1,P2,P3)
+    SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, virtual, P1,P2,P3)
 
-# define smWrapper_addVirtualItem_P4(TYPE, NAME, P1,P2,P3,P4)                 \
+# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P4(TYPE, NAME, P1,P2,P3,P4)            \
                                                                               \
-    smWrapper_addModItem_P4(TYPE, NAME, virtual, P1,P2,P3,P4)
+    SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, virtual, P1,P2,P3,P4)
 
-# define smWrapper_addVirtualItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)              \
+# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P5(TYPE, NAME, P1,P2,P3,P4,P5)         \
                                                                               \
-    smWrapper_addModItem_P5(TYPE, NAME, virtual, P1,P2,P3,P4,P5)
+    SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, virtual, P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_addConstItem_P1(TYPE, NAME, P1)                            \
+# define SM_WRAPPER_MEMBER_CONST_ADD_P1(TYPE, NAME, P1)                       \
                                                                               \
-    smWrapper_addModItem_P1(TYPE, NAME, const, P1)
+    SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, const, P1)
 
-# define smWrapper_addConstItem_P2(TYPE, NAME, P1,P2)                         \
+# define SM_WRAPPER_MEMBER_CONST_ADD_P2(TYPE, NAME, P1,P2)                    \
                                                                               \
-    smWrapper_addModItem_P2(TYPE, NAME, const, P1,P2)
+    SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, const, P1,P2)
 
-# define smWrapper_addConstItem_P3(TYPE, NAME, P1,P2,P3)                      \
+# define SM_WRAPPER_MEMBER_CONST_ADD_P3(TYPE, NAME, P1,P2,P3)                 \
                                                                               \
-    smWrapper_addModItem_P3(TYPE, NAME, const, P1,P2,P3)
+    SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, const, P1,P2,P3)
 
-# define smWrapper_addConstItem_P4(TYPE, NAME, P1,P2,P3,P4)                   \
+# define SM_WRAPPER_MEMBER_CONST_ADD_P4(TYPE, NAME, P1,P2,P3,P4)              \
                                                                               \
-    smWrapper_addModItem_P4(TYPE, NAME, const, P1,P2,P3,P4)
+    SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, const, P1,P2,P3,P4)
 
-# define smWrapper_addConstItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                \
+# define SM_WRAPPER_MEMBER_CONST_ADD_P5(TYPE, NAME, P1,P2,P3,P4,P5)           \
                                                                               \
-    smWrapper_addModItem_P5(TYPE, NAME, const, P1,P2,P3,P4,P5)
+    SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, const, P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smWrapper_addVirtualConstItem_P1(TYPE, NAME, P1)                     \
+# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P1(TYPE, NAME, P1)               \
                                                                               \
-    smWrapper_addModItem_P1(TYPE, NAME, virtual const, P1)
+    SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, virtual const, P1)
 
-# define smWrapper_addVirtualConstItem_P2(TYPE, NAME, P1,P2)                  \
+# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P2(TYPE, NAME, P1,P2)            \
                                                                               \
-    smWrapper_addModItem_P2(TYPE, NAME, virtual const, P1,P2)
+    SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, virtual const, P1,P2)
 
-# define smWrapper_addVirtualConstItem_P3(TYPE, NAME, P1,P2,P3)               \
+# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P3(TYPE, NAME, P1,P2,P3)         \
                                                                               \
-    smWrapper_addModItem_P3(TYPE, NAME, virtual const, P1,P2,P3)
+    SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, virtual const, P1,P2,P3)
 
-# define smWrapper_addVirtualConstItem_P4(TYPE, NAME, P1,P2,P3,P4)            \
+# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P4(TYPE, NAME, P1,P2,P3,P4)      \
                                                                               \
-    smWrapper_addModItem_P4(TYPE, NAME, virtual const, P1,P2,P3,P4)
+    SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, virtual const, P1,P2,P3,P4)
 
-# define smWrapper_addVirtualConstItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)         \
+# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P5(TYPE, NAME, P1,P2,P3,P4,P5)   \
                                                                               \
-    smWrapper_addModItem_P5(TYPE, NAME, virtual const, P1,P2,P3,P4,P5)
-
+    SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, virtual const, P1,P2,P3,P4,P5)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define sm_addSettings()                                                     \
+# define SM_ADD_GLOBALSETTINGS()                                              \
                                                                               \
-    smWrapper_addVirtualItem_P2(Settings, settings, *this, this->mesh())
+    SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                         \
+        GlobalSettings, globalSettings, *this, this->mesh())
 
-# define sm_addRegions()                                                      \
+# define SM_ADD_REGIONS()                                                     \
                                                                               \
-    smWrapper_addVirtualItem_P2(Regions, regions, *this, this->mesh())
+    SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                         \
+        Regions, regions, *this, this->mesh())                                \
+                                                                              \
+        typedef typename DefaultRegion::Control Control;                      \
+                                                                              \
+        public: inline DefaultRegion::Control& control() const                \
+        {                                                                     \
+            return regions().defaultRegion().control();                       \
+        };                                                                    \
+                                                                              \
+        typedef typename DefaultRegion::Settings Settings;                    \
+                                                                              \
+        public: inline DefaultRegion::Settings& settings() const              \
+        {                                                                     \
+            return regions().defaultRegion().settings();                      \
+        };                                                                    \
+                                                                              \
+        typedef typename DefaultRegion::Storage Storage;                      \
+                                                                              \
+        public: inline DefaultRegion::Storage& storage() const                \
+        {                                                                     \
+            return regions().defaultRegion().storage();                       \
+        };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -402,24 +421,30 @@ public:
     // Public typedefs
 
         typedef MANAGER Manager;
+
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef MESH Mesh;
+
+        typedef solverManagerWrapper Wrapper;
 
 
 private:
 
     // Private Data
 
-        //- Reference to args
-        const argList& args_;
-
-        //- Reference to time
-        Time& time_;
-
-        //- Reference to mesh
-        Mesh& mesh_;
-
         //- Reference to manager
         const Manager& manager_;
+
+        // Basic
+
+            //- Reference to args
+            const argList& args_;
+
+            //- Reference to time
+            Time& time_;
+
+            //- Reference to mesh
+            Mesh& mesh_;
 
     // Private Member Functions
 
@@ -430,9 +455,33 @@ private:
         void operator=(const solverManagerWrapper&);
 
 
-protected:
+public:
 
-    // Protected Member Functions
+    // Constructor
+
+        solverManagerWrapper
+        (
+            const Manager& manager,
+            Mesh& mesh
+        )
+        :
+            manager_(manager),
+            args_(manager.args()),
+            time_(manager.time()),
+            mesh_(manager.mesh())
+        {};
+
+    // Destructor
+
+        virtual ~solverManagerWrapper() {};
+
+    // Member Functions
+
+        //- Reference to manager
+        inline const Manager& manager() const
+        {
+            return manager_;
+        };
 
         // Basic
 
@@ -449,16 +498,10 @@ protected:
             };
 
             //- Return reference to mesh
-            Mesh& mesh() const
+            inline Mesh& mesh() const
             {
                 return mesh_;
             }
-
-            //- Is this the master manager?
-            inline const Manager& manager() const
-            {
-                return manager_;
-            };
 
             //- Is this the master manager?
             inline const bool& master() const
@@ -481,71 +524,14 @@ protected:
             //- Reference to settings dictionary
             inline const dictionary& settingsDict() const
             {
-                return manager_.propertiesDict().subDict("settings");
+                return propertiesDict().subDict("settings");
             };
 
             //- Reference to storage dictionary
             inline const dictionary& storageDict() const
             {
-                return manager_.propertiesDict().subDict("storage");
+                return propertiesDict().subDict("storage");
             };
-
-// TODO: Move all these basic functions in the marked block in their
-// |     corresponding nested classes
-// |     starting with solverManagerWrapper. Rename
-// v     solverManagerWrapper to ?????
-            //- Reference to settings dictionary for named region
-            const dictionary& settingsRegionDict
-            (
-                const word& region = polyMesh::defaultRegion
-            ) const
-            {
-                return manager_.settingsRegionDict(region);
-            };
-
-            //- Reference to storage dictionary for named region
-            const dictionary& storageRegionDict
-            (
-                const word& region = polyMesh::defaultRegion
-            ) const
-            {
-                return manager_.storageRegionDict(region);
-            };
-
-            //- Reference to dictionary of named item of storage
-            bool storageItemDict
-            (
-                const word& item,
-                dictionary& dict,
-                const word& region = polyMesh::defaultRegion
-            ) const
-            {
-                return manager_.storageItemDict(item, dict, region);
-            };
-// ^
-// |
-// |
-
-
-public:
-
-    // Constructor
-
-        solverManagerWrapper
-        (
-            const Manager& manager,
-            Mesh& mesh
-        )
-        :
-            args_(manager.args()),
-            time_(manager.time()),
-            mesh_(mesh),
-            manager_(manager)
-        {};
-
-    // Destructor
-
-        virtual ~solverManagerWrapper() {};
 };
 
 

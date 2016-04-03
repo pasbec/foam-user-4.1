@@ -40,19 +40,20 @@ SourceFiles
 #include "argList.H"
 #include "foamTime.H"
 #include "IOdictionary.H"
+#include "dynamicFvMesh.H"
 #include "solutionControl.H"
 
 #include "solverManagerMessages.H"
 #include "solverManagerWrapper.H"
-#include "solverManagerRegions.H"
-#include "solverManagerRegion.H"
-#include "solverManagerStorage.H"
+#include "solverManagerGlobalSettings.H"
 #include "solverManagerSettings.H"
+#include "solverManagerStorage.H"
+#include "solverManagerRegion.H"
+#include "solverManagerRegions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // TODO: Remake setManagerScope, ...
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +61,25 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class solverManager Declaration
+                        Class solverManagerMesh Declaration
+\*---------------------------------------------------------------------------*/
+
+template <typename MESH>
+struct solverManagerMesh
+{
+    typedef typename MESH::Mesh Mesh;
+};
+
+template <>
+struct solverManagerMesh<dynamicFvMesh>
+{
+    typedef dynamicFvMesh Mesh;
+};
+
+// TODO: Specialization for regionDynamicFvMesh
+
+/*---------------------------------------------------------------------------*\
+                         Class solverManager Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MESH>
@@ -72,7 +91,7 @@ public:
 
         typedef solverManager<MESH> Manager;
         typedef MESH ManagerMesh;
-        typedef typename MESH::Mesh Mesh;
+        typedef typename solverManagerMesh<MESH>::Mesh Mesh;
 
         typedef solverManagerMessages<MESH> Messages;
         typedef solutionControl Control;
@@ -205,12 +224,6 @@ public:
             // Destructor
 
                 virtual ~Settings() {};
-
-            // Member Functions
-
-// TODO: Add Settings dictionary
-//                 //- Settings
-//                 virtual const dictionary& dict() const = 0;
         };
 
 
@@ -412,6 +425,7 @@ public:
 
     // Public typedefs
 
+        typedef Settings GlobalSettings;
         typedef typename Parameters::Time TimeParameters;
 
 
@@ -419,7 +433,6 @@ private:
 
     // Private Data
 
-// TODO: Rename
         //- Parameters
         mutable autoPtr<Parameters> parametersPtr_;
 
@@ -544,8 +557,8 @@ public:
         //- Messages
         const Messages& messages() const;
 
-        //- Settings
-        virtual Settings& settings() const = 0;
+        //- Global Settings
+        virtual GlobalSettings& globalSettings() const = 0;
 
         //- Regions
         virtual Regions& regions() const = 0;
@@ -599,33 +612,6 @@ public:
                 return propertiesDict_.subDict("storage");
             };
 
-// TODO: Move all these basic functions in the marked block in their
-// |     corresponding nested classes
-// |     starting with solverManagerWrapper. Rename
-// v     solverManagerWrapper to ?????
-            //- Reference to settings dictionary
-            //- Reference to settings dictionary for named region
-            const dictionary& settingsRegionDict
-            (
-                const word& region = polyMesh::defaultRegion
-            ) const;
-
-            //- Reference to storage dictionary for named region
-            const dictionary& storageRegionDict
-            (
-                const word& region = polyMesh::defaultRegion
-            ) const;
-
-            //- Reference to dictionary of named item of storage
-            bool storageItemDict
-            (
-                const word& item,
-                dictionary& dict,
-                const word& region = polyMesh::defaultRegion
-            ) const;
-// ^
-// |
-// |
 
         // Evolution
 

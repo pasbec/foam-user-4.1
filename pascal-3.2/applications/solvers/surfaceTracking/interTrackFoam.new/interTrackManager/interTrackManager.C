@@ -37,17 +37,13 @@ defineTypeNameAndDebug(interTrackManager, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void interTrackManager::Settings::read() const
+void interTrackManager::GlobalSettings::read() const
 {
-// TODO: Add Settings dictionary
-    const dictionary& settingsDict = this->settingsDict();
-
-    debug = settingsDict.lookupOrDefault<int>("debug", 0);
+    debug = this->dict().lookupOrDefault<int>("debug", 0);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 bool interTrackManager::setCoNum(scalar& CourantNumber) const
 {

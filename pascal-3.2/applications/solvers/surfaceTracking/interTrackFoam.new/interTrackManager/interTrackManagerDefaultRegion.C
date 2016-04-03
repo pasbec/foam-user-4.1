@@ -36,13 +36,12 @@ namespace Foam
 
 void interTrackManager::DefaultRegion::Settings::read() const
 {
-// TODO: Add Settings dictionary
-    const dictionary& settingsDict = this->settingsRegionDict();
-
-    UpCoupled = settingsDict.lookupOrDefault("UpCoupled", false);
-    UpDirectForce = settingsDict.lookupOrDefault("UpDirectForce", false);
+    UpCoupled = this->dict().lookupOrDefault("UpCoupled", false);
+    UpDirectForce = this->dict().lookupOrDefault("UpDirectForce", false);
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void interTrackManager::DefaultRegion::Storage::init_g(const word& init) const
 {
