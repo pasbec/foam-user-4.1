@@ -33,13 +33,13 @@ Description
 #define solverManagerSettings_H
 
 #include "solverManager.H"
-#include "solverManagerBaseNested.H"
+#include "solverManagerWrapper.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define smSettings_new(MANAGER, NAME)                                        \
                                                                               \
-    smBaseNested_new(Settings, solverManagerSettings, MANAGER, NAME)          \
+    smWrapper_new(Settings, solverManagerSettings, MANAGER, NAME)             \
                                                                               \
     private: virtual void read() const;                                       \
                                                                               \
@@ -50,7 +50,7 @@ Description
 
 # define smSettings_end()                                                     \
                                                                               \
-    smBaseNested_end()
+    smWrapper_end()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -65,7 +65,7 @@ namespace Foam
 template <class MANAGER>
 class solverManagerSettings
 :
-    public solverManagerBaseNested<MANAGER>
+    public solverManagerWrapper<MANAGER>
 {
 public:
 
@@ -73,7 +73,7 @@ public:
 
         typedef MANAGER Manager;
         typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename ManagerMesh::Mesh ThisMesh;
+        typedef typename MANAGER::Mesh Mesh;
 
 // TODO: Items
 
@@ -95,7 +95,7 @@ public:
 
         solverManagerSettings(const MANAGER& manager)
         :
-            solverManagerBaseNested<MANAGER>(manager)
+            solverManagerWrapper<MANAGER>(manager)
         {};
 
     // Destructor

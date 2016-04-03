@@ -43,7 +43,7 @@ SourceFiles
 #include "solutionControl.H"
 
 #include "solverManagerMessages.H"
-#include "solverManagerBaseNested.H"
+#include "solverManagerWrapper.H"
 #include "solverManagerRegions.H"
 #include "solverManagerRegion.H"
 #include "solverManagerStorage.H"
@@ -70,9 +70,9 @@ public:
 
     // Public typedefs
 
-        typedef solverManager Manager;
+        typedef solverManager<MESH> Manager;
         typedef MESH ManagerMesh;
-        typedef typename MESH::Mesh ThisMesh;
+        typedef typename MESH::Mesh Mesh;
 
         typedef solverManagerMessages<MESH> Messages;
         typedef solutionControl Control;
@@ -601,8 +601,8 @@ public:
 
 // TODO: Move all these basic functions in the marked block in their
 // |     corresponding nested classes
-// |     starting with solverManagerBaseNested. Rename
-// v     solverManagerBaseNested to ?????
+// |     starting with solverManagerWrapper. Rename
+// v     solverManagerWrapper to ?????
             //- Reference to settings dictionary
             //- Reference to settings dictionary for named region
             const dictionary& settingsRegionDict

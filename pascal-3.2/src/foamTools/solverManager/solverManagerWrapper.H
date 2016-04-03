@@ -22,31 +22,34 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    solverManagerBaseNested
+    solverManagerWrapper
 
 Description
     ...
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solverManagerBaseNested_H
-#define solverManagerBaseNested_H
+#ifndef solverManagerWrapper_H
+#define solverManagerWrapper_H
 
 #include "solverManager.H"
 
+// TODO: Get the mesh in the Wrapper!
+// TODO: WRAPPER or simply solverManagerWrapper?
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_new(BASEPARENT, PARENT, MANAGER, NAME)                  \
+# define smWrapper_new(BASE, WRAPPER, MANAGER, NAME)                          \
                                                                               \
     public: class NAME                                                        \
     :                                                                         \
-        public solverManager<MANAGER::ManagerMesh>::BASEPARENT,               \
-        public PARENT<MANAGER>                                                \
+        public solverManager<MANAGER::ManagerMesh>::BASE,                     \
+        public WRAPPER<MANAGER>                                               \
     {                                                                         \
         friend class MANAGER;                                                 \
                                                                               \
-        public: typedef solverManager<MANAGER::ManagerMesh>::BASEPARENT Base; \
-        public: typedef PARENT<MANAGER> BaseNested;                           \
+        public: typedef solverManager<MANAGER::ManagerMesh>::BASE Base;       \
+        public: typedef WRAPPER<MANAGER> Wrapper;                             \
                                                                               \
         private: NAME(const NAME&);                                           \
                                                                               \
@@ -55,7 +58,7 @@ Description
         public: NAME(const MANAGER& manager)                                  \
         :                                                                     \
             Base(),                                                           \
-            BaseNested(manager)                                               \
+            Wrapper(manager)                                                  \
         {};                                                                   \
                                                                               \
         public: virtual ~NAME() {};
@@ -63,37 +66,37 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_end()                                                   \
+# define smWrapper_end()                                                      \
                                                                               \
     };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_setItem_P1(TYPE, NAME, P1)                              \
+# define smWrapper_setItem_P1(TYPE, NAME, P1)                                 \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1));
 
-# define smBaseNested_setItem_P2(TYPE, NAME, P1,P2)                           \
+# define smWrapper_setItem_P2(TYPE, NAME, P1,P2)                              \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1,P2));
 
-# define smBaseNested_setItem_P3(TYPE, NAME, P1,P2,P3)                        \
+# define smWrapper_setItem_P3(TYPE, NAME, P1,P2,P3)                           \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1,P2,P3));
 
-# define smBaseNested_setItem_P4(TYPE, NAME, P1,P2,P3,P4)                     \
+# define smWrapper_setItem_P4(TYPE, NAME, P1,P2,P3,P4)                        \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1,P2,P3,P4));
 
-# define smBaseNested_setItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                  \
+# define smWrapper_setItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                     \
                                                                               \
                 NAME##Ptr_.set(new TYPE(P1,P2,P3,P4,P5));
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_addModItemNoInit_P1(TYPE, NAME, MOD, P1)                \
+# define smWrapper_addModItemNoInit_P1(TYPE, NAME, MOD, P1)                   \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -101,13 +104,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setItem_P1(TYPE, NAME, P1)                       \
+                smWrapper_setItem_P1(TYPE, NAME, P1)                          \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smBaseNested_addModItemNoInit_P2(TYPE, NAME, MOD, P1,P2)             \
+# define smWrapper_addModItemNoInit_P2(TYPE, NAME, MOD, P1,P2)                \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -115,13 +118,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setItem_P2(TYPE, NAME, P1,P2)                    \
+                smWrapper_setItem_P2(TYPE, NAME, P1,P2)                       \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smBaseNested_addModItemNoInit_P3(TYPE, NAME, MOD, P1,P2,P3)          \
+# define smWrapper_addModItemNoInit_P3(TYPE, NAME, MOD, P1,P2,P3)             \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -129,13 +132,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setItem_P3(TYPE, NAME, P1,P2,P3)                 \
+                smWrapper_setItem_P3(TYPE, NAME, P1,P2,P3)                    \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smBaseNested_addModItemNoInit_P4(TYPE, NAME, MOD, P1,P2,P3,P4)       \
+# define smWrapper_addModItemNoInit_P4(TYPE, NAME, MOD, P1,P2,P3,P4)          \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -143,13 +146,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setItem_P4(TYPE, NAME, P1,P2,P3,P4)              \
+                smWrapper_setItem_P4(TYPE, NAME, P1,P2,P3,P4)                 \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smBaseNested_addModItemNoInit_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5)    \
+# define smWrapper_addModItemNoInit_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5)       \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -157,7 +160,7 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)           \
+                smWrapper_setItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)              \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
@@ -166,40 +169,40 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_setInitItem_P1(TYPE, NAME, P1)                          \
+# define smWrapper_setInitItem_P1(TYPE, NAME, P1)                             \
                                                                               \
-    smBaseNested_setItem_P1(TYPE, NAME, P1);                                  \
+    smWrapper_setItem_P1(TYPE, NAME, P1);                                     \
                                                                               \
                 NAME##Ptr_->checkInit();
 
-# define smBaseNested_setInitItem_P2(TYPE, NAME, P1,P2)                       \
+# define smWrapper_setInitItem_P2(TYPE, NAME, P1,P2)                          \
                                                                               \
-    smBaseNested_setItem_P2(TYPE, NAME, P1,P2);                               \
-                                                                              \
-                NAME##Ptr_->checkInit();
-
-# define smBaseNested_setInitItem_P3(TYPE, NAME, P1,P2,P3)                    \
-                                                                              \
-    smBaseNested_setItem_P3(TYPE, NAME, P1,P2,P3);                            \
+    smWrapper_setItem_P2(TYPE, NAME, P1,P2);                                  \
                                                                               \
                 NAME##Ptr_->checkInit();
 
-# define smBaseNested_setInitItem_P4(TYPE, NAME, P1,P2,P3,P4)                 \
+# define smWrapper_setInitItem_P3(TYPE, NAME, P1,P2,P3)                       \
                                                                               \
-    smBaseNested_setItem_P4(TYPE, NAME, P1,P2,P3,P4);                         \
-                                                                              \
-                NAME##Ptr_->checkInit();
-
-# define smBaseNested_setInitItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)              \
-                                                                              \
-    smBaseNested_setItem_P5(TYPE, NAME, P1,P2,P3,P4,P5);                      \
+    smWrapper_setItem_P3(TYPE, NAME, P1,P2,P3);                               \
                                                                               \
                 NAME##Ptr_->checkInit();
 
+# define smWrapper_setInitItem_P4(TYPE, NAME, P1,P2,P3,P4)                    \
+                                                                              \
+    smWrapper_setItem_P4(TYPE, NAME, P1,P2,P3,P4);                            \
+                                                                              \
+                NAME##Ptr_->checkInit();
+
+# define smWrapper_setInitItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                 \
+                                                                              \
+    smWrapper_setItem_P5(TYPE, NAME, P1,P2,P3,P4,P5);                         \
+                                                                              \
+                NAME##Ptr_->checkInit();
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_addModItem_P1(TYPE, NAME, MOD, P1)                      \
+# define smWrapper_addModItem_P1(TYPE, NAME, MOD, P1)                         \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -207,13 +210,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setInitItem_P1(TYPE, NAME, P1)                   \
+                smWrapper_setInitItem_P1(TYPE, NAME, P1)                      \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smBaseNested_addModItem_P2(TYPE, NAME, MOD, P1,P2)                   \
+# define smWrapper_addModItem_P2(TYPE, NAME, MOD, P1,P2)                      \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -221,13 +224,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setInitItem_P2(TYPE, NAME, P1,P2)                \
+                smWrapper_setInitItem_P2(TYPE, NAME, P1,P2)                   \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smBaseNested_addModItem_P3(TYPE, NAME, MOD, P1,P2,P3)                \
+# define smWrapper_addModItem_P3(TYPE, NAME, MOD, P1,P2,P3)                   \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -235,13 +238,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setInitItem_P3(TYPE, NAME, P1,P2,P3)             \
+                smWrapper_setInitItem_P3(TYPE, NAME, P1,P2,P3)                \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smBaseNested_addModItem_P4(TYPE, NAME, MOD, P1,P2,P3,P4)             \
+# define smWrapper_addModItem_P4(TYPE, NAME, MOD, P1,P2,P3,P4)                \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -249,13 +252,13 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setInitItem_P4(TYPE, NAME, P1,P2,P3,P4)          \
+                smWrapper_setInitItem_P4(TYPE, NAME, P1,P2,P3,P4)             \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
         };
 
-# define smBaseNested_addModItem_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5)          \
+# define smWrapper_addModItem_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5)             \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -263,7 +266,7 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setInitItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)       \
+                smWrapper_setInitItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)          \
             }                                                                 \
                                                                               \
             return NAME##Ptr_();                                              \
@@ -272,105 +275,105 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_addItem_P1(TYPE, NAME, P1)                              \
+# define smWrapper_addItem_P1(TYPE, NAME, P1)                                 \
                                                                               \
-    smBaseNested_addModItem_P1(TYPE, NAME, , P1)
+    smWrapper_addModItem_P1(TYPE, NAME, , P1)
 
-# define smBaseNested_addItem_P2(TYPE, NAME, P1,P2)                           \
+# define smWrapper_addItem_P2(TYPE, NAME, P1,P2)                              \
                                                                               \
-    smBaseNested_addModItem_P2(TYPE, NAME, , P1,P2)
+    smWrapper_addModItem_P2(TYPE, NAME, , P1,P2)
 
-# define smBaseNested_addItem_P3(TYPE, NAME, P1,P2,P3)                        \
+# define smWrapper_addItem_P3(TYPE, NAME, P1,P2,P3)                           \
                                                                               \
-    smBaseNested_addModItem_P3(TYPE, NAME, , P1,P2,P3)
+    smWrapper_addModItem_P3(TYPE, NAME, , P1,P2,P3)
 
-# define smBaseNested_addItem_P4(TYPE, NAME, P1,P2,P3,P4)                     \
+# define smWrapper_addItem_P4(TYPE, NAME, P1,P2,P3,P4)                        \
                                                                               \
-    smBaseNested_addModItem_P4(TYPE, NAME, , P1,P2,P3,P4)
+    smWrapper_addModItem_P4(TYPE, NAME, , P1,P2,P3,P4)
 
-# define smBaseNested_addItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                  \
+# define smWrapper_addItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                     \
                                                                               \
-    smBaseNested_addModItem_P5(TYPE, NAME, , P1,P2,P3,P4,P5)
+    smWrapper_addModItem_P5(TYPE, NAME, , P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_addVirtualItem_P1(TYPE, NAME, P1)                       \
+# define smWrapper_addVirtualItem_P1(TYPE, NAME, P1)                          \
                                                                               \
-    smBaseNested_addModItem_P1(TYPE, NAME, virtual, P1)
+    smWrapper_addModItem_P1(TYPE, NAME, virtual, P1)
 
-# define smBaseNested_addVirtualItem_P2(TYPE, NAME, P1,P2)                    \
+# define smWrapper_addVirtualItem_P2(TYPE, NAME, P1,P2)                       \
                                                                               \
-    smBaseNested_addModItem_P2(TYPE, NAME, virtual, P1,P2)
+    smWrapper_addModItem_P2(TYPE, NAME, virtual, P1,P2)
 
-# define smBaseNested_addVirtualItem_P3(TYPE, NAME, P1,P2,P3)                 \
+# define smWrapper_addVirtualItem_P3(TYPE, NAME, P1,P2,P3)                    \
                                                                               \
-    smBaseNested_addModItem_P3(TYPE, NAME, virtual, P1,P2,P3)
+    smWrapper_addModItem_P3(TYPE, NAME, virtual, P1,P2,P3)
 
-# define smBaseNested_addVirtualItem_P4(TYPE, NAME, P1,P2,P3,P4)              \
+# define smWrapper_addVirtualItem_P4(TYPE, NAME, P1,P2,P3,P4)                 \
                                                                               \
-    smBaseNested_addModItem_P4(TYPE, NAME, virtual, P1,P2,P3,P4)
+    smWrapper_addModItem_P4(TYPE, NAME, virtual, P1,P2,P3,P4)
 
-# define smBaseNested_addVirtualItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)           \
+# define smWrapper_addVirtualItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)              \
                                                                               \
-    smBaseNested_addModItem_P5(TYPE, NAME, virtual, P1,P2,P3,P4,P5)
+    smWrapper_addModItem_P5(TYPE, NAME, virtual, P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_addConstItem_P1(TYPE, NAME, P1)                         \
+# define smWrapper_addConstItem_P1(TYPE, NAME, P1)                            \
                                                                               \
-    smBaseNested_addModItem_P1(TYPE, NAME, const, P1)
+    smWrapper_addModItem_P1(TYPE, NAME, const, P1)
 
-# define smBaseNested_addConstItem_P2(TYPE, NAME, P1,P2)                      \
+# define smWrapper_addConstItem_P2(TYPE, NAME, P1,P2)                         \
                                                                               \
-    smBaseNested_addModItem_P2(TYPE, NAME, const, P1,P2)
+    smWrapper_addModItem_P2(TYPE, NAME, const, P1,P2)
 
-# define smBaseNested_addConstItem_P3(TYPE, NAME, P1,P2,P3)                   \
+# define smWrapper_addConstItem_P3(TYPE, NAME, P1,P2,P3)                      \
                                                                               \
-    smBaseNested_addModItem_P3(TYPE, NAME, const, P1,P2,P3)
+    smWrapper_addModItem_P3(TYPE, NAME, const, P1,P2,P3)
 
-# define smBaseNested_addConstItem_P4(TYPE, NAME, P1,P2,P3,P4)                \
+# define smWrapper_addConstItem_P4(TYPE, NAME, P1,P2,P3,P4)                   \
                                                                               \
-    smBaseNested_addModItem_P4(TYPE, NAME, const, P1,P2,P3,P4)
+    smWrapper_addModItem_P4(TYPE, NAME, const, P1,P2,P3,P4)
 
-# define smBaseNested_addConstItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)             \
+# define smWrapper_addConstItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)                \
                                                                               \
-    smBaseNested_addModItem_P5(TYPE, NAME, const, P1,P2,P3,P4,P5)
+    smWrapper_addModItem_P5(TYPE, NAME, const, P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smBaseNested_addVirtualConstItem_P1(TYPE, NAME, P1)                  \
+# define smWrapper_addVirtualConstItem_P1(TYPE, NAME, P1)                     \
                                                                               \
-    smBaseNested_addModItem_P1(TYPE, NAME, virtual const, P1)
+    smWrapper_addModItem_P1(TYPE, NAME, virtual const, P1)
 
-# define smBaseNested_addVirtualConstItem_P2(TYPE, NAME, P1,P2)               \
+# define smWrapper_addVirtualConstItem_P2(TYPE, NAME, P1,P2)                  \
                                                                               \
-    smBaseNested_addModItem_P2(TYPE, NAME, virtual const, P1,P2)
+    smWrapper_addModItem_P2(TYPE, NAME, virtual const, P1,P2)
 
-# define smBaseNested_addVirtualConstItem_P3(TYPE, NAME, P1,P2,P3)            \
+# define smWrapper_addVirtualConstItem_P3(TYPE, NAME, P1,P2,P3)               \
                                                                               \
-    smBaseNested_addModItem_P3(TYPE, NAME, virtual const, P1,P2,P3)
+    smWrapper_addModItem_P3(TYPE, NAME, virtual const, P1,P2,P3)
 
-# define smBaseNested_addVirtualConstItem_P4(TYPE, NAME, P1,P2,P3,P4)         \
+# define smWrapper_addVirtualConstItem_P4(TYPE, NAME, P1,P2,P3,P4)            \
                                                                               \
-    smBaseNested_addModItem_P4(TYPE, NAME, virtual const, P1,P2,P3,P4)
+    smWrapper_addModItem_P4(TYPE, NAME, virtual const, P1,P2,P3,P4)
 
-# define smBaseNested_addVirtualConstItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)      \
+# define smWrapper_addVirtualConstItem_P5(TYPE, NAME, P1,P2,P3,P4,P5)         \
                                                                               \
-    smBaseNested_addModItem_P5(TYPE, NAME, virtual const, P1,P2,P3,P4,P5)
+    smWrapper_addModItem_P5(TYPE, NAME, virtual const, P1,P2,P3,P4,P5)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define smManager_addSettings_this()                                         \
                                                                               \
-    smBaseNested_addVirtualItem_P1(Settings, settings, *this)
+    smWrapper_addVirtualItem_P1(Settings, settings, *this)
 
 # define smManager_addRegions_this()                                          \
                                                                               \
-    smBaseNested_addVirtualItem_P1(Regions, regions, *this)
+    smWrapper_addVirtualItem_P1(Regions, regions, *this)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -379,11 +382,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerBaseNested Declaration
+                       Class solverManagerWrapper Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER>
-class solverManagerBaseNested
+class solverManagerWrapper
 {
 public:
 
@@ -391,7 +394,7 @@ public:
 
         typedef MANAGER Manager;
         typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename ManagerMesh::Mesh ThisMesh;
+        typedef typename MANAGER::Mesh Mesh;
 
 
 private:
@@ -413,10 +416,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverManagerBaseNested(const solverManagerBaseNested&);
+        solverManagerWrapper(const solverManagerWrapper&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverManagerBaseNested&);
+        void operator=(const solverManagerWrapper&);
 
 
 protected:
@@ -481,8 +484,8 @@ protected:
 
 // TODO: Move all these basic functions in the marked block in their
 // |     corresponding nested classes
-// |     starting with solverManagerBaseNested. Rename
-// v     solverManagerBaseNested to ?????
+// |     starting with solverManagerWrapper. Rename
+// v     solverManagerWrapper to ?????
             //- Reference to settings dictionary for named region
             const dictionary& settingsRegionDict
             (
@@ -520,7 +523,7 @@ public:
 
     // Constructor
 
-        solverManagerBaseNested(const MANAGER& manager)
+        solverManagerWrapper(const MANAGER& manager)
         :
             args_(manager.args()),
             time_(manager.time()),
@@ -530,7 +533,7 @@ public:
 
     // Destructor
 
-        virtual ~solverManagerBaseNested() {};
+        virtual ~solverManagerWrapper() {};
 };
 
 

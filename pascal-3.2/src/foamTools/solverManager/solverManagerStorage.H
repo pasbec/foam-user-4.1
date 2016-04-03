@@ -33,7 +33,7 @@ Description
 #define solverManagerStorage_H
 
 #include "solverManager.H"
-#include "solverManagerBaseNested.H"
+#include "solverManagerWrapper.H"
 
 // TODO: Macro new for regionMeshes where mesh is the mesh of one region:
 //       Storage should be based on MeshType
@@ -60,7 +60,7 @@ Description
 
 # define smStorage_new(MANAGER, NAME)                                         \
                                                                               \
-    smBaseNested_new(Storage, solverManagerStorage, MANAGER, NAME)            \
+    smWrapper_new(Storage, solverManagerStorage, MANAGER, NAME)               \
                                                                               \
     private: virtual void init() const;
 
@@ -69,7 +69,7 @@ Description
 
 # define smStorage_end()                                                      \
                                                                               \
-    smBaseNested_end()
+    smWrapper_end()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -322,7 +322,7 @@ namespace Foam
 template <class MANAGER>
 class solverManagerStorage
 :
-    public solverManagerBaseNested<MANAGER>
+    public solverManagerWrapper<MANAGER>
 {
 public:
 
@@ -330,7 +330,7 @@ public:
 
         typedef MANAGER Manager;
         typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename ManagerMesh::Mesh ThisMesh;
+        typedef typename MANAGER::Mesh Mesh;
 
 // TODO: Items
 
@@ -352,7 +352,7 @@ public:
 
         solverManagerStorage(const MANAGER& manager)
         :
-            solverManagerBaseNested<MANAGER>(manager)
+            solverManagerWrapper<MANAGER>(manager)
         {};
 
     // Destructor

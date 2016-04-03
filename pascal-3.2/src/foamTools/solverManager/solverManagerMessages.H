@@ -50,8 +50,7 @@ public:
 
     // Public typedefs
 
-        typedef MESH Mesh;
-        typedef typename MESH::Mesh MeshType;
+        typedef MESH ManagerMesh;
 
 
 private:
@@ -65,7 +64,7 @@ private:
         const Time& time_;
 
         //- Reference to mesh
-        const Mesh& mesh_;
+        const ManagerMesh& mesh_;
 
     // Private Member Functions
 
@@ -84,7 +83,7 @@ public:
         (
             const argList& args,
             const Time& time,
-            const Mesh& mesh
+            const ManagerMesh& mesh
         )
         :
             args_(args), time_(time), mesh_(mesh)

@@ -33,7 +33,7 @@ Description
 #define solverManagerRegions_H
 
 #include "solverManager.H"
-#include "solverManagerBaseNested.H"
+#include "solverManagerWrapper.H"
 #include "solverManagerRegion.H"
 #include "solverManagerStorage.H"
 
@@ -41,14 +41,14 @@ Description
 
 # define smRegions_new(MANAGER, NAME)                                         \
                                                                               \
-    smBaseNested_new(Regions, solverManagerRegions, MANAGER, NAME)
+    smWrapper_new(Regions, solverManagerRegions, MANAGER, NAME)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define smRegions_end()                                                      \
                                                                               \
-    smBaseNested_end()
+    smWrapper_end()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,7 +61,7 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smBaseNested_setItem_P1(TYPE, NAME, this->manager())          \
+                smWrapper_setItem_P1(TYPE, NAME, this->manager())             \
                                                                               \
                 regions().insert                                              \
                 (                                                             \
@@ -90,7 +90,7 @@ namespace Foam
 template <class MANAGER>
 class solverManagerRegions
 :
-    public solverManagerBaseNested<MANAGER>
+    public solverManagerWrapper<MANAGER>
 {
 public:
 
@@ -98,7 +98,7 @@ public:
 
         typedef MANAGER Manager;
         typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename ManagerMesh::Mesh ThisMesh;
+        typedef typename MANAGER::Mesh Mesh;
 
 
 private:
@@ -118,7 +118,7 @@ public:
 
         solverManagerRegions(const MANAGER& manager)
         :
-            solverManagerBaseNested<MANAGER>(manager)
+            solverManagerWrapper<MANAGER>(manager)
         {};
 
     // Destructor

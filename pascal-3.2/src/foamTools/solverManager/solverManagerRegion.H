@@ -33,7 +33,7 @@ Description
 #define solverManagerRegion_H
 
 #include "solverManager.H"
-#include "solverManagerBaseNested.H"
+#include "solverManagerWrapper.H"
 #include "solverManagerStorage.H"
 
 // TODO: Macro new for regionMeshes where mesh is the mesh of one region:
@@ -48,14 +48,14 @@ Description
 
 # define smRegion_new(MANAGER, NAME)                                          \
                                                                               \
-    smBaseNested_new(Region, solverManagerRegion, MANAGER, NAME)
+    smWrapper_new(Region, solverManagerRegion, MANAGER, NAME)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define smRegion_end()                                                       \
                                                                               \
-    smBaseNested_end()
+    smWrapper_end()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -64,17 +64,17 @@ Description
                                                                               \
     public: typedef TYPE Control;                                             \
                                                                               \
-    smBaseNested_addModItemNoInit_P1(Control, control, virtual, this->mesh())
+    smWrapper_addModItemNoInit_P1(Control, control, virtual, this->mesh())
 
 
 # define smRegion_addSettings_manager()                                       \
                                                                               \
-    smBaseNested_addVirtualItem_P1(Settings, settings, this->manager())
+    smWrapper_addVirtualItem_P1(Settings, settings, this->manager())
 
 
 # define smRegion_addStorage_manager()                                        \
                                                                               \
-    smBaseNested_addVirtualItem_P1(Storage, storage, this->manager())
+    smWrapper_addVirtualItem_P1(Storage, storage, this->manager())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -89,7 +89,7 @@ namespace Foam
 template <class MANAGER>
 class solverManagerRegion
 :
-    public solverManagerBaseNested<MANAGER>
+    public solverManagerWrapper<MANAGER>
 {
 public:
 
@@ -97,7 +97,7 @@ public:
 
         typedef MANAGER Manager;
         typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename ManagerMesh::Mesh ThisMesh;
+        typedef typename MANAGER::Mesh Mesh;
 
         typedef solutionControl Control;
         typedef solverManagerStorage<MANAGER> Storage;
@@ -167,7 +167,7 @@ public:
 
         solverManagerRegion(const MANAGER& manager)
         :
-            solverManagerBaseNested<MANAGER>(manager)
+            solverManagerWrapper<MANAGER>(manager)
         {};
 
     // Destructor
