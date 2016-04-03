@@ -34,8 +34,9 @@ Description
 
 #include "solverManager.H"
 
-// TODO: Get the mesh in the Wrapper!
-// TODO: WRAPPER or simply solverManagerWrapper?
+// TODO: Get the correct mesh in the Wrapper! Therefor I have to change:
+//       public: typedef typename MANAGER::ManagerMesh Mesh;
+//       But ONLY FOR REGION, SETTINGS, and STORAGE of Regions!!!
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,21 +45,29 @@ Description
     public: class NAME                                                        \
     :                                                                         \
         public solverManager<MANAGER::ManagerMesh>::BASE,                     \
-        public WRAPPER<MANAGER>                                               \
+        public WRAPPER<MANAGER, typename MANAGER::ManagerMesh>                \
     {                                                                         \
         friend class MANAGER;                                                 \
                                                                               \
-        public: typedef solverManager<MANAGER::ManagerMesh>::BASE Base;       \
-        public: typedef WRAPPER<MANAGER> Wrapper;                             \
+        public: typedef MANAGER Manager;                                      \
+        public: typedef typename MANAGER::ManagerMesh ManagerMesh;            \
+        public: typedef typename MANAGER::ManagerMesh Mesh;                   \
+                                                                              \
+        public: typedef typename solverManager<ManagerMesh>::BASE Base;       \
+        public: typedef WRAPPER<Manager, ManagerMesh> Wrapper;                \
                                                                               \
         private: NAME(const NAME&);                                           \
                                                                               \
         private: void operator=(const NAME&);                                 \
                                                                               \
-        public: NAME(const MANAGER& manager)                                  \
+        public: NAME                                                          \
+        (                                                                     \
+            const Manager& manager,                                           \
+            Mesh& mesh                                                        \
+        )                                                                     \
         :                                                                     \
             Base(),                                                           \
-            Wrapper(manager)                                                  \
+            Wrapper(manager, mesh)                                            \
         {};                                                                   \
                                                                               \
         public: virtual ~NAME() {};
@@ -367,13 +376,13 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smManager_addSettings_this()                                         \
+# define sm_addSettings()                                                     \
                                                                               \
-    smWrapper_addVirtualItem_P1(Settings, settings, *this)
+    smWrapper_addVirtualItem_P2(Settings, settings, *this, this->mesh())
 
-# define smManager_addRegions_this()                                          \
+# define sm_addRegions()                                                      \
                                                                               \
-    smWrapper_addVirtualItem_P1(Regions, regions, *this)
+    smWrapper_addVirtualItem_P2(Regions, regions, *this, this->mesh())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -385,7 +394,7 @@ namespace Foam
                        Class solverManagerWrapper Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER>
+template <class MANAGER, class MESH>
 class solverManagerWrapper
 {
 public:
@@ -393,8 +402,7 @@ public:
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename MANAGER::Mesh Mesh;
+        typedef MESH Mesh;
 
 
 private:
@@ -408,7 +416,7 @@ private:
         Time& time_;
 
         //- Reference to mesh
-        ManagerMesh& mesh_;
+        Mesh& mesh_;
 
         //- Reference to manager
         const Manager& manager_;
@@ -441,7 +449,7 @@ protected:
             };
 
             //- Return reference to mesh
-            ManagerMesh& mesh() const
+            Mesh& mesh() const
             {
                 return mesh_;
             }
@@ -523,11 +531,15 @@ public:
 
     // Constructor
 
-        solverManagerWrapper(const MANAGER& manager)
+        solverManagerWrapper
+        (
+            const Manager& manager,
+            Mesh& mesh
+        )
         :
             args_(manager.args()),
             time_(manager.time()),
-            mesh_(manager.mesh()),
+            mesh_(mesh),
             manager_(manager)
         {};
 

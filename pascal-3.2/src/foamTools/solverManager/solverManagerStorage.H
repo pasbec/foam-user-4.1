@@ -319,18 +319,17 @@ namespace Foam
                        Class solverManagerStorage Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER>
+template <class MANAGER, class MESH>
 class solverManagerStorage
 :
-    public solverManagerWrapper<MANAGER>
+    public solverManagerWrapper<MANAGER, MESH>
 {
 public:
 
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename MANAGER::Mesh Mesh;
+        typedef MESH Mesh;
 
 // TODO: Items
 
@@ -350,9 +349,13 @@ public:
 
     // Constructor
 
-        solverManagerStorage(const MANAGER& manager)
+        solverManagerStorage(const Manager& manager, Mesh& mesh)
         :
-            solverManagerWrapper<MANAGER>(manager)
+            solverManagerWrapper<Manager, Mesh>
+            (
+                manager,
+                mesh
+            )
         {};
 
     // Destructor

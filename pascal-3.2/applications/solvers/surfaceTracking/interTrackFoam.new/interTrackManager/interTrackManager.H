@@ -63,28 +63,28 @@ public:
     // Public Nested Classes
 
         //- Settings
-        smSettings_new(interTrackManager, Settings);
+        sm_settings_new(interTrackManager, Settings);
 
             mutable Switch debug;
 
-        smSettings_end();
-        smManager_addSettings_this();
+        sm_settings_end();
+        sm_addSettings();
 
 
         //- Default region
         smRegion_new(interTrackManager, DefaultRegion);
 
             //- Control
-            smRegion_addControl_mesh(interTrackControl);
+            smRegion_addControl(interTrackControl);
 
             //- Settings
-            smSettings_new(interTrackManager, Settings);
+            sm_settings_new(interTrackManager, Settings);
 
                 mutable Switch UpCoupled;
                 mutable Switch UpDirectForce;
 
-            smSettings_end();
-            smRegion_addSettings_manager();
+            sm_settings_end();
+            smRegion_addSettings();
 
             //- Storage
             smStorage_new(interTrackManager, Storage);
@@ -123,7 +123,7 @@ public:
                 smStorage_add(trackedSurface, interface);
 
             smStorage_end();
-            smRegion_addStorage_manager();
+            smRegion_addStorage();
 
         smRegion_end();
 
@@ -135,7 +135,7 @@ public:
             smRegions_addDefaultRegion_manager(DefaultRegion);
 
         smRegions_end();
-        smManager_addRegions_this();
+        sm_addRegions();
 
 
 private:

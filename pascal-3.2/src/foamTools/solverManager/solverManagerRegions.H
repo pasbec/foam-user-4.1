@@ -37,6 +37,10 @@ Description
 #include "solverManagerRegion.H"
 #include "solverManagerStorage.H"
 
+// TODO: Get the correct mesh in the Wrapper! Therefor I have to change:
+//       public: typedef typename MANAGER::ManagerMesh Mesh;
+//       But ONLY FOR REGION, SETTINGS, and STORAGE of Regions!!!
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define smRegions_new(MANAGER, NAME)                                         \
@@ -61,7 +65,7 @@ Description
         {                                                                     \
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
-                smWrapper_setItem_P1(TYPE, NAME, this->manager())             \
+                smWrapper_setItem_P2(TYPE, NAME, this->manager(), this->mesh())\
                                                                               \
                 regions().insert                                              \
                 (                                                             \
@@ -87,18 +91,17 @@ namespace Foam
                        Class solverManagerRegions Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER>
+template <class MANAGER, class MESH>
 class solverManagerRegions
 :
-    public solverManagerWrapper<MANAGER>
+    public solverManagerWrapper<MANAGER, MESH>
 {
 public:
 
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename MANAGER::Mesh Mesh;
+        typedef MESH Mesh;
 
 
 private:
@@ -116,9 +119,13 @@ public:
 
     // Constructor
 
-        solverManagerRegions(const MANAGER& manager)
+        solverManagerRegions(const Manager& manager, Mesh& mesh)
         :
-            solverManagerWrapper<MANAGER>(manager)
+            solverManagerWrapper<Manager, Mesh>
+            (
+                manager,
+                mesh
+            )
         {};
 
     // Destructor

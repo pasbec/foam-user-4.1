@@ -60,21 +60,21 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smRegion_addControl_mesh(TYPE)                                       \
+# define smRegion_addControl(TYPE)                                            \
                                                                               \
     public: typedef TYPE Control;                                             \
                                                                               \
     smWrapper_addModItemNoInit_P1(Control, control, virtual, this->mesh())
 
 
-# define smRegion_addSettings_manager()                                       \
+# define smRegion_addSettings()                                               \
                                                                               \
-    smWrapper_addVirtualItem_P1(Settings, settings, this->manager())
+    smWrapper_addVirtualItem_P2(Settings, settings, this->manager(), this->mesh())\
 
 
-# define smRegion_addStorage_manager()                                        \
+# define smRegion_addStorage()                                                \
                                                                               \
-    smWrapper_addVirtualItem_P1(Storage, storage, this->manager())
+    smWrapper_addVirtualItem_P2(Storage, storage, this->manager(), this->mesh())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -86,21 +86,20 @@ namespace Foam
                        Class solverManagerRegion Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER>
+template <class MANAGER, class MESH>
 class solverManagerRegion
 :
-    public solverManagerWrapper<MANAGER>
+    public solverManagerWrapper<MANAGER, MESH>
 {
 public:
 
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename MANAGER::Mesh Mesh;
+        typedef MESH Mesh;
 
-        typedef solutionControl Control;
-        typedef solverManagerStorage<MANAGER> Storage;
+//         typedef solutionControl Control;
+//         typedef solverManagerStorage<MANAGER> Storage;
 
 
 private:
@@ -165,9 +164,13 @@ public:
 
     // Constructor
 
-        solverManagerRegion(const MANAGER& manager)
+        solverManagerRegion(const Manager& manager, Mesh& mesh)
         :
-            solverManagerWrapper<MANAGER>(manager)
+            solverManagerWrapper<Manager, Mesh>
+            (
+                manager,
+                mesh
+            )
         {};
 
     // Destructor

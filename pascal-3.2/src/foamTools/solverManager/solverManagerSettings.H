@@ -37,7 +37,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smSettings_new(MANAGER, NAME)                                        \
+# define sm_settings_new(MANAGER, NAME)                                       \
                                                                               \
     smWrapper_new(Settings, solverManagerSettings, MANAGER, NAME)             \
                                                                               \
@@ -48,7 +48,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define smSettings_end()                                                     \
+# define sm_settings_end()                                                    \
                                                                               \
     smWrapper_end()
 
@@ -62,18 +62,17 @@ namespace Foam
                        Class solverManagerSettings Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER>
+template <class MANAGER, class MESH>
 class solverManagerSettings
 :
-    public solverManagerWrapper<MANAGER>
+    public solverManagerWrapper<MANAGER, MESH>
 {
 public:
 
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename MANAGER::Mesh Mesh;
+        typedef MESH Mesh;
 
 // TODO: Items
 
@@ -93,9 +92,13 @@ public:
 
     // Constructor
 
-        solverManagerSettings(const MANAGER& manager)
+        solverManagerSettings(const Manager& manager, Mesh& mesh)
         :
-            solverManagerWrapper<MANAGER>(manager)
+            solverManagerWrapper<Manager, Mesh>
+            (
+                manager,
+                mesh
+            )
         {};
 
     // Destructor
