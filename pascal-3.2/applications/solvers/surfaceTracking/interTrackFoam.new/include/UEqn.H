@@ -24,6 +24,14 @@
      && settings.UpDirectForce
     )
     {
+        if (globalSettings.debug)
+        {
+            Info << "interTrackManager(UEqn.H) : "
+                << "Applying direct force injection"
+                << " based on source term in U-equation."
+                    << endl;
+        }
+
         UEqn() -= storage.F();
     }
 

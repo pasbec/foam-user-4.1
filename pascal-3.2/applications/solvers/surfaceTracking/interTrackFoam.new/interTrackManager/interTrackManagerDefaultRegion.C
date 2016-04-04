@@ -25,6 +25,7 @@ License
 
 #include "interTrackManager.H"
 #include "zeroGradientFvPatchFields.H"
+#include "fixedGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,6 +39,7 @@ void interTrackManager::DefaultRegion::Settings::read() const
 {
     UpCoupled = this->dict().lookupOrDefault("UpCoupled", false);
     UpDirectForce = this->dict().lookupOrDefault("UpDirectForce", false);
+    pFdirectCorrection = this->dict().lookupOrDefault("pFdirectCorrection", false);
 }
 
 

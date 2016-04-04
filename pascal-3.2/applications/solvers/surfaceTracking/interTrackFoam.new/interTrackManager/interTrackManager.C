@@ -39,7 +39,7 @@ defineTypeNameAndDebug(interTrackManager, 0);
 
 void interTrackManager::GlobalSettings::read() const
 {
-    debug = this->dict().lookupOrDefault<int>("debug", 0);
+    debug = this->dict().lookupOrDefault<int>("debug", this->debug);
 }
 
 

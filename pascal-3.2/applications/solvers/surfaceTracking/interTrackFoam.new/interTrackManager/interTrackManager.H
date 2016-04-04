@@ -86,6 +86,12 @@ public:
                 //- Directly inject volume force F in U-equation
                 SM_SETTINGS_MEMBER_ADD(Switch, UpDirectForce);
 
+                //- Directly correct fixedGradient boundary conditions
+                //  of the pressure (e.g dp/dn = F*n). If this switch is
+                //  enabled, the boudary values are corrected based on
+                //  a fixed flux-pressure
+                SM_SETTINGS_MEMBER_ADD(Switch, pFdirectCorrection);
+
             SM_SETTINGS_ADD();
 
             //- Storage

@@ -35,7 +35,7 @@ Description
 #include "solverManagerRegion.H"
 
 // TODO TODO TODO TODO :
-//       Move all 'intelligent' code in class "Item"
+//       Move all 'more or less intelligent' code in class "Item"
 //       and use only macro to get all items in
 //       the Storage namespace e.g.:
 //
@@ -202,6 +202,13 @@ Description
         if (dict_##NAME(dict, name))                                          \
         {                                                                     \
             enable_##NAME();                                                  \
+                                                                              \
+            if (NAME##Optional_)                                              \
+            {                                                                 \
+                Info << "Enable " << #NAME                                    \
+                    << " for region " << mesh().name()                        \
+                    << endl;                                                  \
+            }                                                                 \
                                                                               \
             return true;                                                      \
         }                                                                     \

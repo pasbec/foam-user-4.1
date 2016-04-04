@@ -15,8 +15,19 @@
 
     autoPtr<surfaceScalarField> phiF;
 
-    if (storage.is_F())
+    if
+    (
+        storage.is_F()
+    && !settings.UpDirectForce
+    )
     {
+        if (globalSettings.debug)
+        {
+            Info << "interTrackManager(pEqn.H) : "
+                << "Adding volume force flux to phiHbyA."
+                    << endl;
+        }
+
         phiF.set
         (
             new surfaceScalarField
@@ -44,6 +55,13 @@
 //       but I have the feeling, that it is NOT!
     if (control.consistent())
     {
+        if (globalSettings.debug)
+        {
+            Info << "interTrackManager(pEqn.H) : "
+                << "Applying consistent PIMPLE correction."
+                    << endl;
+        }
+
         rAtU = 1.0/max(1.0/rAU - UEqn().H1(), 0.1/rAU);
         phiHbyA +=
             fvc::interpolate(rAtU() - rAU)*fvc::snGrad(p)*mesh.magSf();
@@ -57,17 +75,78 @@
         UEqn.clear();
     }
 
-// TODO: Either manually correct the presure boundary conditions eith F or
-// TODO: Port fixedFluxPressureFvPatchScalarField from OpenFOAM 3.0.x:
-//     // Update the fixedFluxPressure BCs to ensure flux consistency
-//     setSnGrad<fixedFluxPressureFvPatchScalarField>
-//     (
-//         p.boundaryField(),
-//         (
-//             phiHbyA.boundaryField()
-//         - MRF.relative(mesh.Sf().boundaryField() & U.boundaryField())
-//         )/(mesh.magSf().boundaryField()*rAUf.boundaryField())
-//     );
+    // Manually correct the boundary conditions for the pressure at walls
+    // if the addititional volume forcing is activated. For this, it is
+    // utterly important to use fixedGradient patchFields instead of
+    // the zeroGradient ones at all walls
+// TODO: What about other pressure boundaries? It is obviously better
+//       to conduct a more general aproach. Therefor it makes probably
+//       sense to port back the fixedFluxPressureFvPatchFields from
+//       OpenFOAM 3.0.x, does it!?
+    if (storage.is_F())
+    {
+        forAll(p.boundaryField(), patchI)
+        {
+            if
+            (
+                p.boundaryField()[patchI].type()
+            == fixedGradientFvPatchField<scalar>::typeName
+            )
+            {
+                fixedGradientFvPatchField<scalar>& pp =
+                    refCast<fixedGradientFvPatchField<scalar> >
+                    (
+                        p.boundaryField()[patchI]
+                    );
+
+                // Patch data
+                const vectorField& Sfp =
+                    mesh.Sf().boundaryField()[patchI];
+                const scalarField& mSfp =
+                    mesh.magSf().boundaryField()[patchI];
+
+
+                if (settings.pFdirectCorrection)
+                {
+                    if (globalSettings.debug)
+                    {
+                        Info << "interTrackManager(pEqn.H) : "
+                            << "Correcting pressure at patch "
+                                << mesh.boundary()[patchI].name()
+                                << " directly, by means of volume force."
+                                << endl;
+                    }
+
+                    // Direct way by means of F
+                    const vectorField& Fp =
+                        storage.F().boundaryField()[patchI];
+
+                    pp.gradient() = (Fp & Sfp)/mSfp;
+                }
+                else
+                {
+                    if (globalSettings.debug)
+                    {
+                        Info << "interTrackManager(pEqn.H) : "
+                            << "Correcting pressure at patch "
+                                << mesh.boundary()[patchI].name()
+                                << " indirectly, by means of fixed flux-pressure."
+                                << endl;
+                    }
+
+                    // Indirect way by means of fixed flux-pressure
+                    const scalarField& phiHbyAp =
+                        phiHbyA.boundaryField()[patchI];
+                    const vectorField& Up =
+                        U.boundaryField()[patchI];
+                    const scalarField& rAUfp =
+                        rAUf.boundaryField()[patchI];
+
+                    pp.gradient() = rAUfp*(phiHbyAp - (Up & Sfp))/mSfp;
+                }
+            }
+        }
+    }
 
     // Non-orthogonal pressure corrector loop
     while (control.correctNonOrthogonal())
