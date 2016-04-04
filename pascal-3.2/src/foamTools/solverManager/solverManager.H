@@ -227,11 +227,11 @@ public:
         };
 
 
-// TODO: Items
-//         //- Item
-//         class Item
-//         {
-//         };
+// TODO: Implement Storage Items
+        //- Item
+        class Item
+        {
+        };
 
 
         //- Storage
@@ -241,8 +241,7 @@ public:
 
             // Public typedefs
 
-// TODO: Items
-//                 typedef typename solverManager<MESH>::Item Item;
+                typedef typename solverManager<MESH>::Item Item;
 
 
         private:

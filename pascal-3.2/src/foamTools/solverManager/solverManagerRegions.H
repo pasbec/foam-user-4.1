@@ -34,6 +34,7 @@ Description
 
 #include "solverManagerWrapper.H"
 
+// TODO: Fix the invalid pointer bug during destruction!
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

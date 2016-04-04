@@ -70,7 +70,7 @@
 
     rAUf = fvc::interpolate(rAtU());
 
-    if (control.nCorrPISO() == 1)
+    if (control.nCorrPISO() <= 1)
     {
         UEqn.clear();
     }

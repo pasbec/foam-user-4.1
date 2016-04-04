@@ -34,7 +34,8 @@ Description
 
 #include "solverManagerRegion.H"
 
-// TODO TODO TODO TODO :
+// TODO: Implement Storage Items
+//
 //       Move all 'more or less intelligent' code in class "Item"
 //       and use only macro to get all items in
 //       the Storage namespace e.g.:

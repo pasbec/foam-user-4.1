@@ -35,6 +35,8 @@ Description
     using namespace Foam;
 #endif
 
+// TODO: Coupled solution of U and p?
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
