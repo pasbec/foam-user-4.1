@@ -22,25 +22,57 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-06;
+        relTol          1e-01;
+    }
+
+    pFinal
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-06;
         relTol          0;
     }
 
-    U
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
+//     U
+//     {
+//         solver          PBiCG;
+//         preconditioner  DILU;
+//         tolerance       1e-08;
+//         relTol          1e-01;
+//     }
 }
 
-PISO
+PIMPLE
 {
-    nOuterCorrectors            10;
-    nCorrectors                 2;
-    nNonOrthogonalCorrectors    1;
+    nOuterCorrectors            50;
+    nCorrectors                 1;
+    nNonOrthogonalCorrectors    50;
     pRefPoint (0.5 0.5 0);
     pRefValue 0;
+
+    momentumPredictor no;
+
+    residualControl
+    {
+//         U
+//         {
+//                 tolerance  1e-08;
+//                 relTol     1e-02;
+//         }
+        p
+        {
+                tolerance  1e-06;
+                relTol     1e-02;
+        }
+     }
+}
+
+relaxationFactors
+{
+//     p        0.3;
+//     pFinal   1;
+//
+//     U        0.7;
 }
 
 // ************************************************************************* //

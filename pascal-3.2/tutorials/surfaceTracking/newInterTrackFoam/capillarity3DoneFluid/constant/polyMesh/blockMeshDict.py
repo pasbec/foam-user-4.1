@@ -40,7 +40,7 @@ d.vertices.set(  5, [geo_x2, geo_y2, geo_z1])
 d.vertices.set(  6, [geo_x1, geo_y2, geo_z2])
 d.vertices.set(  7, [geo_x2, geo_y2, geo_z2])
 
-d.blocks.set( 0, [0, 1, 5, 4, 2, 3, 7, 6], [20, 20, 20])
+d.blocks.set( 0, [0, 1, 5, 4, 2, 3, 7, 6], [40, 40, 40])
 
 d.boundaryFaces.set(1, "bottomWall", 0, "y-")
 d.boundaryFaces.set(2, "trackedSurface", 0, "y+")

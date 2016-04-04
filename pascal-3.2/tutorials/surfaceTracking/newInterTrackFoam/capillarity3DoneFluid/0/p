@@ -27,11 +27,13 @@ boundaryField
     }
     sideWalls
     {
-        type            zeroGradient;
+        type            fixedGradient;
+        gradient        uniform 0;
     }
     bottomWall
     {
-        type            zeroGradient;
+        type            fixedGradient;
+        gradient        uniform 0;
     }
 }
 

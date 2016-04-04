@@ -29,16 +29,17 @@ gradSchemes
 divSchemes
 {
     defalut none;
-    div(phi,U) Gauss linear;
+    div(phi,U) Gauss Gamma 0.5;
+    div((mu*dev(grad(U).T()))) Gauss linear;
+    div((muEff*dev(grad(U).T()))) Gauss linear;
 }
 
 laplacianSchemes
 {
     default none;
     laplacian(mu,U) Gauss linear corrected;
-    laplacian((1|A(U)),p) Gauss linear corrected;
-
-    laplacian((1|interpolate(A(U))),p) Gauss linear corrected;
+    laplacian(muEff,U) Gauss linear corrected;
+    laplacian(rAUf,p) Gauss linear corrected;
 }
 
 interpolationSchemes
