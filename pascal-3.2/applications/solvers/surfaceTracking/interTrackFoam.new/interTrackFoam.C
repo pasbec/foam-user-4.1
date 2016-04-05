@@ -37,6 +37,9 @@ Description
 
 // TODO: Coupled solution of U and p?
 
+// TODO: Read Zhang S., Zhao, X., General formulations for Rhie-Chow interpolation,
+//       ASME Heat Transfer/Fluids Engineering Summer Conference, HT-FED04, Charlotte, USA, 2004
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -46,6 +49,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createDynamicFvMesh.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,14 +66,25 @@ int main(int argc, char *argv[])
     volScalarField& mu = storage.mu();
     trackedSurface& interface = storage.interface();
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// TODO: Test F
+    volVectorField& F = storage.F();
+    F == dimensionedVector
+    (
+        word(),
+        dimMass/pow(dimLength,2)/pow(dimTime, 2),
+        vector(4, -9.81, 4)
+//         vector(0, -9.81, 0)
+    );
+    Info << F.boundaryField() << endl;
 
 // TODO: Two fluids
 // #   include "setRefCell.H"
 
 // TODO: Continuity errors into manager?
 #   include "initContinuityErrs.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,7 +95,7 @@ int main(int argc, char *argv[])
 
         interface.predictPoints(); // abs phi
 
-        // --- Pressure-velocity PIMPLE corrector loop
+        // --- OUTER corrector loop
         while (control.loop())
         {
             interface.updateBoundaryConditions(); // rel phi
@@ -88,12 +103,21 @@ int main(int argc, char *argv[])
             // Make the fluxes relative to the mesh motion
             fvc::makeRelative(phi,U);
 
+            autoPtr<fvVector4Matrix> UpEqn;
+
 #           include "UEqn.H"
 
-             // --- Pressure corrector PISO loop
-            while (control.correct())
+            if (!settings.UpCoupled)
             {
-#               include "pEqn.H"
+                // --- Pressure corrector PISO loop
+                while (control.correct())
+                {
+#                   include "pEqnSegregated.H"
+                }
+            }
+            else
+            {
+#               include "pEqnCoupled.H"
             }
 
             if

@@ -37,9 +37,25 @@ namespace Foam
 
 void interTrackManager::DefaultRegion::Settings::read() const
 {
-    UpCoupled = this->dict().lookupOrDefault("UpCoupled", false);
-    UpDirectForce = this->dict().lookupOrDefault("UpDirectForce", false);
-    pFdirectCorrection = this->dict().lookupOrDefault("pFdirectCorrection", false);
+    UpCoupled =
+        this->dict().lookupOrDefault("UpCoupled", false);
+    UEqnVolumeForce =
+        this->dict().lookupOrDefault("UEqnVolumeForce", false);
+    snGradpFromFlux =
+        this->dict().lookupOrDefault("snGradpFromFlux", true);
+
+    if
+    (
+        UpCoupled
+    && !UEqnVolumeForce
+    )
+    {
+        FatalErrorIn("interTrackManager::DefaultRegion::Settings::read() : ")
+            << "Both coupled solution of U and p and indirect flux "
+            << "representation of enabled volume force is currently "
+            << "not implemented!"
+            << abort(FatalError);
+    }
 }
 
 
@@ -99,6 +115,27 @@ void interTrackManager::DefaultRegion::Storage::init_U(const word& init) const
                 IOobject::AUTO_WRITE
             ),
             this->mesh()
+        )
+    );
+}
+
+
+void interTrackManager::DefaultRegion::Storage::init_Up(const word& init) const
+{
+    UpPtr_.set
+    (
+        new volVector4Field
+        (
+            IOobject
+            (
+                "Up",
+                this->time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            this->mesh(),
+            dimensionedVector4(word(), dimless, vector4::zero)
         )
     );
 }
@@ -303,7 +340,7 @@ void interTrackManager::DefaultRegion::Storage::init_interface(const word& init)
     );
 }
 
-
+// TODO: makeOptional_ has to be connected to settings!
 void interTrackManager::DefaultRegion::Storage::init() const
 {
     make_g();

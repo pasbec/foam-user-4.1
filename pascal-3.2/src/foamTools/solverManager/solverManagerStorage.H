@@ -34,6 +34,8 @@ Description
 
 #include "solverManagerRegion.H"
 
+// TODO: makeOptional_ has to be connected to settings!
+
 // TODO: Implement Storage Items
 //
 //       Move all 'more or less intelligent' code in class "Item"

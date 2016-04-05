@@ -2,6 +2,8 @@
     volScalarField rAU(1.0/UEqn().A());
     surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
 
+// TODO: Boundary conditions for p if settings.UEqnVolumeForce?
+
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn().H();
 
@@ -18,14 +20,14 @@
     if
     (
         storage.is_F()
-    && !settings.UpDirectForce
+    && !settings.UEqnVolumeForce
     )
     {
         if (globalSettings.debug)
         {
-            Info << "interTrackManager(pEqn.H) : "
-                << "Adding volume force flux to phiHbyA."
-                    << endl;
+            Info << "interTrackManager | pEqn.H : "
+                << "Adding volume force flux from F to phiHbyA."
+                << endl;
         }
 
         phiF.set
@@ -57,18 +59,18 @@
     {
         if (globalSettings.debug)
         {
-            Info << "interTrackManager(pEqn.H) : "
+            Info << "interTrackManager | pEqn.H : "
                 << "Applying consistent PIMPLE correction."
-                    << endl;
+                << endl;
         }
 
         rAtU = 1.0/max(1.0/rAU - UEqn().H1(), 0.1/rAU);
         phiHbyA +=
             fvc::interpolate(rAtU() - rAU)*fvc::snGrad(p)*mesh.magSf();
         HbyA -= (rAU - rAtU())*fvc::grad(p);
-    }
 
-    rAUf = fvc::interpolate(rAtU());
+        rAUf = fvc::interpolate(rAtU());
+    }
 
     if (control.nCorrPISO() <= 1)
     {
@@ -76,76 +78,98 @@
     }
 
     // Manually correct the boundary conditions for the pressure at walls
-    // if the addititional volume forcing is activated. For this, it is
+    // if the additional volume forcing is activated. For this, it is
     // utterly important to use fixedGradient patchFields instead of
     // the zeroGradient ones at all walls
-// TODO: What about other pressure boundaries? It is obviously better
-//       to conduct a more general aproach. Therefor it makes probably
-//       sense to port back the fixedFluxPressureFvPatchFields from
-//       OpenFOAM 3.0.x, does it!?
-    if (storage.is_F())
+// TODO: Do not use fixedGradient
+    if
+    (
+        storage.is_F()
+    && !settings.UEqnVolumeForce
+    )
     {
         forAll(p.boundaryField(), patchI)
         {
-            if
-            (
-                p.boundaryField()[patchI].type()
-            == fixedGradientFvPatchField<scalar>::typeName
-            )
+            if (isA<wallFvPatch>(mesh.boundary()[patchI]))
             {
-                fixedGradientFvPatchField<scalar>& pp =
-                    refCast<fixedGradientFvPatchField<scalar> >
-                    (
-                        p.boundaryField()[patchI]
-                    );
-
-                // Patch data
-                const vectorField& Sfp =
-                    mesh.Sf().boundaryField()[patchI];
-                const scalarField& mSfp =
-                    mesh.magSf().boundaryField()[patchI];
-
-
-                if (settings.pFdirectCorrection)
+                if
+                (
+                    p.boundaryField()[patchI].type()
+                == fixedGradientFvPatchField<scalar>::typeName
+                )
                 {
-                    if (globalSettings.debug)
+                    fixedGradientFvPatchField<scalar>& pp =
+                        refCast<fixedGradientFvPatchField<scalar> >
+                        (
+                            p.boundaryField()[patchI]
+                        );
+
+                    // Patch data
+                    const vectorField& Sfp =
+                        mesh.Sf().boundaryField()[patchI];
+                    const scalarField& mSfp =
+                        mesh.magSf().boundaryField()[patchI];
+
+
+                    if (!settings.snGradpFromFlux)
                     {
-                        Info << "interTrackManager(pEqn.H) : "
-                            << "Correcting pressure at patch "
-                                << mesh.boundary()[patchI].name()
-                                << " directly, by means of volume force."
+                        if (globalSettings.debug)
+                        {
+                            Info << "interTrackManager | pEqn.H : "
+                                << "Correcting pressure at patch "
+                                << mesh.boundary()[patchI].name() << "."
                                 << endl;
+                        }
+
+                        // Direct way by means of F
+                        const vectorField& Fp =
+                            storage.F().boundaryField()[patchI];
+
+                        pp.gradient() = (Fp & Sfp)/mSfp;
+                    }
+                    else
+                    {
+                        if (globalSettings.debug)
+                        {
+                            Info << "interTrackManager | pEqn.H : "
+                                << "Correcting pressure at patch "
+                                << mesh.boundary()[patchI].name()
+                                << " from flux-difference."
+                                << endl;
+                        }
+
+                        // Indirect way by means of fixed flux-pressure
+                        const scalarField& phiHbyAp =
+                            phiHbyA.boundaryField()[patchI];
+                        const vectorField& Up =
+                            U.boundaryField()[patchI];
+                        const scalarField& rAUfp =
+                            rAUf.boundaryField()[patchI];
+
+                        pp.gradient() = (phiHbyAp - (Up & Sfp))/(mSfp*rAUfp);
                     }
 
-                    // Direct way by means of F
-                    const vectorField& Fp =
-                        storage.F().boundaryField()[patchI];
-
-                    pp.gradient() = (Fp & Sfp)/mSfp;
+                    pp.updateCoeffs();
                 }
                 else
                 {
-                    if (globalSettings.debug)
-                    {
-                        Info << "interTrackManager(pEqn.H) : "
-                            << "Correcting pressure at patch "
-                                << mesh.boundary()[patchI].name()
-                                << " indirectly, by means of fixed flux-pressure."
-                                << endl;
-                    }
-
-                    // Indirect way by means of fixed flux-pressure
-                    const scalarField& phiHbyAp =
-                        phiHbyA.boundaryField()[patchI];
-                    const vectorField& Up =
-                        U.boundaryField()[patchI];
-                    const scalarField& rAUfp =
-                        rAUf.boundaryField()[patchI];
-
-                    pp.gradient() = rAUfp*(phiHbyAp - (Up & Sfp))/mSfp;
+// TODO: Do not use fixedGradient
+                    WarningIn("interTrackManager | pEqn.H")
+                        << "The pressure boundary condition for "
+                        << "wall-patch named '"
+                        << mesh.boundary()[patchI].name() << "' is '"
+                        << p.boundaryField()[patchI].type() << "',"
+                        << endl << "    "
+                        << "It should be of type 'fixedGradient' "
+                        << "to correctly represent the gradient dp/dn"
+                        << endl << "    "
+                        << "while volume force F is enabled!"
+                        << endl;
                 }
             }
         }
+
+        p.correctBoundaryConditions();
     }
 
     // Non-orthogonal pressure corrector loop
@@ -158,7 +182,7 @@
 
 // TODO: Two fluids
 // TODO: Read pRefCell and pRefValue with control
-// #include "setReference.H"
+// #       include "setReference.H"
 //         pEqn.setReference(pRefCell, pRefValue);
 
         pEqn.solve
@@ -193,7 +217,7 @@
             if
             (
                 storage.is_F()
-            && !settings.UpDirectForce
+            && !settings.UEqnVolumeForce
             )
             {
                 // Correct the momentum source with the pressure gradient

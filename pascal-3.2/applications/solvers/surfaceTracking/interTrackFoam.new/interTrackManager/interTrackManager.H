@@ -44,11 +44,18 @@ SourceFiles
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
 #include "trackedSurface.H"
+#include "fvBlockMatrix.H"
+#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+typedef fvBlockMatrix<vector4> fvVector4Matrix;
+
 
 /*---------------------------------------------------------------------------*\
                        Class interTrackManager Declaration
@@ -83,14 +90,24 @@ public:
                 //- Coupled solution of U and p
                 SM_SETTINGS_MEMBER_ADD(Switch, UpCoupled);
 
-                //- Directly inject volume force F in U-equation
-                SM_SETTINGS_MEMBER_ADD(Switch, UpDirectForce);
+                //- Directly inject volume force F in U-equation as
+                //  source term
+                //
+                //  * enabled: UEqn -= F; PhiHbyA += (rAU*F)_f_internal
+                //
+                //  * disabled: PhiHbyA += (rAU*F)_f
+                //
+                SM_SETTINGS_MEMBER_ADD(Switch, UEqnVolumeForce);
 
-                //- Directly correct fixedGradient boundary conditions
-                //  of the pressure (e.g dp/dn = F*n). If this switch is
-                //  enabled, the boudary values are corrected based on
-                //  a fixed flux-pressure
-                SM_SETTINGS_MEMBER_ADD(Switch, pFdirectCorrection);
+                //- Use fixed flux-pressure to correct pressure p at
+                //  fixedGradient patches
+                // TODO: Do not use fixedGradient
+                //
+                //  * enabled: dp/dn = (PhiHbyA -(U&Sf))/(magSf*rAUf)
+                //
+                //  * disabled: dp/dn = F*n
+                //
+                SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
 
             SM_SETTINGS_ADD();
 
@@ -105,6 +122,9 @@ public:
 
                 //- Velocity
                 SM_STORAGE_MEMBER_ADD(volVectorField, U);
+
+                //- Velocity/Pressure
+                SM_STORAGE_MEMBER_ADD(volVector4Field, Up);
 
                 //- Face flux
                 SM_STORAGE_MEMBER_ADD(surfaceScalarField, phi);

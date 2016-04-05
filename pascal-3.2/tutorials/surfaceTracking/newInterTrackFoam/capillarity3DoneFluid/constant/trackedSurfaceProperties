@@ -29,7 +29,7 @@ pointNormalsCorrectionPatches 0();
 
 nTrackedSurfaceCorrectors 1;
 
-useSubMesh          yes;
+// useSubMesh          yes;
 
 // correctVolume       yes;
 

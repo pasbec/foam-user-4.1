@@ -22,8 +22,8 @@ settings
     region0
     {
         UpCoupled           false;
-        UpDirectForce       false;
-        pFdirectCorrection  false;
+        UEqnVolumeForce     false;
+        snGradpFromFlux     true;
     }
 }
 

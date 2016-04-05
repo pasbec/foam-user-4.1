@@ -1255,8 +1255,8 @@ void trackedSurface::updateDisplacementDirections()
                 }
                 else
                 {
-                    Info  << "trackedSurface::updateDisplacementDirections() : "
-                        << "Warning: centerline polyPatch does not exist. "
+                    WarningIn("trackedSurface::updateDisplacementDirections()")
+                        << "Centerline polyPatch does not exist. "
                         << "Surface points displacement directions "
                         << "will not be corrected at the axis (centerline)"
                         << endl;

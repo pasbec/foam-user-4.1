@@ -27,11 +27,13 @@ boundaryField
     }
     sideWalls
     {
-        type            slip;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
     bottomWall
     {
-        type            slip;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
 }
 

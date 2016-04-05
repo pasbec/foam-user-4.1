@@ -3,7 +3,7 @@
 
     if(storage.is_turbulence())
     {
-        tmu() += rho * storage.turbulence().nut();
+        tmu() += rho*storage.turbulence().nut();
         tmu().rename("muEff");
     }
 
@@ -21,15 +21,14 @@
     if
     (
         storage.is_F()
-     && settings.UpDirectForce
+     && settings.UEqnVolumeForce
     )
     {
         if (globalSettings.debug)
         {
-            Info << "interTrackManager(UEqn.H) : "
-                << "Applying direct force injection"
-                << " based on source term in U-equation."
-                    << endl;
+            Info << "interTrackManager | UEqn.H : "
+                << "Adding source term for volume force F in UEqn."
+                << endl;
         }
 
         UEqn() -= storage.F();
@@ -42,15 +41,15 @@
         if
         (
             storage.is_F()
-        && !settings.UpDirectForce
+        && !settings.UEqnVolumeForce
         )
         {
             solve
             (
                 UEqn == fvc::reconstruct
                 (
-                    - ( fvc::snGrad(p) * mesh.magSf() )
-                    + ( fvc::interpolate(storage.F()) & mesh.Sf() )
+                - (fvc::snGrad(p)*mesh.magSf())
+                + (fvc::interpolate(storage.F()) & mesh.Sf())
                 )
             );
         }
@@ -58,4 +57,13 @@
         {
             solve(UEqn() == -fvc::grad(p));
         }
+    }
+
+    if (settings.UpCoupled)
+    {
+        // Init block matrix
+        UpEqn.set(new fvVector4Matrix(storage.Up()));
+
+        // Add UEqn into block matrix
+        UpEqn().insertEquation(0, UEqn());
     }
