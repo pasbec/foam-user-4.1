@@ -32,6 +32,7 @@ Description
 #ifndef solverManagerStorage_H
 #define solverManagerStorage_H
 
+#include "solverManagerWrapper.H"
 #include "solverManagerRegion.H"
 
 // TODO: makeOptional_ has to be connected to settings!
@@ -54,7 +55,7 @@ Description
 
 # define SM_STORAGE_NEW(MANAGER)                                              \
                                                                               \
-    SM_WRAPPER_NEW(Storage, MANAGER, Storage)                                 \
+    SM_WRAPPER_NEW(Storage, Storage, MANAGER, Storage)                        \
                                                                               \
     private: virtual void init() const;
 
@@ -324,19 +325,19 @@ namespace Foam
 template <class MANAGER>
 class solverManagerStorage
 :
-    public solverManagerRegion<MANAGER>
+    public solverManagerCore<typename MANAGER::ManagerMesh>::Storage,
+    public solverManagerWrapper<MANAGER, typename MANAGER::Mesh>
 {
 public:
 
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::Storage Base;
 
-        typedef solverManagerRegion<MANAGER> Wrapper;
+        typedef typename Manager::ManagerMesh ManagerMesh;
+        typedef typename Manager::Mesh Mesh;
 
-        typedef typename Wrapper::ManagerMesh ManagerMesh;
-        typedef typename Wrapper::Mesh Mesh;
+        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
 
 private:
@@ -348,6 +349,26 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const solverManagerStorage&);
+
+        // Basic
+
+            //- Reference to settings dictionary
+            inline const dictionary& settingsDict() const
+            {
+                return this->Wrapper::settingsDict().subDict
+                (
+                    mesh().name()
+                );
+            };
+
+            //- Reference to storage dictionary
+            inline const dictionary& storageDict() const
+            {
+                return this->Wrapper::storageDict().subDict
+                (
+                    mesh().name()
+                );
+            };
 
 public:
 
@@ -366,10 +387,18 @@ public:
 
         // Basic
 
-            //- Reference to dictionary
+            //- Mesh
+            inline Mesh& mesh() const
+            {
+                return this->Wrapper::wrappedMesh();
+            }
+
+        // Dictionaries
+
+            //- Dictionary
             inline const dictionary& dict() const
             {
-                return this->Wrapper::storageDict();
+                return storageDict();
             };
 
 
@@ -398,7 +427,6 @@ public:
 
                 return false;
             };
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

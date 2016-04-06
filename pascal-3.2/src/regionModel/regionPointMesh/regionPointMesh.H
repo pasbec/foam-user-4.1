@@ -79,7 +79,13 @@ private:
             //- Create new mesh for region with index regionI
             pointMesh* newMesh(const label& regionI) const;
 
+
 public:
+
+    // Public typedefs
+
+        typedef pointMesh Mesh;
+        typedef pointBoundaryMesh BoundaryMesh;
 
     //- Runtime type information
     TypeName("regionPointMesh");

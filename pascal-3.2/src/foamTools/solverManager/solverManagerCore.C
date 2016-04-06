@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "solverManager.H"
+#include "solverManagerCore.H"
 #include "dimensionSet.H"
 #include "polyMesh.H"
 
@@ -35,12 +35,12 @@ namespace Foam
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template <class MESH>
-void solverManager<MESH>::errorIfNotMaster() const
+void solverManagerCore<MESH>::errorIfNotMaster() const
 {
     if (!master())
     {
-        FatalErrorIn("solverManager::messages()")
-            << "This solverManager instantiation is NOT"
+        FatalErrorIn("solverManagerCore::messages()")
+            << "This solverManagerCore instantiation is NOT"
             << " the master manager."
             << abort(FatalError);
     }
@@ -48,7 +48,7 @@ void solverManager<MESH>::errorIfNotMaster() const
 
 
 template <class MESH>
-void solverManager<MESH>::readParameters
+void solverManagerCore<MESH>::readParameters
 (
     Parameters& parameters
 ) const
@@ -60,7 +60,7 @@ void solverManager<MESH>::readParameters
 
 
 template <class MESH>
-void solverManager<MESH>::readTimeParameters
+void solverManagerCore<MESH>::readTimeParameters
 (
     TimeParameters& timePar
 ) const
@@ -81,7 +81,7 @@ void solverManager<MESH>::readTimeParameters
 
 
 template <class MESH>
-void solverManager<MESH>::calcDeltaT
+void solverManagerCore<MESH>::calcDeltaT
 (
     scalar& deltaT
 ) const
@@ -111,7 +111,7 @@ void solverManager<MESH>::calcDeltaT
 
 
 template <class MESH>
-void solverManager<MESH>::applyDeltaT() const
+void solverManagerCore<MESH>::applyDeltaT() const
 {
     errorIfNotMaster();
 
@@ -137,9 +137,9 @@ void solverManager<MESH>::applyDeltaT() const
 
         if (!CoNumSet)
         {
-            FatalErrorIn("solverManager::applyDeltaT()")
+            FatalErrorIn("solverManagerCore::applyDeltaT()")
                 << "A Courant Number needs to be calculated if "
-                    << "solverManager::setDeltaT(scalar& deltaT) "
+                    << "solverManagerCore::setDeltaT(scalar& deltaT) "
                     << "is not beeing used. Utilize the virtual function "
                     << "setCoNum(scalar& newCoNum) to set it. The "
                     << "return value needs to be true."
@@ -160,7 +160,7 @@ void solverManager<MESH>::applyDeltaT() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class MESH>
-solverManager<MESH>::solverManager
+solverManagerCore<MESH>::solverManagerCore
 (
     const argList& args,
     Time& time,
@@ -169,6 +169,9 @@ solverManager<MESH>::solverManager
     const bool& master
 )
 :
+    solverManagerCoreName(),
+    solverManagerCoreMessages<ManagerMesh>(),
+    solverManagerCoreBase<ManagerMesh>(),
     parametersPtr_(NULL),
     messagesPtr_(NULL),
     args_(args),
@@ -196,7 +199,8 @@ solverManager<MESH>::solverManager
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template <class MESH>
-const typename solverManager<MESH>::Parameters& solverManager<MESH>::parameters() const
+const typename solverManagerCore<MESH>::Parameters&
+solverManagerCore<MESH>::parameters() const
 {
     errorIfNotMaster();
 
@@ -213,7 +217,8 @@ const typename solverManager<MESH>::Parameters& solverManager<MESH>::parameters(
 
 
 template <class MESH>
-const typename solverManager<MESH>::Messages& solverManager<MESH>::messages() const
+const typename solverManagerCore<MESH>::Messages&
+solverManagerCore<MESH>::messages() const
 {
     errorIfNotMaster();
 
@@ -230,23 +235,70 @@ const typename solverManager<MESH>::Messages& solverManager<MESH>::messages() co
 
 
 template <class MESH>
-void solverManager<MESH>::read() const
+void solverManagerCore<MESH>::read() const
 {
-    globalSettings().read();
+    settings().read();
     regions().read();
 }
 
 
 template <class MESH>
-void solverManager<MESH>::init() const
+void solverManagerCore<MESH>::init() const
 {
     read();
+    storage().init();
     regions().init();
 }
 
 
 template <class MESH>
-bool solverManager<MESH>::loop() const
+bool solverManagerCore<MESH>::once() const
+{
+    errorIfNotMaster();
+
+    Time& runTime = const_cast<Time&>(time());
+
+    if (prePhase())
+    {
+        init();
+
+        if (!args().optionFound("overwrite"))
+        {
+            runTime++;
+        }
+
+        messages().timeIs();
+        messages().newLine();
+
+        prePhase() = false;
+
+        return true;
+    }
+    else
+    {
+        next();
+
+        time().write();
+
+        if (time().outputTime())
+        {
+            write();
+        }
+
+        messages().executionTime();
+        messages().newLine();
+
+        finalize();
+
+        messages().end();
+
+        return false;
+    }
+}
+
+
+template <class MESH>
+bool solverManagerCore<MESH>::loop() const
 {
     errorIfNotMaster();
 
@@ -298,7 +350,7 @@ bool solverManager<MESH>::loop() const
 
 
 template <class MESH>
-bool solverManager<MESH>::run() const
+bool solverManagerCore<MESH>::run() const
 {
     errorIfNotMaster();
 

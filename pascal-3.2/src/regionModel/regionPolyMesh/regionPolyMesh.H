@@ -91,6 +91,7 @@ private:
             //- Create new mesh for region with index regionI
             polyMesh* newMesh(const label& regionI) const;
 
+
 protected:
 
     // Protected data
@@ -222,15 +223,19 @@ protected:
                 const label& regionI
             ) const;
 
+
 public:
+
+    // Public typedefs
+
+        typedef polyMesh Mesh;
+        typedef polyBoundaryMesh BoundaryMesh;
 
     //- Runtime type information
     TypeName("regionPolyMesh");
 
     //- Return the region data sub-directory name (usually "regionPolyMesh")
     static word regionPolyMeshSubDir;
-
-    // Public typedefs
 
     // Constructors
 

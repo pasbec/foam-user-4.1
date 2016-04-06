@@ -30,7 +30,7 @@
         {
             setRegionScope(control.base());
 
-#           include "eddyCurrentAEqn.H"
+#           include "AEqn.H"
         }
 
         // Only if mesh is 3D
@@ -47,7 +47,7 @@
                 control.relax(ARe);
                 control.relax(AIm);
 
-#               include "eddyCurrentVEqn.H"
+#               include "VEqn.H"
             }
 
             // Update gradient of V

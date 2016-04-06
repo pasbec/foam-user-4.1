@@ -35,353 +35,32 @@ namespace Foam
 defineTypeNameAndDebug(eddyCurrentControl, 0);
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void eddyCurrentControl::readDictDataIfModified()
+bool Foam::eddyCurrentControl::criteriaSatisfied()
 {
-    // Eddy current properties
-    if (propDict_.readIfModified())
-    {
-        // Update data
-        frequency_.value() = propDict_.lookupOrDefault<dimensionedScalar>
-            ("frequency", frequency_).value();
-        omega_.value() = 2.0 * mathematicalConstant::pi * frequency_.value();
-    }
-
-    // Solution properties
-    if
-    (
-        baseSolutionDict_.readIfModified()
-     || conductorSolutionDict_.readIfModified()
-    )
-    {
-        // Update subdicts
-        AVdict_ = baseSolutionDict_.subDict("solvers").subDict("AV");
-        Adict_ = baseSolutionDict_.subDict("solvers").subDict("A");
-        Vdict_ = conductorSolutionDict_.subDict("solvers").subDict("V");
-
-        // Update data
-        tol_ = AVdict_.lookupOrDefault<scalar>("tolerance", tol_);
-        relTol_ = AVdict_.lookupOrDefault<scalar>("relTol", relTol_);
-        maxIter_ = AVdict_.lookupOrDefault<int>("maxIter", maxIter_);
-        relax_ = AVdict_.lookupOrDefault<scalar>("relax", relax_);
-
-        // Reset sub-dictionaries
-        resetSubDictionaries();
-    }
-}
-
-//- Check convergence state
-void eddyCurrentControl::updateResidual() const
-{
-    if (!oldAVresSet_)
-    {
-        oldAVres_ = AVres_;
-        oldAVrelRes_ = AVrelRes_;
-        oldAVresSet_ = true;
-    }
-
-    AVres_ = returnReduce(max(Ares_, Vres_), maxOp<scalar>());
-    AVrelRes_ = mag(oldAVres_ - AVres_)/(oldAVres_ + VSMALL);
+    return true;
 };
 
-void eddyCurrentControl::resetSubDictionaries() const
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::eddyCurrentControl::loop()
 {
-    // Create copy
-    subAdict_ = Adict_;
-    subVdict_ = Vdict_;
-
-    // Override tolerance
-    subAdict_.set<scalar>
-    (
-        "tolerance",
-        min(tol_, Adict_.lookupOrDefault<scalar>("tolerance", tol_))
-    );
-    subVdict_.set<scalar>
-    (
-        "tolerance",
-        min(tol_, Vdict_.lookupOrDefault<scalar>("tolerance", tol_))
-    );
-
-    // Override relative tolerance
-    subAdict_.set<scalar>("relTol", relTol_);
-    subVdict_.set<scalar>("relTol", relTol_);
-}
-
-void eddyCurrentControl::decreaseSubTolerance() const
-{
-    // Linear convergence progress
-    scalar x = min(max(AVres_-tol_, 0.0), 1.0);
-
-    // Relative tolerance decrease function (atan, scaled)
-    scalar decRelTol = atan(subScale_ * x) / mathematicalConstant::piByTwo;
-
-    // Relax decrease function (atan)
-    scalar decRelax = atan(10*x) / mathematicalConstant::piByTwo;
-
-    subRelTol_ = relTol_ * decRelTol;
-    subAdict_.set<scalar>("relTol", subRelTol_);
-    subVdict_.set<scalar>("relTol", subRelTol_);
-
-    subRelax_ = relax_ + (1 - relax_) * (1 - decRelax);
-
-//     Info << endl;
-//     Info << "loop_ = " << loop_ << endl;
-//     Info << "iter_ = " << iter_ << endl;
-//     Info << "AVres_ = " << AVres_ << endl;
-//     Info << "AVrelRes_ = " << AVrelRes_ << endl;
-//     Info << "oldAVres_ = " << oldAVres_ << endl;
-//     Info << "oldAVrelRes_ = " << oldAVrelRes_ << endl;
-//
-//     Info << "subLoop_ = " << subLoop_ << endl;
-//     Info << "subIter_ = " << subIter_ << endl;
-//     Info << "subRelTol_ = " << subRelTol_ << endl;
-//     Info << "subRelTolLim_ = " << subRelTolLim_ << endl;
-//     Info << "subScale_ = " << subScale_ << endl;
-//     Info << "subRelax_ = " << subRelax_ << endl;
-
-    Info << endl;
-    Info << "Relative tolerance = " << subRelTol_ << " / " << relTol_ << endl;
-    if (checkSubRelax())
-    {
-        Info << "Relax factor = " << subRelax_  << " / " << relax_ << endl;
-    }
-    Info << endl;
-}
-
-void eddyCurrentControl::decreaseSubScale() const
-{
-    subRelTolLim_ /= 10.0;
-
-    subScale_ /= 10.0;
-
-    Info << nl << "Relative tolerance limit = " << subRelTolLim_ << endl << nl;
-
-    subIter_ = 0;
-}
-
-const bool& eddyCurrentControl::subLoop() const
-{
-    subLoop_ = !checkSubConvergence();
-
-    subIter_++;
-
-    return subLoop_;
+    return false;
 };
-
-void eddyCurrentControl::reset()
-{
-    readDictDataIfModified();
-
-    stop_ = false;
-    loop_ = false;
-    iter_ = 0;
-
-    subLoop_ = false;
-    subIter_ = -1;
-    subRelTol_ = relTol_;
-    subRelTolLim_ = relTol_/10.0;
-    subScale_ = pow(tol_,-1.0);
-    subRelax_ = relax_;
-    subAdict_ = Adict_;
-    subVdict_ = Vdict_;
-
-    AVres_ = GREAT;
-    AVrelRes_ = GREAT;
-    Ares_ = GREAT;
-    Vres_ = GREAT;
-
-    oldAVres_ = 10*AVres_;
-    oldAVrelRes_ = 10*AVrelRes_;
-    oldAVresSet_ = false;
-
-    if (!mesh3D_)
-    {
-        Vres_ = 0.0;
-
-        subRelTol_ = 0.0;
-
-        solDir_ = -mesh_[baseRegion_].geometricD();
-    }
-
-    // Update subDict copies
-    resetSubDictionaries();
-
-}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 eddyCurrentControl::eddyCurrentControl
 (
-    const argList& args,
-    Time& time,
-    regionFvMesh& mesh,
-    const word& name,
-    const bool& master
+    fvMesh& mesh,
+    const word& dictName
 )
 :
-    solverControl<regionFvMesh>
-    (
-        args, time, mesh, name, master,
-        mesh.regionIndex(polyMesh::defaultRegion)
-    ),
-    conductorRegionName_
-    (
-        word(propDict_.subDict("regions").lookup("conductor"))
-    ),
-    conductorRegion_
-    (
-        mesh_.regionIndex(conductorRegionName_)
-    ),
-    interfacePatchName_
-    (
-        word(propDict_.subDict("patches").lookup("interface"))
-    ),
-    interfacePatch_
-    (
-        mesh_[conductorRegion_].boundaryMesh().findPatchID(interfacePatchName_)
-    ),
-    frequency_
-    (
-        "frequency",
-        dimensionedScalar(propDict_.lookup("frequency"))
-    ),
-    omega_
-    (
-        "omega",
-        2.0 * mathematicalConstant::pi * frequency_
-    ),
-    conductorSolutionDict_(mesh_[conductorRegion_].solutionDict()),
-    AVdict_(baseSolutionDict_.subDict("solvers").subDict("AV")),
-    Adict_(baseSolutionDict_.subDict("solvers").subDict("A")),
-    Vdict_(conductorSolutionDict_.subDict("solvers").subDict("V")),
-    tol_(AVdict_.lookupOrDefault<scalar>("tolerance", 1e-04)),
-    relTol_(AVdict_.lookupOrDefault<scalar>("relTol", 0.5)),
-    maxIter_(AVdict_.lookupOrDefault<int>("maxIter", 100)),
-    relax_(AVdict_.lookupOrDefault<scalar>("relax", 1.0)),
-    mesh3D_((mesh_[baseRegion_].nGeometricD() == 3)),
-    solDir_(mesh_[baseRegion_].geometricD()),
-    stop_(false),
-    loop_(false),
-    iter_(0),
-    subLoop_(false),
-    subIter_(-1),
-    subRelTol_(relTol_),
-    subRelTolLim_(relTol_/10.0),
-    subScale_(pow(tol_,-1.0)),
-    subRelax_(relax_),
-    subAdict_(Adict_),
-    subVdict_(Vdict_),
-    AVres_(GREAT),
-    AVrelRes_(GREAT),
-    Ares_(GREAT),
-    Vres_(GREAT),
-    oldAVres_(10*AVres_),
-    oldAVrelRes_(10*AVrelRes_),
-    oldAVresSet_(false)
-{
-    reset();
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void eddyCurrentControl::relax(volVectorField& vf) const
-{
-    if (checkSubRelax())
-    {
-        if (!firstIteration())
-        {
-            Info << "Relax " << vf.name()
-                << " with a factor = " << subRelax_ << endl;
-
-            vf.relax(subRelax_);
-        }
-
-        vf.storePrevIter();
-    }
-}
-
-void eddyCurrentControl::relax(const regionVolVectorField& rvf) const
-{
-    if (checkSubRelax())
-    {
-        if (!firstIteration())
-        {
-            Info << "Relax " << rvf.name()
-                << " with a factor = " << subRelax_ << endl;
-
-            forAll(rvf.mesh().regionNames(), regionI)
-            {
-                rvf[regionI].relax(subRelax_);
-            }
-        }
-
-        forAll(rvf.mesh().regionNames(), regionI)
-        {
-            rvf[regionI].storePrevIter();
-        }
-    }
-}
-
-const bool& eddyCurrentControl::loop()
-{
-    bool converged = checkConvergence();
-    bool iterBelowMax = checkMaxIterations();
-
-    // Loop if not converged and below max iterations
-    loop_ = !converged && iterBelowMax;
-
-
-    // TODO
-    // Update dict data
-//     readDictDataIfModified();
-
-    if (loop_)
-    {
-        // Reset calculation switch for old residual
-        oldAVresSet_ = false;
-
-        if (!mesh3D_)
-        {
-            iter_++;
-        }
-        else
-        {
-            if (!subLoop())
-            {
-                iter_++;
-
-                decreaseSubScale();
-            }
-
-            decreaseSubTolerance();
-        }
-    }
-    else
-    {
-        reset();
-    }
-
-    return loop_;
-}
-
-
-void eddyCurrentControl::setResidualOfA(scalar residual) const
-{
-    Ares_ = residual;
-
-    updateResidual();
-}
-
-void eddyCurrentControl::setResidualOfV(scalar residual) const
-{
-    Vres_ = residual;
-
-    updateResidual();
-}
-
+    solutionControl(mesh, dictName)
+{}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -389,3 +68,347 @@ void eddyCurrentControl::setResidualOfV(scalar residual) const
 
 // ************************************************************************* //
 
+// void eddyCurrentControl::readDictDataIfModified()
+// {
+//     // Eddy current properties
+//     if (propDict_.readIfModified())
+//     {
+//         // Update data
+//         frequency_.value() = propDict_.lookupOrDefault<dimensionedScalar>
+//             ("frequency", frequency_).value();
+//         omega_.value() = 2.0 * mathematicalConstant::pi * frequency_.value();
+//     }
+//
+//     // Solution properties
+//     if
+//     (
+//         baseSolutionDict_.readIfModified()
+//      || conductorSolutionDict_.readIfModified()
+//     )
+//     {
+//         // Update subdicts
+//         AVdict_ = baseSolutionDict_.subDict("solvers").subDict("AV");
+//         Adict_ = baseSolutionDict_.subDict("solvers").subDict("A");
+//         Vdict_ = conductorSolutionDict_.subDict("solvers").subDict("V");
+//
+//         // Update data
+//         tol_ = AVdict_.lookupOrDefault<scalar>("tolerance", tol_);
+//         relTol_ = AVdict_.lookupOrDefault<scalar>("relTol", relTol_);
+//         maxIter_ = AVdict_.lookupOrDefault<int>("maxIter", maxIter_);
+//         relax_ = AVdict_.lookupOrDefault<scalar>("relax", relax_);
+//
+//         // Reset sub-dictionaries
+//         resetSubDictionaries();
+//     }
+// }
+//
+// //- Check convergence state
+// void eddyCurrentControl::updateResidual() const
+// {
+//     if (!oldAVresSet_)
+//     {
+//         oldAVres_ = AVres_;
+//         oldAVrelRes_ = AVrelRes_;
+//         oldAVresSet_ = true;
+//     }
+//
+//     AVres_ = returnReduce(max(Ares_, Vres_), maxOp<scalar>());
+//     AVrelRes_ = mag(oldAVres_ - AVres_)/(oldAVres_ + VSMALL);
+// };
+//
+// void eddyCurrentControl::resetSubDictionaries() const
+// {
+//     // Create copy
+//     subAdict_ = Adict_;
+//     subVdict_ = Vdict_;
+//
+//     // Override tolerance
+//     subAdict_.set<scalar>
+//     (
+//         "tolerance",
+//         min(tol_, Adict_.lookupOrDefault<scalar>("tolerance", tol_))
+//     );
+//     subVdict_.set<scalar>
+//     (
+//         "tolerance",
+//         min(tol_, Vdict_.lookupOrDefault<scalar>("tolerance", tol_))
+//     );
+//
+//     // Override relative tolerance
+//     subAdict_.set<scalar>("relTol", relTol_);
+//     subVdict_.set<scalar>("relTol", relTol_);
+// }
+//
+// void eddyCurrentControl::decreaseSubTolerance() const
+// {
+//     // Linear convergence progress
+//     scalar x = min(max(AVres_-tol_, 0.0), 1.0);
+//
+//     // Relative tolerance decrease function (atan, scaled)
+//     scalar decRelTol = atan(subScale_ * x) / mathematicalConstant::piByTwo;
+//
+//     // Relax decrease function (atan)
+//     scalar decRelax = atan(10*x) / mathematicalConstant::piByTwo;
+//
+//     subRelTol_ = relTol_ * decRelTol;
+//     subAdict_.set<scalar>("relTol", subRelTol_);
+//     subVdict_.set<scalar>("relTol", subRelTol_);
+//
+//     subRelax_ = relax_ + (1 - relax_) * (1 - decRelax);
+//
+// //     Info << endl;
+// //     Info << "loop_ = " << loop_ << endl;
+// //     Info << "iter_ = " << iter_ << endl;
+// //     Info << "AVres_ = " << AVres_ << endl;
+// //     Info << "AVrelRes_ = " << AVrelRes_ << endl;
+// //     Info << "oldAVres_ = " << oldAVres_ << endl;
+// //     Info << "oldAVrelRes_ = " << oldAVrelRes_ << endl;
+// //
+// //     Info << "subLoop_ = " << subLoop_ << endl;
+// //     Info << "subIter_ = " << subIter_ << endl;
+// //     Info << "subRelTol_ = " << subRelTol_ << endl;
+// //     Info << "subRelTolLim_ = " << subRelTolLim_ << endl;
+// //     Info << "subScale_ = " << subScale_ << endl;
+// //     Info << "subRelax_ = " << subRelax_ << endl;
+//
+//     Info << endl;
+//     Info << "Relative tolerance = " << subRelTol_ << " / " << relTol_ << endl;
+//     if (checkSubRelax())
+//     {
+//         Info << "Relax factor = " << subRelax_  << " / " << relax_ << endl;
+//     }
+//     Info << endl;
+// }
+//
+// void eddyCurrentControl::decreaseSubScale() const
+// {
+//     subRelTolLim_ /= 10.0;
+//
+//     subScale_ /= 10.0;
+//
+//     Info << nl << "Relative tolerance limit = " << subRelTolLim_ << endl << nl;
+//
+//     subIter_ = 0;
+// }
+//
+// const bool& eddyCurrentControl::subLoop() const
+// {
+//     subLoop_ = !checkSubConvergence();
+//
+//     subIter_++;
+//
+//     return subLoop_;
+// };
+//
+// void eddyCurrentControl::reset()
+// {
+//     readDictDataIfModified();
+//
+//     stop_ = false;
+//     loop_ = false;
+//     iter_ = 0;
+//
+//     subLoop_ = false;
+//     subIter_ = -1;
+//     subRelTol_ = relTol_;
+//     subRelTolLim_ = relTol_/10.0;
+//     subScale_ = pow(tol_,-1.0);
+//     subRelax_ = relax_;
+//     subAdict_ = Adict_;
+//     subVdict_ = Vdict_;
+//
+//     AVres_ = GREAT;
+//     AVrelRes_ = GREAT;
+//     Ares_ = GREAT;
+//     Vres_ = GREAT;
+//
+//     oldAVres_ = 10*AVres_;
+//     oldAVrelRes_ = 10*AVrelRes_;
+//     oldAVresSet_ = false;
+//
+//     if (!mesh3D_)
+//     {
+//         Vres_ = 0.0;
+//
+//         subRelTol_ = 0.0;
+//
+//         solDir_ = -mesh_[baseRegion_].geometricD();
+//     }
+//
+//     // Update subDict copies
+//     resetSubDictionaries();
+//
+// }
+//
+//
+// // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+//
+// eddyCurrentControl::eddyCurrentControl
+// (
+//     const argList& args,
+//     Time& time,
+//     regionFvMesh& mesh,
+//     const word& name,
+//     const bool& master
+// )
+// :
+//     solverControl<regionFvMesh>
+//     (
+//         args, time, mesh, name, master,
+//         mesh.regionIndex(polyMesh::defaultRegion)
+//     ),
+//     conductorRegionName_
+//     (
+//         word(propDict_.subDict("regions").lookup("conductor"))
+//     ),
+//     conductorRegion_
+//     (
+//         mesh_.regionIndex(conductorRegionName_)
+//     ),
+//     interfacePatchName_
+//     (
+//         word(propDict_.subDict("patches").lookup("interface"))
+//     ),
+//     interfacePatch_
+//     (
+//         mesh_[conductorRegion_].boundaryMesh().findPatchID(interfacePatchName_)
+//     ),
+//     frequency_
+//     (
+//         "frequency",
+//         dimensionedScalar(propDict_.lookup("frequency"))
+//     ),
+//     omega_
+//     (
+//         "omega",
+//         2.0 * mathematicalConstant::pi * frequency_
+//     ),
+//     conductorSolutionDict_(mesh_[conductorRegion_].solutionDict()),
+//     AVdict_(baseSolutionDict_.subDict("solvers").subDict("AV")),
+//     Adict_(baseSolutionDict_.subDict("solvers").subDict("A")),
+//     Vdict_(conductorSolutionDict_.subDict("solvers").subDict("V")),
+//     tol_(AVdict_.lookupOrDefault<scalar>("tolerance", 1e-04)),
+//     relTol_(AVdict_.lookupOrDefault<scalar>("relTol", 0.5)),
+//     maxIter_(AVdict_.lookupOrDefault<int>("maxIter", 100)),
+//     relax_(AVdict_.lookupOrDefault<scalar>("relax", 1.0)),
+//     mesh3D_((mesh_[baseRegion_].nGeometricD() == 3)),
+//     solDir_(mesh_[baseRegion_].geometricD()),
+//     stop_(false),
+//     loop_(false),
+//     iter_(0),
+//     subLoop_(false),
+//     subIter_(-1),
+//     subRelTol_(relTol_),
+//     subRelTolLim_(relTol_/10.0),
+//     subScale_(pow(tol_,-1.0)),
+//     subRelax_(relax_),
+//     subAdict_(Adict_),
+//     subVdict_(Vdict_),
+//     AVres_(GREAT),
+//     AVrelRes_(GREAT),
+//     Ares_(GREAT),
+//     Vres_(GREAT),
+//     oldAVres_(10*AVres_),
+//     oldAVrelRes_(10*AVrelRes_),
+//     oldAVresSet_(false)
+// {
+//     reset();
+// }
+//
+//
+// // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+//
+// void eddyCurrentControl::relax(volVectorField& vf) const
+// {
+//     if (checkSubRelax())
+//     {
+//         if (!firstIteration())
+//         {
+//             Info << "Relax " << vf.name()
+//                 << " with a factor = " << subRelax_ << endl;
+//
+//             vf.relax(subRelax_);
+//         }
+//
+//         vf.storePrevIter();
+//     }
+// }
+//
+// void eddyCurrentControl::relax(const regionVolVectorField& rvf) const
+// {
+//     if (checkSubRelax())
+//     {
+//         if (!firstIteration())
+//         {
+//             Info << "Relax " << rvf.name()
+//                 << " with a factor = " << subRelax_ << endl;
+//
+//             forAll(rvf.mesh().regionNames(), regionI)
+//             {
+//                 rvf[regionI].relax(subRelax_);
+//             }
+//         }
+//
+//         forAll(rvf.mesh().regionNames(), regionI)
+//         {
+//             rvf[regionI].storePrevIter();
+//         }
+//     }
+// }
+//
+// const bool& eddyCurrentControl::loop()
+// {
+//     bool converged = checkConvergence();
+//     bool iterBelowMax = checkMaxIterations();
+//
+//     // Loop if not converged and below max iterations
+//     loop_ = !converged && iterBelowMax;
+//
+//
+//     // TODO
+//     // Update dict data
+// //     readDictDataIfModified();
+//
+//     if (loop_)
+//     {
+//         // Reset calculation switch for old residual
+//         oldAVresSet_ = false;
+//
+//         if (!mesh3D_)
+//         {
+//             iter_++;
+//         }
+//         else
+//         {
+//             if (!subLoop())
+//             {
+//                 iter_++;
+//
+//                 decreaseSubScale();
+//             }
+//
+//             decreaseSubTolerance();
+//         }
+//     }
+//     else
+//     {
+//         reset();
+//     }
+//
+//     return loop_;
+// }
+//
+//
+// void eddyCurrentControl::setResidualOfA(scalar residual) const
+// {
+//     Ares_ = residual;
+//
+//     updateResidual();
+// }
+//
+// void eddyCurrentControl::setResidualOfV(scalar residual) const
+// {
+//     Vres_ = residual;
+//
+//     updateResidual();
+// }

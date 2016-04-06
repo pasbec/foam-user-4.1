@@ -84,11 +84,10 @@ private:
             //- Create new mesh for region with index regionI
             autoPtr<dynamicFvMesh>* newMesh(const label& regionI) const;
 
+
 protected:
 
-    // Protected data
-
-    // Private Member Functions
+    // Protected Member Functions
 
         // Helper functions for constructor
 
@@ -97,6 +96,7 @@ protected:
 
             //- Init regions
             virtual void initMeshes(const wordList& regionNames) const;
+
 
 public:
 

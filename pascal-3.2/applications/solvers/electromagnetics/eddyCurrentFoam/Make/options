@@ -11,8 +11,8 @@ EXE_INC = \
     -IgradSchemes/electricPotentialGrad \
     -IlaplacianSchemes/electricPotentialLaplacian \
     -IeddyCurrentControl \
-    -Iregions \
-    -Iregions/conductor
+    -IeddyCurrentManager \
+    -Iinclude
 
 
 EXE_LIBS = \

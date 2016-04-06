@@ -33,7 +33,6 @@ defineTypeNameAndDebug(Foam::interTrackControl, 0);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-
 bool Foam::interTrackControl::criteriaSatisfied()
 {
     // no checks on first iteration - nothing has been calculated yet

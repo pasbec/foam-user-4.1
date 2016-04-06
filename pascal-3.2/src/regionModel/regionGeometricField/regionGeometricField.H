@@ -75,9 +75,8 @@ public:
 
         typedef typename RegionGeoMesh::Mesh RegionMesh;
 
-private:
 
-    // Private type defs
+private:
 
     // Private data
 
@@ -104,6 +103,7 @@ private:
                 const label& regionI,
                 const IOobject& io
             ) const;
+
 
 public:
 
@@ -428,27 +428,19 @@ public:
 
     // Member operators
 
-        //- Field access operator for default region (lookup)
-        GeometricField<Type, PatchField, GeoMesh>&
-        operator()() const
-        {
-            return field(polyMesh::defaultRegion);
-        }
-
-        //- Field access operator by index (direct)
+        //- Field access operator by index
         GeometricField<Type, PatchField, GeoMesh>&
         operator[](const label& regionI) const
         {
             return field(regionI);
         }
 
-        //- Field access operator by regionName (lookup)
+        //- Field access operator by regionName
         GeometricField<Type, PatchField, GeoMesh>&
-        operator()(const word& regionName) const
+        operator[](const word& regionName) const
         {
             return field(regionName);
         }
-
 
         void operator=
         (
@@ -458,6 +450,7 @@ public:
                 RegionGeoMesh
             >&
         );
+
         void operator=
         (
             const tmp

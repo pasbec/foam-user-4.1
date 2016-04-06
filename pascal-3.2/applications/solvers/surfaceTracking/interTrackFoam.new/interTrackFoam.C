@@ -44,20 +44,17 @@ Description
 
 int main(int argc, char *argv[])
 {
-#   include "addTrackedSurfacePrefixOption.H"
+    argList::validOptions.insert("prefix", "name");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createDynamicFvMesh.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     interTrackManager manager(args, runTime, mesh);
-    interTrackManager::GlobalSettings& globalSettings = manager.globalSettings();
-    interTrackManager::Settings& settings = manager.settings();
-    interTrackManager::Control& control = manager.control();
-    interTrackManager::Storage& storage = manager.storage();
+
+    SM_REGIONSCOPE_DEFAULTREGION(interTrackManager);
 
     volScalarField& p = storage.p();
     volVectorField& U = storage.U();
@@ -73,7 +70,7 @@ int main(int argc, char *argv[])
     F == dimensionedVector
     (
         word(),
-        dimMass/pow(dimLength,2)/pow(dimTime, 2),
+        dimForce/dimVolume,
         vector(4, -9.81, 4)
 //         vector(0, -9.81, 0)
     );

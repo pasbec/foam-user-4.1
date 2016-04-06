@@ -38,11 +38,11 @@ namespace Foam
 void interTrackManager::DefaultRegion::Settings::read() const
 {
     UpCoupled =
-        this->dict().lookupOrDefault("UpCoupled", false);
+        dict().lookupOrDefault("UpCoupled", false);
     UEqnVolumeForce =
-        this->dict().lookupOrDefault("UEqnVolumeForce", false);
+        dict().lookupOrDefault("UEqnVolumeForce", false);
     snGradpFromFlux =
-        this->dict().lookupOrDefault("snGradpFromFlux", true);
+        dict().lookupOrDefault("snGradpFromFlux", true);
 
     if
     (
@@ -61,7 +61,8 @@ void interTrackManager::DefaultRegion::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void interTrackManager::DefaultRegion::Storage::init_g(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_g
+(const word& init) const
 {
     gPtr_.set
     (
@@ -70,8 +71,8 @@ void interTrackManager::DefaultRegion::Storage::init_g(const word& init) const
             IOobject
             (
                 "g",
-                this->time().constant(),
-                this->mesh(),
+                time().constant(),
+                mesh(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             )
@@ -80,7 +81,8 @@ void interTrackManager::DefaultRegion::Storage::init_g(const word& init) const
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_p(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_p
+(const word& init) const
 {
     pPtr_.set
     (
@@ -89,18 +91,19 @@ void interTrackManager::DefaultRegion::Storage::init_p(const word& init) const
             IOobject
             (
                 "p",
-                this->time().timeName(),
-                this->mesh(),
+                time().timeName(),
+                mesh(),
                 IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
-            this->mesh()
+            mesh()
         )
     );
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_U(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_U
+(const word& init) const
 {
     UPtr_.set
     (
@@ -109,18 +112,19 @@ void interTrackManager::DefaultRegion::Storage::init_U(const word& init) const
             IOobject
             (
                 "U",
-                this->time().timeName(),
-                this->mesh(),
+                time().timeName(),
+                mesh(),
                 IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
-            this->mesh()
+            mesh()
         )
     );
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_Up(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_Up
+(const word& init) const
 {
     UpPtr_.set
     (
@@ -129,19 +133,25 @@ void interTrackManager::DefaultRegion::Storage::init_Up(const word& init) const
             IOobject
             (
                 "Up",
-                this->time().timeName(),
-                this->mesh(),
+                time().timeName(),
+                mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            this->mesh(),
-            dimensionedVector4(word(), dimless, vector4::zero)
+            mesh(),
+            dimensionedVector4
+            (
+                word(),
+                dimless,
+                vector4::zero
+            )
         )
     );
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_phi(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_phi
+(const word& init) const
 {
     phiPtr_.set
     (
@@ -150,12 +160,12 @@ void interTrackManager::DefaultRegion::Storage::init_phi(const word& init) const
             IOobject
             (
                 "phi",
-                this->time().timeName(),
-                this->mesh(),
+                time().timeName(),
+                mesh(),
                 IOobject::READ_IF_PRESENT,
                 IOobject::AUTO_WRITE
             ),
-            linearInterpolate(U()) & this->mesh().Sf()
+            linearInterpolate(U()) & mesh().Sf()
         )
     );
 
@@ -163,7 +173,8 @@ void interTrackManager::DefaultRegion::Storage::init_phi(const word& init) const
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_rho(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_rho
+(const word& init) const
 {
     rhoPtr_.set
     (
@@ -172,20 +183,26 @@ void interTrackManager::DefaultRegion::Storage::init_rho(const word& init) const
             IOobject
             (
                 "rho",
-                this->time().timeName(),
-                this->mesh(),
+                time().timeName(),
+                mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            this->mesh(),
-            dimensionedScalar(word(), dimDensity, 0),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimDensity,
+                0
+            ),
             zeroGradientFvPatchScalarField::typeName
         )
     );
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_mu(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_mu
+(const word& init) const
 {
     muPtr_.set
     (
@@ -194,20 +211,26 @@ void interTrackManager::DefaultRegion::Storage::init_mu(const word& init) const
             IOobject
             (
                 "mu",
-                this->time().timeName(),
-                this->mesh(),
+                time().timeName(),
+                mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            this->mesh(),
-            dimensionedScalar(word(), dimMass/dimLength/dimTime, 0),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimMass/dimLength/dimTime,
+                0
+            ),
             zeroGradientFvPatchScalarField::typeName
         )
     );
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_F(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_F
+(const word& init) const
 {
     if (init == "default")
     {
@@ -218,12 +241,12 @@ void interTrackManager::DefaultRegion::Storage::init_F(const word& init) const
                 IOobject
                 (
                     "F",
-                    this->time().timeName(),
-                    this->mesh(),
+                    time().timeName(),
+                    mesh(),
                     IOobject::MUST_READ,
                     IOobject::AUTO_WRITE
                 ),
-                this->mesh()
+                mesh()
             )
         );
     }
@@ -236,17 +259,17 @@ void interTrackManager::DefaultRegion::Storage::init_F(const word& init) const
                 IOobject
                 (
                     "F",
-                    this->time().timeName(),
-                    this->mesh(),
+                    time().timeName(),
+                    mesh(),
                     IOobject::NO_READ,
                     IOobject::AUTO_WRITE
                 ),
-                this->mesh(),
+                mesh(),
                 dimensionedVector
                 (
                     "F",
-                    dimMass/pow(dimLength,2)/pow(dimTime,2),
-                    pTraits<vector>::zero
+                    dimForce/dimVolume,
+                    vector::zero
                 ),
                 calculatedFvPatchVectorField::typeName
             )
@@ -255,7 +278,8 @@ void interTrackManager::DefaultRegion::Storage::init_F(const word& init) const
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_fluidIndicator(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_fluidIndicator
+(const word& init) const
 {
     fluidIndicatorPtr_.set
     (
@@ -264,18 +288,19 @@ void interTrackManager::DefaultRegion::Storage::init_fluidIndicator(const word& 
             IOobject
             (
                 "fluidIndicator",
-                this->time().timeName(),
-                this->mesh(),
+                time().timeName(),
+                mesh(),
                 IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
-            this->mesh()
+            mesh()
         )
     );
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_transport(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_transport
+(const word& init) const
 {
     transportPtr_.set
     (
@@ -289,7 +314,8 @@ void interTrackManager::DefaultRegion::Storage::init_transport(const word& init)
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_turbulence(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_turbulence
+(const word& init) const
 {
     turbulencePtr_ =
     (
@@ -303,7 +329,8 @@ void interTrackManager::DefaultRegion::Storage::init_turbulence(const word& init
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_interface(const word& init) const
+void interTrackManager::DefaultRegion::Storage::init_interface
+(const word& init) const
 {
     word interfacePrefix;
 
@@ -325,7 +352,7 @@ void interTrackManager::DefaultRegion::Storage::init_interface(const word& init)
     (
         new trackedSurface
         (
-            this->mesh(),
+            mesh(),
             rho(),
             U(),
             p(),

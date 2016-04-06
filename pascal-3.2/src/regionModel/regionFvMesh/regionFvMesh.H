@@ -72,6 +72,7 @@ private:
             //- Create new mesh for region with index regionI
             fvMesh* newMesh(const label& regionI) const;
 
+
 protected:
 
     // Protected data
@@ -86,7 +87,13 @@ protected:
             //- Init regions
             virtual void initMeshes(const wordList& regionNames) const;
 
+
 public:
+
+    // Public typedefs
+
+        typedef fvMesh Mesh;
+        typedef fvBoundaryMesh BoundaryMesh;
 
     //- Runtime type information
     TypeName("regionFvMesh");
@@ -155,7 +162,7 @@ public:
         }
 
         //- Mesh access operator by regionName
-        polyMesh& operator[](const word& regionName) const
+        fvMesh& operator[](const word& regionName) const
         {
             return operator[](regionIndex(regionName));
         }

@@ -34,13 +34,11 @@ Description
 
 #include "solverManagerWrapper.H"
 
-// TODO: Fix the invalid pointer bug during destruction!
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_REGIONS_NEW(MANAGER)                                              \
                                                                               \
-    SM_WRAPPER_NEW(Regions, MANAGER, Regions)
+    SM_WRAPPER_NEW(Regions, Regions, MANAGER, Regions)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,7 +54,7 @@ Description
                 SM_WRAPPER_MEMBER_SETINIT_P2(                                 \
                     TYPE, NAME, this->manager(), PMESH)                       \
                                                                               \
-                this->Base::regions().insert                                  \
+                this->Base::regionHashTable().insert                          \
                 (                                                             \
                     NAME##Ptr_->mesh().name(),                                \
                     NAME##Ptr_.operator->()                                   \
@@ -65,6 +63,7 @@ Description
                                                                               \
             return NAME##Ptr_();                                              \
         };
+
 
 # define SM_REGIONS_DEFAULTREGION_ADD(PMESH)                                  \
                                                                               \
@@ -91,6 +90,7 @@ namespace Foam
 template <class MANAGER>
 class solverManagerRegions
 :
+    public solverManagerCore<typename MANAGER::ManagerMesh>::Regions,
     public solverManagerWrapper<MANAGER, typename MANAGER::ManagerMesh>
 {
 public:
@@ -98,10 +98,9 @@ public:
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::Regions Base;
 
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename MANAGER::ManagerMesh Mesh;
+        typedef typename Manager::ManagerMesh ManagerMesh;
+        typedef typename Manager::ManagerMesh Mesh;
 
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
@@ -129,6 +128,16 @@ public:
     // Destructor
 
         virtual ~solverManagerRegions() {};
+
+    // Member Functions
+
+        // Basic
+
+            //- Mesh
+            inline Mesh& mesh() const
+            {
+                return this->Wrapper::wrappedMesh();
+            }
 };
 
 

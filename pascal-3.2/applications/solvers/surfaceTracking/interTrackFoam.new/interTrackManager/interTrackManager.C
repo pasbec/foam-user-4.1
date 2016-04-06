@@ -37,10 +37,20 @@ defineTypeNameAndDebug(interTrackManager, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void interTrackManager::GlobalSettings::read() const
+void interTrackManager::Settings::read() const
 {
-    debug = this->dict().lookupOrDefault("debug", Switch(interTrackManager::debug));
+    debug =
+        dict().lookupOrDefault
+        (
+            "debug", Switch(interTrackManager::debug)
+        );
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void interTrackManager::Storage::init() const
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +59,7 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
 {
     CourantNumber = 0.0;
 
-    const Time& runTime = this->time();
+    const Time& runTime = time();
     const fvMesh& mesh = this->mesh();
 
     DefaultRegion::Storage& storage = regions().defaultRegion().storage();
@@ -145,8 +155,7 @@ void interTrackManager::write() const
 
 
 void interTrackManager::finalize() const
-{
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -160,7 +169,7 @@ interTrackManager::interTrackManager
     const bool& master
 )
 :
-    solverManager<dynamicFvMesh>
+    solverManagerCore<dynamicFvMesh>
     (
         args, time, mesh, name, master
     )

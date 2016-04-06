@@ -38,9 +38,10 @@ SourceFiles
 
 #include "solverManager.H"
 
+#include "interTrackControl.H"
+
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
-#include "interTrackControl.H"
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
 #include "trackedSurface.H"
@@ -63,28 +64,28 @@ typedef fvBlockMatrix<vector4> fvVector4Matrix;
 
 class interTrackManager
 :
-    public solverManager<dynamicFvMesh>
+    public solverManagerCore<dynamicFvMesh>
 {
 public:
 
-    // Public Nested Classes
+    // Public data types
 
-        //- Global Settings
+        SM_GLOBALCONTROL_ADD_P1(interTrackControl, mesh())
+
         SM_GLOBALSETTINGS_NEW(interTrackManager);
 
             //- Debug switch
-            SM_GLOBALSETTINGS_MEMBER_ADD(Switch, debug);
+            SM_SETTINGS_MEMBER_ADD(Switch, debug);
 
         SM_GLOBALSETTINGS_ADD();
 
 
-        //- Default region
+        SM_GLOBALSTORAGE_NEW(interTrackManager);
+        SM_GLOBALSTORAGE_ADD();
+
+
         SM_DEFAULTREGION_NEW(interTrackManager);
 
-            //- Control
-            SM_REGION_CONTROL_ADD(interTrackControl);
-
-            //- Settings
             SM_SETTINGS_NEW(interTrackManager);
 
                 //- Coupled solution of U and p
@@ -93,7 +94,7 @@ public:
                 //- Directly inject volume force F in U-equation as
                 //  source term
                 //
-                //  * enabled: UEqn -= F; PhiHbyA += (rAU*F)_f_internal
+                //  * enabled: UEqn -= F
                 //
                 //  * disabled: PhiHbyA += (rAU*F)_f
                 //
@@ -111,7 +112,6 @@ public:
 
             SM_SETTINGS_ADD();
 
-            //- Storage
             SM_STORAGE_NEW(interTrackManager);
 
                 //- Gravitational acceleration
@@ -155,11 +155,9 @@ public:
         SM_REGION_END();
 
 
-        //- Regions
         SM_REGIONS_NEW(interTrackManager);
 
-            //- Default region
-            SM_REGIONS_DEFAULTREGION_ADD(this->mesh());
+            SM_REGIONS_DEFAULTREGION_ADD(mesh());
 
         SM_REGIONS_ADD();
 
@@ -208,8 +206,6 @@ public:
     // Destructor
 
         virtual ~interTrackManager() {};
-
-    // Member Functions
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

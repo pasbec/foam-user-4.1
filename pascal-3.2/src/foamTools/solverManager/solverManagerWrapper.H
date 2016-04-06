@@ -36,38 +36,53 @@ Description
 #include "foamTime.H"
 #include "dictionary.H"
 
+#include "solverManagerCore.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_WRAPPER_NEW(BASE, MANAGER, NAME)                                  \
+# define SM_WRAPPER_NEWHEADER(WRAPPER, BASE, MANAGER, NAME)                   \
                                                                               \
     public: class NAME                                                        \
     :                                                                         \
-        public solverManager##BASE<MANAGER>,                                  \
-        public solverManager<ManagerMesh>::BASE                               \
+        public solverManager##WRAPPER<MANAGER>                                \
     {                                                                         \
         friend class MANAGER;                                                 \
                                                                               \
         public: typedef MANAGER Manager;                                      \
-        public: typedef solverManager##BASE<MANAGER> Wrapper;                 \
+        public: typedef solverManager##WRAPPER<MANAGER> Wrapper;              \
                                                                               \
-        public: typedef typename solverManager<ManagerMesh>::BASE Base;       \
+        public: typedef typename solverManagerCore<ManagerMesh>::BASE Base;   \
         public: typedef typename Wrapper::ManagerMesh ManagerMesh;            \
         public: typedef typename Wrapper::Mesh Mesh;                          \
                                                                               \
         private: NAME(const NAME&);                                           \
-        private: void operator=(const NAME&);                                 \
+        private: void operator=(const NAME&);
+
+
+# define SM_WRAPPER_NEWCONSTRUCTOR(WRAPPER, BASE, MANAGER, NAME)              \
                                                                               \
         public: NAME                                                          \
         (                                                                     \
-            const Manager& manager,                                           \
-            Mesh& mesh                                                        \
+            const MANAGER& manager,                                           \
+            solverManager##WRAPPER<MANAGER>::Mesh& mesh                       \
         )                                                                     \
         :                                                                     \
-            Wrapper(manager, mesh),                                           \
-            Base()                                                            \
-        {};                                                                   \
+            solverManager##WRAPPER<MANAGER>(manager, mesh)                    \
+        {};
+
+
+# define SM_WRAPPER_NEWDESTRUCTOR(NAME)                                       \
                                                                               \
         public: virtual ~NAME() {};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define SM_WRAPPER_NEW(WRAPPER, BASE, MANAGER, NAME)                         \
+                                                                              \
+    SM_WRAPPER_NEWHEADER(WRAPPER, BASE, MANAGER, NAME)                        \
+    SM_WRAPPER_NEWCONSTRUCTOR(WRAPPER, BASE, MANAGER, NAME)                   \
+    SM_WRAPPER_NEWDESTRUCTOR(NAME)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -370,38 +385,88 @@ Description
                                                                               \
     SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, virtual const, P1,P2,P3,P4,P5)
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define SM_ADD_GLOBALCONTROL_P1(TYPE, P1)                                    \
+                                                                              \
+        public: typedef TYPE Control;                                         \
+                                                                              \
+        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P1(                                  \
+            Control, control, virtual, P1)
+
+# define SM_ADD_GLOBALCONTROL_P2(TYPE, P1,P2)                                 \
+                                                                              \
+        public: typedef TYPE Control;                                         \
+                                                                              \
+        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P2(                                  \
+            Control, control, virtual, P1,P2)
+
+# define SM_ADD_GLOBALCONTROL_P3(TYPE, P1,P2,P3)                              \
+                                                                              \
+        public: typedef TYPE Control;                                         \
+                                                                              \
+        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P3(                                  \
+            Control, control, virtual, P1,P2,P3)
+
+# define SM_ADD_GLOBALCONTROL_P4(TYPE, P1,P2,P3,P4)                           \
+                                                                              \
+        public: typedef TYPE Control;                                         \
+                                                                              \
+        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P4(                                  \
+            Control, control, virtual, P1,P2,P3,P4)
+
+# define SM_ADD_GLOBALCONTROL_P5(TYPE, P1,P2,P3,P4,P5)                        \
+                                                                              \
+        public: typedef TYPE Control;                                         \
+                                                                              \
+        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P5(                                  \
+            Control, control, virtual, P1,P2,P3,P4,P5)
+
+
+# define SM_GLOBALCONTROL_ADD_P1(TYPE, P1)                                    \
+                                                                              \
+        SM_ADD_GLOBALCONTROL_P1(TYPE, P1)
+
+# define SM_GLOBALCONTROL_ADD_P2(TYPE, P1,P2)                                 \
+                                                                              \
+        SM_ADD_GLOBALCONTROL_P2(TYPE, P1,P2)
+
+# define SM_GLOBALCONTROL_ADD_P3(TYPE, P1,P2,P3)                              \
+                                                                              \
+        SM_ADD_GLOBALCONTROL_P3(TYPE, P1,P2,P3)
+
+# define SM_GLOBALCONTROL_ADD_P4(TYPE, P1,P2,P3,P4)                           \
+                                                                              \
+        SM_ADD_GLOBALCONTROL_P4(TYPE, P1,P2,P3,P4)
+
+# define SM_GLOBALCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)                        \
+                                                                              \
+        SM_ADD_GLOBALCONTROL_P5(TYPE, P1,P2,P3,P4,P5)
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_ADD_GLOBALSETTINGS()                                              \
                                                                               \
     SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                         \
-        GlobalSettings, globalSettings, *this, this->mesh())
+        Settings, settings, *this, this->mesh())
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define SM_ADD_GLOBALSTORAGE()                                               \
+                                                                              \
+        SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                     \
+            Storage, storage, *this, this->mesh())
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_ADD_REGIONS()                                                     \
                                                                               \
     SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                         \
-        Regions, regions, *this, this->mesh())                                \
-                                                                              \
-        typedef typename DefaultRegion::Control Control;                      \
-                                                                              \
-        public: inline DefaultRegion::Control& control() const                \
-        {                                                                     \
-            return regions().defaultRegion().control();                       \
-        };                                                                    \
-                                                                              \
-        typedef typename DefaultRegion::Settings Settings;                    \
-                                                                              \
-        public: inline DefaultRegion::Settings& settings() const              \
-        {                                                                     \
-            return regions().defaultRegion().settings();                      \
-        };                                                                    \
-                                                                              \
-        typedef typename DefaultRegion::Storage Storage;                      \
-                                                                              \
-        public: inline DefaultRegion::Storage& storage() const                \
-        {                                                                     \
-            return regions().defaultRegion().storage();                       \
-        };
+        Regions, regions, *this, this->mesh())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -422,7 +487,7 @@ public:
 
         typedef MANAGER Manager;
 
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename Manager::ManagerMesh ManagerMesh;
         typedef MESH Mesh;
 
         typedef solverManagerWrapper Wrapper;
@@ -437,12 +502,6 @@ private:
 
         // Basic
 
-            //- Reference to args
-            const argList& args_;
-
-            //- Reference to time
-            Time& time_;
-
             //- Reference to mesh
             Mesh& mesh_;
 
@@ -453,6 +512,19 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const solverManagerWrapper&);
+
+
+protected:
+
+    // Protected Member Functions
+
+        // Basic
+
+            //- Mesh
+            inline Mesh& wrappedMesh() const
+            {
+                return mesh_;
+            }
 
 
 public:
@@ -466,9 +538,7 @@ public:
         )
         :
             manager_(manager),
-            args_(manager.args()),
-            time_(manager.time()),
-            mesh_(manager.mesh())
+            mesh_(mesh)
         {};
 
     // Destructor
@@ -485,23 +555,17 @@ public:
 
         // Basic
 
-            //- Reference to args
+            //- Main arguments
             inline const argList& args() const
             {
-                return args_;
+                return manager_.args();
             };
 
-            //- Reference to time
+            //- Time
             inline Time& time() const
             {
-                return time_;
+                return manager_.time();
             };
-
-            //- Return reference to mesh
-            inline Mesh& mesh() const
-            {
-                return mesh_;
-            }
 
             //- Is this the master manager?
             inline const bool& master() const
@@ -509,25 +573,27 @@ public:
                 return manager_.master();
             };
 
-            //- Refrence to control dictionary
+        // Dictionaries
+
+            //- Control dictionary
             inline const dictionary& controlDict() const
             {
-                return time_.controlDict();
+                return time().controlDict();
             }
 
-            //- Reference to properties dictionary
+            //- Properties dictionary
             inline const dictionary& propertiesDict() const
             {
                 return manager_.propertiesDict();
             };
 
-            //- Reference to settings dictionary
+            //- Settings dictionary
             inline const dictionary& settingsDict() const
             {
                 return propertiesDict().subDict("settings");
             };
 
-            //- Reference to storage dictionary
+            //- Storage dictionary
             inline const dictionary& storageDict() const
             {
                 return propertiesDict().subDict("storage");

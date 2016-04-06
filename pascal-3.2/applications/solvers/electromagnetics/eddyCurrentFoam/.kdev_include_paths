@@ -8,12 +8,7 @@
 
 ./laplacianSchemes/electricPotentialLaplacian
 
-./fvPatchFields/lookupFixedGradient
-./fvPatchFields/directionMixedMixed
-./fvPatchFields/patchDirectionMixedMixed
-./fvPatchFields/tangentialMagnetic
-
 ./eddyCurrentControl
+./eddyCurrentManager
 
-./regions
-./regions/conductor
+./include

@@ -3,7 +3,7 @@
     tmp<volScalarField> rAU(1.0/UEqn().A());
     surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU()));
 
-// TODO: Boundary conditions for p if settings.UEqnVolumeForce?
+// TODO: Boundary conditions for p?
 
     // Hint: phiP is a pressure source (Rhie-Chow?). It is important
     //       to note, that it already uses the boundary values of p!

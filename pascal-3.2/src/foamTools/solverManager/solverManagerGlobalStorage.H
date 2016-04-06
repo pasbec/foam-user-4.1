@@ -22,43 +22,44 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    solverManagerSettings
+    solverManagerGlobalStorage
 
 Description
     ...
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solverManagerSettings_H
-#define solverManagerSettings_H
+#ifndef solverManagerGlobalStorage_H
+#define solverManagerGlobalStorage_H
 
 #include "solverManagerWrapper.H"
-#include "solverManagerRegion.H"
+#include "solverManagerStorage.H"
+
+// TODO: makeOptional_ has to be connected to settings!
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_SETTINGS_NEW(MANAGER)                                             \
+# define SM_GLOBALSTORAGE_NEW(MANAGER)                                        \
                                                                               \
-    SM_WRAPPER_NEW(Settings, Settings, MANAGER, Settings)                     \
+    SM_WRAPPER_NEW(GlobalStorage, Storage, MANAGER, Storage)                 \
                                                                               \
-    private: virtual void read() const;                                       \
-                                                                              \
-    public:
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_SETTINGS_MEMBER_ADD(TYPE, NAME)                                   \
-                                                                              \
-        public: mutable TYPE NAME;
+    private: virtual void init() const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_SETTINGS_ADD()                                                    \
+# define SM_GLOBALSTORAGE_MEMBER_ADD(TYPE, NAME)                              \
+                                                                              \
+        SM_STORAGE_MEMBER_ADD(TYPE, NAME)
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define SM_GLOBALSTORAGE_ADD()                                               \
                                                                               \
     SM_WRAPPER_END()                                                          \
-    SM_REGION_SETTINGS_ADD()
+                                                                              \
+    SM_ADD_GLOBALSTORAGE()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -67,14 +68,14 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerSettings Declaration
+                     Class solverManagerGlobalStorage Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER>
-class solverManagerSettings
+class solverManagerGlobalStorage
 :
-    public solverManagerCore<typename MANAGER::ManagerMesh>::Settings,
-    public solverManagerWrapper<MANAGER, typename MANAGER::Mesh>
+    public solverManagerCore<typename MANAGER::ManagerMesh>::Storage,
+    public solverManagerWrapper<MANAGER, typename MANAGER::ManagerMesh>
 {
 public:
 
@@ -83,7 +84,7 @@ public:
         typedef MANAGER Manager;
 
         typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef typename Manager::Mesh Mesh;
+        typedef typename Manager::ManagerMesh Mesh;
 
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
@@ -93,44 +94,23 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverManagerSettings(const solverManagerSettings&);
+        solverManagerGlobalStorage(const solverManagerGlobalStorage&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverManagerSettings&);
-
-        // Basic
-
-            //- Reference to settings dictionary
-            inline const dictionary& settingsDict() const
-            {
-                return this->Wrapper::settingsDict().subDict
-                (
-                    mesh().name()
-                );
-            };
-
-            //- Reference to storage dictionary
-            inline const dictionary& storageDict() const
-            {
-                return this->Wrapper::storageDict().subDict
-                (
-                    mesh().name()
-                );
-            };
-
+        void operator=(const solverManagerGlobalStorage&);
 
 public:
 
     // Constructor
 
-        solverManagerSettings(const Manager& manager, Mesh& mesh)
+        solverManagerGlobalStorage(const Manager& manager, Mesh& mesh)
         :
             Wrapper(manager, mesh)
         {};
 
     // Destructor
 
-        virtual ~solverManagerSettings() {};
+        virtual ~solverManagerGlobalStorage() {};
 
     // Member Functions
 
@@ -147,7 +127,34 @@ public:
             //- Dictionary
             inline const dictionary& dict() const
             {
-                return settingsDict();
+                return this->Wrapper::storageDict();
+            };
+
+
+            //- Read dictionary of named item in storage (if present)
+            bool itemDict
+            (
+                const word& name,
+                dictionary& itemDict
+            ) const
+            {
+                if
+                (
+                    dict().found(name)
+                 && dict().isDict(name)
+                )
+                {
+                    itemDict = dict().subDict(name);
+
+                    Switch enabled;
+
+                    if (itemDict.readIfPresent("enabled", enabled))
+                    {
+                        return enabled;
+                    }
+                }
+
+                return false;
             };
 };
 

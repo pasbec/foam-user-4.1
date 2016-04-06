@@ -33,12 +33,13 @@ Description
 #define solverManagerGlobalSettings_H
 
 #include "solverManagerWrapper.H"
+#include "solverManagerSettings.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_GLOBALSETTINGS_NEW(MANAGER)                                       \
                                                                               \
-    SM_WRAPPER_NEW(GlobalSettings, MANAGER, GlobalSettings)                   \
+    SM_WRAPPER_NEW(GlobalSettings, Settings, MANAGER, Settings)               \
                                                                               \
     private: virtual void read() const;                                       \
                                                                               \
@@ -66,12 +67,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerGlobalSettings Declaration
+                  Class solverManagerGlobalSettings Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER>
 class solverManagerGlobalSettings
 :
+    public solverManagerCore<typename MANAGER::ManagerMesh>::Settings,
     public solverManagerWrapper<MANAGER, typename MANAGER::ManagerMesh>
 {
 public:
@@ -79,10 +81,9 @@ public:
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::GlobalSettings Base;
 
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename MANAGER::ManagerMesh Mesh;
+        typedef typename Manager::ManagerMesh ManagerMesh;
+        typedef typename Manager::ManagerMesh Mesh;
 
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
@@ -104,11 +105,7 @@ public:
 
         solverManagerGlobalSettings(const Manager& manager, Mesh& mesh)
         :
-            solverManagerWrapper<Manager, Mesh>
-            (
-                manager,
-                mesh
-            )
+            Wrapper(manager, mesh)
         {};
 
     // Destructor
@@ -119,7 +116,15 @@ public:
 
         // Basic
 
-            //- Reference to dictionary
+            //- Mesh
+            inline Mesh& mesh() const
+            {
+                return this->Wrapper::wrappedMesh();
+            }
+
+        // Dictionaries
+
+            //- Dictionary
             inline const dictionary& dict() const
             {
                 return this->Wrapper::settingsDict();

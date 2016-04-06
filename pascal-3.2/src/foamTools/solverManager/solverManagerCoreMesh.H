@@ -22,17 +22,19 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    regionGeoMesh
+    solverManagerCoreMesh
 
 Description
     ...
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionGeoMesh_H
-#define regionGeoMesh_H
+#ifndef solverManagerCoreMesh_H
+#define solverManagerCoreMesh_H
 
-#include "objectRegistry.H"
+#include "dynamicFvMesh.H"
+#include "regionDynamicFvMesh.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,50 +42,25 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class regionGeoMesh Declaration
+                     Class solverManagerCoreMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class MESH>
-class regionGeoMesh
+template <typename MESH>
+struct solverManagerCoreMesh
 {
+    typedef typename MESH::Mesh Mesh;
+};
 
-protected:
+template <>
+struct solverManagerCoreMesh<dynamicFvMesh>
+{
+    typedef dynamicFvMesh Mesh;
+};
 
-    // Protected data
-
-        //- Reference to Mesh
-        const MESH& mesh_;
-
-
-public:
-
-    // Public typedefs
-
-        typedef MESH Mesh;
-
-    // Constructors
-
-        //- Construct from MESH
-        explicit regionGeoMesh(const MESH& mesh)
-        :
-            mesh_(mesh)
-        {}
-
-    // Member Functions
-
-        //- Return the object registry
-        const objectRegistry& thisDb() const
-        {
-            return mesh_;
-        }
-
-    // Member Operators
-
-        //- Return reference to polyMesh
-        const MESH& operator()() const
-        {
-            return mesh_;
-        }
+template <>
+struct solverManagerCoreMesh<regionDynamicFvMesh>
+{
+    typedef dynamicFvMesh Mesh;
 };
 
 

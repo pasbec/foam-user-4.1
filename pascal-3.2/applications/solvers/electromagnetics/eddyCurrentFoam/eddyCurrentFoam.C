@@ -28,9 +28,12 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "fvBlockMatrix.H"
-#include "eddyCurrentControl.H"
+#include "eddyCurrentManager.H"
+
+#ifndef namespaceFoam
+#define namespaceFoam
+    using namespace Foam;
+#endif
 
 // TODO: Derived gradient boundary condition for VRe/VIm in conductor region
 
@@ -46,35 +49,52 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createRegionMesh.H"
 
-#   include "eddyCurrentRegionFields.H"
-#   include "eddyCurrentBaseFields.H"
-#   include "eddyCurrentConductorFields.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifndef namespaceFoam
-#define namespaceFoam
-    using namespace Foam;
-#endif
+    eddyCurrentManager manager(args, runTime, regionMesh);
+
+    SM_REGIONSCOPE_DEFAULTREGION(eddyCurrentManager);
+
+    uniformDimensionedScalarField& omega0 = manager.storage().omega0();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    if (!args.optionFound("overwrite"))
+    while(manager.once())
     {
-        runTime++;
+// #       include "AVloop.H"
 
-        control.msg().timeIs();
+        {
+            fvMesh& mesh = manager.regions().defaultRegion().mesh();
+
+            Info << manager.regions()[mesh.name()].mesh().name() << endl;
+
+// TODO
+//             volVectorField& jRe = manager.regions()[mesh.name()].storage().jRe();
+
+//             volScalarField& sigma = manager.storage().sigma()[mesh.name()];
+//
+//             volVectorField& ARe = manager.storage().ARe()[mesh.name()];
+//             volVectorField& AIm = manager.storage().AIm()[mesh.name()];
+//
+//             volVectorField& VReGrad = manager.storage().VReGrad()[mesh.name()];
+//             volVectorField& VImGrad = manager.storage().VImGrad()[mesh.name()];
+//
+//             volVectorField& FL = manager.storage().FL()[mesh.name()];
+//             volScalarField& pB = manager.storage().pB()[mesh.name()];
+//
+//             volVectorField& jRe = manager.regions().defaultRegion().storage().jRe();
+//             volVectorField& jIm = manager.regions().defaultRegion().storage().jIm();
+//             volVectorField& BRe = manager.regions().defaultRegion().storage().BRe();
+//             volVectorField& BIm = manager.regions().defaultRegion().storage().BIm();
+//
+//             regionVolVectorField& FL = manager.storage().FL();
+//             regionVolScalarField& pB = manager.storage().pB();
+
+// #           include "derivedFields.H"
+        }
     }
 
-#   include "eddyCurrentAVloop.H"
-
-#   include "eddyCurrentDerivedFields.H"
-
-    runTime.writeNow();
-
-    control.msg().executionTime();
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    control.msg().end();
 
     return(0);
 }

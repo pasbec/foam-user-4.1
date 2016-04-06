@@ -6,14 +6,14 @@
         << "Create region mesh for time = "
         << runTime.timeName() << endl;
 
-    Foam::regionFvMesh mesh_(runTime);
+    Foam::regionFvMesh regionMesh(runTime);
 
     Foam::Info << "Regions: ";
 
-    forAll (mesh_.regionNames(), regionI)
+    forAll (regionMesh.regionNames(), regionI)
     {
-        Foam::Info << mesh_.regionName(regionI);
-        if (regionI < mesh_.regionNames().size()-1)
+        Foam::Info << regionMesh.regionName(regionI);
+        if (regionI < regionMesh.regionNames().size()-1)
         {
             Foam::Info << ", ";
         }

@@ -38,7 +38,7 @@ Description
 
 # define SM_REGION_NEW(MANAGER, NAME)                                         \
                                                                               \
-    SM_WRAPPER_NEW(Region, MANAGER, NAME)
+    SM_WRAPPER_NEW(Region, Region, MANAGER, NAME)
 
 # define SM_DEFAULTREGION_NEW(MANAGER)                                        \
                                                                               \
@@ -46,14 +46,6 @@ Description
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_REGION_CONTROL_ADD(TYPE)                                          \
-                                                                              \
-        public: typedef TYPE Control;                                         \
-                                                                              \
-        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P1(                                  \
-            Control, control, virtual, this->mesh())
-
 
 # define SM_REGION_SETTINGS_ADD()                                             \
                                                                               \
@@ -86,6 +78,7 @@ namespace Foam
 template <class MANAGER>
 class solverManagerRegion
 :
+    public solverManagerCore<typename MANAGER::ManagerMesh>::Region,
     public solverManagerWrapper<MANAGER, typename MANAGER::Mesh>
 {
 public:
@@ -93,12 +86,13 @@ public:
     // Public typedefs
 
         typedef MANAGER Manager;
-        typedef typename MANAGER::Region Base;
 
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
-        typedef typename MANAGER::Mesh Mesh;
+        typedef typename Manager::ManagerMesh ManagerMesh;
+        typedef typename Manager::Mesh Mesh;
 
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
+
+        typedef typename Manager::Control Control;
 
 
 private:
@@ -127,9 +121,23 @@ public:
 
     // Member Functions
 
+        //- Control
+        virtual Control& control() const
+        {
+            return this->manager().control();
+        };
+
         // Basic
 
-            //- Reference to settings dictionary
+            //- Mesh
+            inline Mesh& mesh() const
+            {
+                return this->Wrapper::wrappedMesh();
+            }
+
+        // Dictionaries
+
+            //- Settings dictionary
             inline const dictionary& settingsDict() const
             {
                 return this->Wrapper::settingsDict().subDict
@@ -138,7 +146,7 @@ public:
                 );
             };
 
-            //- Reference to storage dictionary
+            //- Storage dictionary
             inline const dictionary& storageDict() const
             {
                 return this->Wrapper::storageDict().subDict

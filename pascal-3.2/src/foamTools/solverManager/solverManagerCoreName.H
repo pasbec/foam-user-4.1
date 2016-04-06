@@ -22,69 +22,29 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    regionGeoMesh
+    solverManagerCoreName
 
 Description
     ...
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionGeoMesh_H
-#define regionGeoMesh_H
+#ifndef solverManagerCoreName_H
+#define solverManagerCoreName_H
 
-#include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+template <class MESH> class solverManagerCore;
+
 /*---------------------------------------------------------------------------*\
-                           Class regionGeoMesh Declaration
+                      Class solverManagerName Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class MESH>
-class regionGeoMesh
-{
-
-protected:
-
-    // Protected data
-
-        //- Reference to Mesh
-        const MESH& mesh_;
-
-
-public:
-
-    // Public typedefs
-
-        typedef MESH Mesh;
-
-    // Constructors
-
-        //- Construct from MESH
-        explicit regionGeoMesh(const MESH& mesh)
-        :
-            mesh_(mesh)
-        {}
-
-    // Member Functions
-
-        //- Return the object registry
-        const objectRegistry& thisDb() const
-        {
-            return mesh_;
-        }
-
-    // Member Operators
-
-        //- Return reference to polyMesh
-        const MESH& operator()() const
-        {
-            return mesh_;
-        }
-};
+TemplateName(solverManagerCore);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

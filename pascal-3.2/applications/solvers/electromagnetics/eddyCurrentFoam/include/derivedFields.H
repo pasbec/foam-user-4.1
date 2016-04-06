@@ -1,15 +1,13 @@
 
     // Derived fields in base region
     {
-        setRegionScope(control.base());
-
         // Magnetic field density
         BRe == fvc::curl(ARe);
         BIm == fvc::curl(AIm);
 
         // Eddy current density
-        jRe ==   control.omega() * sigma * AIm - sigma * VReGrad;
-        jIm == - control.omega() * sigma * ARe - sigma * VImGrad;
+        jRe ==   omega0 * sigma * AIm - sigma * VReGrad;
+        jIm == - omega0 * sigma * ARe - sigma * VImGrad;
 
         // Time-averaged Lorentz-force
         FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
@@ -21,9 +19,9 @@
 
     // Derived fields in conductor region
     {
-        FL_.mapExtrapolate(control.conductor());
-        pB_.mapExtrapolate(control.conductor());
+        FL.mapExtrapolate(control.conductor());
+        pB.mapExtrapolate(control.conductor());
 // TODO TEST FIXME Extrapolation sometimes fails
-//         FL_.mapCopyInternal(control.conductor());
-//         pB_.mapCopyInternal(control.conductor());
+//         FL.mapCopyInternal(control.conductor());
+//         pB.mapCopyInternal(control.conductor());
     }

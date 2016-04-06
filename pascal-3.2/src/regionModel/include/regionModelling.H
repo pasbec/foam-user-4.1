@@ -31,25 +31,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define infoCreateRegionField(f)                                             \
-                                                                              \
-    Info << "Create region field " << #f << endl;
-
-# define infoCreateField(regionI, f)                                          \
-                                                                              \
-    Info << "Create field " << #f                                             \
-        << " (" << mesh_.regionName(regionI) << ")" << endl;
-
-# define setConstRegionReference(regionI, t, f)                               \
-                                                                              \
-    const t& f = f##_[regionI]; if (&f != &f) {}
-
-# define setRegionReference(regionI, t, f)                                    \
-                                                                              \
-    t& f = f##_[regionI]; if (&f != &f) {}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #include "regionDynamicFvMesh.H"
 #include "regionFvMesh.H"
 #include "regionPolyMesh.H"
