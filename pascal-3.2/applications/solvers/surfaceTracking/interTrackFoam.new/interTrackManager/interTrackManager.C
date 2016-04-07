@@ -169,7 +169,7 @@ interTrackManager::interTrackManager
     const bool& master
 )
 :
-    solverManagerCore<dynamicFvMesh>
+    solverManager<dynamicFvMesh>
     (
         args, time, mesh, name, master
     )

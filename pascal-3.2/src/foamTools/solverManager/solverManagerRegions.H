@@ -38,7 +38,7 @@ Description
 
 # define SM_REGIONS_NEW(MANAGER)                                              \
                                                                               \
-    SM_WRAPPER_NEW(Regions, Regions, MANAGER, Regions)
+    SM_WRAPPER_NEW(Regions, MANAGER, Regions)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -75,7 +75,7 @@ Description
 # define SM_REGIONS_ADD()                                                     \
                                                                               \
     SM_WRAPPER_END()                                                          \
-    SM_ADD_REGIONS()
+    SM_MANAGER_REGIONS_ADD()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -90,7 +90,11 @@ namespace Foam
 template <class MANAGER>
 class solverManagerRegions
 :
-    public solverManagerCore<typename MANAGER::ManagerMesh>::Regions,
+    public solverManagerBase::Regions
+    <
+        typename MANAGER::ManagerMesh,
+        typename MANAGER::Mesh
+    >,
     public solverManagerWrapper<MANAGER, typename MANAGER::ManagerMesh>
 {
 public:
@@ -102,6 +106,12 @@ public:
         typedef typename Manager::ManagerMesh ManagerMesh;
         typedef typename Manager::ManagerMesh Mesh;
 
+        typedef solverManagerBase::Regions
+        <
+            typename Manager::ManagerMesh,
+            typename Manager::Mesh
+        >
+        Base;
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
 
@@ -122,6 +132,7 @@ public:
 
         solverManagerRegions(const Manager& manager, Mesh& mesh)
         :
+            Base(),
             Wrapper(manager, mesh)
         {};
 
@@ -139,6 +150,23 @@ public:
                 return this->Wrapper::wrappedMesh();
             }
 };
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace solverManagerWrappers
+{
+    template <class MANAGER>
+    struct Regions
+    {
+        typedef MANAGER Manager;
+
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename MANAGER::ManagerMesh Mesh;
+
+        typedef solverManagerRegions<Manager> Type;
+    };
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

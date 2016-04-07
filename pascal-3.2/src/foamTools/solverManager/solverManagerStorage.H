@@ -53,9 +53,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_STORAGE_NEW(MANAGER)                                              \
+# define SM_REGIONSTORAGE_NEW(MANAGER)                                        \
                                                                               \
-    SM_WRAPPER_NEW(Storage, Storage, MANAGER, Storage)                        \
+    SM_WRAPPER_NEW(RegionStorage, MANAGER, Storage)                           \
+                                                                              \
+    private: virtual void init() const;
+
+
+# define SM_GLOBALSTORAGE_NEW(MANAGER)                                        \
+                                                                              \
+    SM_WRAPPER_NEW(GlobalStorage, MANAGER, Storage)                           \
                                                                               \
     private: virtual void init() const;
 
@@ -305,12 +312,23 @@ Description
     };
 
 
+# define SM_GLOBALSTORAGE_MEMBER_ADD(TYPE, NAME)                              \
+                                                                              \
+        SM_STORAGE_MEMBER_ADD(TYPE, NAME)
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_STORAGE_ADD()                                                     \
+# define SM_REGIONSTORAGE_ADD()                                               \
                                                                               \
     SM_WRAPPER_END()                                                          \
-    SM_REGION_STORAGE_ADD()
+    SM_REGION_REGIONSTORAGE_ADD()
+
+
+# define SM_GLOBALSTORAGE_ADD()                                               \
+                                                                              \
+    SM_WRAPPER_END()                                                          \
+    SM_MANAGER_GLOBALSTORAGE_ADD()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -318,15 +336,22 @@ Description
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace solverManagerStorage
+{
+
+// TODO: Use Base class for itemDict?
+
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerStorage Declaration
+              Class solverManagerStorage::RegionStorage Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER>
-class solverManagerStorage
+template <class MANAGER, class MESH>
+class RegionStorage
 :
-    public solverManagerCore<typename MANAGER::ManagerMesh>::Storage,
-    public solverManagerWrapper<MANAGER, typename MANAGER::Mesh>
+    public solverManagerBase::Storage<MESH>,
+    public solverManagerWrapper<MANAGER, MESH>
 {
 public:
 
@@ -335,8 +360,9 @@ public:
         typedef MANAGER Manager;
 
         typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef typename Manager::Mesh Mesh;
+        typedef MESH Mesh;
 
+        typedef solverManagerBase::Storage<Mesh> Base;
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
 
@@ -345,10 +371,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverManagerStorage(const solverManagerStorage&);
+        RegionStorage(const RegionStorage&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverManagerStorage&);
+        void operator=(const RegionStorage&);
 
         // Basic
 
@@ -370,18 +396,20 @@ private:
                 );
             };
 
+
 public:
 
     // Constructor
 
-        solverManagerStorage(const Manager& manager, Mesh& mesh)
+        RegionStorage(const Manager& manager, Mesh& mesh)
         :
+            Base(),
             Wrapper(manager, mesh)
         {};
 
     // Destructor
 
-        virtual ~solverManagerStorage() {};
+        virtual ~RegionStorage() {};
 
     // Member Functions
 
@@ -428,6 +456,149 @@ public:
                 return false;
             };
 };
+
+
+/*---------------------------------------------------------------------------*\
+             Class solverManagerStorage::GlobalStorage Declaration
+\*---------------------------------------------------------------------------*/
+
+template <class MANAGER, class MESH>
+class GlobalStorage
+:
+    public solverManagerBase::Storage<MESH>,
+    public solverManagerWrapper<MANAGER, MESH>
+{
+public:
+
+    // Public typedefs
+
+        typedef MANAGER Manager;
+
+        typedef typename Manager::ManagerMesh ManagerMesh;
+        typedef MESH Mesh;
+
+        typedef solverManagerBase::Storage<Mesh> Base;
+        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
+
+
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        GlobalStorage(const GlobalStorage&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const GlobalStorage&);
+
+        // Basic
+
+            //- Reference to settings dictionary
+            inline const dictionary& settingsDict() const
+            {
+                return this->Wrapper::settingsDict();
+            };
+
+            //- Reference to storage dictionary
+            inline const dictionary& storageDict() const
+            {
+                return this->Wrapper::storageDict();
+            };
+
+
+public:
+
+    // Constructor
+
+        GlobalStorage(const Manager& manager, Mesh& mesh)
+        :
+            Base(),
+            Wrapper(manager, mesh)
+        {};
+
+    // Destructor
+
+        virtual ~GlobalStorage() {};
+
+    // Member Functions
+
+        // Basic
+
+            //- Mesh
+            inline Mesh& mesh() const
+            {
+                return this->Wrapper::wrappedMesh();
+            }
+
+        // Dictionaries
+
+            //- Dictionary
+            inline const dictionary& dict() const
+            {
+                return storageDict();
+            };
+
+
+            //- Read dictionary of named item in storage (if present)
+            bool itemDict
+            (
+                const word& name,
+                dictionary& itemDict
+            ) const
+            {
+                if
+                (
+                    dict().found(name)
+                 && dict().isDict(name)
+                )
+                {
+                    itemDict = dict().subDict(name);
+
+                    Switch enabled;
+
+                    if (itemDict.readIfPresent("enabled", enabled))
+                    {
+                        return enabled;
+                    }
+                }
+
+                return false;
+            };
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace solverManagerStorage
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace solverManagerWrappers
+{
+    template <class MANAGER>
+    struct RegionStorage
+    {
+        typedef MANAGER Manager;
+
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename MANAGER::Mesh Mesh;
+
+        typedef solverManagerStorage::RegionStorage<Manager, Mesh> Type;
+    };
+
+
+    template <class MANAGER>
+    struct GlobalStorage
+    {
+        typedef MANAGER Manager;
+
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename MANAGER::ManagerMesh Mesh;
+
+        typedef solverManagerStorage::GlobalStorage<Manager, Mesh> Type;
+    };
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

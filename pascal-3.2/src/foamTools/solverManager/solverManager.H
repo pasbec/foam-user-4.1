@@ -27,11 +27,28 @@ Class
 Description
     ...
 
+SourceFiles
+    solverManager.C
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef solverManager_H
 #define solverManager_H
 
+#include "autoPtr.H"
+#include "HashPtrTable.H"
+#include "argList.H"
+#include "foamTime.H"
+#include "IOdictionary.H"
+#include "solutionControl.H"
+
+#include "solverManagerBase.H"
+
+#include "solverManagerWrapper.H"
+#include "solverManagerSettings.H"
+#include "solverManagerStorage.H"
+#include "solverManagerRegion.H"
+#include "solverManagerRegions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,14 +97,293 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "solverManagerCore.H"
-#include "solverManagerWrapper.H"
-#include "solverManagerGlobalSettings.H"
-#include "solverManagerGlobalStorage.H"
-#include "solverManagerSettings.H"
-#include "solverManagerStorage.H"
-#include "solverManagerRegion.H"
-#include "solverManagerRegions.H"
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                       Class solverManagerName Declaration
+\*---------------------------------------------------------------------------*/
+
+TemplateName(solverManager);
+
+
+/*---------------------------------------------------------------------------*\
+                         Class solverManager Declaration
+\*---------------------------------------------------------------------------*/
+
+template <class MESH>
+class solverManager
+:
+    public solverManagerName
+{
+public:
+
+    // Public typedefs
+
+        typedef solverManager<MESH> Manager;
+
+        typedef MESH ManagerMesh;
+        typedef typename solverManagerBase::MeshType<ManagerMesh>::Type Mesh;
+
+        typedef typename solverManagerBase::Messages<ManagerMesh> Messages;
+        typedef typename solverManagerBase::Control Control;
+        typedef typename solverManagerBase::Settings<ManagerMesh> Settings;
+        typedef typename solverManagerBase::Storage<ManagerMesh> Storage;
+        typedef typename solverManagerBase::Regions<ManagerMesh, Mesh> Regions;
+
+
+public:
+
+    // Public data types
+
+        //- Parameters
+        class Parameters
+        {
+        public:
+
+            // Public structs
+
+                //- Time parameters
+                struct Time
+                {
+                    bool adjustTimeStep;
+                    scalar maxCo;
+                    scalar maxDeltaT;
+                    scalar CoNum;
+                };
+
+            // Data
+
+                //- Time parameters
+                Time time;
+        };
+
+    // Public typedefs
+
+        typedef typename Parameters::Time TimeParameters;
+
+
+private:
+
+    // Private Data
+
+        //- Parameters
+        mutable autoPtr<Parameters> parametersPtr_;
+
+        //- Messages
+        mutable autoPtr<Messages> messagesPtr_;
+
+        // Basic
+
+            //- Reference to args
+            const argList& args_;
+
+            //- Reference to time
+            Time& time_;
+
+            //- Reference to mesh
+            ManagerMesh& mesh_;
+
+            //- Master manager?
+            const bool master_;
+
+        // Dictionaries
+
+            //- Properties dictionary
+            IOdictionary propertiesDict_;
+
+        // Evolution
+
+            //- Pre runTime phase?
+            mutable bool prePhase_;
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        solverManager(const solverManager&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const solverManager&);
+
+        // Basic
+
+            //- Error if not master manager
+            void errorIfNotMaster() const;
+
+        // Evolution
+
+            //- Pre runTime phase?
+            inline bool& prePhase() const
+            {
+                return prePhase_;
+            };
+
+            //- Read parameters
+            void readParameters(Parameters& par) const;
+
+            //- Read time parameters
+            void readTimeParameters(TimeParameters& timePar) const;
+
+            //- Time step setting
+            void calcDeltaT(scalar& deltaT) const;
+
+            //- Time step application
+            void applyDeltaT() const;
+
+
+protected:
+
+    // Protected Member Functions
+
+        // Evolution
+
+            //- Set time step width
+            //  A return value of true means active
+            virtual bool setDeltaT(scalar& deltaT) const
+            {
+                return false;
+            };
+
+            //- Set time parameters
+            //  A return value of true means active
+            virtual bool setTimeParameters(TimeParameters& timePar) const
+            {
+                return false;
+            };
+
+            //- Set Courant Number
+            //  A return value of true means active
+            virtual bool setCoNum(scalar& CoNum) const
+            {
+                return false;
+            };
+
+            //- Next sequence
+            virtual void next() const = 0;
+
+            //- Write sequence
+            virtual void write() const = 0;
+
+            //- Finalize sequence
+            virtual void finalize() const = 0;
+
+
+public:
+
+    // Constructor
+
+        solverManager
+        (
+            const argList& args,
+            Time& time,
+            ManagerMesh& mesh,
+            const word& prefix,
+            const bool& master = true
+        );
+
+    // Destructor
+
+        virtual ~solverManager() {};
+
+    // Member Functions
+
+        //- Parameters
+        const Parameters& parameters() const;
+
+        //- Messages
+        const Messages& messages() const;
+
+        //- Control
+        virtual Control& control() const = 0;
+
+        //- Settings
+        virtual Settings& settings() const = 0;
+
+        //- Storage
+        virtual Storage& storage() const = 0;
+
+        //- Regions
+        virtual Regions& regions() const = 0;
+
+        // Basic
+
+            //- Main arguments
+            inline const argList& args() const
+            {
+                return args_;
+            };
+
+            //- Time
+            inline Time& time() const
+            {
+                return time_;
+            };
+
+            //- Mesh
+            inline ManagerMesh& mesh() const
+            {
+                return mesh_;
+            };
+
+            //- Is this the master manager?
+            inline const bool& master() const
+            {
+                return master_;
+            };
+
+        // Dictionaries
+
+            //- Control dictionary
+            inline const dictionary& controlDict() const
+            {
+                return time_.controlDict();
+            }
+
+            //- Properties dictionary
+            inline const dictionary& propertiesDict() const
+            {
+                return propertiesDict_;
+            };
+
+            inline const dictionary& settingsDict() const
+            {
+                return propertiesDict_.subDict("settings");
+            };
+
+            //- Storage dictionary
+            inline const dictionary& storageDict() const
+            {
+                return propertiesDict_.subDict("storage");
+            };
+
+
+        // Evolution
+
+            //- Read sequence
+            void read() const;
+
+            //- Init sequence
+            void init() const;
+
+            //- Main time once wrapper
+            bool once() const;
+
+            //- Main time loop wrapper
+            bool loop() const;
+
+            //- Main time run wrapper
+            bool run() const;
+};
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "solverManager.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

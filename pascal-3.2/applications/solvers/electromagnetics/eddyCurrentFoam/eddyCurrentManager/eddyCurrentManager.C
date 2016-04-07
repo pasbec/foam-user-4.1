@@ -294,7 +294,7 @@ eddyCurrentManager::eddyCurrentManager
     const bool& master
 )
 :
-    solverManagerCore<regionFvMesh>
+    solverManager<regionFvMesh>
     (
         args, time, mesh, name, master
     )

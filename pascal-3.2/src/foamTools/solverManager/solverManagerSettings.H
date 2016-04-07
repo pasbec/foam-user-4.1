@@ -37,9 +37,18 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_SETTINGS_NEW(MANAGER)                                             \
+# define SM_REGIONSETTINGS_NEW(MANAGER)                                       \
                                                                               \
-    SM_WRAPPER_NEW(Settings, Settings, MANAGER, Settings)                     \
+    SM_WRAPPER_NEW(RegionSettings, MANAGER, Settings)                         \
+                                                                              \
+    private: virtual void read() const;                                       \
+                                                                              \
+    public:
+
+
+# define SM_GLOBALSETTINGS_NEW(MANAGER)                                       \
+                                                                              \
+    SM_WRAPPER_NEW(GlobalSettings, MANAGER, Settings)                         \
                                                                               \
     private: virtual void read() const;                                       \
                                                                               \
@@ -55,10 +64,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_SETTINGS_ADD()                                                    \
+# define SM_REGIONSETTINGS_ADD()                                              \
                                                                               \
     SM_WRAPPER_END()                                                          \
-    SM_REGION_SETTINGS_ADD()
+    SM_REGION_REGIONSETTINGS_ADD()
+
+
+# define SM_GLOBALSETTINGS_ADD()                                              \
+                                                                              \
+    SM_WRAPPER_END()                                                          \
+    SM_MANAGER_GLOBALSETTINGS_ADD()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -66,15 +81,20 @@ Description
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace solverManagerSettings
+{
+
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerSettings Declaration
+                       Class RegionSettings Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER>
-class solverManagerSettings
+template <class MANAGER, class MESH>
+class RegionSettings
 :
-    public solverManagerCore<typename MANAGER::ManagerMesh>::Settings,
-    public solverManagerWrapper<MANAGER, typename MANAGER::Mesh>
+    public solverManagerBase::Settings<MESH>,
+    public solverManagerWrapper<MANAGER, MESH>
 {
 public:
 
@@ -83,8 +103,9 @@ public:
         typedef MANAGER Manager;
 
         typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef typename Manager::Mesh Mesh;
+        typedef MESH Mesh;
 
+        typedef solverManagerBase::Settings<Mesh> Base;
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
 
@@ -93,10 +114,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverManagerSettings(const solverManagerSettings&);
+        RegionSettings(const RegionSettings&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverManagerSettings&);
+        void operator=(const RegionSettings&);
 
         // Basic
 
@@ -118,19 +139,20 @@ private:
                 );
             };
 
-
+            
 public:
 
     // Constructor
 
-        solverManagerSettings(const Manager& manager, Mesh& mesh)
+        RegionSettings(const Manager& manager, Mesh& mesh)
         :
+            Base(),
             Wrapper(manager, mesh)
         {};
 
     // Destructor
 
-        virtual ~solverManagerSettings() {};
+        virtual ~RegionSettings() {};
 
     // Member Functions
 
@@ -150,6 +172,122 @@ public:
                 return settingsDict();
             };
 };
+
+
+/*---------------------------------------------------------------------------*\
+                       Class GlobalSettings Declaration
+\*---------------------------------------------------------------------------*/
+
+template <class MANAGER, class MESH>
+class GlobalSettings
+:
+    public solverManagerBase::Settings<MESH>,
+    public solverManagerWrapper<MANAGER, MESH>
+{
+public:
+
+    // Public typedefs
+
+        typedef MANAGER Manager;
+
+        typedef typename Manager::ManagerMesh ManagerMesh;
+        typedef MESH Mesh;
+
+        typedef solverManagerBase::Settings<Mesh> Base;
+        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
+
+
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        GlobalSettings(const GlobalSettings&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const GlobalSettings&);
+
+        // Basic
+
+            //- Reference to settings dictionary
+            inline const dictionary& settingsDict() const
+            {
+                return this->Wrapper::settingsDict();
+            };
+
+            //- Reference to storage dictionary
+            inline const dictionary& storageDict() const
+            {
+                return this->Wrapper::storageDict();
+            };
+
+            
+public:
+
+    // Constructor
+
+        GlobalSettings(const Manager& manager, Mesh& mesh)
+        :
+            Base(),
+            Wrapper(manager, mesh)
+        {};
+
+    // Destructor
+
+        virtual ~GlobalSettings() {};
+
+    // Member Functions
+
+        // Basic
+
+            //- Mesh
+            inline Mesh& mesh() const
+            {
+                return this->Wrapper::wrappedMesh();
+            }
+
+        // Dictionaries
+
+            //- Dictionary
+            inline const dictionary& dict() const
+            {
+                return settingsDict();
+            };
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace solverManagerSettings
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace solverManagerWrappers
+{
+
+    template <class MANAGER>
+    struct RegionSettings
+    {
+        typedef MANAGER Manager;
+
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename MANAGER::Mesh Mesh;
+
+        typedef solverManagerSettings::RegionSettings<Manager, Mesh> Type;
+    };
+    
+    template <class MANAGER>
+    struct GlobalSettings
+    {
+        typedef MANAGER Manager;
+
+        typedef typename MANAGER::ManagerMesh ManagerMesh;
+        typedef typename MANAGER::ManagerMesh Mesh;
+
+        typedef solverManagerSettings::GlobalSettings<Manager, Mesh> Type;
+    };
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

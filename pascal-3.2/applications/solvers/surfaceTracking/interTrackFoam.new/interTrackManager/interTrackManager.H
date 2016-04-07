@@ -64,7 +64,7 @@ typedef fvBlockMatrix<vector4> fvVector4Matrix;
 
 class interTrackManager
 :
-    public solverManagerCore<dynamicFvMesh>
+    public solverManager<dynamicFvMesh>
 {
 public:
 
@@ -86,7 +86,7 @@ public:
 
         SM_DEFAULTREGION_NEW(interTrackManager);
 
-            SM_SETTINGS_NEW(interTrackManager);
+            SM_REGIONSETTINGS_NEW(interTrackManager);
 
                 //- Coupled solution of U and p
                 SM_SETTINGS_MEMBER_ADD(Switch, UpCoupled);
@@ -110,9 +110,9 @@ public:
                 //
                 SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
 
-            SM_SETTINGS_ADD();
+            SM_REGIONSETTINGS_ADD();
 
-            SM_STORAGE_NEW(interTrackManager);
+            SM_REGIONSTORAGE_NEW(interTrackManager);
 
                 //- Gravitational acceleration
                 SM_STORAGE_MEMBER_ADD(uniformDimensionedVectorField, g);
@@ -150,7 +150,7 @@ public:
                 //- Tracked surface
                 SM_STORAGE_MEMBER_ADD(trackedSurface, interface);
 
-            SM_STORAGE_ADD();
+            SM_REGIONSTORAGE_ADD();
 
         SM_REGION_END();
 

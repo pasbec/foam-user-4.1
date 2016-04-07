@@ -57,7 +57,7 @@ namespace Foam
 
 class eddyCurrentManager
 :
-    public solverManagerCore<regionFvMesh>
+    public solverManager<regionFvMesh>
 {
 public:
 
@@ -103,10 +103,10 @@ public:
 
         SM_DEFAULTREGION_NEW(eddyCurrentManager);
 
-            SM_SETTINGS_NEW(eddyCurrentManager);
-            SM_SETTINGS_ADD();
+            SM_REGIONSETTINGS_NEW(eddyCurrentManager);
+            SM_REGIONSETTINGS_ADD();
 
-            SM_STORAGE_NEW(eddyCurrentManager);
+            SM_REGIONSTORAGE_NEW(eddyCurrentManager);
 
                 // Source current density
                 SM_STORAGE_MEMBER_ADD(volVectorField, j0Re);
@@ -120,17 +120,17 @@ public:
                 SM_STORAGE_MEMBER_ADD(volVectorField, BRe);
                 SM_STORAGE_MEMBER_ADD(volVectorField, BIm);
 
-            SM_STORAGE_ADD();
+            SM_REGIONSTORAGE_ADD();
 
         SM_REGION_END();
 
 
         SM_REGION_NEW(eddyCurrentManager, ConductorRegion);
 
-            SM_SETTINGS_NEW(eddyCurrentManager);
-            SM_SETTINGS_ADD();
+            SM_REGIONSETTINGS_NEW(eddyCurrentManager);
+            SM_REGIONSETTINGS_ADD();
 
-            SM_STORAGE_NEW(eddyCurrentManager);
+            SM_REGIONSTORAGE_NEW(eddyCurrentManager);
 
                 //- Electric scalar potential
                 SM_STORAGE_MEMBER_ADD(volScalarField, VRe);
@@ -140,7 +140,7 @@ public:
                 SM_STORAGE_MEMBER_ADD(uniformDimensionedScalarField, VReAverage);
                 SM_STORAGE_MEMBER_ADD(uniformDimensionedScalarField, VImAverage);
 
-            SM_STORAGE_ADD();
+            SM_REGIONSTORAGE_ADD();
 
         SM_REGION_END();
 
