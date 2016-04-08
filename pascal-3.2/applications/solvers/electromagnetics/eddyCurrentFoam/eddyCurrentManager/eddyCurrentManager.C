@@ -49,10 +49,10 @@ void eddyCurrentManager::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::Storage::init_f0
+void eddyCurrentManager::Storage::Item_f0::create
 (const word& init) const
 {
-    f0Ptr_.set
+    set
     (
         new uniformDimensionedScalarField
         (
@@ -69,10 +69,10 @@ void eddyCurrentManager::Storage::init_f0
 }
 
 
-void eddyCurrentManager::Storage::init_omega0
+void eddyCurrentManager::Storage::Item_omega0::create
 (const word& init) const
 {
-    omega0Ptr_.set
+    set
     (
         new uniformDimensionedScalarField
         (
@@ -84,16 +84,16 @@ void eddyCurrentManager::Storage::init_omega0
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            mathematicalConstant::twoPi*f0()
+            mathematicalConstant::twoPi*storage().f0()
         )
     );
 }
 
 
-void eddyCurrentManager::Storage::init_sigma
+void eddyCurrentManager::Storage::Item_sigma::create
 (const word& init) const
 {
-    sigmaPtr_.set
+    set
     (
         new regionVolScalarField
         (
@@ -111,10 +111,10 @@ void eddyCurrentManager::Storage::init_sigma
 }
 
 
-void eddyCurrentManager::Storage::init_ARe
+void eddyCurrentManager::Storage::Item_ARe::create
 (const word& init) const
 {
-    ARePtr_.set
+    set
     (
         new regionVolVectorField
         (
@@ -132,10 +132,10 @@ void eddyCurrentManager::Storage::init_ARe
 }
 
 
-void eddyCurrentManager::Storage::init_AIm
+void eddyCurrentManager::Storage::Item_AIm::create
 (const word& init) const
 {
-    AImPtr_.set
+    set
     (
         new regionVolVectorField
         (
@@ -153,10 +153,10 @@ void eddyCurrentManager::Storage::init_AIm
 }
 
 
-void eddyCurrentManager::Storage::init_VReGrad
+void eddyCurrentManager::Storage::Item_VReGrad::create
 (const word& init) const
 {
-    VReGradPtr_.set
+    set
     (
         new regionVolVectorField
         (
@@ -181,10 +181,10 @@ void eddyCurrentManager::Storage::init_VReGrad
 }
 
 
-void eddyCurrentManager::Storage::init_VImGrad
+void eddyCurrentManager::Storage::Item_VImGrad::create
 (const word& init) const
 {
-    VImGradPtr_.set
+    set
     (
         new regionVolVectorField
         (
@@ -209,10 +209,10 @@ void eddyCurrentManager::Storage::init_VImGrad
 }
 
 
-void eddyCurrentManager::Storage::init_FL
+void eddyCurrentManager::Storage::Item_FL::create
 (const word& init) const
 {
-    FLPtr_.set
+    set
     (
         new regionVolVectorField
         (
@@ -237,10 +237,10 @@ void eddyCurrentManager::Storage::init_FL
 }
 
 
-void eddyCurrentManager::Storage::init_pB
+void eddyCurrentManager::Storage::Item_pB::create
 (const word& init) const
 {
-    pBPtr_.set
+    set
     (
         new regionVolScalarField
         (
@@ -265,7 +265,7 @@ void eddyCurrentManager::Storage::init_pB
 }
 
 
-void eddyCurrentManager::Storage::init() const
+void eddyCurrentManager::Storage::create() const
 {}
 
 

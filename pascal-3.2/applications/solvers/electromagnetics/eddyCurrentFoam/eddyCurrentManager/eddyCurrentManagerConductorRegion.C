@@ -38,10 +38,10 @@ void eddyCurrentManager::ConductorRegion::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::ConductorRegion::Storage::init_VRe
+void eddyCurrentManager::ConductorRegion::Storage::Item_VRe::create
 (const word& init) const
 {
-    VRePtr_.set
+    set
     (
         new volScalarField
         (
@@ -59,10 +59,10 @@ void eddyCurrentManager::ConductorRegion::Storage::init_VRe
 }
 
 
-void eddyCurrentManager::ConductorRegion::Storage::init_VIm
+void eddyCurrentManager::ConductorRegion::Storage::Item_VIm::create
 (const word& init) const
 {
-    VRePtr_.set
+    set
     (
         new volScalarField
         (
@@ -80,10 +80,10 @@ void eddyCurrentManager::ConductorRegion::Storage::init_VIm
 }
 
 
-void eddyCurrentManager::ConductorRegion::Storage::init_VReAverage
+void eddyCurrentManager::ConductorRegion::Storage::Item_VReAverage::create
 (const word& init) const
 {
-    VReAveragePtr_.set
+    set
     (
         new uniformDimensionedScalarField
         (
@@ -98,17 +98,17 @@ void eddyCurrentManager::ConductorRegion::Storage::init_VReAverage
             dimensionedScalar(
                 word(),
                 dimVoltage,
-                gAverage(VRe().internalField())
+                gAverage(storage().VRe().internalField())
             )
         )
     );
 }
 
 
-void eddyCurrentManager::ConductorRegion::Storage::init_VImAverage
+void eddyCurrentManager::ConductorRegion::Storage::Item_VImAverage::create
 (const word& init) const
 {
-    VImAveragePtr_.set
+    set
     (
         new uniformDimensionedScalarField
         (
@@ -123,7 +123,7 @@ void eddyCurrentManager::ConductorRegion::Storage::init_VImAverage
             dimensionedScalar(
                 word(),
                 dimVoltage,
-                gAverage(VIm().internalField())
+                gAverage(storage().VIm().internalField())
             )
         )
     );
@@ -132,7 +132,7 @@ void eddyCurrentManager::ConductorRegion::Storage::init_VImAverage
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::ConductorRegion::Storage::init() const
+void eddyCurrentManager::ConductorRegion::Storage::create() const
 {}
 
 

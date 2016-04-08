@@ -368,7 +368,7 @@ void interTrackManager::DefaultRegion::Storage::init_interface
 }
 
 // TODO: makeOptional_ has to be connected to settings!
-void interTrackManager::DefaultRegion::Storage::init() const
+void interTrackManager::DefaultRegion::Storage::create() const
 {
     make_g();
     make_p();

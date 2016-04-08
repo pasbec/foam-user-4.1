@@ -40,49 +40,35 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_WRAPPER_NEWHEADER(WRAPPER, MANAGER, NAME)                         \
+# define SM_WRAPPER_NEW(WRAPPER, NAME)                                        \
                                                                               \
     public: class NAME                                                        \
     :                                                                         \
-        public solverManagerWrappers::WRAPPER<MANAGER>::Type                  \
+        public solverManagerWrappers::WRAPPER<ManagerType>::Type              \
     {                                                                         \
-        friend class MANAGER;                                                 \
-                                                                              \
-        public: typedef MANAGER Manager;                                      \
         public: typedef typename                                              \
-            solverManagerWrappers::WRAPPER<MANAGER>::Type Wrapper;            \
+            solverManagerWrappers::WRAPPER<ManagerType>::Type Wrapper;        \
                                                                               \
-        public: typedef typename Wrapper::ManagerMesh ManagerMesh;            \
-        public: typedef typename Wrapper::Mesh Mesh;                          \
+        private: const ManagerType& manager_;                                 \
+        public: virtual const ManagerType& manager() const                    \
+        {                                                                     \
+            return manager_;                                                  \
+        };                                                                    \
                                                                               \
         private: NAME(const NAME&);                                           \
-        private: void operator=(const NAME&);
-
-
-# define SM_WRAPPER_NEWCONSTRUCTOR(WRAPPER, MANAGER, NAME)                    \
+        private: void operator=(const NAME&);                                 \
                                                                               \
         public: NAME                                                          \
         (                                                                     \
-            const MANAGER& manager,                                           \
-            solverManagerWrappers::WRAPPER<MANAGER>::Mesh& mesh               \
+            const ManagerType& manager,                                       \
+            Wrapper::Mesh& mesh                                               \
         )                                                                     \
         :                                                                     \
-            solverManagerWrappers::WRAPPER<MANAGER>::Type(manager, mesh)      \
-        {};
-
-
-# define SM_WRAPPER_NEWDESTRUCTOR(NAME)                                       \
+            Wrapper(mesh),                                                    \
+            manager_(manager)                                                 \
+        {};                                                                   \
                                                                               \
         public: virtual ~NAME() {};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_WRAPPER_NEW(WRAPPER, MANAGER, NAME)                               \
-                                                                              \
-    SM_WRAPPER_NEWHEADER(WRAPPER, MANAGER, NAME)                              \
-    SM_WRAPPER_NEWCONSTRUCTOR(WRAPPER, MANAGER, NAME)                         \
-    SM_WRAPPER_NEWDESTRUCTOR(NAME)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -430,12 +416,12 @@ Description
                                                                               \
     SM_MANAGER_GLOBALCONTROL_ADD_P1(TYPE, P1)
 
-    
+
 # define SM_GLOBALCONTROL_ADD_P2(TYPE, P1,P2)                                 \
                                                                               \
     SM_MANAGER_GLOBALCONTROL_ADD_P2(TYPE, P1,P2)
 
-    
+
 # define SM_GLOBALCONTROL_ADD_P3(TYPE, P1,P2,P3)                              \
                                                                               \
     SM_MANAGER_GLOBALCONTROL_ADD_P3(TYPE, P1,P2,P3)
@@ -503,9 +489,6 @@ private:
 
     // Private Data
 
-        //- Reference to manager
-        const Manager& manager_;
-
         // Basic
 
             //- Reference to mesh
@@ -537,13 +520,8 @@ public:
 
     // Constructor
 
-        solverManagerWrapper
-        (
-            const Manager& manager,
-            Mesh& mesh
-        )
+        solverManagerWrapper (Mesh& mesh)
         :
-            manager_(manager),
             mesh_(mesh)
         {};
 
@@ -553,30 +531,27 @@ public:
 
     // Member Functions
 
-        //- Reference to manager
-        inline const Manager& manager() const
-        {
-            return manager_;
-        };
+        //- Manager
+        virtual const Manager& manager() const = 0;
 
         // Basic
 
             //- Main arguments
             inline const argList& args() const
             {
-                return manager_.args();
+                return manager().args();
             };
 
             //- Time
             inline Time& time() const
             {
-                return manager_.time();
+                return manager().time();
             };
 
             //- Is this the master manager?
             inline const bool& master() const
             {
-                return manager_.master();
+                return manager().master();
             };
 
         // Dictionaries
@@ -590,7 +565,7 @@ public:
             //- Properties dictionary
             inline const dictionary& propertiesDict() const
             {
-                return manager_.propertiesDict();
+                return manager().propertiesDict();
             };
 
             //- Settings dictionary

@@ -46,6 +46,7 @@ SourceFiles
 
 #include "solverManagerWrapper.H"
 #include "solverManagerSettings.H"
+#include "solverManagerItem.H"
 #include "solverManagerStorage.H"
 #include "solverManagerRegion.H"
 #include "solverManagerRegions.H"
@@ -123,7 +124,7 @@ public:
         typedef solverManager<MESH> Manager;
 
         typedef MESH ManagerMesh;
-        typedef typename solverManagerBase::MeshType<ManagerMesh>::Type Mesh;
+        typedef typename solverManagerBase::Mesh<ManagerMesh>::Type Mesh;
 
         typedef typename solverManagerBase::Messages<ManagerMesh> Messages;
         typedef typename solverManagerBase::Control Control;
@@ -293,6 +294,9 @@ public:
         //- Messages
         const Messages& messages() const;
 
+        //- Regions
+        virtual Regions& regions() const = 0;
+
         //- Control
         virtual Control& control() const = 0;
 
@@ -301,9 +305,6 @@ public:
 
         //- Storage
         virtual Storage& storage() const = 0;
-
-        //- Regions
-        virtual Regions& regions() const = 0;
 
         // Basic
 

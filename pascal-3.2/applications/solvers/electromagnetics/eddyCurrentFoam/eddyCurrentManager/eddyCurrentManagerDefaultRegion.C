@@ -33,15 +33,24 @@ namespace Foam
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void eddyCurrentManager::DefaultRegion::Settings::read() const
-{}
+{
+// TODO
+//     manager().settings();
+//     region().settings();
+//
+//     manager().storage().f0();
+//     manager().regions().defaultRegion().storage().j0Re();
+//     region().storage().j0Re();
+//     manager().regions().conductorRegion().storage().VRe();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::DefaultRegion::Storage::init_j0Re
+void eddyCurrentManager::DefaultRegion::Storage::Item_j0Re::create
 (const word& init) const
 {
-    j0RePtr_.set
+    set
     (
         new volVectorField
         (
@@ -66,10 +75,10 @@ void eddyCurrentManager::DefaultRegion::Storage::init_j0Re
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::init_j0Im
+void eddyCurrentManager::DefaultRegion::Storage::Item_j0Im::create
 (const word& init) const
 {
-    j0ImPtr_.set
+    set
     (
         new volVectorField
         (
@@ -87,10 +96,10 @@ void eddyCurrentManager::DefaultRegion::Storage::init_j0Im
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::init_jRe
+void eddyCurrentManager::DefaultRegion::Storage::Item_jRe::create
 (const word& init) const
 {
-    jRePtr_.set
+    set
     (
         new volVectorField
         (
@@ -115,10 +124,10 @@ void eddyCurrentManager::DefaultRegion::Storage::init_jRe
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::init_jIm
+void eddyCurrentManager::DefaultRegion::Storage::Item_jIm::create
 (const word& init) const
 {
-    jImPtr_.set
+    set
     (
         new volVectorField
         (
@@ -143,10 +152,10 @@ void eddyCurrentManager::DefaultRegion::Storage::init_jIm
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::init_BRe
+void eddyCurrentManager::DefaultRegion::Storage::Item_BRe::create
 (const word& init) const
 {
-    BRePtr_.set
+    set
     (
         new volVectorField
         (
@@ -171,10 +180,10 @@ void eddyCurrentManager::DefaultRegion::Storage::init_BRe
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::init_BIm
+void eddyCurrentManager::DefaultRegion::Storage::Item_BIm::create
 (const word& init) const
 {
-    BImPtr_.set
+    set
     (
         new volVectorField
         (
@@ -199,7 +208,7 @@ void eddyCurrentManager::DefaultRegion::Storage::init_BIm
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::init() const
+void eddyCurrentManager::DefaultRegion::Storage::create() const
 {}
 
 

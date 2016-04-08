@@ -68,11 +68,15 @@ class interTrackManager
 {
 public:
 
+    // Public typedefs
+
+        typedef interTrackManager ManagerType;
+
     // Public data types
 
         SM_GLOBALCONTROL_ADD_P1(interTrackControl, mesh())
 
-        SM_GLOBALSETTINGS_NEW(interTrackManager);
+        SM_GLOBALSETTINGS_NEW();
 
             //- Debug switch
             SM_SETTINGS_MEMBER_ADD(Switch, debug);
@@ -80,13 +84,13 @@ public:
         SM_GLOBALSETTINGS_ADD();
 
 
-        SM_GLOBALSTORAGE_NEW(interTrackManager);
+        SM_GLOBALSTORAGE_NEW();
         SM_GLOBALSTORAGE_ADD();
 
 
-        SM_DEFAULTREGION_NEW(interTrackManager);
+        SM_DEFAULTREGION_NEW();
 
-            SM_REGIONSETTINGS_NEW(interTrackManager);
+            SM_REGIONSETTINGS_NEW();
 
                 //- Coupled solution of U and p
                 SM_SETTINGS_MEMBER_ADD(Switch, UpCoupled);
@@ -112,7 +116,7 @@ public:
 
             SM_REGIONSETTINGS_ADD();
 
-            SM_REGIONSTORAGE_NEW(interTrackManager);
+            SM_REGIONSTORAGE_NEW();
 
                 //- Gravitational acceleration
                 SM_STORAGE_MEMBER_ADD(uniformDimensionedVectorField, g);
@@ -155,7 +159,7 @@ public:
         SM_REGION_END();
 
 
-        SM_REGIONS_NEW(interTrackManager);
+        SM_REGIONS_NEW();
 
             SM_REGIONS_DEFAULTREGION_ADD(mesh());
 

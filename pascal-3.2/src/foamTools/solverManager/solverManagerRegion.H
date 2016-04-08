@@ -36,16 +36,44 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGION_NEW(MANAGER, NAME)                                         \
+# define SM_REGION_NEW(NAME)                                                  \
                                                                               \
-    SM_WRAPPER_NEW(Region, MANAGER, NAME)
+    SM_WRAPPER_NEW(Region, NAME)                                              \
+                                                                              \
+        public: typedef NAME RegionType;
 
-# define SM_DEFAULTREGION_NEW(MANAGER)                                        \
+
+# define SM_DEFAULTREGION_NEW()                                               \
                                                                               \
-    SM_REGION_NEW(MANAGER, DefaultRegion)
+    SM_REGION_NEW(DefaultRegion)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define SM_REGION_REGIONCONTROL_ADD_P1(TYPE, P1)                             \
+                                                                              \
+    SM_MANAGER_GLOBALCONTROL_ADD_P1(TYPE, P1)
+
+
+# define SM_REGION_REGIONCONTROL_ADD_P2(TYPE, P1,P2)                          \
+                                                                              \
+    SM_MANAGER_GLOBALCONTROL_ADD_P2(TYPE, P1,P2)
+
+
+# define SM_REGION_REGIONCONTROL_ADD_P3(TYPE, P1,P2,P3)                       \
+                                                                              \
+    SM_MANAGER_GLOBALCONTROL_ADD_P3(TYPE, P1,P2,P3)
+
+
+# define SM_REGION_REGIONCONTROL_ADD_P4(TYPE, P1,P2,P3,P4)                    \
+                                                                              \
+    SM_MANAGER_GLOBALCONTROL_ADD_P4(TYPE, P1,P2,P3,P4)
+
+
+# define SM_REGION_REGIONCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)                 \
+                                                                              \
+    SM_MANAGER_GLOBALCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)
+
 
 # define SM_REGION_REGIONSETTINGS_ADD()                                       \
                                                                               \
@@ -94,6 +122,8 @@ public:
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
         typedef typename Manager::Control Control;
+        typedef typename solverManagerBase::Settings<Mesh> Settings;
+        typedef typename solverManagerBase::Storage<Mesh> Storage;
 
 
 private:
@@ -111,10 +141,10 @@ public:
 
     // Constructor
 
-        solverManagerRegion(const Manager& manager, Mesh& mesh)
+        solverManagerRegion(Mesh& mesh)
         :
             Base(),
-            Wrapper(manager, mesh)
+            Wrapper(mesh)
         {};
 
     // Destructor
@@ -123,19 +153,34 @@ public:
 
     // Member Functions
 
+        //- Manager
+        virtual const Manager& manager() const = 0;
+
         //- Control
         virtual Control& control() const
         {
             return this->manager().control();
         };
 
+        //- Settings
+        virtual Settings& settings() const = 0;
+
+        //- Storage
+        virtual Storage& storage() const = 0;
+
         // Basic
 
             //- Mesh
-            inline Mesh& mesh() const
+            virtual Mesh& mesh() const
             {
                 return this->Wrapper::wrappedMesh();
             }
+
+            //- Name
+            inline word& name() const
+            {
+                return mesh().name();
+            };
 
         // Dictionaries
 

@@ -35,36 +35,78 @@ Description
 #include "solverManagerWrapper.H"
 #include "solverManagerRegion.H"
 
-// TODO: makeOptional_ has to be connected to settings!
-
-// TODO: Implement Storage Items
-//
-//       Move all 'more or less intelligent' code in class "Item"
-//       and use only macro to get all items in
-//       the Storage namespace e.g.:
-//
-//         autoPtr<Item> pItemPtr_;
-//
-//       And then take the macros only for:
-//
-//         p() => pItemPtr->get(),
-//         pPtr() => pItemPtr_->Ptr(),
-//         is_p() => pItemPtr.is(), ...
+// TODO: Remove old storage
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONSTORAGE_NEW(MANAGER)                                        \
+# define SM_REGIONSTORAGE_NEW_START(WRAPPER)                                  \
                                                                               \
-    SM_WRAPPER_NEW(RegionStorage, MANAGER, Storage)                           \
+    SM_WRAPPER_NEW(WRAPPER, Storage)                                          \
                                                                               \
-    private: virtual void init() const;
+        public: typedef Storage StorageType;
 
 
-# define SM_GLOBALSTORAGE_NEW(MANAGER)                                        \
+# define SM_REGIONSTORAGE_NEW_INTERFACES()                                    \
                                                                               \
-    SM_WRAPPER_NEW(GlobalStorage, MANAGER, Storage)                           \
+        private: virtual void create() const;
+
+
+# define SM_REGIONSTORAGE_NEW_INTERFACES_REGION()                             \
                                                                               \
-    private: virtual void init() const;
+        public: virtual RegionType& region() const                            \
+        {                                                                     \
+            return static_cast<RegionType&>                                   \
+            (                                                                 \
+                manager().regions()[this->mesh().name()]                      \
+            );                                                                \
+        };                                                                    \
+                                                                              \
+        public: virtual RegionType::Control& control() const                  \
+        {                                                                     \
+            return region().control();                                        \
+        };                                                                    \
+                                                                              \
+        public: virtual RegionType::Settings& settings() const                \
+        {                                                                     \
+            return region().settings();                                       \
+        };
+
+
+# define SM_REGIONSTORAGE_NEW_INTERFACES_GLOBAL()                             \
+                                                                              \
+        public: virtual ManagerType::Control& control() const                 \
+        {                                                                     \
+            return manager().control();                                       \
+        };                                                                    \
+                                                                              \
+        public: virtual ManagerType::Settings& settings() const               \
+        {                                                                     \
+            return manager().settings();                                      \
+        };
+
+
+
+# define SM_REGIONSTORAGE_NEW_PUBLIC()                                        \
+                                                                              \
+        public:
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define SM_REGIONSTORAGE_NEW()                                               \
+                                                                              \
+    SM_REGIONSTORAGE_NEW_START(RegionStorage)                                 \
+    SM_REGIONSTORAGE_NEW_INTERFACES()                                         \
+    SM_REGIONSTORAGE_NEW_INTERFACES_REGION()                                  \
+    SM_REGIONSTORAGE_NEW_PUBLIC()
+
+
+# define SM_GLOBALSTORAGE_NEW()                                               \
+                                                                              \
+    SM_REGIONSTORAGE_NEW_START(GlobalStorage)                                 \
+    SM_REGIONSTORAGE_NEW_INTERFACES()                                         \
+    SM_REGIONSTORAGE_NEW_INTERFACES_GLOBAL()                                  \
+    SM_REGIONSTORAGE_NEW_PUBLIC()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -341,14 +383,12 @@ namespace Foam
 namespace solverManagerStorage
 {
 
-// TODO: Use Base class for itemDict?
-
 /*---------------------------------------------------------------------------*\
-              Class solverManagerStorage::RegionStorage Declaration
+              Class solverManagerStorage::Storage Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class MESH>
-class RegionStorage
+class Storage
 :
     public solverManagerBase::Storage<MESH>,
     public solverManagerWrapper<MANAGER, MESH>
@@ -365,58 +405,63 @@ public:
         typedef solverManagerBase::Storage<Mesh> Base;
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
+        typedef typename solverManagerBase::Control Control;
+        typedef typename solverManagerBase::Settings<Mesh> Settings;
+
 
 private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        RegionStorage(const RegionStorage&);
+        Storage(const Storage&);
 
         //- Disallow default bitwise assignment
-        void operator=(const RegionStorage&);
+        void operator=(const Storage&);
 
         // Basic
 
-            //- Reference to settings dictionary
-            inline const dictionary& settingsDict() const
-            {
-                return this->Wrapper::settingsDict().subDict
-                (
-                    mesh().name()
-                );
-            };
+            //- Settings dictionary
+            virtual const dictionary& settingsDict() const = 0;
 
-            //- Reference to storage dictionary
-            inline const dictionary& storageDict() const
-            {
-                return this->Wrapper::storageDict().subDict
-                (
-                    mesh().name()
-                );
-            };
+            //- Storage dictionary
+            virtual const dictionary& storageDict() const = 0;
+
+        // Evolution
+
+            //- Create sequence
+            virtual void create() const = 0;
 
 
 public:
 
     // Constructor
 
-        RegionStorage(const Manager& manager, Mesh& mesh)
+        Storage(Mesh& mesh)
         :
             Base(),
-            Wrapper(manager, mesh)
+            Wrapper(mesh)
         {};
 
     // Destructor
 
-        virtual ~RegionStorage() {};
+        virtual ~Storage() {};
 
     // Member Functions
+
+        //- Manager
+        virtual const Manager& manager() const = 0;
+
+        //- Control
+        virtual Control& control() const = 0;
+
+        //- Settings
+        virtual Settings& settings() const = 0;
 
         // Basic
 
             //- Mesh
-            inline Mesh& mesh() const
+            virtual Mesh& mesh() const
             {
                 return this->Wrapper::wrappedMesh();
             }
@@ -430,6 +475,7 @@ public:
             };
 
 
+// TODO: Remove after old storage is removed
             //- Read dictionary of named item in storage (if present)
             bool itemDict
             (
@@ -459,14 +505,13 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-             Class solverManagerStorage::GlobalStorage Declaration
+              Class solverManagerStorage::RegionStorage Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class MESH>
-class GlobalStorage
+class RegionStorage
 :
-    public solverManagerBase::Storage<MESH>,
-    public solverManagerWrapper<MANAGER, MESH>
+    public Storage<MANAGER, MESH>
 {
 public:
 
@@ -477,8 +522,104 @@ public:
         typedef typename Manager::ManagerMesh ManagerMesh;
         typedef MESH Mesh;
 
-        typedef solverManagerBase::Storage<Mesh> Base;
-        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
+        typedef Storage<MANAGER, MESH> Parent;
+        typedef typename Parent::Base Base;
+        typedef typename Parent::Wrapper Wrapper;
+
+        typedef typename solverManagerBase::Region<Mesh> Region;
+        typedef typename Parent::Control Control;
+        typedef typename Parent::Settings Settings;
+
+
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        RegionStorage(const RegionStorage&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const RegionStorage&);
+
+        // Basic
+
+            //- Settings dictionary
+            virtual const dictionary& settingsDict() const
+            {
+                return this->Wrapper::settingsDict().subDict
+                (
+                    this->Parent::mesh().name()
+                );
+            };
+
+            //- Storage dictionary
+            virtual const dictionary& storageDict() const
+            {
+                return this->Wrapper::storageDict().subDict
+                (
+                    this->Parent::mesh().name()
+                );
+            };
+
+        // Evolution
+
+            //- Create sequence
+            virtual void create() const = 0;
+
+
+public:
+
+    // Constructor
+
+        RegionStorage(Mesh& mesh)
+        :
+            Parent(mesh)
+        {};
+
+    // Destructor
+
+        virtual ~RegionStorage() {};
+
+    // Member Functions
+
+        //- Manager
+        virtual const Manager& manager() const = 0;
+
+        //- Region
+        virtual Region& region() const = 0;
+
+        //- Control
+        virtual Control& control() const = 0;
+
+        //- Settings
+        virtual Settings& settings() const = 0;
+};
+
+
+/*---------------------------------------------------------------------------*\
+             Class solverManagerStorage::GlobalStorage Declaration
+\*---------------------------------------------------------------------------*/
+
+template <class MANAGER, class MESH>
+class GlobalStorage
+:
+    public Storage<MANAGER, MESH>
+{
+public:
+
+    // Public typedefs
+
+        typedef MANAGER Manager;
+
+        typedef typename Manager::ManagerMesh ManagerMesh;
+        typedef MESH Mesh;
+
+        typedef Storage<MANAGER, MESH> Parent;
+        typedef typename Parent::Base Base;
+        typedef typename Parent::Wrapper Wrapper;
+
+        typedef typename Parent::Control Control;
+        typedef typename Parent::Settings Settings;
 
 
 private:
@@ -493,27 +634,31 @@ private:
 
         // Basic
 
-            //- Reference to settings dictionary
-            inline const dictionary& settingsDict() const
+            //- Settings dictionary
+            virtual const dictionary& settingsDict() const
             {
                 return this->Wrapper::settingsDict();
             };
 
-            //- Reference to storage dictionary
-            inline const dictionary& storageDict() const
+            //- Storage dictionary
+            virtual const dictionary& storageDict() const
             {
                 return this->Wrapper::storageDict();
             };
+
+        // Evolution
+
+            //- Create sequence
+            virtual void create() const = 0;
 
 
 public:
 
     // Constructor
 
-        GlobalStorage(const Manager& manager, Mesh& mesh)
+        GlobalStorage(Mesh& mesh)
         :
-            Base(),
-            Wrapper(manager, mesh)
+            Parent(mesh)
         {};
 
     // Destructor
@@ -522,48 +667,14 @@ public:
 
     // Member Functions
 
-        // Basic
+        //- Manager
+        virtual const Manager& manager() const = 0;
 
-            //- Mesh
-            inline Mesh& mesh() const
-            {
-                return this->Wrapper::wrappedMesh();
-            }
+        //- Control
+        virtual Control& control() const = 0;
 
-        // Dictionaries
-
-            //- Dictionary
-            inline const dictionary& dict() const
-            {
-                return storageDict();
-            };
-
-
-            //- Read dictionary of named item in storage (if present)
-            bool itemDict
-            (
-                const word& name,
-                dictionary& itemDict
-            ) const
-            {
-                if
-                (
-                    dict().found(name)
-                 && dict().isDict(name)
-                )
-                {
-                    itemDict = dict().subDict(name);
-
-                    Switch enabled;
-
-                    if (itemDict.readIfPresent("enabled", enabled))
-                    {
-                        return enabled;
-                    }
-                }
-
-                return false;
-            };
+        //- Settings
+        virtual Settings& settings() const = 0;
 };
 
 

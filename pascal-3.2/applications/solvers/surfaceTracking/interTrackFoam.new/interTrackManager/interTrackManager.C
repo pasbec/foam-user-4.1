@@ -49,7 +49,7 @@ void interTrackManager::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void interTrackManager::Storage::init() const
+void interTrackManager::Storage::create() const
 {}
 
 

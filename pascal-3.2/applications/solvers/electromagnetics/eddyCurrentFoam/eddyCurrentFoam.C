@@ -64,12 +64,27 @@ int main(int argc, char *argv[])
 // #       include "AVloop.H"
 
         {
-            fvMesh& mesh = manager.regions().defaultRegion().mesh();
-
-            Info << manager.regions()[mesh.name()].mesh().name() << endl;
-
-// TODO
-//             volVectorField& jRe = manager.regions()[mesh.name()].storage().jRe();
+//             typedef eddyCurrentManager Manager;
+//             typedef Manager::Control GlobalControl;
+//             typedef Manager::Settings GlobalSettings;
+//             typedef Manager::Storage GlobalStorage;
+// 
+//             GlobalControl& globalControl = manager.control();
+//             GlobalSettings& globalSettings = manager.settings();
+//             GlobalStorage& globalStorage = manager.storage();
+// 
+//             //typedef typename Manager::Region<manager.regions().defaultRegion()>::Type Region;
+//             typedef Manager::DefaultRegion Region;
+//             typedef Region::Mesh Mesh;
+//             typedef Region::Control Control;
+//             typedef Region::Settings Settings;
+//             typedef Region::Storage Storage;
+// 
+//             Region& region = manager.regions().defaultRegion();
+//             Mesh& mesh = region.mesh();
+//             Control& control = region.control();
+//             Settings& settings = region.settings();
+//             Storage& storage = region.storage();
 
 //             volScalarField& sigma = manager.storage().sigma()[mesh.name()];
 //

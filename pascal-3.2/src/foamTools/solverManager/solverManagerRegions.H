@@ -36,14 +36,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONS_NEW(MANAGER)                                              \
+# define SM_REGIONS_NEW()                                                     \
                                                                               \
-    SM_WRAPPER_NEW(Regions, MANAGER, Regions)
+    SM_WRAPPER_NEW(Regions, Regions)                                          \
+                                                                              \
+        public: typedef Regions RegionsType;                                  \
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONS_REGION_ADD(TYPE, NAME, PMESH)                             \
+# define SM_REGIONS_REGION_ADD(TYPE, NAME, MESH)                              \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -52,7 +54,7 @@ Description
             if (NAME##Ptr_.empty())                                           \
             {                                                                 \
                 SM_WRAPPER_MEMBER_SETINIT_P2(                                 \
-                    TYPE, NAME, this->manager(), PMESH)                       \
+                    TYPE, NAME, this->manager(), MESH)                        \
                                                                               \
                 this->Base::regionHashTable().insert                          \
                 (                                                             \
@@ -65,9 +67,9 @@ Description
         };
 
 
-# define SM_REGIONS_DEFAULTREGION_ADD(PMESH)                                  \
+# define SM_REGIONS_DEFAULTREGION_ADD(MESH)                                   \
                                                                               \
-        SM_REGIONS_REGION_ADD(DefaultRegion, defaultRegion, PMESH)
+        SM_REGIONS_REGION_ADD(DefaultRegion, defaultRegion, MESH)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -92,8 +94,7 @@ class solverManagerRegions
 :
     public solverManagerBase::Regions
     <
-        typename MANAGER::ManagerMesh,
-        typename MANAGER::Mesh
+        typename MANAGER::ManagerMesh, typename MANAGER::Mesh
     >,
     public solverManagerWrapper<MANAGER, typename MANAGER::ManagerMesh>
 {
@@ -105,14 +106,15 @@ public:
 
         typedef typename Manager::ManagerMesh ManagerMesh;
         typedef typename Manager::ManagerMesh Mesh;
+        typedef typename Manager::Mesh SubMesh;
 
         typedef solverManagerBase::Regions
         <
-            typename Manager::ManagerMesh,
-            typename Manager::Mesh
-        >
-        Base;
+            typename Manager::ManagerMesh, SubMesh
+        > Base;
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
+
+        typedef typename solverManagerBase::Region<SubMesh> Region;
 
 
 private:
@@ -130,10 +132,10 @@ public:
 
     // Constructor
 
-        solverManagerRegions(const Manager& manager, Mesh& mesh)
+        solverManagerRegions(Mesh& mesh)
         :
             Base(),
-            Wrapper(manager, mesh)
+            Wrapper(mesh)
         {};
 
     // Destructor
@@ -142,10 +144,13 @@ public:
 
     // Member Functions
 
+        //- Manager
+        virtual const Manager& manager() const = 0;
+
         // Basic
 
             //- Mesh
-            inline Mesh& mesh() const
+            virtual Mesh& mesh() const
             {
                 return this->Wrapper::wrappedMesh();
             }

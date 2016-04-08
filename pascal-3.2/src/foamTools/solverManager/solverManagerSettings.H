@@ -37,22 +37,74 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONSETTINGS_NEW(MANAGER)                                       \
+# define SM_REGIONSETTINGS_NEW_START(WRAPPER)                                 \
                                                                               \
-    SM_WRAPPER_NEW(RegionSettings, MANAGER, Settings)                         \
+    SM_WRAPPER_NEW(WRAPPER, Settings)                                         \
                                                                               \
-    private: virtual void read() const;                                       \
-                                                                              \
-    public:
+        public: typedef Settings SettingsType;
 
 
-# define SM_GLOBALSETTINGS_NEW(MANAGER)                                       \
+# define SM_REGIONSETTINGS_NEW_INTERFACES()                                   \
                                                                               \
-    SM_WRAPPER_NEW(GlobalSettings, MANAGER, Settings)                         \
+        private: virtual void read() const;
+
+
+# define SM_REGIONSETTINGS_NEW_INTERFACES_REGION()                            \
                                                                               \
-    private: virtual void read() const;                                       \
+        public: virtual RegionType& region() const                            \
+        {                                                                     \
+            return static_cast<RegionType&>                                   \
+            (                                                                 \
+                manager().regions()[this->mesh().name()]                      \
+            );                                                                \
+        };                                                                    \
                                                                               \
-    public:
+        public: virtual RegionType::Control& control() const                  \
+        {                                                                     \
+            return region().control();                                        \
+        };                                                                    \
+                                                                              \
+        public: virtual RegionType::Storage& storage() const                  \
+        {                                                                     \
+            return region().storage();                                        \
+        };
+
+
+# define SM_REGIONSETTINGS_NEW_INTERFACES_GLOBAL()                            \
+                                                                              \
+        public: virtual ManagerType::Control& control() const                 \
+        {                                                                     \
+            return manager().control();                                       \
+        };                                                                    \
+                                                                              \
+        public: virtual ManagerType::Storage& storage() const                 \
+        {                                                                     \
+            return manager().storage();                                       \
+        };
+
+
+
+# define SM_REGIONSETTINGS_NEW_PUBLIC()                                       \
+                                                                              \
+        public:
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+# define SM_REGIONSETTINGS_NEW()                                              \
+                                                                              \
+    SM_REGIONSETTINGS_NEW_START(RegionSettings)                               \
+    SM_REGIONSETTINGS_NEW_INTERFACES()                                        \
+    SM_REGIONSETTINGS_NEW_INTERFACES_REGION()                                 \
+    SM_REGIONSETTINGS_NEW_PUBLIC()
+
+
+# define SM_GLOBALSETTINGS_NEW()                                              \
+                                                                              \
+    SM_REGIONSETTINGS_NEW_START(GlobalSettings)                               \
+    SM_REGIONSETTINGS_NEW_INTERFACES()                                        \
+    SM_REGIONSETTINGS_NEW_INTERFACES_GLOBAL()                                 \
+    SM_REGIONSETTINGS_NEW_PUBLIC()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -87,11 +139,11 @@ namespace solverManagerSettings
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class RegionSettings Declaration
+                Class solverManagerSettings::Settings Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class MESH>
-class RegionSettings
+class Settings
 :
     public solverManagerBase::Settings<MESH>,
     public solverManagerWrapper<MANAGER, MESH>
@@ -108,58 +160,63 @@ public:
         typedef solverManagerBase::Settings<Mesh> Base;
         typedef solverManagerWrapper<Manager, Mesh> Wrapper;
 
+        typedef typename solverManagerBase::Control Control;
+        typedef typename solverManagerBase::Storage<Mesh> Storage;
+
 
 private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        RegionSettings(const RegionSettings&);
+        Settings(const Settings&);
 
         //- Disallow default bitwise assignment
-        void operator=(const RegionSettings&);
+        void operator=(const Settings&);
 
         // Basic
 
-            //- Reference to settings dictionary
-            inline const dictionary& settingsDict() const
-            {
-                return this->Wrapper::settingsDict().subDict
-                (
-                    mesh().name()
-                );
-            };
+            //- Settings dictionary
+            virtual const dictionary& settingsDict() const = 0;;
 
-            //- Reference to storage dictionary
-            inline const dictionary& storageDict() const
-            {
-                return this->Wrapper::storageDict().subDict
-                (
-                    mesh().name()
-                );
-            };
+            //- Storage dictionary
+            virtual const dictionary& storageDict() const = 0;
 
-            
+        // Evolution
+
+            //- Read sequence
+            virtual void read() const = 0;
+
+
 public:
 
     // Constructor
 
-        RegionSettings(const Manager& manager, Mesh& mesh)
+        Settings(Mesh& mesh)
         :
             Base(),
-            Wrapper(manager, mesh)
+            Wrapper(mesh)
         {};
 
     // Destructor
 
-        virtual ~RegionSettings() {};
+        virtual ~Settings() {};
 
     // Member Functions
+
+        //- Manager
+        virtual const Manager& manager() const = 0;
+
+        //- Control
+        virtual Control& control() const = 0;
+
+        //- Storage
+        virtual Storage& storage() const = 0;
 
         // Basic
 
             //- Mesh
-            inline Mesh& mesh() const
+            virtual Mesh& mesh() const
             {
                 return this->Wrapper::wrappedMesh();
             }
@@ -174,15 +231,15 @@ public:
 };
 
 
+
 /*---------------------------------------------------------------------------*\
-                       Class GlobalSettings Declaration
+             Class solverManagerSettings::RegionSettings Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class MESH>
-class GlobalSettings
+class RegionSettings
 :
-    public solverManagerBase::Settings<MESH>,
-    public solverManagerWrapper<MANAGER, MESH>
+    public Settings<MANAGER, MESH>
 {
 public:
 
@@ -193,8 +250,104 @@ public:
         typedef typename Manager::ManagerMesh ManagerMesh;
         typedef MESH Mesh;
 
-        typedef solverManagerBase::Settings<Mesh> Base;
-        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
+        typedef Settings<MANAGER, MESH> Parent;
+        typedef typename Parent::Base Base;
+        typedef typename Parent::Wrapper Wrapper;
+
+        typedef typename solverManagerBase::Region<Mesh> Region;
+        typedef typename Parent::Control Control;
+        typedef typename Parent::Storage Storage;
+
+
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        RegionSettings(const RegionSettings&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const RegionSettings&);
+
+        // Basic
+
+            //- Settings dictionary
+            virtual const dictionary& settingsDict() const
+            {
+                return this->Wrapper::settingsDict().subDict
+                (
+                    this->Parent::mesh().name()
+                );
+            };
+
+            //- Storage dictionary
+            virtual const dictionary& storageDict() const
+            {
+                return this->Wrapper::storageDict().subDict
+                (
+                    this->Parent::mesh().name()
+                );
+            };
+
+        // Evolution
+
+            //- Read sequence
+            virtual void read() const = 0;
+
+
+public:
+
+    // Constructor
+
+        RegionSettings(Mesh& mesh)
+        :
+            Parent(mesh)
+        {};
+
+    // Destructor
+
+        virtual ~RegionSettings() {};
+
+    // Member Functions
+
+        //- Manager
+        virtual const Manager& manager() const = 0;
+
+        //- Region
+        virtual Region& region() const = 0;
+
+        //- Control
+        virtual Control& control() const = 0;
+
+        //- Storage
+        virtual Storage& storage() const = 0;
+};
+
+
+/*---------------------------------------------------------------------------*\
+            Class solverManagerSettings::GlobalSettings Declaration
+\*---------------------------------------------------------------------------*/
+
+template <class MANAGER, class MESH>
+class GlobalSettings
+:
+    public Settings<MANAGER, MESH>
+{
+public:
+
+    // Public typedefs
+
+        typedef MANAGER Manager;
+
+        typedef typename Manager::ManagerMesh ManagerMesh;
+        typedef MESH Mesh;
+
+        typedef Settings<MANAGER, MESH> Parent;
+        typedef typename Parent::Base Base;
+        typedef typename Parent::Wrapper Wrapper;
+ 
+        typedef typename Parent::Control Control;
+        typedef typename Parent::Storage Storage;
 
 
 private:
@@ -209,27 +362,31 @@ private:
 
         // Basic
 
-            //- Reference to settings dictionary
-            inline const dictionary& settingsDict() const
+            //- Settings dictionary
+            virtual const dictionary& settingsDict() const
             {
                 return this->Wrapper::settingsDict();
             };
 
-            //- Reference to storage dictionary
-            inline const dictionary& storageDict() const
+            //- Storage dictionary
+            virtual const dictionary& storageDict() const
             {
                 return this->Wrapper::storageDict();
             };
 
-            
+        // Evolution
+
+            //- Read sequence
+            virtual void read() const = 0;
+
+
 public:
 
     // Constructor
 
-        GlobalSettings(const Manager& manager, Mesh& mesh)
+        GlobalSettings(Mesh& mesh)
         :
-            Base(),
-            Wrapper(manager, mesh)
+            Parent(mesh)
         {};
 
     // Destructor
@@ -238,21 +395,14 @@ public:
 
     // Member Functions
 
-        // Basic
+        //- Manager
+        virtual const Manager& manager() const = 0;
 
-            //- Mesh
-            inline Mesh& mesh() const
-            {
-                return this->Wrapper::wrappedMesh();
-            }
+        //- Control
+        virtual Control& control() const = 0;
 
-        // Dictionaries
-
-            //- Dictionary
-            inline const dictionary& dict() const
-            {
-                return settingsDict();
-            };
+        //- Storage
+        virtual Storage& storage() const = 0;
 };
 
 
@@ -275,7 +425,7 @@ namespace solverManagerWrappers
 
         typedef solverManagerSettings::RegionSettings<Manager, Mesh> Type;
     };
-    
+
     template <class MANAGER>
     struct GlobalSettings
     {

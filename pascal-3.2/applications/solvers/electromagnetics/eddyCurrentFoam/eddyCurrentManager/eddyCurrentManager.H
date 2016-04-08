@@ -61,11 +61,15 @@ class eddyCurrentManager
 {
 public:
 
+    // Public typedefs
+
+        typedef eddyCurrentManager ManagerType;
+
     // Public data types
 
         SM_GLOBALCONTROL_ADD_P1(eddyCurrentControl, mesh()[polyMesh::defaultRegion])
 
-        SM_GLOBALSETTINGS_NEW(eddyCurrentManager);
+        SM_GLOBALSETTINGS_NEW();
 
             //- Debug switch
             SM_SETTINGS_MEMBER_ADD(Switch, debug);
@@ -73,79 +77,79 @@ public:
         SM_GLOBALSETTINGS_ADD();
 
 
-        SM_GLOBALSTORAGE_NEW(eddyCurrentManager);
+        SM_GLOBALSTORAGE_NEW();
 
             //- Harmonic field frequency
-            SM_STORAGE_MEMBER_ADD(uniformDimensionedScalarField, f0);
+            SM_GLOBALITEM_ADD(uniformDimensionedScalarField, f0);
 
             //- Angular harmonic field frequency
-            SM_STORAGE_MEMBER_ADD(uniformDimensionedScalarField, omega0);
+            SM_GLOBALITEM_ADD(uniformDimensionedScalarField, omega0);
 
             //- Electrical conductivity
-            SM_STORAGE_MEMBER_ADD(regionVolScalarField, sigma);
+            SM_GLOBALITEM_ADD(regionVolScalarField, sigma);
 
             //- Magnetic vector potential
-            SM_STORAGE_MEMBER_ADD(regionVolVectorField, ARe);
-            SM_STORAGE_MEMBER_ADD(regionVolVectorField, AIm);
+            SM_GLOBALITEM_ADD(regionVolVectorField, ARe);
+            SM_GLOBALITEM_ADD(regionVolVectorField, AIm);
 
             //- Gradient of electric scalar potential
-            SM_STORAGE_MEMBER_ADD(regionVolVectorField, VReGrad);
-            SM_STORAGE_MEMBER_ADD(regionVolVectorField, VImGrad);
+            SM_GLOBALITEM_ADD(regionVolVectorField, VReGrad);
+            SM_GLOBALITEM_ADD(regionVolVectorField, VImGrad);
 
             //- Lorentz Force (time-averaged)
-            SM_STORAGE_MEMBER_ADD(regionVolVectorField, FL);
+            SM_GLOBALITEM_ADD(regionVolVectorField, FL);
 
             //- Magnetic pressure (time-averaged)
-            SM_STORAGE_MEMBER_ADD(regionVolScalarField, pB);
+            SM_GLOBALITEM_ADD(regionVolScalarField, pB);
 
         SM_GLOBALSTORAGE_ADD();
 
 
-        SM_DEFAULTREGION_NEW(eddyCurrentManager);
+        SM_DEFAULTREGION_NEW();
 
-            SM_REGIONSETTINGS_NEW(eddyCurrentManager);
+            SM_REGIONSETTINGS_NEW();
             SM_REGIONSETTINGS_ADD();
 
-            SM_REGIONSTORAGE_NEW(eddyCurrentManager);
+            SM_REGIONSTORAGE_NEW();
 
                 // Source current density
-                SM_STORAGE_MEMBER_ADD(volVectorField, j0Re);
-                SM_STORAGE_MEMBER_ADD(volVectorField, j0Im);
+                SM_REGIONITEM_ADD(volVectorField, j0Re);
+                SM_REGIONITEM_ADD(volVectorField, j0Im);
 
                 // Current density
-                SM_STORAGE_MEMBER_ADD(volVectorField, jRe);
-                SM_STORAGE_MEMBER_ADD(volVectorField, jIm);
+                SM_REGIONITEM_ADD(volVectorField, jRe);
+                SM_REGIONITEM_ADD(volVectorField, jIm);
 
                 // Magnetic field density
-                SM_STORAGE_MEMBER_ADD(volVectorField, BRe);
-                SM_STORAGE_MEMBER_ADD(volVectorField, BIm);
+                SM_REGIONITEM_ADD(volVectorField, BRe);
+                SM_REGIONITEM_ADD(volVectorField, BIm);
 
             SM_REGIONSTORAGE_ADD();
 
         SM_REGION_END();
 
 
-        SM_REGION_NEW(eddyCurrentManager, ConductorRegion);
+        SM_REGION_NEW(ConductorRegion);
 
-            SM_REGIONSETTINGS_NEW(eddyCurrentManager);
+            SM_REGIONSETTINGS_NEW();
             SM_REGIONSETTINGS_ADD();
 
-            SM_REGIONSTORAGE_NEW(eddyCurrentManager);
+            SM_REGIONSTORAGE_NEW();
 
                 //- Electric scalar potential
-                SM_STORAGE_MEMBER_ADD(volScalarField, VRe);
-                SM_STORAGE_MEMBER_ADD(volScalarField, VIm);
+                SM_REGIONITEM_ADD(volScalarField, VRe);
+                SM_REGIONITEM_ADD(volScalarField, VIm);
 
                 //- Electric scalar potential average
-                SM_STORAGE_MEMBER_ADD(uniformDimensionedScalarField, VReAverage);
-                SM_STORAGE_MEMBER_ADD(uniformDimensionedScalarField, VImAverage);
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, VReAverage);
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, VImAverage);
 
             SM_REGIONSTORAGE_ADD();
 
         SM_REGION_END();
 
 
-        SM_REGIONS_NEW(eddyCurrentManager);
+        SM_REGIONS_NEW();
 
             SM_REGIONS_DEFAULTREGION_ADD(mesh()[polyMesh::defaultRegion]);
 
