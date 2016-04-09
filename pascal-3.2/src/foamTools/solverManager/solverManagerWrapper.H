@@ -40,28 +40,36 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_WRAPPER_NEW(WRAPPER, NAME)                                        \
+# define SM_WRAPPER_NEW_START(WRAPPER, NAME)                                  \
                                                                               \
     public: class NAME                                                        \
     :                                                                         \
-        public solverManagerWrappers::WRAPPER<ManagerType>::Type              \
+        public solverManagerWrappers::WRAPPER<Manager>::Type                  \
     {                                                                         \
         public: typedef typename                                              \
-            solverManagerWrappers::WRAPPER<ManagerType>::Type Wrapper;        \
+            solverManagerWrappers::WRAPPER<Manager>::Type Wrapper;            \
+        public: typedef typename                                              \
+            solverManagerWrappers::WRAPPER<Manager>::Mesh Mesh;
+
+
+# define SM_WRAPPER_NEW_INTERFACES()                                          \
                                                                               \
-        private: const ManagerType& manager_;                                 \
-        public: virtual const ManagerType& manager() const                    \
+        private: const Manager& manager_;                                     \
+        public: virtual const Manager& manager() const                        \
         {                                                                     \
             return manager_;                                                  \
-        };                                                                    \
+        };
+
+
+# define SM_WRAPPER_NEW_CONSTRUCTOR(NAME)                                     \
                                                                               \
         private: NAME(const NAME&);                                           \
         private: void operator=(const NAME&);                                 \
                                                                               \
         public: NAME                                                          \
         (                                                                     \
-            const ManagerType& manager,                                       \
-            Wrapper::Mesh& mesh                                               \
+            const Manager& manager,                                           \
+            Mesh& mesh                                                        \
         )                                                                     \
         :                                                                     \
             Wrapper(mesh),                                                    \
@@ -69,6 +77,13 @@ Description
         {};                                                                   \
                                                                               \
         public: virtual ~NAME() {};
+
+
+# define SM_WRAPPER_NEW(WRAPPER, NAME)                                        \
+                                                                              \
+    SM_WRAPPER_NEW_START(WRAPPER, NAME)                                       \
+    SM_WRAPPER_NEW_INTERFACES()                                               \
+    SM_WRAPPER_NEW_CONSTRUCTOR(NAME)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -103,7 +118,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P1(TYPE, NAME, MOD, P1)             \
+# define SM_WRAPPER_MEMBER_ADD_P1(TYPE, NAME, MOD, P1)                        \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -117,7 +132,7 @@ Description
             return NAME##Ptr_();                                              \
         };
 
-# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P2(TYPE, NAME, MOD, P1,P2)          \
+# define SM_WRAPPER_MEMBER_ADD_P2(TYPE, NAME, MOD, P1,P2)                     \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -131,7 +146,7 @@ Description
             return NAME##Ptr_();                                              \
         };
 
-# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P3(TYPE, NAME, MOD, P1,P2,P3)       \
+# define SM_WRAPPER_MEMBER_ADD_P3(TYPE, NAME, MOD, P1,P2,P3)                  \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -145,7 +160,7 @@ Description
             return NAME##Ptr_();                                              \
         };
 
-# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P4(TYPE, NAME, MOD, P1,P2,P3,P4)    \
+# define SM_WRAPPER_MEMBER_ADD_P4(TYPE, NAME, MOD, P1,P2,P3,P4)               \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -159,7 +174,7 @@ Description
             return NAME##Ptr_();                                              \
         };
 
-# define SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5) \
+# define SM_WRAPPER_MEMBER_ADD_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5) \
                                                                               \
         private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
                                                                               \
@@ -176,241 +191,41 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_WRAPPER_MEMBER_SETINIT_P1(TYPE, NAME, P1)                         \
-                                                                              \
-    SM_WRAPPER_MEMBER_SET_P1(TYPE, NAME, P1);                                 \
-                                                                              \
-                NAME##Ptr_->checkInit();
-
-# define SM_WRAPPER_MEMBER_SETINIT_P2(TYPE, NAME, P1,P2)                      \
-                                                                              \
-    SM_WRAPPER_MEMBER_SET_P2(TYPE, NAME, P1,P2);                              \
-                                                                              \
-                NAME##Ptr_->checkInit();
-
-# define SM_WRAPPER_MEMBER_SETINIT_P3(TYPE, NAME, P1,P2,P3)                   \
-                                                                              \
-    SM_WRAPPER_MEMBER_SET_P3(TYPE, NAME, P1,P2,P3);                           \
-                                                                              \
-                NAME##Ptr_->checkInit();
-
-# define SM_WRAPPER_MEMBER_SETINIT_P4(TYPE, NAME, P1,P2,P3,P4)                \
-                                                                              \
-    SM_WRAPPER_MEMBER_SET_P4(TYPE, NAME, P1,P2,P3,P4);                        \
-                                                                              \
-                NAME##Ptr_->checkInit();
-
-# define SM_WRAPPER_MEMBER_SETINIT_P5(TYPE, NAME, P1,P2,P3,P4,P5)             \
-                                                                              \
-    SM_WRAPPER_MEMBER_SET_P5(TYPE, NAME, P1,P2,P3,P4,P5);                     \
-                                                                              \
-                NAME##Ptr_->checkInit();
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, MOD, P1)                    \
-                                                                              \
-        private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
-                                                                              \
-        public: MOD TYPE& NAME() const                                        \
-        {                                                                     \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                SM_WRAPPER_MEMBER_SETINIT_P1(TYPE, NAME, P1)                  \
-            }                                                                 \
-                                                                              \
-            return NAME##Ptr_();                                              \
-        };
-
-# define SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, MOD, P1,P2)                 \
-                                                                              \
-        private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
-                                                                              \
-        public: MOD TYPE& NAME() const                                        \
-        {                                                                     \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                SM_WRAPPER_MEMBER_SETINIT_P2(TYPE, NAME, P1,P2)               \
-            }                                                                 \
-                                                                              \
-            return NAME##Ptr_();                                              \
-        };
-
-# define SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, MOD, P1,P2,P3)              \
-                                                                              \
-        private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
-                                                                              \
-        public: MOD TYPE& NAME() const                                        \
-        {                                                                     \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                SM_WRAPPER_MEMBER_SETINIT_P3(TYPE, NAME, P1,P2,P3)            \
-            }                                                                 \
-                                                                              \
-            return NAME##Ptr_();                                              \
-        };
-
-# define SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, MOD, P1,P2,P3,P4)           \
-                                                                              \
-        private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
-                                                                              \
-        public: MOD TYPE& NAME() const                                        \
-        {                                                                     \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                SM_WRAPPER_MEMBER_SETINIT_P4(TYPE, NAME, P1,P2,P3,P4)         \
-            }                                                                 \
-                                                                              \
-            return NAME##Ptr_();                                              \
-        };
-
-# define SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, MOD, P1,P2,P3,P4,P5)        \
-                                                                              \
-        private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
-                                                                              \
-        public: MOD TYPE& NAME() const                                        \
-        {                                                                     \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                SM_WRAPPER_MEMBER_SETINIT_P5(TYPE, NAME, P1,P2,P3,P4,P5)        \
-            }                                                                 \
-                                                                              \
-            return NAME##Ptr_();                                              \
-        };
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_WRAPPER_MEMBER_ADD_P1(TYPE, NAME, P1)                             \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, , P1)
-
-# define SM_WRAPPER_MEMBER_ADD_P2(TYPE, NAME, P1,P2)                          \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, , P1,P2)
-
-# define SM_WRAPPER_MEMBER_ADD_P3(TYPE, NAME, P1,P2,P3)                       \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, , P1,P2,P3)
-
-# define SM_WRAPPER_MEMBER_ADD_P4(TYPE, NAME, P1,P2,P3,P4)                    \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, , P1,P2,P3,P4)
-
-# define SM_WRAPPER_MEMBER_ADD_P5(TYPE, NAME, P1,P2,P3,P4,P5)                 \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, , P1,P2,P3,P4,P5)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P1(TYPE, NAME, P1)                     \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, virtual, P1)
-
-# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(TYPE, NAME, P1,P2)                  \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, virtual, P1,P2)
-
-# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P3(TYPE, NAME, P1,P2,P3)               \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, virtual, P1,P2,P3)
-
-# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P4(TYPE, NAME, P1,P2,P3,P4)            \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, virtual, P1,P2,P3,P4)
-
-# define SM_WRAPPER_MEMBER_VIRTUAL_ADD_P5(TYPE, NAME, P1,P2,P3,P4,P5)         \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, virtual, P1,P2,P3,P4,P5)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_WRAPPER_MEMBER_CONST_ADD_P1(TYPE, NAME, P1)                       \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, const, P1)
-
-# define SM_WRAPPER_MEMBER_CONST_ADD_P2(TYPE, NAME, P1,P2)                    \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, const, P1,P2)
-
-# define SM_WRAPPER_MEMBER_CONST_ADD_P3(TYPE, NAME, P1,P2,P3)                 \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, const, P1,P2,P3)
-
-# define SM_WRAPPER_MEMBER_CONST_ADD_P4(TYPE, NAME, P1,P2,P3,P4)              \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, const, P1,P2,P3,P4)
-
-# define SM_WRAPPER_MEMBER_CONST_ADD_P5(TYPE, NAME, P1,P2,P3,P4,P5)           \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, const, P1,P2,P3,P4,P5)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P1(TYPE, NAME, P1)               \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P1(TYPE, NAME, virtual const, P1)
-
-# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P2(TYPE, NAME, P1,P2)            \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P2(TYPE, NAME, virtual const, P1,P2)
-
-# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P3(TYPE, NAME, P1,P2,P3)         \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P3(TYPE, NAME, virtual const, P1,P2,P3)
-
-# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P4(TYPE, NAME, P1,P2,P3,P4)      \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P4(TYPE, NAME, virtual const, P1,P2,P3,P4)
-
-# define sSM_WRAPPER_MEMBER_VIRTUALCONST_ADD_P5(TYPE, NAME, P1,P2,P3,P4,P5)   \
-                                                                              \
-    SM_WRAPPER_MEMBER_MOD_ADD_P5(TYPE, NAME, virtual const, P1,P2,P3,P4,P5)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 # define SM_MANAGER_GLOBALCONTROL_ADD_P1(TYPE, P1)                            \
                                                                               \
-        public: typedef TYPE Control;                                         \
+    public: typedef TYPE Control;                                             \
                                                                               \
-        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P1(                                  \
-            Control, control, virtual, P1)
+    SM_WRAPPER_MEMBER_ADD_P1(                                                 \
+        Control, control, virtual, P1)
 
 # define SM_MANAGER_GLOBALCONTROL_ADD_P2(TYPE, P1,P2)                         \
                                                                               \
-        public: typedef TYPE Control;                                         \
+    public: typedef TYPE Control;                                             \
                                                                               \
-        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P2(                                  \
-            Control, control, virtual, P1,P2)
+    SM_WRAPPER_MEMBER_ADD_P2(                                                 \
+        Control, control, virtual, P1,P2)
 
 # define SM_MANAGER_GLOBALCONTROL_ADD_P3(TYPE, P1,P2,P3)                      \
                                                                               \
-        public: typedef TYPE Control;                                         \
+    public: typedef TYPE Control;                                             \
                                                                               \
-        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P3(                                  \
-            Control, control, virtual, P1,P2,P3)
+    SM_WRAPPER_MEMBER_ADD_P3(                                                 \
+        Control, control, virtual, P1,P2,P3)
 
 # define SM_MANAGER_GLOBALCONTROL_ADD_P4(TYPE, P1,P2,P3,P4)                   \
                                                                               \
-        public: typedef TYPE Control;                                         \
+    public: typedef TYPE Control;                                             \
                                                                               \
-        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P4(                                  \
-            Control, control, virtual, P1,P2,P3,P4)
+    SM_WRAPPER_MEMBER_ADD_P4(                                                 \
+        Control, control, virtual, P1,P2,P3,P4)
 
 # define SM_MANAGER_GLOBALCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)                \
                                                                               \
-        public: typedef TYPE Control;                                         \
+    public: typedef TYPE Control;                                             \
                                                                               \
-        SM_WRAPPER_MEMBER_MOD_NOINIT_ADD_P5(                                  \
-            Control, control, virtual, P1,P2,P3,P4,P5)
+    SM_WRAPPER_MEMBER_ADD_P5(                                                 \
+        Control, control, virtual, P1,P2,P3,P4,P5)
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_GLOBALCONTROL_ADD_P1(TYPE, P1)                                    \
                                                                               \
@@ -439,26 +254,44 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+# define SM_MANAGER_HEADER(NAME)                                              \
+                                                                              \
+    public: typedef NAME Manager;                                             \
+                                                                              \
+    class Settings;                                                           \
+    class Storage;
+
+
+# define SM_HEADER_ADD(NAME)                                                  \
+                                                                              \
+    SM_MANAGER_HEADER(NAME)
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 # define SM_MANAGER_GLOBALSETTINGS_ADD()                                      \
                                                                               \
-    SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                         \
-        Settings, settings, *this, this->mesh())
+    SM_WRAPPER_MEMBER_ADD_P2(                                                 \
+        Settings, settings, virtual,                                          \
+        *this, this->mesh())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_MANAGER_GLOBALSTORAGE_ADD()                                       \
                                                                               \
-        SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                     \
-            Storage, storage, *this, this->mesh())
+    SM_WRAPPER_MEMBER_ADD_P2(                                                 \
+        Storage, storage, virtual,                                            \
+        *this, this->mesh())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_MANAGER_REGIONS_ADD()                                             \
                                                                               \
-    SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                         \
-        Regions, regions, *this, this->mesh())
+    SM_WRAPPER_MEMBER_ADD_P2(                                                 \
+        Regions, regions, virtual,                                            \
+        *this, this->mesh())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -473,18 +306,6 @@ namespace Foam
 template <class MANAGER, class MESH>
 class solverManagerWrapper
 {
-public:
-
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
-
-        typedef solverManagerWrapper Wrapper;
-
-
 private:
 
     // Private Data
@@ -492,7 +313,7 @@ private:
         // Basic
 
             //- Reference to mesh
-            Mesh& mesh_;
+            MESH& mesh_;
 
     // Private Member Functions
 
@@ -510,7 +331,7 @@ protected:
         // Basic
 
             //- Mesh
-            inline Mesh& wrappedMesh() const
+            inline MESH& wrappedMesh() const
             {
                 return mesh_;
             }
@@ -520,7 +341,7 @@ public:
 
     // Constructor
 
-        solverManagerWrapper (Mesh& mesh)
+        solverManagerWrapper (MESH& mesh)
         :
             mesh_(mesh)
         {};
@@ -532,7 +353,7 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
+        virtual const MANAGER& manager() const = 0;
 
         // Basic
 

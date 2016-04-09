@@ -265,8 +265,20 @@ void eddyCurrentManager::Storage::Item_pB::create
 }
 
 
-void eddyCurrentManager::Storage::create() const
-{}
+void eddyCurrentManager::Storage::create(const word& ccase) const
+{
+    item_f0().enable();
+    item_omega0().enable();
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void eddyCurrentManager::Regions::create(const word& ccase) const
+{
+    region_DEFAULT().enable();
+    region_CONDUCTOR().enable();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -294,7 +306,7 @@ eddyCurrentManager::eddyCurrentManager
     const bool& master
 )
 :
-    solverManager<regionFvMesh>
+    solverManager<regionFvMesh, 2>
     (
         args, time, mesh, name, master
     )

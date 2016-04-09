@@ -41,32 +41,30 @@ Description
 
 # define SM_REGIONSTORAGE_NEW_START(WRAPPER)                                  \
                                                                               \
-    SM_WRAPPER_NEW(WRAPPER, Storage)                                          \
-                                                                              \
-        public: typedef Storage StorageType;
+    SM_WRAPPER_NEW(WRAPPER, Storage)
 
 
 # define SM_REGIONSTORAGE_NEW_INTERFACES()                                    \
                                                                               \
-        private: virtual void create() const;
+        private: virtual void create(const word& ccase) const;
 
 
 # define SM_REGIONSTORAGE_NEW_INTERFACES_REGION()                             \
                                                                               \
-        public: virtual RegionType& region() const                            \
+        public: virtual ThisRegion& region() const                            \
         {                                                                     \
-            return static_cast<RegionType&>                                   \
+            return static_cast<ThisRegion&>                                   \
             (                                                                 \
-                manager().regions()[this->mesh().name()]                      \
+                manager().regions()[regionName]                               \
             );                                                                \
         };                                                                    \
                                                                               \
-        public: virtual RegionType::Control& control() const                  \
+        public: inline ThisRegion::Control& control() const                   \
         {                                                                     \
             return region().control();                                        \
         };                                                                    \
                                                                               \
-        public: virtual RegionType::Settings& settings() const                \
+        public: inline ThisRegion::Settings& settings() const                 \
         {                                                                     \
             return region().settings();                                       \
         };
@@ -74,16 +72,15 @@ Description
 
 # define SM_REGIONSTORAGE_NEW_INTERFACES_GLOBAL()                             \
                                                                               \
-        public: virtual ManagerType::Control& control() const                 \
+        public: inline Manager::Control& control() const                      \
         {                                                                     \
             return manager().control();                                       \
         };                                                                    \
                                                                               \
-        public: virtual ManagerType::Settings& settings() const               \
+        public: inline Manager::Settings& settings() const                    \
         {                                                                     \
             return manager().settings();                                      \
         };
-
 
 
 # define SM_REGIONSTORAGE_NEW_PUBLIC()                                        \
@@ -107,256 +104,6 @@ Description
     SM_REGIONSTORAGE_NEW_INTERFACES()                                         \
     SM_REGIONSTORAGE_NEW_INTERFACES_GLOBAL()                                  \
     SM_REGIONSTORAGE_NEW_PUBLIC()
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_STORAGE_MEMBER_ADD(TYPE, NAME)                                    \
-                                                                              \
-    private: mutable autoPtr<TYPE> NAME##Ptr_;                                \
-                                                                              \
-    private: mutable Switch NAME##Optional_;                                  \
-                                                                              \
-    private: mutable Switch NAME##Locked_;                                    \
-                                                                              \
-    private: mutable Switch NAME##Disabled_;                                  \
-                                                                              \
-    private: inline void mandatory_##NAME() const                             \
-    {                                                                         \
-        NAME##Optional_ = false;                                              \
-    };                                                                        \
-                                                                              \
-    private: inline void optional_##NAME() const                              \
-    {                                                                         \
-        NAME##Optional_ = true;                                               \
-    };                                                                        \
-                                                                              \
-    private: void enable_##NAME() const                                       \
-    {                                                                         \
-        if (NAME##Disabled_)                                                  \
-        {                                                                     \
-            NAME##Disabled_ = false;                                          \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-            FatalErrorIn                                                      \
-            (this->manager().type() + "Storage::enable_"+#NAME+"()")          \
-                << "The storage item "                                        \
-                    << #NAME                                                  \
-                    << " is already disabled!"                                \
-                    << abort(FatalError);                                     \
-        }                                                                     \
-    };                                                                        \
-                                                                              \
-    private: void disable_##NAME() const                                      \
-    {                                                                         \
-        if (!NAME##Disabled_)                                                 \
-        {                                                                     \
-            if (NAME##Ptr_.valid())                                           \
-            {                                                                 \
-                FatalErrorIn                                                  \
-                (this->manager().type() + "Storage::disable_"+#NAME+"()")     \
-                    << "The storage item "                                    \
-                        << #NAME                                              \
-                        << " is still allocated and cannot be disabled."      \
-                        << " Clear it first!"                                 \
-                        << abort(FatalError);                                 \
-                                                                              \
-            }                                                                 \
-            else                                                              \
-            {                                                                 \
-                NAME##Disabled_ = true;                                       \
-            }                                                                 \
-        }                                                                     \
-    };                                                                        \
-                                                                              \
-    private: void create_##NAME(const word& init = "default") const           \
-    {                                                                         \
-        if (!NAME##Disabled_)                                                 \
-        {                                                                     \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                if (!NAME##Locked_)                                           \
-                {                                                             \
-                    NAME##Locked_ = true;                                     \
-                                                                              \
-                    Info << "Create " << #NAME                                \
-                        << " for region " << mesh().name()                    \
-                        << endl;                                              \
-                                                                              \
-                    init_##NAME(init);                                        \
-                                                                              \
-                    NAME##Locked_ = false;                                    \
-                }                                                             \
-                else                                                          \
-                {                                                             \
-                    FatalErrorIn                                              \
-                    (this->manager().type() + "Storage::create_"+#NAME+"()")  \
-                        << "Pointer for "                                     \
-                            << #NAME                                          \
-                            << " is part of a circular reference."            \
-                            << " Check all occurances in storage!"            \
-                            << abort(FatalError);                             \
-                }                                                             \
-            }                                                                 \
-                                                                              \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                FatalErrorIn                                                  \
-                (this->manager().type() + "Storage::create_"+#NAME+"()")      \
-                    << "Pointer for "                                         \
-                        << #NAME                                              \
-                        << " is still unallocated after creation."            \
-                        << " Make sure the data member " << #NAME << "Ptr_ "  \
-                        << " is set correctly in its init-function: "         \
-                        << "init_" << #NAME << "(const word& init)!"          \
-                        << abort(FatalError);                                 \
-            }                                                                 \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-            FatalErrorIn                                                      \
-            (this->manager().type() + "Storage::create_"+#NAME+"()")          \
-                << "The storage item "                                        \
-                    << #NAME                                                  \
-                    << " is globally disabled and cannot be used."            \
-                    << " Check your storage settings!"                        \
-                    << abort(FatalError);                                     \
-                                                                              \
-        }                                                                     \
-    };                                                                        \
-                                                                              \
-    private: bool dict_##NAME                                                 \
-    (                                                                         \
-        dictionary& dict,                                                     \
-        const word& name = #NAME                                              \
-    ) const                                                                   \
-    {                                                                         \
-        bool isValid = itemDict(name, dict);                                  \
-                                                                              \
-        if (!NAME##Optional_)                                                 \
-        {                                                                     \
-            return !isValid;                                                  \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-            return isValid;                                                   \
-        }                                                                     \
-    };                                                                        \
-                                                                              \
-    private: bool switch_##NAME                                               \
-    (                                                                         \
-        dictionary& dict,                                                     \
-        const word& name = #NAME                                              \
-    ) const                                                                   \
-    {                                                                         \
-        disable_##NAME();                                                     \
-                                                                              \
-        if (dict_##NAME(dict, name))                                          \
-        {                                                                     \
-            enable_##NAME();                                                  \
-                                                                              \
-            if (NAME##Optional_)                                              \
-            {                                                                 \
-                Info << "Enable " << #NAME                                    \
-                    << " for region " << mesh().name()                        \
-                    << endl;                                                  \
-            }                                                                 \
-                                                                              \
-            return true;                                                      \
-        }                                                                     \
-                                                                              \
-        if (!NAME##Optional_)                                                 \
-        {                                                                     \
-            FatalErrorIn                                                      \
-            (this->manager().type() + "Storage::switch_"+#NAME+"()")          \
-                        << "Storage element "                                 \
-                            << #NAME                                          \
-                            << " is mandatory and cannot be disabled."        \
-                            << " Check settings in storage and properties!"   \
-                            << abort(FatalError);                             \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-            Info << "Disable " << #NAME                                       \
-                << " for region " << mesh().name()                            \
-                << endl;                                                      \
-        }                                                                     \
-                                                                              \
-        return false;                                                         \
-    };                                                                        \
-                                                                              \
-    private: bool make_##NAME(const word& name = #NAME) const                 \
-    {                                                                         \
-        word init = "";                                                       \
-                                                                              \
-        dictionary dict;                                                      \
-        if (switch_##NAME(dict, name))                                        \
-        {                                                                     \
-            init = dict.lookupOrDefault("init", word("default"));             \
-                                                                              \
-            create_##NAME(init);                                              \
-                                                                              \
-            return true;                                                      \
-        }                                                                     \
-                                                                              \
-        return false;                                                         \
-    };                                                                        \
-                                                                              \
-    private: bool makeMandatory_##NAME(const word& name = #NAME) const        \
-    {                                                                         \
-         mandatory_##NAME();                                                  \
-                                                                              \
-         return make_##NAME(name);                                            \
-    };                                                                        \
-                                                                              \
-    private: bool makeOptional_##NAME(const word& name = #NAME) const         \
-    {                                                                         \
-         optional_##NAME();                                                   \
-                                                                              \
-         return make_##NAME(name);                                            \
-    };                                                                        \
-                                                                              \
-    private: void init_##NAME(const word& init = "default") const;            \
-                                                                              \
-    public: inline bool is_##NAME() const                                     \
-    {                                                                         \
-        return !NAME##Disabled_;                                              \
-    };                                                                        \
-                                                                              \
-    public: inline bool isNot_##NAME() const                                  \
-    {                                                                         \
-        return NAME##Disabled_;                                               \
-    };                                                                        \
-                                                                              \
-    public: inline bool isEmpty_##NAME() const                                \
-    {                                                                         \
-        return NAME##Ptr_.empty();                                            \
-    };                                                                        \
-                                                                              \
-    public: inline bool isValid_##NAME() const                                \
-    {                                                                         \
-        return NAME##Ptr_.valid();                                            \
-    };                                                                        \
-                                                                              \
-    public: TYPE& NAME(const word& init = "default") const                    \
-    {                                                                         \
-        create_##NAME(init);                                                  \
-                                                                              \
-        return NAME##Ptr_();                                                  \
-    };                                                                        \
-                                                                              \
-    public: TYPE* NAME##Ptr(const word& init = "default") const               \
-    {                                                                         \
-        create_##NAME(init);                                                  \
-                                                                              \
-        return NAME##Ptr_.operator->();                                       \
-    };
-
-
-# define SM_GLOBALSTORAGE_MEMBER_ADD(TYPE, NAME)                              \
-                                                                              \
-        SM_STORAGE_MEMBER_ADD(TYPE, NAME)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -393,23 +140,12 @@ class Storage
     public solverManagerBase::Storage<MESH>,
     public solverManagerWrapper<MANAGER, MESH>
 {
-public:
-
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
-
-        typedef solverManagerBase::Storage<Mesh> Base;
-        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
-
-        typedef typename solverManagerBase::Control Control;
-        typedef typename solverManagerBase::Settings<Mesh> Settings;
-
-
 private:
+
+    // Private typedefs
+
+        typedef solverManagerBase::Storage<MESH> Base;
+        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
 
     // Private Member Functions
 
@@ -430,14 +166,14 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create() const = 0;
+            virtual void create(const word& ccase) const = 0;
 
 
 public:
 
     // Constructor
 
-        Storage(Mesh& mesh)
+        Storage(MESH& mesh)
         :
             Base(),
             Wrapper(mesh)
@@ -450,18 +186,12 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Settings
-        virtual Settings& settings() const = 0;
+        virtual const MANAGER& manager() const = 0;
 
         // Basic
 
             //- Mesh
-            virtual Mesh& mesh() const
+            virtual MESH& mesh() const
             {
                 return this->Wrapper::wrappedMesh();
             }
@@ -472,34 +202,6 @@ public:
             inline const dictionary& dict() const
             {
                 return storageDict();
-            };
-
-
-// TODO: Remove after old storage is removed
-            //- Read dictionary of named item in storage (if present)
-            bool itemDict
-            (
-                const word& name,
-                dictionary& itemDict
-            ) const
-            {
-                if
-                (
-                    dict().found(name)
-                 && dict().isDict(name)
-                )
-                {
-                    itemDict = dict().subDict(name);
-
-                    Switch enabled;
-
-                    if (itemDict.readIfPresent("enabled", enabled))
-                    {
-                        return enabled;
-                    }
-                }
-
-                return false;
             };
 };
 
@@ -513,25 +215,20 @@ class RegionStorage
 :
     public Storage<MANAGER, MESH>
 {
-public:
+private:
 
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
+    // Private typedefs
 
         typedef Storage<MANAGER, MESH> Parent;
-        typedef typename Parent::Base Base;
-        typedef typename Parent::Wrapper Wrapper;
+        typedef solverManagerBase::Storage<MESH> Base;
+        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
 
-        typedef typename solverManagerBase::Region<Mesh> Region;
-        typedef typename Parent::Control Control;
-        typedef typename Parent::Settings Settings;
-
-
-private:
+        typedef solverManagerBase::Region
+        <
+            typename MANAGER::ManagerMesh,
+            MESH,
+            MANAGER::nRegions
+        > Region;
 
     // Private Member Functions
 
@@ -564,14 +261,14 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create() const = 0;
+            virtual void create(const word& ccase) const = 0;
 
 
 public:
 
     // Constructor
 
-        RegionStorage(Mesh& mesh)
+        RegionStorage(MESH& mesh)
         :
             Parent(mesh)
         {};
@@ -583,16 +280,10 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
+        virtual const MANAGER& manager() const = 0;
 
         //- Region
         virtual Region& region() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Settings
-        virtual Settings& settings() const = 0;
 };
 
 
@@ -605,24 +296,13 @@ class GlobalStorage
 :
     public Storage<MANAGER, MESH>
 {
-public:
+private:
 
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
+    // Private typedefs
 
         typedef Storage<MANAGER, MESH> Parent;
-        typedef typename Parent::Base Base;
-        typedef typename Parent::Wrapper Wrapper;
-
-        typedef typename Parent::Control Control;
-        typedef typename Parent::Settings Settings;
-
-
-private:
+        typedef solverManagerBase::Storage<MESH> Base;
+        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
 
     // Private Member Functions
 
@@ -649,14 +329,14 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create() const = 0;
+            virtual void create(const word& ccase) const = 0;
 
 
 public:
 
     // Constructor
 
-        GlobalStorage(Mesh& mesh)
+        GlobalStorage(MESH& mesh)
         :
             Parent(mesh)
         {};
@@ -668,13 +348,7 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Settings
-        virtual Settings& settings() const = 0;
+        virtual const MANAGER& manager() const = 0;
 };
 
 
@@ -689,24 +363,18 @@ namespace solverManagerWrappers
     template <class MANAGER>
     struct RegionStorage
     {
-        typedef MANAGER Manager;
-
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename MANAGER::Mesh Mesh;
 
-        typedef solverManagerStorage::RegionStorage<Manager, Mesh> Type;
+        typedef solverManagerStorage::RegionStorage<MANAGER, Mesh> Type;
     };
 
 
     template <class MANAGER>
     struct GlobalStorage
     {
-        typedef MANAGER Manager;
-
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename MANAGER::ManagerMesh Mesh;
 
-        typedef solverManagerStorage::GlobalStorage<Manager, Mesh> Type;
+        typedef solverManagerStorage::GlobalStorage<MANAGER, Mesh> Type;
     };
 }
 

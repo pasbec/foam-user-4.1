@@ -39,9 +39,7 @@ Description
 
 # define SM_REGIONSETTINGS_NEW_START(WRAPPER)                                 \
                                                                               \
-    SM_WRAPPER_NEW(WRAPPER, Settings)                                         \
-                                                                              \
-        public: typedef Settings SettingsType;
+    SM_WRAPPER_NEW(WRAPPER, Settings)
 
 
 # define SM_REGIONSETTINGS_NEW_INTERFACES()                                   \
@@ -51,20 +49,20 @@ Description
 
 # define SM_REGIONSETTINGS_NEW_INTERFACES_REGION()                            \
                                                                               \
-        public: virtual RegionType& region() const                            \
+        public: virtual ThisRegion& region() const                            \
         {                                                                     \
-            return static_cast<RegionType&>                                   \
+            return static_cast<ThisRegion&>                                   \
             (                                                                 \
-                manager().regions()[this->mesh().name()]                      \
+                manager().regions()[regionName]                               \
             );                                                                \
         };                                                                    \
                                                                               \
-        public: virtual RegionType::Control& control() const                  \
+        public: inline ThisRegion::Control& control() const                   \
         {                                                                     \
             return region().control();                                        \
         };                                                                    \
                                                                               \
-        public: virtual RegionType::Storage& storage() const                  \
+        public: inline ThisRegion::Storage& storage() const                   \
         {                                                                     \
             return region().storage();                                        \
         };
@@ -72,16 +70,15 @@ Description
 
 # define SM_REGIONSETTINGS_NEW_INTERFACES_GLOBAL()                            \
                                                                               \
-        public: virtual ManagerType::Control& control() const                 \
+        public: inline Manager::Control& control() const                      \
         {                                                                     \
             return manager().control();                                       \
         };                                                                    \
                                                                               \
-        public: virtual ManagerType::Storage& storage() const                 \
+        public: inline Manager::Storage& storage() const                      \
         {                                                                     \
             return manager().storage();                                       \
         };
-
 
 
 # define SM_REGIONSETTINGS_NEW_PUBLIC()                                       \
@@ -148,23 +145,12 @@ class Settings
     public solverManagerBase::Settings<MESH>,
     public solverManagerWrapper<MANAGER, MESH>
 {
-public:
-
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
-
-        typedef solverManagerBase::Settings<Mesh> Base;
-        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
-
-        typedef typename solverManagerBase::Control Control;
-        typedef typename solverManagerBase::Storage<Mesh> Storage;
-
-
 private:
+
+    // Private typedefs
+
+        typedef solverManagerBase::Settings<MESH> Base;
+        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
 
     // Private Member Functions
 
@@ -192,7 +178,7 @@ public:
 
     // Constructor
 
-        Settings(Mesh& mesh)
+        Settings(MESH& mesh)
         :
             Base(),
             Wrapper(mesh)
@@ -205,18 +191,12 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Storage
-        virtual Storage& storage() const = 0;
+        virtual const MANAGER& manager() const = 0;
 
         // Basic
 
             //- Mesh
-            virtual Mesh& mesh() const
+            virtual MESH& mesh() const
             {
                 return this->Wrapper::wrappedMesh();
             }
@@ -241,25 +221,20 @@ class RegionSettings
 :
     public Settings<MANAGER, MESH>
 {
-public:
+private:
 
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
+    // Private typedefs
 
         typedef Settings<MANAGER, MESH> Parent;
-        typedef typename Parent::Base Base;
-        typedef typename Parent::Wrapper Wrapper;
+        typedef solverManagerBase::Settings<MESH> Base;
+        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
 
-        typedef typename solverManagerBase::Region<Mesh> Region;
-        typedef typename Parent::Control Control;
-        typedef typename Parent::Storage Storage;
-
-
-private:
+        typedef solverManagerBase::Region
+        <
+            typename MANAGER::ManagerMesh,
+            MESH,
+            MANAGER::nRegions
+        > Region;
 
     // Private Member Functions
 
@@ -299,7 +274,7 @@ public:
 
     // Constructor
 
-        RegionSettings(Mesh& mesh)
+        RegionSettings(MESH& mesh)
         :
             Parent(mesh)
         {};
@@ -311,16 +286,10 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
+        virtual const MANAGER& manager() const = 0;
 
         //- Region
         virtual Region& region() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Storage
-        virtual Storage& storage() const = 0;
 };
 
 
@@ -333,24 +302,13 @@ class GlobalSettings
 :
     public Settings<MANAGER, MESH>
 {
-public:
+private:
 
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
+    // Private typedefs
 
         typedef Settings<MANAGER, MESH> Parent;
-        typedef typename Parent::Base Base;
-        typedef typename Parent::Wrapper Wrapper;
- 
-        typedef typename Parent::Control Control;
-        typedef typename Parent::Storage Storage;
-
-
-private:
+        typedef solverManagerBase::Settings<MESH> Base;
+        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
 
     // Private Member Functions
 
@@ -384,7 +342,7 @@ public:
 
     // Constructor
 
-        GlobalSettings(Mesh& mesh)
+        GlobalSettings(MESH& mesh)
         :
             Parent(mesh)
         {};
@@ -396,13 +354,7 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Storage
-        virtual Storage& storage() const = 0;
+        virtual const MANAGER& manager() const = 0;
 };
 
 
@@ -418,23 +370,17 @@ namespace solverManagerWrappers
     template <class MANAGER>
     struct RegionSettings
     {
-        typedef MANAGER Manager;
-
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename MANAGER::Mesh Mesh;
 
-        typedef solverManagerSettings::RegionSettings<Manager, Mesh> Type;
+        typedef solverManagerSettings::RegionSettings<MANAGER, Mesh> Type;
     };
 
     template <class MANAGER>
     struct GlobalSettings
     {
-        typedef MANAGER Manager;
-
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename MANAGER::ManagerMesh Mesh;
 
-        typedef solverManagerSettings::GlobalSettings<Manager, Mesh> Type;
+        typedef solverManagerSettings::GlobalSettings<MANAGER, Mesh> Type;
     };
 }
 

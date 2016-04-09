@@ -36,7 +36,6 @@ SourceFiles
 #define solverManager_H
 
 #include "autoPtr.H"
-#include "HashPtrTable.H"
 #include "argList.H"
 #include "foamTime.H"
 #include "IOdictionary.H"
@@ -53,47 +52,67 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONSCOPE_MESHONLY(MANAGER, SCOPETYPE, SCOPE)                   \
+# define SM_MANAGERSCOPE(MANAGER)                                             \
                                                                               \
-    MANAGER::SCOPETYPE::Mesh& mesh =                                          \
-        manager.regions().SCOPE().mesh();                                     \
+    typedef MANAGER Manager;                                                  \
                                                                               \
-    if (&mesh != &mesh) {};
+    typedef Manager::ManagerMesh GlobalMesh;                                  \
+    typedef Manager::Control GlobalControl;                                   \
+    typedef Manager::Settings GlobalSettings;                                 \
+    typedef Manager::Storage GlobalStorage;                                   \
+                                                                              \
+    GlobalMesh& globalMesh = manager.mesh();                                  \
+    GlobalControl& globalControl = manager.control();                         \
+    GlobalSettings& globalSettings = manager.settings();                      \
+    GlobalStorage& globalStorage = manager.storage();                         \
+                                                                              \
+    if (!&globalMesh) {};                                                     \
+    if (!&globalControl) {};                                                  \
+    if (!&globalSettings) {};                                                 \
+    if (!&globalStorage) {};
 
 
-# define SM_REGIONSCOPE_NOMESH(MANAGER, SCOPETYPE, SCOPE)                     \
+# define SM_GLOBALREGIONSCOPE(MANAGER, ENUM)                                  \
                                                                               \
-    MANAGER::ManagerMesh& globalMesh = manager.mesh();                        \
-    MANAGER::Control& globalControl = manager.control();                      \
-    MANAGER::Settings& globalSettings = manager.settings();                   \
-    MANAGER::Storage& globalStorage = manager.storage();                      \
+    SM_MANAGERSCOPE(MANAGER);                                                 \
                                                                               \
-    if (&globalMesh != &globalMesh) {};                                       \
-    if (&globalControl != &globalControl) {};                                 \
-    if (&globalSettings != &globalSettings) {};                               \
-    if (&globalStorage != &globalStorage) {};                                 \
+    typedef Manager::Region_##ENUM Region;                                    \
                                                                               \
-    MANAGER::SCOPETYPE::Control& control =                                    \
-        manager.regions().SCOPE().control();                                  \
-    MANAGER::SCOPETYPE::Settings& settings =                                  \
-        manager.regions().SCOPE().settings();                                 \
-    MANAGER::SCOPETYPE::Storage& storage =                                    \
-        manager.regions().SCOPE().storage();                                  \
+    typedef Region::Control Control;                                          \
+    typedef Region::Settings Settings;                                        \
+    typedef Region::Storage Storage;                                          \
                                                                               \
-    if (&control != &control) {};                                             \
-    if (&settings != &settings) {};                                           \
-    if (&storage != &storage) {};
+    Region& region = manager.regions().region_##ENUM();                       \
+    Control& control = manager.regions().region_##ENUM().control();           \
+    Settings& settings = manager.regions().region_##ENUM().settings();        \
+    Storage& storage = manager.regions().region_##ENUM().storage();           \
+                                                                              \
+    if (!&region) {};                                                         \
+    if (!&control) {};                                                        \
+    if (!&settings) {};                                                       \
+    if (!&storage) {};
 
 
-# define SM_REGIONSCOPE(MANAGER, SCOPETYPE, SCOPE)                            \
+# define SM_REGIONSCOPE(ENUM)                                                 \
                                                                               \
-    SM_REGIONSCOPE_NOMESH(MANAGER, SCOPETYPE, SCOPE)                          \
-    SM_REGIONSCOPE_MESHONLY(MANAGER, SCOPETYPE, SCOPE)
-
-
-# define SM_REGIONSCOPE_DEFAULTREGION(MANAGER)                                \
+    typedef Manager::Region_##ENUM Region;                                    \
                                                                               \
-    SM_REGIONSCOPE_NOMESH(MANAGER, DefaultRegion, defaultRegion);
+    typedef Region::Mesh Mesh;                                                \
+    typedef Region::Control Control;                                          \
+    typedef Region::Settings Settings;                                        \
+    typedef Region::Storage Storage;                                          \
+                                                                              \
+    Region& region = manager.regions().region_##ENUM();                       \
+    Mesh& mesh = region.mesh();                                               \
+    Control& control = manager.regions().region_##ENUM().control();           \
+    Settings& settings = manager.regions().region_##ENUM().settings();        \
+    Storage& storage = manager.regions().region_##ENUM().storage();           \
+                                                                              \
+    if (!&region) {};                                                         \
+    if (!&mesh) {};                                                           \
+    if (!&control) {};                                                        \
+    if (!&settings) {};                                                       \
+    if (!&storage) {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -112,16 +131,18 @@ TemplateName(solverManager);
                          Class solverManager Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MESH>
+template <class MESH, unsigned int NREGIONS = 0>
 class solverManager
 :
     public solverManagerName
 {
 public:
 
-    // Public typedefs
+    // Public Static Const Members
 
-        typedef solverManager<MESH> Manager;
+        static const unsigned int nRegions = NREGIONS;
+
+    // Public typedefs
 
         typedef MESH ManagerMesh;
         typedef typename solverManagerBase::Mesh<ManagerMesh>::Type Mesh;
@@ -130,10 +151,8 @@ public:
         typedef typename solverManagerBase::Control Control;
         typedef typename solverManagerBase::Settings<ManagerMesh> Settings;
         typedef typename solverManagerBase::Storage<ManagerMesh> Storage;
-        typedef typename solverManagerBase::Regions<ManagerMesh, Mesh> Regions;
-
-
-public:
+        typedef typename
+            solverManagerBase::Regions<ManagerMesh, Mesh, nRegions> Regions;
 
     // Public data types
 
@@ -258,13 +277,13 @@ protected:
             {
                 return false;
             };
-
+// TODO: Add this virtual function also to Regions/Region ?
             //- Next sequence
             virtual void next() const = 0;
-
+// TODO: Add this virtual function also to Regions/Region ?
             //- Write sequence
             virtual void write() const = 0;
-
+// TODO: Add this virtual function also to Regions/Region ?
             //- Finalize sequence
             virtual void finalize() const = 0;
 

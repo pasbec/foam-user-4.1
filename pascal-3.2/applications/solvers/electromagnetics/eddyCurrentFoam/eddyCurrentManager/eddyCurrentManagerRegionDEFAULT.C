@@ -32,23 +32,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void eddyCurrentManager::DefaultRegion::Settings::read() const
-{
-// TODO
-//     manager().settings();
-//     region().settings();
-//
-//     manager().storage().f0();
-//     manager().regions().defaultRegion().storage().j0Re();
-//     region().storage().j0Re();
-//     manager().regions().conductorRegion().storage().VRe();
-}
+void eddyCurrentManager::Region_DEFAULT::Settings::read() const
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::DefaultRegion::Storage::Item_j0Re::create
-(const word& init) const
+void eddyCurrentManager::Region_DEFAULT::Storage::Item_j0Re::create
+(const word& ccase) const
 {
     set
     (
@@ -75,8 +66,8 @@ void eddyCurrentManager::DefaultRegion::Storage::Item_j0Re::create
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::Item_j0Im::create
-(const word& init) const
+void eddyCurrentManager::Region_DEFAULT::Storage::Item_j0Im::create
+(const word& ccase) const
 {
     set
     (
@@ -96,8 +87,8 @@ void eddyCurrentManager::DefaultRegion::Storage::Item_j0Im::create
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::Item_jRe::create
-(const word& init) const
+void eddyCurrentManager::Region_DEFAULT::Storage::Item_jRe::create
+(const word& ccase) const
 {
     set
     (
@@ -124,8 +115,8 @@ void eddyCurrentManager::DefaultRegion::Storage::Item_jRe::create
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::Item_jIm::create
-(const word& init) const
+void eddyCurrentManager::Region_DEFAULT::Storage::Item_jIm::create
+(const word& ccase) const
 {
     set
     (
@@ -152,8 +143,8 @@ void eddyCurrentManager::DefaultRegion::Storage::Item_jIm::create
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::Item_BRe::create
-(const word& init) const
+void eddyCurrentManager::Region_DEFAULT::Storage::Item_BRe::create
+(const word& ccase) const
 {
     set
     (
@@ -180,8 +171,8 @@ void eddyCurrentManager::DefaultRegion::Storage::Item_BRe::create
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::Item_BIm::create
-(const word& init) const
+void eddyCurrentManager::Region_DEFAULT::Storage::Item_BIm::create
+(const word& ccase) const
 {
     set
     (
@@ -208,7 +199,8 @@ void eddyCurrentManager::DefaultRegion::Storage::Item_BIm::create
 }
 
 
-void eddyCurrentManager::DefaultRegion::Storage::create() const
+void eddyCurrentManager::Region_DEFAULT::Storage::create
+(const word& ccase) const
 {}
 
 

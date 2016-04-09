@@ -36,40 +36,29 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+# define SM_REGIONS_NEW_START()                                               \
+                                                                              \
+    SM_WRAPPER_NEW(Regions, Regions)
+
+
+# define SM_REGIONS_NEW_INTERFACES()                                          \
+                                                                              \
+        private: virtual void create(const word& ccase = "default") const;
+
+
 # define SM_REGIONS_NEW()                                                     \
                                                                               \
-    SM_WRAPPER_NEW(Regions, Regions)                                          \
-                                                                              \
-        public: typedef Regions RegionsType;                                  \
+    SM_REGIONS_NEW_START()                                                    \
+    SM_REGIONS_NEW_INTERFACES()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONS_REGION_ADD(TYPE, NAME, MESH)                              \
+# define SM_REGIONS_REGION_ADD(ENUM, MESH)                                    \
                                                                               \
-        private: mutable autoPtr<TYPE> NAME##Ptr_;                            \
-                                                                              \
-        public: virtual TYPE& NAME() const                                    \
-        {                                                                     \
-            if (NAME##Ptr_.empty())                                           \
-            {                                                                 \
-                SM_WRAPPER_MEMBER_SETINIT_P2(                                 \
-                    TYPE, NAME, this->manager(), MESH)                        \
-                                                                              \
-                this->Base::regionHashTable().insert                          \
-                (                                                             \
-                    NAME##Ptr_->mesh().name(),                                \
-                    NAME##Ptr_.operator->()                                   \
-                );                                                            \
-            }                                                                 \
-                                                                              \
-            return NAME##Ptr_();                                              \
-        };
-
-
-# define SM_REGIONS_DEFAULTREGION_ADD(MESH)                                   \
-                                                                              \
-        SM_REGIONS_REGION_ADD(DefaultRegion, defaultRegion, MESH)
+        SM_WRAPPER_MEMBER_ADD_P2(                                             \
+            Region_##ENUM, region_##ENUM, virtual,                            \
+            this->manager(), MESH)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -94,30 +83,33 @@ class solverManagerRegions
 :
     public solverManagerBase::Regions
     <
-        typename MANAGER::ManagerMesh, typename MANAGER::Mesh
+        typename MANAGER::ManagerMesh,
+        typename MANAGER::Mesh,
+        MANAGER::nRegions
     >,
     public solverManagerWrapper<MANAGER, typename MANAGER::ManagerMesh>
 {
-public:
+private:
 
-    // Public typedefs
+    // Private typedefs
 
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef typename Manager::ManagerMesh Mesh;
-        typedef typename Manager::Mesh SubMesh;
+        typedef typename MANAGER::ManagerMesh Mesh;
+        typedef typename MANAGER::Mesh SubMesh;
 
         typedef solverManagerBase::Regions
         <
-            typename Manager::ManagerMesh, SubMesh
+            Mesh,
+            SubMesh,
+            MANAGER::nRegions
         > Base;
-        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
+        typedef solverManagerWrapper<MANAGER, Mesh> Wrapper;
 
-        typedef typename solverManagerBase::Region<SubMesh> Region;
-
-
-private:
+        typedef solverManagerBase::Region
+        <
+            Mesh,
+            SubMesh,
+            MANAGER::nRegions
+        > Region;
 
     // Private Member Functions
 
@@ -126,6 +118,11 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const solverManagerRegions&);
+
+        // Evolution
+
+            //- Create sequence
+            virtual void create(const word& ccase) const = 0;
 
 
 public:
@@ -145,7 +142,7 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
+        virtual const MANAGER& manager() const = 0;
 
         // Basic
 
@@ -164,12 +161,9 @@ namespace solverManagerWrappers
     template <class MANAGER>
     struct Regions
     {
-        typedef MANAGER Manager;
-
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename MANAGER::ManagerMesh Mesh;
 
-        typedef solverManagerRegions<Manager> Type;
+        typedef solverManagerRegions<MANAGER> Type;
     };
 }
 

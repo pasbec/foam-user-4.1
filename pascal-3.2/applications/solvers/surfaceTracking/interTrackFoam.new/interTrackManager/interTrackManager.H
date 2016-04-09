@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     interTrackManager.C
-    interTrackManagerDefaultRegion.C
+    interTrackManagerRegionDEFAULT.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -64,15 +64,20 @@ typedef fvBlockMatrix<vector4> fvVector4Matrix;
 
 class interTrackManager
 :
-    public solverManager<dynamicFvMesh>
+    public solverManager<dynamicFvMesh, 1>
 {
 public:
 
-    // Public typedefs
+    // Public enums
 
-        typedef interTrackManager ManagerType;
+        enum RegionNames
+        {
+            DEFAULT
+        };
 
     // Public data types
+
+        SM_HEADER_ADD(interTrackManager)
 
         SM_GLOBALCONTROL_ADD_P1(interTrackControl, mesh())
 
@@ -88,9 +93,17 @@ public:
         SM_GLOBALSTORAGE_ADD();
 
 
-        SM_DEFAULTREGION_NEW();
+        SM_REGION_NEW(DEFAULT);
+
+            SM_REGIONCONTROL_ADD_GLOBALCONTROL();
 
             SM_REGIONSETTINGS_NEW();
+
+                //- Volume force switch
+                SM_SETTINGS_MEMBER_ADD(Switch, volumeForce);
+
+                //- Turbulence switch
+                SM_SETTINGS_MEMBER_ADD(Switch, turbulence);
 
                 //- Coupled solution of U and p
                 SM_SETTINGS_MEMBER_ADD(Switch, UpCoupled);
@@ -119,40 +132,40 @@ public:
             SM_REGIONSTORAGE_NEW();
 
                 //- Gravitational acceleration
-                SM_STORAGE_MEMBER_ADD(uniformDimensionedVectorField, g);
+                SM_REGIONITEM_ADD(uniformDimensionedVectorField, g);
 
                 //- Pressure
-                SM_STORAGE_MEMBER_ADD(volScalarField, p);
+                SM_REGIONITEM_ADD(volScalarField, p);
 
                 //- Velocity
-                SM_STORAGE_MEMBER_ADD(volVectorField, U);
+                SM_REGIONITEM_ADD(volVectorField, U);
 
                 //- Velocity/Pressure
-                SM_STORAGE_MEMBER_ADD(volVector4Field, Up);
+                SM_REGIONITEM_ADD(volVector4Field, Up);
 
                 //- Face flux
-                SM_STORAGE_MEMBER_ADD(surfaceScalarField, phi);
+                SM_REGIONITEM_ADD(surfaceScalarField, phi);
 
                 //- Volume force
-                SM_STORAGE_MEMBER_ADD(volVectorField, F);
+                SM_REGIONITEM_ADD(volVectorField, F);
 
                 //- Density
-                SM_STORAGE_MEMBER_ADD(volScalarField, rho);
+                SM_REGIONITEM_ADD(volScalarField, rho);
 
                 //- Dynamic viscosity
-                SM_STORAGE_MEMBER_ADD(volScalarField, mu);
+                SM_REGIONITEM_ADD(volScalarField, mu);
 
                 //- Fluid indicator
-                SM_STORAGE_MEMBER_ADD(volScalarField, fluidIndicator);
+                SM_REGIONITEM_ADD(volScalarField, fluidIndicator);
 
                 //- Transport model
-                SM_STORAGE_MEMBER_ADD(twoPhaseMixture, transport);
+                SM_REGIONITEM_ADD(twoPhaseMixture, transport);
 
                 //- Turbulence model
-                SM_STORAGE_MEMBER_ADD(incompressible::turbulenceModel, turbulence);
+                SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
 
                 //- Tracked surface
-                SM_STORAGE_MEMBER_ADD(trackedSurface, interface);
+                SM_REGIONITEM_ADD(trackedSurface, interface);
 
             SM_REGIONSTORAGE_ADD();
 
@@ -161,7 +174,7 @@ public:
 
         SM_REGIONS_NEW();
 
-            SM_REGIONS_DEFAULTREGION_ADD(mesh());
+            SM_REGIONS_REGION_ADD(DEFAULT, mesh());
 
         SM_REGIONS_ADD();
 
@@ -220,7 +233,7 @@ public:
 
 #ifdef NoRepository
 #   include "interTrackManager.C"
-#   include "interTrackManagerDefaultRegion.C"
+#   include "interTrackManagerRegionDEFAULT.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

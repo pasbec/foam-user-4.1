@@ -49,8 +49,16 @@ void interTrackManager::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void interTrackManager::Storage::create() const
+void interTrackManager::Storage::create(const word& ccase) const
 {}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void interTrackManager::Regions::create(const word& ccase) const
+{
+    region_DEFAULT().enable();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,7 +70,7 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
     const Time& runTime = time();
     const fvMesh& mesh = this->mesh();
 
-    DefaultRegion::Storage& storage = regions().defaultRegion().storage();
+    Region_DEFAULT::Storage& storage = regions().region_DEFAULT().storage();
 
     tmp<surfaceScalarField> tphi(storage.phi());
     surfaceScalarField& phi = tphi();
@@ -110,7 +118,7 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
 
 void interTrackManager::next() const
 {
-    DefaultRegion::Storage& storage = regions().defaultRegion().storage();
+    Region_DEFAULT::Storage& storage = regions().region_DEFAULT().storage();
 
 // TODO: Use const
     trackedSurface& interface = storage.interface();
@@ -140,7 +148,7 @@ void interTrackManager::next() const
 
 void interTrackManager::write() const
 {
-    DefaultRegion::Storage& storage = regions().defaultRegion().storage();
+    Region_DEFAULT::Storage& storage = regions().region_DEFAULT().storage();
 
 // TODO: Use const
     trackedSurface& interface = storage.interface();
@@ -169,7 +177,7 @@ interTrackManager::interTrackManager
     const bool& master
 )
 :
-    solverManager<dynamicFvMesh>
+    solverManager<dynamicFvMesh, 1>
     (
         args, time, mesh, name, master
     )

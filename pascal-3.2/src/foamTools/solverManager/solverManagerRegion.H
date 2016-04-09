@@ -36,55 +36,97 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGION_NEW(NAME)                                                  \
+# define SM_REGION_NEW_START(ENUM)                                            \
                                                                               \
-    SM_WRAPPER_NEW(Region, NAME)                                              \
+    SM_WRAPPER_NEW(Region, Region_##ENUM)                                      \
                                                                               \
-        public: typedef NAME RegionType;
+        public: static const Manager::RegionNames regionName = ENUM;          \
+                                                                              \
+        public: typedef Region_##ENUM ThisRegion;                              \
+                                                                              \
+        class Settings;                                                       \
+        class Storage;
 
 
-# define SM_DEFAULTREGION_NEW()                                               \
+# define SM_REGION_NEW_INTERFACES(ENUM)                                       \
                                                                               \
-    SM_REGION_NEW(DefaultRegion)
+        public: virtual unsigned int regionIndex() const                      \
+        {                                                                     \
+            return Manager::ENUM;                                             \
+        };                                                                    \
+                                                                              \
+        public: virtual Manager::Regions& regions() const                     \
+        {                                                                     \
+            return manager().regions();                                       \
+        };
+
+
+# define SM_REGION_NEW(ENUM)                                                  \
+                                                                              \
+    SM_REGION_NEW_START(ENUM)                                                 \
+    SM_REGION_NEW_INTERFACES(ENUM)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+# define SM_REGION_REGIONCONTROL_ADD_GLOBALCONTROL()                          \
+                                                                              \
+        public: typedef Manager::Control Control;                             \
+                                                                              \
+        public: virtual Control& control() const                              \
+        {                                                                     \
+            return this->manager().control();                                 \
+        };
+
+# define SM_REGIONCONTROL_ADD_GLOBALCONTROL()                                 \
+                                                                              \
+        SM_REGION_REGIONCONTROL_ADD_GLOBALCONTROL()
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
 # define SM_REGION_REGIONCONTROL_ADD_P1(TYPE, P1)                             \
                                                                               \
-    SM_MANAGER_GLOBALCONTROL_ADD_P1(TYPE, P1)
+        SM_MANAGER_GLOBALCONTROL_ADD_P1(TYPE, P1)
 
 
 # define SM_REGION_REGIONCONTROL_ADD_P2(TYPE, P1,P2)                          \
                                                                               \
-    SM_MANAGER_GLOBALCONTROL_ADD_P2(TYPE, P1,P2)
+        SM_MANAGER_GLOBALCONTROL_ADD_P2(TYPE, P1,P2)
 
 
 # define SM_REGION_REGIONCONTROL_ADD_P3(TYPE, P1,P2,P3)                       \
                                                                               \
-    SM_MANAGER_GLOBALCONTROL_ADD_P3(TYPE, P1,P2,P3)
+        SM_MANAGER_GLOBALCONTROL_ADD_P3(TYPE, P1,P2,P3)
 
 
 # define SM_REGION_REGIONCONTROL_ADD_P4(TYPE, P1,P2,P3,P4)                    \
                                                                               \
-    SM_MANAGER_GLOBALCONTROL_ADD_P4(TYPE, P1,P2,P3,P4)
+        SM_MANAGER_GLOBALCONTROL_ADD_P4(TYPE, P1,P2,P3,P4)
 
 
 # define SM_REGION_REGIONCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)                 \
                                                                               \
-    SM_MANAGER_GLOBALCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)
+        SM_MANAGER_GLOBALCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_REGION_REGIONSETTINGS_ADD()                                       \
                                                                               \
-        SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                     \
-            Settings, settings, this->manager(), this->mesh())
+        SM_WRAPPER_MEMBER_ADD_P2(                                             \
+            Settings, settings, virtual,                                      \
+            this->manager(), this->mesh())
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_REGION_REGIONSTORAGE_ADD()                                        \
                                                                               \
-        SM_WRAPPER_MEMBER_VIRTUAL_ADD_P2(                                     \
-            Storage, storage, this->manager(), this->mesh())
+        SM_WRAPPER_MEMBER_ADD_P2(                                             \
+            Storage, storage, virtual,                                        \
+            this->manager(), this->mesh())
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -103,30 +145,52 @@ namespace Foam
                        Class solverManagerRegion Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH>
+template <class MANAGER>
 class solverManagerRegion
 :
-    public solverManagerBase::Region<MESH>,
-    public solverManagerWrapper<MANAGER, MESH>
+    public solverManagerBase::Region
+    <
+        typename MANAGER::ManagerMesh,
+        typename MANAGER::Mesh,
+        MANAGER::nRegions
+    >,
+    public solverManagerWrapper<MANAGER, typename MANAGER::Mesh>
 {
 public:
 
-    // Public typedefs
+    // Public Member Functions
 
-        typedef MANAGER Manager;
+        // Linking
 
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
-
-        typedef solverManagerBase::Region<Mesh> Base;
-        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
-
-        typedef typename Manager::Control Control;
-        typedef typename solverManagerBase::Settings<Mesh> Settings;
-        typedef typename solverManagerBase::Storage<Mesh> Storage;
+            // Region index
+            virtual unsigned int regionIndex() const = 0;
 
 
 private:
+
+    // Private typedefs
+
+        typedef typename MANAGER::ManagerMesh SuperMesh;
+        typedef typename MANAGER::Mesh Mesh;
+
+        typedef solverManagerBase::Region
+        <
+            SuperMesh,
+            Mesh,
+            MANAGER::nRegions
+        > Base;
+        typedef solverManagerWrapper<MANAGER, Mesh> Wrapper;
+
+        typedef solverManagerBase::Regions
+        <
+            SuperMesh,
+            Mesh,
+            MANAGER::nRegions
+        > Regions;
+
+        typedef typename solverManagerBase::Control Control;
+        typedef typename solverManagerBase::Settings<Mesh> Settings;
+        typedef typename solverManagerBase::Storage<Mesh> Storage;
 
     // Private Member Functions
 
@@ -154,13 +218,13 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
+        virtual const MANAGER& manager() const = 0;
+
+        //- Regions
+        virtual Regions& regions() const = 0;
 
         //- Control
-        virtual Control& control() const
-        {
-            return this->manager().control();
-        };
+        virtual Control& control() const = 0;
 
         //- Settings
         virtual Settings& settings() const = 0;
@@ -210,12 +274,9 @@ namespace solverManagerWrappers
     template <class MANAGER>
     struct Region
     {
-        typedef MANAGER Manager;
-
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename MANAGER::Mesh Mesh;
 
-        typedef solverManagerRegion<Manager, Mesh> Type;
+        typedef solverManagerRegion<MANAGER> Type;
     };
 }
 

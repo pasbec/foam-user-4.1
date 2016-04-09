@@ -41,46 +41,46 @@ Description
                                                                               \
     public: class Item_##NAME                                                 \
     :                                                                         \
-        public solverManagerWrappers::WRAPPER<ManagerType, TYPE>::Type        \
+        public solverManagerWrappers::WRAPPER<Manager, TYPE>::Type            \
     {                                                                         \
         public: typedef typename                                              \
-            solverManagerWrappers::WRAPPER<ManagerType, TYPE>::Type Wrapper;  \
-                                                                              \
-        public: typedef Item_##NAME ItemType;
+            solverManagerWrappers::WRAPPER<Manager, TYPE>::Type Wrapper;      \
+        public: typedef typename                                              \
+            solverManagerWrappers::WRAPPER<Manager, TYPE>::Mesh Mesh;
 
 
 # define SM_ITEM_ADD_DECLARATION_INTERFACES(NAME)                             \
                                                                               \
-        private: const ManagerType& manager_;                                 \
-        public: virtual const ManagerType& manager() const                    \
+        private: const Manager& manager_;                                     \
+        public: virtual const Manager& manager() const                        \
         {                                                                     \
             return manager_;                                                  \
         };                                                                    \
                                                                               \
-        private: virtual void create(const word& init = "default") const;
-        
-                                                                              
+        private: virtual void create(const word& ccase = "default") const;
+
+
 # define SM_ITEM_ADD_DECLARATION_INTERFACES_REGION(NAME)                      \
                                                                               \
-        public: virtual RegionType& region() const                            \
+        public: virtual ThisRegion& region() const                            \
         {                                                                     \
-            return static_cast<RegionType&>                                   \
+            return static_cast<ThisRegion&>                                   \
             (                                                                 \
-                manager().regions()[this->mesh().name()]                      \
+                manager().regions()[regionName]                               \
             );                                                                \
         };                                                                    \
                                                                               \
-        public: virtual RegionType::Control& control() const                  \
+        public: inline ThisRegion::Control& control() const                   \
         {                                                                     \
             return region().control();                                        \
         };                                                                    \
                                                                               \
-        public: virtual RegionType::Settings& settings() const                \
+        public: inline ThisRegion::Settings& settings() const                 \
         {                                                                     \
             return region().settings();                                       \
         };                                                                    \
                                                                               \
-        public: virtual StorageType& storage() const                          \
+        public: virtual ThisRegion::Storage& storage() const                  \
         {                                                                     \
             return region().storage();                                        \
         };
@@ -88,17 +88,17 @@ Description
 
 # define SM_ITEM_ADD_DECLARATION_INTERFACES_GLOBAL(NAME)                      \
                                                                               \
-        public: virtual ManagerType::Control& control() const                 \
+        public: inline Manager::Control& control() const                      \
         {                                                                     \
             return manager().control();                                       \
         };                                                                    \
                                                                               \
-        public: virtual ManagerType::Settings& settings() const               \
+        public: inline Manager::Settings& settings() const                    \
         {                                                                     \
             return manager().settings();                                      \
         };                                                                    \
                                                                               \
-        public: virtual StorageType& storage() const                          \
+        public: virtual Manager::Storage& storage() const                     \
         {                                                                     \
             return manager().storage();                                       \
         };
@@ -111,8 +111,8 @@ Description
                                                                               \
         public: Item_##NAME                                                   \
         (                                                                     \
-            const ManagerType& manager,                                       \
-            Wrapper::Mesh& mesh,                                              \
+            const Manager& manager,                                           \
+            Mesh& mesh,                                                       \
             const word& name                                                  \
         )                                                                     \
         :                                                                     \
@@ -121,7 +121,7 @@ Description
         {};                                                                   \
                                                                               \
         public: virtual ~Item_##NAME() {};
-        
+
 
 # define SM_ITEM_ADD_DECLARATION_END()                                        \
                                                                               \
@@ -130,26 +130,9 @@ Description
 
 # define SM_ITEM_ADD_DEFINITION(NAME)                                         \
                                                                               \
-    private: mutable autoPtr<Item_##NAME> item_##NAME##Ptr_;                  \
-                                                                              \
-    public: Item_##NAME& item_##NAME() const                                  \
-    {                                                                         \
-        if (item_##NAME##Ptr_.empty())                                        \
-        {                                                                     \
-            SM_WRAPPER_MEMBER_SETINIT_P3(                                     \
-                Item_##NAME, item_##NAME,                                     \
-                this->manager(), this->mesh(), word(#NAME)                    \
-            )                                                                 \
-                                                                              \
-            this->Base::itemHashTable().insert                                \
-            (                                                                 \
-                item_##NAME##Ptr_->name(),                                    \
-                item_##NAME##Ptr_.operator->()                                \
-            );                                                                \
-        }                                                                     \
-                                                                              \
-        return item_##NAME##Ptr_();                                           \
-    };
+    SM_WRAPPER_MEMBER_ADD_P3(                                                 \
+        Item_##NAME, item_##NAME, virtual,                                    \
+        this->manager(), this->mesh(), word(#NAME))
 
 
 # define SM_ITEM_ADD_DATAACCESS(TYPE, NAME)                                   \
@@ -208,24 +191,14 @@ class Item
     public solverManagerBase::Item<MESH, TYPE>,
     public solverManagerWrapper<MANAGER, MESH>
 {
-public:
-
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
-
-        typedef solverManagerBase::Item<Mesh, TYPE> Base;
-        typedef solverManagerWrapper<Manager, Mesh> Wrapper;
-
-        typedef typename solverManagerBase::Control Control;
-        typedef typename solverManagerBase::Settings<Mesh> Settings;
-        typedef typename solverManagerBase::Storage<Mesh> Storage;
-
-
 private:
+
+    // Private typedefs
+
+        typedef solverManagerBase::Item<MESH, TYPE> Base;
+        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
+
+        typedef typename solverManagerBase::Storage<MESH> Storage;
 
     // Private Member Functions
 
@@ -246,14 +219,14 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& init) const = 0;
+            virtual void create(const word& ccase) const = 0;
 
 
 public:
 
     // Constructor
 
-        Item(Mesh& mesh, const word& name)
+        Item(MESH& mesh, const word& name)
         :
             Base(name),
             Wrapper(mesh)
@@ -265,22 +238,16 @@ public:
 
     // Member Functions
 
-        //- Manager
-        virtual const Manager& manager() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Settings
-        virtual Settings& settings() const = 0;
-
         //- Storage
         virtual Storage& storage() const = 0;
+
+        //- Manager
+        virtual const MANAGER& manager() const = 0;
 
         // Basic
 
             //- Mesh
-            virtual Mesh& mesh() const
+            virtual MESH& mesh() const
             {
                 return this->Wrapper::wrappedMesh();
             }
@@ -304,27 +271,21 @@ class RegionItem
 :
     public Item<MANAGER, MESH, TYPE>
 {
-public:
+private:
 
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
+    // Private typedefs
 
         typedef Item<MANAGER, MESH, TYPE> Parent;
-        typedef typename Parent::Base Base;
-        typedef typename Parent::Wrapper Wrapper;
+        typedef solverManagerBase::Item<MESH, TYPE> Base;
+        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
 
-        typedef typename solverManagerBase::Region<Mesh> Region;
-
-        typedef typename Parent::Control Control;
-        typedef typename Parent::Settings Settings;
-        typedef typename Parent::Storage Storage;
-
-
-private:
+        typedef solverManagerBase::Region
+        <
+            typename MANAGER::ManagerMesh,
+            MESH,
+            MANAGER::nRegions
+        > Region;
+        typedef typename solverManagerBase::Storage<MESH> Storage;
 
     // Private Member Functions
 
@@ -357,14 +318,14 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& init) const = 0;
+            virtual void create(const word& ccase) const = 0;
 
 
 public:
 
     // Constructor
 
-        RegionItem(Mesh& mesh, const word& name)
+        RegionItem(MESH& mesh, const word& name)
         :
             Parent(mesh, name)
         {};
@@ -376,16 +337,10 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
+        virtual const MANAGER& manager() const = 0;
 
         //- Region
         virtual Region& region() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Settings
-        virtual Settings& settings() const = 0;
 
         //- Storage
         virtual Storage& storage() const = 0;
@@ -402,25 +357,15 @@ class GlobalItem
 :
     public Item<MANAGER, MESH, TYPE>
 {
-public:
+private:
 
-    // Public typedefs
-
-        typedef MANAGER Manager;
-
-        typedef typename Manager::ManagerMesh ManagerMesh;
-        typedef MESH Mesh;
+    // Private typedefs
 
         typedef Item<MANAGER, MESH, TYPE> Parent;
-        typedef typename Parent::Base Base;
-        typedef typename Parent::Wrapper Wrapper;
+        typedef solverManagerBase::Item<MESH, TYPE> Base;
+        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
 
-        typedef typename Parent::Control Control;
-        typedef typename Parent::Settings Settings;
-        typedef typename Parent::Storage Storage;
-
-
-private:
+        typedef typename solverManagerBase::Storage<MESH> Storage;
 
     // Private Member Functions
 
@@ -447,14 +392,14 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& init) const = 0;
+            virtual void create(const word& ccase) const = 0;
 
 
 public:
 
     // Constructor
 
-        GlobalItem(Mesh& mesh, const word& name)
+        GlobalItem(MESH& mesh, const word& name)
         :
             Parent(mesh, name)
         {};
@@ -466,13 +411,7 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const Manager& manager() const = 0;
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Settings
-        virtual Settings& settings() const = 0;
+        virtual const MANAGER& manager() const = 0;
 
         //- Storage
         virtual Storage& storage() const = 0;
@@ -491,28 +430,18 @@ namespace solverManagerWrappers
     template <class MANAGER, class TYPE>
     struct RegionItem
     {
-        typedef MANAGER Manager;
-
-        typedef TYPE ItemType;
-
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename MANAGER::Mesh Mesh;
 
-        typedef solverManagerItem::RegionItem<Manager, Mesh, ItemType> Type;
+        typedef solverManagerItem::RegionItem<MANAGER, Mesh, TYPE> Type;
     };
 
 
     template <class MANAGER, class TYPE>
     struct GlobalItem
     {
-        typedef MANAGER Manager;
-
-        typedef TYPE ItemType;
-
-        typedef typename MANAGER::ManagerMesh ManagerMesh;
         typedef typename MANAGER::ManagerMesh Mesh;
 
-        typedef solverManagerItem::GlobalItem<Manager, Mesh, ItemType> Type;
+        typedef solverManagerItem::GlobalItem<MANAGER, Mesh, TYPE> Type;
     };
 }
 

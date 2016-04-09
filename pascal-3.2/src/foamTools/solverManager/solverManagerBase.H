@@ -37,13 +37,14 @@ Description
 
 #include "solutionControl.H"
 #include "autoPtr.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-template <class MESH> class solverManager;
+template <class MESH, unsigned int NREGIONS> class solverManager;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,8 +55,8 @@ template <class MESH> class Mesh;
 template <class MESH> class Settings;
 template <class MESH, class TYPE> class Item;
 template <class MESH> class Storage;
-template <class MESH> class Region;
-template <class MANAGERMESH, class MESH> class Regions;
+template <class MANAGERMESH, class MESH, unsigned int NREGIONS> class Region;
+template <class MANAGERMESH, class MESH, unsigned int NREGIONS> class Regions;
 
 /*---------------------------------------------------------------------------*\
                   Class solverManagerBase::Mesh Declaration
@@ -88,6 +89,67 @@ typedef solutionControl Control;
 
 
 /*---------------------------------------------------------------------------*\
+                   Class solverManagerBase::Create Declaration
+\*---------------------------------------------------------------------------*/
+
+class Create
+{
+private:
+
+    // Private Data
+
+        // Evolution
+
+            //- Created?
+            mutable Switch created_;
+
+    // Protected Member Functions
+
+        // Evolution
+
+            //- Create sequence
+            virtual void create(const word& ccase) const = 0;
+
+
+public:
+
+    // Constructor
+
+        Create() : created_(false) {};
+
+    // Destructor
+
+        virtual ~Create() {};
+
+
+public:
+
+    // Member Functions
+
+        // Evolution
+
+            //- Created?
+            inline bool created() const
+            {
+                return created_;
+            };
+
+            //- Create sequence wrapper
+            inline bool checkCreate(const word& ccase = "default") const
+            {
+                if (!created_)
+                {
+                    created_ = true;
+
+                    create(ccase);
+                }
+
+                return created_;
+            };
+};
+
+
+/*---------------------------------------------------------------------------*\
                     Class solverManagerBase::Read Declaration
 \*---------------------------------------------------------------------------*/
 
@@ -99,11 +161,11 @@ private:
 
         // Evolution
 
-            //- Init sequence
+            //- Read sequence
             virtual void read() const = 0;
 
 
-public:
+protected:
 
     // Constructor
 
@@ -112,6 +174,21 @@ public:
     // Destructor
 
         virtual ~Read() {};
+
+
+public:
+
+    // Member Functions
+
+        // Evolution
+
+            //- Read sequence wrapper
+            inline bool checkRead() const
+            {
+                read();
+
+                return true;
+            };
 };
 
 
@@ -138,7 +215,7 @@ private:
             virtual void init() const = 0;
 
 
-public:
+protected:
 
     // Constructor
 
@@ -148,12 +225,21 @@ public:
 
         virtual ~Init() {};
 
+
+public:
+
     // Member Functions
 
         // Evolution
 
+            //- Initialized?
+            inline bool initialized() const
+            {
+                return initialized_;
+            };
+
             //- Init sequence wrapper
-            bool checkInit() const
+            inline bool checkInit() const
             {
                 if (!initialized_)
                 {
@@ -163,7 +249,113 @@ public:
                 }
 
                 return initialized_;
-            }
+            };
+};
+
+
+/*---------------------------------------------------------------------------*\
+                Class solverManagerBase::LinkSlave Declaration
+\*---------------------------------------------------------------------------*/
+
+class LinkSlave
+{
+private:
+
+    // Private Data
+
+        // Evolution
+
+            //- Linked?
+            mutable Switch linked_;
+
+    // Protected Member Functions
+
+        // Linking
+
+            //- Link slave to master
+            virtual void link() const = 0;
+
+            //- Unlink slave from master
+            virtual void unlink() const = 0;
+
+
+protected:
+
+    // Constructor
+
+        LinkSlave() : linked_(false) {};
+
+    // Destructor
+
+        virtual ~LinkSlave() {};
+
+    // Member Functions
+
+        // Linking
+
+            //- Is slave linked?
+            inline bool linked() const
+            {
+                return linked_;
+            };
+
+            //- Link wrapper
+            inline bool checkLink() const
+            {
+                if (!linked_)
+                {
+                    linked_ = true;
+
+                    link();
+                }
+
+                return linked_;
+            };
+
+            //- Unlink wrapper
+            inline bool checkUnlink() const
+            {
+                if (linked_)
+                {
+                    linked_ = false;
+
+                    unlink();
+                }
+
+                return linked_;
+            };
+};
+
+
+/*---------------------------------------------------------------------------*\
+                Class solverManagerBase::LinkMaster Declaration
+\*---------------------------------------------------------------------------*/
+
+template <class TYPE>
+class LinkMaster
+{
+private:
+
+    // Protected Member Functions
+
+        // Linking
+
+            //- Link slave to master
+            virtual void link(TYPE* slave) const = 0;
+
+            //- Unlink slave from master
+            virtual void unlink(const TYPE* slave) const = 0;
+
+
+public:
+
+    // Constructor
+
+        LinkMaster() {};
+
+    // Destructor
+
+        virtual ~LinkMaster() {};
 };
 
 
@@ -174,13 +366,8 @@ public:
 template <class MESH>
 class Settings
 :
-    public Read,
-    public Init
+    public Read
 {
-    //- Friends
-    template<class M> friend class solverManager;
-    template<class M> friend class Region;
-
 private:
 
     // Private Member Functions
@@ -190,27 +377,21 @@ private:
             //- Read sequence
             virtual void read() const = 0;
 
-            //- Init sequence (empty)
-            virtual void init() const {};
 
-
-public:
+protected:
 
     // Constructor
 
-        Settings() : Read(), Init() {};
+        Settings() : Read() {};
 
     // Destructor
 
         virtual ~Settings() {};
 
+
+public:
+
     // Member Functions
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Storage
-        virtual Storage<MESH>& storage() const = 0;
 
         // Basic
 
@@ -220,18 +401,15 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-                   Class solverManagerBase::Item Declaration
+                 Class solverManagerBase::ItemCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class ItemCore
 :
-    public Read,
-    public Init
+    public Create,
+    public Init,
+    public LinkSlave
 {
-    //- Friends
-    template<class M, class T> friend class Item;
-    template<class M> friend class Storage;
-
 private:
 
     // Private Data
@@ -239,103 +417,83 @@ private:
         //- Name
         word name_;
 
-        //- Disabled switch
-        mutable Switch disabled_;
-
         //- Locked switch
         mutable Switch locked_;
-
-        //- Optional switch
-        mutable Switch optional_;
 
     // Private Member Functions
 
         // Evolution
 
-            //- Read sequence (empty)
-            virtual void read() const {};
+            //- Create sequence
+            virtual void create(const word& ccase) const = 0;
 
             //- Init sequence
-            virtual void init() const
-            {
-                if (!disabled())
-                {
-                    checkMake();
-                }
-                else
-                {
-                    FatalErrorIn
-                    (
-                        "solverManagerBase::ItemCore::"
-                        + this->ItemCore::name() + "::init()"
-                    )
-                        << "Item is globally disabled and cannot be used."
-                            << " Check your settings!"
-                            << abort(FatalError);
-
-                }
-            };
-
-            //- Make sequence wrapper
-            virtual void checkMake() const = 0;
+            virtual void init() const = 0;
 
 
 protected:
 
     // Protected Member Functions
 
-        // Disabling
+        // Linking
 
-            //- Reference to disabled switch
-            Switch& disabledSwitch() const
-            {
-                return disabled_;
-            };
+            //- Link item to storage
+            virtual void link() const = 0;
 
-        // Locking
+            //- Unlink item from storage
+            virtual void unlink() const = 0;
 
-            //- Reference to locked switch
-            Switch& lockedSwitch() const
-            {
-                return locked_;
-            };
+        // Item Data
 
-            //- Is item locked?
-            inline bool locked() const
-            {
-                return locked_;
-            };
+            // Locking
 
-            //- Lock item
-            inline void lock() const
-            {
-                locked_ = true;
-            };
+                //- Reference to locked switch
+                Switch& lockedSwitch() const
+                {
+                    return locked_;
+                };
 
-            //- Unlock item
-            inline void unlock() const
-            {
-                locked_ = false;
-            };
+                //- Is item unlocked?
+                inline bool unlocked() const
+                {
+                    return !locked_;
+                };
 
+                //- Is item locked?
+                inline bool locked() const
+                {
+                    return locked_;
+                };
 
-public:
+                //- Lock item
+                inline void lock() const
+                {
+                    locked_ = true;
+                };
+
+                //- Unlock item
+                inline void unlock() const
+                {
+                    locked_ = false;
+                };
 
     // Constructor
 
         ItemCore(const word& name)
         :
-            Read(),
+            Create(),
             Init(),
+            LinkSlave(),
             name_(name),
-            disabled_(false),
-            locked_(false),
-            optional_(false)
+            locked_(false)
         {};
 
     // Destructor
 
         virtual ~ItemCore() {};
+
+
+public:
 
     // Member Functions
 
@@ -344,50 +502,12 @@ public:
         {
             return name_;
         };
-
-        // Pointer
-
-            //- Item is empty
-            virtual bool empty() const = 0;
-
-            //- Item is valid
-            virtual bool valid() const = 0;
-
-        // Disabling
-
-            //- Is item disabled?
-            inline bool disabled() const
-            {
-                return disabled_;
-            };
-
-            //- Disable item
-            virtual void disable() const = 0;
-
-            //- Enable item
-            virtual void enable() const = 0;
-
-        // Optional
-
-            //- Is item optional?
-            inline bool optional() const
-            {
-                return optional_;
-            };
-
-            //- Make item optional
-            inline void makeOptional() const
-            {
-                optional_ = true;
-            };
-
-            //- Make item mandatory
-            inline void makeMandatory() const
-            {
-                optional_ = false;
-            };
 };
 
+
+/*---------------------------------------------------------------------------*\
+                   Class solverManagerBase::Item Declaration
+\*---------------------------------------------------------------------------*/
 
 template <class MESH, class TYPE>
 class Item
@@ -399,38 +519,52 @@ private:
     // Private Data
 
         //- Item data
-        mutable autoPtr<TYPE> itemPtr_;
+        mutable autoPtr<TYPE> dataPtr_;
 
     // Private Member functions
 
-        // Evolution
+        // Linking
 
-            //- Create sequence
-            virtual void create(const word& init) const = 0;
+            //- Link item to storage
+            virtual void link() const
+            {
+                storage().link
+                (
+                    const_cast<Item<MESH, TYPE>*>(this)
+                );
+            };
+
+            //- Unlink item from storage
+            virtual void unlink() const
+            {
+                storage().unlink(this);
+            };
+
+        // Item Data
 
             //- Make sequence
             void make() const
             {
-                if (!this->ItemCore::locked())
+                if (this->unlocked())
                 {
-                    this->ItemCore::lockedSwitch() = true;
+                    this->lockedSwitch() = true;
 
-                    Info << "Create " << this->ItemCore::name()
+                    Info << "Create " << this->name()
                         << " for region " << mesh().name()
                         << endl;
 
                     word init = dict().lookupOrDefault(name(), word("default"));
 
-                    create(init);
+                    this->checkCreate(init);
 
-                    this->ItemCore::lockedSwitch() = false;
+                    this->lockedSwitch() = false;
                 }
                 else
                 {
                     FatalErrorIn
                     (
                         "solverManagerBase::Item::"
-                        + this->ItemCore::name() + "::make()"
+                        + this->name() + "::make()"
                     )
                         << "Pointer for item is part of a circular "
                         << "reference. Check all occurances!"
@@ -439,18 +573,18 @@ private:
             };
 
             //- Make sequence wrapper
-            virtual void checkMake() const
+            void checkMake() const
             {
-                if (itemPtr_.empty())
+                if (dataPtr_.empty())
                 {
                     make();
 
-                    if (itemPtr_.empty())
+                    if (dataPtr_.empty())
                     {
                         FatalErrorIn
                         (
                             "solverManagerBase::Item::"
-                            + this->ItemCore::name() + "::checkMake()"
+                            + this->name() + "::checkMake()"
                         )
                             << "Pointer for item is still unallocated "
                             << "after creation. Make sure you have set "
@@ -461,27 +595,66 @@ private:
                 }
             };
 
+            //- Init data sequence
+            void initData() const
+            {
+                if (enabled())
+                {
+                    checkMake();
+                }
+                else
+                {
+                    FatalErrorIn
+                    (
+                        "solverManagerBase::Item::"
+                        + this->name() + "::initData()"
+                    )
+                        << "Item is globally disabled and cannot be used."
+                            << " Check your settings!"
+                            << abort(FatalError);
+
+                }
+            };
+
+        // Evolution
+
+            //- Create sequence
+            virtual void create(const word& ccase) const = 0;
+
+
+            //- Init sequence (empty)
+            virtual void init() const
+            {
+                // Init had nothing to do exept for data init,
+                // but data init is only done on data access
+                // to deal with disabled (optional) data.
+                // This function is only kept here for later use.
+            };
+
 
 protected:
 
-    // Private Member functions
+    // Protected Member functions
 
-        // Access
+        // Item Data
 
-            //- Return auto pointer
-            inline autoPtr<TYPE> get() const
+            //- Return auto pointer of item
+            inline autoPtr<TYPE>& get() const
             {
-                return itemPtr_;
+                return dataPtr_;
             };
 
-            //- Set auto pointer
-            inline void set(TYPE* p) const
+            //- Set auto pointer content of item
+            inline void set(TYPE* pointer) const
             {
-                itemPtr_.set(p);
+                dataPtr_.set(pointer);
             };
 
-
-public:
+            //- Set auto pointer of item directly
+            inline void set(autoPtr<TYPE> autoPointer) const
+            {
+                dataPtr_ = autoPointer;
+            };
 
     // Constructor
 
@@ -491,13 +664,10 @@ public:
 
         virtual ~Item() {};
 
+
+public:
+
     // Member Functions
-
-        //- Control
-        virtual Control& control() const = 0;
-
-        //- Settings
-        virtual Settings<MESH>& settings() const = 0;
 
         //- Storage
         virtual Storage<MESH>& storage() const = 0;
@@ -509,95 +679,98 @@ public:
 
         // Dictionaries
 
+            //- Storage dictionary
             virtual const dictionary& dict() const = 0;
 
-        // Access
+        // Enabling/Disabling
 
-            //- Return auto pointer (DANGEROUS!)
-            inline autoPtr<TYPE> aPtr() const
+            //- Item is enabled
+            inline bool enabled() const
             {
-                return itemPtr_;
+                return this->linked();
             };
 
-            //- Return raw pointer (DANGEROUS!)
-            inline TYPE* rPtr() const
+            //- Item is disabled
+            inline bool disabled() const
             {
-                return itemPtr_.operator->();
-            };
-
-            //- Return pointer
-            inline TYPE* ptr() const
-            {
-                this->ItemCore::init();
-
-                return itemPtr_.operator->();
-            };
-
-            //- Return reference
-            inline TYPE& ref() const
-            {
-                this->ItemCore::init();
-
-                return itemPtr_();
-            };
-
-        // Pointer
-
-            //- Item is empty
-            virtual bool empty() const
-            {
-                return itemPtr_.empty();
-            };
-
-            //- Item is valid
-            virtual bool valid() const
-            {
-                return itemPtr_.valid();
-            };
-
-        // Disabling
-
-            //- Disable item
-            virtual void disable() const
-            {
-                if (!this->ItemCore::disabled())
-                {
-                    if (valid())
-                    {
-                        FatalErrorIn
-                        (
-                            "solverManagerBase::Item::"
-                            + this->ItemCore::name() + "::disable()"
-                        )
-                            << "Item is still allocated and cannot "
-                            <<"be disabled. Clear it first!"
-                            << abort(FatalError);
-                    }
-                    else
-                    {
-                        this->ItemCore::disabledSwitch() = true;
-                    }
-                }
+                return !this->linked();
             };
 
             //- Enable item
-            virtual void enable() const
+            inline void enable() const
             {
-                if (this->ItemCore::disabled())
+                checkMake();
+
+                this->checkLink();
+            };
+
+            //- Disable item
+            inline void disable() const
+            {
+                this->checkUnlink();
+
+                dataPtr_.clear();
+            };
+
+            //- Set state of item directly
+            inline void setState(const bool& state) const
+            {
+                if (state)
                 {
-                    FatalErrorIn
-                    (
-                        "solverManagerBase::Item::"
-                        + this->ItemCore::name() + "::enable()"
-                    )
-                        << "Item is already enabled!"
-                        << abort(FatalError);
+                    enable();
                 }
                 else
                 {
-                    this->ItemCore::disabledSwitch() = false;
+                    disable();
                 }
             };
+
+        // Item Data
+
+            // Pointer state
+
+                //- Item is empty
+                inline bool empty() const
+                {
+                    return dataPtr_.empty();
+                };
+
+                //- Item is valid
+                inline bool valid() const
+                {
+                    return dataPtr_.valid();
+                };
+
+            // Access
+
+                //- Return reference
+                inline TYPE& ref() const
+                {
+                    initData();
+
+                    return dataPtr_();
+                };
+
+                //- Return pointer
+                inline TYPE* ptr() const
+                {
+                    initData();
+
+                    return dataPtr_.operator->();
+                };
+
+                //- Return raw pointer
+                inline TYPE* rawPtr() const
+                {
+                    if (valid())
+                    {
+                        return dataPtr_.operator->();
+                    }
+                    else
+                    {
+                        return NULL;
+                    }
+                };
 };
 
 
@@ -608,12 +781,17 @@ public:
 template <class MESH>
 class Storage
 :
-    public Read,
-    public Init
+    public Create,
+    public Init,
+    public LinkMaster<ItemCore>
 {
-    //- Friends
-    template<class M> friend class solverManager;
-    template<class M> friend class Region;
+public:
+
+    // Friends declarations
+
+        //- Friend with Item
+        template<class M, class T> friend class Item;
+
 
 protected:
 
@@ -631,17 +809,40 @@ private:
 
     // Private Member Functions
 
+        //- Hash table
+        inline ItemHashTable& itemHashTable() const
+        {
+            if (itemHashTable_.empty())
+            {
+                itemHashTable_.set(new ItemHashTable());
+            }
+
+            return itemHashTable_();
+        };
+
+        // Linking
+
+            //- Link/register pointer of item
+            virtual void link(ItemCore* item) const
+            {
+                itemHashTable().insert(item->name(), item);
+            };
+
+            //- Link/register pointer of item
+            virtual void unlink(const ItemCore* item) const
+            {
+                itemHashTable().erase(item->name());
+            };
+
         // Evolution
 
-            //- Read sequence (empty)
-            virtual void read() const {};
+            //- Create sequence
+            virtual void create(const word& ccase) const = 0;
 
             //- Init all regions in hash table
             virtual void init() const
             {
-                read();
-
-                create();
+                this->checkCreate();
 
                 forAllConstIter(
                     typename ItemHashTable, itemHashTable(), iter)
@@ -650,49 +851,56 @@ private:
                 }
             };
 
-            //- Create sequence
-            virtual void create() const = 0;
-
 
 protected:
 
-        // Protected Member Functions
-
-            //- Hash table
-            inline ItemHashTable& itemHashTable() const
-            {
-                if (itemHashTable_.empty())
-                {
-                    itemHashTable_.set(new ItemHashTable());
-                }
-
-                return itemHashTable_();
-            };
-
-public:
-
     // Constructor
 
-        Storage() : Read(), Init() {};
+        Storage() : Create(), Init(), LinkMaster<ItemCore>() {};
 
     // Destructor
 
         virtual ~Storage() {};
 
+
+public:
+
     // Member Functions
 
-        //- Control
-        virtual Control& control() const = 0;
+        // Items
 
-        //- Settings
-        virtual Settings<MESH>& settings() const = 0;
+            //- Return current hash table
+            inline const ItemHashTable& hashTable() const
+            {
+                return itemHashTable();
+            };
 
-        //- Find existing named item and return ref cast to T
-        template<class T>
-        inline Item<MESH, T>& lookup(const word& name)
-        {
-            return *dynamic_cast<Item<MESH, T>* >(itemHashTable()[name]);
-        };
+            //- Find existing item by ref to its data content
+            template<class T>
+            inline Item<MESH, T>* item(const T& itemData) const
+            {
+                Item<MESH, T>* itemPointer = NULL;
+
+                forAllConstIter(
+                    typename ItemHashTable, itemHashTable(), iter)
+                {
+                    itemPointer = dynamic_cast<Item<MESH, T>*>(iter());
+
+                    if(itemPointer->ptr() == &itemData)
+                    {
+                        return itemPointer;
+                    }
+                }
+
+                return itemPointer;
+            };
+
+            //- Find existing item by named item and return ptr cast to T
+            template<class T>
+            inline Item<MESH, T>* item(const word& name) const
+            {
+                return dynamic_cast<Item<MESH, T>*>(itemHashTable()[name]);
+            };
 
         // Basic
 
@@ -701,11 +909,13 @@ public:
 
     // Member Operators
 
-        //- Find and return existing named item
-        inline ItemCore& operator[](const word& name)
-        {
-            return *itemHashTable()[name];
-        };
+        // Items
+
+            //- Find and return existing named item
+            inline ItemCore& operator[](const word& name) const
+            {
+                return *itemHashTable()[name];
+            };
 };
 
 
@@ -713,47 +923,76 @@ public:
                   Class solverManagerBase::Region Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MESH>
+template <class MANAGERMESH, class MESH, unsigned int NREGIONS>
 class Region
 :
     public Read,
-    public Init
+    public Init,
+    public LinkSlave
 {
-    //- Friends
-    template<class M> friend class solverManager;
-    template<class MM, class M> friend class Regions;
+public:
+
+    // Public Member Functions
+
+        // Linking
+
+            // Region index
+            virtual unsigned int regionIndex() const = 0;
+
 
 private:
 
     // Private Member Functions
+
+        // Linking
+
+            //- Link region to regions
+            virtual void link() const
+            {
+                regions().link
+                (
+                    const_cast<Region<MANAGERMESH, MESH, NREGIONS>*>(this)
+                );
+            };
+
+            //- Unlink region from regions
+            virtual void unlink() const
+            {
+                regions().unlink(this);
+            };
 
         // Evolution
 
             //- Read sequence
             virtual void read() const
             {
-                settings().read();
+                settings().checkRead();
             };
 
             //- Init sequence
             virtual void init() const
             {
-                read();
                 storage().checkInit();
             };
 
 
-public:
+protected:
 
     // Constructor
 
-        Region() : Read(), Init()  {};
+        Region() : Read(), Init(), LinkSlave() {};
 
     // Destructor
 
         virtual ~Region() {};
 
+
+public:
+
     // Member Functions
+
+        //- Regions
+        virtual Regions<MANAGERMESH, MESH, NREGIONS>& regions() const = 0;
 
         //- Control
         virtual Control& control() const = 0;
@@ -768,6 +1007,47 @@ public:
 
             //- Mesh
             virtual MESH& mesh() const = 0;
+
+        // Enabling/Disabling
+
+            //- Region is enabled
+            inline bool enabled() const
+            {
+                return this->linked();
+            };
+
+            //- Region is disabled
+            inline bool disabled() const
+            {
+                return !this->linked();
+            };
+
+            //- Enable region
+            inline void enable() const
+            {
+// TODO
+                this->checkLink();
+            };
+
+            //- Disable region
+            inline void disable() const
+            {
+// TODO
+                this->checkUnlink();
+            };
+
+            //- Set state of region directly
+            inline void setState(const bool& state) const
+            {
+                if (state)
+                {
+                    enable();
+                }
+                else
+                {
+                    disable();
+                }
+            };
 };
 
 
@@ -775,47 +1055,92 @@ public:
                   Class solverManagerBase::Regions Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGERMESH, class MESH>
+template <class MANAGERMESH, class MESH, unsigned int NREGIONS>
 class Regions
 :
+    public Create,
     public Read,
-    public Init
+    public Init,
+    LinkMaster<Region<MANAGERMESH, MESH, NREGIONS> >
 {
-    //- Friends
-    template<class M> friend class solverManager;
+public:
 
-protected:
+    // Friends declarations
 
-    // Protected typedefs
-
-        typedef HashTable<Region<MESH>*> RegionHashTable;
+        //- Friend with Region
+        template<class MM, class M, unsigned int N> friend class Region;
 
 
 private:
 
+    // Private typedef
+
+        //- Region list type
+        typedef HashTable
+            <
+                Region<MANAGERMESH, MESH, NREGIONS>*,
+                unsigned int
+            > RegionHashTable;
+
     // Private Data
 
-        //- Hash table
-        mutable autoPtr<RegionHashTable> regionHashTable_;
+        //- Region list
+        mutable autoPtr<RegionHashTable> regionHashTablePtr_;
 
     // Private Member Functions
 
+        //- Region list
+        inline RegionHashTable& regionHashTable() const
+        {
+            if (regionHashTablePtr_.empty())
+            {
+                regionHashTablePtr_.set(new RegionHashTable());
+            }
+
+            return regionHashTablePtr_();
+        };
+
+        // Linking
+
+            //- Link/register pointer of region
+            virtual void link
+            (
+                Region<MANAGERMESH, MESH, NREGIONS>* region
+            ) const
+            {
+                regionHashTable().insert(region->regionIndex(), region);
+            };
+
+            //- Unlink/deregister pointer of region
+            virtual void unlink
+            (
+                const Region<MANAGERMESH, MESH, NREGIONS>* region
+            ) const
+            {
+                regionHashTable().erase(region->regionIndex());
+            };
+
         // Evolution
+
+            //- Create sequence
+            virtual void create(const word& ccase) const = 0;
 
             //- Read all regions in hash table
             virtual void read() const
             {
+                this->checkCreate();
+
                 forAllConstIter(
                     typename RegionHashTable, regionHashTable(), iter)
                 {
-                    iter()->read();
+                    iter()->checkRead();
                 }
             };
 
             //- Init all regions in hash table
             virtual void init() const
             {
-                read();
+                this->checkCreate();
 
                 forAllConstIter(
                     typename RegionHashTable, regionHashTable(), iter)
@@ -827,38 +1152,34 @@ private:
 
 protected:
 
-        // Protected Member Functions
-
-            //- Hash table
-            inline RegionHashTable& regionHashTable() const
-            {
-                if (regionHashTable_.empty())
-                {
-                    regionHashTable_.set(new RegionHashTable());
-                }
-
-                return regionHashTable_();
-            };
-
-
-public:
-
     // Constructor
 
-        Regions() : Read(), Init() {};
+        Regions() : Create(), Read(), Init() {};
 
     // Destructor
 
         virtual ~Regions() {};
 
+
+public:
+
     // Member Functions
 
-        //- Find existing named region and ref cast to T
-        template<class T>
-        inline T& lookup(const word& name)
-        {
-            return *dynamic_cast<T*>(regionHashTable()[name]);
-        };
+        // Regions
+
+            //- Return current hash table
+            inline const RegionHashTable& hashTable() const
+            {
+                return regionHashTable();
+            };
+
+
+            //- Find existing named region and ref cast to T
+            template<class T>
+            inline T& region(const unsigned int& regionI) const
+            {
+                return *dynamic_cast<T*>(regionHashTable()[regionI]);
+            };
 
         // Basic
 
@@ -867,11 +1188,16 @@ public:
 
     // Member Operators
 
-        //- Find and return existing named region
-        inline Region<MESH>& operator[](const word& name)
-        {
-            return *regionHashTable()[name];
-        };
+        // Regions
+
+            //- Return region by index
+            inline Region<MANAGERMESH, MESH, NREGIONS>& operator[]
+            (
+                const unsigned int& regionI
+            ) const
+            {
+                return *regionHashTable()[regionI];
+            };
 };
 
 
@@ -883,6 +1209,14 @@ public:
 template <class MESH>
 class Messages
 {
+public:
+
+    // Friends declarations
+
+        //- Friend with solverManager
+        template <class M, unsigned int N> friend class solverManager;
+
+
 private:
 
     // Private Data

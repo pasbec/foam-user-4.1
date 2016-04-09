@@ -1,7 +1,7 @@
 
     tmp<volScalarField> tmu = mu;
 
-    if(storage.is_turbulence())
+    if(storage.item_turbulence().enabled())
     {
         tmu() += rho*storage.turbulence().nut();
         tmu().rename("muEff");
@@ -20,7 +20,7 @@
 
     if
     (
-        storage.is_F()
+        storage.item_F().enabled()
      && settings.UEqnVolumeForce
     )
     {
@@ -40,7 +40,7 @@
     {
         if
         (
-            storage.is_F()
+            storage.item_F().enabled()
         && !settings.UEqnVolumeForce
         )
         {

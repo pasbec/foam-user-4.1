@@ -32,14 +32,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void eddyCurrentManager::ConductorRegion::Settings::read() const
+void eddyCurrentManager::Region_CONDUCTOR::Settings::read() const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::ConductorRegion::Storage::Item_VRe::create
-(const word& init) const
+void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VRe::create
+(const word& ccase) const
 {
     set
     (
@@ -59,8 +59,8 @@ void eddyCurrentManager::ConductorRegion::Storage::Item_VRe::create
 }
 
 
-void eddyCurrentManager::ConductorRegion::Storage::Item_VIm::create
-(const word& init) const
+void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VIm::create
+(const word& ccase) const
 {
     set
     (
@@ -80,8 +80,8 @@ void eddyCurrentManager::ConductorRegion::Storage::Item_VIm::create
 }
 
 
-void eddyCurrentManager::ConductorRegion::Storage::Item_VReAverage::create
-(const word& init) const
+void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VReAverage::create
+(const word& ccase) const
 {
     set
     (
@@ -105,8 +105,8 @@ void eddyCurrentManager::ConductorRegion::Storage::Item_VReAverage::create
 }
 
 
-void eddyCurrentManager::ConductorRegion::Storage::Item_VImAverage::create
-(const word& init) const
+void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VImAverage::create
+(const word& ccase) const
 {
     set
     (
@@ -132,7 +132,8 @@ void eddyCurrentManager::ConductorRegion::Storage::Item_VImAverage::create
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::ConductorRegion::Storage::create() const
+void eddyCurrentManager::Region_CONDUCTOR::Storage::create
+(const word& ccase) const
 {}
 
 

@@ -19,7 +19,7 @@
 
     if
     (
-        storage.is_F()
+        storage.item_F().enabled()
     && !settings.UEqnVolumeForce
     )
     {
@@ -84,7 +84,7 @@
 // TODO: Do not use fixedGradient
     if
     (
-        storage.is_F()
+        storage.item_F().enabled()
     && !settings.UEqnVolumeForce
     )
     {
@@ -216,7 +216,7 @@
 
             if
             (
-                storage.is_F()
+                storage.item_F().enabled()
             && !settings.UEqnVolumeForce
             )
             {

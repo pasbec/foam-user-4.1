@@ -34,9 +34,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
-void interTrackManager::DefaultRegion::Settings::read() const
+void interTrackManager::Region_DEFAULT::Settings::read() const
 {
+    volumeForce =
+        dict().lookupOrDefault("volumeForce", false);
+    turbulence =
+        dict().lookupOrDefault("turbulence", false);
+
     UpCoupled =
         dict().lookupOrDefault("UpCoupled", false);
     UEqnVolumeForce =
@@ -50,7 +54,7 @@ void interTrackManager::DefaultRegion::Settings::read() const
     && !UEqnVolumeForce
     )
     {
-        FatalErrorIn("interTrackManager::DefaultRegion::Settings::read() : ")
+        FatalErrorIn("interTrackManager::Region_DEFAULT::Settings::read() : ")
             << "Both coupled solution of U and p and indirect flux "
             << "representation of enabled volume force is currently "
             << "not implemented!"
@@ -61,10 +65,10 @@ void interTrackManager::DefaultRegion::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void interTrackManager::DefaultRegion::Storage::init_g
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_g::create
+(const word& ccase) const
 {
-    gPtr_.set
+    set
     (
         new uniformDimensionedVectorField
         (
@@ -81,10 +85,10 @@ void interTrackManager::DefaultRegion::Storage::init_g
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_p
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_p::create
+(const word& ccase) const
 {
-    pPtr_.set
+    set
     (
         new volScalarField
         (
@@ -102,10 +106,10 @@ void interTrackManager::DefaultRegion::Storage::init_p
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_U
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_U::create
+(const word& ccase) const
 {
-    UPtr_.set
+    set
     (
         new volVectorField
         (
@@ -123,10 +127,10 @@ void interTrackManager::DefaultRegion::Storage::init_U
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_Up
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_Up::create
+(const word& ccase) const
 {
-    UpPtr_.set
+    set
     (
         new volVector4Field
         (
@@ -150,10 +154,10 @@ void interTrackManager::DefaultRegion::Storage::init_Up
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_phi
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_phi::create
+(const word& ccase) const
 {
-    phiPtr_.set
+    set
     (
         new surfaceScalarField
         (
@@ -165,18 +169,18 @@ void interTrackManager::DefaultRegion::Storage::init_phi
                 IOobject::READ_IF_PRESENT,
                 IOobject::AUTO_WRITE
             ),
-            linearInterpolate(U()) & mesh().Sf()
+            linearInterpolate(storage().U()) & mesh().Sf()
         )
     );
 
-    phiPtr_->oldTime();
+    get()->oldTime();
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_rho
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_rho::create
+(const word& ccase) const
 {
-    rhoPtr_.set
+    set
     (
         new volScalarField
         (
@@ -201,10 +205,10 @@ void interTrackManager::DefaultRegion::Storage::init_rho
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_mu
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_mu::create
+(const word& ccase) const
 {
-    muPtr_.set
+    set
     (
         new volScalarField
         (
@@ -229,12 +233,12 @@ void interTrackManager::DefaultRegion::Storage::init_mu
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_F
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_F::create
+(const word& ccase) const
 {
-    if (init == "default")
+    if (ccase == "default")
     {
-        FPtr_.set
+        set
         (
             new volVectorField
             (
@@ -250,9 +254,9 @@ void interTrackManager::DefaultRegion::Storage::init_F
             )
         );
     }
-    else if (init == "calculated")
+    else if (ccase == "calculated")
     {
-        FPtr_.set
+        set
         (
             new volVectorField
             (
@@ -278,10 +282,10 @@ void interTrackManager::DefaultRegion::Storage::init_F
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_fluidIndicator
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_fluidIndicator::create
+(const word& ccase) const
 {
-    fluidIndicatorPtr_.set
+    set
     (
         new volScalarField
         (
@@ -299,38 +303,38 @@ void interTrackManager::DefaultRegion::Storage::init_fluidIndicator
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_transport
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_transport::create
+(const word& ccase) const
 {
-    transportPtr_.set
+    set
     (
         new twoPhaseMixture
         (
-            U(),
-            phi(),
-            fluidIndicator().name()
+            storage().U(),
+            storage().phi(),
+            storage().fluidIndicator().name()
         )
     );
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_turbulence
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_turbulence::create
+(const word& ccase) const
 {
-    turbulencePtr_ =
+    set
     (
         incompressible::turbulenceModel::New
         (
-            U(),
-            phi(),
-            transport()
+            storage().U(),
+            storage().phi(),
+            storage().transport()
         )
     );
 }
 
 
-void interTrackManager::DefaultRegion::Storage::init_interface
-(const word& init) const
+void interTrackManager::Region_DEFAULT::Storage::Item_interface::create
+(const word& ccase) const
 {
     word interfacePrefix;
 
@@ -339,46 +343,41 @@ void interTrackManager::DefaultRegion::Storage::init_interface
         interfacePrefix = trackedSurface::typeName;
     }
 
-    // Include turbulence only if it is activated
-    incompressible::turbulenceModel* turbPtr = NULL;
-    if(is_turbulence())
-    {
-        turbPtr = turbulencePtr();
-    }
-
 // TODO: Add more constructors and simplify
 //       Make it use real rho and mu fields!
-    interfacePtr_.set
+    set
     (
         new trackedSurface
         (
-            mesh(),
-            rho(),
-            U(),
-            p(),
-            phi(),
+            storage().mesh(),
+            storage().rho(),
+            storage().U(),
+            storage().p(),
+            storage().phi(),
             NULL,
-            gPtr(),
-            transportPtr(),
-            turbPtr,
+            storage().item_g().rawPtr(),
+            storage().item_transport().rawPtr(),
+            storage().item_turbulence().rawPtr(),
             NULL,
             interfacePrefix
         )
     );
 }
 
-// TODO: makeOptional_ has to be connected to settings!
-void interTrackManager::DefaultRegion::Storage::create() const
+
+void interTrackManager::Region_DEFAULT::Storage::create
+(const word& ccase) const
 {
-    make_g();
-    make_p();
-    make_U();
-    make_phi();
-    make_rho();
-    make_mu();
-    makeOptional_F();
-    make_fluidIndicator();
-    make_transport();
+    item_g().enable();
+    item_p().enable();
+    item_U().enable();
+    item_phi().enable();
+    item_rho().enable();
+    item_mu().enable();
+    item_F().setState(settings().volumeForce);
+
+    item_fluidIndicator().enable();
+    item_transport().enable();
 
     // Init density from transport (viscosity) model
     {
@@ -404,8 +403,8 @@ void interTrackManager::DefaultRegion::Storage::create() const
         mu().correctBoundaryConditions();
     }
 
-    makeOptional_turbulence();
-    make_interface();
+    item_turbulence().setState(settings().turbulence);
+    item_interface().enable();
 }
 
 

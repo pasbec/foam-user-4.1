@@ -54,7 +54,10 @@ int main(int argc, char *argv[])
 
     interTrackManager manager(args, runTime, mesh);
 
-    SM_REGIONSCOPE_DEFAULTREGION(interTrackManager);
+    manager.read();
+    manager.init();
+
+    SM_GLOBALREGIONSCOPE(interTrackManager, DEFAULT);
 
     volScalarField& p = storage.p();
     volVectorField& U = storage.U();
@@ -66,6 +69,7 @@ int main(int argc, char *argv[])
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // TODO: Test F
+    storage.item_F().enable();
     volVectorField& F = storage.F();
     F == dimensionedVector
     (
@@ -120,7 +124,7 @@ int main(int argc, char *argv[])
             if
             (
                 control.turbCorr()
-             && storage.is_turbulence()
+             && storage.item_turbulence().enabled()
             )
             {
                 storage.turbulence().correct();

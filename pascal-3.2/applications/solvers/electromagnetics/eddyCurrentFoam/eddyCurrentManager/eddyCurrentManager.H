@@ -29,8 +29,8 @@ Description
 
 SourceFiles
     eddyCurrentManager.C
-    eddyCurrentManagerDefaultRegion.C
-    eddyCurrentManagerConductorRegion.C
+    eddyCurrentManagerRegionDEFAULT.C
+    eddyCurrentManagerRegionCONDUCTOR.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,15 +57,21 @@ namespace Foam
 
 class eddyCurrentManager
 :
-    public solverManager<regionFvMesh>
+    public solverManager<regionFvMesh, 2>
 {
 public:
 
-    // Public typedefs
+    // Public enums
 
-        typedef eddyCurrentManager ManagerType;
+        enum RegionNames
+        {
+            DEFAULT,
+            CONDUCTOR
+        };
 
     // Public data types
+
+        SM_HEADER_ADD(eddyCurrentManager)
 
         SM_GLOBALCONTROL_ADD_P1(eddyCurrentControl, mesh()[polyMesh::defaultRegion])
 
@@ -105,7 +111,9 @@ public:
         SM_GLOBALSTORAGE_ADD();
 
 
-        SM_DEFAULTREGION_NEW();
+        SM_REGION_NEW(DEFAULT);
+
+            SM_REGIONCONTROL_ADD_GLOBALCONTROL();
 
             SM_REGIONSETTINGS_NEW();
             SM_REGIONSETTINGS_ADD();
@@ -129,7 +137,9 @@ public:
         SM_REGION_END();
 
 
-        SM_REGION_NEW(ConductorRegion);
+        SM_REGION_NEW(CONDUCTOR);
+
+            SM_REGIONCONTROL_ADD_GLOBALCONTROL();
 
             SM_REGIONSETTINGS_NEW();
             SM_REGIONSETTINGS_ADD();
@@ -151,10 +161,10 @@ public:
 
         SM_REGIONS_NEW();
 
-            SM_REGIONS_DEFAULTREGION_ADD(mesh()[polyMesh::defaultRegion]);
+            SM_REGIONS_REGION_ADD(DEFAULT, mesh()[polyMesh::defaultRegion]);
 
 // TODO: Read name during construction
-            SM_REGIONS_REGION_ADD(ConductorRegion, conductorRegion, mesh()["region_conductor"]);
+            SM_REGIONS_REGION_ADD(CONDUCTOR, mesh()["region_conductor"]);
 
         SM_REGIONS_ADD();
 
@@ -212,8 +222,8 @@ public:
 
 #ifdef NoRepository
 #   include "eddyCurrentManager.C"
-#   include "eddyCurrentManagerDefaultRegion.C"
-#   include "eddyCurrentManagerConductorRegion.C"
+#   include "eddyCurrentManagerRegionDEFAULT.C"
+#   include "eddyCurrentManagerRegionCONDUCTOR.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
