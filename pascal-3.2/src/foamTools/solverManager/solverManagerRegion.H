@@ -34,15 +34,18 @@ Description
 
 #include "solverManagerWrapper.H"
 
+// TODO: Check if region is enabled or disabled!!
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_REGION_NEW_START(ENUM)                                            \
                                                                               \
-    SM_WRAPPER_NEW(Region, Region_##ENUM)                                      \
+    SM_WRAPPER_NEW(Region, Region_##ENUM)                                     \
                                                                               \
-        public: static const Manager::RegionNames regionName = ENUM;          \
+        public: static const solverManagerRegion::Labels regionLabel =        \
+            solverManagerRegion::ENUM;                                        \
                                                                               \
-        public: typedef Region_##ENUM ThisRegion;                              \
+        public: typedef Region_##ENUM ThisRegion;                             \
                                                                               \
         class Settings;                                                       \
         class Storage;
@@ -50,9 +53,9 @@ Description
 
 # define SM_REGION_NEW_INTERFACES(ENUM)                                       \
                                                                               \
-        public: virtual unsigned int regionIndex() const                      \
+        public: virtual label regionIndex() const                             \
         {                                                                     \
-            return Manager::ENUM;                                             \
+            return regionLabel;                                               \
         };                                                                    \
                                                                               \
         public: virtual Manager::Regions& regions() const                     \
@@ -141,12 +144,17 @@ Description
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace solverManagerRegion
+{
+
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerRegion Declaration
+                  Class solverManagerRegion::Region Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER>
-class solverManagerRegion
+class Region
 :
     public solverManagerBase::Region
     <
@@ -154,7 +162,7 @@ class solverManagerRegion
         typename MANAGER::Mesh,
         MANAGER::nRegions
     >,
-    public solverManagerWrapper<MANAGER, typename MANAGER::Mesh>
+    public solverManagerWrappers::Base<MANAGER, typename MANAGER::Mesh>
 {
 public:
 
@@ -163,7 +171,7 @@ public:
         // Linking
 
             // Region index
-            virtual unsigned int regionIndex() const = 0;
+            virtual label regionIndex() const = 0;
 
 
 private:
@@ -179,7 +187,7 @@ private:
             Mesh,
             MANAGER::nRegions
         > Base;
-        typedef solverManagerWrapper<MANAGER, Mesh> Wrapper;
+        typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
         typedef solverManagerBase::Regions
         <
@@ -195,17 +203,17 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverManagerRegion(const solverManagerRegion&);
+        Region(const Region&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverManagerRegion&);
+        void operator=(const Region&);
 
 
 public:
 
     // Constructor
 
-        solverManagerRegion(Mesh& mesh)
+        Region(Mesh& mesh)
         :
             Base(),
             Wrapper(mesh)
@@ -213,7 +221,7 @@ public:
 
     // Destructor
 
-        virtual ~solverManagerRegion() {};
+        virtual ~Region() {};
 
     // Member Functions
 
@@ -267,18 +275,32 @@ public:
             };
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace solverManagerRegion
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace solverManagerWrappers
 {
+
+/*---------------------------------------------------------------------------*\
+                Class solverManagerWrappers::Region Declaration
+\*---------------------------------------------------------------------------*/
+
     template <class MANAGER>
     struct Region
     {
         typedef typename MANAGER::Mesh Mesh;
 
-        typedef solverManagerRegion<MANAGER> Type;
+        typedef solverManagerRegion::Region<MANAGER> Type;
     };
-}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace solverManagerWrappers
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

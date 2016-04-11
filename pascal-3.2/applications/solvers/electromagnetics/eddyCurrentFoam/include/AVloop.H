@@ -1,26 +1,14 @@
 
-# define updateSigmaA(regionI)                                                \
-                                                                              \
-    sigma_.mapExtrapolate(regionI);                                           \
-    ARe_.mapInterpolate(regionI);                                             \
-    AIm_.mapInterpolate(regionI);
-
-# define updateRmapGradient(regionI,vsf)                                      \
-                                                                              \
-    vsf##Grad_[regionI] == fvc::grad(vsf);                                    \
-    vsf##Grad_.rmap(regionI);
-
-# define updateGradientV(regionI)                                             \
-                                                                              \
-    updateRmapGradient(regionI,VRe);                                          \
-    updateRmapGradient(regionI,VIm);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
     // Init gradient of V in first iteration
     if (control.meshIs3D() )
     {
-        updateGradientV(control.conductor());
+        SM_REGIONSCOPE(CONDUCTOR);
+
+        globalStorage.VReGrad()[CONDUCTOR] == fvc::grad(storage.VRe());
+        globalStorage.VImGrad()[CONDUCTOR] == fvc::grad(storage.VIm());
+
+        globalStorage.VReGrad().rmap(CONDUCTOR);
+        globalStorage.VImGrad().rmap(CONDUCTOR);
     }
 
     // AV iterations
@@ -28,31 +16,62 @@
     {
         // Solve for A in base region
         {
-            setRegionScope(control.base());
+            SM_REGIONSCOPE(DEFAULT);
+
+            volScalarField& sigma = globalStorage.sigma()[DEFAULT];
+
+            volVectorField& ARe = globalStorage.ARe()[DEFAULT];
+            volVectorField& AIm = globalStorage.AIm()[DEFAULT];
+
+            volVectorField& VReGrad = globalStorage.VReGrad()[DEFAULT];
+            volVectorField& VImGrad = globalStorage.VImGrad()[DEFAULT];
+
+            volVectorField& j0Re = storage.j0Re();
+            volVectorField& j0Im = storage.j0Im();
 
 #           include "AEqn.H"
         }
 
-        // Only if mesh is 3D
+        // The electric scalar potential is only necesasry if have
+        // a 3D case
         if (control.meshIs3D())
         {
-            // Update A and sigma
-            updateSigmaA(control.conductor());
+            // Update sigma in conductor region
+            globalStorage.sigma().mapExtrapolate(CONDUCTOR);
+
+            // Update A in conductor region
+            globalStorage.ARe().mapExtrapolate(CONDUCTOR);
+            globalStorage.AIm().mapExtrapolate(CONDUCTOR);
 
             // Solve for V in conductor region
             {
-                setRegionScope(control.conductor());
+                SM_REGIONSCOPE(CONDUCTOR);
+
+                volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];
+
+                volVectorField& ARe = globalStorage.ARe()[CONDUCTOR];
+                volVectorField& AIm = globalStorage.AIm()[CONDUCTOR];
+
+                volScalarField& VRe = storage.VRe();
+                volScalarField& VIm = storage.VIm();
 
                 // Relax A
-                control.relax(ARe);
-                control.relax(AIm);
+// TODO
+//                 control.relax(globalStorage.ARe());
+//                 control.relax(globalStorage.AIm());
 
 #               include "VEqn.H"
             }
 
             // Update gradient of V
-            updateGradientV(control.conductor());
+            {
+                SM_REGIONSCOPE(CONDUCTOR);
+
+                globalStorage.VReGrad()[CONDUCTOR] == fvc::grad(storage.VRe());
+                globalStorage.VImGrad()[CONDUCTOR] == fvc::grad(storage.VIm());
+
+                globalStorage.VReGrad().rmap(CONDUCTOR);
+                globalStorage.VImGrad().rmap(CONDUCTOR);
+            }
         }
     }
-
-    Info << nl;

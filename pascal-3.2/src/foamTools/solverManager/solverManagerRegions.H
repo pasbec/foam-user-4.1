@@ -74,12 +74,17 @@ Description
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace solverManagerRegions
+{
+
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerRegions Declaration
+                Class solverManagerRegions::Regions Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER>
-class solverManagerRegions
+class Regions
 :
     public solverManagerBase::Regions
     <
@@ -87,7 +92,7 @@ class solverManagerRegions
         typename MANAGER::Mesh,
         MANAGER::nRegions
     >,
-    public solverManagerWrapper<MANAGER, typename MANAGER::ManagerMesh>
+    public solverManagerWrappers::Base<MANAGER, typename MANAGER::ManagerMesh>
 {
 private:
 
@@ -102,7 +107,7 @@ private:
             SubMesh,
             MANAGER::nRegions
         > Base;
-        typedef solverManagerWrapper<MANAGER, Mesh> Wrapper;
+        typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
         typedef solverManagerBase::Region
         <
@@ -114,10 +119,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverManagerRegions(const solverManagerRegions&);
+        Regions(const Regions&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverManagerRegions&);
+        void operator=(const Regions&);
 
         // Evolution
 
@@ -129,7 +134,7 @@ public:
 
     // Constructor
 
-        solverManagerRegions(Mesh& mesh)
+        Regions(Mesh& mesh)
         :
             Base(),
             Wrapper(mesh)
@@ -137,7 +142,7 @@ public:
 
     // Destructor
 
-        virtual ~solverManagerRegions() {};
+        virtual ~Regions() {};
 
     // Member Functions
 
@@ -156,17 +161,29 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace solverManagerRegions
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace solverManagerWrappers
 {
+
+/*---------------------------------------------------------------------------*\
+               Class solverManagerWrappers::Regions Declaration
+\*---------------------------------------------------------------------------*/
+
     template <class MANAGER>
     struct Regions
     {
         typedef typename MANAGER::ManagerMesh Mesh;
 
-        typedef solverManagerRegions<MANAGER> Type;
+        typedef solverManagerRegions::Regions<MANAGER> Type;
     };
-}
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace solverManagerWrappers
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

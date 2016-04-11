@@ -234,9 +234,6 @@ public:
     //- Runtime type information
     TypeName("regionPolyMesh");
 
-    //- Return the region data sub-directory name (usually "regionPolyMesh")
-    static word regionPolyMeshSubDir;
-
     // Constructors
 
         //- Construct from time
@@ -268,7 +265,7 @@ public:
                 if (!initialized()) initMeshes(regionNames);
             };
 
-            bool initialized() const
+            inline bool initialized() const
             {
                 return initialized_;
             }
@@ -276,68 +273,137 @@ public:
         // Access
 
             //- Return reference to regionPolyMesh
-            const regionPolyMesh& rpmesh() const
+            inline const regionPolyMesh& rpmesh() const
             {
                 return *this;
             };
 
             //- Return const reference to time
-            const Time& time() const
+            inline const Time& time() const
             {
                 return time_;
             };
 
             //- Return const reference to global region count
-            const label& size() const
+            inline const label& size() const
             {
                 return size_;
             };
 
             //- Return const reference to the list of all region names
-            const List<word>& regionNames() const
+            inline const List<word>& regionNames() const
             {
                 return regionNames_;
             };
 
             //- Return name of region with index regionI
-            word regionName(const label& regionI) const
+            inline word regionName(const label& regionI) const
             {
                 return regionNames_[regionI];
             }
 
+// TODO: Use hash table
             //- Return region index for region with regionName
-            label regionIndex(const word& regionName) const;
+            label regionIndex
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const;
 
             //- Return whether this is a processor mesh
-            const bool& parallel() const
+            inline const bool& parallel() const
             {
                 return parallel_;
             }
 
             //- Return whether mesh was split into regions
             //  AFTER parallel decomposition of processors
-            const bool& parallelSplitRegions() const
+            inline const bool& parallelSplitRegions() const
             {
                 return parallelSplitRegions_;
             }
 
             //- Return reference to mesh
-            polyMesh& mesh(const label& regionI) const
+            inline polyMesh& mesh(const label& regionI) const
             {
                 return operator[](regionI);
             }
 
             //- Return reference to mesh
-            polyMesh& mesh(const word& regionName) const
+            inline polyMesh& mesh
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
             {
                 return operator[](regionIndex(regionName));
             }
 
             //- Return the object registry
-            const objectRegistry& thisDb() const
+            inline const objectRegistry& thisDb() const
             {
                 return *this;
             }
+
+        // Active mesh data
+
+            //- Return the vector of geometric directions in mesh
+            inline const Vector<label>& geometricD(const label& regionI) const
+            {
+                return operator[](regionI).geometricD();
+            };
+
+            //- Return the vector of geometric directions in mesh
+            inline const Vector<label>& geometricD
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
+            {
+                return operator[](regionIndex(regionName)).geometricD();
+            };
+
+            //- Return the number of valid geometric dimensions in the mesh
+            inline label nGeometricD(const label& regionI) const
+            {
+                return operator[](regionI).nGeometricD();
+            };
+
+            //- Return the number of valid geometric dimensions in the mesh
+            inline label nGeometricD
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
+            {
+                return operator[](regionIndex(regionName)).nGeometricD();
+            };
+
+            //- Return the vector of solved-for directions in mesh
+            inline const Vector<label>& solutionD(const label& regionI) const
+            {
+                return operator[](regionI).solutionD();
+            };
+
+            //- Return the vector of solved-for directions in mesh
+            inline const Vector<label>& solutionD
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
+            {
+                return operator[](regionIndex(regionName)).solutionD();
+            };
+
+            //- Return the number of valid solved-for dimensions in the mesh
+            inline label nSolutionD(const label& regionI) const
+            {
+                return operator[](regionI).nSolutionD();
+            };
+
+            //- Return the number of valid solved-for dimensions in the mesh
+            inline label nSolutionD
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
+            {
+                return operator[](regionIndex(regionName)).nSolutionD();
+            };
 
         // Mapping
 
@@ -454,7 +520,7 @@ public:
         }
 
         //- Mesh access operator by regionName
-        polyMesh& operator[](const word& regionName) const
+        inline polyMesh& operator[](const word& regionName) const
         {
             return operator[](regionIndex(regionName));
         }

@@ -1,27 +1,42 @@
 
     // Derived fields in base region
     {
+        SM_REGIONSCOPE(DEFAULT);
+
+        volScalarField& sigma = globalStorage.sigma()[DEFAULT];
+
+        volVectorField& ARe = globalStorage.ARe()[DEFAULT];
+        volVectorField& AIm = globalStorage.AIm()[DEFAULT];
+
+        volVectorField& VReGrad = globalStorage.VReGrad()[DEFAULT];
+        volVectorField& VImGrad = globalStorage.VImGrad()[DEFAULT];
+
+        volVectorField& FL = globalStorage.FL()[DEFAULT];
+        volScalarField& pB = globalStorage.pB()[DEFAULT];
+
         // Magnetic field density
-        BRe == fvc::curl(ARe);
-        BIm == fvc::curl(AIm);
+        storage.BRe() == fvc::curl(ARe);
+        storage.BIm() == fvc::curl(AIm);
 
         // Eddy current density
-        jRe ==   omega0 * sigma * AIm - sigma * VReGrad;
-        jIm == - omega0 * sigma * ARe - sigma * VImGrad;
+        storage.jRe() ==   omega0 * sigma * AIm - sigma * VReGrad;
+        storage.jIm() == - omega0 * sigma * ARe - sigma * VImGrad;
 
         // Time-averaged Lorentz-force
-        FL == 0.5 * ( (jRe ^ BRe) + (jIm ^ BIm) );
+        FL == 0.5 * ( (storage.jRe() ^ storage.BRe())
+                    + (storage.jIm() ^ storage.BIm()) );
 
         // Time-averaged magnetic pressure
         pB == 0.5 * physicalConstant::rMu0
-            * 0.5 * ( (BRe & BRe) + (BIm & BIm) );
+            * 0.5 * ( (storage.BRe() & storage.BRe())
+                    + (storage.BIm() & storage.BIm()) );
     }
 
     // Derived fields in conductor region
     {
-        FL.mapExtrapolate(control.conductor());
-        pB.mapExtrapolate(control.conductor());
-// TODO TEST FIXME Extrapolation sometimes fails
-//         FL.mapCopyInternal(control.conductor());
-//         pB.mapCopyInternal(control.conductor());
+        globalStorage.FL().mapExtrapolate(CONDUCTOR);
+        globalStorage.pB().mapExtrapolate(CONDUCTOR);
+// // TODO FIXME Extrapolation sometimes fails
+//         globalStorage.FL().mapCopyInternal(CONDUCTOR);
+//         globalStorage.pB().mapCopyInternal(CONDUCTOR);
     }

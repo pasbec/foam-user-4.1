@@ -44,7 +44,7 @@ Description
 namespace Foam
 {
 
-template <class MESH, unsigned int NREGIONS> class solverManager;
+template <class MESH, label NREGIONS> class solverManager;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,8 +55,8 @@ template <class MESH> class Mesh;
 template <class MESH> class Settings;
 template <class MESH, class TYPE> class Item;
 template <class MESH> class Storage;
-template <class MANAGERMESH, class MESH, unsigned int NREGIONS> class Region;
-template <class MANAGERMESH, class MESH, unsigned int NREGIONS> class Regions;
+template <class MANAGERMESH, class MESH, label NREGIONS> class Region;
+template <class MANAGERMESH, class MESH, label NREGIONS> class Regions;
 
 /*---------------------------------------------------------------------------*\
                   Class solverManagerBase::Mesh Declaration
@@ -875,31 +875,11 @@ public:
                 return itemHashTable();
             };
 
-            //- Find existing item by ref to its data content
+            //- Find existing item by named item and return ref cast to T
             template<class T>
-            inline Item<MESH, T>* item(const T& itemData) const
+            inline T& item(const word& name) const
             {
-                Item<MESH, T>* itemPointer = NULL;
-
-                forAllConstIter(
-                    typename ItemHashTable, itemHashTable(), iter)
-                {
-                    itemPointer = dynamic_cast<Item<MESH, T>*>(iter());
-
-                    if(itemPointer->ptr() == &itemData)
-                    {
-                        return itemPointer;
-                    }
-                }
-
-                return itemPointer;
-            };
-
-            //- Find existing item by named item and return ptr cast to T
-            template<class T>
-            inline Item<MESH, T>* item(const word& name) const
-            {
-                return dynamic_cast<Item<MESH, T>*>(itemHashTable()[name]);
+                return *dynamic_cast<T*>(itemHashTable()[name]);
             };
 
         // Basic
@@ -912,7 +892,7 @@ public:
         // Items
 
             //- Find and return existing named item
-            inline ItemCore& operator[](const word& name) const
+            virtual ItemCore& operator[](const word& name) const
             {
                 return *itemHashTable()[name];
             };
@@ -923,7 +903,7 @@ public:
                   Class solverManagerBase::Region Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGERMESH, class MESH, unsigned int NREGIONS>
+template <class MANAGERMESH, class MESH, label NREGIONS>
 class Region
 :
     public Read,
@@ -937,7 +917,7 @@ public:
         // Linking
 
             // Region index
-            virtual unsigned int regionIndex() const = 0;
+            virtual label regionIndex() const = 0;
 
 
 private:
@@ -1055,7 +1035,7 @@ public:
                   Class solverManagerBase::Regions Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGERMESH, class MESH, unsigned int NREGIONS>
+template <class MANAGERMESH, class MESH, label NREGIONS>
 class Regions
 :
     public Create,
@@ -1068,7 +1048,7 @@ public:
     // Friends declarations
 
         //- Friend with Region
-        template<class MM, class M, unsigned int N> friend class Region;
+        template<class MM, class M, label N> friend class Region;
 
 
 private:
@@ -1079,7 +1059,7 @@ private:
         typedef HashTable
             <
                 Region<MANAGERMESH, MESH, NREGIONS>*,
-                unsigned int
+                label
             > RegionHashTable;
 
     // Private Data
@@ -1176,7 +1156,7 @@ public:
 
             //- Find existing named region and ref cast to T
             template<class T>
-            inline T& region(const unsigned int& regionI) const
+            inline T& region(const label& regionI) const
             {
                 return *dynamic_cast<T*>(regionHashTable()[regionI]);
             };
@@ -1191,9 +1171,9 @@ public:
         // Regions
 
             //- Return region by index
-            inline Region<MANAGERMESH, MESH, NREGIONS>& operator[]
+            virtual Region<MANAGERMESH, MESH, NREGIONS>& operator[]
             (
-                const unsigned int& regionI
+                const label& regionI
             ) const
             {
                 return *regionHashTable()[regionI];
@@ -1214,7 +1194,7 @@ public:
     // Friends declarations
 
         //- Friend with solverManager
-        template <class M, unsigned int N> friend class solverManager;
+        template <class M, label N> friend class solverManager;
 
 
 private:

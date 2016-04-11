@@ -14,25 +14,33 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+regions
+{
+    conductor    "region_conductor";
+}
+
 settings
 {
-    debug                   1;
+    debug        1;
+
+    region0
+    {
+    }
+
+    region_conductor
+    {
+    }
 }
 
 storage
 {
-}
+    region0
+    {
+    }
 
-regions
-{
-    conductor    region_conductor;
+    region_conductor
+    {
+    }
 }
-
-patches
-{
-    interface    oldInternalFaces;
-}
-
-frequency        frequency [ 0 0 -1 0 0 0 0 ] 10000.0;
 
 // ************************************************************************* //

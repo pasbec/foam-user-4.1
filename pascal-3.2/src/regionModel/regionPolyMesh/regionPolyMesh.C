@@ -34,8 +34,6 @@ namespace Foam
 
 defineTypeNameAndDebug(regionPolyMesh, 0);
 
-word regionPolyMesh::regionPolyMeshSubDir = "regionPolyMesh";
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -64,7 +62,7 @@ wordList regionPolyMesh::readRegionNames() const
         (
             "regions",
             this->time().constant(),
-            *this,
+            this->time(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -196,7 +194,7 @@ regionPolyMesh::regionPolyMesh
     objectRegistry(
         IOobject
         (
-            "regionPolyMesh",
+            "regions[]",
             runTime.constant(),
             runTime.db(),
             IOobject::NO_READ,
@@ -236,7 +234,7 @@ regionPolyMesh::regionPolyMesh
     objectRegistry(
         IOobject
         (
-            "regionPolyMesh",
+            "regions[]",
             runTime.constant(),
             runTime.db(),
             IOobject::NO_READ,

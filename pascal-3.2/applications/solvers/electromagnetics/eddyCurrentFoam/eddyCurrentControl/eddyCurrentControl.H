@@ -62,6 +62,24 @@ class eddyCurrentControl
 {
 private:
 
+    // Private data
+
+        // Setup
+
+            //- Is mesh 3D?
+            const bool mesh3D_;
+
+            //- Solution direction
+            const Vector<label> solutionDir_;
+
+            //- Name of conductor interface
+            const word interfacePatchName_;
+
+            //- Label of conductor interface
+            const word interfacePatch_;
+
+        // Solution control
+
     // Private member functions
 
         //- Disallow default bitwise copy construct
@@ -103,6 +121,34 @@ public:
 
 
     // Member Functions
+
+        // Setup
+
+            //- Mesh geometry is 3D
+            inline bool meshIs3D() const
+            {
+                return mesh3D_;
+            };
+
+            //- Mesh solution direction
+            inline const Vector<label>& solutionDir() const
+            {
+                return solutionDir_;
+            };
+
+            //- Reference to conductor interface name
+            const word& interfaceName() const
+            {
+                return interfacePatchName_;
+            };
+
+            //- Reference to conductor interface ID
+            inline const word& interface() const
+            {
+                return interfacePatch_;
+            };
+
+        // Solution control
 
         // Evolution
 

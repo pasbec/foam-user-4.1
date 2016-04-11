@@ -66,7 +66,7 @@ Description
         {                                                                     \
             return static_cast<ThisRegion&>                                   \
             (                                                                 \
-                manager().regions()[regionName]                               \
+                manager().regions()[regionLabel]                              \
             );                                                                \
         };                                                                    \
                                                                               \
@@ -189,14 +189,14 @@ template <class MANAGER, class MESH, class TYPE>
 class Item
 :
     public solverManagerBase::Item<MESH, TYPE>,
-    public solverManagerWrapper<MANAGER, MESH>
+    public solverManagerWrappers::Base<MANAGER, MESH>
 {
 private:
 
     // Private typedefs
 
         typedef solverManagerBase::Item<MESH, TYPE> Base;
-        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
+        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
 
         typedef typename solverManagerBase::Storage<MESH> Storage;
 
@@ -277,7 +277,7 @@ private:
 
         typedef Item<MANAGER, MESH, TYPE> Parent;
         typedef solverManagerBase::Item<MESH, TYPE> Base;
-        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
+        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
 
         typedef solverManagerBase::Region
         <
@@ -363,7 +363,7 @@ private:
 
         typedef Item<MANAGER, MESH, TYPE> Parent;
         typedef solverManagerBase::Item<MESH, TYPE> Base;
-        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
+        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
 
         typedef typename solverManagerBase::Storage<MESH> Storage;
 
@@ -427,6 +427,11 @@ public:
 
 namespace solverManagerWrappers
 {
+
+/*---------------------------------------------------------------------------*\
+            Class solverManagerWrappers::RegionItem Declaration
+\*---------------------------------------------------------------------------*/
+
     template <class MANAGER, class TYPE>
     struct RegionItem
     {
@@ -436,6 +441,10 @@ namespace solverManagerWrappers
     };
 
 
+/*---------------------------------------------------------------------------*\
+            Class solverManagerWrappers::GlobalItem Declaration
+\*---------------------------------------------------------------------------*/
+
     template <class MANAGER, class TYPE>
     struct GlobalItem
     {
@@ -443,8 +452,11 @@ namespace solverManagerWrappers
 
         typedef solverManagerItem::GlobalItem<MANAGER, Mesh, TYPE> Type;
     };
-}
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace solverManagerWrappers
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -124,31 +124,31 @@ public:
         // Access
 
             //- Return reference to mesh
-            fvMesh& mesh(const label& regionI) const
+            inline fvMesh& mesh(const label& regionI) const
             {
                 return operator[](regionI);
             }
 
             //- Return reference to mesh
-            fvMesh& mesh(const word& regionName) const
+            inline fvMesh& mesh(const word& regionName) const
             {
                 return operator[](regionIndex(regionName));
             }
 
             //- Return reference to default solution dict
-            fvSolution& solutionDict() const
+            inline fvSolution& solutionDict() const
             {
                 return mesh(regionIndex(polyMesh::defaultRegion)).solutionDict();
             };
 
             //- Return reference to solution dict
-            fvSolution& solutionDict(const label& regionI) const
+            inline fvSolution& solutionDict(const label& regionI) const
             {
                 return mesh(regionI).solutionDict();
             };
 
             //- Return reference to solution dict
-            fvSolution& solutionDict(const word& regionName) const
+            inline fvSolution& solutionDict(const word& regionName) const
             {
                 return mesh(regionIndex(regionName)).solutionDict();
             };
@@ -162,7 +162,7 @@ public:
         }
 
         //- Mesh access operator by regionName
-        fvMesh& operator[](const word& regionName) const
+        inline fvMesh& operator[](const word& regionName) const
         {
             return operator[](regionIndex(regionName));
         }

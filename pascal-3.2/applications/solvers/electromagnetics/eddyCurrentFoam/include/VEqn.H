@@ -32,7 +32,7 @@
                         );
 
                     // Set correct gradient
-                    VReP.gradient() =  control.omega().value()
+                    VReP.gradient() =  omega0.value()
                     * (AIm.boundaryField()[patchI] & VReP.patch().nf());
 
                     // Evaluate values
@@ -52,7 +52,7 @@
                         );
 
                     // Set correct gradient
-                    VImP.gradient() = -control.omega().value()
+                    VImP.gradient() = -omega0.value()
                     * (ARe.boundaryField()[patchI] & VImP.patch().nf());
 
                     // Evaluate values
@@ -73,12 +73,12 @@
 
         // Explicit source terms due to variable sigma
         // in conducting region with implied condition div(A)=0
-        VReEqn -= control.omega() * (sigmaGrad & AIm);
-        VImEqn += control.omega() * (sigmaGrad & ARe);
+        VReEqn -= omega0 * (sigmaGrad & AIm);
+        VImEqn += omega0 * (sigmaGrad & ARe);
 
 //         // TEST
-//         VReEqn -= control.omega() * sigma * fvc::div(AIm);
-//         VImEqn += control.omega() * sigma * fvc::div(ARe);
+//         VReEqn -= omega0 * sigma * fvc::div(AIm);
+//         VImEqn += omega0 * sigma * fvc::div(ARe);
 
 //         // Restore solution level from average
 //         cVRe += VReAverage;
@@ -88,13 +88,17 @@
         // NOTE: Currently a deflated solver is necessary
         //       as both matrices are kept singluar!
         // TODO: Warning if no deflated solver is used!
-        lduSolverPerformance VReEqnPerf = VReEqn.solve(control.Vdict());
-        lduSolverPerformance VImEqnPerf = VImEqn.solve(control.Vdict());
+// TODO
+//         lduSolverPerformance VReEqnPerf = VReEqn.solve(control.Vdict());
+//         lduSolverPerformance VImEqnPerf = VImEqn.solve(control.Vdict());
+        lduSolverPerformance VReEqnPerf = VReEqn.solve();
+        lduSolverPerformance VImEqnPerf = VImEqn.solve();
 
         // Store max residual
         scalar resVRe = VReEqnPerf.initialResidual();
         scalar resVIm = VImEqnPerf.initialResidual();
-        control.setResidualOfV(max(resVRe, resVIm));
+// TODO
+//         control.setResidualOfV(max(resVRe, resVIm));
 
         // Correct boundary conditions
         VRe.correctBoundaryConditions();

@@ -299,12 +299,17 @@ Description
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace solverManagerWrappers
+{
+
 /*---------------------------------------------------------------------------*\
-                       Class solverManagerWrapper Declaration
+                   Class solverManagerWrappers::Base Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class MESH>
-class solverManagerWrapper
+class Base
 {
 private:
 
@@ -318,10 +323,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        solverManagerWrapper(const solverManagerWrapper&);
+        Base(const Base&);
 
         //- Disallow default bitwise assignment
-        void operator=(const solverManagerWrapper&);
+        void operator=(const Base&);
 
 
 protected:
@@ -341,14 +346,14 @@ public:
 
     // Constructor
 
-        solverManagerWrapper (MESH& mesh)
+        Base (MESH& mesh)
         :
             mesh_(mesh)
         {};
 
     // Destructor
 
-        virtual ~solverManagerWrapper() {};
+        virtual ~Base() {};
 
     // Member Functions
 
@@ -389,6 +394,11 @@ public:
                 return manager().propertiesDict();
             };
 
+            inline const dictionary& regionsDict() const
+            {
+                return propertiesDict().subDict("regions");
+            };
+
             //- Settings dictionary
             inline const dictionary& settingsDict() const
             {
@@ -402,6 +412,10 @@ public:
             };
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace solverManagerWrappers
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

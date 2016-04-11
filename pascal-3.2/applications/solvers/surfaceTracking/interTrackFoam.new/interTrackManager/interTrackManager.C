@@ -177,11 +177,18 @@ interTrackManager::interTrackManager
     const bool& master
 )
 :
-    solverManager<dynamicFvMesh, 1>
+    solverManager<dynamicFvMesh, solverManagerRegion::SIZE>
     (
         args, time, mesh, name, master
     )
-{}
+{
+    // Use solverManagerRegion to get region labels and size
+    using namespace solverManagerRegion;
+
+    // Region name list
+    regionNames_.setSize(SIZE);
+    regionNames_[DEFAULT] = polyMesh::defaultRegion;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -34,7 +34,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 void solverManager<MESH, NREGIONS>::errorIfNotMaster() const
 {
     if (!master())
@@ -47,7 +47,7 @@ void solverManager<MESH, NREGIONS>::errorIfNotMaster() const
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 void solverManager<MESH, NREGIONS>::readParameters
 (
     Parameters& parameters
@@ -59,7 +59,7 @@ void solverManager<MESH, NREGIONS>::readParameters
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 void solverManager<MESH, NREGIONS>::readTimeParameters
 (
     TimeParameters& timePar
@@ -80,7 +80,7 @@ void solverManager<MESH, NREGIONS>::readTimeParameters
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 void solverManager<MESH, NREGIONS>::calcDeltaT
 (
     scalar& deltaT
@@ -110,7 +110,7 @@ void solverManager<MESH, NREGIONS>::calcDeltaT
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 void solverManager<MESH, NREGIONS>::applyDeltaT() const
 {
     errorIfNotMaster();
@@ -159,7 +159,7 @@ void solverManager<MESH, NREGIONS>::applyDeltaT() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 solverManager<MESH, NREGIONS>::solverManager
 (
     const argList& args,
@@ -196,7 +196,7 @@ solverManager<MESH, NREGIONS>::solverManager
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 const typename solverManager<MESH, NREGIONS>::Parameters&
 solverManager<MESH, NREGIONS>::parameters() const
 {
@@ -214,7 +214,7 @@ solverManager<MESH, NREGIONS>::parameters() const
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 const typename solverManager<MESH, NREGIONS>::Messages&
 solverManager<MESH, NREGIONS>::messages() const
 {
@@ -232,7 +232,7 @@ solverManager<MESH, NREGIONS>::messages() const
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 void solverManager<MESH, NREGIONS>::read() const
 {
     settings().checkRead();
@@ -240,7 +240,7 @@ void solverManager<MESH, NREGIONS>::read() const
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 void solverManager<MESH, NREGIONS>::init() const
 {
     storage().checkInit();
@@ -248,7 +248,7 @@ void solverManager<MESH, NREGIONS>::init() const
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 bool solverManager<MESH, NREGIONS>::once() const
 {
     errorIfNotMaster();
@@ -264,6 +264,7 @@ bool solverManager<MESH, NREGIONS>::once() const
             runTime++;
         }
 
+        messages().newLine();
         messages().timeIs();
         messages().newLine();
 
@@ -294,7 +295,7 @@ bool solverManager<MESH, NREGIONS>::once() const
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 bool solverManager<MESH, NREGIONS>::loop() const
 {
     errorIfNotMaster();
@@ -346,7 +347,7 @@ bool solverManager<MESH, NREGIONS>::loop() const
 }
 
 
-template <class MESH, unsigned int NREGIONS>
+template <class MESH, label NREGIONS>
 bool solverManager<MESH, NREGIONS>::run() const
 {
     errorIfNotMaster();

@@ -7,14 +7,14 @@
             physicalConstant::rMu0 * fvm::laplacian(ARe)
 //        + sigma * control.omega() * AIm
 //        - sigma * VReGrad
-          + jsRe
+          + j0Re
         );
         fvVectorMatrix AImEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(AIm)
 //        - sigma * control.omega() * ARe
 //        - sigma * VImGrad
-          + jsIm
+          + j0Im
         );
 
         // Create list with boundary types
@@ -39,7 +39,7 @@
         for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
         {
             // Only solve for valid directions
-            if (control.solutionDir()[cmpt] < 1) continue;
+            if(control.solutionDir()[cmpt] < 1) continue;
 
             // Create component fields
             volScalarField AReCmpt
@@ -127,8 +127,8 @@
 
             // Add coupling terms for real/imagninary ARe-AIm
             // dependence of magnetic vector potential
-            AcmptEqn.insertEquationCoupling(0, 1,  control.omega() * sigma);
-            AcmptEqn.insertEquationCoupling(1, 0, -control.omega() * sigma);
+            AcmptEqn.insertEquationCoupling(0, 1,  omega0 * sigma);
+            AcmptEqn.insertEquationCoupling(1, 0, -omega0 * sigma);
 
             // Solve A
             BlockSolverPerformance<vector2> AcmptEqnPerf("A", "A");
@@ -136,7 +136,9 @@
             scalar preResidual= gMax(mag(AcmptEqn.residual(ACmpt, AcmptEqn.source())));
             if (preResidual > 0)
             {
-                AcmptEqnPerf = AcmptEqn.solve(control.Adict());
+// TODO
+//                 AcmptEqnPerf = AcmptEqn.solve(control.Adict());
+                AcmptEqnPerf = AcmptEqn.solve();
             }
 
 //             // Solve A
@@ -161,7 +163,8 @@
         }
 
         // Store max residual
-        control.setResidualOfA(resAcmpt);
+// TODO
+//         control.setResidualOfA(resAcmpt);
 
         // Correct boundary conditions
         ARe.correctBoundaryConditions();

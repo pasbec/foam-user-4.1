@@ -50,7 +50,7 @@ void eddyCurrentManager::Region_DEFAULT::Storage::Item_j0Re::create
                 "j0Re",
                 time().timeName(),
                 mesh(),
-                IOobject::MUST_READ,
+                IOobject::READ_IF_PRESENT,
                 IOobject::AUTO_WRITE
             ),
             mesh(),
@@ -78,10 +78,17 @@ void eddyCurrentManager::Region_DEFAULT::Storage::Item_j0Im::create
                 "j0Im",
                 time().timeName(),
                 mesh(),
-                IOobject::MUST_READ,
+                IOobject::READ_IF_PRESENT,
                 IOobject::AUTO_WRITE
             ),
-            mesh()
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimCurrent/dimArea,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
         )
     );
 }
@@ -201,7 +208,16 @@ void eddyCurrentManager::Region_DEFAULT::Storage::Item_BIm::create
 
 void eddyCurrentManager::Region_DEFAULT::Storage::create
 (const word& ccase) const
-{}
+{
+    item_j0Re().enable();
+    item_j0Im().enable();
+
+    item_jRe().enable();
+    item_jIm().enable();
+
+    item_BRe().enable();
+    item_BIm().enable();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

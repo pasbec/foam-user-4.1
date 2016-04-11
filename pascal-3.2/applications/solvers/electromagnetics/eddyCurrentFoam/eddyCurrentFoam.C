@@ -47,9 +47,7 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 #   include "createTime.H"
-#   include "createRegionMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#   include "createRegionMeshUninitialized.H"
 
     eddyCurrentManager manager(args, runTime, regionMesh);
 
@@ -64,32 +62,9 @@ int main(int argc, char *argv[])
 
     while(manager.once())
     {
-// #       include "AVloop.H"
+#       include "AVloop.H"
 
-        {
-            SM_REGIONSCOPE(DEFAULT);
-
-//             volScalarField& sigma = manager.storage().sigma()[mesh.name()];
-//
-//             volVectorField& ARe = manager.storage().ARe()[mesh.name()];
-//             volVectorField& AIm = manager.storage().AIm()[mesh.name()];
-//
-//             volVectorField& VReGrad = manager.storage().VReGrad()[mesh.name()];
-//             volVectorField& VImGrad = manager.storage().VImGrad()[mesh.name()];
-//
-//             volVectorField& FL = manager.storage().FL()[mesh.name()];
-//             volScalarField& pB = manager.storage().pB()[mesh.name()];
-//
-//             volVectorField& jRe = manager.regions().defaultRegion().storage().jRe();
-//             volVectorField& jIm = manager.regions().defaultRegion().storage().jIm();
-//             volVectorField& BRe = manager.regions().defaultRegion().storage().BRe();
-//             volVectorField& BIm = manager.regions().defaultRegion().storage().BIm();
-//
-//             regionVolVectorField& FL = manager.storage().FL();
-//             regionVolScalarField& pB = manager.storage().pB();
-
-// #           include "derivedFields.H"
-        }
+#       include "derivedFields.H"
     }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

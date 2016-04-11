@@ -269,6 +269,17 @@ void eddyCurrentManager::Storage::create(const word& ccase) const
 {
     item_f0().enable();
     item_omega0().enable();
+
+    item_sigma().enable();
+
+    item_ARe().enable();
+    item_AIm().enable();
+
+    item_VReGrad().enable();
+    item_VImGrad().enable();
+
+    item_FL().enable();
+    item_pB().enable();
 }
 
 
@@ -306,11 +317,23 @@ eddyCurrentManager::eddyCurrentManager
     const bool& master
 )
 :
-    solverManager<regionFvMesh, 2>
+    solverManager<regionFvMesh, solverManagerRegion::SIZE>
     (
         args, time, mesh, name, master
-    )
-{}
+    ),
+    regionNames_(wordList())
+{
+    // Use solverManagerRegion to get region labels and size
+    using namespace solverManagerRegion;
+
+    // Region name list
+    regionNames_.setSize(SIZE);
+    regionNames_[DEFAULT] = polyMesh::defaultRegion;
+    regionNames_[CONDUCTOR] = word(this->regionsDict().lookup("conductor"));
+
+    // Init regionMesh
+    mesh.init(regionNames_);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

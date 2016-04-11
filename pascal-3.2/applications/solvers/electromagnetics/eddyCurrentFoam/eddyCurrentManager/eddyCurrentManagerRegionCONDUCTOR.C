@@ -134,7 +134,13 @@ void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VImAverage::create
 
 void eddyCurrentManager::Region_CONDUCTOR::Storage::create
 (const word& ccase) const
-{}
+{
+    item_VRe().enable();
+    item_VIm().enable();
+    
+    item_VReAverage().enable();
+    item_VImAverage().enable();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

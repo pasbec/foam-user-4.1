@@ -129,49 +129,49 @@ public:
         // Access
 
             //- Return reference to mesh
-            dynamicFvMesh& mesh(const label& regionI) const
+            inline dynamicFvMesh& mesh(const label& regionI) const
             {
                 return operator[](regionI);
             }
 
             //- Return reference to mesh
-            dynamicFvMesh& mesh(const word& regionName) const
+            inline dynamicFvMesh& mesh(const word& regionName) const
             {
                 return operator[](regionIndex(regionName));
             }
 
             //- Return refrence to fe motion solver list
-            const boolList& isFeMotionSolver() const
+            inline const boolList& isFeMotionSolver() const
             {
                 return isFeMotionSolver_;
             }
 
             //- Return true if motion solver type is fe
-            bool isFeMotionSolver(const label& regionI) const
+            inline bool isFeMotionSolver(const label& regionI) const
             {
                 return isFeMotionSolver_[regionI];
             }
 
             //- Return true if motion solver type is fe
-            bool isFeMotionSolver(const word& regionName) const
+            inline bool isFeMotionSolver(const word& regionName) const
             {
                 return isFeMotionSolver_[regionIndex(regionName)];
             }
 
             //- Return refrence to fv motion solver list
-            const boolList& isFvMotionSolver() const
+            inline const boolList& isFvMotionSolver() const
             {
                 return isFvMotionSolver_;
             }
 
             //- Return true if motion solver type is fv
-            bool isFvMotionSolver(const label& regionI) const
+            inline bool isFvMotionSolver(const label& regionI) const
             {
                 return isFvMotionSolver_[regionI];
             }
 
             //- Return true if motion solver type is fv
-            bool isFvMotionSolver(const word& regionName) const
+            inline bool isFvMotionSolver(const word& regionName) const
             {
                 return isFvMotionSolver_[regionIndex(regionName)];
             }
@@ -203,7 +203,7 @@ public:
         }
 
         //- Mesh access operator by regionName
-        dynamicFvMesh& operator[](const word& regionName) const
+        inline dynamicFvMesh& operator[](const word& regionName) const
         {
             return operator[](regionIndex(regionName));
         }

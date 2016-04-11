@@ -55,7 +55,7 @@ Description
         {                                                                     \
             return static_cast<ThisRegion&>                                   \
             (                                                                 \
-                manager().regions()[regionName]                               \
+                manager().regions()[regionLabel]                              \
             );                                                                \
         };                                                                    \
                                                                               \
@@ -138,14 +138,14 @@ template <class MANAGER, class MESH>
 class Storage
 :
     public solverManagerBase::Storage<MESH>,
-    public solverManagerWrapper<MANAGER, MESH>
+    public solverManagerWrappers::Base<MANAGER, MESH>
 {
 private:
 
     // Private typedefs
 
         typedef solverManagerBase::Storage<MESH> Base;
-        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
+        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
 
     // Private Member Functions
 
@@ -221,7 +221,7 @@ private:
 
         typedef Storage<MANAGER, MESH> Parent;
         typedef solverManagerBase::Storage<MESH> Base;
-        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
+        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
 
         typedef solverManagerBase::Region
         <
@@ -302,7 +302,7 @@ private:
 
         typedef Storage<MANAGER, MESH> Parent;
         typedef solverManagerBase::Storage<MESH> Base;
-        typedef solverManagerWrapper<MANAGER, MESH> Wrapper;
+        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
 
     // Private Member Functions
 
@@ -360,24 +360,36 @@ public:
 
 namespace solverManagerWrappers
 {
-    template <class MANAGER>
-    struct RegionStorage
-    {
-        typedef typename MANAGER::Mesh Mesh;
 
-        typedef solverManagerStorage::RegionStorage<MANAGER, Mesh> Type;
-    };
+/*---------------------------------------------------------------------------*\
+            Class solverManagerWrappers::RegionStorage Declaration
+\*---------------------------------------------------------------------------*/
+
+template <class MANAGER>
+struct RegionStorage
+{
+    typedef typename MANAGER::Mesh Mesh;
+
+    typedef solverManagerStorage::RegionStorage<MANAGER, Mesh> Type;
+};
 
 
-    template <class MANAGER>
-    struct GlobalStorage
-    {
-        typedef typename MANAGER::ManagerMesh Mesh;
+/*---------------------------------------------------------------------------*\
+             Class solverManagerWrappers::GlobalStorage Declaration
+\*---------------------------------------------------------------------------*/
 
-        typedef solverManagerStorage::GlobalStorage<MANAGER, Mesh> Type;
-    };
-}
+template <class MANAGER>
+struct GlobalStorage
+{
+    typedef typename MANAGER::ManagerMesh Mesh;
 
+    typedef solverManagerStorage::GlobalStorage<MANAGER, Mesh> Type;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace solverManagerWrappers
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

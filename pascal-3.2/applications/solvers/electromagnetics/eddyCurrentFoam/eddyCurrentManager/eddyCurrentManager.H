@@ -44,12 +44,25 @@ SourceFiles
 #include "fvCFD.H"
 #include "regionModelling.H"
 #include "fvBlockMatrix.H"
+#include "physicalConstants.H"
 #include "uniformDimensionedFields.H"
+#include "fixedGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+namespace solverManagerRegion
+{
+    enum Labels
+    {
+        DEFAULT,
+        CONDUCTOR
+    };
+
+    static const label SIZE = 2;
+}
 
 /*---------------------------------------------------------------------------*\
                        Class eddyCurrentManager Declaration
@@ -57,23 +70,17 @@ namespace Foam
 
 class eddyCurrentManager
 :
-    public solverManager<regionFvMesh, 2>
+    public solverManager<regionFvMesh, solverManagerRegion::SIZE>
 {
 public:
 
-    // Public enums
-
-        enum RegionNames
-        {
-            DEFAULT,
-            CONDUCTOR
-        };
-
-    // Public data types
+    // Solver Manager Construction
 
         SM_HEADER_ADD(eddyCurrentManager)
 
-        SM_GLOBALCONTROL_ADD_P1(eddyCurrentControl, mesh()[polyMesh::defaultRegion])
+
+        SM_GLOBALCONTROL_ADD_P1(eddyCurrentControl, mesh()[solverManagerRegion::DEFAULT])
+
 
         SM_GLOBALSETTINGS_NEW();
 
@@ -161,15 +168,21 @@ public:
 
         SM_REGIONS_NEW();
 
-            SM_REGIONS_REGION_ADD(DEFAULT, mesh()[polyMesh::defaultRegion]);
+            SM_REGIONS_REGION_ADD(DEFAULT, mesh()[solverManagerRegion::DEFAULT]);
 
-// TODO: Read name during construction
-            SM_REGIONS_REGION_ADD(CONDUCTOR, mesh()["region_conductor"]);
+            SM_REGIONS_REGION_ADD(CONDUCTOR, mesh()[solverManagerRegion::CONDUCTOR]);
 
         SM_REGIONS_ADD();
 
 
 private:
+
+    // Private Data
+
+        // Regions
+
+            //- Region mesh names
+            wordList regionNames_;
 
     // Private Member Functions
 
@@ -212,6 +225,20 @@ public:
         virtual ~eddyCurrentManager() {};
 
     // Member Functions
+
+        // Regions
+
+            //- Region mesh names
+            inline const wordList& regionNames() const
+            {
+                return regionNames_;
+            };
+
+            //- Region mesh name for given region label
+            inline word regionName(const label& regionI) const
+            {
+                return regionNames_[regionI];
+            };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

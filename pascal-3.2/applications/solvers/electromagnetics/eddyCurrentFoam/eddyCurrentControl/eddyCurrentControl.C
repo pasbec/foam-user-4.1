@@ -47,7 +47,7 @@ bool Foam::eddyCurrentControl::criteriaSatisfied()
 
 bool Foam::eddyCurrentControl::loop()
 {
-    return false;
+    return true;
 };
 
 
@@ -59,7 +59,19 @@ eddyCurrentControl::eddyCurrentControl
     const word& dictName
 )
 :
-    solutionControl(mesh, dictName)
+    solutionControl(mesh, dictName),
+    mesh3D_((mesh.nGeometricD() == 3)),
+    solutionDir_(mesh3D_ ? mesh.geometricD() : -mesh.geometricD()),
+    interfacePatchName_
+    (
+        this->dict().lookup("interface")
+    ),
+    interfacePatch_
+    (
+// TODO
+//         this->mesh_[conductorRegion_].boundaryMesh().findPatchID(interfacePatchName_)
+        -1
+    )
 {}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

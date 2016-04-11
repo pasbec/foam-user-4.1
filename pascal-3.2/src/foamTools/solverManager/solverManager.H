@@ -56,6 +56,8 @@ SourceFiles
                                                                               \
     typedef MANAGER Manager;                                                  \
                                                                               \
+    using namespace solverManagerRegion;                                      \
+                                                                              \
     typedef Manager::ManagerMesh GlobalMesh;                                  \
     typedef Manager::Control GlobalControl;                                   \
     typedef Manager::Settings GlobalSettings;                                 \
@@ -131,7 +133,7 @@ TemplateName(solverManager);
                          Class solverManager Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MESH, unsigned int NREGIONS = 0>
+template <class MESH, label NREGIONS = 0>
 class solverManager
 :
     public solverManagerName
@@ -140,7 +142,7 @@ public:
 
     // Public Static Const Members
 
-        static const unsigned int nRegions = NREGIONS;
+        static const label nRegions = NREGIONS;
 
     // Public typedefs
 
@@ -363,6 +365,11 @@ public:
             inline const dictionary& propertiesDict() const
             {
                 return propertiesDict_;
+            };
+
+            inline const dictionary& regionsDict() const
+            {
+                return propertiesDict_.subDict("regions");
             };
 
             inline const dictionary& settingsDict() const
