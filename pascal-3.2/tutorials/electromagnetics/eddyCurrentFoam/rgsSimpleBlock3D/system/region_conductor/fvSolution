@@ -16,27 +16,38 @@ FoamFile
 
 solvers
 {
-    V
+//     V
+// //     {
+// //         solver                   GAMG;
+// //
+// //         tolerance                1e-04;
+// //         relTol                   0;
+// //
+// //         minIter                  0;
+// //         maxIter                  1000;
+// //
+// //         smoother                 DIC;
+// //         nPreSweeps               0;
+// //         nPostSweeps              2;
+// //
+// //         cacheAgglomeration       on;
+// //         agglomerator             faceAreaPair;
+// //         nCellsInCoarsestLevel    200;
+// //         mergeLevels              1;
+// //     }
+// //     {
+// //         solver                   BiCGStab;
+// //
+// //         tolerance                1e-04;
+// //         relTol                   0;
+// //
+// //         minIter                  0;
+// //         maxIter                  300;
+// //
+// //         preconditioner           DIC; // Cholesky
+// //     }
 //     {
-//         solver                   GAMG;
-//
-//         tolerance                1e-04;
-//         relTol                   0;
-//
-//         minIter                  0;
-//         maxIter                  1000;
-//
-//         smoother                 DIC;
-//         nPreSweeps               0;
-//         nPostSweeps              2;
-//
-//         cacheAgglomeration       on;
-//         agglomerator             faceAreaPair;
-//         nCellsInCoarsestLevel    200;
-//         mergeLevels              1;
-//     }
-//     {
-//         solver                   BiCGStab;
+//         solver                   deflatedPCG;
 //
 //         tolerance                1e-04;
 //         relTol                   0;
@@ -44,8 +55,10 @@ solvers
 //         minIter                  0;
 //         maxIter                  300;
 //
-//         preconditioner           DIC; // Cholesky
+//         preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
+//                                       // GAMG, SymGaussSeidel, diagonal, none
 //     }
+    "(VRe|VIm)"
     {
         solver                   deflatedPCG;
 
@@ -55,7 +68,8 @@ solvers
         minIter                  0;
         maxIter                  300;
 
-        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC, GAMG, SymGaussSeidel, diagonal, none
+        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
+                                      // GAMG, SymGaussSeidel, diagonal, none
     }
 }
 

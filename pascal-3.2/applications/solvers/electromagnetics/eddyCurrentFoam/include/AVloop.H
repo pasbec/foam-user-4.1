@@ -73,4 +73,6 @@
                 globalStorage.VImGrad().rmap(CONDUCTOR);
             }
         }
+
+        manager.messages().newLine();
     }

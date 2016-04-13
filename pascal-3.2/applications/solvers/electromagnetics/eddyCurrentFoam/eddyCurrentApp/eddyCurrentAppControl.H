@@ -58,7 +58,18 @@ class Control
 {
 private:
 
-    // Private data
+    // Private member functions
+
+        //- Disallow default bitwise copy construct
+        Control(const Control&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const Control&);
+
+
+protected:
+
+    // Protected data
 
         //- Mesh
         const regionFvMesh& mesh_;
@@ -75,27 +86,23 @@ private:
             const word interfacePatchName_;
 
             //- Label of conductor interface
-            const word interfacePatch_;
+            const word interfacePatchLabel_;
 
-        // Solution control
+        // Solution controls
 
-    // Private member functions
-
-        //- Disallow default bitwise copy construct
-        Control(const Control&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const Control&);
-
-
-protected:
-
-    // Protected data
+            //- Maximum number of EDDYCURRENT correctors
+            label nCorrEDDYCURRENT_;
 
     // Protected Member Functions
 
+        //- Read controls from fvSolution dictionary
+        virtual void read();
+
         //- Return true if all convergence checks are satisfied
         virtual bool criteriaSatisfied();
+
+        //- Store previous iteration fields
+        virtual void storePrevIterFields() const;
 
 
 public:
@@ -135,15 +142,15 @@ public:
             };
 
             //- Reference to conductor interface name
-            const word& interfaceName() const
+            inline const word& interfaceName() const
             {
                 return interfacePatchName_;
             };
 
             //- Reference to conductor interface ID
-            inline const word& interface() const
+            inline const word& interfaceLabel() const
             {
-                return interfacePatch_;
+                return interfacePatchLabel_;
             };
 
         // Solution control

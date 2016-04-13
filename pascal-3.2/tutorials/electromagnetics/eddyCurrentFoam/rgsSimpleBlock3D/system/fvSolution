@@ -16,15 +16,27 @@ FoamFile
 
 solvers
 {
-    AV
-    {
-        tolerance                1e-4;
-        relTol                   0.5;
-
-        maxIter                  100;
-    }
-
-    A
+//     AV
+//     {
+//         tolerance                1e-4;
+//         relTol                   0.5;
+//
+//         maxIter                  100;
+//     }
+//
+//     A
+//     {
+//         solver                   BiCGStab;
+//
+//         tolerance                1e-04;
+//         relTol                   0;
+//
+//         minIter                  0;
+//         maxIter                  300;
+//
+//         preconditioner           Cholesky;
+//     }
+    "(Ax|Ay|Az)"
     {
         solver                   BiCGStab;
 
@@ -36,6 +48,18 @@ solvers
 
         preconditioner           Cholesky;
     }
+}
+
+EDDYCURRENT
+{
+    interface      "oldInternalFaces";
+
+    nCorrectors    10;
+}
+
+relaxationFactors
+{
+
 }
 
 // ************************************************************************* //

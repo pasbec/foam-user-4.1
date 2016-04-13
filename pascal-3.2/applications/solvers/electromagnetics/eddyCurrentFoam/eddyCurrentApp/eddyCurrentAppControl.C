@@ -32,18 +32,25 @@ defineTypeNameAndDebug(Foam::eddyCurrentApp::Control, 0);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+void Foam::eddyCurrentApp::Control::read()
+{
+    solutionControl::read(false);
+
+    // Read solution controls
+    const dictionary& eddyCurrentDict = dict();
+    nCorrEDDYCURRENT_ =
+        eddyCurrentDict.lookupOrDefault<label>("nCorrectors", 1);
+}
+
+// TODO
 bool Foam::eddyCurrentApp::Control::criteriaSatisfied()
 {
-    return true;
+    return false;
 };
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::eddyCurrentApp::Control::loop()
-{
-    return true;
-};
+void Foam::eddyCurrentApp::Control::storePrevIterFields() const
+{}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -62,12 +69,78 @@ Foam::eddyCurrentApp::Control::Control
     (
         this->dict().lookup("interface")
     ),
-    interfacePatch_
+    interfacePatchLabel_
     (
         this->mesh_[Region::CONDUCTOR].
             boundaryMesh().findPatchID(interfacePatchName_)
     )
-{}
+{
+    read();
+
+    Info<< nl;
+
+    if (residualControl_.empty())
+    {
+        Info<< algorithmName_ << ": no residual control data found. "
+            << "Calculations will employ " << nCorrEDDYCURRENT_
+            << " corrector loops" << nl << endl;
+    }
+    else
+    {
+        Info<< algorithmName_ << ": max iterations = " << nCorrEDDYCURRENT_
+            << endl;
+        forAll(residualControl_, i)
+        {
+            Info<< "    field " << residualControl_[i].name << token::TAB
+                << ": relTol " << residualControl_[i].relTol
+                << ", tolerance " << residualControl_[i].absTol
+                << nl;
+        }
+        Info<< endl;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+// TODO
+bool Foam::eddyCurrentApp::Control::loop()
+{
+    read();
+
+    corr_++;
+
+    if (debug)
+    {
+        Info<< algorithmName_ << " loop: corr = " << corr_ << endl;
+    }
+
+    if (corr_ == nCorrEDDYCURRENT_ + 1)
+    {
+        Info<< algorithmName_ << ": not converged within "
+            << nCorrEDDYCURRENT_ << " iterations" << endl;
+
+        corr_ = 0;
+        return false;
+    }
+
+    if (criteriaSatisfied())
+    {
+        Info<< algorithmName_ << ": converged in " << corr_ - 1
+            << " iterations" << endl;
+
+        corr_ = 0;
+
+        return false;
+    }
+    else
+    {
+        Info<< algorithmName_ << ": iteration " << corr_ << endl;
+        storePrevIterFields();
+    }
+
+    return true;
+};
 
 
 // ************************************************************************* //
