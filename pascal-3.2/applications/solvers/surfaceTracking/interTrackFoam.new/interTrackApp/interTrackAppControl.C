@@ -97,7 +97,7 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
                 Info<< algorithmName_ << " loop:" << endl;
 
                 Info<< "    " << variableName
-                    << " PIMPLE iter " << corr_
+                    << " " << algorithmName_ << " iter " << corr_
                     << ": ini res = "
                     << residualControl_[fieldI].initialResidual
                     << ", abs tol = " << residual
@@ -164,7 +164,7 @@ void Foam::interTrackApp::Control::storeResiduals(const word& name)
                     Info<< algorithmName_ << " loop:" << endl;
 
                     Info<< "    " << variableName
-                        << " PIMPLE iter " << corr_
+                        << " " << algorithmName_ << " iter " << corr_
                         << ": storing res = "
                         << residualStorage_[fieldI].residual
                         << endl;
@@ -209,7 +209,7 @@ void Foam::interTrackApp::Control::skipZeroNonOrtho(const word& name)
             if (debug)
             {
                 Info<< "    " << name
-                    << " PIMPLE iter " << corr_
+                    << " " << algorithmName_ << " iter " << corr_
                     << ": nIter = "
                     << nIter
                     << ", skipping further non-orthogonal correctors"
