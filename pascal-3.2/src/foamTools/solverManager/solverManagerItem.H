@@ -40,10 +40,10 @@ Description
                                                                               \
     public: class Item_##NAME                                                 \
     :                                                                         \
-        public solverManagerWrappers::WRAPPER<Manager, TYPE>::Type            \
+        public solverManagerWrappers::WRAPPER<Manager, TYPE>                  \
     {                                                                         \
         public: typedef typename                                              \
-            solverManagerWrappers::WRAPPER<Manager, TYPE>::Type Wrapper;      \
+            solverManagerWrappers::WRAPPER<Manager, TYPE> Wrapper;            \
         public: typedef typename                                              \
             solverManagerWrappers::WRAPPER<Manager, TYPE>::Mesh Mesh;
 
@@ -177,11 +177,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace solverManagerItem
+namespace solverManagerWrappers
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class solverManagerItem::Item Declaration
+                  Class solverManagerWrappers::Item Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class MESH, class TYPE>
@@ -190,6 +190,13 @@ class Item
     public solverManagerBase::Item<MESH, TYPE>,
     public solverManagerWrappers::Base<MANAGER, MESH>
 {
+public:
+
+    // Public typedefs
+
+        typedef MESH Mesh;
+
+
 private:
 
     // Private typedefs
@@ -265,26 +272,33 @@ public:
                Class solverManagerItem::RegionItem Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH, class TYPE>
+template <class MANAGER, class TYPE>
 class RegionItem
 :
-    public Item<MANAGER, MESH, TYPE>
+    public Item<MANAGER, typename MANAGER::Mesh, TYPE>
 {
+public:
+
+    // Public typedefs
+
+        typedef typename MANAGER::Mesh Mesh;
+
+
 private:
 
     // Private typedefs
 
-        typedef Item<MANAGER, MESH, TYPE> Parent;
-        typedef solverManagerBase::Item<MESH, TYPE> Base;
-        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
+        typedef Item<MANAGER, Mesh, TYPE> Parent;
+        typedef solverManagerBase::Item<Mesh, TYPE> Base;
+        typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
         typedef solverManagerBase::Region_
         <
             typename MANAGER::ManagerMesh,
-            MESH,
+            Mesh,
             MANAGER::nRegions
         > Region_;
-        typedef typename solverManagerBase::Storage<MESH> Storage;
+        typedef typename solverManagerBase::Storage<Mesh> Storage;
 
     // Private Member Functions
 
@@ -324,7 +338,7 @@ public:
 
     // Constructor
 
-        RegionItem(MESH& mesh, const word& name)
+        RegionItem(Mesh& mesh, const word& name)
         :
             Parent(mesh, name)
         {};
@@ -351,20 +365,27 @@ public:
               Class solverManagerItem::GlobalItem Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH, class TYPE>
+template <class MANAGER, class TYPE>
 class GlobalItem
 :
-    public Item<MANAGER, MESH, TYPE>
+    public Item<MANAGER, typename MANAGER::ManagerMesh, TYPE>
 {
+public:
+
+    // Public typedefs
+    
+        typedef typename MANAGER::ManagerMesh Mesh;
+
+
 private:
 
     // Private typedefs
 
-        typedef Item<MANAGER, MESH, TYPE> Parent;
-        typedef solverManagerBase::Item<MESH, TYPE> Base;
-        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
+        typedef Item<MANAGER, Mesh, TYPE> Parent;
+        typedef solverManagerBase::Item<Mesh, TYPE> Base;
+        typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
-        typedef typename solverManagerBase::Storage<MESH> Storage;
+        typedef typename solverManagerBase::Storage<Mesh> Storage;
 
     // Private Member Functions
 
@@ -398,7 +419,7 @@ public:
 
     // Constructor
 
-        GlobalItem(MESH& mesh, const word& name)
+        GlobalItem(Mesh& mesh, const word& name)
         :
             Parent(mesh, name)
         {};
@@ -416,41 +437,6 @@ public:
         virtual Storage& storage() const = 0;
 
 };
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace solverManagerItem
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace solverManagerWrappers
-{
-
-/*---------------------------------------------------------------------------*\
-            Class solverManagerWrappers::RegionItem Declaration
-\*---------------------------------------------------------------------------*/
-
-    template <class MANAGER, class TYPE>
-    struct RegionItem
-    {
-        typedef typename MANAGER::Mesh Mesh;
-
-        typedef solverManagerItem::RegionItem<MANAGER, Mesh, TYPE> Type;
-    };
-
-
-/*---------------------------------------------------------------------------*\
-            Class solverManagerWrappers::GlobalItem Declaration
-\*---------------------------------------------------------------------------*/
-
-    template <class MANAGER, class TYPE>
-    struct GlobalItem
-    {
-        typedef typename MANAGER::ManagerMesh Mesh;
-
-        typedef solverManagerItem::GlobalItem<MANAGER, Mesh, TYPE> Type;
-    };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

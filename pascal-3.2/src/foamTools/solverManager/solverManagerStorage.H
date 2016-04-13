@@ -124,11 +124,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace solverManagerStorage
+namespace solverManagerWrappers
 {
 
 /*---------------------------------------------------------------------------*\
-              Class solverManagerStorage::Storage Declaration
+               Class solverManagerWrappers::Storage Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class MESH>
@@ -137,6 +137,13 @@ class Storage
     public solverManagerBase::Storage<MESH>,
     public solverManagerWrappers::Base<MANAGER, MESH>
 {
+public:
+
+    // Public typedefs
+    
+        typedef MESH Mesh;
+
+
 private:
 
     // Private typedefs
@@ -207,23 +214,30 @@ public:
               Class solverManagerStorage::RegionStorage Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH>
+template <class MANAGER>
 class RegionStorage
 :
-    public Storage<MANAGER, MESH>
+    public Storage<MANAGER, typename MANAGER::Mesh>
 {
+public:
+
+    // Public typedefs
+
+        typedef typename MANAGER::Mesh Mesh;
+
+
 private:
 
     // Private typedefs
 
-        typedef Storage<MANAGER, MESH> Parent;
-        typedef solverManagerBase::Storage<MESH> Base;
-        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
+        typedef Storage<MANAGER, Mesh> Parent;
+        typedef solverManagerBase::Storage<Mesh> Base;
+        typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
         typedef solverManagerBase::Region_
         <
             typename MANAGER::ManagerMesh,
-            MESH,
+            Mesh,
             MANAGER::nRegions
         > Region_;
 
@@ -265,7 +279,7 @@ public:
 
     // Constructor
 
-        RegionStorage(MESH& mesh)
+        RegionStorage(Mesh& mesh)
         :
             Parent(mesh)
         {};
@@ -288,18 +302,25 @@ public:
              Class solverManagerStorage::GlobalStorage Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH>
+template <class MANAGER>
 class GlobalStorage
 :
-    public Storage<MANAGER, MESH>
+    public Storage<MANAGER, typename MANAGER::ManagerMesh>
 {
+public:
+
+    // Public typedefs
+
+        typedef typename MANAGER::ManagerMesh Mesh;
+
+
 private:
 
     // Private typedefs
 
-        typedef Storage<MANAGER, MESH> Parent;
-        typedef solverManagerBase::Storage<MESH> Base;
-        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
+        typedef Storage<MANAGER, Mesh> Parent;
+        typedef solverManagerBase::Storage<Mesh> Base;
+        typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
     // Private Member Functions
 
@@ -333,7 +354,7 @@ public:
 
     // Constructor
 
-        GlobalStorage(MESH& mesh)
+        GlobalStorage(Mesh& mesh)
         :
             Parent(mesh)
         {};
@@ -346,41 +367,6 @@ public:
 
         //- Manager
         virtual const MANAGER& manager() const = 0;
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace solverManagerStorage
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace solverManagerWrappers
-{
-
-/*---------------------------------------------------------------------------*\
-            Class solverManagerWrappers::RegionStorage Declaration
-\*---------------------------------------------------------------------------*/
-
-template <class MANAGER>
-struct RegionStorage
-{
-    typedef typename MANAGER::Mesh Mesh;
-
-    typedef solverManagerStorage::RegionStorage<MANAGER, Mesh> Type;
-};
-
-
-/*---------------------------------------------------------------------------*\
-             Class solverManagerWrappers::GlobalStorage Declaration
-\*---------------------------------------------------------------------------*/
-
-template <class MANAGER>
-struct GlobalStorage
-{
-    typedef typename MANAGER::ManagerMesh Mesh;
-
-    typedef solverManagerStorage::GlobalStorage<MANAGER, Mesh> Type;
 };
 
 

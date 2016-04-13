@@ -131,11 +131,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace solverManagerSettings
+namespace solverManagerWrappers
 {
 
 /*---------------------------------------------------------------------------*\
-                Class solverManagerSettings::Settings Declaration
+                Class solverManagerWrappers::Settings Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class MESH>
@@ -144,6 +144,13 @@ class Settings
     public solverManagerBase::Settings<MESH>,
     public solverManagerWrappers::Base<MANAGER, MESH>
 {
+public:
+
+    // Public typedefs
+
+        typedef MESH Mesh;
+
+
 private:
 
     // Private typedefs
@@ -215,23 +222,30 @@ public:
              Class solverManagerSettings::RegionSettings Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH>
+template <class MANAGER>
 class RegionSettings
 :
-    public Settings<MANAGER, MESH>
+    public Settings<MANAGER, typename MANAGER::Mesh>
 {
+public:
+
+    // Public typedefs
+
+        typedef typename MANAGER::Mesh Mesh;
+
+
 private:
 
     // Private typedefs
 
-        typedef Settings<MANAGER, MESH> Parent;
-        typedef solverManagerBase::Settings<MESH> Base;
-        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
+        typedef Settings<MANAGER, Mesh> Parent;
+        typedef solverManagerBase::Settings<Mesh> Base;
+        typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
         typedef solverManagerBase::Region_
         <
             typename MANAGER::ManagerMesh,
-            MESH,
+            Mesh,
             MANAGER::nRegions
         > Region_;
 
@@ -273,7 +287,7 @@ public:
 
     // Constructor
 
-        RegionSettings(MESH& mesh)
+        RegionSettings(Mesh& mesh)
         :
             Parent(mesh)
         {};
@@ -296,18 +310,25 @@ public:
             Class solverManagerSettings::GlobalSettings Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGER, class MESH>
+template <class MANAGER>
 class GlobalSettings
 :
-    public Settings<MANAGER, MESH>
+    public Settings<MANAGER, typename MANAGER::ManagerMesh>
 {
+public:
+
+    // Public typedefs
+    
+        typedef typename MANAGER::ManagerMesh Mesh;
+
+
 private:
 
     // Private typedefs
 
-        typedef Settings<MANAGER, MESH> Parent;
-        typedef solverManagerBase::Settings<MESH> Base;
-        typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
+        typedef Settings<MANAGER, Mesh> Parent;
+        typedef solverManagerBase::Settings<Mesh> Base;
+        typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
     // Private Member Functions
 
@@ -341,7 +362,7 @@ public:
 
     // Constructor
 
-        GlobalSettings(MESH& mesh)
+        GlobalSettings(Mesh& mesh)
         :
             Parent(mesh)
         {};
@@ -355,40 +376,6 @@ public:
         //- Manager
         virtual const MANAGER& manager() const = 0;
 };
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace solverManagerSettings
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-namespace solverManagerWrappers
-{
-
-/*---------------------------------------------------------------------------*\
-            Class solverManagerWrappers::RegionSettings Declaration
-\*---------------------------------------------------------------------------*/
-
-    template <class MANAGER>
-    struct RegionSettings
-    {
-        typedef typename MANAGER::Mesh Mesh;
-
-        typedef solverManagerSettings::RegionSettings<MANAGER, Mesh> Type;
-    };
-
-
-/*---------------------------------------------------------------------------*\
-             Class solverManagerWrappers::GlobalSettings Declaration
-\*---------------------------------------------------------------------------*/
-
-    template <class MANAGER>
-    struct GlobalSettings
-    {
-        typedef typename MANAGER::ManagerMesh Mesh;
-
-        typedef solverManagerSettings::GlobalSettings<MANAGER, Mesh> Type;
-    };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

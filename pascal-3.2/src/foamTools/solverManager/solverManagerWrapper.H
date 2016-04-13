@@ -44,10 +44,10 @@ Description
                                                                               \
     public: class NAME                                                        \
     :                                                                         \
-        public solverManagerWrappers::WRAPPER<Manager>::Type                  \
+        public solverManagerWrappers::WRAPPER<Manager>                        \
     {                                                                         \
         public: typedef typename                                              \
-            solverManagerWrappers::WRAPPER<Manager>::Type Wrapper;            \
+            solverManagerWrappers::WRAPPER<Manager> Wrapper;                  \
         public: typedef typename                                              \
             solverManagerWrappers::WRAPPER<Manager>::Mesh Mesh;
 
@@ -286,6 +286,13 @@ namespace solverManagerWrappers
 template <class MANAGER, class MESH>
 class Base
 {
+public:
+
+    // Public typedefs
+
+        typedef MESH Mesh;
+
+
 private:
 
     // Private Data

@@ -146,11 +146,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace solverManagerRegion
+namespace solverManagerWrappers
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class solverManagerRegion::Region_ Declaration
+                Class solverManagerWrappers::Region_ Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER>
@@ -166,6 +166,10 @@ class Region_
 {
 public:
 
+    // Public typedefs
+    
+        typedef typename MANAGER::Mesh Mesh;
+
     // Public Member Functions
 
         // Linking
@@ -179,7 +183,6 @@ private:
     // Private typedefs
 
         typedef typename MANAGER::ManagerMesh SuperMesh;
-        typedef typename MANAGER::Mesh Mesh;
 
         typedef solverManagerBase::Region_
         <
@@ -274,28 +277,6 @@ public:
                 );
             };
 };
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace solverManagerRegion
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace solverManagerWrappers
-{
-
-/*---------------------------------------------------------------------------*\
-                Class solverManagerWrappers::Region_ Declaration
-\*---------------------------------------------------------------------------*/
-
-    template <class MANAGER>
-    struct Region_
-    {
-        typedef typename MANAGER::Mesh Mesh;
-
-        typedef solverManagerRegion::Region_<MANAGER> Type;
-    };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
