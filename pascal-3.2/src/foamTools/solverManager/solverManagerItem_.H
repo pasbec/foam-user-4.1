@@ -29,8 +29,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solverManagerItem_H
-#define solverManagerItem_H
+#ifndef solverManagerItem__H
+#define solverManagerItem__H
 
 #include "solverManagerWrapper.H"
 
@@ -151,7 +151,7 @@ Description
 
 # define SM_REGIONITEM_ADD(TYPE, NAME)                                        \
                                                                               \
-    SM_ITEM_ADD_DECLARATION_START(RegionItem, TYPE, NAME)                     \
+    SM_ITEM_ADD_DECLARATION_START(RegionItem_, TYPE, NAME)                    \
     SM_ITEM_ADD_DECLARATION_INTERFACES()                                      \
     SM_ITEM_ADD_DECLARATION_INTERFACES_REGION()                               \
     SM_ITEM_ADD_DECLARATION_CONSTRUCTION(NAME)                                \
@@ -162,7 +162,7 @@ Description
 
 # define SM_GLOBALITEM_ADD(TYPE, NAME)                                        \
                                                                               \
-    SM_ITEM_ADD_DECLARATION_START(GlobalItem, TYPE, NAME)                     \
+    SM_ITEM_ADD_DECLARATION_START(GlobalItem_, TYPE, NAME)                    \
     SM_ITEM_ADD_DECLARATION_INTERFACES()                                      \
     SM_ITEM_ADD_DECLARATION_INTERFACES_GLOBAL()                               \
     SM_ITEM_ADD_DECLARATION_CONSTRUCTION(NAME)                                \
@@ -181,13 +181,13 @@ namespace solverManagerWrappers
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class solverManagerWrappers::Item Declaration
+                  Class solverManagerWrappers::Item_ Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class MESH, class TYPE>
-class Item
+class Item_
 :
-    public solverManagerBase::Item<MESH, TYPE>,
+    public solverManagerBase::Item_<MESH, TYPE>,
     public solverManagerWrappers::Base<MANAGER, MESH>
 {
 public:
@@ -201,7 +201,7 @@ private:
 
     // Private typedefs
 
-        typedef solverManagerBase::Item<MESH, TYPE> Base;
+        typedef solverManagerBase::Item_<MESH, TYPE> Base;
         typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
 
         typedef typename solverManagerBase::Storage<MESH> Storage;
@@ -209,10 +209,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        Item(const Item&);
+        Item_(const Item_&);
 
         //- Disallow default bitwise assignment
-        void operator=(const Item&);
+        void operator=(const Item_&);
 
         // Basic
 
@@ -232,7 +232,7 @@ public:
 
     // Constructor
 
-        Item(MESH& mesh, const word& name)
+        Item_(MESH& mesh, const word& name)
         :
             Base(name),
             Wrapper(mesh)
@@ -240,7 +240,7 @@ public:
 
     // Destructor
 
-        virtual ~Item() {};
+        virtual ~Item_() {};
 
     // Member Functions
 
@@ -269,13 +269,13 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-               Class solverManagerItem::RegionItem Declaration
+               Class solverManagerItem::RegionItem_ Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class TYPE>
-class RegionItem
+class RegionItem_
 :
-    public Item<MANAGER, typename MANAGER::Mesh, TYPE>
+    public Item_<MANAGER, typename MANAGER::Mesh, TYPE>
 {
 public:
 
@@ -288,8 +288,8 @@ private:
 
     // Private typedefs
 
-        typedef Item<MANAGER, Mesh, TYPE> Parent;
-        typedef solverManagerBase::Item<Mesh, TYPE> Base;
+        typedef Item_<MANAGER, Mesh, TYPE> Parent;
+        typedef solverManagerBase::Item_<Mesh, TYPE> Base;
         typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
         typedef solverManagerBase::Region_
@@ -303,10 +303,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        RegionItem(const RegionItem&);
+        RegionItem_(const RegionItem_&);
 
         //- Disallow default bitwise assignment
-        void operator=(const RegionItem&);
+        void operator=(const RegionItem_&);
 
         // Basic
 
@@ -338,14 +338,14 @@ public:
 
     // Constructor
 
-        RegionItem(Mesh& mesh, const word& name)
+        RegionItem_(Mesh& mesh, const word& name)
         :
             Parent(mesh, name)
         {};
 
     // Destructor
 
-        virtual ~RegionItem() {};
+        virtual ~RegionItem_() {};
 
     // Member Functions
 
@@ -362,18 +362,18 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-              Class solverManagerItem::GlobalItem Declaration
+              Class solverManagerItem::GlobalItem_ Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER, class TYPE>
-class GlobalItem
+class GlobalItem_
 :
-    public Item<MANAGER, typename MANAGER::ManagerMesh, TYPE>
+    public Item_<MANAGER, typename MANAGER::ManagerMesh, TYPE>
 {
 public:
 
     // Public typedefs
-    
+
         typedef typename MANAGER::ManagerMesh Mesh;
 
 
@@ -381,8 +381,8 @@ private:
 
     // Private typedefs
 
-        typedef Item<MANAGER, Mesh, TYPE> Parent;
-        typedef solverManagerBase::Item<Mesh, TYPE> Base;
+        typedef Item_<MANAGER, Mesh, TYPE> Parent;
+        typedef solverManagerBase::Item_<Mesh, TYPE> Base;
         typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
         typedef typename solverManagerBase::Storage<Mesh> Storage;
@@ -390,10 +390,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        GlobalItem(const GlobalItem&);
+        GlobalItem_(const GlobalItem_&);
 
         //- Disallow default bitwise assignment
-        void operator=(const GlobalItem&);
+        void operator=(const GlobalItem_&);
 
         // Basic
 
@@ -419,14 +419,14 @@ public:
 
     // Constructor
 
-        GlobalItem(Mesh& mesh, const word& name)
+        GlobalItem_(Mesh& mesh, const word& name)
         :
             Parent(mesh, name)
         {};
 
     // Destructor
 
-        virtual ~GlobalItem() {};
+        virtual ~GlobalItem_() {};
 
     // Member Functions
 

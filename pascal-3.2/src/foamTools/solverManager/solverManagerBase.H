@@ -53,7 +53,7 @@ namespace solverManagerBase
 
 template <class MESH> class Mesh;
 template <class MESH> class Settings;
-template <class MESH, class TYPE> class Item;
+template <class MESH, class TYPE> class Item_;
 template <class MESH> class Storage;
 template <class MANAGERMESH, class MESH, label NREGIONS> class Region_;
 template <class MANAGERMESH, class MESH, label NREGIONS> class Regions;
@@ -506,11 +506,11 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-                   Class solverManagerBase::Item Declaration
+                   Class solverManagerBase::Item_ Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MESH, class TYPE>
-class Item
+class Item_
 :
     public ItemCore
 {
@@ -530,7 +530,7 @@ private:
             {
                 storage().link
                 (
-                    const_cast<Item<MESH, TYPE>*>(this)
+                    const_cast<Item_<MESH, TYPE>*>(this)
                 );
             };
 
@@ -563,7 +563,7 @@ private:
                 {
                     FatalErrorIn
                     (
-                        "solverManagerBase::Item::"
+                        "solverManagerBase::Item_"
                         + this->name() + "::make()"
                     )
                         << "Pointer for item is part of a circular "
@@ -583,7 +583,7 @@ private:
                     {
                         FatalErrorIn
                         (
-                            "solverManagerBase::Item::"
+                            "solverManagerBase::Item_"
                             + this->name() + "::checkMake()"
                         )
                             << "Pointer for item is still unallocated "
@@ -606,7 +606,7 @@ private:
                 {
                     FatalErrorIn
                     (
-                        "solverManagerBase::Item::"
+                        "solverManagerBase::Item_"
                         + this->name() + "::initData()"
                     )
                         << "Item is globally disabled and cannot be used."
@@ -658,11 +658,11 @@ protected:
 
     // Constructor
 
-        Item(const word& name) : ItemCore(name) {};
+        Item_(const word& name) : ItemCore(name) {};
 
     // Destructor
 
-        virtual ~Item() {};
+        virtual ~Item_() {};
 
 
 public:
@@ -790,7 +790,7 @@ public:
     // Friends declarations
 
         //- Friend with Item
-        template<class M, class T> friend class Item;
+        template<class M, class T> friend class Item_;
 
 
 protected:

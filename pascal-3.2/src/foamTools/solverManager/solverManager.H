@@ -45,7 +45,7 @@ SourceFiles
 
 #include "solverManagerWrapper.H"
 #include "solverManagerSettings.H"
-#include "solverManagerItem.H"
+#include "solverManagerItem_.H"
 #include "solverManagerStorage.H"
 #include "solverManagerRegion_.H"
 #include "solverManagerRegions.H"
