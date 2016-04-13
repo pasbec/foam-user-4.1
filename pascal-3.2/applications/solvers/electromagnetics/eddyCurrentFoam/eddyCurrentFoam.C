@@ -30,10 +30,6 @@ Description
 
 #include "eddyCurrentApp.H"
 
-using namespace Foam;
-using namespace eddyCurrentApp;
-using namespace eddyCurrentApp::Region;
-
 // TODO: Derived gradient boundary condition for VRe/VIm in conductor region
 
 // TODO: Extrapolation sometimes completely fails
@@ -42,11 +38,16 @@ using namespace eddyCurrentApp::Region;
 
 int main(int argc, char *argv[])
 {
+    using namespace Foam;
+
     argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createRegionMeshUninitialized.H"
+
+    using namespace eddyCurrentApp;
+    using namespace eddyCurrentApp::Region;
 
     Manager manager(args, runTime, regionMesh);
 
@@ -55,9 +56,9 @@ int main(int argc, char *argv[])
 
     SM_GLOBALREGIONSCOPE(DEFAULT);
 
-    uniformDimensionedScalarField& omega0 = manager.storage().omega0();
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    uniformDimensionedScalarField& omega0 = manager.storage().omega0();
 
     while(manager.once())
     {

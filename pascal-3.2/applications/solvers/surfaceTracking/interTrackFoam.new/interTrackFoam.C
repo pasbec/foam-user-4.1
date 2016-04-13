@@ -30,10 +30,6 @@ Description
 
 #include "interTrackApp.H"
 
-using namespace Foam;
-using namespace interTrackApp;
-using namespace interTrackApp::Region;
-
 // TODO: Coupled solution of U and p?
 
 // TODO: Read Zhang S., Zhao, X., General formulations for Rhie-Chow interpolation,
@@ -43,6 +39,8 @@ using namespace interTrackApp::Region;
 
 int main(int argc, char *argv[])
 {
+    using namespace Foam;
+
     argList::validOptions.insert("prefix", "name");
 
 #   include "setRootCase.H"
@@ -51,12 +49,17 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    using namespace interTrackApp;
+    using namespace interTrackApp::Region;
+
     Manager manager(args, runTime, mesh);
 
     manager.read();
     manager.init();
 
     SM_GLOBALREGIONSCOPE(DEFAULT);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     volScalarField& p = storage.p();
     volVectorField& U = storage.U();
@@ -65,26 +68,10 @@ int main(int argc, char *argv[])
     volScalarField& mu = storage.mu();
     trackedSurface& interface = storage.interface();
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// TODO: Test F
-    storage.item_F().enable();
-    volVectorField& F = storage.F();
-    F == dimensionedVector
-    (
-        word(),
-        dimForce/dimVolume,
-        vector(4, -9.81, 4)
-//         vector(0, -9.81, 0)
-    );
-    Info << F.boundaryField() << endl;
-
 // TODO: Two fluids
 // #   include "setRefCell.H"
 
-// TODO: Continuity errors into manager?
 #   include "initContinuityErrs.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -134,15 +121,10 @@ int main(int argc, char *argv[])
 
             interface.correctPoints(); // abs phi
 
-// TODO: Move to manager function called something like
-//       loopSurfaceStatistics
 #           include "freeSurfaceContinuityErrs.H"
         }
 
 #       include "volContinuity.H"
-
-// TODO: Move to surface info from writePre to manager
-//       function called something like timeSurfaceStatistics
     }
 
     return(0);
