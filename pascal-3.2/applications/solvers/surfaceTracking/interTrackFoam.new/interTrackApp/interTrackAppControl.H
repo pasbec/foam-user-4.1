@@ -50,15 +50,6 @@ class Control
 :
     public pimpleControl
 {
-public:
-
-    struct residualStorage
-    {
-        bool stored;
-        scalar residual;
-    };
-
-
 private:
 
     // Private member functions
@@ -71,6 +62,15 @@ private:
 
 
 protected:
+
+    // Protected structs
+
+        //- Residual storage
+        struct residualStorage
+        {
+            bool stored;
+            scalar residual;
+        };
 
     // Protected data
 

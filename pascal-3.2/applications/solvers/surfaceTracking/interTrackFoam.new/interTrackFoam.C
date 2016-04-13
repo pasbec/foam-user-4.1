@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
             interface.correctPoints(); // abs phi
 
-#           include "freeSurfaceContinuityErrs.H"
+#           include "trackedSurfaceContinuityErrs.H"
         }
 
 #       include "volContinuity.H"
