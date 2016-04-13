@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "eddyCurrentManager.H"
+#include "eddyCurrentAppManager.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -32,13 +32,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void eddyCurrentManager::Region_CONDUCTOR::Settings::read() const
+void eddyCurrentApp::Manager::Region_CONDUCTOR::Settings::read() const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VRe::create
+void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create
 (const word& ccase) const
 {
     set
@@ -59,7 +59,7 @@ void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VRe::create
 }
 
 
-void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VIm::create
+void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create
 (const word& ccase) const
 {
     set
@@ -80,7 +80,7 @@ void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VIm::create
 }
 
 
-void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VReAverage::create
+void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VReAverage::create
 (const word& ccase) const
 {
     set
@@ -105,7 +105,7 @@ void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VReAverage::create
 }
 
 
-void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VImAverage::create
+void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VImAverage::create
 (const word& ccase) const
 {
     set
@@ -132,12 +132,12 @@ void eddyCurrentManager::Region_CONDUCTOR::Storage::Item_VImAverage::create
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::Region_CONDUCTOR::Storage::create
+void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create
 (const word& ccase) const
 {
     item_VRe().enable();
     item_VIm().enable();
-    
+
     item_VReAverage().enable();
     item_VImAverage().enable();
 }

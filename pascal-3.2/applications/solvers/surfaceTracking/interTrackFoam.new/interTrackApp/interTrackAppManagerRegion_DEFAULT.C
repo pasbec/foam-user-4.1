@@ -23,18 +23,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackManager.H"
-#include "zeroGradientFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "interTrackAppManager.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void interTrackManager::Region_DEFAULT::Settings::read() const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
 {
     volumeForce =
         dict().lookupOrDefault("volumeForce", false);
@@ -54,7 +47,11 @@ void interTrackManager::Region_DEFAULT::Settings::read() const
     && !UEqnVolumeForce
     )
     {
-        FatalErrorIn("interTrackManager::Region_DEFAULT::Settings::read() : ")
+        FatalErrorIn
+        (
+            word("Foam::interTrackApp::Manager::")
+          + word("Region_DEFAULT::Settings::read() : ")
+        )
             << "Both coupled solution of U and p and indirect flux "
             << "representation of enabled volume force is currently "
             << "not implemented!"
@@ -65,7 +62,7 @@ void interTrackManager::Region_DEFAULT::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void interTrackManager::Region_DEFAULT::Storage::Item_g::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_g::create
 (const word& ccase) const
 {
     set
@@ -85,7 +82,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_g::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_p::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p::create
 (const word& ccase) const
 {
     set
@@ -106,7 +103,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_p::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_U::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U::create
 (const word& ccase) const
 {
     set
@@ -127,7 +124,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_U::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_Up::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Up::create
 (const word& ccase) const
 {
     set
@@ -154,7 +151,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_Up::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_phi::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_phi::create
 (const word& ccase) const
 {
     set
@@ -177,7 +174,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_phi::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_rho::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_rho::create
 (const word& ccase) const
 {
     set
@@ -205,7 +202,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_rho::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_mu::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_mu::create
 (const word& ccase) const
 {
     set
@@ -233,7 +230,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_mu::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_F::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create
 (const word& ccase) const
 {
     if (ccase == "default")
@@ -282,7 +279,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_F::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_fluidIndicator::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_fluidIndicator::create
 (const word& ccase) const
 {
     set
@@ -303,7 +300,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_fluidIndicator::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_transport::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_transport::create
 (const word& ccase) const
 {
     set
@@ -318,7 +315,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_transport::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_turbulence::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_turbulence::create
 (const word& ccase) const
 {
     set
@@ -333,7 +330,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_turbulence::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::Item_interface::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::create
 (const word& ccase) const
 {
     word interfacePrefix;
@@ -365,7 +362,7 @@ void interTrackManager::Region_DEFAULT::Storage::Item_interface::create
 }
 
 
-void interTrackManager::Region_DEFAULT::Storage::create
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create
 (const word& ccase) const
 {
     item_g().enable();
@@ -407,10 +404,6 @@ void interTrackManager::Region_DEFAULT::Storage::create
     item_interface().enable();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 

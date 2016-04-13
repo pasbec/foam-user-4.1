@@ -33,9 +33,6 @@ Description
 #define solverManagerStorage_H
 
 #include "solverManagerWrapper.H"
-#include "solverManagerRegion.H"
-
-// TODO: Remove old storage
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -223,12 +220,12 @@ private:
         typedef solverManagerBase::Storage<MESH> Base;
         typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
 
-        typedef solverManagerBase::Region
+        typedef solverManagerBase::Region_
         <
             typename MANAGER::ManagerMesh,
             MESH,
             MANAGER::nRegions
-        > Region;
+        > Region_;
 
     // Private Member Functions
 
@@ -283,7 +280,7 @@ public:
         virtual const MANAGER& manager() const = 0;
 
         //- Region
-        virtual Region& region() const = 0;
+        virtual Region_& region() const = 0;
 };
 
 

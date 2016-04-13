@@ -29,8 +29,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solverManagerRegion_H
-#define solverManagerRegion_H
+#ifndef solverManagerRegion__H
+#define solverManagerRegion__H
 
 #include "solverManagerWrapper.H"
 
@@ -40,10 +40,10 @@ Description
 
 # define SM_REGION_NEW_START(ENUM)                                            \
                                                                               \
-    SM_WRAPPER_NEW(Region, Region_##ENUM)                                     \
+    SM_WRAPPER_NEW(Region_, Region_##ENUM)                                    \
                                                                               \
-        public: static const solverManagerRegion::Labels regionLabel =        \
-            solverManagerRegion::ENUM;                                        \
+        public: static const Region::Labels regionLabel =                     \
+            Region::ENUM;                                                     \
                                                                               \
         public: typedef Region_##ENUM ThisRegion;                             \
                                                                               \
@@ -150,13 +150,13 @@ namespace solverManagerRegion
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class solverManagerRegion::Region Declaration
+                  Class solverManagerRegion::Region_ Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGER>
-class Region
+class Region_
 :
-    public solverManagerBase::Region
+    public solverManagerBase::Region_
     <
         typename MANAGER::ManagerMesh,
         typename MANAGER::Mesh,
@@ -181,7 +181,7 @@ private:
         typedef typename MANAGER::ManagerMesh SuperMesh;
         typedef typename MANAGER::Mesh Mesh;
 
-        typedef solverManagerBase::Region
+        typedef solverManagerBase::Region_
         <
             SuperMesh,
             Mesh,
@@ -203,17 +203,17 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        Region(const Region&);
+        Region_(const Region_&);
 
         //- Disallow default bitwise assignment
-        void operator=(const Region&);
+        void operator=(const Region_&);
 
 
 public:
 
     // Constructor
 
-        Region(Mesh& mesh)
+        Region_(Mesh& mesh)
         :
             Base(),
             Wrapper(mesh)
@@ -221,7 +221,7 @@ public:
 
     // Destructor
 
-        virtual ~Region() {};
+        virtual ~Region_() {};
 
     // Member Functions
 
@@ -286,15 +286,15 @@ namespace solverManagerWrappers
 {
 
 /*---------------------------------------------------------------------------*\
-                Class solverManagerWrappers::Region Declaration
+                Class solverManagerWrappers::Region_ Declaration
 \*---------------------------------------------------------------------------*/
 
     template <class MANAGER>
-    struct Region
+    struct Region_
     {
         typedef typename MANAGER::Mesh Mesh;
 
-        typedef solverManagerRegion::Region<MANAGER> Type;
+        typedef solverManagerRegion::Region_<MANAGER> Type;
     };
 
 

@@ -109,13 +109,6 @@ private:
         > Base;
         typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
-        typedef solverManagerBase::Region
-        <
-            Mesh,
-            SubMesh,
-            MANAGER::nRegions
-        > Region;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

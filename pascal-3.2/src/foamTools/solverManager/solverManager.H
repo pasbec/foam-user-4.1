@@ -47,16 +47,12 @@ SourceFiles
 #include "solverManagerSettings.H"
 #include "solverManagerItem.H"
 #include "solverManagerStorage.H"
-#include "solverManagerRegion.H"
+#include "solverManagerRegion_.H"
 #include "solverManagerRegions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_MANAGERSCOPE(MANAGER)                                             \
-                                                                              \
-    typedef MANAGER Manager;                                                  \
-                                                                              \
-    using namespace solverManagerRegion;                                      \
+# define SM_MANAGERSCOPE()                                                    \
                                                                               \
     typedef Manager::ManagerMesh GlobalMesh;                                  \
     typedef Manager::Control GlobalControl;                                   \
@@ -74,17 +70,17 @@ SourceFiles
     if (!&globalStorage) {};
 
 
-# define SM_GLOBALREGIONSCOPE(MANAGER, ENUM)                                  \
+# define SM_GLOBALREGIONSCOPE(ENUM)                                           \
                                                                               \
-    SM_MANAGERSCOPE(MANAGER);                                                 \
+    SM_MANAGERSCOPE();                                                        \
                                                                               \
-    typedef Manager::Region_##ENUM Region;                                    \
+    typedef Manager::Region_##ENUM Region_;                                   \
                                                                               \
-    typedef Region::Control Control;                                          \
-    typedef Region::Settings Settings;                                        \
-    typedef Region::Storage Storage;                                          \
+    typedef Region_::Control Control;                                         \
+    typedef Region_::Settings Settings;                                       \
+    typedef Region_::Storage Storage;                                         \
                                                                               \
-    Region& region = manager.regions().region_##ENUM();                       \
+    Region_& region = manager.regions().region_##ENUM();                      \
     Control& control = manager.regions().region_##ENUM().control();           \
     Settings& settings = manager.regions().region_##ENUM().settings();        \
     Storage& storage = manager.regions().region_##ENUM().storage();           \
@@ -97,14 +93,14 @@ SourceFiles
 
 # define SM_REGIONSCOPE(ENUM)                                                 \
                                                                               \
-    typedef Manager::Region_##ENUM Region;                                    \
+    typedef Manager::Region_##ENUM Region_;                                   \
                                                                               \
-    typedef Region::Mesh Mesh;                                                \
-    typedef Region::Control Control;                                          \
-    typedef Region::Settings Settings;                                        \
-    typedef Region::Storage Storage;                                          \
+    typedef Region_::Mesh Mesh;                                               \
+    typedef Region_::Control Control;                                         \
+    typedef Region_::Settings Settings;                                       \
+    typedef Region_::Storage Storage;                                         \
                                                                               \
-    Region& region = manager.regions().region_##ENUM();                       \
+    Region_& region = manager.regions().region_##ENUM();                      \
     Mesh& mesh = region.mesh();                                               \
     Control& control = manager.regions().region_##ENUM().control();           \
     Settings& settings = manager.regions().region_##ENUM().settings();        \

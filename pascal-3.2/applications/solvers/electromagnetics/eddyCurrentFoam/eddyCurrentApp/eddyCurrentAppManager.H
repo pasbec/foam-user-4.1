@@ -22,64 +22,54 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    eddyCurrentManager
+    Foam::eddyCurrentApp::Manager
 
 Description
     ...
 
 SourceFiles
-    eddyCurrentManager.C
-    eddyCurrentManagerRegionDEFAULT.C
-    eddyCurrentManagerRegionCONDUCTOR.C
+    eddyCurrentAppManager.C
+    eddyCurrentAppManagerRegion_DEFAULT.C
+    eddyCurrentAppManagerRegion_CONDUCTOR.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef eddyCurrentManager_H
-#define eddyCurrentManager_H
+#ifndef eddyCurrentAppManager_H
+#define eddyCurrentAppManager_H
+
+#include "eddyCurrentAppInclude.H"
+#include "eddyCurrentAppRegion.H"
+#include "eddyCurrentAppControl.H"
 
 #include "solverManager.H"
-
-#include "eddyCurrentControl.H"
-
-#include "fvCFD.H"
-#include "regionModelling.H"
-#include "fvBlockMatrix.H"
-#include "physicalConstants.H"
-#include "uniformDimensionedFields.H"
-#include "fixedGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-namespace solverManagerRegion
+namespace eddyCurrentApp
 {
-    enum Labels
-    {
-        DEFAULT,
-        CONDUCTOR
-    };
-
-    static const label SIZE = 2;
-}
 
 /*---------------------------------------------------------------------------*\
-                       Class eddyCurrentManager Declaration
+                   Class eddyCurrentApp::Manager Declaration
 \*---------------------------------------------------------------------------*/
 
-class eddyCurrentManager
+class Manager
 :
-    public solverManager<regionFvMesh, solverManagerRegion::SIZE>
+    public solverManager<regionFvMesh, Region::SIZE>
 {
 public:
 
+    // Public typedefs and forward declarations
+
+        typedef eddyCurrentApp::Control Control;
+        class Settings;
+        class Storage;
+
     // Solver Manager Construction
 
-        SM_HEADER_ADD(eddyCurrentManager)
-
-
-        SM_GLOBALCONTROL_ADD_P1(eddyCurrentControl, mesh()[solverManagerRegion::DEFAULT])
+        SM_GLOBALCONTROL_ADD_P1(Control, mesh())
 
 
         SM_GLOBALSETTINGS_NEW();
@@ -168,9 +158,9 @@ public:
 
         SM_REGIONS_NEW();
 
-            SM_REGIONS_REGION_ADD(DEFAULT, mesh()[solverManagerRegion::DEFAULT]);
+            SM_REGIONS_REGION_ADD(DEFAULT, mesh()[Region::DEFAULT]);
 
-            SM_REGIONS_REGION_ADD(CONDUCTOR, mesh()[solverManagerRegion::CONDUCTOR]);
+            SM_REGIONS_REGION_ADD(CONDUCTOR, mesh()[Region::CONDUCTOR]);
 
         SM_REGIONS_ADD();
 
@@ -187,10 +177,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        eddyCurrentManager(const eddyCurrentManager&);
+        Manager(const Manager&);
 
         //- Disallow default bitwise assignment
-        void operator=(const eddyCurrentManager&);
+        void operator=(const Manager&);
 
         // Evolution
 
@@ -207,11 +197,11 @@ private:
 public:
 
     // Runtime type information
-    TypeName("eddyCurrentManager");
+    TypeName("eddyCurrentApp::Manager");
 
     // Constructor
 
-        eddyCurrentManager
+        Manager
         (
             const argList& args,
             Time& time,
@@ -222,7 +212,7 @@ public:
 
     // Destructor
 
-        virtual ~eddyCurrentManager() {};
+        virtual ~Manager();
 
     // Member Functions
 
@@ -241,6 +231,11 @@ public:
             };
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace eddyCurrentApp
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -248,9 +243,9 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "eddyCurrentManager.C"
-#   include "eddyCurrentManagerRegionDEFAULT.C"
-#   include "eddyCurrentManagerRegionCONDUCTOR.C"
+#   include "eddyCurrentAppManager.C"
+#   include "eddyCurrentAppManagerRegion_DEFAULT.C"
+#   include "eddyCurrentAppManagerRegion_CONDUCTOR.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

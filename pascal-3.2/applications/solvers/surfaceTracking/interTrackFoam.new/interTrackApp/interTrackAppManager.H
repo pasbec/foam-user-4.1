@@ -22,67 +22,53 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    interTrackManager
+    Foam::interTrackApp::Manager
 
 Description
     ...
 
 SourceFiles
-    interTrackManager.C
-    interTrackManagerRegionDEFAULT.C
+    interTrackAppManager.C
+    interTrackAppManagerRegion_DEFAULT.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackManager_H
-#define interTrackManager_H
+#ifndef interTrackAppManager_H
+#define interTrackAppManager_H
+
+#include "interTrackAppInclude.H"
+#include "interTrackAppRegion.H"
+#include "interTrackAppControl.H"
 
 #include "solverManager.H"
-
-#include "interTrackControl.H"
-
-#include "fvCFD.H"
-#include "dynamicFvMesh.H"
-#include "twoPhaseMixture.H"
-#include "turbulenceModel.H"
-#include "trackedSurface.H"
-#include "fvBlockMatrix.H"
-#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace solverManagerRegion
+namespace interTrackApp
 {
-    enum Labels
-    {
-        DEFAULT
-    };
-
-    static const label SIZE = 1;
-}
-
-typedef fvBlockMatrix<vector4> fvVector4Matrix;
 
 /*---------------------------------------------------------------------------*\
-                       Class interTrackManager Declaration
+                   Class interTrackApp::Manager Declaration
 \*---------------------------------------------------------------------------*/
 
-class interTrackManager
+class Manager
 :
-    public solverManager<dynamicFvMesh, solverManagerRegion::SIZE>
+    public solverManager<dynamicFvMesh, Region::SIZE>
 {
 public:
 
+    // Public typedefs and forward declarations
+
+        typedef interTrackApp::Control Control;
+        class Settings;
+        class Storage;
+
     // Solver Manager Construction
 
-        SM_HEADER_ADD(interTrackManager)
-
-
-        SM_GLOBALCONTROL_ADD_P1(interTrackControl, mesh())
+        SM_GLOBALCONTROL_ADD_P1(Control, mesh())
 
 
         SM_GLOBALSETTINGS_NEW();
@@ -195,10 +181,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        interTrackManager(const interTrackManager&);
+        Manager(const Manager&);
 
         //- Disallow default bitwise assignment
-        void operator=(const interTrackManager&);
+        void operator=(const Manager&);
 
         // Evolution
 
@@ -218,11 +204,11 @@ private:
 public:
 
     // Runtime type information
-    TypeName("interTrackManager");
+    TypeName("interTrackApp::Manager");
 
     // Constructor
 
-        interTrackManager
+        Manager
         (
             const argList& args,
             Time& time,
@@ -233,7 +219,7 @@ public:
 
     // Destructor
 
-        virtual ~interTrackManager() {};
+        virtual ~Manager();
 
     // Member Functions
 
@@ -252,6 +238,11 @@ public:
             };
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace interTrackApp
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -259,8 +250,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interTrackManager.C"
-#   include "interTrackManagerRegionDEFAULT.C"
+#   include "interTrackAppManager.C"
+#   include "interTrackAppManagerRegion_DEFAULT.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

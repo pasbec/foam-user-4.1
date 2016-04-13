@@ -10,8 +10,7 @@ EXE_INC = \
     -IlnInclude \
     -IgradSchemes/electricPotentialGrad \
     -IlaplacianSchemes/electricPotentialLaplacian \
-    -IeddyCurrentControl \
-    -IeddyCurrentManager \
+    -IeddyCurrentApp \
     -Iinclude
 
 

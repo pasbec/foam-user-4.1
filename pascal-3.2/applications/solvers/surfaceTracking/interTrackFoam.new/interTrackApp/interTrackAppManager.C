@@ -23,39 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackManager.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "interTrackAppManager.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(interTrackManager, 0);
+defineTypeNameAndDebug(Foam::interTrackApp::Manager, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void interTrackManager::Settings::read() const
+void Foam::interTrackApp::Manager::Settings::read() const
 {
-    debug =
-        dict().lookupOrDefault
-        (
-            "debug", Switch(interTrackManager::debug)
-        );
+    debug = dict().lookupOrDefault("debug", Switch(debug));
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void interTrackManager::Storage::create(const word& ccase) const
+void Foam::interTrackApp::Manager::Storage::create(const word& ccase) const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void interTrackManager::Regions::create(const word& ccase) const
+void Foam::interTrackApp::Manager::Regions::create(const word& ccase) const
 {
     region_DEFAULT().enable();
 }
@@ -63,7 +54,7 @@ void interTrackManager::Regions::create(const word& ccase) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool interTrackManager::setCoNum(scalar& CourantNumber) const
+bool Foam::interTrackApp::Manager::setCoNum(scalar& CourantNumber) const
 {
     CourantNumber = 0.0;
 
@@ -116,7 +107,7 @@ bool interTrackManager::setCoNum(scalar& CourantNumber) const
 }
 
 
-void interTrackManager::next() const
+void Foam::interTrackApp::Manager::next() const
 {
     Region_DEFAULT::Storage& storage = regions().region_DEFAULT().storage();
 
@@ -146,7 +137,7 @@ void interTrackManager::next() const
 }
 
 
-void interTrackManager::write() const
+void Foam::interTrackApp::Manager::write() const
 {
     Region_DEFAULT::Storage& storage = regions().region_DEFAULT().storage();
 
@@ -162,13 +153,13 @@ void interTrackManager::write() const
 }
 
 
-void interTrackManager::finalize() const
+void Foam::interTrackApp::Manager::finalize() const
 {}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-interTrackManager::interTrackManager
+Foam::interTrackApp::Manager::Manager
 (
     const argList& args,
     Time& time,
@@ -177,23 +168,22 @@ interTrackManager::interTrackManager
     const bool& master
 )
 :
-    solverManager<dynamicFvMesh, solverManagerRegion::SIZE>
+    solverManager<dynamicFvMesh, Region::SIZE>
     (
         args, time, mesh, name, master
     )
 {
-    // Use solverManagerRegion to get region labels and size
-    using namespace solverManagerRegion;
-
     // Region name list
-    regionNames_.setSize(SIZE);
-    regionNames_[DEFAULT] = polyMesh::defaultRegion;
+    regionNames_.setSize(Region::SIZE);
+    regionNames_[Region::DEFAULT] = polyMesh::defaultRegion;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::interTrackApp::Manager::~Manager()
+{}
+
 
 // ************************************************************************* //
 

@@ -55,7 +55,7 @@ template <class MESH> class Mesh;
 template <class MESH> class Settings;
 template <class MESH, class TYPE> class Item;
 template <class MESH> class Storage;
-template <class MANAGERMESH, class MESH, label NREGIONS> class Region;
+template <class MANAGERMESH, class MESH, label NREGIONS> class Region_;
 template <class MANAGERMESH, class MESH, label NREGIONS> class Regions;
 
 /*---------------------------------------------------------------------------*\
@@ -904,7 +904,7 @@ public:
 \*---------------------------------------------------------------------------*/
 
 template <class MANAGERMESH, class MESH, label NREGIONS>
-class Region
+class Region_
 :
     public Read,
     public Init,
@@ -931,7 +931,7 @@ private:
             {
                 regions().link
                 (
-                    const_cast<Region<MANAGERMESH, MESH, NREGIONS>*>(this)
+                    const_cast<Region_<MANAGERMESH, MESH, NREGIONS>*>(this)
                 );
             };
 
@@ -960,11 +960,11 @@ protected:
 
     // Constructor
 
-        Region() : Read(), Init(), LinkSlave() {};
+        Region_() : Read(), Init(), LinkSlave() {};
 
     // Destructor
 
-        virtual ~Region() {};
+        virtual ~Region_() {};
 
 
 public:
@@ -1041,14 +1041,14 @@ class Regions
     public Create,
     public Read,
     public Init,
-    LinkMaster<Region<MANAGERMESH, MESH, NREGIONS> >
+    LinkMaster<Region_<MANAGERMESH, MESH, NREGIONS> >
 {
 public:
 
     // Friends declarations
 
         //- Friend with Region
-        template<class MM, class M, label N> friend class Region;
+        template<class MM, class M, label N> friend class Region_;
 
 
 private:
@@ -1058,7 +1058,7 @@ private:
         //- Region list type
         typedef HashTable
             <
-                Region<MANAGERMESH, MESH, NREGIONS>*,
+                Region_<MANAGERMESH, MESH, NREGIONS>*,
                 label
             > RegionHashTable;
 
@@ -1085,7 +1085,7 @@ private:
             //- Link/register pointer of region
             virtual void link
             (
-                Region<MANAGERMESH, MESH, NREGIONS>* region
+                Region_<MANAGERMESH, MESH, NREGIONS>* region
             ) const
             {
                 regionHashTable().insert(region->regionIndex(), region);
@@ -1094,7 +1094,7 @@ private:
             //- Unlink/deregister pointer of region
             virtual void unlink
             (
-                const Region<MANAGERMESH, MESH, NREGIONS>* region
+                const Region_<MANAGERMESH, MESH, NREGIONS>* region
             ) const
             {
                 regionHashTable().erase(region->regionIndex());
@@ -1171,7 +1171,7 @@ public:
         // Regions
 
             //- Return region by index
-            virtual Region<MANAGERMESH, MESH, NREGIONS>& operator[]
+            virtual Region_<MANAGERMESH, MESH, NREGIONS>& operator[]
             (
                 const label& regionI
             ) const

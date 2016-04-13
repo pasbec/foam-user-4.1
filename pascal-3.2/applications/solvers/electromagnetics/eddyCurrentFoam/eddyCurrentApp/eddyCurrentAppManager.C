@@ -23,33 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "eddyCurrentManager.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "eddyCurrentAppManager.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(eddyCurrentManager, 0);
+defineTypeNameAndDebug(Foam::eddyCurrentApp::Manager, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void eddyCurrentManager::Settings::read() const
+void Foam::eddyCurrentApp::Manager::Settings::read() const
 {
-    debug =
-        dict().lookupOrDefault
-        (
-            "debug", Switch(eddyCurrentManager::debug)
-        );
+    debug = dict().lookupOrDefault("debug", Switch(debug));
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::Storage::Item_f0::create
+void Foam::eddyCurrentApp::Manager::Storage::Item_f0::create
 (const word& init) const
 {
     set
@@ -69,7 +60,7 @@ void eddyCurrentManager::Storage::Item_f0::create
 }
 
 
-void eddyCurrentManager::Storage::Item_omega0::create
+void Foam::eddyCurrentApp::Manager::Storage::Item_omega0::create
 (const word& init) const
 {
     set
@@ -90,7 +81,7 @@ void eddyCurrentManager::Storage::Item_omega0::create
 }
 
 
-void eddyCurrentManager::Storage::Item_sigma::create
+void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create
 (const word& init) const
 {
     set
@@ -111,7 +102,7 @@ void eddyCurrentManager::Storage::Item_sigma::create
 }
 
 
-void eddyCurrentManager::Storage::Item_ARe::create
+void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create
 (const word& init) const
 {
     set
@@ -132,7 +123,7 @@ void eddyCurrentManager::Storage::Item_ARe::create
 }
 
 
-void eddyCurrentManager::Storage::Item_AIm::create
+void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create
 (const word& init) const
 {
     set
@@ -153,7 +144,7 @@ void eddyCurrentManager::Storage::Item_AIm::create
 }
 
 
-void eddyCurrentManager::Storage::Item_VReGrad::create
+void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create
 (const word& init) const
 {
     set
@@ -181,7 +172,7 @@ void eddyCurrentManager::Storage::Item_VReGrad::create
 }
 
 
-void eddyCurrentManager::Storage::Item_VImGrad::create
+void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create
 (const word& init) const
 {
     set
@@ -209,7 +200,7 @@ void eddyCurrentManager::Storage::Item_VImGrad::create
 }
 
 
-void eddyCurrentManager::Storage::Item_FL::create
+void Foam::eddyCurrentApp::Manager::Storage::Item_FL::create
 (const word& init) const
 {
     set
@@ -237,7 +228,7 @@ void eddyCurrentManager::Storage::Item_FL::create
 }
 
 
-void eddyCurrentManager::Storage::Item_pB::create
+void Foam::eddyCurrentApp::Manager::Storage::Item_pB::create
 (const word& init) const
 {
     set
@@ -265,7 +256,7 @@ void eddyCurrentManager::Storage::Item_pB::create
 }
 
 
-void eddyCurrentManager::Storage::create(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::create(const word& ccase) const
 {
     item_f0().enable();
     item_omega0().enable();
@@ -285,7 +276,7 @@ void eddyCurrentManager::Storage::create(const word& ccase) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::Regions::create(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Regions::create(const word& ccase) const
 {
     region_DEFAULT().enable();
     region_CONDUCTOR().enable();
@@ -294,21 +285,21 @@ void eddyCurrentManager::Regions::create(const word& ccase) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::next() const
+void Foam::eddyCurrentApp::Manager::next() const
 {}
 
 
-void eddyCurrentManager::write() const
+void Foam::eddyCurrentApp::Manager::write() const
 {}
 
 
-void eddyCurrentManager::finalize() const
+void Foam::eddyCurrentApp::Manager::finalize() const
 {}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-eddyCurrentManager::eddyCurrentManager
+Foam::eddyCurrentApp::Manager::Manager
 (
     const argList& args,
     Time& time,
@@ -317,31 +308,42 @@ eddyCurrentManager::eddyCurrentManager
     const bool& master
 )
 :
-    solverManager<regionFvMesh, solverManagerRegion::SIZE>
+    solverManager<regionFvMesh, Region::SIZE>
     (
         args, time, mesh, name, master
     ),
     regionNames_(wordList())
 {
-    // Use solverManagerRegion to get region labels and size
-    using namespace solverManagerRegion;
-
     // Region name list
-    regionNames_.setSize(SIZE);
-    regionNames_[DEFAULT] = polyMesh::defaultRegion;
-    regionNames_[CONDUCTOR] = word(this->regionsDict().lookup("conductor"));
+    regionNames_.setSize(Region::SIZE);
+    regionNames_[Region::DEFAULT] = polyMesh::defaultRegion;
+    regionNames_[Region::CONDUCTOR] =
+        word(this->regionsDict().lookup("conductor"));
 
     // Init regionMesh
-    mesh.init(regionNames_);
+    if (mesh.initialized())
+    {
+        FatalErrorIn
+        (
+            "Foam::eddyCurrentApp::Manager::Manager(...) : "
+        )
+            << "Region mesh is already initialized. This Manager "
+            << "needs to initialize the region mesh by itself. "
+            << "Construct the regionMesh with 'init=false'!"
+            << abort(FatalError);
+    }
+    else
+    {
+        mesh.init(regionNames_);
+    }
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
+Foam::eddyCurrentApp::Manager::~Manager()
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 

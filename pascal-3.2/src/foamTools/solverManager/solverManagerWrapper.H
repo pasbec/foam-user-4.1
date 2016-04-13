@@ -193,35 +193,25 @@ Description
 
 # define SM_MANAGER_GLOBALCONTROL_ADD_P1(TYPE, P1)                            \
                                                                               \
-    public: typedef TYPE Control;                                             \
-                                                                              \
     SM_WRAPPER_MEMBER_ADD_P1(                                                 \
         Control, control, virtual, P1)
 
 # define SM_MANAGER_GLOBALCONTROL_ADD_P2(TYPE, P1,P2)                         \
-                                                                              \
-    public: typedef TYPE Control;                                             \
                                                                               \
     SM_WRAPPER_MEMBER_ADD_P2(                                                 \
         Control, control, virtual, P1,P2)
 
 # define SM_MANAGER_GLOBALCONTROL_ADD_P3(TYPE, P1,P2,P3)                      \
                                                                               \
-    public: typedef TYPE Control;                                             \
-                                                                              \
     SM_WRAPPER_MEMBER_ADD_P3(                                                 \
         Control, control, virtual, P1,P2,P3)
 
 # define SM_MANAGER_GLOBALCONTROL_ADD_P4(TYPE, P1,P2,P3,P4)                   \
                                                                               \
-    public: typedef TYPE Control;                                             \
-                                                                              \
     SM_WRAPPER_MEMBER_ADD_P4(                                                 \
         Control, control, virtual, P1,P2,P3,P4)
 
 # define SM_MANAGER_GLOBALCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)                \
-                                                                              \
-    public: typedef TYPE Control;                                             \
                                                                               \
     SM_WRAPPER_MEMBER_ADD_P5(                                                 \
         Control, control, virtual, P1,P2,P3,P4,P5)
@@ -250,21 +240,6 @@ Description
 # define SM_GLOBALCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)                        \
                                                                               \
     SM_MANAGER_GLOBALCONTROL_ADD_P5(TYPE, P1,P2,P3,P4,P5)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-# define SM_MANAGER_HEADER(NAME)                                              \
-                                                                              \
-    public: typedef NAME Manager;                                             \
-                                                                              \
-    class Settings;                                                           \
-    class Storage;
-
-
-# define SM_HEADER_ADD(NAME)                                                  \
-                                                                              \
-    SM_MANAGER_HEADER(NAME)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

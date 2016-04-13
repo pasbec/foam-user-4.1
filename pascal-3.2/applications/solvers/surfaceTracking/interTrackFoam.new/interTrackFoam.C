@@ -28,12 +28,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackManager.H"
+#include "interTrackApp.H"
 
-#ifndef namespaceFoam
-#define namespaceFoam
-    using namespace Foam;
-#endif
+using namespace Foam;
+using namespace interTrackApp;
+using namespace interTrackApp::Region;
 
 // TODO: Coupled solution of U and p?
 
@@ -52,12 +51,12 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    interTrackManager manager(args, runTime, mesh);
+    Manager manager(args, runTime, mesh);
 
     manager.read();
     manager.init();
 
-    SM_GLOBALREGIONSCOPE(interTrackManager, DEFAULT);
+    SM_GLOBALREGIONSCOPE(DEFAULT);
 
     volScalarField& p = storage.p();
     volVectorField& U = storage.U();

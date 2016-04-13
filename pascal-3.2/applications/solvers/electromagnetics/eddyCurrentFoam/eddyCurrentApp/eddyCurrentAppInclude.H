@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     |
-    \\  /    A nd           | For copyright notice see file Copyright
-     \\/     M anipulation  |
+   \\    /   O peration     | Version:     3.2
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
     This file is part of foam-extend.
@@ -21,54 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    ...
-
 Description
+    ...
 
 \*---------------------------------------------------------------------------*/
 
-#include "eddyCurrentApp.H"
+#ifndef eddyCurrentAppInclude_H
+#define eddyCurrentAppInclude_H
 
-using namespace Foam;
-using namespace eddyCurrentApp;
-using namespace eddyCurrentApp::Region;
-
-// TODO: Derived gradient boundary condition for VRe/VIm in conductor region
-
-// TODO: Extrapolation sometimes completely fails
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
-{
-    argList::validOptions.insert("overwrite", "");
-
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createRegionMeshUninitialized.H"
-
-    Manager manager(args, runTime, regionMesh);
-
-    manager.read();
-    manager.init();
-
-    SM_GLOBALREGIONSCOPE(DEFAULT);
-
-    uniformDimensionedScalarField& omega0 = manager.storage().omega0();
+#include "regionModelling.H"
+#include "fvBlockMatrix.H"
+#include "physicalConstants.H"
+#include "uniformDimensionedFields.H"
+#include "fixedGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    while(manager.once())
-    {
-#       include "AVloop.H"
-
-#       include "derivedFields.H"
-    }
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    return(0);
-}
+#endif
 
 // ************************************************************************* //

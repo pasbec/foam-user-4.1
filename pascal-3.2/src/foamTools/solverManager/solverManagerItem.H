@@ -33,7 +33,6 @@ Description
 #define solverManagerItem_H
 
 #include "solverManagerWrapper.H"
-#include "solverManagerStorage.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -279,12 +278,12 @@ private:
         typedef solverManagerBase::Item<MESH, TYPE> Base;
         typedef solverManagerWrappers::Base<MANAGER, MESH> Wrapper;
 
-        typedef solverManagerBase::Region
+        typedef solverManagerBase::Region_
         <
             typename MANAGER::ManagerMesh,
             MESH,
             MANAGER::nRegions
-        > Region;
+        > Region_;
         typedef typename solverManagerBase::Storage<MESH> Storage;
 
     // Private Member Functions
@@ -340,7 +339,7 @@ public:
         virtual const MANAGER& manager() const = 0;
 
         //- Region
-        virtual Region& region() const = 0;
+        virtual Region_& region() const = 0;
 
         //- Storage
         virtual Storage& storage() const = 0;

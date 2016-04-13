@@ -23,17 +23,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackControl.H"
-#include "Switch.H"
+#include "interTrackAppControl.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::interTrackControl, 0);
+defineTypeNameAndDebug(Foam::interTrackApp::Control, 0);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool Foam::interTrackControl::criteriaSatisfied()
+bool Foam::interTrackApp::Control::criteriaSatisfied()
 {
     // no checks on first iteration - nothing has been calculated yet
     if ((corr_ == 1) || residualControl_.empty() || finalIter())
@@ -116,7 +115,7 @@ bool Foam::interTrackControl::criteriaSatisfied()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::interTrackControl::interTrackControl(fvMesh& mesh, const word& dictName)
+Foam::interTrackApp::Control::Control(fvMesh& mesh, const word& dictName)
 :
     pimpleControl(mesh, dictName),
     residualStorage_(residualControl_.size())
@@ -132,13 +131,13 @@ Foam::interTrackControl::interTrackControl(fvMesh& mesh, const word& dictName)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::interTrackControl::~interTrackControl()
+Foam::interTrackApp::Control::~Control()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::interTrackControl::storeResiduals(const word& name)
+void Foam::interTrackApp::Control::storeResiduals(const word& name)
 {
     const dictionary& solverDict = mesh_.solverPerformanceDict();
     forAllConstIter(dictionary, solverDict, iter)
@@ -178,7 +177,7 @@ void Foam::interTrackControl::storeResiduals(const word& name)
 }
 
 
-void Foam::interTrackControl::skipZeroNonOrtho(const word& name)
+void Foam::interTrackApp::Control::skipZeroNonOrtho(const word& name)
 {
     // skip if this is the final non-orthogonal iteration
     if (!finalNonOrthogonalIter())

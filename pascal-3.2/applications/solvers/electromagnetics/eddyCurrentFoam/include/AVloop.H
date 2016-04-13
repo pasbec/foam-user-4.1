@@ -46,6 +46,10 @@
             // Solve for V in conductor region
             {
                 SM_REGIONSCOPE(CONDUCTOR);
+// TODO
+                // Relax A
+//                 control.relax(globalStorage.ARe());
+//                 control.relax(globalStorage.AIm());
 
                 volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];
 
@@ -54,11 +58,6 @@
 
                 volScalarField& VRe = storage.VRe();
                 volScalarField& VIm = storage.VIm();
-
-                // Relax A
-// TODO
-//                 control.relax(globalStorage.ARe());
-//                 control.relax(globalStorage.AIm());
 
 #               include "VEqn.H"
             }

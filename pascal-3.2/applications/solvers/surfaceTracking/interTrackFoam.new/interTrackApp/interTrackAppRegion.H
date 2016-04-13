@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     |
-    \\  /    A nd           | For copyright notice see file Copyright
-     \\/     M anipulation  |
+   \\    /   O peration     | Version:     3.2
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
     This file is part of foam-extend.
@@ -21,54 +21,50 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    ...
+InNamespace
+    Foam::interTrackApp
 
 Description
+    ...
 
 \*---------------------------------------------------------------------------*/
 
-#include "eddyCurrentApp.H"
-
-using namespace Foam;
-using namespace eddyCurrentApp;
-using namespace eddyCurrentApp::Region;
-
-// TODO: Derived gradient boundary condition for VRe/VIm in conductor region
-
-// TODO: Extrapolation sometimes completely fails
+#ifndef interTrackAppRegion_H
+#define interTrackAppRegion_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+namespace Foam
 {
-    argList::validOptions.insert("overwrite", "");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createRegionMeshUninitialized.H"
+namespace interTrackApp
+{
 
-    Manager manager(args, runTime, regionMesh);
+/*---------------------------------------------------------------------------*\
+                   Namespace interTrackApp::Region Declaration
+\*---------------------------------------------------------------------------*/
 
-    manager.read();
-    manager.init();
+namespace Region
+{
+    enum Labels
+    {
+        DEFAULT
+    };
 
-    SM_GLOBALREGIONSCOPE(DEFAULT);
+    static const label SIZE = 1;
+}
 
-    uniformDimensionedScalarField& omega0 = manager.storage().omega0();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    while(manager.once())
-    {
-#       include "AVloop.H"
+} // End namespace interTrackApp
 
-#       include "derivedFields.H"
-    }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+} // End namespace Foam
 
-    return(0);
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

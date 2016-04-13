@@ -22,41 +22,37 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    eddyCurrentControl
+    Foam::eddyCurrentApp::Control
 
 Description
     ...
 
 SourceFiles
-    eddyCurrentControl.C
+    eddyCurrentAppControl.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef eddyCurrentControl_H
-#define eddyCurrentControl_H
+#ifndef eddyCurrentAppControl_H
+#define eddyCurrentAppControl_H
+
+#include "eddyCurrentAppInclude.H"
+#include "eddyCurrentAppRegion.H"
 
 #include "solutionControl.H"
-#include "regionFvMesh.H"
-
-// #include "PstreamReduceOps.H"
-// #include "mathematicalConstants.H"
-// #include "physicalConstants.H"
-// #include "regionModelling.H"
-//
-// #include "fixedGradientFvPatchFields.H"
-// #include "tangentialMagneticFvPatchFields.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+namespace eddyCurrentApp
+{
+
 /*---------------------------------------------------------------------------*\
-                       Class eddyCurrentControl Declaration
+                   Class eddyCurrentApp::Control Declaration
 \*---------------------------------------------------------------------------*/
 
-class eddyCurrentControl
+class Control
 :
     public solutionControl
 {
@@ -64,10 +60,13 @@ private:
 
     // Private data
 
+        //- Mesh
+        const regionFvMesh& mesh_;
+
         // Setup
 
             //- Is mesh 3D?
-            const bool mesh3D_;
+            const bool meshIs3D_;
 
             //- Solution direction
             const Vector<label> solutionDir_;
@@ -83,10 +82,10 @@ private:
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        eddyCurrentControl(const eddyCurrentControl&);
+        Control(const Control&);
 
         //- Disallow default bitwise assignment
-        void operator=(const eddyCurrentControl&);
+        void operator=(const Control&);
 
 
 protected:
@@ -102,22 +101,21 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("eddyCurrentControl");
+    TypeName("eddyCurrentApp::Control");
 
 
     // Constructors
 
-        //- Construct from mesh, the name of control sub-dictionary and
-        // TODO
-        eddyCurrentControl
+        //- Construct from mesh and the name of control sub-dictionary
+        Control
         (
-            fvMesh& mesh,
+            regionFvMesh& mesh,
             const word& dictName = "EDDYCURRENT"
         );
 
 
     //- Destructor
-    virtual ~eddyCurrentControl() {};
+    virtual ~Control() {};
 
 
     // Member Functions
@@ -127,7 +125,7 @@ public:
             //- Mesh geometry is 3D
             inline bool meshIs3D() const
             {
-                return mesh3D_;
+                return meshIs3D_;
             };
 
             //- Mesh solution direction
@@ -159,12 +157,16 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace eddyCurrentApp
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "eddyCurrentControl.C"
+#   include "eddyCurrentAppControl.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -173,7 +175,7 @@ public:
 
 // ************************************************************************* //
 
-// class eddyCurrentControl
+// class eddyCurrentAppControl
 // :
 //     public solverControl<regionFvMesh>
 // {
@@ -301,10 +303,10 @@ public:
 //     // Private Member Functions
 //
 //         //- Disallow default bitwise copy construct
-//         eddyCurrentControl(const eddyCurrentControl&);
+//         eddyCurrentAppControl(const eddyCurrentAppControl&);
 //
 //         //- Disallow default bitwise assignment
-//         void operator=(const eddyCurrentControl&);
+//         void operator=(const eddyCurrentAppControl&);
 //
 //         // Inline helper
 //
@@ -382,12 +384,12 @@ public:
 // public:
 //
 //     // Runtime type information
-//     TypeName("eddyCurrentControl");
+//     TypeName("eddyCurrentAppControl");
 //
 //     // Constructors
 //
 //         //- Construct from mesh and name
-//         eddyCurrentControl
+//         eddyCurrentAppControl
 //         (
 //             const argList& args,
 //             Time& time,
@@ -398,7 +400,7 @@ public:
 //
 //     // Destructor
 //
-//         virtual ~eddyCurrentControl() {};
+//         virtual ~eddyCurrentAppControl() {};
 //
 //     // Member Functions
 //

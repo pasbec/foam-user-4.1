@@ -13,7 +13,6 @@
 
 ../trackedSurface.new/lnInclude
 
-./interTrackControl
-./interTrackManager
+./interTrackApp
 
 ./include

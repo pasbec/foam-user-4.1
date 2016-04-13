@@ -8,7 +8,6 @@
 
 ./laplacianSchemes/electricPotentialLaplacian
 
-./eddyCurrentControl
-./eddyCurrentManager
+./eddyCurrentApp
 
 ./include

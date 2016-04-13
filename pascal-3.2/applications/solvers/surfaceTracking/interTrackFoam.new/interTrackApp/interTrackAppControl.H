@@ -22,15 +22,15 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interTrackControl
+    Foam::interTrackApp::Control
 
 Description
     Specialization of the pimpleControl class for interTrackFoam.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackControl_H
-#define interTrackControl_H
+#ifndef interTrackAppControl_H
+#define interTrackAppControl_H
 
 #include "pimpleControl.H"
 
@@ -39,11 +39,14 @@ Description
 namespace Foam
 {
 
+namespace interTrackApp
+{
+
 /*---------------------------------------------------------------------------*\
-                        Class interTrackControl Declaration
+                   Class interTrackApp::Control Declaration
 \*---------------------------------------------------------------------------*/
 
-class interTrackControl
+class Control
 :
     public pimpleControl
 {
@@ -61,10 +64,10 @@ private:
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        interTrackControl(const interTrackControl&);
+        Control(const Control&);
 
         //- Disallow default bitwise assignment
-        void operator=(const interTrackControl&);
+        void operator=(const Control&);
 
 
 protected:
@@ -83,17 +86,17 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("interTrackControl");
+    TypeName("interTrackApp::Control");
 
 
     // Constructors
 
         //- Construct from mesh and the name of control sub-dictionary
-        interTrackControl(fvMesh& mesh, const word& dictName="OUTER");
+        Control(fvMesh& mesh, const word& dictName="OUTER");
 
 
     //- Destructor
-    virtual ~interTrackControl();
+    virtual ~Control();
 
 
     // Member Functions
@@ -117,14 +120,21 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace interTrackApp
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "interTrackControlI.H"
+#include "interTrackAppControlI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interTrackControl.C"
+#   include "interTrackAppControl.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

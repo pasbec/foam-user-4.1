@@ -21,15 +21,23 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    ...
+
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#ifndef interTrackApp_H
+#define interTrackApp_H
 
-inline bool Foam::interTrackControl::firstInnerIter() const
-{
-    return
-       corrPISO_ == 1
-    && corrNonOrtho_ == 1;
-}
+#include "interTrackAppInclude.H"
+#include "interTrackAppRegion.H"
+#include "interTrackAppControl.H"
+#include "interTrackAppManager.H"
+
+#include "fvCFD.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

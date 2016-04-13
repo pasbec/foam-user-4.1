@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "eddyCurrentManager.H"
+#include "eddyCurrentAppManager.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -32,13 +32,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void eddyCurrentManager::Region_DEFAULT::Settings::read() const
+void eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentManager::Region_DEFAULT::Storage::Item_j0Re::create
+void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create
 (const word& ccase) const
 {
     set
@@ -66,7 +66,7 @@ void eddyCurrentManager::Region_DEFAULT::Storage::Item_j0Re::create
 }
 
 
-void eddyCurrentManager::Region_DEFAULT::Storage::Item_j0Im::create
+void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create
 (const word& ccase) const
 {
     set
@@ -94,7 +94,7 @@ void eddyCurrentManager::Region_DEFAULT::Storage::Item_j0Im::create
 }
 
 
-void eddyCurrentManager::Region_DEFAULT::Storage::Item_jRe::create
+void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_jRe::create
 (const word& ccase) const
 {
     set
@@ -122,7 +122,7 @@ void eddyCurrentManager::Region_DEFAULT::Storage::Item_jRe::create
 }
 
 
-void eddyCurrentManager::Region_DEFAULT::Storage::Item_jIm::create
+void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_jIm::create
 (const word& ccase) const
 {
     set
@@ -150,7 +150,7 @@ void eddyCurrentManager::Region_DEFAULT::Storage::Item_jIm::create
 }
 
 
-void eddyCurrentManager::Region_DEFAULT::Storage::Item_BRe::create
+void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_BRe::create
 (const word& ccase) const
 {
     set
@@ -178,7 +178,7 @@ void eddyCurrentManager::Region_DEFAULT::Storage::Item_BRe::create
 }
 
 
-void eddyCurrentManager::Region_DEFAULT::Storage::Item_BIm::create
+void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_BIm::create
 (const word& ccase) const
 {
     set
@@ -206,7 +206,7 @@ void eddyCurrentManager::Region_DEFAULT::Storage::Item_BIm::create
 }
 
 
-void eddyCurrentManager::Region_DEFAULT::Storage::create
+void eddyCurrentApp::Manager::Region_DEFAULT::Storage::create
 (const word& ccase) const
 {
     item_j0Re().enable();

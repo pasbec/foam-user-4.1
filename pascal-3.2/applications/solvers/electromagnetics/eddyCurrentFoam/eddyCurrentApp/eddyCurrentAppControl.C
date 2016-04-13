@@ -23,21 +23,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "eddyCurrentControl.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "eddyCurrentAppControl.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(eddyCurrentControl, 0);
+defineTypeNameAndDebug(Foam::eddyCurrentApp::Control, 0);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool Foam::eddyCurrentControl::criteriaSatisfied()
+bool Foam::eddyCurrentApp::Control::criteriaSatisfied()
 {
     return true;
 };
@@ -45,7 +40,7 @@ bool Foam::eddyCurrentControl::criteriaSatisfied()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::eddyCurrentControl::loop()
+bool Foam::eddyCurrentApp::Control::loop()
 {
     return true;
 };
@@ -53,34 +48,31 @@ bool Foam::eddyCurrentControl::loop()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-eddyCurrentControl::eddyCurrentControl
+Foam::eddyCurrentApp::Control::Control
 (
-    fvMesh& mesh,
+    regionFvMesh& mesh,
     const word& dictName
 )
 :
-    solutionControl(mesh, dictName),
-    mesh3D_((mesh.nGeometricD() == 3)),
-    solutionDir_(mesh3D_ ? mesh.geometricD() : -mesh.geometricD()),
+    solutionControl(mesh[Region::DEFAULT], dictName),
+    mesh_(mesh),
+    meshIs3D_((mesh.nGeometricD() == 3)),
+    solutionDir_(meshIs3D_ ? mesh.geometricD() : -mesh.geometricD()),
     interfacePatchName_
     (
         this->dict().lookup("interface")
     ),
     interfacePatch_
     (
-// TODO
-//         this->mesh_[conductorRegion_].boundaryMesh().findPatchID(interfacePatchName_)
-        -1
+        this->mesh_[Region::CONDUCTOR].
+            boundaryMesh().findPatchID(interfacePatchName_)
     )
 {}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 
-// void eddyCurrentControl::readDictDataIfModified()
+// void eddyCurrentAppControl::readDictDataIfModified()
 // {
 //     // Eddy current properties
 //     if (propDict_.readIfModified())
@@ -115,7 +107,7 @@ eddyCurrentControl::eddyCurrentControl
 // }
 //
 // //- Check convergence state
-// void eddyCurrentControl::updateResidual() const
+// void eddyCurrentAppControl::updateResidual() const
 // {
 //     if (!oldAVresSet_)
 //     {
@@ -128,7 +120,7 @@ eddyCurrentControl::eddyCurrentControl
 //     AVrelRes_ = mag(oldAVres_ - AVres_)/(oldAVres_ + VSMALL);
 // };
 //
-// void eddyCurrentControl::resetSubDictionaries() const
+// void eddyCurrentAppControl::resetSubDictionaries() const
 // {
 //     // Create copy
 //     subAdict_ = Adict_;
@@ -151,7 +143,7 @@ eddyCurrentControl::eddyCurrentControl
 //     subVdict_.set<scalar>("relTol", relTol_);
 // }
 //
-// void eddyCurrentControl::decreaseSubTolerance() const
+// void eddyCurrentAppControl::decreaseSubTolerance() const
 // {
 //     // Linear convergence progress
 //     scalar x = min(max(AVres_-tol_, 0.0), 1.0);
@@ -192,7 +184,7 @@ eddyCurrentControl::eddyCurrentControl
 //     Info << endl;
 // }
 //
-// void eddyCurrentControl::decreaseSubScale() const
+// void eddyCurrentAppControl::decreaseSubScale() const
 // {
 //     subRelTolLim_ /= 10.0;
 //
@@ -203,7 +195,7 @@ eddyCurrentControl::eddyCurrentControl
 //     subIter_ = 0;
 // }
 //
-// const bool& eddyCurrentControl::subLoop() const
+// const bool& eddyCurrentAppControl::subLoop() const
 // {
 //     subLoop_ = !checkSubConvergence();
 //
@@ -212,7 +204,7 @@ eddyCurrentControl::eddyCurrentControl
 //     return subLoop_;
 // };
 //
-// void eddyCurrentControl::reset()
+// void eddyCurrentAppControl::reset()
 // {
 //     readDictDataIfModified();
 //
@@ -255,7 +247,7 @@ eddyCurrentControl::eddyCurrentControl
 //
 // // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 //
-// eddyCurrentControl::eddyCurrentControl
+// eddyCurrentAppControl::eddyCurrentAppControl
 // (
 //     const argList& args,
 //     Time& time,
@@ -330,7 +322,7 @@ eddyCurrentControl::eddyCurrentControl
 //
 // // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 //
-// void eddyCurrentControl::relax(volVectorField& vf) const
+// void eddyCurrentAppControl::relax(volVectorField& vf) const
 // {
 //     if (checkSubRelax())
 //     {
@@ -346,7 +338,7 @@ eddyCurrentControl::eddyCurrentControl
 //     }
 // }
 //
-// void eddyCurrentControl::relax(const regionVolVectorField& rvf) const
+// void eddyCurrentAppControl::relax(const regionVolVectorField& rvf) const
 // {
 //     if (checkSubRelax())
 //     {
@@ -368,7 +360,7 @@ eddyCurrentControl::eddyCurrentControl
 //     }
 // }
 //
-// const bool& eddyCurrentControl::loop()
+// const bool& eddyCurrentAppControl::loop()
 // {
 //     bool converged = checkConvergence();
 //     bool iterBelowMax = checkMaxIterations();
@@ -411,14 +403,14 @@ eddyCurrentControl::eddyCurrentControl
 // }
 //
 //
-// void eddyCurrentControl::setResidualOfA(scalar residual) const
+// void eddyCurrentAppControl::setResidualOfA(scalar residual) const
 // {
 //     Ares_ = residual;
 //
 //     updateResidual();
 // }
 //
-// void eddyCurrentControl::setResidualOfV(scalar residual) const
+// void eddyCurrentAppControl::setResidualOfV(scalar residual) const
 // {
 //     Vres_ = residual;
 //
