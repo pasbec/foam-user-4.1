@@ -91,12 +91,12 @@ void regionPolyMesh::resizeLists() const
 
 void regionPolyMesh::initMeshes(const wordList& regionNames) const
 {
-    size_ = 1 + regionNames.size();
+    size_ = regionNames.size();
     regionNames_ = regionNames;
 
     resizeLists();
 
-    forAll(regionNames_, regionI)
+    forAll (regionNames_, regionI)
     {
         if (debug)
         {
@@ -119,7 +119,7 @@ void regionPolyMesh::setParallelSplitRegions() const
 {
     if (parallel())
     {
-        forAll(regionNames(), regionI)
+        forAll (regionNames(), regionI)
         {
             IOobject faceProcAddObj
             (
@@ -204,7 +204,7 @@ regionPolyMesh::regionPolyMesh
     polyMeshes_(List<polyMesh*>(0)),
     time_(runTime),
     parallel_(runTime.processorCase()),
-    size_ (0),
+    size_(0),
     regionNames_(List<word>(0)),
     parallelSplitRegions_(0),
     initialized_(false),
@@ -244,7 +244,7 @@ regionPolyMesh::regionPolyMesh
     polyMeshes_(List<polyMesh*>(0)),
     time_(runTime),
     parallel_(runTime.processorCase()),
-    size_ (1 + regionNames.size()),
+    size_(regionNames.size()),
     regionNames_(regionNames),
     parallelSplitRegions_(0),
     initialized_(false),
@@ -271,7 +271,7 @@ label regionPolyMesh::regionIndex(const word& regionName) const
 {
     label regionID = -1;
 
-    forAll(regionNames(), regionI)
+    forAll (*this, regionI)
     {
         if(regionNames()[regionI] == regionName)
         {

@@ -75,7 +75,7 @@ void regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
                 toRegionI
             )[0];
 
-        forAll(mesh(fromRegionI).boundary(), fromPatchI)
+        forAll (mesh(fromRegionI).boundary(), fromPatchI)
         {
             label toPatchI = patchMap[fromPatchI];
 
@@ -142,7 +142,7 @@ void regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
                 toRegionI
             )[0];
 
-        forAll(mesh(fromRegionI).boundary(), fromPatchI)
+        forAll (mesh(fromRegionI).boundary(), fromPatchI)
         {
             label toPatchI = patchMap[fromPatchI];
 

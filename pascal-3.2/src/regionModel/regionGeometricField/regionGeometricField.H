@@ -241,13 +241,13 @@ public:
             //- Internal field forward mapping
             void mapInteralField(const label& regionI) const
             {
-                notImplemented(type() + "::rmap()");
+                notImplemented(type() + "::mapInteralField()");
             };
 
             //- Internal field reverse mapping
             void rmapInteralField(const label& regionI) const
             {
-                notImplemented(type() + "::rmap()");
+                notImplemented(type() + "::rmapInteralField()");
             };
 
         // Boundary field data processing
@@ -257,7 +257,7 @@ public:
             void mapBoundaryField(const label& regionI) const
             ;
 //             {
-//                 notImplemented(type() + "::rmap()");
+//                 notImplemented(type() + "::mapBoundaryField()");
 //             };
 
             //- TODO FIXME: Boundary field copy from internal field
@@ -265,7 +265,7 @@ public:
             void copyInternalBoundaryField(const label& regionI) const
             ;
 //             {
-//                 notImplemented(type() + "::rmap()");
+//                 notImplemented(type() + "::copyInternalBoundaryField()");
 //             };
 
             //- TODO: Boundary field interpolation
@@ -273,7 +273,7 @@ public:
             void interpolateBoundaryField(const label& regionI) const
             ;
 //             {
-//                 notImplemented(type() + "::rmap()");
+//                 notImplemented(type() + "::interpolateBoundaryField()");
 //             };
 
             //- TODO: Boundary field extrapolation
@@ -281,7 +281,7 @@ public:
             void extrapolateBoundaryField(const label& regionI) const
             ;
 //             {
-//                 notImplemented(type() + "::rmap()");
+//                 notImplemented(type() + "::extrapolateBoundaryField()");
 //             };
 
         // Mapping with patch mapping where possible

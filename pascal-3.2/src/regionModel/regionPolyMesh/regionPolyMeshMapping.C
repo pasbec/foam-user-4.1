@@ -55,7 +55,7 @@ void regionPolyMesh::map
 
     if (patchName == "")
     {
-        forAll(givenPoints, pointI)
+        forAll (givenPoints, pointI)
         {
             givenPoints[pointI] = points[map[pointI]];
         }
@@ -80,7 +80,7 @@ void regionPolyMesh::map
 
         labelList mpmap = patch.meshPointMap().toc();
 
-        forAll(mpmap, patchPointI)
+        forAll (mpmap, patchPointI)
         {
             label pointI = mpmap[patchPointI];
 
@@ -153,7 +153,7 @@ void regionPolyMesh::rmap
 
     if (patchName == "")
     {
-        forAll(points, pointI)
+        forAll (points, pointI)
         {
             givenPoints[map[pointI]] = points[pointI];
         }
@@ -178,7 +178,7 @@ void regionPolyMesh::rmap
 
         labelList mpmap = patch.meshPointMap().toc();
 
-        forAll(mpmap, patchPointI)
+        forAll (mpmap, patchPointI)
         {
             label pointI = mpmap[patchPointI];
 
@@ -261,7 +261,7 @@ labelListList regionPolyMesh::patchMapDirectMapped
         )
     );
 
-    forAll(fromMesh.boundaryMesh(), fromPatchI)
+    forAll (fromMesh.boundaryMesh(), fromPatchI)
     {
         if
         (

@@ -8,6 +8,7 @@
 
 ./laplacianSchemes/electricPotentialLaplacian
 
+./edgeBiotSavart
 ./eddyCurrentApp
 
 ./include

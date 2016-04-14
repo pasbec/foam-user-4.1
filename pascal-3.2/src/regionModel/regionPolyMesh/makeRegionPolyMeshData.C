@@ -422,7 +422,7 @@ labelIOList* regionPolyMesh::newRegionMap
 
         labelList& map = *regionMapPtr;
 
-        forAll(map, facei)
+        forAll (map, facei)
         {
             label mapI = map[facei];
 
@@ -550,7 +550,7 @@ labelIOList* regionPolyMesh::newCellRegionProcMap
 
             labelIOList& cellRegionProcMap = *cellRegionProcMapPtr;
 
-            forAll(procMap,cellI)
+            forAll (procMap,cellI)
             {
                 cellRegionProcMap[cellI] =
                     findIndex<labelList>
@@ -672,7 +672,7 @@ labelIOList* regionPolyMesh::newPointRegionProcMap
 
             labelIOList& pointRegionProcMap = *pointRegionProcMapPtr;
 
-            forAll(procMap,cellI)
+            forAll (procMap,cellI)
             {
                 pointRegionProcMap[cellI] =
                     findIndex<labelList>

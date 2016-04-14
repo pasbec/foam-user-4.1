@@ -9,27 +9,45 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      BRe;
+    class       dictionary;
+    object      edgeBiotSavartProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 0 -2 0 0 -1 0];
-
-internalField   uniform (0 0 0);
-
-boundaryField
+inductors
 {
-    infinity
+    coil
     {
-        type            calculated;
-        value           $internalField;
+        file       "coil.eMesh";
+        reverse    false;
+        current    1414.2136;
+        phase      0.0;
     }
-    "procBoundary.*"
-    {
-        type            processor;
-        value           $internalField;
-    }
+
+//     coil1
+//     {
+//         file       "coil1.eMesh";
+//         reverse    false;
+//         current    1414.2136;
+//         phase      0.0;
+//     }
+//
+//     coil2
+//     {
+//         file       "coil2.eMesh";
+//         reverse    false;
+//         current    1414.2136;
+//         phase      0.0;
+//     }
+//
+//     coil3
+//     {
+//         file       "coil3.eMesh";
+//         reverse    false;
+//         current    1414.2136;
+//         phase      0.0;
+//     }
 }
+
 
 // ************************************************************************* //

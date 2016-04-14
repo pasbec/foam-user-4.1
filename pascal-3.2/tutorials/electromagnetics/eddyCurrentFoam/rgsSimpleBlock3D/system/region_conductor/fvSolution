@@ -16,54 +16,26 @@ FoamFile
 
 solvers
 {
-//     V
-// //     {
-// //         solver                   GAMG;
-// //
-// //         tolerance                1e-04;
-// //         relTol                   0;
-// //
-// //         minIter                  0;
-// //         maxIter                  1000;
-// //
-// //         smoother                 DIC;
-// //         nPreSweeps               0;
-// //         nPostSweeps              2;
-// //
-// //         cacheAgglomeration       on;
-// //         agglomerator             faceAreaPair;
-// //         nCellsInCoarsestLevel    200;
-// //         mergeLevels              1;
-// //     }
-// //     {
-// //         solver                   BiCGStab;
-// //
-// //         tolerance                1e-04;
-// //         relTol                   0;
-// //
-// //         minIter                  0;
-// //         maxIter                  300;
-// //
-// //         preconditioner           DIC; // Cholesky
-// //     }
-//     {
-//         solver                   deflatedPCG;
-//
-//         tolerance                1e-04;
-//         relTol                   0;
-//
-//         minIter                  0;
-//         maxIter                  300;
-//
-//         preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
-//                                       // GAMG, SymGaussSeidel, diagonal, none
-//     }
+    "(A0Re|A0Im)"
+    {
+        solver                   PCG;
+
+        tolerance                1e-08;
+        relTol                   0;
+
+        minIter                  0;
+        maxIter                  300;
+
+        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
+                                      // GAMG, SymGaussSeidel, diagonal, none
+    }
+
     "(VRe|VIm)"
     {
         solver                   deflatedPCG;
 
-        tolerance                1e-04;
-        relTol                   0;
+        tolerance                1e-05;
+        relTol                   0.5;
 
         minIter                  0;
         maxIter                  300;

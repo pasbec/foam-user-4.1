@@ -1,21 +1,45 @@
 
-    // Solve A component-wise
+    // Solve A component-wise in default region
     {
+        SM_REGIONSCOPE(DEFAULT);
+
+        volScalarField& sigma = globalStorage.sigma()[DEFAULT];
+
+        volVectorField& ARe = globalStorage.ARe()[DEFAULT];
+        volVectorField& AIm = globalStorage.AIm()[DEFAULT];
+
+        volVectorField& VReGrad = globalStorage.VReGrad()[DEFAULT];
+        volVectorField& VImGrad = globalStorage.VImGrad()[DEFAULT];
+
         // Assemble base-matrices for A
         fvVectorMatrix AReEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(ARe)
-//        + sigma * control.omega() * AIm
+//        + sigma * omega0 * AIm
 //        - sigma * VReGrad
-          + j0Re
+//        + j0Re
+//        + sigma * omega0 * A0Im
         );
         fvVectorMatrix AImEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(AIm)
-//        - sigma * control.omega() * ARe
+//        - sigma * omega0 * ARe
 //        - sigma * VImGrad
-          + j0Im
+//        + j0Im
+//        - sigma * omega0 * A0Re
         );
+
+        // Add source current or source vector potential if Biot-Savart is used
+        if (!globalSettings.biotSavart)
+        {
+            AReEqn += storage.j0Re();
+            AImEqn += storage.j0Im();
+        }
+        else
+        {
+            AReEqn += sigma * omega0 * globalStorage.A0Im()[DEFAULT];
+            AImEqn -= sigma * omega0 * globalStorage.A0Re()[DEFAULT];
+        }
 
         // Create list with boundary types
         wordList ARePatchTypes(mesh.boundary().size());
@@ -31,9 +55,6 @@
             AImPatchTypes[patchI] =
                 AIm.boundaryField()[patchI].type();
         }
-
-        // Component residual
-        scalar resAcmpt = VSMALL;
 
         // Loop over components
         for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
@@ -131,23 +152,14 @@
             AcmptEqn.insertEquationCoupling(1, 0, -omega0 * sigma);
 
             // Solve A
-            BlockSolverPerformance<vector2> AcmptEqnPerf("A", "A");
-            // TODO TEST: Prevent segfault for "0"-Solution
+            // TEST: Prevent segfault for "0"-Solution
+// TODO: Check prevention of segfault for "0"-Solution
             scalar preResidual= gMax(mag(AcmptEqn.residual(ACmpt, AcmptEqn.source())));
             if (preResidual > 0)
             {
-// TODO
-//                 AcmptEqnPerf = AcmptEqn.solve(control.Adict());
-                AcmptEqnPerf = AcmptEqn.solve();
+                AcmptEqn.solve(control.subDict(Region::DEFAULT, ACmpt.name()));
             }
-
-//             // Solve A
-//             AcmptEqnPerf = AcmptEqn.solve(control.Adict());
-
-            // Store residuals
-            scalar resAcmptRe = AcmptEqnPerf.initialResidual().component(0);
-            scalar resAcmptIm = AcmptEqnPerf.initialResidual().component(1);
-            resAcmpt = max(resAcmpt, max(resAcmptRe, resAcmptIm));
+//             AcmptEqn.solve(control.subDict(Region::DEFAULT, ACmpt.name()));
 
             // Retrieve solution
             AcmptEqn.retrieveSolution(0, AReCmpt.internalField());
@@ -161,10 +173,6 @@
             ARe.replace(cmpt, AReCmpt);
             AIm.replace(cmpt, AImCmpt);
         }
-
-        // Store max residual
-// TODO
-//         control.setResidualOfA(resAcmpt);
 
         // Correct boundary conditions
         ARe.correctBoundaryConditions();

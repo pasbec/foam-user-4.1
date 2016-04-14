@@ -1,48 +1,41 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
-| \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     3.1                                |
-|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.4.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      eddyCurrentProperties;
+    class       featureEdgeMesh;
+    object      coil1.eMesh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-regions
-{
-    conductor    "region_conductor";
-}
 
-settings
-{
-    debug        1;
+// points:
 
-    biotSavart   true;
+4
+(
+( 0.065 -0.12 0.009)
+( 0.065  0.12 0.009)
+(-0.065  0.12 0.009)
+(-0.065 -0.12 0.009)
+)
 
-    region0
-    {
-    }
+// edges:
 
-    region_conductor
-    {
-    }
-}
+4
+(
+(0 1)
+(1 2)
+(2 3)
+(3 0)
+)
 
-storage
-{
-    region0
-    {
-    }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    region_conductor
-    {
-    }
-}
 
 // ************************************************************************* //

@@ -1,42 +1,45 @@
 
-    // Derived fields in base region
+    // Derived fields in conductor region
     {
-        SM_REGIONSCOPE(DEFAULT);
+        SM_REGIONSCOPE(CONDUCTOR);
 
-        volScalarField& sigma = globalStorage.sigma()[DEFAULT];
+        volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];
 
-        volVectorField& ARe = globalStorage.ARe()[DEFAULT];
-        volVectorField& AIm = globalStorage.AIm()[DEFAULT];
+        volVectorField& ARe = globalStorage.ARe()[CONDUCTOR];
+        volVectorField& AIm = globalStorage.AIm()[CONDUCTOR];
 
-        volVectorField& VReGrad = globalStorage.VReGrad()[DEFAULT];
-        volVectorField& VImGrad = globalStorage.VImGrad()[DEFAULT];
+        volVectorField& VReGrad = globalStorage.VReGrad()[CONDUCTOR];
+        volVectorField& VImGrad = globalStorage.VImGrad()[CONDUCTOR];
 
-        volVectorField& FL = globalStorage.FL()[DEFAULT];
-        volScalarField& pB = globalStorage.pB()[DEFAULT];
+        volVectorField& FL = globalStorage.FL()[CONDUCTOR];
+        volScalarField& pB = globalStorage.pB()[CONDUCTOR];
 
-        // Magnetic field density
-        storage.BRe() == fvc::curl(ARe);
-        storage.BIm() == fvc::curl(AIm);
+        volVectorField& BRe = globalStorage.BRe()[CONDUCTOR];
+        volVectorField& BIm = globalStorage.BIm()[CONDUCTOR];
 
         // Eddy current density
         storage.jRe() ==   omega0 * sigma * AIm - sigma * VReGrad;
         storage.jIm() == - omega0 * sigma * ARe - sigma * VImGrad;
 
+        if (globalSettings.biotSavart)
+        {
+            storage.jRe() += omega0 * sigma * globalStorage.A0Im()[CONDUCTOR];
+            storage.jIm() -= omega0 * sigma * globalStorage.A0Re()[CONDUCTOR];
+        }
+
         // Time-averaged Lorentz-force
-        FL == 0.5 * ( (storage.jRe() ^ storage.BRe())
-                    + (storage.jIm() ^ storage.BIm()) );
+        FL == 0.5 * ( (storage.jRe() ^ BRe)
+                    + (storage.jIm() ^ BIm) );
 
         // Time-averaged magnetic pressure
         pB == 0.5 * physicalConstant::rMu0
-            * 0.5 * ( (storage.BRe() & storage.BRe())
-                    + (storage.BIm() & storage.BIm()) );
+            * 0.5 * ( (BRe & BRe)
+                    + (BIm & BIm) );
     }
 
-    // Derived fields in conductor region
+    // Derived fields in default region
     {
-        globalStorage.FL().mapExtrapolate(CONDUCTOR);
-        globalStorage.pB().mapExtrapolate(CONDUCTOR);
-// // TODO FIXME Extrapolation sometimes fails
-//         globalStorage.FL().mapCopyInternal(CONDUCTOR);
-//         globalStorage.pB().mapCopyInternal(CONDUCTOR);
+        globalStorage.FL().rmap(CONDUCTOR);
+        globalStorage.pB().rmap(CONDUCTOR);
     }
+

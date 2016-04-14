@@ -46,7 +46,7 @@ void regionGeometricField                                                     \
                                                                               \
     const labelIOList& map = mesh().cellMap(regionI);                         \
                                                                               \
-    forAll(field(regionI), celli)                                             \
+    forAll (vf, celli)                                                        \
     {                                                                         \
         vf[celli] = vf0[map[celli]];                                          \
     }                                                                         \
@@ -69,7 +69,7 @@ void regionGeometricField                                                     \
                                                                               \
     const labelIOList& map = mesh().cellMap(regionI);                         \
                                                                               \
-    forAll(field(regionI), celli)                                             \
+    forAll (vf, celli)                                                        \
     {                                                                         \
         vf0[map[celli]] = vf[celli];                                          \
     }                                                                         \

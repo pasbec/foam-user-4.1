@@ -21,23 +21,43 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    ...
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef eddyCurrentAppInclude_H
-#define eddyCurrentAppInclude_H
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#include "regionModelling.H"
-#include "fvBlockMatrix.H"
-#include "physicalConstants.H"
-#include "uniformDimensionedFields.H"
-#include "fixedValueFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
+inline bool
+Foam::eddyCurrentApp::Control::meshIs3D() const
+{
+    return meshIs3D_;
+};
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+inline const Foam::Vector<Foam::label>&
+Foam::eddyCurrentApp::Control::solutionDir() const
+{
+    return solutionDir_;
+};
+
+
+inline const Foam::word&
+Foam::eddyCurrentApp::Control::interfaceName() const
+{
+    return interfacePatchName_;
+};
+
+
+inline Foam::label
+Foam::eddyCurrentApp::Control::interfaceLabel() const
+{
+    return interfacePatchLabel_;
+};
+
+
+inline Foam::label
+Foam::eddyCurrentApp::Control::subCorr() const
+{
+    return subCorr_;
+}
+
 
 // ************************************************************************* //

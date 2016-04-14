@@ -53,7 +53,7 @@ regionPointMesh::regionPointMesh
     rpMesh_(rpMesh),
     pointMeshes_(List<pointMesh*>(rpMesh_.size(),NULL))
 {
-    forAll(regionNames(), regionI)
+    forAll (regionNames(), regionI)
     {
         if (debug)
         {

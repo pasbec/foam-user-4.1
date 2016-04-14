@@ -25,20 +25,15 @@ License
 
 #include "eddyCurrentAppManager.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create
 (const word& ccase) const
 {
     set
@@ -66,7 +61,7 @@ void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create
 }
 
 
-void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create
 (const word& ccase) const
 {
     set
@@ -94,135 +89,13 @@ void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create
 }
 
 
-void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_jRe::create
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create
 (const word& ccase) const
 {
-    set
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                "jRe",
-                time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh(),
-            dimensionedVector
-            (
-                word(),
-                dimCurrent/dimArea,
-                vector::zero
-            ),
-            calculatedFvPatchVectorField::typeName
-        )
-    );
+    item_j0Re().setState(!globalSettings().biotSavart);
+    item_j0Im().setState(!globalSettings().biotSavart);
 }
 
-
-void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_jIm::create
-(const word& ccase) const
-{
-    set
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                "jIm",
-                time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh(),
-            dimensionedVector
-            (
-                word(),
-                dimCurrent/dimArea,
-                vector::zero
-            ),
-            calculatedFvPatchVectorField::typeName
-        )
-    );
-}
-
-
-void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_BRe::create
-(const word& ccase) const
-{
-    set
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                "BRe",
-                time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh(),
-            dimensionedVector
-            (
-                word(),
-                dimVoltage*dimTime/dimArea,
-                vector::zero
-            ),
-            calculatedFvPatchVectorField::typeName
-        )
-    );
-}
-
-
-void eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_BIm::create
-(const word& ccase) const
-{
-    set
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                "BIm",
-                time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh(),
-            dimensionedVector
-            (
-                word(),
-                dimVoltage*dimTime/dimArea,
-                vector::zero
-            ),
-            calculatedFvPatchVectorField::typeName
-        )
-    );
-}
-
-
-void eddyCurrentApp::Manager::Region_DEFAULT::Storage::create
-(const word& ccase) const
-{
-    item_j0Re().enable();
-    item_j0Im().enable();
-
-    item_jRe().enable();
-    item_jIm().enable();
-
-    item_BRe().enable();
-    item_BIm().enable();
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 

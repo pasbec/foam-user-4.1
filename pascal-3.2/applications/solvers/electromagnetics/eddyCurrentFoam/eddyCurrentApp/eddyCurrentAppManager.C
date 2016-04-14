@@ -35,6 +35,8 @@ defineTypeNameAndDebug(Foam::eddyCurrentApp::Manager, 0);
 void Foam::eddyCurrentApp::Manager::Settings::read() const
 {
     debug = dict().lookupOrDefault("debug", Switch(debug));
+
+    biotSavart = dict().lookupOrDefault("biotSavart", false);
 }
 
 
@@ -97,6 +99,64 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create
                 IOobject::AUTO_WRITE
             ),
             mesh()
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create
+(const word& ccase) const
+{
+    set
+    (
+        new regionVolVectorField
+        (
+            IOobject
+            (
+                "A0Re",
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+// TODO
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime/dimLength,
+                vector::zero
+            ),
+            fixedValueFvPatchVectorField::typeName
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create
+(const word& ccase) const
+{
+    set
+    (
+        new regionVolVectorField
+        (
+            IOobject
+            (
+                "A0Im",
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+// TODO
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime/dimLength,
+                vector::zero
+            ),
+            fixedValueFvPatchVectorField::typeName
         )
     );
 }
@@ -200,6 +260,62 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create
 }
 
 
+void Foam::eddyCurrentApp::Manager::Storage::Item_BRe::create
+(const word& ccase) const
+{
+    set
+    (
+        new regionVolVectorField
+        (
+            IOobject
+            (
+                "BRe",
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime/dimArea,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Storage::Item_BIm::create
+(const word& ccase) const
+{
+    set
+    (
+        new regionVolVectorField
+        (
+            IOobject
+            (
+                "BIm",
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime/dimArea,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
+
 void Foam::eddyCurrentApp::Manager::Storage::Item_FL::create
 (const word& init) const
 {
@@ -263,11 +379,17 @@ void Foam::eddyCurrentApp::Manager::Storage::create(const word& ccase) const
 
     item_sigma().enable();
 
+    item_A0Re().setState(settings().biotSavart);
+    item_A0Im().setState(settings().biotSavart);
+
     item_ARe().enable();
     item_AIm().enable();
 
     item_VReGrad().enable();
     item_VImGrad().enable();
+
+    item_BRe().enable();
+    item_BIm().enable();
 
     item_FL().enable();
     item_pB().enable();
@@ -336,6 +458,9 @@ Foam::eddyCurrentApp::Manager::Manager
     {
         mesh.init(regionNames_);
     }
+
+    this->read();
+    this->init();
 }
 
 

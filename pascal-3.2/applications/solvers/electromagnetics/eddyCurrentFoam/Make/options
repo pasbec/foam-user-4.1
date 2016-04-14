@@ -11,6 +11,8 @@ EXE_INC = \
     -IgradSchemes/electricPotentialGrad \
     -IlaplacianSchemes/electricPotentialLaplacian \
     -IeddyCurrentApp \
+    -IedgeBiotSavart \
+    -I$(LIB_SRC)/edgeMesh/lnInclude \
     -Iinclude
 
 
@@ -20,5 +22,6 @@ EXE_LIBS = \
     -ldynamicMesh \
     -ldynamicFvMesh \
     -ltetFiniteElement \
+    -ledgeMesh \
     -L$(FOAM_USER_LIBBIN) -lfoamTools \
     -L$(FOAM_USER_LIBBIN) -lregionModel

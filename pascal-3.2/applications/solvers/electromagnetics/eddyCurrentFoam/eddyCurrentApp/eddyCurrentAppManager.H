@@ -77,6 +77,9 @@ public:
             //- Debug switch
             SM_SETTINGS_MEMBER_ADD(Switch, debug);
 
+            //- Switch to set wether Biot-Savart is used
+            SM_SETTINGS_MEMBER_ADD(Switch, biotSavart);
+
         SM_GLOBALSETTINGS_ADD();
 
 
@@ -91,6 +94,10 @@ public:
             //- Electrical conductivity
             SM_GLOBALITEM_ADD(regionVolScalarField, sigma);
 
+            //- Source vector potential
+            SM_GLOBALITEM_ADD(regionVolVectorField, A0Re);
+            SM_GLOBALITEM_ADD(regionVolVectorField, A0Im);
+
             //- Magnetic vector potential
             SM_GLOBALITEM_ADD(regionVolVectorField, ARe);
             SM_GLOBALITEM_ADD(regionVolVectorField, AIm);
@@ -98,6 +105,10 @@ public:
             //- Gradient of electric scalar potential
             SM_GLOBALITEM_ADD(regionVolVectorField, VReGrad);
             SM_GLOBALITEM_ADD(regionVolVectorField, VImGrad);
+
+            // Magnetic field density
+            SM_GLOBALITEM_ADD(regionVolVectorField, BRe);
+            SM_GLOBALITEM_ADD(regionVolVectorField, BIm);
 
             //- Lorentz Force (time-averaged)
             SM_GLOBALITEM_ADD(regionVolVectorField, FL);
@@ -121,14 +132,6 @@ public:
                 SM_REGIONITEM_ADD(volVectorField, j0Re);
                 SM_REGIONITEM_ADD(volVectorField, j0Im);
 
-                // Current density
-                SM_REGIONITEM_ADD(volVectorField, jRe);
-                SM_REGIONITEM_ADD(volVectorField, jIm);
-
-                // Magnetic field density
-                SM_REGIONITEM_ADD(volVectorField, BRe);
-                SM_REGIONITEM_ADD(volVectorField, BIm);
-
             SM_REGIONSTORAGE_ADD();
 
         SM_REGION_END();
@@ -150,6 +153,10 @@ public:
                 //- Electric scalar potential average
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, VReAverage);
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, VImAverage);
+
+                // Current density
+                SM_REGIONITEM_ADD(volVectorField, jRe);
+                SM_REGIONITEM_ADD(volVectorField, jIm);
 
             SM_REGIONSTORAGE_ADD();
 

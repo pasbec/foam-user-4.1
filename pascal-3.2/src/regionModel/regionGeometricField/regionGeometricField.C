@@ -106,7 +106,7 @@ regionGeometricField
     regionMesh_(regionMesh),
     fields_(List<GeometricField<Type, PatchField, GeoMesh>*>(size_,NULL))
 {
-    forAll(regionNames_, regionI)
+    forAll (regionNames_, regionI)
     {
         if (debug)
         {
@@ -158,7 +158,7 @@ regionGeometricField
     regionMesh_(regionMesh),
     fields_(List<GeometricField<Type, PatchField, GeoMesh>*>(size_,NULL))
 {
-    forAll(regionNames_, regionI)
+    forAll (regionNames_, regionI)
     {
         if (debug)
         {
@@ -208,7 +208,7 @@ regionGeometricField
     regionMesh_(regionMesh),
     fields_(List<GeometricField<Type, PatchField, GeoMesh>*>(size_,NULL))
 {
-    forAll(regionNames_, regionI)
+    forAll (regionNames_, regionI)
     {
         if (debug)
         {
@@ -260,7 +260,7 @@ regionGeometricField
     regionMesh_(rgf.mesh()),
     fields_(List<GeometricField<Type, PatchField, GeoMesh>*>(size_,NULL))
 {
-    forAll(regionNames_, regionI)
+    forAll (regionNames_, regionI)
     {
         if (debug)
         {
@@ -311,7 +311,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 
     checkField(*this, rgf, "=");
 
-    forAll(this->mesh().regionNames(), regionI)
+    forAll (this->mesh().regionNames(), regionI)
     {
         checkField(this->field(regionI), rgf.field(regionI), "=");
 
@@ -362,7 +362,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 
     checkField(*this, rgf, "=");
 
-    forAll(this->mesh().regionNames(), regionI)
+    forAll (this->mesh().regionNames(), regionI)
     {
         checkField(this->field(regionI), rgf.field(regionI), "=");
 
@@ -405,7 +405,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::mapBoundaryField
     const polyBoundaryMesh& pbm0 = vf0.mesh().boundaryMesh();
     const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
 
-    forAll(pbm, patchI)
+    forAll (pbm, patchI)
     {
         const polyPatch& patch = pbm[patchI];
 
@@ -426,7 +426,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::mapBoundaryField
 
             const labelList& fmap = mesh().faceMap(regionI);
 
-            forAll(patchField, facei)
+            forAll (patchField, facei)
             {
                 label faceI = patchStart + facei;
                 label faceI0 = fmap[faceI];
@@ -467,7 +467,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::copyInternalBoun
     GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
     const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
 
-    forAll(pbm, patchI)
+    forAll (pbm, patchI)
     {
         const Field<Type>& patchInternalField = vf.boundaryField()[patchI].patchInternalField();
         Field<Type>& patchField = vf.boundaryField()[patchI];
@@ -497,7 +497,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolateBound
     const polyBoundaryMesh& pbm0 = vf0.mesh().boundaryMesh();
     const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
 
-    forAll(pbm, patchI)
+    forAll (pbm, patchI)
     {
         const polyPatch& patch = pbm[patchI];
 
@@ -520,7 +520,7 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolateBound
 
             const labelList& fmap = mesh().faceMap(regionI);
 
-            forAll(patchField, facei)
+            forAll (patchField, facei)
             {
                 label faceI = patchStart + facei;
                 label faceI0 = fmap[faceI];

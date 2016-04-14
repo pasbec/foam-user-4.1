@@ -22,13 +22,15 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    ...
+    eddyCurrentFoam
 
 Description
+    ...
 
 \*---------------------------------------------------------------------------*/
 
 #include "eddyCurrentApp.H"
+#include "edgeBiotSavart.H"
 
 // TODO: Derived gradient boundary condition for VRe/VIm in conductor region
 
@@ -51,9 +53,6 @@ int main(int argc, char *argv[])
 
     Manager manager(args, runTime, regionMesh);
 
-    manager.read();
-    manager.init();
-
     SM_GLOBALREGIONSCOPE(DEFAULT);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,7 +61,11 @@ int main(int argc, char *argv[])
 
     while(manager.once())
     {
-#       include "AVloop.H"
+#       include "A0BiotSavart.H"
+
+#       include "AVLoop.H"
+
+#       include "BUpdate.H"
 
 #       include "derivedFields.H"
     }

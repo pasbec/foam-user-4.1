@@ -58,6 +58,8 @@ SourceFiles
 
 // TODO [High]: Check if all region names are unique
 
+// TODO [High]: Check regionI != defaultRegionI for maps!!!
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

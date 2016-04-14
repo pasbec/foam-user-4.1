@@ -63,12 +63,12 @@ void regionFvMesh::resizeLists() const
 
 void regionFvMesh::initMeshes(const wordList& regionNames) const
 {
-    size_ = 1 + regionNames.size();
+    size_ = regionNames.size();
     regionNames_ = regionNames;
 
     resizeLists();
 
-    forAll(regionNames_, regionI)
+    forAll (regionNames_, regionI)
     {
         if (debug)
         {

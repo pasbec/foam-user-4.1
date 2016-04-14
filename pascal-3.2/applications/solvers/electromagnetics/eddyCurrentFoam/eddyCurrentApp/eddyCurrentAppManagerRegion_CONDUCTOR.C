@@ -25,20 +25,15 @@ License
 
 #include "eddyCurrentAppManager.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void eddyCurrentApp::Manager::Region_CONDUCTOR::Settings::read() const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Settings::read() const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create
 (const word& ccase) const
 {
     set
@@ -59,7 +54,7 @@ void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create
 }
 
 
-void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create
 (const word& ccase) const
 {
     set
@@ -80,7 +75,7 @@ void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create
 }
 
 
-void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VReAverage::create
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VReAverage::create
 (const word& ccase) const
 {
     set
@@ -105,7 +100,7 @@ void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VReAverage::create
 }
 
 
-void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VImAverage::create
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VImAverage::create
 (const word& ccase) const
 {
     set
@@ -130,9 +125,65 @@ void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VImAverage::create
 }
 
 
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jRe::create
+(const word& ccase) const
+{
+    set
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                "jRe",
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimCurrent/dimArea,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create
+(const word& ccase) const
+{
+    set
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                "jIm",
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimCurrent/dimArea,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create
 (const word& ccase) const
 {
     item_VRe().enable();
@@ -140,12 +191,11 @@ void eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create
 
     item_VReAverage().enable();
     item_VImAverage().enable();
+
+    item_jRe().enable();
+    item_jIm().enable();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 
