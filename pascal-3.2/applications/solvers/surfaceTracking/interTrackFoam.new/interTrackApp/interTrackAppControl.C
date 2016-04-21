@@ -53,7 +53,7 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
         const label fieldI = applyToField(variableName);
         if (fieldI != -1)
         {
-            const List<dictionary> sp(iter().stream());
+            const List<dictionary> sp = iter().stream();
 
             // use either stored residual or read from dict
             scalar residual = GREAT;
@@ -150,7 +150,7 @@ void Foam::interTrackApp::Control::storeResiduals(const word& name)
             const label fieldI = applyToField(variableName);
             if (fieldI != -1)
             {
-                const List<dictionary> sp(iter().stream());
+                const List<dictionary> sp = iter().stream();
 
                 // store current residual
                 residualStorage_[fieldI].residual =
@@ -195,7 +195,7 @@ void Foam::interTrackApp::Control::skipZeroNonOrtho(const word& name)
                 const label fieldI = applyToField(variableName);
                 if (fieldI != -1)
                 {
-                    const List<dictionary> sp(iter().stream());
+                    const List<dictionary> sp = iter().stream();
 
                     nIter = readInt(sp.last().lookup("nIterations"));
                 }

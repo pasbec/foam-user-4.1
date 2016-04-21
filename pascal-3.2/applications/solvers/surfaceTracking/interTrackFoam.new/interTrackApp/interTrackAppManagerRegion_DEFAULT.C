@@ -29,17 +29,12 @@ License
 
 void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
 {
-    volumeForce =
-        dict().lookupOrDefault("volumeForce", false);
-    turbulence =
-        dict().lookupOrDefault("turbulence", false);
+    volumeForce = dict().lookupOrDefault("volumeForce", false);
+    turbulence = dict().lookupOrDefault("turbulence", false);
 
-    UpCoupled =
-        dict().lookupOrDefault("UpCoupled", false);
-    UEqnVolumeForce =
-        dict().lookupOrDefault("UEqnVolumeForce", false);
-    snGradpFromFlux =
-        dict().lookupOrDefault("snGradpFromFlux", true);
+    UpCoupled = dict().lookupOrDefault("UpCoupled", false);
+    UEqnVolumeForce = dict().lookupOrDefault("UEqnVolumeForce", false);
+    snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
 
     if
     (

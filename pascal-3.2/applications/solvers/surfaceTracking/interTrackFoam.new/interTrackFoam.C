@@ -54,9 +54,6 @@ int main(int argc, char *argv[])
 
     Manager manager(args, runTime, mesh);
 
-    manager.read();
-    manager.init();
-
     SM_GLOBALREGIONSCOPE(DEFAULT);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

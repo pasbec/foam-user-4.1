@@ -158,6 +158,9 @@ Foam::interTrackApp::Manager::Manager
     // Region name list
     regionNames_.setSize(Region::SIZE);
     regionNames_[Region::DEFAULT] = polyMesh::defaultRegion;
+
+    this->read();
+    this->init();
 }
 
 
