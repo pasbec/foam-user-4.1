@@ -1,9 +1,0 @@
-trackedSurface.C
-makeTrackedSurfaceData.C
-trackedSurfacePointDisplacement.C
-trackedSurfaceWrite.C
-
-functionObjects/bubbleHistory/bubbleHistory.C
-functionObjects/sloshingHistory/sloshingHistory.C
-
-LIB = $(FOAM_USER_LIBBIN)/libtrackedSurface
