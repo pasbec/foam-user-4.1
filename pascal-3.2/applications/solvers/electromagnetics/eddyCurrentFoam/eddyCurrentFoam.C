@@ -30,7 +30,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "eddyCurrentApp.H"
-#include "edgeBiotSavart.H"
 
 // TODO: Derived gradient boundary condition for VRe/VIm in conductor region
 

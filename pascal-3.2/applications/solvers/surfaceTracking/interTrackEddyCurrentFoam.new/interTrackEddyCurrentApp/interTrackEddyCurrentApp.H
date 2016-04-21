@@ -26,17 +26,15 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef eddyCurrentAppInclude_H
-#define eddyCurrentAppInclude_H
+#ifndef interTrackEddyCurrentApp_H
+#define interTrackEddyCurrentApp_H
 
-#include "regionModelling.H"
-#include "physicalConstants.H"
-#include "edgeBiotSavart.H"
+#include "interTrackEddyCurrentAppInclude.H"
+#include "interTrackEddyCurrentAppRegion.H"
+// #include "interTrackAppControl.H"
+// #include "interTrackAppManager.H"
 
-#include "fvBlockMatrix.H"
-#include "uniformDimensionedFields.H"
-#include "fixedValueFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
+#include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

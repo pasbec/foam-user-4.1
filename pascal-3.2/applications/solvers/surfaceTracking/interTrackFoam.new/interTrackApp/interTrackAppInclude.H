@@ -29,10 +29,11 @@ Description
 #ifndef interTrackAppInclude_H
 #define interTrackAppInclude_H
 
+#include "trackedSurface.H"
+
 #include "dynamicFvMesh.H"
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
-#include "trackedSurface.H"
 #include "fvBlockMatrix.H"
 #include "wallFvPatch.H"
 #include "Switch.H"

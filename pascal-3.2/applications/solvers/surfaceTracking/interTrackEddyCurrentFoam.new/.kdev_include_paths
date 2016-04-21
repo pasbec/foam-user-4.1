@@ -12,13 +12,13 @@
 ../../../../src/foamTools/lnInclude
 ../../../../src/regionModel/lnInclude
 
+../../electromagnetics/eddyCurrentFoam/include
+../../electromagnetics/eddyCurrentFoam/eddyCurrentApp
+
+../include.new
 ../trackedSurface.new/lnInclude
-../../electromagnetics/eddyCurrentFoam/lnInclude
+../interTrackFoam.new/include
+../interTrackFoam.new/interTrackApp
 
-./regions
-./regions/fluid
-./regions/fluid/coupled
-
-./interTrackControl
-./interTrackMagneticControl
-./interTrackEddyCurrentControl
+./interTrackEddyCurrentApp
+./include

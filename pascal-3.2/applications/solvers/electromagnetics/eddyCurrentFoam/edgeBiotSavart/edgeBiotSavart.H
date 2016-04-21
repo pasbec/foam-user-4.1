@@ -39,6 +39,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "volFields.H"
 #include "featureEdgeMesh.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -11,15 +11,14 @@ EXE_INC = \
     -I$(FOAM_USER_SRC)/finiteArea.new/lnInclude \
     -I$(FOAM_USER_SRC)/foamTools/lnInclude \
     -I$(FOAM_USER_SRC)/regionModel/lnInclude \
-    -I$(FOAM_USER_APP)/solvers/surfaceTracking/trackedSurface.new/lnInclude \
+    -I$(FOAM_USER_APP)/solvers/electromagnetics/eddyCurrentFoam/include \
+    -I$(FOAM_USER_APP)/solvers/electromagnetics/eddyCurrentFoam/eddyCurrentApp \
     -I$(FOAM_USER_APP)/solvers/surfaceTracking/include.new \
-    -I$(FOAM_USER_APP)/solvers/electromagnetics/eddyCurrentFoam/lnInclude \
-    -IinterTrackControl \
-    -IinterTrackMagneticControl \
-    -IinterTrackEddyCurrentControl \
-    -Iregions \
-    -Iregions/fluid \
-    -Iregions/fluid/coupled
+    -I$(FOAM_USER_APP)/solvers/surfaceTracking/trackedSurface.new/lnInclude \
+    -I$(FOAM_USER_APP)/solvers/surfaceTracking/interTrackFoam.new/include \
+    -I$(FOAM_USER_APP)/solvers/surfaceTracking/interTrackFoam.new/interTrackApp \
+    -IinterTrackEddyCurrentApp \
+    -Iinclude
 
 
 EXE_LIBS = \

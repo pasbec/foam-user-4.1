@@ -26,17 +26,23 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef eddyCurrentAppInclude_H
-#define eddyCurrentAppInclude_H
+#ifndef interTrackEddyCurrentAppInclude_H
+#define interTrackEddyCurrentAppInclude_H
 
 #include "regionModelling.H"
 #include "physicalConstants.H"
-#include "edgeBiotSavart.H"
+#include "trackedSurface.H"
 
+#include "twoPhaseMixture.H"
+#include "turbulenceModel.H"
 #include "fvBlockMatrix.H"
-#include "uniformDimensionedFields.H"
+#include "wallFvPatch.H"
+#include "Switch.H"
 #include "fixedValueFvPatchFields.H"
+#include "zeroGradientFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
+
+typedef fvBlockMatrix<vector4> fvVector4Matrix;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
