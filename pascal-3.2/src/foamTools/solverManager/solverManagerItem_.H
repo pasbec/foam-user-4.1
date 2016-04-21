@@ -61,6 +61,21 @@ Description
 
 # define SM_ITEM_ADD_DECLARATION_INTERFACES_REGION(NAME)                      \
                                                                               \
+        public: inline Manager::Control& globalControl() const                \
+        {                                                                     \
+            return manager().control();                                       \
+        };                                                                    \
+                                                                              \
+        public: inline Manager::Settings& globalSettings() const              \
+        {                                                                     \
+            return manager().settings();                                      \
+        };                                                                    \
+                                                                              \
+        public: inline Manager::Storage& globalStorage() const                \
+        {                                                                     \
+            return manager().storage();                                       \
+        };                                                                    \
+                                                                              \
         public: virtual ThisRegion& region() const                            \
         {                                                                     \
             return static_cast<ThisRegion&>                                   \

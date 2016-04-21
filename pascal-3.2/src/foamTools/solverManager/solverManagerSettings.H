@@ -36,17 +36,32 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONSETTINGS_NEW_START(WRAPPER)                                 \
+# define SM_SETTINGS_NEW_START(WRAPPER)                                       \
                                                                               \
     SM_WRAPPER_NEW(WRAPPER, Settings)
 
 
-# define SM_REGIONSETTINGS_NEW_INTERFACES()                                   \
+# define SM_SETTINGS_NEW_INTERFACES()                                         \
                                                                               \
         private: virtual void read() const;
 
 
-# define SM_REGIONSETTINGS_NEW_INTERFACES_REGION()                            \
+# define SM_SETTINGS_NEW_INTERFACES_REGION()                                  \
+                                                                              \
+        public: inline Manager::Control& globalControl() const                \
+        {                                                                     \
+            return manager().control();                                       \
+        };                                                                    \
+                                                                              \
+        public: inline Manager::Settings& globalSettings() const              \
+        {                                                                     \
+            return manager().settings();                                      \
+        };                                                                    \
+                                                                              \
+        public: inline Manager::Storage& globalStorage() const                \
+        {                                                                     \
+            return manager().storage();                                       \
+        };                                                                    \
                                                                               \
         public: virtual ThisRegion& region() const                            \
         {                                                                     \
@@ -67,7 +82,7 @@ Description
         };
 
 
-# define SM_REGIONSETTINGS_NEW_INTERFACES_GLOBAL()                            \
+# define SM_SETTINGS_NEW_INTERFACES_GLOBAL()                                  \
                                                                               \
         public: inline Manager::Control& control() const                      \
         {                                                                     \
@@ -80,7 +95,7 @@ Description
         };
 
 
-# define SM_REGIONSETTINGS_NEW_PUBLIC()                                       \
+# define SM_SETTINGS_NEW_PUBLIC()                                             \
                                                                               \
         public:
 
@@ -89,18 +104,18 @@ Description
 
 # define SM_REGIONSETTINGS_NEW()                                              \
                                                                               \
-    SM_REGIONSETTINGS_NEW_START(RegionSettings)                               \
-    SM_REGIONSETTINGS_NEW_INTERFACES()                                        \
-    SM_REGIONSETTINGS_NEW_INTERFACES_REGION()                                 \
-    SM_REGIONSETTINGS_NEW_PUBLIC()
+    SM_SETTINGS_NEW_START(RegionSettings)                                     \
+    SM_SETTINGS_NEW_INTERFACES()                                              \
+    SM_SETTINGS_NEW_INTERFACES_REGION()                                       \
+    SM_SETTINGS_NEW_PUBLIC()
 
 
 # define SM_GLOBALSETTINGS_NEW()                                              \
                                                                               \
-    SM_REGIONSETTINGS_NEW_START(GlobalSettings)                               \
-    SM_REGIONSETTINGS_NEW_INTERFACES()                                        \
-    SM_REGIONSETTINGS_NEW_INTERFACES_GLOBAL()                                 \
-    SM_REGIONSETTINGS_NEW_PUBLIC()
+    SM_SETTINGS_NEW_START(GlobalSettings)                                     \
+    SM_SETTINGS_NEW_INTERFACES()                                              \
+    SM_SETTINGS_NEW_INTERFACES_GLOBAL()                                       \
+    SM_SETTINGS_NEW_PUBLIC()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -318,7 +333,7 @@ class GlobalSettings
 public:
 
     // Public typedefs
-    
+
         typedef typename MANAGER::ManagerMesh Mesh;
 
 

@@ -36,17 +36,32 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-# define SM_REGIONSTORAGE_NEW_START(WRAPPER)                                  \
+# define SM_STORAGE_NEW_START(WRAPPER)                                        \
                                                                               \
     SM_WRAPPER_NEW(WRAPPER, Storage)
 
 
-# define SM_REGIONSTORAGE_NEW_INTERFACES()                                    \
+# define SM_STORAGE_NEW_INTERFACES()                                          \
                                                                               \
         private: virtual void create(const word& ccase) const;
 
 
-# define SM_REGIONSTORAGE_NEW_INTERFACES_REGION()                             \
+# define SM_STORAGE_NEW_INTERFACES_REGION()                                   \
+                                                                              \
+        public: inline Manager::Control& globalControl() const                \
+        {                                                                     \
+            return manager().control();                                       \
+        };                                                                    \
+                                                                              \
+        public: inline Manager::Settings& globalSettings() const              \
+        {                                                                     \
+            return manager().settings();                                      \
+        };                                                                    \
+                                                                              \
+        public: inline Manager::Storage& globalStorage() const                \
+        {                                                                     \
+            return manager().storage();                                       \
+        };                                                                    \
                                                                               \
         public: virtual ThisRegion& region() const                            \
         {                                                                     \
@@ -67,7 +82,7 @@ Description
         };
 
 
-# define SM_REGIONSTORAGE_NEW_INTERFACES_GLOBAL()                             \
+# define SM_STORAGE_NEW_INTERFACES_GLOBAL()                                   \
                                                                               \
         public: inline Manager::Control& control() const                      \
         {                                                                     \
@@ -80,7 +95,7 @@ Description
         };
 
 
-# define SM_REGIONSTORAGE_NEW_PUBLIC()                                        \
+# define SM_STORAGE_NEW_PUBLIC()                                              \
                                                                               \
         public:
 
@@ -89,18 +104,18 @@ Description
 
 # define SM_REGIONSTORAGE_NEW()                                               \
                                                                               \
-    SM_REGIONSTORAGE_NEW_START(RegionStorage)                                 \
-    SM_REGIONSTORAGE_NEW_INTERFACES()                                         \
-    SM_REGIONSTORAGE_NEW_INTERFACES_REGION()                                  \
-    SM_REGIONSTORAGE_NEW_PUBLIC()
+    SM_STORAGE_NEW_START(RegionStorage)                                       \
+    SM_STORAGE_NEW_INTERFACES()                                               \
+    SM_STORAGE_NEW_INTERFACES_REGION()                                        \
+    SM_STORAGE_NEW_PUBLIC()
 
 
 # define SM_GLOBALSTORAGE_NEW()                                               \
                                                                               \
-    SM_REGIONSTORAGE_NEW_START(GlobalStorage)                                 \
-    SM_REGIONSTORAGE_NEW_INTERFACES()                                         \
-    SM_REGIONSTORAGE_NEW_INTERFACES_GLOBAL()                                  \
-    SM_REGIONSTORAGE_NEW_PUBLIC()
+    SM_STORAGE_NEW_START(GlobalStorage)                                       \
+    SM_STORAGE_NEW_INTERFACES()                                               \
+    SM_STORAGE_NEW_INTERFACES_GLOBAL()                                        \
+    SM_STORAGE_NEW_PUBLIC()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -140,7 +155,7 @@ class Storage
 public:
 
     // Public typedefs
-    
+
         typedef MESH Mesh;
 
 
