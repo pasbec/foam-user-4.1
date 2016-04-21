@@ -879,8 +879,8 @@ trackedSurface::trackedSurface
         IOobject
         (
             prefix + "Properties",
-            Ub.mesh().time().constant(),
-            Ub.mesh(),
+            m.time().constant(),
+            m,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -900,7 +900,7 @@ trackedSurface::trackedSurface
     transportPtr_(transportPtr),
     turbulencePtr_(turbulencePtr),
     p0Ptr_(p0Ptr),
-    curTimeIndex_(Ub.mesh().time().timeIndex()),
+    curTimeIndex_(m.time().timeIndex()),
     twoFluids_
     (
         this->lookup("twoFluids")
