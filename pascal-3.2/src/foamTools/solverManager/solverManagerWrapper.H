@@ -48,17 +48,7 @@ Description
     {                                                                         \
         public: typedef typename                                              \
             solverManagerWrappers::WRAPPER<Manager> Wrapper;                  \
-        public: typedef typename                                              \
-            solverManagerWrappers::WRAPPER<Manager>::Mesh Mesh;
-
-
-# define SM_WRAPPER_NEW_INTERFACES()                                          \
-                                                                              \
-        private: const Manager& manager_;                                     \
-        public: virtual const Manager& manager() const                        \
-        {                                                                     \
-            return manager_;                                                  \
-        };
+        public: typedef typename Wrapper::Mesh Mesh;
 
 
 # define SM_WRAPPER_NEW_CONSTRUCTOR(NAME)                                     \
@@ -72,8 +62,7 @@ Description
             Mesh& mesh                                                        \
         )                                                                     \
         :                                                                     \
-            Wrapper(mesh),                                                    \
-            manager_(manager)                                                 \
+            Wrapper(manager, mesh)                                            \
         {};                                                                   \
                                                                               \
         public: virtual ~NAME() {};
@@ -82,7 +71,6 @@ Description
 # define SM_WRAPPER_NEW(WRAPPER, NAME)                                        \
                                                                               \
     SM_WRAPPER_NEW_START(WRAPPER, NAME)                                       \
-    SM_WRAPPER_NEW_INTERFACES()                                               \
     SM_WRAPPER_NEW_CONSTRUCTOR(NAME)
 
 
@@ -297,10 +285,13 @@ private:
 
     // Private Data
 
+        //- Reference to manager
+        const MANAGER& manager_;
+
         // Basic
 
             //- Reference to mesh
-            MESH& mesh_;
+            Mesh& mesh_;
 
     // Private Member Functions
 
@@ -318,7 +309,7 @@ protected:
         // Basic
 
             //- Mesh
-            inline MESH& wrappedMesh() const
+            inline Mesh& wrappedMesh() const
             {
                 return mesh_;
             }
@@ -328,8 +319,13 @@ public:
 
     // Constructor
 
-        Base (MESH& mesh)
+        Base
+        (
+            const MANAGER& manager,
+            Mesh& mesh
+        )
         :
+            manager_(manager),
             mesh_(mesh)
         {};
 
@@ -340,7 +336,10 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const MANAGER& manager() const = 0;
+        inline const MANAGER& manager() const
+        {
+            return manager_;
+        };
 
         // Basic
 

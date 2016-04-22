@@ -44,7 +44,7 @@ Description
 namespace Foam
 {
 
-template <class MESH, label NREGIONS> class solverManager;
+template <class MESH> class solverManager;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,8 +55,8 @@ template <class MESH> class Mesh;
 template <class MESH> class Settings;
 template <class MESH, class TYPE> class Item_;
 template <class MESH> class Storage;
-template <class MANAGERMESH, class MESH, label NREGIONS> class Region_;
-template <class MANAGERMESH, class MESH, label NREGIONS> class Regions;
+template <class MANAGERMESH, class MESH> class Region_;
+template <class MANAGERMESH, class MESH> class Regions;
 
 /*---------------------------------------------------------------------------*\
                   Class solverManagerBase::Mesh Declaration
@@ -903,7 +903,7 @@ public:
                   Class solverManagerBase::Region Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGERMESH, class MESH, label NREGIONS>
+template <class MANAGERMESH, class MESH>
 class Region_
 :
     public Read,
@@ -931,7 +931,7 @@ private:
             {
                 regions().link
                 (
-                    const_cast<Region_<MANAGERMESH, MESH, NREGIONS>*>(this)
+                    const_cast<Region_<MANAGERMESH, MESH>*>(this)
                 );
             };
 
@@ -972,7 +972,7 @@ public:
     // Member Functions
 
         //- Regions
-        virtual Regions<MANAGERMESH, MESH, NREGIONS>& regions() const = 0;
+        virtual Regions<MANAGERMESH, MESH>& regions() const = 0;
 
         //- Control
         virtual Control& control() const = 0;
@@ -1035,20 +1035,20 @@ public:
                   Class solverManagerBase::Regions Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MANAGERMESH, class MESH, label NREGIONS>
+template <class MANAGERMESH, class MESH>
 class Regions
 :
     public Create,
     public Read,
     public Init,
-    LinkMaster<Region_<MANAGERMESH, MESH, NREGIONS> >
+    LinkMaster<Region_<MANAGERMESH, MESH> >
 {
 public:
 
     // Friends declarations
 
         //- Friend with Region
-        template<class MM, class M, label N> friend class Region_;
+        template<class MM, class M> friend class Region_;
 
 
 private:
@@ -1056,11 +1056,7 @@ private:
     // Private typedef
 
         //- Region list type
-        typedef HashTable
-            <
-                Region_<MANAGERMESH, MESH, NREGIONS>*,
-                label
-            > RegionHashTable;
+        typedef HashTable<Region_<MANAGERMESH, MESH>*, label> RegionHashTable;
 
     // Private Data
 
@@ -1085,7 +1081,7 @@ private:
             //- Link/register pointer of region
             virtual void link
             (
-                Region_<MANAGERMESH, MESH, NREGIONS>* region
+                Region_<MANAGERMESH, MESH>* region
             ) const
             {
                 regionHashTable().insert(region->regionIndex(), region);
@@ -1094,7 +1090,7 @@ private:
             //- Unlink/deregister pointer of region
             virtual void unlink
             (
-                const Region_<MANAGERMESH, MESH, NREGIONS>* region
+                const Region_<MANAGERMESH, MESH>* region
             ) const
             {
                 regionHashTable().erase(region->regionIndex());
@@ -1171,7 +1167,7 @@ public:
         // Regions
 
             //- Return region by index
-            virtual Region_<MANAGERMESH, MESH, NREGIONS>& operator[]
+            virtual Region_<MANAGERMESH, MESH>& operator[]
             (
                 const label& regionI
             ) const
@@ -1194,7 +1190,7 @@ public:
     // Friends declarations
 
         //- Friend with solverManager
-        template <class M, label N> friend class solverManager;
+        template <class M> friend class solverManager;
 
 
 private:

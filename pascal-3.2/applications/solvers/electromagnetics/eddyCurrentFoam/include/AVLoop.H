@@ -13,11 +13,12 @@
         {
 #           include "AVLoop_AEqn.H"
 
+#           include "AVLoop_AUpdate.H"
+
             // The electric scalar potential is only necessary
             // in case of a three-dimensional mesh
             if (control.meshIs3D())
             {
-#               include "AVLoop_AUpdate.H"
 
 // TODO: Fix relaxation
 //                 // Relax A

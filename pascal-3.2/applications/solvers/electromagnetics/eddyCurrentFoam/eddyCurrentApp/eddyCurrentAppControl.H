@@ -36,7 +36,6 @@ SourceFiles
 #define eddyCurrentAppControl_H
 
 #include "eddyCurrentAppInclude.H"
-#include "eddyCurrentAppRegion.H"
 
 #include "solutionControl.H"
 

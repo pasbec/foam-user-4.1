@@ -2,6 +2,8 @@
 deflatedLduSolvers/deflatedPCG/deflatedPCG.C
 deflatedLduSolvers/deflatedICCG/deflatedICCG.C
 
+edgeBiotSavart/edgeBiotSavart.C
+
 fvPatchFields/correctedFvPatchFields/correctedFvPatchField/correctedFvPatchFields.C
 fvPatchFields/correctedFvPatchFields/basicCorrectedFvPatchFields/fixedValue/fixedValueCorrectedFvPatchFields.C
 fvPatchFields/correctedFvPatchFields/basicCorrectedFvPatchFields/fixedGradient/fixedGradientCorrectedFvPatchFields.C

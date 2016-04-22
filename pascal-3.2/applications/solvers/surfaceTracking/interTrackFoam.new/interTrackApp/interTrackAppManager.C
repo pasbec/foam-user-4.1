@@ -107,6 +107,35 @@ bool Foam::interTrackApp::Manager::setCoNum(scalar& CourantNumber) const
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::interTrackApp::Manager::Manager
+(
+    const argList& args,
+    Time& time,
+    dynamicFvMesh& mesh,
+    bool master,
+    const word& name
+)
+:
+    solverManager<dynamicFvMesh>
+    (
+        args, time, mesh, master, name
+    )
+{
+    this->read();
+    this->init();
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::interTrackApp::Manager::~Manager()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::interTrackApp::Manager::next() const
 {
     Region_DEFAULT::Storage& storage = regions().region_DEFAULT().storage();
@@ -136,37 +165,6 @@ void Foam::interTrackApp::Manager::write() const
 
 
 void Foam::interTrackApp::Manager::finalize() const
-{}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::interTrackApp::Manager::Manager
-(
-    const argList& args,
-    Time& time,
-    dynamicFvMesh& mesh,
-    const word& name,
-    const bool& master
-)
-:
-    solverManager<dynamicFvMesh, Region::SIZE>
-    (
-        args, time, mesh, name, master
-    )
-{
-    // Region name list
-    regionNames_.setSize(Region::SIZE);
-    regionNames_[Region::DEFAULT] = polyMesh::defaultRegion;
-
-    this->read();
-    this->init();
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::interTrackApp::Manager::~Manager()
 {}
 
 

@@ -51,8 +51,6 @@ namespace Region
         DEFAULT,
         CONDUCTOR
     };
-
-    static const label SIZE = 2;
 }
 
 

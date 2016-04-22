@@ -50,8 +50,6 @@ namespace Region
     {
         DEFAULT
     };
-
-    static const label SIZE = 1;
 }
 
 

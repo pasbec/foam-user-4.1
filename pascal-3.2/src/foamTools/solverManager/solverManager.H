@@ -129,16 +129,12 @@ TemplateName(solverManager);
                          Class solverManager Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class MESH, label NREGIONS = 0>
+template <class MESH>
 class solverManager
 :
     public solverManagerName
 {
 public:
-
-    // Public Static Const Members
-
-        static const label nRegions = NREGIONS;
 
     // Public typedefs
 
@@ -150,7 +146,7 @@ public:
         typedef typename solverManagerBase::Settings<ManagerMesh> Settings;
         typedef typename solverManagerBase::Storage<ManagerMesh> Storage;
         typedef typename
-            solverManagerBase::Regions<ManagerMesh, Mesh, nRegions> Regions;
+            solverManagerBase::Regions<ManagerMesh, Mesh> Regions;
 
     // Public data types
 
@@ -249,43 +245,6 @@ private:
             void applyDeltaT() const;
 
 
-protected:
-
-    // Protected Member Functions
-
-        // Evolution
-
-            //- Set time step width
-            //  A return value of true means active
-            virtual bool setDeltaT(scalar& deltaT) const
-            {
-                return false;
-            };
-
-            //- Set time parameters
-            //  A return value of true means active
-            virtual bool setTimeParameters(TimeParameters& timePar) const
-            {
-                return false;
-            };
-
-            //- Set Courant Number
-            //  A return value of true means active
-            virtual bool setCoNum(scalar& CoNum) const
-            {
-                return false;
-            };
-// TODO: Add this virtual function also to Regions/Region ?
-            //- Next sequence
-            virtual void next() const = 0;
-// TODO: Add this virtual function also to Regions/Region ?
-            //- Write sequence
-            virtual void write() const = 0;
-// TODO: Add this virtual function also to Regions/Region ?
-            //- Finalize sequence
-            virtual void finalize() const = 0;
-
-
 public:
 
     // Constructor
@@ -295,8 +254,8 @@ public:
             const argList& args,
             Time& time,
             ManagerMesh& mesh,
-            const word& prefix,
-            const bool& master = true
+            bool master = true,
+            const word& name = "solverManager"
         );
 
     // Destructor
@@ -382,11 +341,41 @@ public:
 
         // Evolution
 
+            //- Set time step width
+            //  A return value of true means active
+            virtual bool setDeltaT(scalar& deltaT) const
+            {
+                return false;
+            };
+
+            //- Set time parameters
+            //  A return value of true means active
+            virtual bool setTimeParameters(TimeParameters& timePar) const
+            {
+                return false;
+            };
+
+            //- Set Courant Number
+            //  A return value of true means active
+            virtual bool setCoNum(scalar& CoNum) const
+            {
+                return false;
+            };
+
             //- Read sequence
-            void read() const;
+            virtual void read() const;
 
             //- Init sequence
-            void init() const;
+            virtual void init() const;
+
+            //- Next sequence
+            virtual void next() const = 0;
+
+            //- Write sequence
+            virtual void write() const = 0;
+
+            //- Finalize sequence
+            virtual void finalize() const = 0;
 
             //- Main time once wrapper
             bool once() const;

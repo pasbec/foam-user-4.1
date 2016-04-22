@@ -53,8 +53,6 @@ namespace Region
         FLUID,
         BUFFER
     };
-
-    static const label SIZE = 4;
 }
 
 
@@ -78,8 +76,6 @@ namespace Region
         DEFAULT = interTrackEddyCurrentApp::Region::DEFAULT,
         CONDUCTOR = interTrackEddyCurrentApp::Region::CONDUCTOR
     };
-
-    static const label SIZE = 2;
 }
 
 
@@ -102,8 +98,6 @@ namespace Region
     {
         DEFAULT = interTrackEddyCurrentApp::Region::FLUID
     };
-
-    static const label SIZE = 1;
 }
 
 

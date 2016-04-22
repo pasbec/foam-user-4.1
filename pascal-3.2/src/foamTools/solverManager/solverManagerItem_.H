@@ -50,31 +50,10 @@ Description
 
 # define SM_ITEM_ADD_DECLARATION_INTERFACES(NAME)                             \
                                                                               \
-        private: const Manager& manager_;                                     \
-        public: virtual const Manager& manager() const                        \
-        {                                                                     \
-            return manager_;                                                  \
-        };                                                                    \
-                                                                              \
         private: virtual void create(const word& ccase = "default") const;
 
 
 # define SM_ITEM_ADD_DECLARATION_INTERFACES_REGION(NAME)                      \
-                                                                              \
-        public: inline Manager::Control& globalControl() const                \
-        {                                                                     \
-            return manager().control();                                       \
-        };                                                                    \
-                                                                              \
-        public: inline Manager::Settings& globalSettings() const              \
-        {                                                                     \
-            return manager().settings();                                      \
-        };                                                                    \
-                                                                              \
-        public: inline Manager::Storage& globalStorage() const                \
-        {                                                                     \
-            return manager().storage();                                       \
-        };                                                                    \
                                                                               \
         public: virtual ThisRegion& region() const                            \
         {                                                                     \
@@ -100,24 +79,6 @@ Description
         };
 
 
-# define SM_ITEM_ADD_DECLARATION_INTERFACES_GLOBAL(NAME)                      \
-                                                                              \
-        public: inline Manager::Control& control() const                      \
-        {                                                                     \
-            return manager().control();                                       \
-        };                                                                    \
-                                                                              \
-        public: inline Manager::Settings& settings() const                    \
-        {                                                                     \
-            return manager().settings();                                      \
-        };                                                                    \
-                                                                              \
-        public: virtual Manager::Storage& storage() const                     \
-        {                                                                     \
-            return manager().storage();                                       \
-        };
-
-
 # define SM_ITEM_ADD_DECLARATION_CONSTRUCTION(NAME)                           \
                                                                               \
         private: Item_##NAME(const Item_##NAME&);                             \
@@ -125,13 +86,12 @@ Description
                                                                               \
         public: Item_##NAME                                                   \
         (                                                                     \
+            const word& name,                                                 \
             const Manager& manager,                                           \
-            Mesh& mesh,                                                       \
-            const word& name                                                  \
+            Mesh& mesh                                                        \
         )                                                                     \
         :                                                                     \
-            Wrapper(mesh, name),                                              \
-            manager_(manager)                                                 \
+            Wrapper(name, manager, mesh)                                      \
         {};                                                                   \
                                                                               \
         public: virtual ~Item_##NAME() {};
@@ -146,7 +106,7 @@ Description
                                                                               \
     SM_WRAPPER_MEMBER_ADD_P3(                                                 \
         Item_##NAME, item_##NAME, virtual,                                    \
-        this->manager(), this->mesh(), word(#NAME))
+        word(#NAME), this->manager(), this->mesh())
 
 
 # define SM_ITEM_ADD_DATAACCESS(TYPE, NAME)                                   \
@@ -179,7 +139,6 @@ Description
                                                                               \
     SM_ITEM_ADD_DECLARATION_START(GlobalItem_, TYPE, NAME)                    \
     SM_ITEM_ADD_DECLARATION_INTERFACES()                                      \
-    SM_ITEM_ADD_DECLARATION_INTERFACES_GLOBAL()                               \
     SM_ITEM_ADD_DECLARATION_CONSTRUCTION(NAME)                                \
     SM_ITEM_ADD_DECLARATION_END()                                             \
     SM_ITEM_ADD_DEFINITION(NAME)                                              \
@@ -247,10 +206,15 @@ public:
 
     // Constructor
 
-        Item_(MESH& mesh, const word& name)
+        Item_
+        (
+            const word& name,
+            const MANAGER& manager,
+            Mesh& mesh
+        )
         :
             Base(name),
-            Wrapper(mesh)
+            Wrapper(manager, mesh)
         {};
 
     // Destructor
@@ -261,9 +225,6 @@ public:
 
         //- Storage
         virtual Storage& storage() const = 0;
-
-        //- Manager
-        virtual const MANAGER& manager() const = 0;
 
         // Basic
 
@@ -308,11 +269,7 @@ private:
         typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
         typedef solverManagerBase::Region_
-        <
-            typename MANAGER::ManagerMesh,
-            Mesh,
-            MANAGER::nRegions
-        > Region_;
+            <typename MANAGER::ManagerMesh, Mesh> Region_;
         typedef typename solverManagerBase::Storage<Mesh> Storage;
 
     // Private Member Functions
@@ -353,9 +310,14 @@ public:
 
     // Constructor
 
-        RegionItem_(Mesh& mesh, const word& name)
+        RegionItem_
+        (
+            const word& name,
+            const MANAGER& manager,
+            Mesh& mesh
+        )
         :
-            Parent(mesh, name)
+            Parent(name, manager, mesh)
         {};
 
     // Destructor
@@ -365,7 +327,24 @@ public:
     // Member Functions
 
         //- Manager
-        virtual const MANAGER& manager() const = 0;
+
+        //- Global control
+        inline typename MANAGER::Control& globalControl() const
+        {
+            return this->Wrapper::manager().control();
+        };
+
+        // - Global settings
+        inline typename MANAGER::Settings& globalSettings() const
+        {
+            return this->Wrapper::manager().settings();
+        };
+
+        //- Global storage
+        inline typename MANAGER::Storage& globalStorage() const
+        {
+            return this->Wrapper::manager().storage();
+        };
 
         //- Region
         virtual Region_& region() const = 0;
@@ -434,9 +413,14 @@ public:
 
     // Constructor
 
-        GlobalItem_(Mesh& mesh, const word& name)
+        GlobalItem_
+        (
+            const word& name,
+            const MANAGER& manager,
+            Mesh& mesh
+        )
         :
-            Parent(mesh, name)
+            Parent(name, manager, mesh)
         {};
 
     // Destructor
@@ -445,11 +429,23 @@ public:
 
     // Member Functions
 
-        //- Manager
-        virtual const MANAGER& manager() const = 0;
+        //- Control
+        inline typename MANAGER::Control& control() const
+        {
+            return this->Wrapper::manager().control();
+        };
+
+        //- Settings
+        inline typename MANAGER::Settings& settings() const
+        {
+            return this->Wrapper::manager().settings();
+        };
 
         //- Storage
-        virtual Storage& storage() const = 0;
+        virtual typename MANAGER::Storage& storage() const
+        {
+            return this->Wrapper::manager().storage();
+        };
 
 };
 

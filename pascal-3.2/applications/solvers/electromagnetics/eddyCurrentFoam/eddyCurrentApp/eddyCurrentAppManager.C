@@ -405,20 +405,6 @@ void Foam::eddyCurrentApp::Manager::Regions::create(const word& ccase) const
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void Foam::eddyCurrentApp::Manager::next() const
-{}
-
-
-void Foam::eddyCurrentApp::Manager::write() const
-{}
-
-
-void Foam::eddyCurrentApp::Manager::finalize() const
-{}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::eddyCurrentApp::Manager::Manager
@@ -426,37 +412,61 @@ Foam::eddyCurrentApp::Manager::Manager
     const argList& args,
     Time& time,
     regionFvMesh& mesh,
-    const word& name,
-    const bool& master
+    bool master,
+    const word& name
 )
 :
-    solverManager<regionFvMesh, Region::SIZE>
+    solverManager<regionFvMesh>
     (
-        args, time, mesh, name, master
-    ),
-    regionNames_(wordList())
+        args, time, mesh, master, name
+    )
 {
-    // Region name list
-    regionNames_.setSize(Region::SIZE);
-    regionNames_[Region::DEFAULT] = polyMesh::defaultRegion;
-    regionNames_[Region::CONDUCTOR] =
-        word(this->regionsDict().lookup("conductor"));
+    if (master)
+    {
+        // Init regionMesh
+        if (mesh.initialized())
+        {
+            FatalErrorIn
+            (
+                "Foam::eddyCurrentApp::Manager::Manager(...) : "
+            )
+                << "Region mesh is already initialized. This Manager "
+                << "needs to initialize the region mesh by itself. "
+                << "Construct the regionMesh with 'init=false'!"
+                << abort(FatalError);
+        }
+        else
+        {
+            HashTable<label> regionNameHashTable;
 
-    // Init regionMesh
-    if (mesh.initialized())
-    {
-        FatalErrorIn
-        (
-            "Foam::eddyCurrentApp::Manager::Manager(...) : "
-        )
-            << "Region mesh is already initialized. This Manager "
-            << "needs to initialize the region mesh by itself. "
-            << "Construct the regionMesh with 'init=false'!"
-            << abort(FatalError);
-    }
-    else
-    {
-        mesh.init(regionNames_);
+            regionNameHashTable.insert
+            (
+                polyMesh::defaultRegion,
+                Region::DEFAULT
+            );
+
+            regionNameHashTable.insert
+            (
+                word(this->regionsDict().lookup("conductor")),
+                Region::CONDUCTOR
+            );
+
+            wordList regionNames =
+                wordList
+                (
+                    regionNameHashTable.size(),
+                    word("MISSING_REGION_NAME")
+                );
+
+            forAllConstIter(HashTable<label>, regionNameHashTable, iter)
+            {
+                regionNames[iter()] = iter.key();
+            }
+
+            mesh.init(regionNames);
+
+            this->messages().newLine();
+        }
     }
 
     this->read();
@@ -467,6 +477,20 @@ Foam::eddyCurrentApp::Manager::Manager
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::eddyCurrentApp::Manager::~Manager()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::eddyCurrentApp::Manager::next() const
+{}
+
+
+void Foam::eddyCurrentApp::Manager::write() const
+{}
+
+
+void Foam::eddyCurrentApp::Manager::finalize() const
 {}
 
 

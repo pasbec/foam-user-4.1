@@ -64,10 +64,9 @@ bool Foam::eddyCurrentApp::Control::criteriaSatisfied()
             const label fieldI = applyToField(variableName);
             if (fieldI != -1)
             {
-                const List<dictionary> sp = iter().stream();
+                const List<solverPerformanceData> spd = iter().stream();
 
-                const scalar residual =
-                    readScalar(sp.last().lookup("initialResidual"));
+                const scalar residual = max(spd.last().initialResidual());
 
                 checked = true;
 
@@ -117,24 +116,21 @@ bool Foam::eddyCurrentApp::Control::subCriteriaSatisfied()
             const label fieldI = applyToField(variableName);
             if (fieldI != -1)
             {
-                const List<dictionary> sp = iter().stream();
+                const List<solverPerformanceData> spd = iter().stream();
 
                 scalar oldOldResidual = VGREAT;
-                if (sp.size() > 2)
+                if (spd.size() > 2)
                 {
-                    oldOldResidual =
-                        readScalar(sp[sp.size()-3].lookup("initialResidual"));
+                    oldOldResidual = max(spd[spd.size()-3].initialResidual());
                 }
 
                 scalar oldResidual = GREAT;
-                if (sp.size() > 1)
+                if (spd.size() > 1)
                 {
-                    oldResidual =
-                        readScalar(sp[sp.size()-2].lookup("initialResidual"));
+                    oldResidual = max(spd[spd.size()-2].initialResidual());
                 }
 
-                scalar residual =
-                    readScalar(sp.last().lookup("initialResidual"));
+                scalar residual = max(spd.last().initialResidual());
 
                 scalar oldRelative =
                     mag(oldResidual/(oldOldResidual+VSMALL) - 1.0);
@@ -217,7 +213,6 @@ Foam::eddyCurrentApp::Control::Control
                 << ", tol " << residualControl_[i].absTol
                 << nl;
         }
-        Info<< endl;
     }
 }
 
@@ -283,7 +278,7 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
     scalar relTolScale = VGREAT;
     scalar progressLeft;
 
-    if ((corr_ == 1) &&  (subCorr_ == 1))
+    if ((corr_ == 1) && (subCorr_ == 1))
     {
         progressLeft = 1.0;
     }
@@ -302,10 +297,9 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
                 const label fieldI = applyToField(variableName);
                 if (fieldI != -1)
                 {
-                    const List<dictionary> sp = iter().stream();
+                    const List<solverPerformanceData> spd = iter().stream();
 
-                    const scalar residual =
-                        readScalar(sp.last().lookup("initialResidual"));
+                    const scalar residual = max(spd.last().initialResidual());
 
                     // Residual difference from target residual
                     scalar residualDiff =
@@ -365,14 +359,6 @@ bool Foam::eddyCurrentApp::Control::subLoop()
         Info<< algorithmName_ << " sub-loop: corr = " << subCorr_ << endl;
     }
 
-    if (!meshIs3D())
-    {
-        subCorr_ = 0;
-        subScale_ = 1.0;
-
-        return false;
-    }
-
     if (criteriaSatisfied())
     {
         subCorr_ = 0;
@@ -381,7 +367,7 @@ bool Foam::eddyCurrentApp::Control::subLoop()
         return false;
     }
 
-    if (subCriteriaSatisfied())
+    if (meshIs3D() && subCriteriaSatisfied())
     {
         subCorr_ = 0;
         subScale_ /= 10.0;
@@ -392,11 +378,6 @@ bool Foam::eddyCurrentApp::Control::subLoop()
     }
     else
     {
-        if (subCorr_ > 1)
-        {
-            Info<< nl;
-            Info<< algorithmName_ << ": iteration " << corr_ << endl;
-        }
         Info<< algorithmName_ << ": sub-iteration " << subCorr_ << endl;
         storePrevIterFields();
     }

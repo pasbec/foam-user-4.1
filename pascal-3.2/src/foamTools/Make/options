@@ -2,8 +2,10 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(FOAM_USER_SRC)/foamTools/lnInclude
 
-EXE_LIBS = \
+LIB_LIBS = \
     -lfiniteVolume \
-    -lmeshTools
+    -lmeshTools \
+    -ledgeMesh

@@ -48,21 +48,6 @@ Description
 
 # define SM_STORAGE_NEW_INTERFACES_REGION()                                   \
                                                                               \
-        public: inline Manager::Control& globalControl() const                \
-        {                                                                     \
-            return manager().control();                                       \
-        };                                                                    \
-                                                                              \
-        public: inline Manager::Settings& globalSettings() const              \
-        {                                                                     \
-            return manager().settings();                                      \
-        };                                                                    \
-                                                                              \
-        public: inline Manager::Storage& globalStorage() const                \
-        {                                                                     \
-            return manager().storage();                                       \
-        };                                                                    \
-                                                                              \
         public: virtual ThisRegion& region() const                            \
         {                                                                     \
             return static_cast<ThisRegion&>                                   \
@@ -79,19 +64,6 @@ Description
         public: inline ThisRegion::Settings& settings() const                 \
         {                                                                     \
             return region().settings();                                       \
-        };
-
-
-# define SM_STORAGE_NEW_INTERFACES_GLOBAL()                                   \
-                                                                              \
-        public: inline Manager::Control& control() const                      \
-        {                                                                     \
-            return manager().control();                                       \
-        };                                                                    \
-                                                                              \
-        public: inline Manager::Settings& settings() const                    \
-        {                                                                     \
-            return manager().settings();                                      \
         };
 
 
@@ -114,7 +86,6 @@ Description
                                                                               \
     SM_STORAGE_NEW_START(GlobalStorage)                                       \
     SM_STORAGE_NEW_INTERFACES()                                               \
-    SM_STORAGE_NEW_INTERFACES_GLOBAL()                                        \
     SM_STORAGE_NEW_PUBLIC()
 
 
@@ -192,10 +163,14 @@ public:
 
     // Constructor
 
-        Storage(MESH& mesh)
+        Storage
+        (
+            const MANAGER& manager,
+            Mesh& mesh
+        )
         :
             Base(),
-            Wrapper(mesh)
+            Wrapper(manager, mesh)
         {};
 
     // Destructor
@@ -203,9 +178,6 @@ public:
         virtual ~Storage() {};
 
     // Member Functions
-
-        //- Manager
-        virtual const MANAGER& manager() const = 0;
 
         // Basic
 
@@ -250,11 +222,7 @@ private:
         typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
         typedef solverManagerBase::Region_
-        <
-            typename MANAGER::ManagerMesh,
-            Mesh,
-            MANAGER::nRegions
-        > Region_;
+            <typename MANAGER::ManagerMesh, Mesh> Region_;
 
     // Private Member Functions
 
@@ -294,9 +262,13 @@ public:
 
     // Constructor
 
-        RegionStorage(Mesh& mesh)
+        RegionStorage
+        (
+            const MANAGER& manager,
+            Mesh& mesh
+        )
         :
-            Parent(mesh)
+            Parent(manager, mesh)
         {};
 
     // Destructor
@@ -305,8 +277,23 @@ public:
 
     // Member Functions
 
-        //- Manager
-        virtual const MANAGER& manager() const = 0;
+        //- Global control
+        inline typename MANAGER::Control& globalControl() const
+        {
+            return this->Wrapper::manager().control();
+        };
+
+        // - Global settings
+        inline typename MANAGER::Settings& globalSettings() const
+        {
+            return this->Wrapper::manager().settings();
+        };
+
+        //- Global storage
+        inline typename MANAGER::Storage& globalStorage() const
+        {
+            return this->Wrapper::manager().storage();
+        };
 
         //- Region
         virtual Region_& region() const = 0;
@@ -369,9 +356,13 @@ public:
 
     // Constructor
 
-        GlobalStorage(Mesh& mesh)
+        GlobalStorage
+        (
+            const MANAGER& manager,
+            Mesh& mesh
+        )
         :
-            Parent(mesh)
+            Parent(manager, mesh)
         {};
 
     // Destructor
@@ -380,8 +371,17 @@ public:
 
     // Member Functions
 
-        //- Manager
-        virtual const MANAGER& manager() const = 0;
+        //- Control
+        inline typename MANAGER::Control& control() const
+        {
+            return this->Wrapper::manager().control();
+        };
+
+        // Settings
+        inline typename MANAGER::Settings& settings() const
+        {
+            return this->Wrapper::manager().settings();
+        };
 };
 
 

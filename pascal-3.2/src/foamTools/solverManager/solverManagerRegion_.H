@@ -157,17 +157,13 @@ template <class MANAGER>
 class Region_
 :
     public solverManagerBase::Region_
-    <
-        typename MANAGER::ManagerMesh,
-        typename MANAGER::Mesh,
-        MANAGER::nRegions
-    >,
+        <typename MANAGER::ManagerMesh, typename MANAGER::Mesh>,
     public solverManagerWrappers::Base<MANAGER, typename MANAGER::Mesh>
 {
 public:
 
     // Public typedefs
-    
+
         typedef typename MANAGER::Mesh Mesh;
 
     // Public Member Functions
@@ -184,20 +180,10 @@ private:
 
         typedef typename MANAGER::ManagerMesh SuperMesh;
 
-        typedef solverManagerBase::Region_
-        <
-            SuperMesh,
-            Mesh,
-            MANAGER::nRegions
-        > Base;
+        typedef solverManagerBase::Region_ <SuperMesh, Mesh> Base;
         typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
-        typedef solverManagerBase::Regions
-        <
-            SuperMesh,
-            Mesh,
-            MANAGER::nRegions
-        > Regions;
+        typedef solverManagerBase::Regions <SuperMesh, Mesh> Regions;
 
         typedef typename solverManagerBase::Control Control;
         typedef typename solverManagerBase::Settings<Mesh> Settings;
@@ -216,10 +202,14 @@ public:
 
     // Constructor
 
-        Region_(Mesh& mesh)
+        Region_
+        (
+            const MANAGER& manager,
+            Mesh& mesh
+        )
         :
             Base(),
-            Wrapper(mesh)
+            Wrapper(manager, mesh)
         {};
 
     // Destructor
@@ -227,9 +217,6 @@ public:
         virtual ~Region_() {};
 
     // Member Functions
-
-        //- Manager
-        virtual const MANAGER& manager() const = 0;
 
         //- Regions
         virtual Regions& regions() const = 0;

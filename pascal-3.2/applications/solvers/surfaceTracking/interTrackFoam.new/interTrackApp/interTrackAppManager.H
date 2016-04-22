@@ -37,7 +37,6 @@ SourceFiles
 #define interTrackAppManager_H
 
 #include "interTrackAppInclude.H"
-#include "interTrackAppRegion.H"
 #include "interTrackAppControl.H"
 
 #include "solverManager.H"
@@ -56,7 +55,7 @@ namespace interTrackApp
 
 class Manager
 :
-    public solverManager<dynamicFvMesh, Region::SIZE>
+    public solverManager<dynamicFvMesh>
 {
 public:
 
@@ -171,13 +170,6 @@ public:
 
 private:
 
-    // Private Data
-
-        // Regions
-
-            //- Region mesh names
-            wordList regionNames_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -185,20 +177,6 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const Manager&);
-
-        // Evolution
-
-            //- Set Courant Number
-            virtual bool setCoNum(scalar& CoNum) const;
-
-            //- Next sequence
-            virtual void next() const;
-
-            //- Write sequence
-            virtual void write() const;
-
-            //- Finalize sequence
-            virtual void finalize() const;
 
 
 public:
@@ -213,8 +191,8 @@ public:
             const argList& args,
             Time& time,
             dynamicFvMesh& mesh,
-            const word& prefix = "interTrack",
-            const bool& master = true
+            bool master = true,
+            const word& prefix = "interTrack"
         );
 
     // Destructor
@@ -223,19 +201,19 @@ public:
 
     // Member Functions
 
-        // Regions
+        // Evolution
 
-            //- Region mesh names
-            inline const wordList& regionNames() const
-            {
-                return regionNames_;
-            };
+            //- Set Courant Number
+            virtual bool setCoNum(scalar& CoNum) const;
 
-            //- Region mesh name for given region label
-            inline word regionName(const label& regionI) const
-            {
-                return regionNames_[regionI];
-            };
+            //- Next sequence
+            virtual void next() const;
+
+            //- Write sequence
+            virtual void write() const;
+
+            //- Finalize sequence
+            virtual void finalize() const;
 };
 
 

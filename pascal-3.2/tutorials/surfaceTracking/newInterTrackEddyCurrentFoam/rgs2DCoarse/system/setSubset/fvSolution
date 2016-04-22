@@ -1,0 +1,85 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.2                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+AV
+{
+    method          "segregated";
+    coupled
+    {
+        coupledCorr     1;
+    }
+    segregated
+    {
+        segregatedCorr  1;
+    }
+    coupledSegregated
+    {
+        coupledCorr     1;
+        segregatedCorr  3;
+    }
+}
+
+solvers
+{
+    "(AV)"
+    {
+        solver          BiCGStab;
+        tolerance       1e-06;
+        relTol          1e-05;
+        minIter         1;
+        maxIter         50;
+        preconditioner  Cholesky;
+    }
+    "(A)"
+    {
+        solver          BiCGStab;
+        tolerance       1e-06;
+        relTol          1e-05;
+        minIter         1;
+        maxIter         50;
+        preconditioner  Cholesky;
+    }
+    "(VRe|VIm)"
+    {
+        solver          GAMG;
+        tolerance       1e-06;
+        relTol          1e-05;
+        minIter         1;
+        maxIter         100;
+        smoother        DICGaussSeidel;
+        nPreSweeps      2;
+        nPostSweeps     2;
+        cacheAgglomeration on;
+        agglomerator    faceAreaPair;
+        nCellsInCoarsestLevel 200;
+        mergeLevels     1;
+    }
+}
+
+Magnetic
+{
+    update
+    {
+        active          on;
+        outputCycle     2147483647;
+        timeStepCycle   10;
+        timeCycle       1e+100;
+    }
+}
+
+
+// ************************************************************************* //

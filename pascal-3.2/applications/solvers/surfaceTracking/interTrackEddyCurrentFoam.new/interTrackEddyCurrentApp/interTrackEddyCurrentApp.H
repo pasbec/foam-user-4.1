@@ -31,8 +31,7 @@ Description
 
 #include "interTrackEddyCurrentAppInclude.H"
 #include "interTrackEddyCurrentAppRegion.H"
-// #include "interTrackAppControl.H"
-// #include "interTrackAppManager.H"
+#include "interTrackEddyCurrentAppManager.H"
 
 #include "fvCFD.H"
 

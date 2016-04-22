@@ -32,8 +32,9 @@ Description
 
 // TODO: Coupled solution of U and p?
 
-// TODO: Read Zhang S., Zhao, X., General formulations for Rhie-Chow interpolation,
-//       ASME Heat Transfer/Fluids Engineering Summer Conference, HT-FED04, Charlotte, USA, 2004
+// TODO: Read Zhang S., Zhao, X., General formulations for Rhie-Chow
+//       interpolation, ASME Heat Transfer/Fluids Engineering Summer
+//       Conference, HT-FED04, Charlotte, USA, 2004
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,70 +59,20 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    volScalarField& p = storage.p();
-    volVectorField& U = storage.U();
-    surfaceScalarField& phi = storage.phi();
-    volScalarField& rho = storage.rho();
-    volScalarField& mu = storage.mu();
-    trackedSurface& interface = storage.interface();
-
 // TODO: Two fluids
 // #   include "setRefCell.H"
 
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// TODO: Continuity errors
+// #   include "initContinuityErrs.H"
 
     while (manager.run())
     {
-        interface.updateMesh(); // abs phi
-        interface.updateDisplacementDirections();
+#       include "meshUpdate.H"
 
-        interface.predictPoints(); // abs phi
+#       include "UpLoop.H"
 
-        // --- OUTER corrector loop
-        while (control.loop())
-        {
-            interface.updateBoundaryConditions(); // rel phi
-
-            // Make the fluxes relative to the mesh motion
-            fvc::makeRelative(phi,U);
-
-            autoPtr<fvVector4Matrix> UpEqn;
-
-#           include "UEqn.H"
-
-            if (!settings.UpCoupled)
-            {
-                // --- Pressure corrector PISO loop
-                while (control.correct())
-                {
-#                   include "pEqnSegregated.H"
-                }
-            }
-            else
-            {
-#               include "pEqnCoupled.H"
-            }
-
-            if
-            (
-                control.turbCorr()
-             && storage.item_turbulence().enabled()
-            )
-            {
-                storage.turbulence().correct();
-            }
-
-            // Make the fluxes absolute
-            fvc::makeAbsolute(phi, U);
-
-            interface.correctPoints(); // abs phi
-
-#           include "trackedSurfaceContinuityErrs.H"
-        }
-
-#       include "volContinuity.H"
+// TODO: Continuity errors
+// #       include "volContinuity.H"
     }
 
     return(0);

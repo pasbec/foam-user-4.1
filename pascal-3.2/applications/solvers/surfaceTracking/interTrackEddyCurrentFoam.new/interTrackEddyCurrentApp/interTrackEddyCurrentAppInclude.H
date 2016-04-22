@@ -29,20 +29,10 @@ Description
 #ifndef interTrackEddyCurrentAppInclude_H
 #define interTrackEddyCurrentAppInclude_H
 
-#include "regionModelling.H"
-#include "physicalConstants.H"
-#include "trackedSurface.H"
+#include "interTrackAppInclude.H"
+#include "eddyCurrentAppInclude.H"
 
-#include "twoPhaseMixture.H"
-#include "turbulenceModel.H"
-#include "fvBlockMatrix.H"
-#include "wallFvPatch.H"
-#include "Switch.H"
-#include "fixedValueFvPatchFields.H"
-#include "zeroGradientFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-
-typedef fvBlockMatrix<vector4> fvVector4Matrix;
+#include "twoDPointCorrector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

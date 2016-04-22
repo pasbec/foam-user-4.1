@@ -33,6 +33,9 @@ Description
 #include "physicalConstants.H"
 #include "edgeBiotSavart.H"
 
+#include "Switch.H"
+#include "HashTable.H"
+
 #include "fvBlockMatrix.H"
 #include "uniformDimensionedFields.H"
 #include "fixedValueFvPatchFields.H"

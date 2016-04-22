@@ -38,7 +38,6 @@ SourceFiles
 #define eddyCurrentAppManager_H
 
 #include "eddyCurrentAppInclude.H"
-#include "eddyCurrentAppRegion.H"
 #include "eddyCurrentAppControl.H"
 
 #include "solverManager.H"
@@ -57,7 +56,7 @@ namespace eddyCurrentApp
 
 class Manager
 :
-    public solverManager<regionFvMesh, Region::SIZE>
+    public solverManager<regionFvMesh>
 {
 public:
 
@@ -174,13 +173,6 @@ public:
 
 private:
 
-    // Private Data
-
-        // Regions
-
-            //- Region mesh names
-            wordList regionNames_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -188,17 +180,6 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const Manager&);
-
-        // Evolution
-
-            //- Next sequence
-            virtual void next() const;
-
-            //- Write sequence
-            virtual void write() const;
-
-            //- Finalize sequence
-            virtual void finalize() const;
 
 
 public:
@@ -213,8 +194,8 @@ public:
             const argList& args,
             Time& time,
             regionFvMesh& mesh,
-            const word& prefix = "eddyCurrent",
-            const bool& master = true
+            bool master = true,
+            const word& prefix = "eddyCurrent"
         );
 
     // Destructor
@@ -223,19 +204,16 @@ public:
 
     // Member Functions
 
-        // Regions
+        // Evolution
 
-            //- Region mesh names
-            inline const wordList& regionNames() const
-            {
-                return regionNames_;
-            };
+            //- Next sequence
+            virtual void next() const;
 
-            //- Region mesh name for given region label
-            inline word regionName(const label& regionI) const
-            {
-                return regionNames_[regionI];
-            };
+            //- Write sequence
+            virtual void write() const;
+
+            //- Finalize sequence
+            virtual void finalize() const;
 };
 
 

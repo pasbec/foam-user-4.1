@@ -27,6 +27,6 @@ EXE_LIBS = \
     -lincompressibleTurbulenceModel \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
-    -L$(FOAM_USER_LIBBIN) -lnewFiniteArea \
     -L$(FOAM_USER_LIBBIN) -lfoamTools \
+    -L$(FOAM_USER_LIBBIN) -lnewFiniteArea \
     -L$(FOAM_USER_LIBBIN) -lnewTrackedSurface

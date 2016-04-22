@@ -53,7 +53,7 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
         const label fieldI = applyToField(variableName);
         if (fieldI != -1)
         {
-            const List<dictionary> sp = iter().stream();
+            const List<solverPerformanceData> spd = iter().stream();
 
             // use either stored residual or read from dict
             scalar residual = GREAT;
@@ -64,7 +64,7 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
             }
             else
             {
-                residual = readScalar(sp.last().lookup("initialResidual"));
+                residual = max(spd.last().initialResidual());
             }
 
 
@@ -73,7 +73,7 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
             if (storeIni)
             {
                 residualControl_[fieldI].initialResidual =
-                    readScalar(sp.first().lookup("initialResidual"));
+                    max(spd.first().initialResidual());
             }
 
             const bool absCheck = residual < residualControl_[fieldI].absTol;
@@ -150,11 +150,11 @@ void Foam::interTrackApp::Control::storeResiduals(const word& name)
             const label fieldI = applyToField(variableName);
             if (fieldI != -1)
             {
-                const List<dictionary> sp = iter().stream();
+                const List<solverPerformanceData> spd = iter().stream();
 
                 // store current residual
                 residualStorage_[fieldI].residual =
-                    readScalar(sp.last().lookup("initialResidual"));
+                    max(spd.last().initialResidual());
 
                 // indicate that the residual has been stored
                 residualStorage_[fieldI].stored = true;
@@ -195,9 +195,9 @@ void Foam::interTrackApp::Control::skipZeroNonOrtho(const word& name)
                 const label fieldI = applyToField(variableName);
                 if (fieldI != -1)
                 {
-                    const List<dictionary> sp = iter().stream();
+                    const List<solverPerformanceData> spd = iter().stream();
 
-                    nIter = readInt(sp.last().lookup("nIterations"));
+                    nIter = spd.last().nIterations();
                 }
 
                 break;

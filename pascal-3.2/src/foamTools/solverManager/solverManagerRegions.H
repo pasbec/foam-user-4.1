@@ -57,7 +57,7 @@ Description
 # define SM_REGIONS_REGION_ADD(ENUM, MESH)                                    \
                                                                               \
         SM_WRAPPER_MEMBER_ADD_P2(                                             \
-            Region_##ENUM, region_##ENUM, virtual,                            \
+            Region_##ENUM, region_##ENUM, ,                                   \
             this->manager(), MESH)
 
 
@@ -87,11 +87,7 @@ template <class MANAGER>
 class Regions
 :
     public solverManagerBase::Regions
-    <
-        typename MANAGER::ManagerMesh,
-        typename MANAGER::Mesh,
-        MANAGER::nRegions
-    >,
+        <typename MANAGER::ManagerMesh, typename MANAGER::Mesh>,
     public solverManagerWrappers::Base<MANAGER, typename MANAGER::ManagerMesh>
 {
 public:
@@ -107,12 +103,7 @@ private:
 
         typedef typename MANAGER::Mesh SubMesh;
 
-        typedef solverManagerBase::Regions
-        <
-            Mesh,
-            SubMesh,
-            MANAGER::nRegions
-        > Base;
+        typedef solverManagerBase::Regions <Mesh, SubMesh> Base;
         typedef solverManagerWrappers::Base<MANAGER, Mesh> Wrapper;
 
     // Private Member Functions
@@ -133,10 +124,14 @@ public:
 
     // Constructor
 
-        Regions(Mesh& mesh)
+        Regions
+        (
+            const MANAGER& manager,
+            Mesh& mesh
+        )
         :
             Base(),
-            Wrapper(mesh)
+            Wrapper(manager, mesh)
         {};
 
     // Destructor
@@ -144,9 +139,6 @@ public:
         virtual ~Regions() {};
 
     // Member Functions
-
-        //- Manager
-        virtual const MANAGER& manager() const = 0;
 
         // Basic
 
