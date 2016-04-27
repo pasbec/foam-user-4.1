@@ -1,11 +1,11 @@
 
-    volScalarField rAU(1.0/UEqn().A()); rAU.rename("rAU");
-    surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
+    tmp<volScalarField> rAU(1.0/UEqn().A()); rAU().rename("rAU");
+    surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU()));
 
 // TODO: Boundary conditions for p if settings.UEqnVolumeForce?
 
     volVectorField HbyA("HbyA", U);
-    HbyA = rAU*UEqn().H();
+    HbyA = rAU()*UEqn().H();
 
     surfaceScalarField phiHbyA
     (
@@ -51,7 +51,7 @@
 //     fvc::makeAbsolute(phiHbyA, U);
 // }
 
-    tmp<volScalarField> rAtU(rAU);
+    tmp<volScalarField> rAtU(new volScalarField(rAU()));
 
 // TODO: Learn and get to know if this is ok with F
 //       but I have the feeling, that it is NOT!
@@ -64,13 +64,15 @@
                 << endl;
         }
 
-        rAtU = 1.0/max(1.0/rAU - UEqn().H1(), 0.1/rAU);
+        rAtU = 1.0/max(1.0/rAU() - UEqn().H1(), 0.1/rAU());
         phiHbyA +=
-            fvc::interpolate(rAtU() - rAU)*fvc::snGrad(p)*mesh.magSf();
-        HbyA -= (rAU - rAtU())*fvc::grad(p);
+            fvc::interpolate(rAtU() - rAU())*fvc::snGrad(p)*mesh.magSf();
+        HbyA -= (rAU() - rAtU())*fvc::grad(p);
 
         rAUf = fvc::interpolate(rAtU());
     }
+
+    rAU.clear();
 
     if (control.nCorrPISO() <= 1)
     {
@@ -85,7 +87,6 @@
     if
     (
         storage.item_F().enabled()
-    && !settings.UEqnVolumeForce
     )
     {
         forAll(p.boundaryField(), patchI)

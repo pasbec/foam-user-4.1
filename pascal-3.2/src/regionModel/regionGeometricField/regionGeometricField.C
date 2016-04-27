@@ -469,10 +469,8 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::copyInternalBoun
 
     forAll (pbm, patchI)
     {
-        const Field<Type>& patchInternalField = vf.boundaryField()[patchI].patchInternalField();
-        Field<Type>& patchField = vf.boundaryField()[patchI];
-
-        patchField = patchInternalField;
+        vf.boundaryField()[patchI] ==
+            vf.boundaryField()[patchI].patchInternalField();
     }
 };
 

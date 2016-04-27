@@ -363,6 +363,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create
     item_g().enable();
     item_p().enable();
     item_U().enable();
+    item_Up().setState(settings().UpCoupled);
     item_phi().enable();
     item_rho().enable();
     item_mu().enable();
@@ -371,29 +372,11 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create
     item_fluidIndicator().enable();
     item_transport().enable();
 
-    // Init density from transport (viscosity) model
-    {
-        dimensionedScalar rho1 = transport().rho1();
-        dimensionedScalar rho2 = transport().rho2();
+    rho() = transport().rho();
+    rho().correctBoundaryConditions();
 
-        rho() = fluidIndicator()*(rho1 - rho2) + rho2;
-        rho().correctBoundaryConditions();
-    }
-
-    // Init (dynamic) viscosity from transport (viscosity) model and density
-    {
-        dimensionedScalar nu1 = dimensionedScalar
-        (
-            transport().nuModel1().viscosityProperties().lookup("nu")
-        );
-        dimensionedScalar nu2 = dimensionedScalar
-        (
-            transport().nuModel2().viscosityProperties().lookup("nu")
-        );
-
-        mu() = (fluidIndicator()*(nu1 -nu2) + nu2) * rho();
-        mu().correctBoundaryConditions();
-    }
+    mu() = transport().mu();
+    mu().correctBoundaryConditions();
 
     item_turbulence().setState(settings().turbulence);
     item_interface().enable();

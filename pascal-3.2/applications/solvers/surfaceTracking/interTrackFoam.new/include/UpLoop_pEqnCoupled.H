@@ -2,6 +2,8 @@
     tmp<volScalarField> rAU(1.0/UEqn().A()); rAU().rename("rAU");
     surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU()));
 
+    rAU.clear();
+
 // TODO: Boundary conditions for p?
 
     // Hint: phiP is a pressure source (Rhie-Chow?). It is important

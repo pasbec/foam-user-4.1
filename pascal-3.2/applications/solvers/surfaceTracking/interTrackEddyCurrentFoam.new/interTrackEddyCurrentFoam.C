@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 #           include "meshUpdate.H"
         }
 
-// TODO: Magnetic update?
+// TODO: Magnetic update? "interTrackEddyCurrentApp::Control"
 
 // TODO: Magnetic update?
         // Update mesh in buffer region

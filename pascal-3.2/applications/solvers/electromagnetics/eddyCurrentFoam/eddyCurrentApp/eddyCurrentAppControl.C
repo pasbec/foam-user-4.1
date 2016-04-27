@@ -97,7 +97,7 @@ void Foam::eddyCurrentApp::Control::storePrevIterFields() const
 bool Foam::eddyCurrentApp::Control::subCriteriaSatisfied()
 {
     // no checks on first sub-iteration - nothing has been calculated yet
-    if ((subCorr_ == 1) || residualControl_.empty())
+    if (residualControl_.empty())
     {
         return false;
     }
@@ -242,7 +242,7 @@ bool Foam::eddyCurrentApp::Control::loop()
         return false;
     }
 
-    if (criteriaSatisfied())
+    if ((corr_ > 1) && criteriaSatisfied())
     {
         Info<< algorithmName_ << ": converged in " << corr_ - 1
             << " iterations" << endl;
@@ -359,7 +359,7 @@ bool Foam::eddyCurrentApp::Control::subLoop()
         Info<< algorithmName_ << " sub-loop: corr = " << subCorr_ << endl;
     }
 
-    if (criteriaSatisfied())
+    if ((subCorr_ > 1) && criteriaSatisfied())
     {
         subCorr_ = 0;
         subScale_ = 1.0;
@@ -367,7 +367,7 @@ bool Foam::eddyCurrentApp::Control::subLoop()
         return false;
     }
 
-    if (meshIs3D() && subCriteriaSatisfied())
+    if ((subCorr_ > 1) && subCriteriaSatisfied() && meshIs3D())
     {
         subCorr_ = 0;
         subScale_ /= 10.0;

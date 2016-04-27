@@ -1,22 +1,24 @@
 
-    tmp<volScalarField> tmu = mu;
+    tmp<volScalarField> tmuEff(new volScalarField(mu));
 
     if(storage.item_turbulence().enabled())
     {
-        tmu() += rho*storage.turbulence().nut();
-        tmu().rename("muEff");
+        tmuEff() += rho*storage.turbulence().nut();
+        tmuEff().rename("muEff");
     }
+
+    tmuEff().correctBoundaryConditions();
 
     tmp<fvVectorMatrix> UEqn
     (
         fvm::ddt(rho, U)
       + fvm::div(fvc::interpolate(rho)*phi, U, "div(phi,U)")
-      - fvm::laplacian(tmu(), U)
-      - fvc::div(tmu()*dev(fvc::grad(U)().T()))
-//       - (fvc::grad(U) & fvc::grad(tmu()))
+      - fvm::laplacian(tmuEff(), U)
+      - fvc::div(tmuEff()*dev(fvc::grad(U)().T()))
+//       - (fvc::grad(U) & fvc::grad(tmuEff()))
     );
 
-    tmu.clear();
+    tmuEff.clear();
 
     if
     (
@@ -46,7 +48,7 @@
         {
             solve
             (
-                UEqn == fvc::reconstruct
+                UEqn() == fvc::reconstruct
                 (
                 - (fvc::snGrad(p)*mesh.magSf())
                 + (fvc::interpolate(storage.F()) & mesh.Sf())

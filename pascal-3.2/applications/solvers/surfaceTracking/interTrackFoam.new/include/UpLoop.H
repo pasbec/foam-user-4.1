@@ -5,8 +5,8 @@
         volScalarField& p = storage.p();
         volVectorField& U = storage.U();
         surfaceScalarField& phi = storage.phi();
-        volScalarField& rho = storage.rho();
-        volScalarField& mu = storage.mu();
+        const volScalarField& rho = storage.rho();
+        const volScalarField& mu = storage.mu();
         trackedSurface& interface = storage.interface();
 
         interface.updateBoundaryConditions(); // rel phi
@@ -34,7 +34,7 @@
         if
         (
             control.turbCorr()
-            && storage.item_turbulence().enabled()
+         && storage.item_turbulence().enabled()
         )
         {
             storage.turbulence().correct();
