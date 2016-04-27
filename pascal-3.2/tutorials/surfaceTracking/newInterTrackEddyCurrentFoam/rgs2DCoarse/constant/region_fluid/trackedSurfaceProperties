@@ -29,20 +29,20 @@ pointNormalsCorrectionPatches   1(frontAndBack);
 
 nTrackedSurfaceCorrectors       1;
 
-useSubMesh                      yes;
+// useSubMesh                      yes;
 
-// correctVolume                yes;
+correctVolume                   yes;
 
-// resetControlPoints           yes;
+resetControlPoints              yes;
 
-// smoothing                    yes;
+// smoothing                       yes;
 
-// freeContactAngle             yes;
+// freeContactAngle                yes;
 
-// correctPointNormals          yes;
-// correctDisplacement          yes;
-// correctCurvature             yes;
+// correctPointNormals             yes;
+// correctDisplacement             yes;
+// correctCurvature                yes;
 //
-// fvcNGradUn                   yes;
+// fvcNGradUn                      yes;
 
 // ************************************************************************* //

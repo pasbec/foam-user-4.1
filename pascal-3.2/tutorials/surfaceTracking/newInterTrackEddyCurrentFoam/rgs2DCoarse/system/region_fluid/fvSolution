@@ -37,28 +37,21 @@ solvers
 
     p { $pFinal; relTol 1e-02; }
 
-    U
+    "(UFinal|epsilon|omega|k|nuTilda)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          1e-02;
+        solver                   PBiCG;
+        tolerance                1e-08;
+        relTol                   0;
+        preconditioner           DILU;
     }
 
-//     "(UFinal|epsilon|omega|k|nuTilda)"
-//     {
-//         solver                   PBiCG;
-//         tolerance                1e-08;
-//         relTol                   0;
-//         preconditioner           DILU;
-//     }
-//
-//     U { $UFinal; relTol 1e-3; }
+    U { $UFinal; }
+//     U { $UFinal; relTol 1e-02; }
 }
 
-OUTER
+INTERTRACK
 {
-    nOuterCorrectors            50;
+    nOuterCorrectors            10;
     nCorrectors                 1;
     nNonOrthogonalCorrectors    5;
     pRefPoint (0.5 0.5 0);

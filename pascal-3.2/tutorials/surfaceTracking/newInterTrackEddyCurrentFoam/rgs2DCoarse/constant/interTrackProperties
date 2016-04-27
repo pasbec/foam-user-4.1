@@ -22,11 +22,11 @@ settings
     region_fluid
     {
         volumeForce         true;
-        turbulence          false;
+        turbulence          true;
 
         UpCoupled           false;
-        UEqnVolumeForce     false;
-        snGradpFromFlux     true;
+        UEqnVolumeForce     true;
+        snGradpFromFlux     false;
     }
 }
 

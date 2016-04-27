@@ -21,6 +21,11 @@ ddtSchemes
     ddt(rho,U)                            backward;
 // TODO
     ddt(U)                                backward;
+
+    ddt(k)                                backward;
+    ddt(omega)                            backward;
+    ddt(epsilon)                          backward;
+    ddt(nuTilda)                          backward;
 }
 
 gradSchemes
@@ -56,6 +61,9 @@ divSchemes
     div(phi,epsilon)                      Gauss Gamma 0.5;
     div(phi,omega)                        Gauss Gamma 0.5;
     div(phi,nuTilda)                      Gauss Gamma 0.5;
+
+    // Up
+    div(U)                                Gauss linear;
 }
 
 laplacianSchemes
@@ -64,8 +72,8 @@ laplacianSchemes
 
     laplacian(mu,U)                       Gauss linear corrected;
     laplacian(muEff,U)                    Gauss linear corrected;
-//     laplacian(rAUf,p)                     Gauss linear corrected;
-    laplacian(rAUf,p)                     Gauss linear limited 0.5;
+    laplacian(rAUf,p)                     Gauss linear corrected;
+//     laplacian(rAUf,p)                     Gauss linear limited 0.5;
 //     laplacian(rAUf,p)                     Gauss linear limited 0.3333;
 
     laplacian(DkEff,k)                    Gauss linear corrected;
@@ -83,14 +91,17 @@ interpolationSchemes
     interpolate(rAU)                      linear;
     interpolate(HbyA)                     linear;
     interpolate(F)                        linear;
+
+    // Up
+    interpolate(grad(p))                  linear;
 }
 
 snGradSchemes
 {
     default                               none;
 
-//     snGrad(p)                             corrected;
-    snGrad(p)                             limited 0.5;
+    snGrad(p)                             corrected;
+//     snGrad(p)                             limited 0.5;
 //     snGrad(p)                             limited 0.3333;
 }
 

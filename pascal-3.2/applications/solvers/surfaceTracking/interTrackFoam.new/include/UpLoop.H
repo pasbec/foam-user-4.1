@@ -1,5 +1,5 @@
 
-    // --- OUTER corrector loop
+    // --- INTERTRACK corrector loop
     while (control.loop())
     {
         volScalarField& p = storage.p();

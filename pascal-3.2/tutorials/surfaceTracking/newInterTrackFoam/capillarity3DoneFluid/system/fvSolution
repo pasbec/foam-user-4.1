@@ -52,7 +52,7 @@ solvers
     }
 }
 
-OUTER
+INTERTRACK
 {
     nOuterCorrectors            50;
     nCorrectors                 1;

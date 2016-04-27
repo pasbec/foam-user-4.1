@@ -27,7 +27,8 @@ boundaryField
     fixedWall
     {
         type            calculated;
-        value           uniform 120;
+        value           uniform 90;
+//         value           uniform 120;
     }
     "procBoundary.*"
     {

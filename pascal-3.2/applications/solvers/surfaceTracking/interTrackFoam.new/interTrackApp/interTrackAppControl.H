@@ -92,7 +92,7 @@ public:
     // Constructors
 
         //- Construct from mesh and the name of control sub-dictionary
-        Control(fvMesh& mesh, const word& dictName="OUTER");
+        Control(fvMesh& mesh, const word& dictName="INTERTRACK");
 
 
     //- Destructor
