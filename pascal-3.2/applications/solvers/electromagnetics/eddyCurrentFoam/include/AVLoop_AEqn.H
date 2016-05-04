@@ -15,6 +15,7 @@
         fvVectorMatrix AReEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(ARe)
+//        - physicalConstant::rMu0 * fvc::grad(fvc::div(ARe))
 //        + sigma * omega0 * AIm
 //        - sigma * VReGrad
 //        + j0Re
@@ -23,6 +24,7 @@
         fvVectorMatrix AImEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(AIm)
+//        - physicalConstant::rMu0 * fvc::grad(fvc::div(AIm))
 //        - sigma * omega0 * ARe
 //        - sigma * VImGrad
 //        + j0Im

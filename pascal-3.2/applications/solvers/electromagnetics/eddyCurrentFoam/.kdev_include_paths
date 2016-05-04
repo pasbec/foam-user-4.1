@@ -4,9 +4,8 @@
 ../../../../src/foamTools/lnInclude
 ../../../../src/regionModel/lnInclude
 
-./gradSchemes/electricPotentialGrad
-
-./laplacianSchemes/electricPotentialLaplacian
+./electricPotential/electricPotentialGrad
+./electricPotential/electricPotentialLaplacian
 
 ./edgeBiotSavart
 ./eddyCurrentApp

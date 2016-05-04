@@ -52,20 +52,8 @@ electricPotentialGrad<scalar>::calcGrad
 {
     const fvMesh& mesh = vsf.mesh();
 
-    // Mesh references
-    const unallocLabelList& own = mesh.owner();
-    const unallocLabelList& nei = mesh.neighbour();
-
-    const vectorField& Sf = mesh.Sf();
-    const scalarField& magSf = mesh.magSf();
-    const scalarField& w = mesh.weights();
-    const scalarField& d = mesh.deltaCoeffs();
-
-    // Derived mesh data
-    const vectorField Sn = Sf/magSf;
-
-    // Prepare gradient data
-    tmp<volVectorField> tepGrad
+    // Prepare gradient field
+    tmp<volVectorField> tgrad
     (
         new volVectorField
         (
@@ -87,115 +75,78 @@ electricPotentialGrad<scalar>::calcGrad
             zeroGradientFvPatchField<vector>::typeName
         )
     );
-    volVectorField& epGrad = tepGrad();
-    vectorField& epGradIn = epGrad.internalField();
+    volVectorField& grad = tgrad();
+    vectorField& gradIn = grad.internalField();
 
-    //
-    if (this->baseScheme() == this->GAUSS)
+    // Electrical conductivity from gamma
+    const volScalarField& sigma =
+        mesh.lookupObject<volScalarField>(nameSigma_);
+    const scalarField& sigmaIn = sigma.internalField();
+
+    // Linear interpolated sigma (mean)
+    tmp<surfaceScalarField> tsigmaMean
+    (
+        linearInterpolate(sigma)
+    );
+    const surfaceScalarField& sigmaMean = tsigmaMean();
+    const scalarField& sigmaMeanIn = sigmaMean.internalField();
+
+    // Rate of change of flux of magnetic vector potential
+    const surfaceScalarField& ddtAflux =
+        mesh.lookupObject<surfaceScalarField>(nameDdtAflux_);
+    const scalarField& ddtAfluxIn = ddtAflux.internalField();
+
+    // Mesh data
+    const unallocLabelList& own = mesh.owner();
+    const unallocLabelList& nei = mesh.neighbour();
+    const scalarField& w = mesh.weights();
+    const scalarField& d = mesh.deltaCoeffs();
+    const scalarField& magSf = mesh.magSf();
+    const vectorField& Sf = mesh.Sf();
+
+    if (baseScheme() == GAUSS)
     {
-        const dimensionedScalar frequency
-        (
-            magneticProperties_.lookup("frequency")
-        );
-
-        const dimensionedScalar omega
-        (
-            "omega",
-            2.0 * mathematicalConstant::pi * frequency
-        );
-
-        // TODO: Check if vsf.name() ~ nameElectricPotential_
-
-        // TODO: Prevent segfault!
-        word complexNameV = vsf.name();
-        word complexPartV =
-            complexNameV
-            (
-                complexNameV.size()-2,
-                complexNameV.size()-1
-            );
-
-        word complexPartA = word();
-        scalar complexSignA = 0.0;
-
-        if (complexPartV == "Re")
-        {
-            complexPartA = "Im";
-            complexSignA = 1.0;
-        }
-        else if (complexPartV == "Im")
-        {
-            complexPartA = "Re";
-            complexSignA = -1.0;
-        }
-        else
-        {
-            // TODO: Error handling!
-        }
-
-        const volScalarField& sigma =
-            mesh.lookupObject<volScalarField>
-            (
-                nameConductivity_
-            );
-
-        const volVectorField& A =
-            mesh.lookupObject<volVectorField>
-            (
-                nameMagneticPotential_ + complexPartA
-            );
-
-        scalar As = complexSignA;
-
         // Internal contributions
         forAll(own, faceI)
-        // TODO: Optimize speed
         {
+            // Cell labels
             label ownFaceI = own[faceI];
             label neiFaceI = nei[faceI];
 
-            {
-                // Interpolation weights
-                scalar wP = w[faceI];
-                scalar wN = 1.0 - wP;
+            // Interpolation weights
+            scalar wP = w[faceI];
+            scalar wN = 1.0 - wP;
 
-                // Conductivity
-                scalar sigmaOwn = sigma[ownFaceI];
-                scalar SigmaNei = sigma[neiFaceI];
+            // Cell sigma
+            scalar sigmaOwn = sigmaIn[ownFaceI];
+            scalar sigmaNei = sigmaIn[neiFaceI];
+            scalar sigmaOff = sigmaNei - sigmaOwn;
 
-                // Conductivity-weighted inverse face centre
-                // to cell centre distances
-                scalar dByWsigmaOwn = d[faceI] / wN * sigmaOwn;
-                scalar dByWsigmaNei = d[faceI] / wP * SigmaNei;
+            // Face value based on jump conditions
+            scalar ssv = sigmaOwn * wP * vsf[ownFaceI]
+                       + sigmaNei * wN * vsf[neiFaceI]
+// TODO FIXME: deltaCoeffs should come from snGradscheme! Otherwise this is not consistent with
+//             the corresponding laplacian operator. Thus, currently only an uncorrected version
+//             of the electricPotentialLaplacian exists
+                       + sigmaOff * wP * wN * ddtAfluxIn[faceI]/magSf[faceI] / d[faceI];
 
-                // Compex signed sigma difference
-                scalar sigmaDiff = As * (sigmaOwn - SigmaNei);
+            ssv /= sigmaMeanIn[faceI];
 
-                // Face interpolated complex time derivative of A
-                scalar wPownAn = wP * (A[ownFaceI] & Sn[faceI]);
-                scalar wNneiAn = wN * (A[neiFaceI] & Sn[faceI]);
-                scalar ddtAfn = omega.value() * (wPownAn + wNneiAn);
-
-                // Current conserving face value of V
-                scalar Vf = sigmaDiff * ddtAfn;
-                Vf += dByWsigmaOwn * vsf[ownFaceI];
-                Vf += dByWsigmaNei * vsf[neiFaceI];
-                Vf /= dByWsigmaOwn + dByWsigmaNei;
-
-                // Gradient contributions
-                epGrad[ownFaceI] += Sf[faceI] * Vf;
-                epGrad[neiFaceI] -= Sf[faceI] * Vf;
-            }
+            // Gradient contributions
+            gradIn[ownFaceI] += Sf[faceI] * ssv;
+            gradIn[neiFaceI] -= Sf[faceI] * ssv;
         }
 
+        tsigmaMean.clear();
+
         // Boundary contributions
-        // TEST
+        // TODO: How can we do this without another interpolation?
         // TODO: Is this enough? What if there are symmetry,
         //       empty or other special bc?
         {
             tmp<surfaceScalarField> tssf
             (
-                tinterpScheme_().interpolate(vsf)
+                linearInterpolate(vsf)
             );
             surfaceScalarField& ssf = tssf();
 
@@ -210,32 +161,29 @@ electricPotentialGrad<scalar>::calcGrad
 
                 forAll(mesh.boundary()[patchi], facei)
                 {
-                    epGrad[pFaceCells[facei]] += pSf[facei]*pssf[facei];
+                    grad[pFaceCells[facei]] += pSf[facei]*pssf[facei];
                 }
             }
 
             tssf.clear();
         }
 
-        epGradIn /= mesh.V();
+        gradIn /= mesh.V();
     }
-    else if (this->baseScheme() == this->LEASTSQUARES)
+    else if (baseScheme() == LEASTSQUARES)
     {
         FatalErrorIn
         (
-            "electricPotentialGrad<scalar>::calcGrad\n"
-            "(\n"
-            "    GeometricField<Type, fvPatchField, volMesh>&\n"
-            ")\n"
+            "electricPotentialGrad<scalar>::calcGrad(...)"
         )   << "Gradient calculation for LEASTSQUARES "
             << "base scheme not yet implemented."
             << abort(FatalError);
     }
 
-    epGrad.rename("grad(" + vsf.name() + ')');
-    this->correctBoundaryConditions(vsf, epGrad);
+    grad.rename("grad(" + vsf.name() + ')');
+    grad.correctBoundaryConditions();
 
-    return tepGrad;
+    return tgrad;
 }
 
 
@@ -249,10 +197,7 @@ electricPotentialGrad<scalar>::fvmGrad
 {
     FatalErrorIn
     (
-        "electricPotentialGrad<scalar>::fvmGrad\n"
-        "(\n"
-        "    GeometricField<Type, fvPatchField, volMesh>&\n"
-        ")\n"
+        "electricPotentialGrad<scalar>::fvmGrad(...)"
     )   << "Implicit gradient operator not yet implemented."
         << abort(FatalError);
 

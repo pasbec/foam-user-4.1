@@ -33,6 +33,62 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtARePhi::create
+(const word& ccase) const
+{
+    set
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                "ddtARePhi",
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimVoltage*dimLength,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtAImPhi::create
+(const word& ccase) const
+{
+    set
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                "ddtAImPhi",
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimVoltage*dimLength,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName
+        )
+    );
+}
+
+
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create
 (const word& ccase) const
 {
@@ -70,56 +126,6 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create
                 IOobject::AUTO_WRITE
             ),
             mesh()
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VReAverage::create
-(const word& ccase) const
-{
-    set
-    (
-        new uniformDimensionedScalarField
-        (
-            IOobject
-            (
-                "VReAverage",
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            dimensionedScalar(
-                word(),
-                dimVoltage,
-                gAverage(storage().VRe().internalField())
-            )
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VImAverage::create
-(const word& ccase) const
-{
-    set
-    (
-        new uniformDimensionedScalarField
-        (
-            IOobject
-            (
-                "VImAverage",
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            dimensionedScalar(
-                word(),
-                dimVoltage,
-                gAverage(storage().VIm().internalField())
-            )
         )
     );
 }
@@ -186,11 +192,11 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create
 (const word& ccase) const
 {
+    item_ddtARePhi().enable();
+    item_ddtAImPhi().enable();
+
     item_VRe().enable();
     item_VIm().enable();
-
-    item_VReAverage().enable();
-    item_VImAverage().enable();
 
     item_jRe().enable();
     item_jIm().enable();

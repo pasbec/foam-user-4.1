@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "electricPotentialGradBase.H"
+#include "electricPotentialLaplacianBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,12 +36,11 @@ template<>
 const char*
 NamedEnum
 <
-    typename fv::electricPotentialGradBase::scheme,
-    2
+    typename fv::electricPotentialLaplacianBase::BaseScheme,
+    1
 >::names[] =
 {
-    "Gauss",
-    "leastSquares"
+    "Gauss"
 };
 
 
@@ -49,10 +48,10 @@ NamedEnum
 
 const NamedEnum
 <
-    typename fv::electricPotentialGradBase::scheme,
-    2
+    typename fv::electricPotentialLaplacianBase::BaseScheme,
+    1
 >
-fv::electricPotentialGradBase::schemeNames_;
+fv::electricPotentialLaplacianBase::schemeNames_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -44,6 +44,7 @@ Foam::tmp<Foam::fvMatrix<Foam::Type> >                                       \
 Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
 (                                                                            \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
+    const word& vfGammaName,                                                 \
     GeometricField<Type, fvPatchField, volMesh>& vf                          \
 )                                                                            \
 {                                                                            \
@@ -54,18 +55,20 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
         gamma*mesh.magSf()                                                   \
     );                                                                       \
                                                                              \
-    tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected(gammaMagSf, vf);     \
+    tmp<fvMatrix<Type> > tfvm =                                              \
+        fvmLaplacianUncorrected(gammaMagSf, vfGammaName, vf);                \
     fvMatrix<Type>& fvm = tfvm();                                            \
                                                                              \
     if (this->tsnGradScheme_().corrected())                                  \
     {                                                                        \
         if (mesh.schemesDict().fluxRequired(vf.name()))                      \
         {                                                                    \
-            fvm.faceFluxCorrectionPtr() = new                                \
-            GeometricField<Type, fvsPatchField, surfaceMesh>                 \
-            (                                                                \
-                gammaMagSf*this->tsnGradScheme_().correction(vf)             \
-            );                                                               \
+            fvm.faceFluxCorrectionPtr() =                                    \
+                new                                                          \
+                GeometricField<Type, fvsPatchField, surfaceMesh>             \
+                (                                                            \
+                    gammaMagSf*this->tsnGradScheme_().correction(vf)         \
+                );                                                           \
                                                                              \
             fvm.source() -=                                                  \
                 mesh.V()*                                                    \
@@ -90,10 +93,29 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
                                                                              \
                                                                              \
 template<>                                                                   \
+Foam::tmp<Foam::fvMatrix<Foam::Type> >                                       \
+Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
+(                                                                            \
+    const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
+    GeometricField<Type, fvPatchField, volMesh>& vf                          \
+)                                                                            \
+{                                                                            \
+    FatalErrorIn                                                             \
+    (                                                                        \
+        "electricPotentialLaplacian::fvmLaplacian(...)"                      \
+    )   << "Laplacian method with gamma as surfaceField is not allowed."     \
+        << exit(FatalError);                                                 \
+                                                                             \
+    return fvmLaplacian(gamma, word(), vf);                                  \
+}                                                                            \
+                                                                             \
+                                                                             \
+template<>                                                                   \
 Foam::tmp<Foam::GeometricField<Foam::Type, Foam::fvPatchField, Foam::volMesh> >\
 Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian \
 (                                                                            \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
+    const word& vfGammaName,                                                 \
     const GeometricField<Type, fvPatchField, volMesh>& vf                    \
 )                                                                            \
 {                                                                            \
@@ -107,6 +129,24 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian \
     tLaplacian().rename("laplacian(" + gamma.name() + ',' + vf.name() + ')');\
                                                                              \
     return tLaplacian;                                                       \
+}                                                                            \
+                                                                             \
+                                                                             \
+template<>                                                                   \
+Foam::tmp<Foam::GeometricField<Foam::Type, Foam::fvPatchField, Foam::volMesh> >\
+Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian \
+(                                                                            \
+    const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
+    const GeometricField<Type, fvPatchField, volMesh>& vf                    \
+)                                                                            \
+{                                                                            \
+    FatalErrorIn                                                             \
+    (                                                                        \
+        "electricPotentialLaplacian::fvmLaplacian(...)"                      \
+    )   << "Laplacian calculus with gamma as surfaceField is not allowed."   \
+        << exit(FatalError);                                                 \
+                                                                             \
+    return fvcLaplacian(gamma, word(), vf);                                  \
 }
 
 

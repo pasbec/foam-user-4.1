@@ -39,20 +39,6 @@ namespace fv
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void electricPotentialGrad<Type>::readMagneticProperties()
-{
-    dictionary namesDict(magneticProperties_.subDict("names"));
-
-    nameInterface_ = word(namesDict.lookup("interface"));
-    nameConductivity_ = word(namesDict.lookup("conductivity"));
-    nameElectricPotential_ = word(namesDict.lookup("electricPotential"));
-    nameMagneticPotential_ = word(namesDict.lookup("magneticPotential"));
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
 tmp
 <
     GeometricField

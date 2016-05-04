@@ -55,78 +55,54 @@ namespace fv
 
 class electricPotentialLaplacianBase
 {
-
 public:
 
     //- Enumeration defining the valid
     //  base laplacian schemes
-    enum scheme
+    enum BaseScheme
     {
         GAUSS,
         UNDEFINED
     };
+
 
 private:
 
     // Private data
 
         //- Base laplacian scheme
-        scheme scheme_;
+        BaseScheme scheme_;
 
         //- Names of valid base laplacian schemes
-        static const NamedEnum<scheme, 1> schemeNames_;
+        static const NamedEnum<BaseScheme, 1> schemeNames_;
 
-public:
 
-    // Constructors
+protected:
 
-        //- Construct from scheme
-        electricPotentialLaplacianBase(const scheme scheme)
-        {
-            setBaseScheme(scheme);
-        }
-
-        //- Construct from scheme name
-        electricPotentialLaplacianBase(const word schemeName)
-        {
-            setBaseScheme(schemeName);
-        }
-
-    // Destructor
-
-        virtual ~electricPotentialLaplacianBase()
-        {}
-
-    // Member Functions
+    // Protected Member Functions
 
         //- Set base laplacian scheme
-        void setBaseScheme(const scheme scheme)
-        {
-            scheme_ = scheme;
-        }
-
-        //- Set base laplacian scheme
-        void setBaseScheme(const word schemeName)
+        void setBaseScheme(const word& schemeName)
         {
             if (schemeName == "")
             {
                 FatalErrorIn
                 (
-                    "electricPotentialLaplacianBase::setBaseScheme(const word)"
+                    "electricPotentialLaplacianBase::setBaseScheme(const word&)"
                 )   << "Base laplacian scheme not specified!" << endl
                     << "Valid base laplacian schemes are :" << endl
                     << schemeNames_.sortedToc()
                     << exit(FatalIOError);
             }
 
-            typename NamedEnum<scheme, 1>::const_iterator
+            typename NamedEnum<BaseScheme, 1>::const_iterator
                 cIter = schemeNames_.find(schemeName);
 
             if (cIter == schemeNames_.end())
             {
                 FatalErrorIn
                 (
-                    "electricPotentialLaplacianBase::setBaseScheme(const word)"
+                    "electricPotentialLaplacianBase::setBaseScheme(const word&)"
                 )   << "Base laplacian scheme " << schemeName
                     << " is not supported!" << endl
                     << "Valid base laplacian schemes are :" << endl
@@ -135,14 +111,8 @@ public:
             }
             else
             {
-                setBaseScheme(schemeNames_[schemeName]);
+                scheme_ = schemeNames_[schemeName];
             }
-        }
-
-        //- Set base laplacian scheme
-        void setBaseScheme(Istream& is)
-        {
-            setBaseScheme(word(is));
         }
 
         //- Check base laplacian scheme
@@ -161,11 +131,38 @@ public:
         }
 
         //- Return base laplacian scheme
-        scheme baseScheme() const
+        BaseScheme baseScheme() const
         {
             return scheme_;
         }
 
+
+public:
+
+    // Constructors
+
+        //- Construct from scheme
+        electricPotentialLaplacianBase(BaseScheme scheme)
+        :
+            scheme_(scheme)
+        {}
+
+        //- Construct from scheme name
+        electricPotentialLaplacianBase(const word& schemeName)
+        {
+            setBaseScheme(schemeName);
+        }
+
+        //- Construct from stream
+        electricPotentialLaplacianBase(Istream& is)
+        {
+            setBaseScheme(word(is));
+        }
+
+    // Destructor
+
+        virtual ~electricPotentialLaplacianBase()
+        {}
 };
 
 

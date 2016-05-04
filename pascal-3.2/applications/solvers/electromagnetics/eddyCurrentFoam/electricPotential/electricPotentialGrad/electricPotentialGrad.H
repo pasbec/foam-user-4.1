@@ -25,7 +25,7 @@ Class
     Foam::fv::electricPotentialGrad
 
 Description
-    TODO
+    ...
 
     NOTE: Currently it is NOT SUPPORTED or even tested to put the
           conducting region on any type of boundary
@@ -43,6 +43,9 @@ SourceFiles
 #include "linear.H"
 #include "faceSet.H"
 #include "electricPotentialGradBase.H"
+
+// TODO: Currently it is NOT SUPPORTED or even tested to put the
+//       conducting region on any type of boundary
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,29 +72,18 @@ private:
 
     // Private data
 
-        //- Interpolation scheme
-        tmp<surfaceInterpolationScheme<Type> > tinterpScheme_;
+        //- Name of the electrical conductivity field
+        word nameSigma_;
 
-        //- Magnetic properties dictionary
-        const IOdictionary& magneticProperties_;
+        //- Name of the field of rate of change of
+        //  flux of magnetic vector potential
+        word nameDdtAflux_;
 
-        //- Name of the faceSet for non-conducting/conducting interface
+        //- Name of the faceSet for jumps of conductivity
         word nameInterface_;
-
-        //- Name of the conductivity
-        word nameConductivity_;
-
-        //- Name of the electric scalar potential
-        word nameElectricPotential_;
-
-        //- Name of the magnetic vector potential
-        word nameMagneticPotential_;
 
 
     // Private Member Functions
-
-        //- Read dictionary data
-        void readMagneticProperties();
 
         //- Disallow default bitwise copy construct
         electricPotentialGrad(const electricPotentialGrad&);
@@ -103,8 +95,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("electricPotential");
-
+    TypeName("electricPotentialGrad");
 
     // Constructors
 
@@ -116,24 +107,11 @@ public:
         :
             electricPotentialGradBase(GAUSS),
             gradScheme<Type>(mesh),
-            tinterpScheme_
-            (
-                new linear<Type>
-                (
-                    mesh
-                )
-            ),
-            magneticProperties_
-            (
-                mesh.lookupObject<IOdictionary>
-                (
-                    "magneticProperties"
-                )
-            )
+            nameSigma_("sigma"),
+            nameDdtAflux_("ddtAflux"),
+            nameInterface_()
         {
             checkBaseScheme();
-
-            readMagneticProperties();
         }
 
         //- Construct from mesh and Istream
@@ -145,33 +123,22 @@ public:
         :
             electricPotentialGradBase(is),
             gradScheme<Type>(mesh),
-            tinterpScheme_(NULL),
-            magneticProperties_
-            (
-                mesh.lookupObject<IOdictionary>
-                (
-                    "magneticProperties"
-                )
-            )
+            nameSigma_(),
+            nameDdtAflux_(),
+            nameInterface_()
         {
             checkBaseScheme();
 
-            if (baseScheme() == GAUSS)
+            nameSigma_ = word(is);
+
+            nameDdtAflux_ = word(is);
+
+            // TODO: Apply only for given faceSet?
+            if (!is.eof())
             {
-                tinterpScheme_ =
-                tmp<surfaceInterpolationScheme<Type> >
-                (
-                    surfaceInterpolationScheme<Type>::New
-                    (
-                        mesh,
-                        is
-                    )
-                );
+                nameInterface_ = word(is);
             }
-
-            readMagneticProperties();
         }
-
 
     // Member Functions
 

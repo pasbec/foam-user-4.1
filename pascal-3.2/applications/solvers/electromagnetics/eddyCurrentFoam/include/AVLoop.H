@@ -3,6 +3,7 @@
     // in case of a three-dimensional mesh
     if (control.meshIs3D())
     {
+#       include "AVLoop_AUpdate.H"
 #       include "AVLoop_VGradUpdate.H"
     }
 

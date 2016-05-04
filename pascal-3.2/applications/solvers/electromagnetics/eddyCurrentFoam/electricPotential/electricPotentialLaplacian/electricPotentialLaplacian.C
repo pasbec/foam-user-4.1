@@ -42,25 +42,16 @@ namespace fv
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type, class GType>
-void electricPotentialLaplacian<Type, GType>::readMagneticProperties()
-{
-    dictionary namesDict(magneticProperties_.subDict("names"));
-
-    nameInterface_ = word(namesDict.lookup("interface"));
-    nameConductivity_ = word(namesDict.lookup("conductivity"));
-    nameElectricPotential_ = word(namesDict.lookup("electricPotential"));
-    nameMagneticPotential_ = word(namesDict.lookup("magneticPotential"));
-}
-
-
-template<class Type, class GType>
 tmp<fvMatrix<Type> >
 electricPotentialLaplacian<Type, GType>::fvmLaplacianUncorrected
 (
     const surfaceScalarField& gammaMagSf,
+    const word& vfGammaName,
     GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
+    // NOTE: gammaMagSf contains harmonically interpolated gamma!
+
     tmp<surfaceScalarField> tdeltaCoeffs =
         this->tsnGradScheme_().deltaCoeffs(vf);
     const surfaceScalarField& deltaCoeffs = tdeltaCoeffs();
@@ -88,7 +79,71 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacianUncorrected
         fvm.boundaryCoeffs()[patchI] = -patchGamma*psf.gradientBoundaryCoeffs();
     }
 
+    // Source contributions
+    fvm.source() = fvmLaplacianSource(gammaMagSf, vfGammaName);
+
     return tfvm;
+}
+
+
+template<class Type, class GType>
+tmp<Field<Type> >
+electricPotentialLaplacian<Type, GType>::fvmLaplacianSource
+(
+    const surfaceScalarField& gammaMagSf,
+    const word& vfGammaName
+)
+{
+    // NOTE: gammaMagSf contains harmonically interpolated gamma!
+    const scalarField& gammaMagSfIn = gammaMagSf.internalField();
+
+    const fvMesh& mesh = this->mesh();
+
+    // Electrical conductivity as vol field
+    const GeometricField<GType, fvPatchField, volMesh>& sigma =
+        mesh.lookupObject<GeometricField<GType, fvPatchField, volMesh> >(vfGammaName);
+    const Field<GType>& sigmaIn = sigma.internalField();
+
+    // Rate of change of flux of magnetic vector potential
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& ddtAflux =
+        mesh.lookupObject<GeometricField<Type, fvsPatchField, surfaceMesh> >(nameDdtAflux_);
+    const Field<Type>& ddtAfluxIn = ddtAflux.internalField();
+
+    // Mesh data
+    const unallocLabelList& own = mesh.owner();
+    const unallocLabelList& nei = mesh.neighbour();
+    const scalarField& w = mesh.weights();
+    const scalarField& magSf = mesh.magSf();
+
+    tmp<Field<Type> > tsource(new Field<Type>(sigma.size(), pTraits<Type>::zero));
+    Field<Type>& source = tsource();
+
+
+    // Source contributions from jump conditions
+    forAll(own, faceI)
+    {
+        // Cell labels
+        label ownFaceI = own[faceI];
+        label neiFaceI = nei[faceI];
+
+        // Interpolation weights
+        scalar wP = w[faceI];
+        scalar wN = 1.0 - wP;
+
+        // Cell sigma
+        // TODO: This is currently only a workaround to avoid
+        //       template specializations for different types
+        scalar sigmaOwn = mag(sigmaIn[ownFaceI]);
+        scalar sigmaNei = mag(sigmaIn[neiFaceI]);
+
+        source[ownFaceI] -= gammaMagSfIn[faceI]
+          * (1.0 - sigmaOwn/sigmaNei) * wP * ddtAfluxIn[faceI]/magSf[faceI];
+
+        source[neiFaceI] -= gammaMagSfIn[faceI]
+          * (sigmaNei/sigmaOwn - 1.0) * wN * ddtAfluxIn[faceI]/magSf[faceI];
+    }
+
+    return tsource;
 }
 
 
@@ -97,6 +152,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
 electricPotentialLaplacian<Type, GType>::gammaSnGradCorr
 (
     const surfaceVectorField& SfGammaCorr,
+    const word& vfGammaName,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -136,30 +192,11 @@ electricPotentialLaplacian<Type, GType>::gammaSnGradCorr
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type, class GType>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-electricPotentialLaplacian<Type, GType>::fvcLaplacian
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    const fvMesh& mesh = this->mesh();
-
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tLaplacian
-    (
-        fvc::div(this->tsnGradScheme_().snGrad(vf)*mesh.magSf())
-    );
-
-    tLaplacian().rename("laplacian(" + vf.name() + ')');
-
-    return tLaplacian;
-}
-
-
-template<class Type, class GType>
 tmp<fvMatrix<Type> >
 electricPotentialLaplacian<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
+    const word& vfGammaName,
     GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -173,11 +210,12 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacian
 
     surfaceVectorField SfGammaCorr = SfGamma - SfGammaSn*Sn;
 
-    tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected(SfGammaSn, vf);
+    tmp<fvMatrix<Type> > tfvm =
+        fvmLaplacianUncorrected(SfGammaSn, vfGammaName, vf);
     fvMatrix<Type>& fvm = tfvm();
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tfaceFluxCorrection
-        = gammaSnGradCorr(SfGammaCorr, vf);
+        = gammaSnGradCorr(SfGammaCorr, vfGammaName, vf);
 
     if (this->tsnGradScheme_().corrected())
     {
@@ -197,10 +235,73 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacian
 
 
 template<class Type, class GType>
+tmp<fvMatrix<Type> >
+electricPotentialLaplacian<Type, GType>::fvmLaplacian
+(
+    const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
+    GeometricField<Type, fvPatchField, volMesh>& vf
+)
+{
+    FatalErrorIn
+    (
+        "electricPotentialLaplacian::fvmLaplacian(...)"
+    )   << "Laplacian method with gamma as surfaceField is not allowed."
+        << exit(FatalError);
+
+    // Dummy
+    return fvmLaplacian(gamma, word(), vf);
+}
+
+
+template<class Type, class GType>
+tmp<fvMatrix<Type> >
+electricPotentialLaplacian<Type, GType>::fvmLaplacian
+(
+    const GeometricField<GType, fvPatchField, volMesh>& gamma,
+    GeometricField<Type, fvPatchField, volMesh>& vf
+)
+{
+    return fvmLaplacian
+    (
+        this->tinterpGammaScheme_().interpolate(gamma)(),
+        gamma.name(),
+        vf
+    );
+}
+
+
+template<class Type, class GType>
+tmp<GeometricField<Type, fvPatchField, volMesh> >
+electricPotentialLaplacian<Type, GType>::fvcLaplacian
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vf
+)
+{
+    FatalErrorIn
+    (
+        "electricPotentialLaplacian::fvcLaplacian(...)"
+    )   << "Laplacian calculus without gamma is not allowed."
+        << exit(FatalError);
+
+    const fvMesh& mesh = this->mesh();
+
+    tmp<GeometricField<Type, fvPatchField, volMesh> > tLaplacian
+    (
+        fvc::div(this->tsnGradScheme_().snGrad(vf)*mesh.magSf())
+    );
+
+    tLaplacian().rename("laplacian(" + vf.name() + ')');
+
+    return tLaplacian;
+}
+
+
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 electricPotentialLaplacian<Type, GType>::fvcLaplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
+    const word& vfGammaName,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -221,13 +322,49 @@ electricPotentialLaplacian<Type, GType>::fvcLaplacian
         fvc::div
         (
             SfGammaSn*this->tsnGradScheme_().snGrad(vf)
-          + gammaSnGradCorr(SfGammaCorr, vf)
+          + gammaSnGradCorr(SfGammaCorr, vfGammaName, vf)
         )
     );
 
     tLaplacian().rename("laplacian(" + gamma.name() + ',' + vf.name() + ')');
 
     return tLaplacian;
+}
+
+
+template<class Type, class GType>
+tmp<GeometricField<Type, fvPatchField, volMesh> >
+electricPotentialLaplacian<Type, GType>::fvcLaplacian
+(
+    const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
+    const GeometricField<Type, fvPatchField, volMesh>& vf
+)
+{
+    FatalErrorIn
+    (
+        "electricPotentialLaplacian::fvmLaplacian(...)"
+    )   << "Laplacian calculus with gamma as surfaceField is not allowed."
+        << exit(FatalError);
+
+    // Dummy
+    return fvcLaplacian(gamma, word(), vf);
+}
+
+
+template<class Type, class GType>
+tmp<GeometricField<Type, fvPatchField, volMesh> >
+electricPotentialLaplacian<Type, GType>::fvcLaplacian
+(
+    const GeometricField<GType, fvPatchField, volMesh>& gamma,
+    const GeometricField<Type, fvPatchField, volMesh>& vf
+)
+{
+    return fvcLaplacian
+    (
+        this->tinterpGammaScheme_().interpolate(gamma)(),
+        gamma.name(),
+        vf
+    );
 }
 
 

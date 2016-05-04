@@ -25,10 +25,13 @@ Class
     Foam::fv::electricPotentialLaplacian
 
 Description
-    Basic second-order laplacian using face-gradients and Gauss' theorem.
+    ...
 
 SourceFiles
     electricPotentialLaplacian.C
+
+// TODO: Currently it is NOT SUPPORTED or even tested to put the
+//       conducting region on any type of boundary
 
 \*---------------------------------------------------------------------------*/
 
@@ -36,8 +39,10 @@ SourceFiles
 #define electricPotentialLaplacian_H
 
 #include "laplacianScheme.H"
-#include "gaussLaplacianScheme.H"
 #include "electricPotentialLaplacianBase.H"
+#include "harmonic.H"
+#include "snGradScheme.H"
+#include "uncorrectedSnGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,35 +69,32 @@ private:
 
     // Private data
 
-        //- Magnetic properties dictionary
-        const IOdictionary& magneticProperties_;
+        //- Name of the field of rate of change of
+        //  flux of magnetic vector potential
+        word nameDdtAflux_;
 
-        //- Name of the faceSet for non-conducting/conducting interface
+        //- Name of the faceSet for jumps of conductivity
         word nameInterface_;
 
-        //- Name of the conductivity
-        word nameConductivity_;
-
-        //- Name of the electric scalar potential
-        word nameElectricPotential_;
-
-        //- Name of the magnetic vector potential
-        word nameMagneticPotential_;
-
     // Private Member Functions
-
-        //- Read dictionary data
-        void readMagneticProperties();
 
         tmp<fvMatrix<Type> > fvmLaplacianUncorrected
         (
             const surfaceScalarField& gammaMagSf,
+            const word&,
             GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        tmp<Field<Type> > fvmLaplacianSource
+        (
+            const surfaceScalarField& gammaMagSf,
+            const word&
         );
 
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > gammaSnGradCorr
         (
             const surfaceVectorField& SfGammaCorr,
+            const word&,
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
@@ -106,141 +108,123 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("electricPotential");
-
+    TypeName("electricPotentialLaplacian");
 
     // Constructors
 
         //- Construct null
-        electricPotentialLaplacian(const fvMesh& mesh)
+        electricPotentialLaplacian
+        (
+            const fvMesh& mesh
+        )
         :
             electricPotentialLaplacianBase(GAUSS),
-            laplacianScheme<Type, GType>(mesh),
-            magneticProperties_
+            laplacianScheme<Type, GType>
             (
-                mesh.lookupObject<IOdictionary>
+                mesh,
+                tmp<surfaceInterpolationScheme<GType> >
                 (
-                    "magneticProperties"
+                    new harmonic<GType>(mesh)
+                ),
+// TODO FIXME: Special snGradSchemes are necessary!
+                tmp<snGradScheme<Type> >
+                (
+                    new uncorrectedSnGrad<Type>(mesh)
                 )
-            )
+            ),
+            nameDdtAflux_("ddtAflux"),
+            nameInterface_()
         {
             checkBaseScheme();
-
-            readMagneticProperties();
         }
 
         //- Construct from Istream
-        electricPotentialLaplacian(const fvMesh& mesh, Istream& is)
+        electricPotentialLaplacian
+        (
+            const fvMesh& mesh,
+            Istream& is
+        )
         :
             electricPotentialLaplacianBase(is),
-            laplacianScheme<Type, GType>(mesh, is),
-            magneticProperties_
+            laplacianScheme<Type, GType>
             (
-                mesh.lookupObject<IOdictionary>
+                mesh,
+                tmp<surfaceInterpolationScheme<GType> >
                 (
-                    "magneticProperties"
+                    new harmonic<GType>(mesh)
+                ),
+// TODO FIXME: Special snGradSchemes are necessary!
+                tmp<snGradScheme<Type> >
+                (
+                    new uncorrectedSnGrad<Type>(mesh)
                 )
-            )
+            ),
+            nameDdtAflux_(is),
+            nameInterface_()
         {
             checkBaseScheme();
 
-            readMagneticProperties();
+            // TODO: Apply only for given faceSet?
+            if (!is.eof())
+            {
+                nameInterface_ = word(is);
+            }
         }
-
-        //- Construct from mesh, interpolation and snGrad schemes
-        electricPotentialLaplacian
-        (
-            const fvMesh& mesh,
-            const tmp<surfaceInterpolationScheme<GType> >& igs,
-            const tmp<snGradScheme<Type> >& sngs
-        )
-        :
-            electricPotentialLaplacianBase(GAUSS),
-            laplacianScheme<Type, GType>(mesh, igs, sngs),
-            magneticProperties_
-            (
-                mesh.lookupObject<IOdictionary>
-                (
-                    "magneticProperties"
-                )
-            )
-        {
-            checkBaseScheme();
-
-            readMagneticProperties();
-        }
-
-        //- Construct from mesh, baseLaplcian, interpolation and snGrad schemes
-        electricPotentialLaplacian
-        (
-            const fvMesh& mesh,
-            const scheme bls,
-            const tmp<surfaceInterpolationScheme<GType> >& igs,
-            const tmp<snGradScheme<Type> >& sngs
-        )
-        :
-            electricPotentialLaplacianBase(bls),
-            laplacianScheme<Type, GType>(mesh, igs, sngs),
-            magneticProperties_
-            (
-                mesh.lookupObject<IOdictionary>
-                (
-                    "magneticProperties"
-                )
-            )
-        {
-            checkBaseScheme();
-
-            readMagneticProperties();
-        }
-
-        //- Construct from mesh, baseLaplcian, interpolation and snGrad schemes
-        electricPotentialLaplacian
-        (
-            const fvMesh& mesh,
-            const word blsName,
-            const tmp<surfaceInterpolationScheme<GType> >& igs,
-            const tmp<snGradScheme<Type> >& sngs
-        )
-        :
-            electricPotentialLaplacianBase(blsName),
-            laplacianScheme<Type, GType>(mesh, igs, sngs),
-            magneticProperties_
-            (
-                mesh.lookupObject<IOdictionary>
-                (
-                    "magneticProperties"
-                )
-            )
-        {
-            checkBaseScheme();
-
-            readMagneticProperties();
-        }
-
 
     // Destructor
 
         virtual ~electricPotentialLaplacian()
         {}
 
-
     // Member Functions
 
-        tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        // -Laplacian method with name of volField of gamma
+        tmp<fvMatrix<Type> > fvmLaplacian
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<GType, fvsPatchField, surfaceMesh>&,
+            const word&,
+            GeometricField<Type, fvPatchField, volMesh>&
         );
 
-        tmp<fvMatrix<Type> > fvmLaplacian
+        // -NOTE: Deactivated!
+        virtual tmp<fvMatrix<Type> > fvmLaplacian
         (
             const GeometricField<GType, fvsPatchField, surfaceMesh>&,
             GeometricField<Type, fvPatchField, volMesh>&
         );
 
+        // -Laplacian method which interpolates gamma and passes its name
+        virtual tmp<fvMatrix<Type> > fvmLaplacian
+        (
+            const GeometricField<GType, fvPatchField, volMesh>&,
+            GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        // -NOTE: Deactivated!
+        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        // -Laplacian calculation with name of volField of gamma
         tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
         (
             const GeometricField<GType, fvsPatchField, surfaceMesh>&,
+            const word&,
+            const GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        // -NOTE: Deactivated!
+        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        (
+            const GeometricField<GType, fvsPatchField, surfaceMesh>&,
+            const GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        // -Laplacian calculation which interpolates gamma and passes its name
+        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        (
+            const GeometricField<GType, fvPatchField, volMesh>&,
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 };
@@ -252,10 +236,29 @@ public:
 #define defineLaplacianScalarGamma(Type)                                    \
                                                                             \
 template<>                                                                  \
-tmp<fvMatrix<Type> > electricPotentialLaplacian<Type, scalar>::fvmLaplacian \
+tmp<fvMatrix<Type> >                                                        \
+electricPotentialLaplacian<Type, scalar>::fvmLaplacian                      \
+(                                                                           \
+    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
+    const word&,                                                            \
+    GeometricField<Type, fvPatchField, volMesh>&                            \
+);                                                                          \
+                                                                            \
+template<>                                                                  \
+tmp<fvMatrix<Type> >                                                        \
+electricPotentialLaplacian<Type, scalar>::fvmLaplacian                      \
 (                                                                           \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
     GeometricField<Type, fvPatchField, volMesh>&                            \
+);                                                                          \
+                                                                            \
+template<>                                                                  \
+tmp<GeometricField<Type, fvPatchField, volMesh> >                           \
+electricPotentialLaplacian<Type, scalar>::fvcLaplacian                      \
+(                                                                           \
+    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
+    const word&,                                                            \
+    const GeometricField<Type, fvPatchField, volMesh>&                      \
 );                                                                          \
                                                                             \
 template<>                                                                  \

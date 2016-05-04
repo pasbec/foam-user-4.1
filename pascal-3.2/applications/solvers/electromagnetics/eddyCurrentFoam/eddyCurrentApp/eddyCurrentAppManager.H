@@ -146,12 +146,12 @@ public:
             SM_REGIONSTORAGE_NEW();
 
                 //- Electric scalar potential
+                SM_REGIONITEM_ADD(surfaceScalarField, ddtARePhi);
+                SM_REGIONITEM_ADD(surfaceScalarField, ddtAImPhi);
+
+                //- Electric scalar potential
                 SM_REGIONITEM_ADD(volScalarField, VRe);
                 SM_REGIONITEM_ADD(volScalarField, VIm);
-
-                //- Electric scalar potential average
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, VReAverage);
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, VImAverage);
 
                 // Current density
                 SM_REGIONITEM_ADD(volVectorField, jRe);

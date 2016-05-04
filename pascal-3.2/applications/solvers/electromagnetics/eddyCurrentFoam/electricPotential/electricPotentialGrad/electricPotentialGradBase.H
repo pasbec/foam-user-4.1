@@ -25,7 +25,7 @@ Class
     Foam::fv::electricPotentialGradBase
 
 Description
-    TODO
+    ...
 
 SourceFiles
     electricPotentialGradBase.C
@@ -55,79 +55,55 @@ namespace fv
 
 class electricPotentialGradBase
 {
-
 public:
 
     //- Enumeration defining the valid
     //  base gradient schemes
-    enum scheme
+    enum BaseScheme
     {
         GAUSS,
         LEASTSQUARES,
         UNDEFINED
     };
 
+
 private:
 
     // Private data
 
         //- Base gradient scheme
-        scheme scheme_;
+        BaseScheme scheme_;
 
         //- Names of valid base gradient schemes
-        static const NamedEnum<scheme, 2> schemeNames_;
+        static const NamedEnum<BaseScheme, 2> schemeNames_;
 
-public:
 
-    // Constructors
+protected:
 
-        //- Construct from scheme
-        electricPotentialGradBase(const scheme scheme)
-        {
-            setBaseScheme(scheme);
-        }
-
-        //- Construct from scheme name
-        electricPotentialGradBase(const word schemeName)
-        {
-            setBaseScheme(schemeName);
-        }
-
-    // Destructor
-
-        virtual ~electricPotentialGradBase()
-        {}
-
-    // Member Functions
+    // Protected Member Functions
 
         //- Set base gradient scheme
-        void setBaseScheme(const scheme scheme)
-        {
-            scheme_ = scheme;
-        }
-
-        //- Set base gradient scheme
-        void setBaseScheme(const word schemeName)
+        void setBaseScheme(const word& schemeName)
         {
             if (schemeName == "")
             {
                 FatalErrorIn
                 (
-                    "electricPotentialGradBase::setBaseScheme(const word)"
+                    "electricPotentialGradBase::setBaseScheme(const word&)"
                 )   << "Base gradient scheme not specified!" << endl
                     << "Valid base gradient schemes are :" << endl
                     << schemeNames_.sortedToc()
                     << exit(FatalIOError);
             }
 
-            typename NamedEnum<scheme, 2>::const_iterator
+            typename NamedEnum<BaseScheme, 2>::const_iterator
                 cIter = schemeNames_.find(schemeName);
 
             if (cIter == schemeNames_.end())
             {
                 FatalErrorIn
                 (
-                    "electricPotentialGradBase::setBaseScheme(const word)"
+                    "electricPotentialGradBase::setBaseScheme(const word&)"
                 )   << "Base gradient scheme " << schemeName
                     << " is not supported!" << endl
                     << "Valid base gradient schemes are :" << endl
@@ -136,14 +112,8 @@ public:
             }
             else
             {
-                setBaseScheme(schemeNames_[schemeName]);
+                scheme_ = schemeNames_[schemeName];
             }
-        }
-
-        //- Set base gradient scheme
-        void setBaseScheme(Istream& is)
-        {
-            setBaseScheme(word(is));
         }
 
         //- Check base gradient scheme
@@ -162,11 +132,37 @@ public:
         }
 
         //- Return base gradient scheme
-        scheme baseScheme() const
+        BaseScheme baseScheme() const
         {
             return scheme_;
         }
 
+public:
+
+    // Constructors
+
+        //- Construct from scheme
+        electricPotentialGradBase(BaseScheme scheme)
+        :
+            scheme_(scheme)
+        {}
+
+        //- Construct from scheme name
+        electricPotentialGradBase(const word& schemeName)
+        {
+            setBaseScheme(schemeName);
+        }
+
+        //- Construct from stream
+        electricPotentialGradBase(Istream& is)
+        {
+            setBaseScheme(word(is));
+        }
+
+    // Destructor
+
+        virtual ~electricPotentialGradBase()
+        {}
 };
 
 

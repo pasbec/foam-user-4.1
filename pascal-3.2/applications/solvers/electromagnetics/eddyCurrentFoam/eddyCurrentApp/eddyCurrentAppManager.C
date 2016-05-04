@@ -217,7 +217,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::AUTO_WRITE
             ),
             mesh(),
             dimensionedVector
@@ -245,7 +245,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::AUTO_WRITE
             ),
             mesh(),
             dimensionedVector
