@@ -74,27 +74,55 @@
         fvScalarMatrix VReEqn(fvm::laplacian(sigma, VRe));
         fvScalarMatrix VImEqn(fvm::laplacian(sigma, VIm));
 
-// TODO FIXME: Think wether this is necessary or not...
-//         volVectorField sigmaGrad = fvc::grad(sigma);
-//
-//         // Explicit source terms due to variable sigma
-//         // in conducting region with implied condition div(A)=0
-//         VReEqn -= omega0 * (sigmaGrad & AIm);
-//         VImEqn += omega0 * (sigmaGrad & ARe);
-//
-// //         // TEST
-// //         VReEqn -= omega0 * sigma * fvc::div(AIm);
-// //         VImEqn += omega0 * sigma * fvc::div(ARe);
-//
-//         if (globalSettings.biotSavart)
-//         {
-//             VReEqn -= omega0 * (sigmaGrad & globalStorage.A0Im()[CONDUCTOR]);
-//             VImEqn += omega0 * (sigmaGrad & globalStorage.A0Re()[CONDUCTOR]);
-//
-// //             // TEST
-// //             VReEqn -= omega0 * sigma * fvc::div(globalStorage.A0Im()[CONDUCTOR]);
-// //             VImEqn += omega0 * sigma * fvc::div(globalStorage.A0Re()[CONDUCTOR]);
-//         }
+        if
+        (
+            word
+            (
+                mesh.schemesDict().laplacianScheme
+                (
+                    "laplacian(" + sigma.name() + "," + VRe.name() + ")"
+                )
+            ) != "electricPotentialLaplacian"
+        )
+        {
+            volVectorField sigmaGrad = fvc::grad(sigma);
+
+            // Explicit source term for VRe due to variable sigma
+            // in conducting region with implied condition div(A)=0
+            VReEqn -= omega0 * (sigmaGrad & AIm);
+//          VReEqn -= omega0 * sigma * fvc::div(AIm);
+
+            if (globalSettings.biotSavart)
+            {
+                VReEqn -= omega0 * (sigmaGrad & globalStorage.A0Im()[CONDUCTOR]);
+//              VReEqn -= omega0 * sigma * fvc::div(globalStorage.A0Im()[CONDUCTOR]);
+            }
+        }
+
+        if
+        (
+            word
+            (
+                mesh.schemesDict().laplacianScheme
+                (
+                    "laplacian(" + sigma.name() + "," + VIm.name() + ")"
+                )
+            ) != "electricPotentialLaplacian"
+        )
+        {
+            volVectorField sigmaGrad = fvc::grad(sigma);
+
+            // Explicit source term for VIm due to variable sigma
+            // in conducting region with implied condition div(A)=0
+            VImEqn += omega0 * (sigmaGrad & ARe);
+//          VImEqn += omega0 * sigma * fvc::div(ARe);
+
+            if (globalSettings.biotSavart)
+            {
+                VImEqn += omega0 * (sigmaGrad & globalStorage.A0Re()[CONDUCTOR]);
+//              VImEqn += omega0 * sigma * fvc::div(globalStorage.A0Re()[CONDUCTOR]);
+            }
+        }
 
         // Solve V-equations
         // NOTE: Currently a deflated solver is necessary
