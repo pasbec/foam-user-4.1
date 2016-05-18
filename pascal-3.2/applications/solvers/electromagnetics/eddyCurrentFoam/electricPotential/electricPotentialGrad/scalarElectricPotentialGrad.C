@@ -192,7 +192,7 @@ template<>
 tmp<BlockLduSystem<vector, vector> >
 electricPotentialGrad<scalar>::fvmGrad
 (
-    const GeometricField<scalar, fvPatchField, volMesh>& vsf
+    const GeometricField<scalar, fvPatchField, volMesh>& vf
 ) const
 {
     FatalErrorIn
@@ -203,9 +203,80 @@ electricPotentialGrad<scalar>::fvmGrad
 
     tmp<BlockLduSystem<vector, vector> > tbs
     (
-        new BlockLduSystem<vector, vector>(vsf.mesh())
+        new BlockLduSystem<vector, vector>(vf.mesh())
     );
+
     return tbs;
+
+//     const fvMesh& mesh = vf.mesh();
+//
+//     const surfaceScalarField& weights = mesh.weights();
+//     const scalarField& wIn = weights.internalField();
+//
+//     tmp<BlockLduSystem<vector, vector> > tbs
+//     (
+//         new BlockLduSystem<vector, vector>(mesh)
+//     );
+//     BlockLduSystem<vector, vector>& bs = tbs();
+//     vectorField& source = bs.source();
+//
+//     // Grab ldu parts of block matrix as linear always
+//     CoeffField<vector>::linearTypeField& d = bs.diag().asLinear();
+//     CoeffField<vector>::linearTypeField& u = bs.upper().asLinear();
+//     CoeffField<vector>::linearTypeField& l = bs.lower().asLinear();
+//
+//     const vectorField& SfIn = mesh.Sf().internalField();
+//
+//     l = -wIn*SfIn;
+//     u = l + SfIn;
+//     bs.negSumDiag();
+//
+//     // Boundary contributions
+//     forAll (vf.boundaryField(), patchI)
+//     {
+//         const fvPatchScalarField& pf = vf.boundaryField()[patchI];
+//         const fvPatch& patch = pf.patch();
+//         const vectorField& pSf = patch.Sf();
+//         const fvsPatchScalarField& pw = weights.boundaryField()[patchI];
+//         const labelList& fc = patch.faceCells();
+//
+//         const scalarField internalCoeffs(pf.valueInternalCoeffs(pw));
+//
+//         // Diag contribution
+//         forAll (pf, faceI)
+//         {
+//             d[fc[faceI]] += internalCoeffs[faceI]*pSf[faceI];
+//         }
+//
+//         if (patch.coupled())
+//         {
+//             CoeffField<vector>::linearTypeField& pcoupleUpper =
+//                 bs.coupleUpper()[patchI].asLinear();
+//             CoeffField<vector>::linearTypeField& pcoupleLower =
+//                 bs.coupleLower()[patchI].asLinear();
+//
+//             const vectorField pcl = -pw*pSf;
+//             const vectorField pcu = pcl + pSf;
+//
+//             // Coupling  contributions
+//             pcoupleLower -= pcl;
+//             pcoupleUpper -= pcu;
+//         }
+//         else
+//         {
+//             const scalarField boundaryCoeffs(pf.valueBoundaryCoeffs(pw));
+//
+//             // Boundary contribution
+//             forAll (pf, faceI)
+//             {
+//                 source[fc[faceI]] -= boundaryCoeffs[faceI]*pSf[faceI];
+//             }
+//         }
+//     }
+//
+//     // Interpolation schemes with corrections not accounted for
+//
+//     return tbs;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

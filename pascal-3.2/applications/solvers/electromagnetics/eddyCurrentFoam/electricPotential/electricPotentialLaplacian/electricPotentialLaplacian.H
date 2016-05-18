@@ -126,7 +126,7 @@ public:
                 (
                     new harmonic<GType>(mesh)
                 ),
-// TODO FIXME: Special snGradSchemes are necessary!
+// TODO FIXME: Special snGradSchemes are necessary?
                 tmp<snGradScheme<Type> >
                 (
                     new uncorrectedSnGrad<Type>(mesh)
@@ -153,7 +153,7 @@ public:
                 (
                     new harmonic<GType>(mesh)
                 ),
-// TODO FIXME: Special snGradSchemes are necessary!
+// TODO FIXME: Special snGradSchemes are necessary?
                 tmp<snGradScheme<Type> >
                 (
                     new uncorrectedSnGrad<Type>(mesh)

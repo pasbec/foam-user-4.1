@@ -74,6 +74,10 @@
         fvScalarMatrix VReEqn(fvm::laplacian(sigma, VRe));
         fvScalarMatrix VImEqn(fvm::laplacian(sigma, VIm));
 
+        // TODO: Apply electricPotentialLaplacian only for given faceSet?
+        //       In this case we'd need a special electricConducivityGrad
+        //       which evaluates to zero in normal direction to corresponding
+        //       faces
         if
         (
             word
@@ -99,6 +103,10 @@
             }
         }
 
+        // TODO: Apply electricPotentialLaplacian only for given faceSet?
+        //       In this case we'd need a special electricConducivityGrad
+        //       which evaluates to zero in normal direction to corresponding
+        //       faces
         if
         (
             word
