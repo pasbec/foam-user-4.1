@@ -29,13 +29,16 @@ gradSchemes
     snGradCorr(A0Re)                  Gauss linear;
     snGradCorr(A0Im)                  Gauss linear;
 
-    grad(sigma)                       Gauss linear;
+//     grad(sigma)                       Gauss linear;
+//     grad(sigma)                       Gauss harmonic;
 
-    grad(VRe)                         Gauss linear;
-    grad(VIm)                         Gauss linear;
-
-    snGradCorr(VRe)                   Gauss linear;
-    snGradCorr(VIm)                   Gauss linear;
+//     grad(VRe)                         Gauss linear;
+//     grad(VIm)                         Gauss linear;
+    grad(VRe)                         electricPotentialGrad Gauss sigma ddtAImPhi;
+    grad(VIm)                         electricPotentialGrad Gauss sigma ddtARePhi;
+//
+//     snGradCorr(VRe)                   Gauss linear;
+//     snGradCorr(VIm)                   Gauss linear;
 }
 
 divSchemes
@@ -56,13 +59,23 @@ laplacianSchemes
     laplacian(A0Re)                   Gauss linear corrected;
     laplacian(A0Im)                   Gauss linear corrected;
 
-    laplacian(sigma,VRe)              Gauss linear corrected;
-    laplacian(sigma,VIm)              Gauss linear corrected;
+//     laplacian(sigma,VRe)              Gauss linear corrected;
+//     laplacian(sigma,VIm)              Gauss linear corrected;
+//     laplacian(sigma,VRe)              Gauss linear uncorrected;
+//     laplacian(sigma,VIm)              Gauss linear uncorrected;
+    laplacian(sigma,VRe)              electricPotentialLaplacian Gauss ddtAImPhi;
+    laplacian(sigma,VIm)              electricPotentialLaplacian Gauss ddtARePhi;
 }
 
 interpolationSchemes
 {
     default                           none;
+
+    interpolate(A0Re)                 linear;
+    interpolate(A0Im)                 linear;
+
+    interpolate(ARe)                  linear;
+    interpolate(AIm)                  linear;
 }
 
 // ************************************************************************* //

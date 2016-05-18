@@ -9,33 +9,43 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       featureEdgeMesh;
-    object      coil2.eMesh;
+    class       dictionary;
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+ddtSchemes
+{
+    default                           none;
+}
 
-// points:
+gradSchemes
+{
+    default                           none;
 
-4
-(
-( 0.065 -0.12 0.022)
-( 0.065  0.12 0.022)
-(-0.065  0.12 0.022)
-(-0.065 -0.12 0.022)
-)
+    curl(ARe)                         Gauss linear;
+    curl(AIm)                         Gauss linear;
 
-// edges:
+    snGradCorr(ARe)                   Gauss linear;
+    snGradCorr(AIm)                   Gauss linear;
+}
 
-4
-(
-(0 1)
-(1 2)
-(2 3)
-(3 0)
-)
+divSchemes
+{
+    default                           none;
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+laplacianSchemes
+{
+    default                           none;
 
+    laplacian(ARe)                    Gauss linear corrected;
+    laplacian(AIm)                    Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default                           none;
+}
 
 // ************************************************************************* //

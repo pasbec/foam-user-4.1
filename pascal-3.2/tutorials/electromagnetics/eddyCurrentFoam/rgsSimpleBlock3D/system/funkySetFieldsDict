@@ -58,29 +58,64 @@ expressions
     keepPatches   true;
   }
 
-  sigma_conductor
+  sigma_conductor_zero
   {
     field         sigma;
     variables     $materialProperties;
     condition     "set(cellSet_material_conductor)";
+    expression    "1";
+    keepPatches   true;
+  }
+  sigma_conductor_y_le_0
+  {
+    field         sigma;
+    variables     $materialProperties;
+    condition     "set(cellSet_material_conductor) && pos().y<=0";
+    expression    "sigma_silicon_liquid/10";
+    keepPatches   true;
+  }
+  sigma_conductor_y_gt_0
+  {
+    field         sigma;
+    variables     $materialProperties;
+    condition     "set(cellSet_material_conductor) && pos().y>0";
     expression    "sigma_silicon_liquid";
     keepPatches   true;
   }
-//   sigma_conductor1
+//   sigma_conductor_const_x_le_0
 //   {
 //     field         sigma;
 //     variables     $materialProperties;
-//     condition     "set(cellSet_material_conductor)";
+//     condition     "set(cellSet_material_conductor) && pos().x<=0";
 // //     expression    "sigma_silicon_liquid";
-//     expression    "(mag(pos().x-0.035)/0.035*sigma_silicon_liquid)+1";
+//     expression    "(sigma_silicon_liquid)";
 //     keepPatches   true;
 //   }
-//   sigma_conductor2
+//   sigma_conductor_linear_x_gt_0_y_le_0
 //   {
 //     field         sigma;
 //     variables     $materialProperties;
-//     condition     "set(cellSet_material_conductor) && pos().x>=0";
-//     expression    "0.001*sigma_silicon_liquid";
+//     condition     "set(cellSet_material_conductor) && pos().x>0 && pos().y<=0";
+// //     expression    "sigma_silicon_liquid";
+//     expression    "(-(pos().x-0.035)/0.035)*sigma_silicon_liquid*99/100 + sigma_silicon_liquid/100";
+//     keepPatches   true;
+//   }
+//   sigma_conductor_linear_x_gt_0_y_gt_0
+//   {
+//     field         sigma;
+//     variables     $materialProperties;
+//     condition     "set(cellSet_material_conductor) && pos().x>0 && pos().y>0";
+// //     expression    "sigma_silicon_liquid";
+//     expression    "(pos().y/0.075)*(pos().x/0.035)*sigma_silicon_liquid*99/100 + sigma_silicon_liquid/100";
+//     keepPatches   true;
+//   }
+//   sigma_conductor_whole
+//   {
+//     field         sigma;
+//     variables     $materialProperties;
+//     condition     "set(cellSet_material_conductor) && pos().x<0.01 && pos().x>-0.01 && pos().y<-0.05 && pos().y>-0.07";
+// //     expression    "sigma_silicon_liquid";
+//     expression    "1";
 //     keepPatches   true;
 //   }
 

@@ -9,33 +9,53 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       featureEdgeMesh;
-    object      coil3.eMesh;
+    class       dictionary;
+    object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+solvers
+{
+    "(Ax|Ay|Az)"
+    {
+        solver                   BiCGStab;
 
-// points:
+        tolerance                1e-05;
+        relTol                   0.1;
 
-4
-(
-( 0.065 -0.12 0.035)
-( 0.065  0.12 0.035)
-(-0.065  0.12 0.035)
-(-0.065 -0.12 0.035)
-)
+        minIter                  0;
+        maxIter                  300;
 
-// edges:
+        preconditioner           Cholesky;
+    }
+}
 
-4
-(
-(0 1)
-(1 2)
-(2 3)
-(3 0)
-)
+EDDYCURRENT
+{
+    interface          "oldInternalFaces";
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    nCorrectors        5;
 
+    residualControl
+    {
+        "(Ax|Ay|Az)"
+        {
+//             tolerance  1e-05;
+            tolerance  1e-03;
+            relTol     0.1;
+        }
+
+        "(VRe|VIm)"
+        {
+//             tolerance  1e-05;
+            tolerance  1e-03;
+            relTol     0.1;
+        }
+     }
+}
+
+relaxationFactors
+{
+}
 
 // ************************************************************************* //
