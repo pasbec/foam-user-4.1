@@ -1379,6 +1379,23 @@ class blockMeshDict(object):
 
     # ----------------------------------------------------------------------- #
 
+    def arc(self, label1, label2, label3, end="\n"):
+
+        vertice1 = self.vertices.labelIndex[label1]
+        vertice2 = self.vertices.labelIndex[label2]
+        vertice3 = self.vertices.labelIndex[label3]
+
+        wstr  = "arc " + str(vertice1) + " " + str(vertice2)
+
+        wstr += " ( "
+        for component in self.vertices.points[vertice3]:
+            wstr += str(float(component)) + " "
+        wstr += ")"
+
+        self.io.write(wstr, end=end)
+
+    # ----------------------------------------------------------------------- #
+
     def manual(self, string, end="\n"):
 
         self.io.write(string, end=end)
