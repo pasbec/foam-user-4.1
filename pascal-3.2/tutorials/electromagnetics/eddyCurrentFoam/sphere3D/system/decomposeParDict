@@ -10,50 +10,40 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      fvSolution;
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
+numberOfSubdomains    2;
+
+method               simple;
+
+simpleCoeffs
 {
-    "(Ax|Ay|Az)"
-    {
-        solver                   BiCGStab;
-
-        tolerance                1e-05;
-        relTol                   0.1;
-
-        minIter                  0;
-        maxIter                  300;
-
-        preconditioner           Cholesky;
-    }
+    n                (2 1 1);
+    delta            0.001;
 }
 
-EDDYCURRENT
-{
-    interface          "oldInternalFaces";
-
-    nCorrectors        5;
-
-    residualControl
-    {
-        "(Ax|Ay|Az)"
-        {
-            tolerance  1e-05;
-            relTol     0.1;
-        }
-
-        "(VRe|VIm)"
-        {
-            tolerance  1e-05;
-            relTol     0.1;
-        }
-     }
-}
-
-relaxationFactors
+hierarchicalCoeffs
 {
 }
+
+metisCoeffs
+{
+}
+
+scotchCoeffs
+{
+}
+
+manualCoeffs
+{
+}
+
+distributed     no;
+
+roots
+(
+);
 
 // ************************************************************************* //

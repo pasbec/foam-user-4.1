@@ -10,50 +10,21 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      fvSolution;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
-{
-    "(Ax|Ay|Az)"
-    {
-        solver                   BiCGStab;
+matchTolerance 1e-12;
 
-        tolerance                1e-05;
-        relTol                   0.1;
+pointSync true;
 
-        minIter                  0;
-        maxIter                  300;
+patchInfo
+(
+);
 
-        preconditioner           Cholesky;
-    }
-}
-
-EDDYCURRENT
-{
-    interface          "oldInternalFaces";
-
-    nCorrectors        5;
-
-    residualControl
-    {
-        "(Ax|Ay|Az)"
-        {
-            tolerance  1e-05;
-            relTol     0.1;
-        }
-
-        "(VRe|VIm)"
-        {
-            tolerance  1e-05;
-            relTol     0.1;
-        }
-     }
-}
-
-relaxationFactors
-{
-}
+// OpenFOAM syntax
+patches
+(
+);
 
 // ************************************************************************* //

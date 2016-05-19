@@ -16,9 +16,23 @@ FoamFile
 
 solvers
 {
-    "(Ax|Ay|Az)"
+    "(A0Re|A0Im)"
     {
-        solver                   BiCGStab;
+        solver                   PCG;
+
+        tolerance                1e-08;
+        relTol                   0;
+
+        minIter                  0;
+        maxIter                  300;
+
+        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
+                                      // GAMG, SymGaussSeidel, diagonal, none
+    }
+
+    "(VRe|VIm)"
+    {
+        solver                   deflatedPCG;
 
         tolerance                1e-05;
         relTol                   0.1;
@@ -26,34 +40,9 @@ solvers
         minIter                  0;
         maxIter                  300;
 
-        preconditioner           Cholesky;
+        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
+                                      // GAMG, SymGaussSeidel, diagonal, none
     }
-}
-
-EDDYCURRENT
-{
-    interface          "oldInternalFaces";
-
-    nCorrectors        5;
-
-    residualControl
-    {
-        "(Ax|Ay|Az)"
-        {
-            tolerance  1e-05;
-            relTol     0.1;
-        }
-
-        "(VRe|VIm)"
-        {
-            tolerance  1e-05;
-            relTol     0.1;
-        }
-     }
-}
-
-relaxationFactors
-{
 }
 
 // ************************************************************************* //

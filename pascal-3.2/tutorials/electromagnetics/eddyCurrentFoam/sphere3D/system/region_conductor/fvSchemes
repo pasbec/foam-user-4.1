@@ -23,22 +23,28 @@ gradSchemes
 {
     default                           none;
 
-    curl(A0Re)                        Gauss linear;
-    curl(A0Im)                        Gauss linear;
+//     curl(A0Re)                        Gauss linear;
+//     curl(A0Im)                        Gauss linear;
+    curl(A0Re)                        leastSquares;
+    curl(A0Im)                        leastSquares;
 
-    snGradCorr(A0Re)                  Gauss linear;
-    snGradCorr(A0Im)                  Gauss linear;
+//     snGradCorr(A0Re)                  Gauss linear;
+//     snGradCorr(A0Im)                  Gauss linear;
+    snGradCorr(A0Re)                  leastSquares;
+    snGradCorr(A0Im)                  leastSquares;
 
 //     grad(sigma)                       Gauss linear;
-//     grad(sigma)                       Gauss harmonic;
+    grad(sigma)                       leastSquares;
 
 //     grad(VRe)                         Gauss linear;
 //     grad(VIm)                         Gauss linear;
-    grad(VRe)                         electricPotentialGrad Gauss sigma ddtAImPhi;
-    grad(VIm)                         electricPotentialGrad Gauss sigma ddtARePhi;
-//
+    grad(VRe)                         leastSquares;
+    grad(VIm)                         leastSquares;
+
 //     snGradCorr(VRe)                   Gauss linear;
 //     snGradCorr(VIm)                   Gauss linear;
+    snGradCorr(VRe)                   leastSquares;
+    snGradCorr(VIm)                   leastSquares;
 }
 
 divSchemes
@@ -53,12 +59,8 @@ laplacianSchemes
     laplacian(A0Re)                   Gauss linear corrected;
     laplacian(A0Im)                   Gauss linear corrected;
 
-//     laplacian(sigma,VRe)              Gauss linear corrected;
-//     laplacian(sigma,VIm)              Gauss linear corrected;
-//     laplacian(sigma,VRe)              Gauss linear uncorrected;
-//     laplacian(sigma,VIm)              Gauss linear uncorrected;
-    laplacian(sigma,VRe)              electricPotentialLaplacian Gauss ddtAImPhi;
-    laplacian(sigma,VIm)              electricPotentialLaplacian Gauss ddtARePhi;
+    laplacian(sigma,VRe)              Gauss linear corrected;
+    laplacian(sigma,VIm)              Gauss linear corrected;
 }
 
 interpolationSchemes
