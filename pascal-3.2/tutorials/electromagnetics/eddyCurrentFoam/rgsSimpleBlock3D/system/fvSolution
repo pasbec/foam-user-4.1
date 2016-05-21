@@ -21,7 +21,7 @@ solvers
         solver                   BiCGStab;
 
         tolerance                1e-05;
-        relTol                   0.1;
+        relTol                   0.5;
 
         minIter                  0;
         maxIter                  300;
