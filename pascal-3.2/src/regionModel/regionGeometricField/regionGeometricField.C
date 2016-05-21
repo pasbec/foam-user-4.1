@@ -25,6 +25,7 @@ License
 
 #include "regionGeometricField.H"
 #include "fvcExtrapolate.H"
+#include "calculatedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -383,8 +384,6 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
     trgf.clear();
 }
 
-
-// TODO: Only for calculated- and fixedValue- patchFields
 // TODO: Parallel?
 template
 <
@@ -407,51 +406,57 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::mapBoundaryField
 
     forAll (pbm, patchI)
     {
-        const polyPatch& patch = pbm[patchI];
-
-        label patchI0 = pbm0.findPatchID(patch.name());
-
-        // Patch is present in regionI AND also in
-        // default region. Mapping is done based on
-        // direct addressing.
-        if (patchI0 > -1)
+        if
+        (
+            vf.boundaryField()[patchI].type()
+         == calculatedFvPatchField<Type>::typeName
+        )
         {
-            const polyPatch& patch0 = pbm0[patchI0];
-            const Field<Type>& patchField0 = vf0.boundaryField()[patchI0];
-            label patchStart0 = patch0.start();
-            label patchSize0 = patchField0.size();
+            const polyPatch& patch = pbm[patchI];
 
-            Field<Type>& patchField = vf.boundaryField()[patchI];
-            label patchStart = patch.start();
+            label patchI0 = pbm0.findPatchID(patch.name());
 
-            const labelList& fmap = mesh().faceMap(regionI);
-
-            forAll (patchField, facei)
+            // Patch is present in regionI AND also in
+            // default region. Mapping is done based on
+            // direct addressing.
+            if (patchI0 > -1)
             {
-                label faceI = patchStart + facei;
-                label faceI0 = fmap[faceI];
+                const polyPatch& patch0 = pbm0[patchI0];
+                const Field<Type>& patchField0 = vf0.boundaryField()[patchI0];
+                label patchStart0 = patch0.start();
+                label patchSize0 = patchField0.size();
 
-                label facei0 = faceI0 - patchStart0;
+                Field<Type>& patchField = vf.boundaryField()[patchI];
+                label patchStart = patch.start();
 
-                if (facei0 > -1 && facei0 < patchSize0)
+                const labelList& fmap = mesh().faceMap(regionI);
+
+                forAll (patchField, facei)
                 {
-                    patchField[facei] = patchField0[facei0];
-                }
-                else
-                {
-                    // TODO: Mapped from internal face. Do what?
-                    //       one side of an intersecting patch?
-                    // NOTE: This should already be avoided during
-                    //       construction of regionPolyMesh
-                    //       (or the first time faceMap is used) by
-                    //       checking all boundary faces?
+                    label faceI = patchStart + facei;
+                    label faceI0 = fmap[faceI];
+
+                    label facei0 = faceI0 - patchStart0;
+
+                    if (facei0 > -1 && facei0 < patchSize0)
+                    {
+                        patchField[facei] = patchField0[facei0];
+                    }
+                    else
+                    {
+                        // TODO: Mapped from internal face. Do what?
+                        //       one side of an intersecting patch?
+                        // NOTE: This should already be avoided during
+                        //       construction of regionPolyMesh
+                        //       (or the first time faceMap is used) by
+                        //       checking all boundary faces?
+                    }
                 }
             }
         }
     }
 };
 
-// TODO: Only for calculated- and fixedValue- patchFields
 // TODO: Parallel?
 template
 <
@@ -469,12 +474,18 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::copyInternalBoun
 
     forAll (pbm, patchI)
     {
-        vf.boundaryField()[patchI] ==
-            vf.boundaryField()[patchI].patchInternalField();
+        if
+        (
+            vf.boundaryField()[patchI].type()
+         == calculatedFvPatchField<Type>::typeName
+        )
+        {
+            vf.boundaryField()[patchI] ==
+                vf.boundaryField()[patchI].patchInternalField();
+        }
     }
 };
 
-// TODO: Only for calculated- and fixedValue- patchFields
 // TODO: Parallel?
 template
 <
@@ -497,52 +508,58 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolateBound
 
     forAll (pbm, patchI)
     {
-        const polyPatch& patch = pbm[patchI];
-
-        label patchI0 = pbm0.findPatchID(patch.name());
-
-        // Patch is only present in regionI but NOT in
-        // default region. Thus, all faces of this patch
-        // correspond to interal faces of default region.
-        // Linear interpolation is applied to get values
-        // for the corresponding patch field.
-        if (patchI0 == -1)
+        if
+        (
+            vf.boundaryField()[patchI].type()
+         == calculatedFvPatchField<Type>::typeName
+        )
         {
-            const Field<Type>& vf0In = vf0.internalField();
-            const scalarField& w0 = vf0.mesh().weights().internalField();
-            const labelList& own0 = vf0.mesh().faceOwner();
-            const labelList& ngb0 = vf0.mesh().faceNeighbour();
+            const polyPatch& patch = pbm[patchI];
 
-            Field<Type>& patchField = vf.boundaryField()[patchI];
-            label patchStart = patch.start();
+            label patchI0 = pbm0.findPatchID(patch.name());
 
-            const labelList& fmap = mesh().faceMap(regionI);
-
-            forAll (patchField, facei)
+            // Patch is only present in regionI but NOT in
+            // default region. Thus, all faces of this patch
+            // correspond to interal faces of default region.
+            // Linear interpolation is applied to get values
+            // for the corresponding patch field.
+            if (patchI0 == -1)
             {
-                label faceI = patchStart + facei;
-                label faceI0 = fmap[faceI];
+                const Field<Type>& vf0In = vf0.internalField();
+                const scalarField& w0 = vf0.mesh().weights().internalField();
+                const labelList& own0 = vf0.mesh().faceOwner();
+                const labelList& ngb0 = vf0.mesh().faceNeighbour();
 
-                scalar w0I = w0[faceI0];
+                Field<Type>& patchField = vf.boundaryField()[patchI];
+                label patchStart = patch.start();
 
-                patchField[facei] =
-                    w0I * vf0In[own0[faceI0]]
-                 + (1.0 - w0I) * vf0In[ngb0[faceI0]];
+                const labelList& fmap = mesh().faceMap(regionI);
+
+                forAll (patchField, facei)
+                {
+                    label faceI = patchStart + facei;
+                    label faceI0 = fmap[faceI];
+
+                    scalar w0I = w0[faceI0];
+
+                    patchField[facei] =
+                        w0I * vf0In[own0[faceI0]]
+                    + (1.0 - w0I) * vf0In[ngb0[faceI0]];
+                }
             }
-        }
-        else
-        {
-            // TODO: What if someone changes the name of
-            //       one side of an intersecting patch?
-            // NOTE: This should already be avoided during
-            //       construction of regionPolyMesh
-            //       (or the first time faceMap is used) by
-            //       checking all boundary faces?
+            else
+            {
+                // TODO: What if someone changes the name of
+                //       one side of an intersecting patch?
+                // NOTE: This should already be avoided during
+                //       construction of regionPolyMesh
+                //       (or the first time faceMap is used) by
+                //       checking all boundary faces?
+            }
         }
     }
 };
 
-//- TODO: Only for calculated- and fixedValue- patchFields
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,

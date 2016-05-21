@@ -56,16 +56,14 @@ namespace fvc
     void
     extrapolate
     (
-        GeometricField<Type, fvPatchField, volMesh>& vf,
-        const scalar& alpha = 0.5
+        GeometricField<Type, fvPatchField, volMesh>& vf
     );
 
     template<class Type>
     void
     extrapolate
     (
-        tmp<GeometricField<Type, fvPatchField, volMesh> >& vf,
-        const scalar& alpha = 0.5
+        tmp<GeometricField<Type, fvPatchField, volMesh> >& vf
     );
 }
 

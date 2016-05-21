@@ -14,58 +14,43 @@
         volScalarField& VRe = storage.VRe();
         volScalarField& VIm = storage.VIm();
 
+// TODO: Use dedicated boundary condition?
         // Update gradient boundary condition for V
         {
-            const polyBoundaryMesh& boundaryMesh = mesh.boundaryMesh();
+            label patchI = control.interfaceLabel();
 
-            label patchI = boundaryMesh.findPatchID(control.interfaceName());
-
-            if (patchI == -1)
+            if
+            (
+                VRe.boundaryField()[patchI].type()
+             == fixedGradientFvPatchField<scalar>::typeName
+            )
             {
-                FatalError
-                    << "Given patch name "
-                    << control.interfaceName()
-                    << " does not exist."
-                    << abort(FatalError);
+                fixedGradientFvPatchField<scalar>& VReP =
+                    refCast<fixedGradientFvPatchField<scalar> >
+                    (
+                        VRe.boundaryField()[patchI]
+                    );
+
+                // Set correct gradient
+                VReP.gradient() = -ddtAImPhi.boundaryField()[patchI]/VReP.patch().magSf();
             }
 
-// TODO: Use dedicated boundary condition
-            // Boundary values for V
+            if
+            (
+                VIm.boundaryField()[patchI].type()
+             == fixedGradientFvPatchField<scalar>::typeName
+            )
             {
-                if
-                (
-                    VRe.boundaryField()[patchI].type()
-                 == fixedGradientFvPatchField<scalar>::typeName
-                )
-                {
-                    fixedGradientFvPatchField<scalar>& VReP =
-                        refCast<fixedGradientFvPatchField<scalar> >
-                        (
-                            VRe.boundaryField()[patchI]
-                        );
+                fixedGradientFvPatchField<scalar>& VImP =
+                    refCast<fixedGradientFvPatchField<scalar> >
+                    (
+                        VIm.boundaryField()[patchI]
+                    );
 
-                    // Set correct gradient
-                    VReP.gradient() = -ddtAImPhi.boundaryField()[patchI]/VReP.patch().magSf();
-                }
-
-                if
-                (
-                    VIm.boundaryField()[patchI].type()
-                 == fixedGradientFvPatchField<scalar>::typeName
-                )
-                {
-                    fixedGradientFvPatchField<scalar>& VImP =
-                        refCast<fixedGradientFvPatchField<scalar> >
-                        (
-                            VIm.boundaryField()[patchI]
-                        );
-
-                    // Set correct gradient
-                    VImP.gradient() = -ddtARePhi.boundaryField()[patchI]/VImP.patch().magSf();
-                }
+                // Set correct gradient
+                VImP.gradient() = -ddtARePhi.boundaryField()[patchI]/VImP.patch().magSf();
             }
 
-            // Correct boundary conditions for V
             VRe.correctBoundaryConditions();
             VIm.correctBoundaryConditions();
         }

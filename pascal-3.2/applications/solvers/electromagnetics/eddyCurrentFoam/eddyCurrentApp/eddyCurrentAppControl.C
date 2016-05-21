@@ -192,6 +192,15 @@ Foam::eddyCurrentApp::Control::Control
     subCorr_(0),
     subScale_(1.0)
 {
+    if (interfacePatchLabel_ == -1)
+    {
+        FatalError
+            << "Conductor patch name '"
+            << interfaceName()
+            << "' does not exist."
+            << abort(FatalError);
+    }
+
     read();
 
     Info<< nl;

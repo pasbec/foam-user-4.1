@@ -23,19 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "beGaussGrad.H"
-
-#include "emptyFvPatchFields.H"
-#include "symmetryFvPatchFields.H"
-#include "wedgeFvPatchFields.H"
 #include "calculatedFvPatchFields.H"
-#include "zeroGradientFvPatchFields.H"
-
-// TODO [High] One could also realize this in boundary condition?
-
-// TODO [High] Currently only for calculated patches and fails if any other patch type is use
-//             except for "special" patches - which are ignored anyway. There might be a better
-//             approach?
+#include "extrapolatedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,24 +42,34 @@ template<class Type>
 void
 extrapolate
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf,
-    const scalar& alpha
+    GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    if (alpha < 0.0 || alpha > 1.0)
-    {
-        FatalErrorIn("fvc::extrapolate(...)")
-            << "Value for alpha out of range. The weighting factor "
-            << " alpha may only have values between 0.0 and 1.0."
-            << abort(FatalError);
-    }
-
     const fvMesh& mesh = vf.mesh();
 
-    typedef typename outerProduct<vector, Type>::type GradType;
+    // Create list with boundary types
+    wordList vfPatchTypes(mesh.boundary().size());
 
-    // Create copy of vf with zero-gradient patches
-    tmp< GeometricField<Type, fvPatchField, volMesh> > tvfZg
+    forAll(vf.boundaryField(), patchI)
+    {
+        if
+        (
+            vf.boundaryField()[patchI].type()
+         == calculatedFvPatchField<Type>::typeName
+        )
+        {
+            vfPatchTypes[patchI] =
+                extrapolatedFvPatchField<Type>::typeName;
+        }
+        else
+        {
+            vfPatchTypes[patchI] =
+                vf.boundaryField()[patchI].type();
+        }
+    }
+
+    // Create copy of vf with extrapolated patches
+    tmp< GeometricField<Type, fvPatchField, volMesh> > tvfEx
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -84,97 +83,22 @@ extrapolate
                 false
             ),
             vf,
-            zeroGradientFvPatchField<Type>::typeName
+            vfPatchTypes
         )
     );
 
-    GeometricField<Type, fvPatchField, volMesh>& vfZg = tvfZg();
+    // Extrapolation
+    tvfEx().correctBoundaryConditions();
 
-    // Create boundary extrapolated gradient scheme
-    tmp<fv::beGaussGrad<Type> > tvfGradScheme
-    (
-        new fv::beGaussGrad<Type>(mesh)
-     );
-
-    fv::beGaussGrad<Type>& vfGradScheme = tvfGradScheme();
-
-    // Gradient field of vf with extrapolated boundary values
-    tmp<GeometricField<GradType, fvPatchField, volMesh> > tvfGrad
-    (
-        new GeometricField<GradType, fvPatchField, volMesh>
-        (
-            vfGradScheme.grad(vfZg)
-        )
-    );
-
-    GeometricField<GradType, fvPatchField, volMesh>& vfGrad = tvfGrad();
-
-    tvfZg.clear();
-    tvfGradScheme.clear();
-
-    // Extrapolate boundary values
-    forAll(vf.boundaryField(), patchI)
-    {
-        const polyPatch& pp = mesh.boundaryMesh()[patchI];
-
-        if
-        (
-            vf.boundaryField()[patchI].type()
-            == calculatedFvPatchField<Type>::typeName
-        )
-        {
-            calculatedFvPatchField<Type>& vfp =
-                refCast<calculatedFvPatchField<Type> >
-                (
-                    vf.boundaryField()[patchI]
-                );
-
-            tmp<Field<vector> > deltap =
-                mesh.boundary()[patchI].delta();
-
-            tmp<Field<Type> > vfpi =
-                vf.boundaryField()[patchI].patchInternalField();
-
-            tmp<Field<GradType> > vfpGrad = alpha
-              * vfGrad.boundaryField()[patchI];
-
-            tmp<Field<GradType> > vfpiGrad = (1.0-alpha)
-              * vfGrad.boundaryField()[patchI].patchInternalField();
-
-            // Extrapolate boundary values
-            vfp == vfpi + ((vfpGrad+vfpiGrad) & deltap);
-
-            vfpiGrad.clear();
-            vfpGrad.clear();
-            vfpi.clear();
-            deltap.clear();
-        }
-        else if
-        (
-            (pp.type() != emptyFvPatch::typeName)
-         && (pp.type() != symmetryFvPatch::typeName)
-         && (pp.type() != wedgeFvPatch::typeName)
-         && !pp.coupled()
-        )
-        {
-            FatalErrorIn("fvc::extrapolate(...)")
-                << "Boundary patch "
-                << pp.name()
-                << " of field " << vf.name()
-                << " is not of type \"calculated\"."
-                << abort(FatalError);
-        }
-    }
-
-    tvfGrad.clear();
+    // Copy extrapolated field and delete tmp
+    vf == tvfEx;
 }
 
 template<class Type>
 void
 extrapolate
 (
-    tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
-    const scalar& alpha
+    tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
 )
 {
     GeometricField<Type, fvPatchField, volMesh>& vf = tvf();

@@ -40,6 +40,8 @@ Description
 #include "uniformDimensionedFields.H"
 #include "fixedValueFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
+#include "calculatedFvPatchFields.H"
+#include "extrapolatedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

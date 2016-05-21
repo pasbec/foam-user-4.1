@@ -450,6 +450,7 @@ void extrapolatedFvPatchField<Type>::write(Ostream& os) const
 
     os.writeKeyword("zeroGradient")
         << zeroGradient_ << token::END_STATEMENT << nl;
+    this->writeEntry("value", os);
 }
 
 

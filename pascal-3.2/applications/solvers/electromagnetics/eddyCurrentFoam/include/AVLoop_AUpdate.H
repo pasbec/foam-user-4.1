@@ -4,27 +4,12 @@
     {
         SM_REGIONSCOPE(CONDUCTOR);
 
-// TODO: Extrapolation bugfix for skewed meshes
-        globalStorage.sigma().mapExtrapolate(CONDUCTOR);
-//         globalStorage.sigma().mapCopyInternal(CONDUCTOR);
+        // Update sigma in conductor region
+        globalStorage.sigma().mapCopyInternal(CONDUCTOR);
 
         // Update A in conductor region
-        if (globalSettings.biotSavart)
-        {
-// TODO: Extrapolation bugfix for skewed meshes
-            globalStorage.ARe().mapExtrapolate(CONDUCTOR);
-            globalStorage.AIm().mapExtrapolate(CONDUCTOR);
-//             globalStorage.ARe().mapCopyInternal(CONDUCTOR);
-//             globalStorage.AIm().mapCopyInternal(CONDUCTOR);
-        }
-        else
-        {
-// TODO: Interpolation in parallel
-            globalStorage.ARe().mapInterpolate(CONDUCTOR);
-            globalStorage.AIm().mapInterpolate(CONDUCTOR);
-//             globalStorage.ARe().mapCopyInternal(CONDUCTOR);
-//             globalStorage.AIm().mapCopyInternal(CONDUCTOR);
-        }
+        globalStorage.ARe().mapExtrapolate(CONDUCTOR);
+        globalStorage.AIm().mapExtrapolate(CONDUCTOR);
 
         // Update rate of change of flux of A
         {

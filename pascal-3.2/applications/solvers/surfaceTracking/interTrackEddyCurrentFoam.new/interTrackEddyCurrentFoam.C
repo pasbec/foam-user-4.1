@@ -164,11 +164,8 @@ int main(int argc, char *argv[])
             using namespace interTrackEddyCurrentApp;
             using namespace interTrackEddyCurrentApp::Region;
 
-// TODO: Extrapolation
-//             eddyCurrentAppManager.storage.FL().mapExtrapolate(Region::FLUID);
-//             eddyCurrentAppManager.storage.pB().mapExtrapolate(Region::FLUID);
-            eddyCurrentAppManager.storage().FL().mapCopyInternal(Region::FLUID);
-            eddyCurrentAppManager.storage().pB().mapCopyInternal(Region::FLUID);
+            eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
+            eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);
         }
 
 // TODO: Magnetic update?
