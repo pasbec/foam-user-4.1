@@ -20,6 +20,16 @@ pointSync                true;
 
 patchInfo
 (
+    {
+        name             conductorSurface;
+        constructFrom    patches;
+        patches          (region_space_to_region_conductor);
+
+        dictionary
+        {
+            type         patch;
+        }
+    }
 );
 
 // ************************************************************************* //

@@ -35,7 +35,7 @@ solvers
         relTol          0;
     }
 
-    p { $pFinal; relTol 1e-02; }
+    p { $pFinal; relTol 0.1; }
 
     "(UFinal|epsilon|omega|k|nuTilda)"
     {
@@ -53,7 +53,7 @@ INTERTRACK
 {
     nOuterCorrectors            10;
     nCorrectors                 1;
-    nNonOrthogonalCorrectors    5;
+    nNonOrthogonalCorrectors    2;
     pRefPoint (0.5 0.5 0);
     pRefValue 0;
 

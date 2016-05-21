@@ -6,10 +6,10 @@ cellSet cellSet_geometry_all              new    boxToCell      (-1 -1 -1) ( 1  
 
 # Fluid
 
-cellSet cellSet_geometry_fluid_dynamic    new    boxToCell      (-0.03500 -1.00000  0.00000) ( 0.03500  1.00000  0.02000)
+cellSet cellSet_geometry_fluid_buffer     new    boxToCell      (-0.03500 -1.00000  0.00000) ( 0.03500  1.00000  0.02000)
 cellSet cellSet_geometry_fluid_static     new    boxToCell      (-0.03500 -1.00000 -0.00040) ( 0.04500  1.00000  0.00000)
 
-cellSet cellSet_geometry_fluid            new    setToCell      cellSet_geometry_fluid_dynamic
+cellSet cellSet_geometry_fluid            new    setToCell      cellSet_geometry_fluid_buffer
 cellSet cellSet_geometry_fluid            add    setToCell      cellSet_geometry_fluid_static
 cellSet cellSet_geometry_fluid_old        remove
 
@@ -23,11 +23,11 @@ cellSet cellSet_geometry_substrate        new    boxToCell      (-0.07800 -1.000
 
 # Frame
 
-cellSet cellSet_geometry_frame_dynamic_l  new    boxToCell      (-0.04500 -1.00000  0.00000) (-0.03500  1.00000  0.05000)
-cellSet cellSet_geometry_frame_dynamic_r  new    boxToCell      ( 0.03500 -1.00000  0.00000) ( 0.04500  1.00000  0.05000)
-cellSet cellSet_geometry_frame_dynamic    new    setToCell      cellSet_geometry_frame_dynamic_l
-cellSet cellSet_geometry_frame_dynamic    add    setToCell      cellSet_geometry_frame_dynamic_r
-cellSet cellSet_geometry_frame_dynamic_old remove
+cellSet cellSet_geometry_frame_buffer_l   new    boxToCell      (-0.04500 -1.00000  0.00000) (-0.03500  1.00000  0.05000)
+cellSet cellSet_geometry_frame_buffer_r   new    boxToCell      ( 0.03500 -1.00000  0.00000) ( 0.04500  1.00000  0.05000)
+cellSet cellSet_geometry_frame_buffer     new    setToCell      cellSet_geometry_frame_buffer_l
+cellSet cellSet_geometry_frame_buffer     add    setToCell      cellSet_geometry_frame_buffer_r
+cellSet cellSet_geometry_frame_buffer_old remove
 
 cellSet cellSet_geometry_frame_static_l   new    boxToCell      (-0.04500 -1.00000  0.05000) (-0.03500  1.00000  0.09000)
 cellSet cellSet_geometry_frame_static_r   new    boxToCell      ( 0.03500 -1.00000  0.05000) ( 0.04500  1.00000  0.09000)
@@ -35,17 +35,17 @@ cellSet cellSet_geometry_frame_static     new    setToCell      cellSet_geometry
 cellSet cellSet_geometry_frame_static     add    setToCell      cellSet_geometry_frame_static_r
 cellSet cellSet_geometry_frame_static_old remove
 
-cellSet cellSet_geometry_frame            new    setToCell      cellSet_geometry_frame_dynamic
+cellSet cellSet_geometry_frame            new    setToCell      cellSet_geometry_frame_buffer
 cellSet cellSet_geometry_frame            add    setToCell      cellSet_geometry_frame_static
 cellSet cellSet_geometry_frame_old        remove
 
 # Free
 
-cellSet cellSet_geometry_free_dynamic     new    boxToCell      (-0.03500 -1.00000  0.02000) ( 0.03500  1.00000  0.05000)
+cellSet cellSet_geometry_free_buffer      new    boxToCell      (-0.03500 -1.00000  0.02000) ( 0.03500  1.00000  0.05000)
 
 cellSet cellSet_geometry_free_static      new    boxToCell      (-0.03500 -1.00000  0.05000) ( 0.03500  1.00000  0.09000)
 
-cellSet cellSet_geometry_free             new    setToCell      cellSet_geometry_free_dynamic
+cellSet cellSet_geometry_free             new    setToCell      cellSet_geometry_free_buffer
 cellSet cellSet_geometry_free             add    setToCell      cellSet_geometry_free_static
 cellSet cellSet_geometry_free_old         remove
 
@@ -109,16 +109,16 @@ cellSet cellSet_material_air              new    setToCell      cellSet_geometry
 
 ### Regions
 
-cellSet cellSet_region_fluid              new    setToCell      cellSet_geometry_fluid_dynamic
+cellSet cellSet_region_fluid              new    setToCell      cellSet_geometry_fluid_buffer
 
-cellSet cellSet_region_dynamic            new    setToCell      cellSet_geometry_frame_dynamic
-cellSet cellSet_region_dynamic            add    setToCell      cellSet_geometry_free_dynamic
-cellSet cellSet_region_dynamic_old        remove
+cellSet cellSet_region_buffer            new    setToCell      cellSet_geometry_frame_buffer
+cellSet cellSet_region_buffer            add    setToCell      cellSet_geometry_free_buffer
+cellSet cellSet_region_buffer_old        remove
 
 cellSet cellSet_region_static             new    setToCell      cellSet_geometry_all
-cellSet cellSet_region_static             delete setToCell      cellSet_geometry_fluid_dynamic
-cellSet cellSet_region_static             delete setToCell      cellSet_geometry_frame_dynamic
-cellSet cellSet_region_static             delete setToCell      cellSet_geometry_free_dynamic
+cellSet cellSet_region_static             delete setToCell      cellSet_geometry_fluid_buffer
+cellSet cellSet_region_static             delete setToCell      cellSet_geometry_frame_buffer
+cellSet cellSet_region_static             delete setToCell      cellSet_geometry_free_buffer
 cellSet cellSet_region_static_old         remove
 
 cellSet cellSet_region_conductor          new    setToCell      cellSet_geometry_fluid

@@ -18,7 +18,7 @@ dictionaryReplacement
 {
     boundary
     {
-        region_space_to_region_conductor
+        conductorSurface
         {
             type            patch;
         }

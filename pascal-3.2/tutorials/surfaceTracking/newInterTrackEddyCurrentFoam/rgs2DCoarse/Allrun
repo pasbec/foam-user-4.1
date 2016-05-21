@@ -30,7 +30,7 @@ done
 setErrorTrap
 
 regionlist_splitn=2
-regionlist_split1="region_fluid region_dynamic region_static"
+regionlist_split1="region_fluid region_buffer region_static"
 regionlist_split2="region_conductor region_space"
 regionlist_split="$regionlist_split1 $regionlist_split2"
 

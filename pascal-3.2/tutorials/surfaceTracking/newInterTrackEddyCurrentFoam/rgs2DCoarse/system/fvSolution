@@ -32,7 +32,7 @@ solvers
 
 EDDYCURRENT
 {
-    interface          "oldInternalFaces";
+    interface          "conductorSurface";
 
     nCorrectors        5;
 
@@ -52,15 +52,8 @@ EDDYCURRENT
      }
 }
 
-Magnetic
+relaxationFactors
 {
-    update
-    {
-        active           on;
-        outputCycle      2147483647;
-        timeStepCycle    1;
-        timeCycle        0.05;
-    }
 }
 
 // ************************************************************************* //

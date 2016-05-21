@@ -23,11 +23,8 @@ gradSchemes
 {
     default                           none;
 
-    curl(ARe)                         Gauss linear;
-    curl(AIm)                         Gauss linear;
-
-    snGradCorr(ARe)                   Gauss linear;
-    snGradCorr(AIm)                   Gauss linear;
+    curl(A0Re)                        Gauss linear;
+    curl(A0Im)                        Gauss linear;
 }
 
 divSchemes
@@ -39,13 +36,19 @@ laplacianSchemes
 {
     default                           none;
 
-    laplacian(ARe)                    Gauss linear corrected;
-    laplacian(AIm)                    Gauss linear corrected;
+    laplacian(A0Re)                   Gauss linear corrected;
+    laplacian(A0Im)                   Gauss linear corrected;
 }
 
 interpolationSchemes
 {
     default                           none;
+
+    interpolate(A0Re)                 linear;
+    interpolate(A0Im)                 linear;
+
+    interpolate(ARe)                  linear;
+    interpolate(AIm)                  linear;
 }
 
 // ************************************************************************* //

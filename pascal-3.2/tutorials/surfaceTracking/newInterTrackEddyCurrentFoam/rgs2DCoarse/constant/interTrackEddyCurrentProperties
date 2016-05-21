@@ -18,7 +18,7 @@ regions
 {
     conductor    region_conductor;
     fluid        region_fluid;
-    buffer       region_dynamic;
+    buffer       region_buffer;
 }
 
 // ************************************************************************* //
