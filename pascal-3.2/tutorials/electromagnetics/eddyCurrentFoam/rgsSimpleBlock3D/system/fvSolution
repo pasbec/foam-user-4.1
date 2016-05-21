@@ -40,15 +40,15 @@ EDDYCURRENT
     {
         "(Ax|Ay|Az)"
         {
-//             tolerance  1e-05;
-            tolerance  1e-03;
+            tolerance  1e-05;
+//             tolerance  1e-03;
             relTol     0.1;
         }
 
         "(VRe|VIm)"
         {
-//             tolerance  1e-05;
-            tolerance  1e-03;
+            tolerance  1e-05;
+//             tolerance  1e-03;
             relTol     0.1;
         }
      }

@@ -16,41 +16,9 @@ FoamFile
 
 inductors
 {
-//     coil
-//     {
-//         file       "coil.eMesh";
-//         reverse    false;
-//         current    1414.2136;
-//         phase      0.0;
-//     }
-
-//     coil1
-//     {
-//         file       "coil0.eMesh";
-//         reverse    false;
-//         current    1414.2136;
-//         phase      0.0;
-//     }
-//
-//     coil2
-//     {
-//         file       "coil1.eMesh";
-//         reverse    false;
-//         current    1414.2136;
-//         phase      0.0;
-//     }
-//
-//     coil3
-//     {
-//         file       "coil2.eMesh";
-//         reverse    false;
-//         current    1414.2136;
-//         phase      0.0;
-//     }
-
     coil1
     {
-        file       "geometry_coil0.eMesh";
+        file       "coil0.eMesh";
         reverse    false;
         current    1414.2136;
         phase      0.0;
@@ -58,7 +26,7 @@ inductors
 
     coil2
     {
-        file       "geometry_coil1.eMesh";
+        file       "coil1.eMesh";
         reverse    false;
         current    1414.2136;
         phase      0.0;
@@ -66,7 +34,7 @@ inductors
 
     coil3
     {
-        file       "geometry_coil2.eMesh";
+        file       "coil2.eMesh";
         reverse    false;
         current    1414.2136;
         phase      0.0;

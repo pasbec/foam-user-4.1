@@ -27,7 +27,7 @@ off_z = 0.013
 arc_n = 12
 arc_alpha = (m.pi/2.0)/arc_n
 
-fileNameBase = 'geometry_coil'
+fileNameBase = 'coil'
 
 # --------------------------------------------------------------------------- #
 
