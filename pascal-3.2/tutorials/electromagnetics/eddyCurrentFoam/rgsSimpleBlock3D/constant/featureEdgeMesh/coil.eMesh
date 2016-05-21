@@ -9,45 +9,46 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      edgeBiotSavartProperties;
+    class       featureEdgeMesh;
+    object      coil.eMesh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inductors
-{
-    coil
-    {
-        file       "coil.eMesh";
-        reverse    false;
-        current    1414.2136;
-        phase      0.0;
-    }
+// points:
 
-//     coil1
-//     {
-//         file       "coil0.eMesh";
-//         reverse    false;
-//         current    1414.2136;
-//         phase      0.0;
-//     }
-//
-//     coil2
-//     {
-//         file       "coil1.eMesh";
-//         reverse    false;
-//         current    1414.2136;
-//         phase      0.0;
-//     }
-//
-//     coil3
-//     {
-//         file       "coil2.eMesh";
-//         reverse    false;
-//         current    1414.2136;
-//         phase      0.0;
-//     }
-}
+12
 
+(
+( 0.065 -0.12 0.009)
+( 0.065  0.12 0.009)
+(-0.065  0.12 0.009)
+(-0.065 -0.12 0.009)
+( 0.065 -0.12 0.022)
+( 0.065  0.12 0.022)
+(-0.065  0.12 0.022)
+(-0.065 -0.12 0.022)
+( 0.065 -0.12 0.035)
+( 0.065  0.12 0.035)
+(-0.065  0.12 0.035)
+(-0.065 -0.12 0.035)
+)
+
+// edges:
+
+12
+(
+(0 1)
+(1 2)
+(2 3)
+(3 0)
+(4 5)
+(5 6)
+(6 7)
+(7 4)
+(8 9)
+(9 10)
+(10 11)
+(11 8)
+)
 
 // ************************************************************************* //

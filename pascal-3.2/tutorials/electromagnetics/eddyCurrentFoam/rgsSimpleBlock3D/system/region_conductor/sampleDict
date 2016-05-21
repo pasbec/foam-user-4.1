@@ -72,10 +72,10 @@ surfaces
 
 fields
 (
-    BRe
-    BIm
     jRe
     jIm
+    BRe
+    BIm
     FL
 );
 
