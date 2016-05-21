@@ -324,7 +324,7 @@ moveZeroToConstantPolyMesh ()
     fi
 
     [[ ! -d "$baseDirConstant" ]] && mkdir "$baseDirConstant" > /dev/null 2>&1
-    mv  "$baseDirZero/polyMesh" "$baseDirConstant/polyMesh" > /dev/null 2>&1
+    mv  "$baseDirZero/polyMesh" "$baseDirConstant/" > /dev/null 2>&1
 }
 
 moveZeroToConstantPolyMeshParallel ()
@@ -340,7 +340,7 @@ moveZeroToConstantPolyMeshParallel ()
         fi
 
         [[ ! -d "$baseDirConstant" ]] && mkdir "$baseDirConstant" > /dev/null 2>&1
-        mv  "$baseDirZero/polyMesh" "$baseDirConstant/polyMesh" > /dev/null 2>&1
+        mv  "$baseDirZero/polyMesh" "$baseDirConstant/" > /dev/null 2>&1
 
     done
 }
