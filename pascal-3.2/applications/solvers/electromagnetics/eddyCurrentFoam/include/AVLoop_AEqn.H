@@ -154,14 +154,12 @@
             AcmptEqn.insertEquationCoupling(1, 0, -omega0 * sigma);
 
             // Solve A
-            // TEST: Prevent segfault for "0"-Solution
-// TODO: Check prevention of segfault for "0"-Solution
+            // and prevent segfault for "0"-Solution
             scalar preResidual= gMax(mag(AcmptEqn.residual(ACmpt, AcmptEqn.source())));
             if (preResidual > 0)
             {
                 AcmptEqn.solve(control.subDict(Region::DEFAULT, ACmpt.name()));
             }
-//             AcmptEqn.solve(control.subDict(Region::DEFAULT, ACmpt.name()));
 
             // Retrieve solution
             AcmptEqn.retrieveSolution(0, AReCmpt.internalField());

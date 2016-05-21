@@ -36,8 +36,6 @@
             A0Im.correctBoundaryConditions();
         }
 
-        Info << nl;
-
         // Reverse map A0 to default region
         globalStorage.A0Re().rmap(CONDUCTOR);
         globalStorage.A0Im().rmap(CONDUCTOR);
