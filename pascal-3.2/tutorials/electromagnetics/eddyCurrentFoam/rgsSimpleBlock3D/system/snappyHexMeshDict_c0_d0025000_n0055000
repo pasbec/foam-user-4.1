@@ -81,7 +81,7 @@ castellatedMeshControls
     (
         // Can be done implicitely with "implicitFeatureSnap" in snapControls{}
         // for OpenFOAM 2.2.0 or higher
-        {file "geometry_conductor.eMesh"; level 4;}
+        {file "geometry_conductor.eMesh"; level 2;}
 
     );
 
@@ -92,7 +92,7 @@ castellatedMeshControls
     {
         geometry_conductor
         {
-            level (4 4);
+            level (2 2);
 
             cellZone geometry_conductor;
             cellZoneInside inside;
@@ -124,13 +124,13 @@ castellatedMeshControls
         geometry_conductor
         {
             mode inside;
-            levels ((1e-15 4));
+            levels ((1e-15 2));
         }
 
         geometry_conductor_layer
         {
             mode inside;
-            levels ((1e-15 3));
+            levels ((1e-15 1));
         }
     }
 

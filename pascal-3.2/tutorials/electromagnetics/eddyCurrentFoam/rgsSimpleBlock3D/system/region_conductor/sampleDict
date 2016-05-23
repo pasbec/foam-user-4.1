@@ -38,7 +38,7 @@ surfaceFormat      null;
 
 sets
 (
-    line_x
+    line_x1
     {
         type       uniform;
         axis       x;
@@ -47,7 +47,7 @@ sets
         nPoints    57;
     }
 
-    line_y
+    line_y1
     {
         type       uniform;
         axis       y;
@@ -56,7 +56,16 @@ sets
         nPoints    121;
     }
 
-    line_z
+    line_y2
+    {
+        type       uniform;
+        axis       y;
+        start      ( 0.0300 -0.0750  0.0100);
+        end        ( 0.0300  0.0750  0.0100);
+        nPoints    121;
+    }
+
+    line_z1
     {
         type       uniform;
         axis       z;

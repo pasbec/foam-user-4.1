@@ -26,7 +26,8 @@ cellSet  cellSet_geometry_coil2           new    pointToCell    pointSet_geometr
 cellSet  cellSet_geometry_coil            new    setToCell      cellSet_geometry_coil0
 cellSet  cellSet_geometry_coil            add    setToCell      cellSet_geometry_coil1
 cellSet  cellSet_geometry_coil            add    setToCell      cellSet_geometry_coil2
-cellSet  cellSet_geometry_coil_old        remove
+# This throws an error if the coils are not meshed and cellSet_geometry_coil is still empty
+#cellSet  cellSet_geometry_coil_old        remove
 
 pointSet pointSet_geometry_coil0          remove
 pointSet pointSet_geometry_coil1          remove

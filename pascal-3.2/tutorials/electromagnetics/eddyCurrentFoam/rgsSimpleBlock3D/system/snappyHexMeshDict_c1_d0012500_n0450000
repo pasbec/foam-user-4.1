@@ -44,6 +44,24 @@ geometry
         min     (-0.05000 -0.11000 -0.02000);
         max     ( 0.05000  0.11000  0.04000);
     }
+
+    geometry_coil0.stl
+    {
+        type triSurfaceMesh;
+        name geometry_coil0;
+    }
+
+    geometry_coil1.stl
+    {
+        type triSurfaceMesh;
+        name geometry_coil1;
+    }
+
+    geometry_coil2.stl
+    {
+        type triSurfaceMesh;
+        name geometry_coil2;
+    }
 };
 
 castellatedMeshControls
@@ -81,7 +99,10 @@ castellatedMeshControls
     (
         // Can be done implicitely with "implicitFeatureSnap" in snapControls{}
         // for OpenFOAM 2.2.0 or higher
-        {file "geometry_conductor.eMesh"; level 4;}
+        {file "geometry_conductor.eMesh"; level 3;}
+        {file "geometry_coil0.eMesh"; level 2;}
+        {file "geometry_coil1.eMesh"; level 2;}
+        {file "geometry_coil2.eMesh"; level 2;}
 
     );
 
@@ -92,12 +113,45 @@ castellatedMeshControls
     {
         geometry_conductor
         {
-            level (4 4);
+            level (3 3);
 
             cellZone geometry_conductor;
             cellZoneInside inside;
 
             faceZone conductor;
+            faceType internal;
+        }
+
+        geometry_coil0
+        {
+            level (2 3);
+
+            cellZone geometry_coil0;
+            cellZoneInside inside;
+
+            faceZone coil0;
+            faceType internal;
+        }
+
+        geometry_coil1
+        {
+            level (2 3);
+
+            cellZone geometry_coil1;
+            cellZoneInside inside;
+
+            faceZone coil1;
+            faceType internal;
+        }
+
+        geometry_coil2
+        {
+            level (2 3);
+
+            cellZone geometry_coil2;
+            cellZoneInside inside;
+
+            faceZone coil2;
             faceType internal;
         }
     }
@@ -124,13 +178,40 @@ castellatedMeshControls
         geometry_conductor
         {
             mode inside;
-            levels ((1e-15 4));
+            levels ((1e-15 3));
         }
 
         geometry_conductor_layer
         {
             mode inside;
-            levels ((1e-15 3));
+            levels ((1e-15 2));
+        }
+
+        geometry_coil0
+        {
+//             mode inside;
+//             levels ((1e-15 3));
+
+            mode distance;
+            levels ((0.015 2) (0.04 1));
+        }
+
+        geometry_coil1
+        {
+//             mode inside;
+//             levels ((1e-15 3));
+
+            mode distance;
+            levels ((0.015 2) (0.04 1));
+        }
+
+        geometry_coil2
+        {
+//             mode inside;
+//             levels ((1e-15 3));
+
+            mode distance;
+            levels ((0.015 2) (0.04 1));
         }
     }
 
