@@ -38,11 +38,71 @@ void Foam::interTrackEddyCurrentApp::Manager::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// TODO: Move to conductor region
+void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emPrevC::create
+(const word& ccase) const
+{
+    set
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                "emPrevC",
+                time().timeName(),
+                mesh()[Region::CONDUCTOR],
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh()[Region::CONDUCTOR],
+            dimensionedVector
+            (
+                word(),
+                dimLength,
+                vector::zero
+            ),
+            zeroGradientFvPatchVectorField::typeName
+        )
+    );
+}
+
+
+// TODO: Move to conductor region
+void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emRelDeltaA::create
+(const word& init) const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "emRelDeltaA",
+                time().timeName(),
+                mesh()[Region::CONDUCTOR],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()[Region::CONDUCTOR],
+            dimensionedScalar
+            (
+                word(),
+                dimless,
+                0.0
+            ),
+            zeroGradientFvPatchScalarField::typeName
+        )
+    );
+}
+
 void Foam::interTrackEddyCurrentApp::Manager::Storage::create
 (
     const word& ccase
 ) const
-{}
+{
+    item_emPrevC().enable();
+    item_emRelDeltaA().enable();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -142,13 +202,6 @@ Foam::interTrackEddyCurrentApp::Manager::~Manager()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-Foam::interTrackEddyCurrentApp::Manager::Control&
-Foam::interTrackEddyCurrentApp::Manager::control() const
-{
-    return interTrackAppManager().control();
-}
 
 Foam::interTrackApp::Manager&
 Foam::interTrackEddyCurrentApp::Manager::interTrackAppManager() const

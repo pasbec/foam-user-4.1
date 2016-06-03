@@ -36,6 +36,7 @@ SourceFiles
 #define interTrackEddyCurrentAppManager_H
 
 #include "interTrackEddyCurrentAppInclude.H"
+#include "interTrackEddyCurrentAppControl.H"
 
 #include "interTrackAppManager.H"
 #include "eddyCurrentAppManager.H"
@@ -61,17 +62,26 @@ public:
 
     // Public typedefs and forward declarations
 
-        typedef interTrackApp::Control Control;
+        typedef interTrackEddyCurrentApp::Control Control;
         class Settings;
         class Storage;
 
     // Solver Manager Construction
+
+        SM_GLOBALCONTROL_ADD_P1(Control, mesh())
 
         SM_GLOBALSETTINGS_NEW();
         SM_GLOBALSETTINGS_ADD();
 
 
         SM_GLOBALSTORAGE_NEW();
+
+            //- Cell centres from last electromagnetic update
+            SM_GLOBALITEM_ADD(volVectorField, emPrevC);
+
+            //- Relative change of A amplitude
+            SM_GLOBALITEM_ADD(volScalarField, emRelDeltaA);
+
         SM_GLOBALSTORAGE_ADD();
 
 
@@ -119,9 +129,6 @@ public:
         virtual ~Manager();
 
     // Public Member Functions
-
-        //- Control
-        virtual Control& control() const;
 
         // Managers
 

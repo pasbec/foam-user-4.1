@@ -263,6 +263,10 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::internalA
     ComplexPart part
 ) const
 {
+    Info << "Biot-Savart for A on internal field"
+        << " (" << part << ")"
+        << endl;
+
     return calcA(mesh_.C().internalField(), part);
 }
 
@@ -273,6 +277,11 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
     ComplexPart part
 ) const
 {
+    Info << "Biot-Savart for A on boundary field"
+        << " of patch " << "'" << mesh_.boundaryMesh()[patchI].name() << "'"
+        << " (" << part << ")"
+        << endl;
+
     return calcA(mesh_.C().boundaryField()[patchI], part);
 }
 
@@ -285,7 +294,12 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
 {
     label patchI = mesh_.boundaryMesh().findPatchID(patchName);
 
-    return boundaryPatchA(patchI, part);
+    Info << "Biot-Savart for A on boundary field "
+        << " of patch " << "'" << patchName << "'"
+        << " (" << part << ")"
+        << endl;
+
+    return calcA(mesh_.C().boundaryField()[patchI], part);
 }
 
 
@@ -341,6 +355,10 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::internalB
     ComplexPart part
 ) const
 {
+    Info << "Biot-Savart for B on internal field"
+        << " (" << part << ")"
+        << endl;
+
     return calcB(mesh_.C().internalField(), part);
 }
 
@@ -351,6 +369,11 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
     ComplexPart part
 ) const
 {
+    Info << "Biot-Savart for B on boundary field"
+        << " of patch " << "'" << mesh_.boundaryMesh()[patchI].name() << "'"
+        << " (" << part << ")"
+        << endl;
+
     return calcB(mesh_.C().boundaryField()[patchI], part);
 }
 
@@ -362,6 +385,11 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
 ) const
 {
     label patchI = mesh_.boundaryMesh().findPatchID(patchName);
+
+    Info << "Biot-Savart for B on boundary field "
+        << " of patch " << "'" << patchName << "'"
+        << " (" << part << ")"
+        << endl;
 
     return boundaryPatchB(patchI, part);
 }

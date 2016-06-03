@@ -21,23 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    ...
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackEddyCurrentApp_H
-#define interTrackEddyCurrentApp_H
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#include "interTrackEddyCurrentAppInclude.H"
-#include "interTrackEddyCurrentAppRegion.H"
-#include "interTrackEddyCurrentAppControl.H"
-#include "interTrackEddyCurrentAppManager.H"
+inline bool
+Foam::interTrackEddyCurrentApp::Control::updateZeroCounter() const
+{
+    return (emUpdateData_.counter == 0);
+}
 
-#include "fvCFD.H"
+inline bool
+Foam::interTrackEddyCurrentApp::Control::updateOutputTimeIndex() const
+{
+    return (emUpdateData_.outputTimeIndex > 0)
+        && (emUpdateData_.outputTimeIndex % emSettings_.outputTimeIndexCycle == 0);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+inline bool
+Foam::interTrackEddyCurrentApp::Control::updateTimeIndex() const
+{
+    return (mesh_.time().timeIndex() > 0)
+        && (mesh_.time().timeIndex() % emSettings_.timeIndexCycle == 0);
+}
 
-#endif
+inline bool
+Foam::interTrackEddyCurrentApp::Control::updateTime() const
+{
+    return (mesh_.time().value() - emUpdateData_.lastTime > emSettings_.timeCycle);
+}
 
 // ************************************************************************* //
