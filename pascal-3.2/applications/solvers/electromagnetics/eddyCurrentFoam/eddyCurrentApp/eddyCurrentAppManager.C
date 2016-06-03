@@ -117,7 +117,6 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
-// TODO
                 IOobject::AUTO_WRITE
             ),
             mesh(),
@@ -146,7 +145,6 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
-// TODO
                 IOobject::AUTO_WRITE
             ),
             mesh(),

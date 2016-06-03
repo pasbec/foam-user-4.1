@@ -1,8 +1,8 @@
 
     // Calculate B
     {
-        globalStorage.BRe()[DEFAULT] == fvc::curl(globalStorage.ARe()[DEFAULT]);
-        globalStorage.BIm()[DEFAULT] == fvc::curl(globalStorage.AIm()[DEFAULT]);
+        globalStorage.BRe()[DEFAULT] = fvc::curl(globalStorage.ARe()[DEFAULT]);
+        globalStorage.BIm()[DEFAULT] = fvc::curl(globalStorage.AIm()[DEFAULT]);
 
         // Update B in conductor region
         globalStorage.BRe().mapExtrapolate(CONDUCTOR);

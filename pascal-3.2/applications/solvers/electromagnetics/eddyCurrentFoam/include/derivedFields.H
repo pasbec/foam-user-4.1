@@ -18,8 +18,8 @@
         volVectorField& BIm = globalStorage.BIm()[CONDUCTOR];
 
         // Eddy current density
-        storage.jRe() ==   omega0 * sigma * AIm - sigma * VReGrad;
-        storage.jIm() == - omega0 * sigma * ARe - sigma * VImGrad;
+        storage.jRe() =   omega0 * sigma * AIm - sigma * VReGrad;
+        storage.jIm() = - omega0 * sigma * ARe - sigma * VImGrad;
 
         if (globalSettings.biotSavart)
         {
