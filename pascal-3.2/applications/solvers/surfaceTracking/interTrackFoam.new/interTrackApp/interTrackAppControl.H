@@ -32,6 +32,8 @@ Description
 #ifndef interTrackAppControl_H
 #define interTrackAppControl_H
 
+#include "interTrackAppInclude.H"
+
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

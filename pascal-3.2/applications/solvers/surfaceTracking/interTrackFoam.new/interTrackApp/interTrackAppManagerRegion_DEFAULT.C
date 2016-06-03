@@ -263,7 +263,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create
                 mesh(),
                 dimensionedVector
                 (
-                    "F",
+                    word(),
                     dimForce/dimVolume,
                     vector::zero
                 ),
