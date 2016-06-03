@@ -43,6 +43,8 @@ SourceFiles
 #include "foamTime.H"
 #include "wordIOList.H"
 
+// TODO [High]: Destructor
+
 // TODO [High]: Finish parallel face mapping
 // TODO [High]: faceRegionAddressing and faceMap does not seem to be the same (flip-sign!!!)
 // TODO [High]: How to deal with faceRegionAddressing and faceMap, properly?

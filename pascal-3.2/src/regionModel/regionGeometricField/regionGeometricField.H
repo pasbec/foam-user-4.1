@@ -161,7 +161,7 @@ public:
 
     // Destructor
 
-        virtual ~regionGeometricField() {};
+        virtual ~regionGeometricField();
 
     // Member Functions
 

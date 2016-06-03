@@ -39,6 +39,8 @@ SourceFiles
 
 #include "regionPolyMesh.H"
 
+// TODO [High]: Destructor
+
 // TODO [High]: Derive regionPointMesh from regionGeoMesh<regionPolyMesh>
 
 // TODO [High]: Implement access functions for point mapping

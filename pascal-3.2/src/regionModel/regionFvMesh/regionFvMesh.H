@@ -39,6 +39,8 @@ SourceFiles
 
 #include "regionPolyMesh.H"
 
+// TODO [High]: Destructor
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

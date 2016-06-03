@@ -281,6 +281,31 @@ regionGeometricField
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+~regionGeometricField()
+{
+    forAll (regionNames_, regionI)
+    {
+        if (debug)
+        {
+            Info << "regionGeometricField::~regionGeometricField() : "
+                << "Delete field for region "
+                << regionMesh_.regionName(regionI)
+                << endl;
+        }
+
+        delete fields_[regionI];
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template
