@@ -54,8 +54,7 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-    // Init eddy-current app
+    // Init eddyCurrentApp
     {
         using namespace eddyCurrentApp;
         using namespace eddyCurrentApp::Region;
@@ -76,10 +75,13 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Init interface tracking app
+    // Init interTrackEddyCurrentApp
     {
         using namespace interTrackEddyCurrentApp;
         using namespace interTrackEddyCurrentApp::Region;
+
+        eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
+        eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);
 
         multiManager.storage().emPrevC() =
             multiManager.mesh()[Region::CONDUCTOR].C();

@@ -53,8 +53,6 @@ void Foam::interTrackEddyCurrentApp::Control::read()
         emUpdateDict_.lookupOrAddDefault<int>("outputTimeIndex", 0);
     emUpdateData_.lastTime =
         emUpdateDict_.lookupOrAddDefault<scalar>("lastTime", -VGREAT);
-
-Info << "DEBUG | emUpdateDict_ = " << emUpdateDict_ << endl;
 }
 
 bool Foam::interTrackEddyCurrentApp::Control::criteriaSatisfied()
@@ -185,12 +183,11 @@ bool Foam::interTrackEddyCurrentApp::Control::updateRelDeltaA() const
 
 bool Foam::interTrackEddyCurrentApp::Control::update() const
 {
-Info << "DEBUG | updateZeroCounter() = " << updateZeroCounter() << endl;
-Info << "DEBUG | updateOutputTimeIndex() = " << updateOutputTimeIndex() << endl;
-Info << "DEBUG | updateTimeIndex() = " << updateTimeIndex() << endl;
-Info << "DEBUG | updateTime() = " << updateTime() << endl;
-Info << "DEBUG | updateRelDeltaA() = " << updateRelDeltaA() << endl;
-
+// Info << "DEBUG | updateZeroCounter() = " << updateZeroCounter() << endl;
+// Info << "DEBUG | updateOutputTimeIndex() = " << updateOutputTimeIndex() << endl;
+// Info << "DEBUG | updateTimeIndex() = " << updateTimeIndex() << endl;
+// Info << "DEBUG | updateTime() = " << updateTime() << endl;
+// Info << "DEBUG | updateRelDeltaA() = " << updateRelDeltaA() << endl;
     return updateZeroCounter()
         || updateOutputTimeIndex()
         || updateTimeIndex()
