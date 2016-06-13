@@ -10,8 +10,8 @@ wmake interFreeFoam || exit 1
 wmake interFreeFoam.new || exit 1
 
 
-wmake interTrackFoam.new || exit 1
-
 wmake all trackedSurface.new || exit 1
+
+wmake interTrackFoam.new || exit 1
 
 wmake interTrackEddyCurrentFoam.new || exit 1
