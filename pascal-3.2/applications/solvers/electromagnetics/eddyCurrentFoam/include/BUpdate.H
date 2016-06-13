@@ -16,6 +16,11 @@
             globalStorage.BRe()[CONDUCTOR] += fvc::curl(globalStorage.A0Re()[CONDUCTOR]);
             globalStorage.BIm()[CONDUCTOR] += fvc::curl(globalStorage.A0Im()[CONDUCTOR]);
 
+            // Update boundary field of B
+            globalStorage.BRe().extrapolateBoundaryField(CONDUCTOR);
+            globalStorage.BIm().extrapolateBoundaryField(CONDUCTOR);
+
+            // Reverse map the solution of B
             globalStorage.BRe().rmap(CONDUCTOR);
             globalStorage.BIm().rmap(CONDUCTOR);
         }
