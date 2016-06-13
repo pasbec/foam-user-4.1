@@ -188,6 +188,7 @@ bool Foam::interTrackEddyCurrentApp::Control::update() const
 // Info << "DEBUG | updateTimeIndex() = " << updateTimeIndex() << endl;
 // Info << "DEBUG | updateTime() = " << updateTime() << endl;
 // Info << "DEBUG | updateRelDeltaA() = " << updateRelDeltaA() << endl;
+
     return updateZeroCounter()
         || updateOutputTimeIndex()
         || updateTimeIndex()

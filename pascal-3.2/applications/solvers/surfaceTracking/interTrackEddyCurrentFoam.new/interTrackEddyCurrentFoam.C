@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// TODO: Make this nicer!
     // Init eddyCurrentApp
     {
         using namespace eddyCurrentApp;
@@ -67,6 +68,7 @@ int main(int argc, char *argv[])
 
         {
 #           include "AVLoop_AUpdate.H"
+
 #           include "AVLoop_VGradUpdate.H"
 
 #           include "BUpdate.H"
@@ -75,6 +77,7 @@ int main(int argc, char *argv[])
         }
     }
 
+// TODO: Make this nicer!
     // Init interTrackEddyCurrentApp
     {
         using namespace interTrackEddyCurrentApp;
@@ -87,9 +90,29 @@ int main(int argc, char *argv[])
             multiManager.mesh()[Region::CONDUCTOR].C();
     }
 
-    // Init/Read controls
+// TODO: Make this nicer!
+    // Init interTrackApp
     {
-        multiManager.control().loop();
+        using namespace interTrackApp;
+        using namespace interTrackApp::Region;
+
+        Manager& manager = interTrackAppManager;
+
+        SM_GLOBALREGIONSCOPE(DEFAULT);
+
+        const volVectorField& FL =
+            eddyCurrentAppManager.storage().FL()[Region::DEFAULT];
+        const volScalarField& pB =
+            eddyCurrentAppManager.storage().pB()[Region::DEFAULT];
+
+        // Use Lorentz force as volume force in fluid region
+        storage.F() = FL;
+
+// // TODO: Magnetic pressure?
+//         pB *= lorentzForceRotationalFactor;
+//
+//         F = FL + fvc::grad(pB);
+//         F *= lorentzForceVolumeFactor;
     }
 
     while (multiManager.run())

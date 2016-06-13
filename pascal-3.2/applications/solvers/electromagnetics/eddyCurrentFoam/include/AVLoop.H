@@ -1,11 +1,7 @@
 
-    // Init gradient of V in first iteration
-    // in case of a three-dimensional mesh
-    if (control.meshIs3D())
-    {
-#       include "AVLoop_AUpdate.H"
-#       include "AVLoop_VGradUpdate.H"
-    }
+    // Init
+#   include "AVLoop_AUpdate.H"
+#   include "AVLoop_VGradUpdate.H"
 
     // AV loop
     while (control.loop())
@@ -16,19 +12,16 @@
 
 #           include "AVLoop_AUpdate.H"
 
-            // The electric scalar potential is only necessary
-            // in case of a three-dimensional mesh
-            if (control.meshIs3D())
-            {
-
 // TODO: Fix relaxation
+//             if (control.meshIs3D())
+//             {
 //                 // Relax A
 //                 control.relax(globalStorage.ARe());
 //                 control.relax(globalStorage.AIm());
+//             }
 
-#               include "AVLoop_VEqn.H"
+#           include "AVLoop_VEqn.H"
 
-#               include "AVLoop_VGradUpdate.H"
-            }
+#           include "AVLoop_VGradUpdate.H"
         }
     }
