@@ -5,8 +5,8 @@
         globalStorage.BIm()[DEFAULT] = fvc::curl(globalStorage.AIm()[DEFAULT]);
 
         // Update B in conductor region
-        globalStorage.BRe().mapExtrapolate(CONDUCTOR);
-        globalStorage.BIm().mapExtrapolate(CONDUCTOR);
+        globalStorage.BRe().map(CONDUCTOR);
+        globalStorage.BIm().map(CONDUCTOR);
 
         // If Biot-Savart IS used, A0 in the non-cunducting region
         // is NOT calculated. Thus, we are not allowed to do fvc::curl(A + A0)

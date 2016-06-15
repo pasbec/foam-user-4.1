@@ -128,6 +128,9 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
 
         # Touch paraFoam files
         paraviewTouchOpenFOAM
+        for region in $regionlist; do
+            paraviewTouchOpenFOAM "$region"
+        done
 
     fi
 
@@ -137,8 +140,18 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         runApplication \
             decomposePar || exit 1
 
+        # Decompose mesh
+        # for regions
+        for region in $regionlist; do
+            runApplication -r "$region" \
+                decomposePar -region $region || exit 1
+        done
+
         # Touch paraFoam files
         paraviewTouchOpenFOAMParallel
+        for region in $regionlist; do
+            paraviewTouchOpenFOAMParallel "$region"
+        done
     fi
 fi
 

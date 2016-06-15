@@ -28,13 +28,13 @@
         }
 
         // Time-averaged Lorentz-force
-        FL == 0.5 * ( (storage.jRe() ^ BRe)
-                    + (storage.jIm() ^ BIm) );
+        FL = 0.5 * ( (storage.jRe() ^ BRe)
+                   + (storage.jIm() ^ BIm) );
 
         // Time-averaged magnetic pressure
-        pB == 0.5 * physicalConstant::rMu0
-            * 0.5 * ( (BRe & BRe)
-                    + (BIm & BIm) );
+        pB = 0.5 * physicalConstant::rMu0
+           * 0.5 * ( (BRe & BRe)
+                   + (BIm & BIm) );
     }
 
     // Derived fields in default region

@@ -480,9 +480,11 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::mapBoundaryField
             }
         }
     }
+
+    vf.correctBoundaryConditions();
 };
 
-// TODO: Parallel?
+
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
@@ -509,7 +511,10 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::copyInternalBoun
                 vf.boundaryField()[patchI].patchInternalField();
         }
     }
+
+    vf.correctBoundaryConditions();
 };
+
 
 // TODO: Parallel?
 template
@@ -583,7 +588,10 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolateBound
             }
         }
     }
+
+    vf.correctBoundaryConditions();
 };
+
 
 template
 <

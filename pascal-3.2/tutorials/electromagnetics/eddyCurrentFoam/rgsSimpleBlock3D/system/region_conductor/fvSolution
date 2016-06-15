@@ -40,8 +40,8 @@ solvers
         minIter                  0;
         maxIter                  300;
 
-        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
-                                      // GAMG, SymGaussSeidel, diagonal, none
+        preconditioner           DIC; // DIC, DILU, FDIC
+                                      // GAMG, diagonal, none
     }
 }
 

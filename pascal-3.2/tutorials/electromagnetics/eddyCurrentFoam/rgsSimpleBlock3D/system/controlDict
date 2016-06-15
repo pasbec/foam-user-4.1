@@ -49,8 +49,7 @@ cycleWrite          0;
 // writeFormat         binary; // ascii
 writeFormat         ascii;
 
-// writePrecision      8;
-writePrecision      12;
+writePrecision      8;
 
 writeCompression    uncompressed;
 
@@ -63,6 +62,11 @@ timePrecision       8;
 runTimeModifiable   yes;
 
 // **************************** DEBUG SWITCHES ***************************** //
+
+// OptimisationSwitches
+// {
+//     commsType       nonBlocking;
+// }
 
 // *************************** FUNCTION OBJECTS **************************** //
 
