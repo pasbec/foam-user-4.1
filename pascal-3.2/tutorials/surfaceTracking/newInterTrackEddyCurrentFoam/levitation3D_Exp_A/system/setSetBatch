@@ -1,0 +1,41 @@
+### Geometry
+
+# All
+
+cellSet  cellSet_geometry_all             new    sphereToCell      (0.0 0.0 0.0) 1
+
+# Conductor
+
+cellSet  cellSet_geometry_conductor       new    sphereToCell      (0.0 0.0 0.0) 0.002745
+
+# Background
+
+cellSet  cellSet_geometry_background      new    setToCell      cellSet_geometry_all
+cellSet  cellSet_geometry_background      delete setToCell      cellSet_geometry_conductor
+cellSet  cellSet_geometry_background_old  remove
+
+
+
+### Materials
+
+cellSet cellSet_material_conductor        new    setToCell      cellSet_geometry_conductor
+
+cellSet cellSet_material_air              new    setToCell      cellSet_geometry_background
+
+
+
+### Regions
+
+cellSet cellSet_region_conductor          new    setToCell      cellSet_geometry_conductor
+
+cellSet cellSet_region_space              new    setToCell      cellSet_geometry_background
+
+cellSet cellSet_region_fluid              new    setToCell      cellSet_geometry_conductor
+
+cellSet cellSet_region_buffer             new    setToCell      cellSet_geometry_background
+
+
+
+### End
+
+quit

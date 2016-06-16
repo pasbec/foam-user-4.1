@@ -1,0 +1,78 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.2                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// ************************* SIMLUTAITON TIMES ***************************** //
+
+application         interTrackEddyCurrentFoam;
+
+startFrom           latestTime;
+
+startTime           0;
+
+stopAt              endTime;
+
+endTime             10.0;
+
+// *************************** TIME STEPPING ******************************* //
+
+deltaT              1;
+
+adjustTimeStep      yes;
+
+// maxCo               5.0;
+maxCo               3.0;
+
+maxDeltaT           5e-5;
+
+// *************************** OUTPUT SETTINGS ***************************** //
+
+writeControl        adjustableRunTime;
+// writeControl        timeStep;
+
+writeInterval       0.001;
+// writeInterval       1;
+
+purgeWrite          0;
+
+cycleWrite          0;
+
+writeFormat         binary; // ascii
+// writeFormat         ascii;
+
+writePrecision      8;
+
+writeCompression    uncompressed;
+
+timeFormat          general;
+
+timePrecision       8;
+
+// **************************** OTHER SETTINGS ***************************** //
+
+runTimeModifiable   yes;
+
+OptimisationSwitches
+{
+    commsType       nonBlocking;
+}
+
+// **************************** DEBUG SWITCHES ***************************** //
+
+// *************************** FUNCTION OBJECTS **************************** //
+
+// ******************************* LIBRARIES ******************************* //
+
+// ************************************************************************* //

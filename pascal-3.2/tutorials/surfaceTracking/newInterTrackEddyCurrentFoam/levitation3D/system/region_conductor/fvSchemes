@@ -1,0 +1,77 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.2                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default                           none;
+}
+
+gradSchemes
+{
+    default                           none;
+
+//     curl(A0Re)                        Gauss linear;
+//     curl(A0Im)                        Gauss linear;
+    curl(A0Re)                        leastSquares;
+    curl(A0Im)                        leastSquares;
+
+//     snGradCorr(A0Re)                  Gauss linear;
+//     snGradCorr(A0Im)                  Gauss linear;
+    snGradCorr(A0Re)                  leastSquares;
+    snGradCorr(A0Im)                  leastSquares;
+
+//     grad(sigma)                       Gauss linear;
+    grad(sigma)                       leastSquares;
+
+//     grad(VRe)                         Gauss linear;
+//     grad(VIm)                         Gauss linear;
+    grad(VRe)                         leastSquares;
+    grad(VIm)                         leastSquares;
+
+//     snGradCorr(VRe)                   Gauss linear;
+//     snGradCorr(VIm)                   Gauss linear;
+    snGradCorr(VRe)                   leastSquares;
+    snGradCorr(VIm)                   leastSquares;
+}
+
+divSchemes
+{
+    default                           none;
+}
+
+laplacianSchemes
+{
+    default                           none;
+
+    laplacian(A0Re)                   Gauss linear corrected;
+    laplacian(A0Im)                   Gauss linear corrected;
+
+    laplacian(sigma,VRe)              Gauss linear corrected;
+    laplacian(sigma,VIm)              Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default                           none;
+
+    interpolate(A0Re)                 linear;
+    interpolate(A0Im)                 linear;
+
+    interpolate(ARe)                  linear;
+    interpolate(AIm)                  linear;
+}
+
+// ************************************************************************* //
