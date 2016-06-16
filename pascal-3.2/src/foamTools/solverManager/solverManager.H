@@ -204,7 +204,7 @@ private:
         // Dictionaries
 
             //- Properties dictionary
-            IOdictionary propertiesDict_;
+            mutable IOdictionary propertiesDict_;
 
         // Evolution
 

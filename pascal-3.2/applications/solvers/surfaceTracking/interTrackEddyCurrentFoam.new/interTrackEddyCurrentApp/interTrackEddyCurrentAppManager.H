@@ -68,7 +68,12 @@ public:
 
     // Solver Manager Construction
 
-        SM_GLOBALCONTROL_ADD_P1(Control, mesh())
+        SM_GLOBALCONTROL_ADD_P2
+        (
+            Control,
+            mesh(),
+            propertiesDict().subDict("emUpdate")
+        );
 
         SM_GLOBALSETTINGS_NEW();
         SM_GLOBALSETTINGS_ADD();

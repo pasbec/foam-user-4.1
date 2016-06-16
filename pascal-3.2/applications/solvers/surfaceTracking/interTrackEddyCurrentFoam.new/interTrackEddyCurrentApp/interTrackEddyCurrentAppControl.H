@@ -100,22 +100,20 @@ protected:
             //- Estimated relative deviation of A
             volScalarField& relDeltaA_;
 
-// TODO: Settings
-//             //- Electromagnetic settings dictionary
-//             const dictionary& emSettingsDict_;
+            //- Electromagnetic settings dictionary
+            const dictionary& emUpdateSettingsDict_;
 
             //- Electromagnetic update data
             emSettings emSettings_;
 
             //- Electromagnetic update dictionary
-            IOdictionary emUpdateDict_;
+            IOdictionary emUpdateDataDict_;
 
             //- Electromagnetic update data
             emUpdateData emUpdateData_;
 
     // Protected Member Functions
 
-// TODO: Settings
         //- Read controls
         virtual void read();
 
@@ -155,6 +153,7 @@ public:
         Control
         (
             regionDynamicFvMesh& mesh,
+            const dictionary& emUpdateSettingsDict,
             const word& dictName="INTERTRACKEDDYCURRENT"
         );
 

@@ -235,6 +235,8 @@ solverManager<MESH>::messages() const
 template <class MESH>
 void solverManager<MESH>::read() const
 {
+    propertiesDict_.readIfModified();
+
     settings().checkRead();
     regions().checkRead();
 }
