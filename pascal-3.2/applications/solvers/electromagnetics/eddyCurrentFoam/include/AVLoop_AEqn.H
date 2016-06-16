@@ -144,6 +144,19 @@
             // Prepare block system for current component
             fvBlockMatrix<vector2> AcmptEqn(ACmpt);
 
+            // Lookup solver type for AcmptEqn
+            word solverType =
+                mesh.solutionDict().subDict("solvers").
+                subDict(AcmptEqn.psi().name()).lookup("solver");
+
+            // Force diag/upper/lower square for AMG (matrix for A is asymmetric)
+            if (solverType == "AMG")
+            {
+                Field<tensor2>& AEqnD = AcmptEqn.diag().asSquare(); AEqnD = tensor2::zero;
+                Field<tensor2>& AEqnU = AcmptEqn.upper().asSquare(); AEqnU = tensor2::zero;
+                Field<tensor2>& AEqnL = AcmptEqn.lower().asSquare(); AEqnL = tensor2::zero;
+            }
+
             // Insert equations into block matrix
             AcmptEqn.insertEquation(0, AReCmptEqn);
             AcmptEqn.insertEquation(1, AImCmptEqn);

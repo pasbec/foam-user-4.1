@@ -68,7 +68,7 @@ public:
 
     // Solver Manager Construction
 
-        SM_GLOBALCONTROL_ADD_P1(Control, mesh())
+        SM_GLOBALCONTROL_ADD_P1(Control, mesh());
 
 
         SM_GLOBALSETTINGS_NEW();
