@@ -301,7 +301,6 @@ void trackedSurface::initControlPointsPosition()
     const faceList& faces = aMesh().faces();
     const pointField& points = aMesh().points();
 
-
     pointField newPoints = points + displacement;
 
     scalarField sweptVol(faces.size(), 0.0);

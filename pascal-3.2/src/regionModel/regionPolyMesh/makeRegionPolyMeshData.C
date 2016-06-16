@@ -550,6 +550,7 @@ labelIOList* regionPolyMesh::newCellRegionProcMap
 
             labelIOList& cellRegionProcMap = *cellRegionProcMapPtr;
 
+// TODO: This is a damn slow NxN-operation!
             forAll (procMap,cellI)
             {
                 cellRegionProcMap[cellI] =

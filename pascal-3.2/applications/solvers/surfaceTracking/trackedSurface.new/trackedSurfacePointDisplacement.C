@@ -180,148 +180,155 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
 //             mesh().oldPoints()[meshPoints[pI]];
 //     }
 
-    forAll (patchMirrorPoints, patchI)
+    forAll (aMesh().boundary(), patchI)
     {
-        patchMirrorPoints.set
+        if
         (
-            patchI,
-            new vectorField
-            (
-                aMesh().boundary()[patchI].faPatch::size(),
-                vector::zero
-            )
-        );
-
-        vectorField N =
-            aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
-
-        vectorField Nr = N;
-
-        const labelList& eFaces =
-            aMesh().boundary()[patchI].edgeFaces();
-
-        // Correct Nr according to specified contact angle
-        if (contactAnglePtr_)
+            aMesh().boundary()[patchI].type()
+         != processorFaPatch::typeName
+        )
         {
-            label ngbPolyPatchID =
-                aMesh().boundary()[patchI].ngbPolyPatchIndex();
-
-            if (ngbPolyPatchID != -1)
-            {
-                if
+            patchMirrorPoints.set
+            (
+                patchI,
+                new vectorField
                 (
-                    isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
+                    aMesh().boundary()[patchI].faPatch::size(),
+                    vector::zero
                 )
+            );
+
+            vectorField N =
+                aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
+
+            vectorField Nr = N;
+
+            const labelList& eFaces =
+                aMesh().boundary()[patchI].edgeFaces();
+
+            // Correct Nr according to specified contact angle
+            if (contactAnglePtr_)
+            {
+                label ngbPolyPatchID =
+                    aMesh().boundary()[patchI].ngbPolyPatchIndex();
+
+                if (ngbPolyPatchID != -1)
                 {
-                    scalarField& contactAngle =
-                        contactAnglePtr_->boundaryField()[patchI];
-
-                    scalarField rotAngle = 90 - contactAngle;
-
-//                     rotAngle = average(rotAngle);
-
-                    rotAngle *= M_PI/180.0;
-
-                    vectorField rotationAxis(N.size(), vector::zero);
-
-                    const vectorField& pEdgN =
-                        aMesh().edgeAreaNormals().boundaryField()[patchI];
-
-                    rotationAxis = (N^pEdgN);
-
-                    const edgeList::subList patchEdges =
-                        aMesh().boundary()[patchI].patchSlice(aMesh().edges());
-
-                    forAll (rotationAxis, edgeI)
+                    if
+                    (
+                        isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
+                    )
                     {
+                        scalarField& contactAngle =
+                            contactAnglePtr_->boundaryField()[patchI];
+
+                        scalarField rotAngle = 90 - contactAngle;
+
+//                         rotAngle = average(rotAngle);
+
+                        rotAngle *= M_PI/180.0;
+
+                        vectorField rotationAxis(N.size(), vector::zero);
+
+                        const vectorField& pEdgN =
+                            aMesh().edgeAreaNormals().boundaryField()[patchI];
+
+                        rotationAxis = (N^pEdgN);
+
+                        const edgeList::subList patchEdges =
+                            aMesh().boundary()[patchI].patchSlice(aMesh().edges());
+
+                        forAll (rotationAxis, edgeI)
+                        {
 // TEST: Why oldPoints?
-//                         vector e = patchEdges[edgeI].vec(oldPoints);
-                        vector e = patchEdges[edgeI].vec(aMesh().points());
+//                             vector e = patchEdges[edgeI].vec(oldPoints);
+                            vector e = patchEdges[edgeI].vec(aMesh().points());
 
-                        // Adjust direction
-                        rotationAxis[edgeI] =
-                            e*(e&rotationAxis[edgeI])
-                           /mag((e&rotationAxis[edgeI]));
+                            // Adjust direction
+                            rotationAxis[edgeI] =
+                                e*(e&rotationAxis[edgeI])
+                            /mag((e&rotationAxis[edgeI]));
+                        }
+                        rotationAxis /= mag(rotationAxis) + SMALL;
+
+                        vectorField rotationAxis2 = rotationAxis;
+                        forAll (rotationAxis2, edgeI)
+                        {
+                            rotationAxis2[edgeI] =
+                                (N[edgeI]^facesDisplacementDir()[eFaces[edgeI]]);
+
+                            // Adjust direction
+                            rotationAxis2[edgeI] =
+                                rotationAxis2[edgeI]
+                            *(rotationAxis2[edgeI]&rotationAxis[edgeI])
+                            /mag((rotationAxis2[edgeI]&rotationAxis[edgeI]));
+                        }
+                        rotationAxis2 /= mag(rotationAxis2) + SMALL;
+
+                        forAll (rotationAxis, edgeI)
+                        {
+                            vector NI = N[edgeI];
+                            scalar rotAngleI = rotAngle[edgeI];
+                            vector rotAxisI = rotationAxis[edgeI];
+
+                            // Rodrigues' rotation formula
+                            Nr[edgeI] = NI*cos(rotAngleI)
+                            + rotAxisI*(rotAxisI & NI)*(1 - cos(rotAngleI))
+                            + (rotAxisI^NI)*sin(rotAngleI);
+                        }
+
+                        Nr /= mag(Nr);
+
+                        Nr = (rotationAxis^Nr);
+
+                        Nr = (Nr^rotationAxis2);
+
+                        Nr /= mag(Nr);
                     }
-                    rotationAxis /= mag(rotationAxis) + SMALL;
-
-                    vectorField rotationAxis2 = rotationAxis;
-                    forAll (rotationAxis2, edgeI)
-                    {
-                        rotationAxis2[edgeI] =
-                            (N[edgeI]^facesDisplacementDir()[eFaces[edgeI]]);
-
-                        // Adjust direction
-                        rotationAxis2[edgeI] =
-                            rotationAxis2[edgeI]
-                           *(rotationAxis2[edgeI]&rotationAxis[edgeI])
-                           /mag((rotationAxis2[edgeI]&rotationAxis[edgeI]));
-                    }
-                    rotationAxis2 /= mag(rotationAxis2) + SMALL;
-
-                    forAll (rotationAxis, edgeI)
-                    {
-                        vector NI = N[edgeI];
-                        scalar rotAngleI = rotAngle[edgeI];
-                        vector rotAxisI = rotationAxis[edgeI];
-
-                        // Rodrigues' rotation formula
-                        Nr[edgeI] = NI*cos(rotAngleI)
-                          + rotAxisI*(rotAxisI & NI)*(1 - cos(rotAngleI))
-                          + (rotAxisI^NI)*sin(rotAngleI);
-                    }
-
-                    Nr /= mag(Nr);
-
-                    Nr = (rotationAxis^Nr);
-
-                    Nr = (Nr^rotationAxis2);
-
-                    Nr /= mag(Nr);
                 }
             }
-        }
 
-        const labelList peFaces =
-            labelList::subList
-            (
-                aMesh().edgeOwner(),
-                aMesh().boundary()[patchI].faPatch::size(),
-                aMesh().boundary()[patchI].start()
-            );
+            const labelList peFaces =
+                labelList::subList
+                (
+                    aMesh().edgeOwner(),
+                    aMesh().boundary()[patchI].faPatch::size(),
+                    aMesh().boundary()[patchI].start()
+                );
 
-        const labelList& pEdges = aMesh().boundary()[patchI];
+            const labelList& pEdges = aMesh().boundary()[patchI];
 
-        vectorField peCentres(pEdges.size(), vector::zero);
-        forAll (peCentres, edgeI)
-        {
-            peCentres[edgeI] =
-                edges[pEdges[edgeI]].centre(points);
-        }
+            vectorField peCentres(pEdges.size(), vector::zero);
+            forAll (peCentres, edgeI)
+            {
+                peCentres[edgeI] =
+                    edges[pEdges[edgeI]].centre(points);
+            }
 
-        vectorField delta =
-            vectorField(controlPoints(), peFaces)
-          - peCentres;
+            vectorField delta =
+                vectorField(controlPoints(), peFaces)
+            - peCentres;
 
-//         patchMirrorPoints[patchI] =
-//             peCentres + ((I - 2*N*N)&delta);
+//             patchMirrorPoints[patchI] =
+//                 peCentres + ((I - 2*N*N)&delta);
 
-        vectorField deltaN = N * (N & delta);
+            vectorField deltaN = N * (N & delta);
 
-        vectorField deltaNr = Nr / (Nr&N) * mag(deltaN);
+            vectorField deltaNr = Nr / (Nr&N) * mag(deltaN);
 
-        patchMirrorPoints[patchI] =
-            peCentres + delta + 2*deltaNr;
+            patchMirrorPoints[patchI] =
+                peCentres + delta + 2*deltaNr;
 
 // TEST: DEBUG | Additional debugging
-        if (debug > 2)
-        {
-            writeVTKpoints
-            (
-                word("MirrorPoints")
-              + word(aMesh().boundary()[patchI].name()),
-                patchMirrorPoints[patchI]
-            );
+            if (debug > 2)
+            {
+                writeVTKpoints
+                (
+                    word("MirrorPoints")
+                  + word(aMesh().boundary()[patchI].name()),
+                    patchMirrorPoints[patchI]
+                );
+            }
         }
     }
 

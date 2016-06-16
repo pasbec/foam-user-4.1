@@ -54,6 +54,7 @@ void Foam::interTrackApp::Manager::Regions::create(const word& ccase) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// TODO: Something seems to be wrong here (after bulk mesh movement)!
 bool Foam::interTrackApp::Manager::setCoNum(scalar& CourantNumber) const
 {
     CourantNumber = 0.0;

@@ -27,6 +27,8 @@ Description
 
 #include "faSubMesh.H"
 
+// TODO: Fix FPE on parallel
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -90,7 +92,7 @@ void faSubMesh::makeFaceCurvatures() const
     {
         label subPointI = baseAreaMesh().nPoints() + facei;
 
-// TODO: This might fail for some cases!
+// TODO: This might fail for most cases!
 // WARNING
 //
 // subPointI is a GLOBAL point index, but
