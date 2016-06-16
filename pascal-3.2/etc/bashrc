@@ -63,6 +63,9 @@ fe32 ()
         env_set 'FOAM_ETC' "$FE32_FOAM_ETC"
         env_set 'FOAM_USER_ETC' "$FE32_FOAM_USER_ETC"
 
+        # Compile option (defaults to 'Opt')
+        env_set 'WM_COMPILE_OPTION' "${1:-'Opt'}"
+
         # Load new environment
         feLoad
 
