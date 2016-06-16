@@ -35,7 +35,7 @@ adjustTimeStep      yes;
 // maxCo               5.0;
 maxCo               3.0;
 
-maxDeltaT           5e-5;
+maxDeltaT           2e-5;
 
 // *************************** OUTPUT SETTINGS ***************************** //
 
@@ -64,10 +64,10 @@ timePrecision       8;
 
 runTimeModifiable   yes;
 
-OptimisationSwitches
-{
-    commsType       nonBlocking;
-}
+// OptimisationSwitches
+// {
+//     commsType       nonBlocking;
+// }
 
 // **************************** DEBUG SWITCHES ***************************** //
 

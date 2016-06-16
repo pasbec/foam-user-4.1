@@ -25,4 +25,15 @@ storage
 {
 }
 
+emUpdate
+{
+    enabled                 yes;
+
+    outputTimeIndexCycle    2147483647;
+    timeIndexCycle          2147483647;
+    timeCycle               1e+300;
+
+    relDeltaAmax            0.01;
+}
+
 // ************************************************************************* //

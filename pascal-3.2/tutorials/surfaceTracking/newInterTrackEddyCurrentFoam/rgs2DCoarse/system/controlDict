@@ -64,6 +64,11 @@ timePrecision       8;
 
 runTimeModifiable   yes;
 
+// OptimisationSwitches
+// {
+//     commsType       nonBlocking;
+// }
+
 // **************************** DEBUG SWITCHES ***************************** //
 
 // *************************** FUNCTION OBJECTS **************************** //

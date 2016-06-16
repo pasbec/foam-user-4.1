@@ -30,11 +30,11 @@ nTrackedSurfaceCorrectors                    1;
 
 interfaceDeformationLimit                    0.2;
 
-useSubMesh                                   yes;
+// useSubMesh                                   yes;
 
 correctVolume                                yes;
 
-// resetControlPoints                           yes;
+resetControlPoints                           yes;
 
 // smoothing                                    yes;
 
