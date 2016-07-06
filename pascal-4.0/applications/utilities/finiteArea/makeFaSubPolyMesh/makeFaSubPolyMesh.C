@@ -38,6 +38,8 @@ Description
 #include "cellSet.H"
 #include "triSurface.H"
 #include "fvMeshSubset.H"
+#include "Map.H"
+#include "SortableList.H"
 #include "Xfer.H"
 
 using namespace Foam;
@@ -422,102 +424,113 @@ Info << endl;
 
 Info << "DEBUG | aBMtri.points().size() = " << aBMtri.points().size() << endl;
 Info << "DEBUG | aBMtri.faces().size() = " << aBMtri.faces().size() << endl;
-// Info << "DEBUG | aBMtri.points() = " << aBMtri.points() << endl;
-// Info << "DEBUG | aBMtri.faces() = " << aBMtri.faces() << endl;
 Info << endl;
 
 // Points
 
-    labelHashSet usedCMpointLabels;
+    // Point map from base-mesh to carrier-mesh
+    // Key: Point label in base-mesh
+    // Content: Point label in carrier-mesh
+    Map<label> usedBMpointsCMmap;
 
     // Collect all base-mesh point labels from points in carrier-mesh
     forAll(cMeshSubset.pointMap(), pointI)
     {
-            usedCMpointLabels.insert(cMeshSubset.pointMap()[pointI]);
+            usedBMpointsCMmap.insert(cMeshSubset.pointMap()[pointI], pointI);
     }
 
-    // Remove all base-mesh point labels from area base-mesh
+    // Remove all base-mesh point labels of area base-mesh
     forAll(aBMdata.meshPoints, pointI)
     {
-            usedCMpointLabels.unset(aBMdata.meshPoints[pointI]);
+            usedBMpointsCMmap.erase(aBMdata.meshPoints[pointI]);
     }
 
     // Init points
-    int nPoints = usedCMpointLabels.size() + aBMtri.points().size();
+    int nPoints = usedBMpointsCMmap.size() + aBMtri.points().size();
     pointField points(nPoints, vector::zero);
+    labelList usedBMpoints = usedBMpointsCMmap.toc();
 
     // Add used points of carrier-mesh
-// TODO: Point order?
-    labelList usedCMpointLabelList = usedCMpointLabels.toc();
-    forAll(usedCMpointLabelList, pointI)
+    forAll(usedBMpoints, pointI)
     {
-        points[pointI] = mesh.points()[usedCMpointLabelList[pointI]];
+        points[pointI] = mesh.points()[usedBMpoints[pointI]];
     }
 
     // Add all points of triangulated area base-mesh
     forAll (aBMtri.points(), pointI)
     {
-        points[usedCMpointLabels.size() + pointI] = aBMtri.points()[pointI];
+        points[usedBMpoints.size() + pointI] = aBMtri.points()[pointI];
     }
 
-Info << "DEBUG | usedCMpointLabels.size() = " << usedCMpointLabels.size() << endl;
+    // Create reverse pointMap from base-mesh to carrier-mesh
+    Map<label> cMpointRmap;
+    forAll (usedBMpoints, pointI)
+    {
+        cMpointRmap.insert(usedBMpoints[pointI], pointI);
+    }
+
+    // Create reverse pointMap from base-mesh to area base-mesh
+    Map<label> aBMpointRmap;
+    forAll (aBMdata.meshPoints, pointI)
+    {
+        aBMpointRmap.insert(aBMdata.meshPoints[pointI], usedBMpoints.size() + pointI);
+    }
+
+Info << "DEBUG | usedBMpoints.size() = " << usedBMpoints.size() << endl;
 Info << "DEBUG | points.size() = " << points.size() << endl;
-// Info << "DEBUG | usedCMpointLabels.toc() = " << usedCMpointLabels.toc() << endl;
-// Info << "DEBUG | points = " << points << endl;
 Info << endl;
 
 // Faces
 
-    labelHashSet usedCMfaceLabels;
+    // Face map from base-mesh to carrier-mesh
+    // Key: Face label in base-mesh
+    // Content: Face label in carrier-mesh
+    Map<label> usedBMfacesCMmap;
 
     // Collect all base-mesh face labels from faces in carrier-mesh
     forAll(cMeshSubset.faceMap(), faceI)
     {
-            usedCMfaceLabels.insert(cMeshSubset.faceMap()[faceI]);
+            usedBMfacesCMmap.insert(cMeshSubset.faceMap()[faceI], faceI);
     }
 
-    // Remove all base-mesh face labels from area base-mesh
+    // Remove all base-mesh face labels of area base-mesh
     forAll(aBMdata.faceLabels, faceI)
     {
-            usedCMfaceLabels.unset(aBMdata.faceLabels[faceI]);
+            usedBMfacesCMmap.erase(aBMdata.faceLabels[faceI]);
     }
 
     // Init faces
-    int nFaces = usedCMfaceLabels.size() + aBMtri.faces().size();
+    int nFaces = usedBMfacesCMmap.size() + aBMtri.faces().size();
     faceList faces(nFaces);
+    labelList usedBMfaces = usedBMfacesCMmap.toc();
 
-    // Create reverse pointMap from base-mesh to carrier-mesh
-// TODO: Redcuce memory? At least tmp<> should be used here!
-    labelList cMpointRmap(mesh.points().size(),-1);
-    forAll (usedCMpointLabelList, pointI)
+    // Sort faces by temporary patchIDs
+    labelList usedBMfaceCMPatchIDs(usedBMfaces.size(), -1);
+    forAll(usedBMfaces, faceI)
     {
-        cMpointRmap[usedCMpointLabelList[pointI]] = pointI;
+        label bMfaceI = usedBMfaces[faceI];
+        label cMfaceI = usedBMfacesCMmap[bMfaceI];
+
+        usedBMfaceCMPatchIDs[faceI] = cMesh.boundaryMesh().whichPatch(cMfaceI);
     }
+    SortableList<label> sortedUsedBMfaceCMPatchIDs(usedBMfaceCMPatchIDs);
+    const labelList& usedBMfaceOrder = sortedUsedBMfaceCMPatchIDs.indices();
 
-    // Create reverse pointMap from base-mesh to area base-mesh
-// TODO: Redcuce memory? At least tmp<> should be used here!
-    labelList aBMpointRmap(mesh.points().size(),-1);
-    forAll (aBMdata.meshPoints, pointI)
+    // Add used faces of carrier-mesh in sort order of patches in carrier-mesh
+    forAll(usedBMfaces, faceI)
     {
-        aBMpointRmap[aBMdata.meshPoints[pointI]] = usedCMpointLabels.size() + pointI;
-    }
-
-    // Add used faces of carrier-mesh
-    labelList usedCMfaceLabelList = usedCMfaceLabels.toc();
-    forAll(usedCMfaceLabelList, faceI)
-    {
-        face curFace = mesh.faces()[usedCMfaceLabelList[faceI]];
+        face curFace = mesh.faces()[usedBMfaces[usedBMfaceOrder[faceI]]];
 
         // Map face vertices
         labelList pointLabels(curFace.size(), -1);
         forAll(pointLabels, pointI)
         {
-            // Point label is part of usedCMpointLabels (point from carrier-mesh)
-            if (usedCMpointLabels.found(curFace[pointI]))
+            // Point label is part of usedBMpoints (point from carrier-mesh)
+            if (usedBMpointsCMmap.found(curFace[pointI]))
             {
                 pointLabels[pointI] = cMpointRmap[curFace[pointI]];
             }
-            // Point label is NOT part of usedCMpointLabels (point from area base-mesh)
+            // Point label is NOT part of usedBMpoints (point from area base-mesh)
             else
             {
                 pointLabels[pointI] = aBMpointRmap[curFace[pointI]];
@@ -536,36 +549,95 @@ Info << endl;
         labelList pointLabels(curFace.size(), -1);
         forAll(pointLabels, pointI)
         {
-            pointLabels[pointI] = usedCMpointLabels.size() + curFace[pointI];
+            pointLabels[pointI] = usedBMpoints.size() + curFace[pointI];
         }
 
-        faces[usedCMfaceLabels.size() + faceI] = face(pointLabels);
+        faces[usedBMfaces.size() + faceI] = face(pointLabels);
     }
 
-Info << "DEBUG | usedCMfaceLabels.size() = " << usedCMfaceLabels.size() << endl;
-// Info << "DEBUG | usedCMfaceLabels.toc() = " << usedCMfaceLabels.toc() << endl;
+Info << "DEBUG | usedBMfaces.size() = " << usedBMfaces.size() << endl;
 Info << "DEBUG | faces.size() = " << faces.size() << endl;
 // Info << "DEBUG | faces = " << faces << endl;
 Info << endl;
 
-labelHashSet allPointLabels;
-forAll(faces, faceI)
-{
-    face curFace = faces[faceI];
-    forAll(curFace, pointI)
-    {
-        allPointLabels.insert(curFace[pointI]);
-    }
-}
-Info << "DEBUG | allPointLabels.size() = " << allPointLabels.size() << endl;
-// Info << "DEBUG | allPointLabels.sortedToc() = " << allPointLabels.sortedToc() << endl;
-Info << endl;
-
-// TODO FIXME: Face ordering! (Internal/Boundary/Inactive)
-
-// TODO: Cells
+// labelHashSet allPointLabels;
+// forAll(faces, faceI)
+// {
+//     face curFace = faces[faceI];
+//     forAll(curFace, pointI)
+//     {
+//         allPointLabels.insert(curFace[pointI]);
+//     }
+// }
+// Info << "DEBUG | allPointLabels.size() = " << allPointLabels.size() << endl;
+// // Info << "DEBUG | allPointLabels.sortedToc() = " << allPointLabels.sortedToc() << endl;
+// Info << endl;
 
 // TODO: Patches
+
+    // Init patch face data
+    label nInternalFaces = 0;
+    label nBoundaryFaces = 0;
+
+    // Init patch data
+    label patchI = -1;
+    label lastPatchID = -1;
+    label lastPatchStart = 0;
+    labelHashSet patchLabels;
+    Map<word> patchTypes;
+    Map<word> patchNames;
+    Map<label> patchSizes;
+    Map<label> patchStarts;
+
+    // Count patches and gather face information for carrier-mesh
+    forAll (usedBMfaces, faceI)
+    {
+        label curPatchID = sortedUsedBMfaceCMPatchIDs[faceI];
+
+        if (curPatchID < 0)
+        {
+            nInternalFaces++;
+        }
+        else
+        {
+            nBoundaryFaces++;
+
+            if (lastPatchID != curPatchID)
+            {
+                patchLabels.insert(++patchI);
+                patchTypes.insert(patchI, cMesh.boundary()[curPatchID].type());
+                patchNames.insert(patchI, cMesh.boundary()[curPatchID].name());
+                if (patchI > 0)
+                {
+                    patchSizes.insert(patchI-1, faceI - lastPatchStart);
+                }
+                patchStarts.insert(patchI, faceI);
+
+                lastPatchID = curPatchID;
+                lastPatchStart = faceI;
+            }
+        }
+    }
+    patchSizes.insert(patchI, usedBMfaces.size() - lastPatchStart);
+
+    // Add/Modify patch data for triangulated area base-mesh
+    nBoundaryFaces += aBMtri.faces().size();
+    patchLabels.insert(++patchI);
+    patchTypes.insert(patchI, "patch");
+    patchNames.insert(patchI, "triangulatedFaces");
+    patchStarts.insert(patchI, usedBMfaces.size());
+    patchSizes.insert(patchI, aBMtri.faces().size());
+
+
+Info << "DEBUG | nInternalFaces = " << nInternalFaces << endl;
+Info << "DEBUG | nBoundaryFaces = " << nBoundaryFaces << endl;
+Info << "DEBUG | patchTypes = " << patchTypes << endl;
+Info << "DEBUG | patchNames = " << patchNames << endl;
+Info << "DEBUG | patchSizes = " << patchSizes << endl;
+Info << "DEBUG | patchStarts = " << patchStarts << endl;
+Info << endl;
+
+// TODO: Cells
 
         // Create polyMesh
         polyMesh sMesh
@@ -596,10 +668,10 @@ Info << endl;
 //             0,                        // index
 //             sMesh.boundaryMesh()      // boundary mesh
 //         ).ptr();
-// 
+//
 //     // Add patches
 //     List<polyPatch*> sPatches(1, aSubPatch);
-// 
+//
 //     sMesh.addPatches(sPatches, true);
 
     // Write subMesh
@@ -609,7 +681,7 @@ Info << endl;
 
 //     // Write addressings
 //     //
-// 
+//
 //        Info << "Write faceSubAddressing ... ";
 //         labelIOList ioFaceSubAddressing
 //         (
@@ -626,7 +698,7 @@ Info << endl;
 //         );
 //         ioFaceSubAddressing.write();
 //         Info << "Done" << endl;
-// 
+//
 //         Info << "Write faceBaseAddressing ... ";
 //         labelIOList ioFaceBaseAddressing
 //         (
