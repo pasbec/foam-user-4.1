@@ -23,9 +23,9 @@ sourcePSD "$PSD/bashrc.d/source.sh"
 feClear ()
 {
     # Backup keys
-    local fe32_foam_inst_dir="$FE32_FOAM_INST_DIR"
-    local fe32_foam_etc="$FE32_FOAM_ETC"
-    local fe32_foam_user_etc="$FE32_FOAM_USER_ETC"
+    local fe40_foam_inst_dir="$FE40_FOAM_INST_DIR"
+    local fe40_foam_etc="$FE40_FOAM_ETC"
+    local fe40_foam_user_etc="$FE40_FOAM_USER_ETC"
 
     # Clear environment
     env_unsetRegex WM_.*
@@ -34,9 +34,9 @@ feClear ()
     env_removeAll 'foam-extend'
 
     # Restore keys
-    env_set 'FE32_FOAM_INST_DIR' "$fe32_foam_inst_dir"
-    env_set 'FE32_FOAM_ETC' "$fe32_foam_etc"
-    env_set 'FE32_FOAM_USER_ETC' "$fe32_foam_user_etc"
+    env_set 'FE40_FOAM_INST_DIR' "$fe40_foam_inst_dir"
+    env_set 'FE40_FOAM_ETC' "$fe40_foam_etc"
+    env_set 'FE40_FOAM_USER_ETC' "$fe40_foam_user_etc"
 }
 
 
@@ -50,18 +50,18 @@ feLoad ()
 }
 
 
-fe32 ()
+fe40 ()
 {
-    if [ -e "$FE32_FOAM_ETC" ] && [ -d "$FE32_FOAM_ETC" ]; then
+    if [ -e "$FE40_FOAM_ETC" ] && [ -d "$FE40_FOAM_ETC" ]; then
 
         # Clear old environment
         feClear
 
         # Restore basic environment variables
-        [ ! -z "$FE32_FOAM_INST_DIR" ] && \
-            env_set 'FOAM_INST_DIR' "$FE32_FOAM_INST_DIR"
-        env_set 'FOAM_ETC' "$FE32_FOAM_ETC"
-        env_set 'FOAM_USER_ETC' "$FE32_FOAM_USER_ETC"
+        [ ! -z "$FE40_FOAM_INST_DIR" ] && \
+            env_set 'FOAM_INST_DIR' "$FE40_FOAM_INST_DIR"
+        env_set 'FOAM_ETC' "$FE40_FOAM_ETC"
+        env_set 'FOAM_USER_ETC' "$FE40_FOAM_USER_ETC"
 
         # Compile option (defaults to 'Opt')
         env_set 'WM_COMPILE_OPTION' "${1:-'Opt'}"
@@ -78,7 +78,7 @@ fe32 ()
             msg="$msg this 'bashrc' or set FOAM_ETC directly instead?"
             msg="$msg Is foam-extend really installed, correctly?"
 
-        error_fatal "$msg" 'fe32'
+        error_fatal "$msg" 'fe40'
 
     fi
 }

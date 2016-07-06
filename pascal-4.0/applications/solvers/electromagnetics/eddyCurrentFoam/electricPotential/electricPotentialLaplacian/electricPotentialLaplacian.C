@@ -47,7 +47,7 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacianUncorrected
 (
     const surfaceScalarField& gammaMagSf,
     const word& vfGammaName,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     // NOTE: gammaMagSf contains harmonically interpolated gamma!
@@ -197,7 +197,7 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const word& vfGammaName,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     const fvMesh& mesh = this->mesh();
@@ -239,7 +239,7 @@ tmp<fvMatrix<Type> >
 electricPotentialLaplacian<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     FatalErrorIn
@@ -258,7 +258,7 @@ tmp<fvMatrix<Type> >
 electricPotentialLaplacian<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvPatchField, volMesh>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fvmLaplacian

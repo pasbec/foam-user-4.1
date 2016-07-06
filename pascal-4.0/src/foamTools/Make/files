@@ -21,4 +21,6 @@ fvPatchFields/tangentialMagnetic/tangentialMagneticFvPatchFields.C
 snGradSchemes/patchCorrectedSnGrad/patchCorrectedSnGrads.C
 snGradSchemes/skewModCorrectedSnGrad/skewModCorrectedSnGrads.C
 
+solverPerformanceData/solverPerformanceData.C
+
 LIB = $(FOAM_USER_LIBBIN)/libfoamTools

@@ -82,7 +82,7 @@ private:
         (
             const surfaceScalarField& gammaMagSf,
             const word&,
-            GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>&
         );
 
         tmp<Field<Type> > fvmLaplacianSource
@@ -183,21 +183,21 @@ public:
         (
             const GeometricField<GType, fvsPatchField, surfaceMesh>&,
             const word&,
-            GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>&
         );
 
         // -NOTE: Deactivated!
         virtual tmp<fvMatrix<Type> > fvmLaplacian
         (
             const GeometricField<GType, fvsPatchField, surfaceMesh>&,
-            GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>&
         );
 
         // -Laplacian method which interpolates gamma and passes its name
         virtual tmp<fvMatrix<Type> > fvmLaplacian
         (
             const GeometricField<GType, fvPatchField, volMesh>&,
-            GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>&
         );
 
         // -NOTE: Deactivated!
@@ -241,7 +241,7 @@ electricPotentialLaplacian<Type, scalar>::fvmLaplacian                      \
 (                                                                           \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
     const word&,                                                            \
-    GeometricField<Type, fvPatchField, volMesh>&                            \
+    const GeometricField<Type, fvPatchField, volMesh>&                      \
 );                                                                          \
                                                                             \
 template<>                                                                  \
@@ -249,7 +249,7 @@ tmp<fvMatrix<Type> >                                                        \
 electricPotentialLaplacian<Type, scalar>::fvmLaplacian                      \
 (                                                                           \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
-    GeometricField<Type, fvPatchField, volMesh>&                            \
+    const GeometricField<Type, fvPatchField, volMesh>&                      \
 );                                                                          \
                                                                             \
 template<>                                                                  \

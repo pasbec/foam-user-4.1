@@ -45,7 +45,7 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
 (                                                                            \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
     const word& vfGammaName,                                                 \
-    GeometricField<Type, fvPatchField, volMesh>& vf                          \
+    const GeometricField<Type, fvPatchField, volMesh>& vf                    \
 )                                                                            \
 {                                                                            \
     const fvMesh& mesh = this->mesh();                                       \
@@ -97,7 +97,7 @@ Foam::tmp<Foam::fvMatrix<Foam::Type> >                                       \
 Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
 (                                                                            \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
-    GeometricField<Type, fvPatchField, volMesh>& vf                          \
+    const GeometricField<Type, fvPatchField, volMesh>& vf                    \
 )                                                                            \
 {                                                                            \
     FatalErrorIn                                                             \

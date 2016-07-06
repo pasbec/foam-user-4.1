@@ -35,6 +35,7 @@ Description
 #include "interTrackAppInclude.H"
 
 #include "pimpleControl.H"
+#include "solverPerformanceData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

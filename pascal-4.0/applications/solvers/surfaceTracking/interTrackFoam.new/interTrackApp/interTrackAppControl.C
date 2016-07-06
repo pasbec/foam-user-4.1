@@ -47,7 +47,9 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
     bool achieved = true;
     bool checked = false;    // safety that some checks were indeed performed
 
-    const dictionary& solverDict = mesh_.solverPerformanceDict();
+    const dictionary& solverDict =
+        mesh_.solutionDict().solverPerformanceDict();
+
     forAllConstIter(dictionary, solverDict, iter)
     {
         const word& variableName = iter().keyword();
@@ -65,7 +67,7 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
             }
             else
             {
-                residual = max(spd.last().initialResidual());
+                residual = spd.last().maxInitialResidual();
             }
 
 
@@ -74,7 +76,7 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
             if (storeIni)
             {
                 residualControl_[fieldI].initialResidual =
-                    max(spd.first().initialResidual());
+                    spd.first().maxInitialResidual();
             }
 
             const bool absCheck = residual < residualControl_[fieldI].absTol;
@@ -140,7 +142,9 @@ Foam::interTrackApp::Control::~Control()
 
 void Foam::interTrackApp::Control::storeResiduals(const word& name)
 {
-    const dictionary& solverDict = mesh_.solverPerformanceDict();
+    const dictionary& solverDict =
+        mesh_.solutionDict().solverPerformanceDict();
+
     forAllConstIter(dictionary, solverDict, iter)
     {
         const word& variableName = iter().keyword();
@@ -155,7 +159,7 @@ void Foam::interTrackApp::Control::storeResiduals(const word& name)
 
                 // store current residual
                 residualStorage_[fieldI].residual =
-                    max(spd.last().initialResidual());
+                    spd.last().maxInitialResidual();
 
                 // indicate that the residual has been stored
                 residualStorage_[fieldI].stored = true;
@@ -185,7 +189,9 @@ void Foam::interTrackApp::Control::skipZeroNonOrtho(const word& name)
     {
         int nIter = -1;
 
-        const dictionary& solverDict = mesh_.solverPerformanceDict();
+        const dictionary& solverDict =
+            mesh_.solutionDict().solverPerformanceDict();
+
         forAllConstIter(dictionary, solverDict, iter)
         {
             const word& variableName = iter().keyword();

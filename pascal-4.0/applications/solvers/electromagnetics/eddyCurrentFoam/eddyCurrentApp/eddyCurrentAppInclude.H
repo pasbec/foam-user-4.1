@@ -36,6 +36,7 @@ Description
 #include "Switch.H"
 #include "HashTable.H"
 
+#include "fvCFD.H"
 #include "fvBlockMatrix.H"
 #include "uniformDimensionedFields.H"
 #include "fixedValueFvPatchFields.H"

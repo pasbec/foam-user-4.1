@@ -31,6 +31,7 @@ Description
 
 #include "trackedSurface.H"
 
+#include "fvCFD.H"
 #include "dynamicFvMesh.H"
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"

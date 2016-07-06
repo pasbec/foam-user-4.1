@@ -34,8 +34,8 @@ Description
 
 #include "interTrackEddyCurrentAppInclude.H"
 
-#include "IOdictionary.H"
 #include "solutionControl.H"
+#include "solverPerformanceData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

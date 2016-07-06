@@ -40,6 +40,8 @@ void Foam::eddyCurrentApp::Control::read()
     const dictionary& eddyCurrentDict = dict();
     nCorrEDDYCURRENT_ =
         eddyCurrentDict.lookupOrDefault<label>("nCorrectors", 1);
+    nSubCorrEDDYCURRENT_ =
+        eddyCurrentDict.lookupOrDefault<label>("nSubCorrectors", 2147483647);
 }
 
 
@@ -56,7 +58,7 @@ bool Foam::eddyCurrentApp::Control::criteriaSatisfied()
     forAll (mesh_, regionI)
     {
         const dictionary& solverDict =
-            mesh_[regionI].solverPerformanceDict();
+            mesh_[regionI].solutionDict().solverPerformanceDict();
 
         forAllConstIter(dictionary, solverDict, iter)
         {
@@ -66,7 +68,7 @@ bool Foam::eddyCurrentApp::Control::criteriaSatisfied()
             {
                 const List<solverPerformanceData> spd = iter().stream();
 
-                const scalar residual = max(spd.last().initialResidual());
+                const scalar residual = spd.last().maxInitialResidual();
 
                 checked = true;
 
@@ -108,7 +110,7 @@ bool Foam::eddyCurrentApp::Control::subCriteriaSatisfied()
     forAll (mesh_, regionI)
     {
         const dictionary& solverDict =
-            mesh_[regionI].solverPerformanceDict();
+            mesh_[regionI].solutionDict().solverPerformanceDict();
 
         forAllConstIter (dictionary, solverDict, iter)
         {
@@ -121,16 +123,15 @@ bool Foam::eddyCurrentApp::Control::subCriteriaSatisfied()
                 scalar oldOldResidual = VGREAT;
                 if (spd.size() > 2)
                 {
-                    oldOldResidual = max(spd[spd.size()-3].initialResidual());
+                    oldOldResidual = spd[spd.size()-3].maxInitialResidual();
                 }
 
                 scalar oldResidual = GREAT;
                 if (spd.size() > 1)
                 {
-                    oldResidual = max(spd[spd.size()-2].initialResidual());
+                    oldResidual = spd[spd.size()-2].maxInitialResidual();
                 }
-
-                scalar residual = max(spd.last().initialResidual());
+                const scalar residual = spd.last().maxInitialResidual();
 
                 scalar oldRelative =
                     mag(oldResidual/(oldOldResidual+VSMALL) - 1.0);
@@ -189,6 +190,7 @@ Foam::eddyCurrentApp::Control::Control
             boundaryMesh().findPatchID(interfacePatchName_)
     ),
     nCorrEDDYCURRENT_(-1),
+    nSubCorrEDDYCURRENT_(-1),
     subCorr_(0),
     subScale_(1.0)
 {
@@ -209,11 +211,17 @@ Foam::eddyCurrentApp::Control::Control
     {
         Info<< algorithmName_ << ": no residual control data found. "
             << "Calculations will employ " << nCorrEDDYCURRENT_
-            << " corrector loops" << nl << endl;
+            << " corrector loops"
+            << " and " << nSubCorrEDDYCURRENT_
+            << " sub-corrector loops" << nl << endl;
     }
     else
     {
-        Info<< algorithmName_ << ": max iterations = " << nCorrEDDYCURRENT_
+        Info<< algorithmName_ << ": max iterations = "
+            << nCorrEDDYCURRENT_
+            << endl
+            << algorithmName_ << ": max sub-iterations = "
+            << nSubCorrEDDYCURRENT_
             << endl;
         forAll(residualControl_, i)
         {
@@ -298,7 +306,7 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
         forAll (mesh_, regioni)
         {
             const dictionary& solverDict =
-                mesh_[regioni].solverPerformanceDict();
+                mesh_[regionI].solutionDict().solverPerformanceDict();
 
             forAllConstIter (dictionary, solverDict, iter)
             {
@@ -308,7 +316,7 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
                 {
                     const List<solverPerformanceData> spd = iter().stream();
 
-                    const scalar residual = max(spd.last().initialResidual());
+                    const scalar residual = spd.last().maxInitialResidual();
 
                     // Residual difference from target residual
                     scalar residualDiff =
@@ -372,6 +380,16 @@ bool Foam::eddyCurrentApp::Control::subLoop()
     {
         subCorr_ = 0;
         subScale_ = 1.0;
+
+        return false;
+    }
+
+    if (subCorr_ == nSubCorrEDDYCURRENT_ + 1)
+    {
+        subCorr_ = 0;
+        subScale_ /= 10.0;
+
+        Info<< algorithmName_ << " sub-loop: scale = " << subScale_ << endl;
 
         return false;
     }

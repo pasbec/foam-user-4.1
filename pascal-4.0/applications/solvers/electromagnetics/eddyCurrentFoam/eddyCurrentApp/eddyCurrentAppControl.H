@@ -38,6 +38,7 @@ SourceFiles
 #include "eddyCurrentAppInclude.H"
 
 #include "solutionControl.H"
+#include "solverPerformanceData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,6 +90,9 @@ protected:
 
             //- Maximum number of EDDYCURRENT correctors
             label nCorrEDDYCURRENT_;
+
+            //- Maximum number of EDDYCURRENT sub-correctors
+            label nSubCorrEDDYCURRENT_;
 
         // Sub-iteration
 
