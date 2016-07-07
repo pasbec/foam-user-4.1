@@ -11,13 +11,13 @@
         (
             cMeshPrefix,
             mesh.pointsInstance(),
-            mesh,
+            runTime,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         mesh
     );
 
-    cMeshSubset.setCellSubset(aBMdata.faCells);
+    cMeshSubset.setLargeCellSubset(aBMdata.faCells);
     fvMesh& cMesh = cMeshSubset.subMesh();
-    cMesh.write();
+    Info << nl;
