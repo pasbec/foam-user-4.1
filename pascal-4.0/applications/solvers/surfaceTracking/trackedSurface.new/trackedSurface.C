@@ -344,7 +344,6 @@ void trackedSurface::initControlPointsPosition()
 
 // TEST: Volume conservation
 // TODO: Check this implementation in parallel
-// TODO: Add switch for volume correction
 // TODO: Improve implementation of "curVolA_" and "oldVolA_"
 void trackedSurface::correctInterfacePhi(scalarField& interfacePhi)
 {

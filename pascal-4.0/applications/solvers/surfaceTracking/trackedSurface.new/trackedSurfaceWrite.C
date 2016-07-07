@@ -43,17 +43,6 @@ void trackedSurface::writeVTK() const
         aMesh().patch(),
         aMesh().patch().points()
     );
-
-// TEST: Sub-mesh
-    if (aSubMeshPtr_)
-    {
-        aSubMesh().subAreaMesh().patch().writeVTK
-        (
-            DB().timePath()/aSubMesh().name(),
-            aSubMesh().subAreaMesh().patch(),
-            aSubMesh().subAreaMesh().patch().points()
-        );
-    }
 }
 
 

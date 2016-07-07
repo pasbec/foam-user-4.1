@@ -56,16 +56,11 @@ class faSubMesh
 {
     // Private data
 
-        //- Name
-        const word name_;
-
         //- Base faMesh
         const polyMesh& basePolyMesh_;
 
         //- Base faMesh
         const faMesh& baseAreaMesh_;
-
-        const pointField& splitFacePoints_;
 
     // Permanent data
 
@@ -131,9 +126,7 @@ public:
 
         faSubMesh
         (
-            const word name,
-            const faMesh& baseAreaMesh,
-            const pointField& splitFacePoints
+            const faMesh& baseAreaMesh
         );
 
 
@@ -150,12 +143,6 @@ public:
         // Database
 
         // Access
-
-            //- Name
-            const word name() const
-            {
-                return name_;
-            }
 
             //- Return access to base polyMesh
             const polyMesh& basePolyMesh() const
@@ -179,12 +166,6 @@ public:
             faMesh& subAreaMesh() const
             {
                 return *subAreaMeshPtr_;
-            }
-
-            //- Return points to split faces of base mesh
-            const pointField& splitFacePoints() const
-            {
-                return splitFacePoints_;
             }
 
         // Mesh motion and mophing

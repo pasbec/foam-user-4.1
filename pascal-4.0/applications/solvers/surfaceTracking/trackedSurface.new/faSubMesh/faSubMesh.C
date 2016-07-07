@@ -48,7 +48,7 @@ tmp<pointField> faSubMesh::calcSubPolyMeshPoints() const
     int nPoints = nBasePoints + nBaseControlPoints;
 
     const pointField& basePoints = baseAreaMesh().points();
-    const pointField& baseControlPoints = splitFacePoints();
+    const pointField& baseControlPoints = baseAreaMesh().patch().faceCentres();
 
     tmp<pointField> tpoints
     (
@@ -215,7 +215,7 @@ void faSubMesh::initSubPolyMesh()
         (
             IOobject
             (
-                name(),
+                basePolyMesh().name() + "_faSubMesh",
                 basePolyMesh().pointsInstance(),
                 basePolyMesh(),
                 IOobject::NO_READ,
@@ -275,15 +275,11 @@ void faSubMesh::clearOut() const
 
 faSubMesh::faSubMesh
 (
-    const word name,
-    const faMesh& baseAreaMesh,
-    const pointField& splitFacePoints
+    const faMesh& baseAreaMesh
 )
 :
-name_(name),
 basePolyMesh_(baseAreaMesh.mesh()),
 baseAreaMesh_(baseAreaMesh),
-splitFacePoints_(splitFacePoints),
 subPolyPatchPtr_(NULL),
 subPolyMeshPtr_(NULL),
 subAreaMeshPtr_(NULL),
