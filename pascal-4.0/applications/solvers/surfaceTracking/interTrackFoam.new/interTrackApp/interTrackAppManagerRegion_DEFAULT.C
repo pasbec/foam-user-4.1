@@ -95,6 +95,8 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p::create
             mesh()
         )
     );
+
+    mesh().schemesDict().setFluxRequired(get()->name());
 }
 
 
