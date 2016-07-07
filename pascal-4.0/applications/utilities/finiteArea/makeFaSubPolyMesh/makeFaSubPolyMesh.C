@@ -470,9 +470,9 @@ int main(int argc, char *argv[])
 
     forAllConstIter (Map<label>, usedBMpointsCMmap, iter)
     {
-        label pointI = iter();
+        label cMpointI = iter();
 
-        usedCMpointsBMmap.insert(pointI, cMeshSubset.pointMap()[pointI]);
+        usedCMpointsBMmap.insert(cMpointI, cMeshSubset.pointMap()[cMpointI]);
     }
 
     // Init points
@@ -500,16 +500,23 @@ int main(int argc, char *argv[])
     forAll (usedCMpoints, pointI)
     {
         label cMpointI = usedCMpoints[pointI];
-        label bMpointI = usedCMpointsBMmap[cMpointI];
 
-        cMpointRmap.insert(bMpointI, pointI);
+        cMpointRmap.insert
+        (
+            cMpointI,
+            pointI
+        );
     }
 
     // Create reverse pointMap for area base-mesh
     Map<label> aBMpointRmap;
     forAll (aBMdata.meshPoints, pointI)
     {
-        aBMpointRmap.insert(aBMdata.meshPoints[pointI], usedCMpoints.size() + pointI);
+        aBMpointRmap.insert
+        (
+            bMpointsCMmap[aBMdata.meshPoints[pointI]],
+            usedCMpoints.size() + pointI
+        );
     }
 
     if (debug)
@@ -561,16 +568,15 @@ int main(int argc, char *argv[])
     forAll(usedCMfaces, faceI)
     {
         label cMfaceI = usedCMfaces[faceI];
-        label bMFaceI = usedCMfacesBMmap[cMfaceI];
 
-        face curFace = mesh.faces()[bMFaceI];
+        face curFace = cMesh.faces()[cMfaceI];
 
         // Map face vertices
         labelList pointLabels(curFace.size(), -1);
         forAll(pointLabels, pointI)
         {
             // Point label is part of usedBMpoints (point from carrier-mesh)
-            if (usedBMpointsCMmap.found(curFace[pointI]))
+            if (usedCMpointsBMmap.found(curFace[pointI]))
             {
                 pointLabels[pointI] = cMpointRmap[curFace[pointI]];
             }
