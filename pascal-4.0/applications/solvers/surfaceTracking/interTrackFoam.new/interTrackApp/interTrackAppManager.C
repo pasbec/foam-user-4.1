@@ -34,7 +34,19 @@ defineTypeNameAndDebug(Foam::interTrackApp::Manager, 0);
 
 void Foam::interTrackApp::Manager::Settings::read() const
 {
-    debug = dict().lookupOrDefault("debug", Switch(debug));
+    Foam::interTrackApp::Manager::debug =
+        dict().lookupOrDefault
+        (
+            "debug",
+            Foam::interTrackApp::Manager::debug()
+        );
+
+    Foam::interTrackApp::Control::debug =
+        dict().lookupOrDefault
+        (
+            "debug",
+            Foam::interTrackApp::Control::debug()
+        );
 }
 
 

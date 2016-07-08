@@ -33,7 +33,21 @@ defineTypeNameAndDebug(Foam::interTrackEddyCurrentApp::Manager, 0);
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::interTrackEddyCurrentApp::Manager::Settings::read() const
-{}
+{
+    Foam::interTrackEddyCurrentApp::Manager::debug =
+        dict().lookupOrDefault
+        (
+            "debug",
+            Foam::interTrackEddyCurrentApp::Manager::debug()
+        );
+
+    Foam::interTrackEddyCurrentApp::Control::debug =
+        dict().lookupOrDefault
+        (
+            "debug",
+            Foam::interTrackEddyCurrentApp::Control::debug()
+        );
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

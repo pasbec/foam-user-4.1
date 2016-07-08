@@ -24,7 +24,7 @@
      && settings.UEqnVolumeForce
     )
     {
-        if (globalSettings.debug)
+        if (Manager::debug)
         {
             Info << "interTrackManager | UEqn.H : "
                 << "Adding source term for volume force F in UEqn."

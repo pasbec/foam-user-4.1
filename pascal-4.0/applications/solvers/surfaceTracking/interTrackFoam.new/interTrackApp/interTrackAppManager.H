@@ -72,9 +72,6 @@ public:
 
         SM_GLOBALSETTINGS_NEW();
 
-            //- Debug switch
-            SM_SETTINGS_MEMBER_ADD(Switch, debug);
-
         SM_GLOBALSETTINGS_ADD();
 
 

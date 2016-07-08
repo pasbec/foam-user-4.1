@@ -235,8 +235,6 @@ solverManager<MESH>::messages() const
 template <class MESH>
 void solverManager<MESH>::read() const
 {
-    propertiesDict_.readIfModified();
-
     settings().checkRead();
     regions().checkRead();
 }
@@ -328,6 +326,8 @@ bool solverManager<MESH>::loop() const
 
     if (runTime.loop())
     {
+        propertiesDict_.readIfModified();
+
         read();
 
         messages().timeIs();
@@ -380,6 +380,8 @@ bool solverManager<MESH>::run() const
 
     if (runTime.run())
     {
+        propertiesDict_.readIfModified();
+
         read();
 
         applyDeltaT();

@@ -38,13 +38,19 @@ void Foam::interTrackEddyCurrentApp::Control::read()
     emSettings_.enabled =
         emUpdateSettingsDict_.lookupOrDefault<bool>("enabled", true);
     emSettings_.outputTimeIndexCycle =
-        emUpdateSettingsDict_.lookupOrDefault<bool>("outputTimeIndexCycle", 2147483647);
+        emUpdateSettingsDict_.lookupOrDefault<int>("outputTimeIndexCycle", 2147483647);
     emSettings_.timeIndexCycle =
-        emUpdateSettingsDict_.lookupOrDefault<bool>("timeIndexCycle", 2147483647);
+        emUpdateSettingsDict_.lookupOrDefault<int>("timeIndexCycle", 2147483647);
     emSettings_.timeCycle =
         emUpdateSettingsDict_.lookupOrDefault<scalar>("timeCycle", VGREAT);
     emSettings_.relDeltaAmax =
         emUpdateSettingsDict_.lookupOrDefault<scalar>("relDeltaAmax", 0.01);
+
+    if (debug > 1)
+    {
+        Info << "interTrackEddyCurrentApp::Control::read() : "
+            << "emUpdateSettingsDict = " << emUpdateSettingsDict_;
+    }
 
     // Read data
     emUpdateDataDict_.readIfModified();
@@ -55,6 +61,12 @@ void Foam::interTrackEddyCurrentApp::Control::read()
         emUpdateDataDict_.lookupOrAddDefault<int>("outputTimeIndex", 0);
     emUpdateData_.lastTime =
         emUpdateDataDict_.lookupOrAddDefault<scalar>("lastTime", -VGREAT);
+
+    if (debug > 1)
+    {
+        Info << "interTrackEddyCurrentApp::Control::read() : "
+            << "emUpdateDataDict = " << emUpdateDataDict_;
+    }
 }
 
 bool Foam::interTrackEddyCurrentApp::Control::criteriaSatisfied()
@@ -185,6 +197,20 @@ bool Foam::interTrackEddyCurrentApp::Control::updateRelDeltaA() const
 
 bool Foam::interTrackEddyCurrentApp::Control::update() const
 {
+    if (debug)
+    {
+        Info << "interTrackEddyCurrentApp::Control::update() : "
+            << "updateZeroCounter() = " << updateZeroCounter() << endl;
+        Info << "interTrackEddyCurrentApp::Control::update() : "
+            << "updateOutputTimeIndex() = " << updateOutputTimeIndex() << endl;
+        Info << "interTrackEddyCurrentApp::Control::update() : "
+            << "updateTimeIndex() = " << updateTimeIndex() << endl;
+        Info << "interTrackEddyCurrentApp::Control::update() : "
+            << "updateTime() = " << updateTime() << endl;
+        Info << "interTrackEddyCurrentApp::Control::update() : "
+            << "updateRelDeltaA() = " << updateRelDeltaA() << endl;
+    }
+
     return updateZeroCounter()
         || updateOutputTimeIndex()
         || updateTimeIndex()
@@ -198,7 +224,7 @@ bool Foam::interTrackEddyCurrentApp::Control::update() const
 Foam::interTrackEddyCurrentApp::Control::Control
 (
     regionDynamicFvMesh& mesh,
-    const dictionary& emUpdateSettingsDict,
+    const dictionary& propertiesDict,
     const word& dictName
 )
 :
@@ -218,9 +244,13 @@ Foam::interTrackEddyCurrentApp::Control::Control
             mesh_[Region::CONDUCTOR].lookupObject<volScalarField> ("emRelDeltaA")
         )
     ),
+    propertiesDict_
+    (
+        propertiesDict
+    ),
     emUpdateSettingsDict_
     (
-        emUpdateSettingsDict
+        propertiesDict_.subDict("emUpdate")
     ),
     emUpdateDataDict_
     (

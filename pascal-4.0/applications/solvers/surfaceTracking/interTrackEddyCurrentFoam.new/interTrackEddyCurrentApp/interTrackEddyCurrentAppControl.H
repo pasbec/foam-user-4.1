@@ -100,10 +100,13 @@ protected:
             //- Estimated relative deviation of A
             volScalarField& relDeltaA_;
 
+            //- Properties dictionary
+            const dictionary& propertiesDict_;
+
             //- Electromagnetic settings dictionary
             const dictionary& emUpdateSettingsDict_;
 
-            //- Electromagnetic update data
+            //- Electromagnetic settings
             emSettings emSettings_;
 
             //- Electromagnetic update dictionary
@@ -153,7 +156,7 @@ public:
         Control
         (
             regionDynamicFvMesh& mesh,
-            const dictionary& emUpdateSettingsDict,
+            const dictionary& propertiesDict,
             const word& dictName="INTERTRACKEDDYCURRENT"
         );
 

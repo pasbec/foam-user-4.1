@@ -72,7 +72,7 @@ public:
         (
             Control,
             mesh(),
-            propertiesDict().subDict("emUpdate")
+            propertiesDict()
         );
 
         SM_GLOBALSETTINGS_NEW();

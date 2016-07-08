@@ -34,7 +34,19 @@ defineTypeNameAndDebug(Foam::eddyCurrentApp::Manager, 0);
 
 void Foam::eddyCurrentApp::Manager::Settings::read() const
 {
-    debug = dict().lookupOrDefault("debug", Switch(debug));
+    Foam::eddyCurrentApp::Manager::debug =
+        dict().lookupOrDefault
+        (
+            "debug",
+            Foam::eddyCurrentApp::Manager::debug()
+        );
+
+    Foam::eddyCurrentApp::Control::debug =
+        dict().lookupOrDefault
+        (
+            "debug",
+            Foam::eddyCurrentApp::Control::debug()
+        );
 
     biotSavart = dict().lookupOrDefault("biotSavart", false);
 }

@@ -23,7 +23,7 @@
     && !settings.UEqnVolumeForce
     )
     {
-        if (globalSettings.debug)
+        if (Manager::debug)
         {
             Info << "interTrackManager | pEqn.H : "
                 << "Adding volume force flux from F to phiHbyA."
@@ -57,7 +57,7 @@
 //       but I have the feeling, that it is NOT!
     if (control.consistent())
     {
-        if (globalSettings.debug)
+        if (Manager::debug)
         {
             Info << "interTrackManager | pEqn.H : "
                 << "Applying consistent PIMPLE correction."
@@ -113,7 +113,7 @@
 
                     if (!settings.snGradpFromFlux)
                     {
-                        if (globalSettings.debug)
+                        if (Manager::debug)
                         {
                             Info << "interTrackManager | pEqn.H : "
                                 << "Correcting pressure at patch "
@@ -129,7 +129,7 @@
                     }
                     else
                     {
-                        if (globalSettings.debug)
+                        if (Manager::debug)
                         {
                             Info << "interTrackManager | pEqn.H : "
                                 << "Correcting pressure at patch "

@@ -73,9 +73,6 @@ public:
 
         SM_GLOBALSETTINGS_NEW();
 
-            //- Debug switch
-            SM_SETTINGS_MEMBER_ADD(Switch, debug);
-
             //- Switch to set wether Biot-Savart is used
             SM_SETTINGS_MEMBER_ADD(Switch, biotSavart);
 
