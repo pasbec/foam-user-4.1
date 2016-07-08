@@ -41,6 +41,10 @@ Description
 #include "Map.H"
 #include "SortableList.H"
 #include "Xfer.H"
+#include "emptyPolyPatch.H"
+#include "directMappedPolyPatch.H"
+#include "directMappedWallPolyPatch.H"
+#include "emptyFaPatch.H"
 
 using namespace Foam;
 
@@ -484,9 +488,8 @@ int main(int argc, char *argv[])
     forAll(usedCMpoints, pointI)
     {
         label cMpointI = usedCMpoints[pointI];
-        label bMpointI = usedCMpointsBMmap[cMpointI];
 
-        points[pointI] = mesh.points()[bMpointI];
+        points[pointI] = cMesh.points()[cMpointI];
     }
 
     // Add all points of triangulated area base-mesh
@@ -707,89 +710,292 @@ int main(int argc, char *argv[])
         faceNeighbour[faceI] = cMesh.faceNeighbour()[cMfaceI];
     }
 
-// Assemble polyMesh
 
-    // Create polyMesh
-    polyMesh sMesh
-    (
-        IOobject
+// subPolyMesh
+
+    // Creation
+
+        polyMesh sMesh
         (
-            mesh.name() + "_faSubMesh",
-            mesh.pointsInstance(),
-            runTime,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        xferCopy(points),
-        xferCopy(faces),
-        xferCopy(faceOwner),
-        xferCopy(faceNeighbour),
-        false
-    );
+            IOobject
+            (
+                mesh.name() + "_faSubMesh",
+                mesh.pointsInstance(),
+                runTime,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            xferCopy(points),
+            xferCopy(faces),
+            xferCopy(faceOwner),
+            xferCopy(faceNeighbour),
+            false
+        );
 
-    // Create patches
-    List<polyPatch*> sPatches(patchTypes.size(), NULL);
-    forAll (sPatches, patchI)
-    {
+        // Create patches
+        List<polyPatch*> sPatches(patchTypes.size(), NULL);
+        forAll (sPatches, patchI)
+        {
+            word curPatchType = patchTypes[patchI];
 
-        sPatches[patchI] = polyPatch::New
+            // Empty directions may become invalidated as we have
+            // triangulated faces
+            if (curPatchType == emptyPolyPatch::typeName)
+            {
+                curPatchType = polyPatch::typeName;
+            }
+
+            // Mapped region will not be present
+            if (curPatchType == directMappedPolyPatch::typeName)
+            {
+                curPatchType = polyPatch::typeName;
+            }
+
+            // Mapped region will not be present
+            if (curPatchType == directMappedWallPolyPatch::typeName)
+            {
+                curPatchType = wallPolyPatch::typeName;
+            }
+
+            sPatches[patchI] = polyPatch::New
+            (
+                curPatchType,
+                patchNames[patchI],
+                patchSizes[patchI],
+                patchStarts[patchI],
+                patchI,
+                sMesh.boundaryMesh()
+            ).ptr();
+        }
+
+        // Add patches
+        sMesh.addPatches(sPatches, true);
+
+        // Write subMesh
+        Info << "Write subMesh ... ";
+        sMesh.write();
+        Info << "Done" << endl;
+
+
+    // Maps
+
+        labelIOList pointMap
         (
-// TODO: Which type?
-            "patch",
-            patchNames[patchI],
-            patchSizes[patchI],
-            patchStarts[patchI],
-            patchI,
-            sMesh.boundaryMesh()
-        ).ptr();
-    }
+            IOobject
+            (
+                "pointMap",
+                sMesh.facesInstance(),
+                polyMesh::meshSubDir,
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            labelList(points.size(), -1)
+        );
+        forAll (usedCMpoints, pointI)
+        {
+            label cMpointI = usedCMpoints[pointI];
+            label bMpointI = usedCMpointsBMmap[cMpointI];
 
-    // Add patches
-    sMesh.addPatches(sPatches, true);
+            pointMap[pointI] = bMpointI;
+        }
+        pointMap.write();
 
-    // Write subMesh
-    Info << "Write subMesh ... ";
-    sMesh.write();
-    Info << "Done" << endl;
+        labelIOList pointAreaMap
+        (
+            IOobject
+            (
+                "pointAreaMap",
+                sMesh.facesInstance(),
+                polyMesh::meshSubDir,
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            labelList(points.size(), -1)
+        );
+        forAll (aBMdata.meshPoints, pointI)
+        {
+            pointAreaMap[usedCMpoints.size() + pointI] = pointI;
+        }
+        pointAreaMap.write();
 
-// TODO: Addressings
+        labelIOList pointTriMap
+        (
+            IOobject
+            (
+                "pointTriMap",
+                sMesh.facesInstance(),
+                polyMesh::meshSubDir,
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            labelList(points.size(), -1)
+        );
+        forAll (aBMdata.faceLabels, pointI)
+        {
+            pointTriMap[usedCMpoints.size() + aBMdata.meshPoints.size() + pointI] = pointI;
+        }
+        pointTriMap.write();
 
-//     // Write addressings
-//     //
-//
-//        Info << "Write faceSubAddressing ... ";
-//         labelIOList ioFaceSubAddressing
+        labelIOList faceMap
+        (
+            IOobject
+            (
+                "faceMap",
+                sMesh.facesInstance(),
+                polyMesh::meshSubDir,
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            labelList(faces.size(), -1)
+        );
+        forAll (usedCMfaces, faceI)
+        {
+            label cMfaceI = usedCMfaces[faceI];
+            label bMfaceI = usedCMfacesBMmap[cMfaceI];
+
+            faceMap[faceI] = bMfaceI;
+        }
+        faceMap.write();
+
+        labelIOList cellMap
+        (
+            IOobject
+            (
+                "cellMap",
+                sMesh.facesInstance(),
+                polyMesh::meshSubDir,
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            cMeshSubset.cellMap()
+        );
+        cellMap.write();
+
+// TODO: patchMap
+
+
+// subAreaMesh
+
+    // faMeshDefinition
+
+        // Read faMeshDefinition dictionary from area base-mesh
+        IOdictionary aBMdefinition
+        (
+            IOobject
+            (
+                "faMeshDefinition",
+                mesh.facesInstance(),
+                faMesh::meshSubDir,
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        // Create faMeshDefinition dictionary
+        IOdictionary faMeshDefinition
+        (
+            IOobject
+            (
+                "faMeshDefinition",
+                sMesh.facesInstance(),
+                faMesh::meshSubDir,
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        // Set polyMeshPatches
+        faMeshDefinition.add
+        (
+            "polyMeshPatches",
+            wordList(1, "triangulatedFaces")
+        );
+
+        // Copy boundary from area base-mesh
+        faMeshDefinition.add
+        (
+            "boundary",
+            aBMdefinition.subDict("boundary")
+        );
+
+        dictionary& bndDict = faMeshDefinition.subDict("boundary");
+
+        wordList faPatchNames = bndDict.toc();
+
+        // Check for empty patches and replace all
+        // ownerPolyPatches with triangulatedFaces
+        forAll (faPatchNames, patchI)
+        {
+            dictionary& curPatchDict =
+                bndDict.subDict(faPatchNames[patchI]);
+
+            word curPatchType = word(curPatchDict.lookup("type"));
+
+            // Empty directions may become invalidated as we have
+            // triangulated faces
+            if (curPatchType == emptyFaPatch::typeName)
+            {
+                curPatchType = faPatch::typeName;
+            }
+
+            curPatchDict.set("type", curPatchType);
+
+            curPatchDict.set("ownerPolyPatch", word("triangulatedFaces"));
+        }
+
+        // Write faMeshDefinition
+        faMeshDefinition.regIOobject::write();
+
+    // Creation
+
+        faMesh sAmesh(sMesh, fileName("faMeshDefinition"));
+        sAmesh.write();
+
+
+    // TODO: Maps
+
+//         labelIOList faFaceMap
 //         (
 //             IOobject
 //             (
-//                 "faceSubAddressing",
-//                 mesh.facesInstance(),
+//                 "faceMap",
+//                 sMesh.facesInstance(),
 //                 faMesh::meshSubDir,
-//                 mesh,
+//                 sMesh,
 //                 IOobject::NO_READ,
 //                 IOobject::NO_WRITE
 //             ),
-//             faceSubAddressing
+//             aBMtri.faceMap()
 //         );
-//         ioFaceSubAddressing.write();
-//         Info << "Done" << endl;
+//         faFaceMap.write();
 //
-//         Info << "Write faceBaseAddressing ... ";
-//         labelIOList ioFaceBaseAddressing
+//         labelListIOList faFaceRmap
 //         (
 //             IOobject
 //             (
-//                 "faceBaseAddressing",
-//                 subMesh.facesInstance(),
-//                 faMesh::meshSubDir,
-//                 subMesh,
+//                 "faceRmap",
+//                 sMesh.facesInstance(),
+//                 polyMesh::meshSubDir,
+//                 sMesh,
 //                 IOobject::NO_READ,
 //                 IOobject::NO_WRITE
 //             ),
-//             faceBaseAddressing
+//             labelListList(aBMtri.faces().size())
 //         );
-//         ioFaceBaseAddressing.write();
-//         Info << "Done" << endl;
+//         forAll (aBMtri.faces(), faceI)
+//         {
+//             faFaceRmap[faceI] = aBMtri.faceRmap()[faceI].toc();
+//         }
+//         faFaceRmap.write();
+
+// TODO: patchMap
 
     return(0);
 }

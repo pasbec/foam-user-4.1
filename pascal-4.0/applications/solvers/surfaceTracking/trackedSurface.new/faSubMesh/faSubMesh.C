@@ -40,222 +40,44 @@ defineTypeNameAndDebug(faSubMesh, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-tmp<pointField> faSubMesh::calcSubPolyMeshPoints() const
+tmp<pointField> faSubMesh::calcNewPoints() const
 {
-
-    int nBasePoints = baseAreaMesh().nPoints();
-    int nBaseControlPoints = baseAreaMesh().nFaces();
-    int nPoints = nBasePoints + nBaseControlPoints;
-
-    const pointField& basePoints = baseAreaMesh().points();
-    const pointField& baseControlPoints = baseAreaMesh().patch().faceCentres();
+    const pointField& basePolyMeshPoints = basePolyMesh().points();
+    const pointField& baseAreaMeshPoints = baseAreaMesh().points();
+    const pointField& splitPoints = subFacePoints();
 
     tmp<pointField> tpoints
     (
-        new pointField(nPoints)
+        new pointField(subPolyMesh().allPoints())
     );
     pointField& points = tpoints();
 
-    // Base vertices
-    forAll(basePoints, basePointI)
+// TODO: Optimize without if statements by knowing the sizes of each sublist
+    forAll(subPolyMesh().points(), pointI)
     {
-        label pointI = basePointI;
+        label basePolyMeshPointI = subPolyMeshPointMap_[pointI];
+        label baseAreaMeshPointI = subPolyMeshPointAreaMap_[pointI];
+        label splitPointI = subPolyMeshPointTriMap_[pointI];
 
-        points[pointI] = basePoints[pointI];
-    }
-
-    // Base control points
-    forAll(baseControlPoints, baseControlPointI)
-    {
-        label pointI = nBasePoints + baseControlPointI;
-
-        points[pointI] = baseControlPoints[baseControlPointI];
+        if (basePolyMeshPointI > -1)
+        {
+            points[pointI] = basePolyMeshPoints[basePolyMeshPointI];
+        }
+        else if (baseAreaMeshPointI > -1)
+        {
+            points[pointI] = baseAreaMeshPoints[baseAreaMeshPointI];
+        }
+        else if (splitPointI > -1)
+        {
+            points[pointI] = splitPoints[splitPointI];
+        }
+        else
+        {
+            // FatalError
+        }
     }
 
     return tpoints;
-}
-
-
-void faSubMesh::initSubPolyMesh()
-{
-    // Collect triangulation points
-    //
-
-        pointField points = calcSubPolyMeshPoints();
-
-
-    // Calc triangulation
-    //
-
-        int nBaseEdges = baseAreaMesh().nEdges();
-        int nBaseInternalEdges = baseAreaMesh().nInternalEdges();
-
-        int nFaces = nBaseEdges + nBaseInternalEdges;
-        triFaceList faces(nFaces);
-
-        const edgeList& baseEdges = baseAreaMesh().edges();
-
-
-    // Internal triangulation
-    // based on lower/upper addressing
-
-        int nBasePoints = baseAreaMesh().nPoints();
-        const unallocLabelList& baseOwn = baseAreaMesh().owner();
-        const unallocLabelList& baseNei = baseAreaMesh().neighbour();
-
-        forAll(baseOwn, baseEdgeI)
-        {
-            edge e = baseEdges[baseEdgeI];
-
-            // Owner side triangle
-            label ownP1 = e.start();
-            label ownP2 = e.end();
-            label ownP3 = nBasePoints + baseOwn[baseEdgeI];
-
-            label ownFaceI = 2*baseEdgeI;
-
-            faces[ownFaceI] = triFace(ownP1, ownP2, ownP3);
-
-            // Neighbour side triangle
-            label neiP1 = e.end();
-            label neiP2 = e.start();
-            label neiP3 = nBasePoints + baseNei[baseEdgeI];
-
-            label neiFaceI = 2*baseEdgeI + 1;
-
-            faces[neiFaceI] = triFace(neiP1, neiP2, neiP3);
-        }
-
-
-    // Patch boundary triangulation
-    //
-
-        const faPatchList& basePatches = baseAreaMesh().boundary();
-
-        int nBasePatchEdges = 0;
-
-        forAll(basePatches, basePatchI)
-        {
-            const faPatch& basePatch = basePatches[basePatchI];
-
-            if (basePatch.size() > 0)
-            {
-                const unallocLabelList& basePatchEdgeFaces =
-                    basePatch.edgeFaces();
-
-                forAll(basePatch, basePatchEdgeI)
-                {
-                    // Start corresponding to current patch
-                    label baseEdgeI = basePatch.start() + basePatchEdgeI;
-
-                    edge e = baseEdges[baseEdgeI];
-
-                    // Patch edge triangle
-                    label pP1 = e.start();
-                    label pP2 = e.end();
-                    label pP3 =
-                        nBasePoints + basePatchEdgeFaces[basePatchEdgeI];
-
-                    label pFaceI =
-                        2*nBaseInternalEdges + nBasePatchEdges++;
-
-                    faces[pFaceI] = triFace(pP1, pP2, pP3);
-                }
-            }
-        }
-
-
-    // Empty boundary triangulation
-    //
-
-        int nBaseNonEmptyEdges = nBaseInternalEdges + nBasePatchEdges;
-        int nBaseEmptyEdges = nBaseEdges - nBaseNonEmptyEdges;
-
-        if (nBaseEmptyEdges > 0)
-        {
-            labelList::subList baseEmptyOwn
-            (
-                baseAreaMesh().edgeOwner(),
-                nBaseEmptyEdges,
-                nBaseNonEmptyEdges
-            );
-
-            forAll(baseEmptyOwn, baseEmptyEdgeI)
-            {
-                // Start after all non-empty edges
-                label baseEdgeI = nBaseNonEmptyEdges + baseEmptyEdgeI;
-
-                edge e = baseEdges[baseEdgeI];
-
-                // Empty edge triangle
-                label eP1 = e.start();
-                label eP2 = e.end();
-                label eP3 = nBasePoints + baseEmptyOwn[baseEmptyEdgeI];
-
-                label eFaceI =
-                    2*nBaseInternalEdges + nBasePatchEdges + baseEmptyEdgeI;
-
-                faces[eFaceI] = triFace(eP1, eP2, eP3);
-            }
-        }
-
-
-    // Create polyMesh
-    //
-
-        // Create mesh with points and faces
-        faceList polyFaces(faces.size());
-
-        forAll (polyFaces, faceI)
-        {
-            polyFaces[faceI] = faces[faceI];
-        }
-
-        subPolyMeshPtr_ = new polyMesh
-        (
-            IOobject
-            (
-                basePolyMesh().name() + "_faSubMesh",
-                basePolyMesh().pointsInstance(),
-                basePolyMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            xferCopy(points),
-            xferCopy(polyFaces),
-            xferCopy(labelList(0)),
-            xferCopy(labelList(0)),
-            false
-        );
-
-
-    // Create/Add polyPatch
-    //
-
-        // Create one single patch containing all faces
-        subPolyPatchPtr_ =
-            polyPatch::New
-            (
-                "patch",                        // type
-                "default",                      // name
-                nFaces,                         // size
-                0,                              // start
-                0,                              // index
-                subPolyMeshPtr_->boundaryMesh() // boundary mesh
-            ).ptr();
-
-        // Add patches
-        List<polyPatch*> patches(1, subPolyPatchPtr_);
-
-        subPolyMeshPtr_->addPatches(patches, true);
-}
-
-
-void faSubMesh::initSubAreaMesh()
-{
-    // Use first (and only) patch of sub polyMesh
-    // to construct sub faMesh
-    subAreaMeshPtr_ = new faMesh(subPolyMesh(), 0);
 }
 
 
@@ -275,34 +97,81 @@ void faSubMesh::clearOut() const
 
 faSubMesh::faSubMesh
 (
-    const faMesh& baseAreaMesh
+    const faMesh& baseAreaMesh,
+    const pointField& subFacePoints
 )
 :
 basePolyMesh_(baseAreaMesh.mesh()),
 baseAreaMesh_(baseAreaMesh),
-subPolyPatchPtr_(NULL),
-subPolyMeshPtr_(NULL),
-subAreaMeshPtr_(NULL),
+subPolyMesh_
+(
+    IOobject
+    (
+        basePolyMesh_.name() + "_faSubMesh",
+        basePolyMesh_.time().timeName(),
+        basePolyMesh_.time(),
+        IOobject::MUST_READ
+    )
+),
+subPolyMeshPointMap_
+(
+    IOobject
+    (
+        "pointMap",
+        subPolyMesh_.facesInstance(),
+        polyMesh::meshSubDir,
+        subPolyMesh_,
+        IOobject::MUST_READ
+    )
+),
+subPolyMeshPointAreaMap_
+(
+    IOobject
+    (
+        "pointAreaMap",
+        subPolyMesh_.facesInstance(),
+        polyMesh::meshSubDir,
+        subPolyMesh_,
+        IOobject::MUST_READ
+    )
+),
+subPolyMeshPointTriMap_
+(
+    IOobject
+    (
+        "pointTriMap",
+        subPolyMesh_.facesInstance(),
+        polyMesh::meshSubDir,
+        subPolyMesh_,
+        IOobject::MUST_READ
+    )
+),
+subPolyMeshFaceMap_
+(
+    IOobject
+    (
+        "faceMap",
+        subPolyMesh_.facesInstance(),
+        polyMesh::meshSubDir,
+        subPolyMesh_,
+        IOobject::MUST_READ
+    )
+),
+subPolyMeshCellMap_
+(
+    IOobject
+    (
+        "cellMap",
+        subPolyMesh_.facesInstance(),
+        polyMesh::meshSubDir,
+        subPolyMesh_,
+        IOobject::MUST_READ
+    )
+),
+subAreaMesh_(subPolyMesh_),
+subFacePoints_(subFacePoints),
 faceCurvaturesPtr_(NULL)
-{
-    if (debug)
-    {
-        Info<< "faSubMesh::calcSubPolyMeshPoints() : "
-            << "init polyMesh"
-            << endl;
-    }
-
-    initSubPolyMesh();
-
-    if (debug)
-    {
-        Info<< "faSubMesh::faSubMesh() : "
-            << "init areaMesh"
-            << endl;
-    }
-
-    initSubAreaMesh();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * * //

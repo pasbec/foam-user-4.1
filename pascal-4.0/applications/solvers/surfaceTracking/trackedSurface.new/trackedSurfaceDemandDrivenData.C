@@ -524,7 +524,12 @@ void trackedSurface::makeFaSubMesh() const
             << abort(FatalError);
     }
 
-    aSubMeshPtr_ = new faSubMesh(aMesh());
+    aSubMeshPtr_ =
+        new faSubMesh
+        (
+            aMesh(),
+            controlPoints()
+        );
 }
 
 

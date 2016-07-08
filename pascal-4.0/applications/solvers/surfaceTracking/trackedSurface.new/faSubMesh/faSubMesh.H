@@ -62,16 +62,29 @@ class faSubMesh
         //- Base faMesh
         const faMesh& baseAreaMesh_;
 
-    // Permanent data
-
-        //- Sub polyPatch
-        polyPatch* subPolyPatchPtr_;
-
         //- Sub polyMesh
-        polyMesh* subPolyMeshPtr_;
+        mutable polyMesh subPolyMesh_;
+
+        //- Sub polyMesh pointMap
+        const labelIOList subPolyMeshPointMap_;
+
+        //- Sub polyMesh pointAreaMap
+        const labelIOList subPolyMeshPointAreaMap_;
+
+        //- Sub polyMesh pointAreaMap
+        const labelIOList subPolyMeshPointTriMap_;
+
+        //- Sub polyMesh faceMap
+        const labelIOList subPolyMeshFaceMap_;
+
+        //- Sub polyMesh cellMap
+        const labelIOList subPolyMeshCellMap_;
 
         //- Sub faMesh
-        faMesh* subAreaMeshPtr_;
+        mutable faMesh subAreaMesh_;
+
+        //- Split points
+        const pointField& subFacePoints_;
 
 
     // Demand-driven data
@@ -94,15 +107,7 @@ class faSubMesh
         // Helpers
 
             //- Make/Collect points for sub polyMesh
-            tmp<pointField> calcSubPolyMeshPoints() const;
-
-        //- Initialization
-
-            //- Make sub polyMesh
-            void initSubPolyMesh();
-
-            //- Make sub faMesh
-            void initSubAreaMesh();
+            tmp<pointField> calcNewPoints() const;
 
         // Demand-driven data
 
@@ -126,7 +131,8 @@ public:
 
         faSubMesh
         (
-            const faMesh& baseAreaMesh
+            const faMesh& baseAreaMesh,
+            const pointField& subFacePoints
         );
 
 
@@ -138,7 +144,6 @@ public:
     // Member Functions
 
         // Helpers
-
 
         // Database
 
@@ -159,13 +164,19 @@ public:
             //- Return access to sub polyMesh
             polyMesh& subPolyMesh() const
             {
-                return *subPolyMeshPtr_;
+                return subPolyMesh_;
             }
 
             //- Return access to sub faMesh
             faMesh& subAreaMesh() const
             {
-                return *subAreaMeshPtr_;
+                return subAreaMesh_;
+            }
+
+            //- Return points to split faces of base mesh
+            const pointField& subFacePoints() const
+            {
+                return subFacePoints_;
             }
 
         // Mesh motion and mophing
@@ -183,7 +194,7 @@ public:
 
                 subPolyMesh().movePoints
                 (
-                    calcSubPolyMeshPoints()
+                    calcNewPoints()
                 );
 
                 return true;
