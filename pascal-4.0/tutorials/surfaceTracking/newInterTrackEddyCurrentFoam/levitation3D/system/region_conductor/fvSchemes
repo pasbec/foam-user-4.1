@@ -28,10 +28,10 @@ gradSchemes
     curl(A0Re)                        leastSquares;
     curl(A0Im)                        leastSquares;
 
-//     snGradCorr(A0Re)                  Gauss linear;
-//     snGradCorr(A0Im)                  Gauss linear;
-    snGradCorr(A0Re)                  leastSquares;
-    snGradCorr(A0Im)                  leastSquares;
+//     grad(A0Re)                        Gauss linear;
+//     grad(A0Im)                       Gauss linear;
+    grad(A0Re)                        leastSquares;
+    grad(A0Im)                        leastSquares;
 
 //     grad(sigma)                       Gauss linear;
     grad(sigma)                       leastSquares;
@@ -40,11 +40,6 @@ gradSchemes
 //     grad(VIm)                         Gauss linear;
     grad(VRe)                         leastSquares;
     grad(VIm)                         leastSquares;
-
-//     snGradCorr(VRe)                   Gauss linear;
-//     snGradCorr(VIm)                   Gauss linear;
-    snGradCorr(VRe)                   leastSquares;
-    snGradCorr(VIm)                   leastSquares;
 }
 
 divSchemes
@@ -69,6 +64,12 @@ interpolationSchemes
 
     interpolate(A0Re)                 linear;
     interpolate(A0Im)                 linear;
+
+    interpolate(grad(A0Re))           linear;
+    interpolate(grad(A0Im))           linear;
+
+    interpolate(grad(VRe))            linear;
+    interpolate(grad(VIm))            linear;
 
     interpolate(ARe)                  linear;
     interpolate(AIm)                  linear;

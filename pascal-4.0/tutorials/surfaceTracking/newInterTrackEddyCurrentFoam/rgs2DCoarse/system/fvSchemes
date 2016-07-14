@@ -26,8 +26,8 @@ gradSchemes
     curl(ARe)                         Gauss linear;
     curl(AIm)                         Gauss linear;
 
-    snGradCorr(ARe)                   Gauss linear;
-    snGradCorr(AIm)                   Gauss linear;
+    grad(ARe)                         Gauss linear;
+    grad(AIm)                         Gauss linear;
 }
 
 divSchemes
@@ -46,6 +46,9 @@ laplacianSchemes
 interpolationSchemes
 {
     default                           none;
+
+    interpolate(grad(ARe))            linear;
+    interpolate(grad(AIm))            linear;
 }
 
 // ************************************************************************* //

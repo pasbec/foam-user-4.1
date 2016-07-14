@@ -28,10 +28,10 @@ gradSchemes
     curl(ARe)                         leastSquares;
     curl(AIm)                         leastSquares;
 
-//     snGradCorr(ARe)                   Gauss linear;
-//     snGradCorr(AIm)                   Gauss linear;
-    snGradCorr(ARe)                   leastSquares;
-    snGradCorr(AIm)                   leastSquares;
+//     grad(ARe)                         Gauss linear;
+//     grad(AIm)                         Gauss linear;
+    grad(ARe)                         leastSquares;
+    grad(AIm)                         leastSquares;
 }
 
 divSchemes
@@ -50,6 +50,9 @@ laplacianSchemes
 interpolationSchemes
 {
     default                           none;
+
+    interpolate(grad(ARe))            linear;
+    interpolate(grad(AIm))            linear;
 }
 
 // ************************************************************************* //

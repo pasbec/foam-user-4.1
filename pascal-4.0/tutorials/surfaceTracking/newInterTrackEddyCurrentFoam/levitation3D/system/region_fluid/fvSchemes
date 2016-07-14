@@ -35,18 +35,10 @@ gradSchemes
     grad(U)                               Gauss linear;
     grad(p)                               Gauss linear;
 
-    snGradCorr(U)                         Gauss linear;
-    snGradCorr(p)                         Gauss linear;
-
     grad(k)                               Gauss linear;
     grad(omega)                           Gauss linear;
     grad(epsilon)                         Gauss linear;
     grad(nuTilda)                         Gauss linear;
-
-    snGradCorr(k)                         Gauss linear;
-    snGradCorr(omega)                     Gauss linear;
-    snGradCorr(epsilon)                   Gauss linear;
-    snGradCorr(nuTilda)                   Gauss linear;
 }
 
 divSchemes
@@ -92,17 +84,12 @@ interpolationSchemes
     interpolate(HbyA)                     linear;
     interpolate(F)                        linear;
 
-    // Up
+    interpolate(grad(U))                  linear;
     interpolate(grad(p))                  linear;
-}
 
-snGradSchemes
-{
-    default                               none;
-
-    snGrad(p)                             corrected;
-//     snGrad(p)                             limited 0.5;
-//     snGrad(p)                             limited 0.3333;
+    interpolate(grad(k))                  linear;
+    interpolate(grad(epsilon))            linear;
+    interpolate(grad(omega))              linear;
 }
 
 fluxRequired

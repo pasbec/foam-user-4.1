@@ -22,9 +22,6 @@ ddtSchemes
 gradSchemes
 {
     default                           none;
-
-    curl(A0Re)                        Gauss linear;
-    curl(A0Im)                        Gauss linear;
 }
 
 divSchemes
@@ -35,17 +32,11 @@ divSchemes
 laplacianSchemes
 {
     default                           none;
-
-    laplacian(A0Re)                   Gauss linear corrected;
-    laplacian(A0Im)                   Gauss linear corrected;
 }
 
 interpolationSchemes
 {
     default                           none;
-
-    interpolate(A0Re)                 linear;
-    interpolate(A0Im)                 linear;
 
     interpolate(ARe)                  linear;
     interpolate(AIm)                  linear;

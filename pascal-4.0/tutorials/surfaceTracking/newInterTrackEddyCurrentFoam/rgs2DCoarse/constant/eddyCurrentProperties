@@ -14,16 +14,17 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-regions
-{
-    conductor    region_conductor;
-}
 
 settings
 {
-    debug        1;
+//     debug                   1;
 
-//     biotSavart   true;
+//     biotSavart              true;
+}
+
+regions
+{
+    conductor               region_conductor;
 }
 
 storage

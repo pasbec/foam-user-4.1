@@ -14,11 +14,16 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+settings
+{
+//     debug                   10;
+}
+
 regions
 {
-    conductor    region_conductor;
-    fluid        region_fluid;
-    buffer       region_buffer;
+    conductor               region_conductor;
+    fluid                   region_fluid;
+    buffer                  region_buffer;
 }
 
 storage
