@@ -75,6 +75,9 @@ cd "$HOME/foam/foam-extend-3.2"
 git remote add 'upstream' 'git://git.code.sf.net/p/foam-extend/foam-extend-3.2'
 git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-Mirror/foam-extend-foam-extend-3.2.git'
 git remote add 'sf' 'https://p-be@git.code.sf.net/u/p-be/foam-extend-3.2'
+git remote add 'hzdr' 'https://beckst30@redmine.hzdr.de/git/rgs.foam-extend-user-pascal'
+git remote add 'uts' 'ssh://beckst30@uts.fz-rossendorf.de/home/beckst30/foam'
+
 #git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-3.2'
 ```
 

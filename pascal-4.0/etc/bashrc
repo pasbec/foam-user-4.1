@@ -33,6 +33,9 @@ feClear ()
     env_removeAll 'foam'
     env_removeAll 'foam-extend'
 
+    # Clear alias
+    unalias pf &> /dev/null
+
     # Restore keys
     env_set 'FE40_FOAM_INST_DIR' "$fe40_foam_inst_dir"
     env_set 'FE40_FOAM_ETC' "$fe40_foam_etc"
@@ -47,6 +50,9 @@ feLoad ()
 
     # Load user environment
     source "$FOAM_USER_ETC/user/source.sh"
+
+    # Set alias
+    alias pf='paraFoam -nativeReader &> /dev/null &'
 }
 
 

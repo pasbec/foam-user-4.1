@@ -41,6 +41,10 @@ SourceFiles
 #include "featureEdgeMesh.H"
 #include "OFstream.H"
 
+// TODO: Use named enums!
+
+// TODO: Hybrid calculation
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
