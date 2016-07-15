@@ -32,6 +32,7 @@ Description
 #include "eddyCurrentApp.H"
 
 // TODO: Derived gradient boundary condition for VRe/VIm in conductor region
+// TODO: Remove interfaceLabel? Use alias of calculatedFvPatchField or special patchField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

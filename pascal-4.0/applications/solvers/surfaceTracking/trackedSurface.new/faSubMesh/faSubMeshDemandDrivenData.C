@@ -27,7 +27,11 @@ Description
 
 #include "faSubMesh.H"
 
-// TODO: Fix FPE on parallel
+// TODO: Test in parallel!
+// TODO: Fix indexing (Load faMesh mappings)
+// TODO: Fix boundary curvatures
+// TODO: Fix contactAngle (adjust pointNormals)
+//
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

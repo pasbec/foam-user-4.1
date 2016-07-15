@@ -45,6 +45,8 @@ SourceFiles
 
 // TODO: Hybrid calculation
 
+// TODO: Special patchField for automatic calculation
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
