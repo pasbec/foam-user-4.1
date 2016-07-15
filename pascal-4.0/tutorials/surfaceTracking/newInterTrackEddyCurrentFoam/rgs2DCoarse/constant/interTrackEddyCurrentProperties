@@ -1,9 +1,9 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     3.2                                |
+|  \\    /   O peration     | Version:     4.0                                |
 |   \\  /    A nd           | Web:         http://www.foam-extend.org         |
-|    \\/     M anipulation  |                                                 |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
@@ -16,7 +16,7 @@ FoamFile
 
 settings
 {
-//     debug                   10;
+//     debug                   1;
 }
 
 regions
@@ -34,11 +34,11 @@ emUpdate
 {
     enabled                 yes;
 
-    outputTimeIndexCycle    2147483647;
+    outputTimeIndexCycle    5;
     timeIndexCycle          2147483647;
     timeCycle               1e+300;
 
-    relDeltaAmax            0.10;
+    relDeltaAmax            0.01;
 }
 
 // ************************************************************************* //

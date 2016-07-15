@@ -1,9 +1,9 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     3.2                                |
+|  \\    /   O peration     | Version:     4.0                                |
 |   \\  /    A nd           | Web:         http://www.foam-extend.org         |
-|    \\/     M anipulation  |                                                 |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
@@ -18,8 +18,9 @@ twoFluids                                    no;
 
 cleanInterface                               yes;
 
-normalMotionDir                              no;
+noCleanTangentialSurfaceTensionCorrection    yes;
 
+normalMotionDir                              no;
 motionDir                                    (0 0 1);
 
 fixedTrackedSurfacePatches                   0();
@@ -37,14 +38,14 @@ correctVolume                                yes;
 
 resetControlPoints                           yes;
 
-// smoothing                                 yes;
+// smoothing                                    yes;
 
-// freeContactAngle                          yes;
+// freeContactAngle                             yes;
 
-// correctPointNormals                       yes;
-// correctDisplacement                       yes;
-// correctCurvature                          yes;
+// correctPointNormals                          yes;
+// correctDisplacement                          yes;
+// correctCurvature                             yes;
 //
-// fvcNGradUn                                yes;
+// fvcNGradUn                                   yes;
 
 // ************************************************************************* //
