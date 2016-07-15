@@ -1,9 +1,9 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     3.2                                |
+|  \\    /   O peration     | Version:     4.0                                |
 |   \\  /    A nd           | Web:         http://www.foam-extend.org         |
-|    \\/     M anipulation  |                                                 |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
@@ -28,6 +28,27 @@ solvers
 
         preconditioner           Cholesky;
     }
+//     {
+//         solver          AMG;
+//         cycle           V-cycle;
+//         coarseningType  AAMG;
+//         norm            componentNorm;
+//         normComponent   0;
+//
+//         nPreSweeps      2;
+//         nPostSweeps     2;
+//         groupSize       2;
+//         minCoarseEqns   4;
+//         nMaxLevels      100;
+//         scale           on;
+//         coarseSmoother  ILU;
+//         fineSmoother    ILU;
+//
+//         minIter         0;
+//         maxIter         100;
+//         tolerance       1e-05;
+//         relTol          0.5;
+//     }
 }
 
 EDDYCURRENT

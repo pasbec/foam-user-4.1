@@ -246,14 +246,14 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
             paraviewTouchOpenFOAM "$region"
         done
 
-        # Translate mesh points
-        transVector='(0 0 -0.003)'
-#         runApplication \
-            transformPoints -translate "$transVector" || exit 1
-        for region in $regionlist_split; do
-#             runApplication -r "$region" \
-            transformPoints -region "$region" -translate "$transVector" || exit 1
-        done
+#         # Translate mesh points
+#         transVector='(0 0 -0.0003)'
+# #         runApplication \
+#             transformPoints -translate "$transVector" || exit 1
+#         for region in $regionlist_split; do
+# #             runApplication -r "$region" \
+#             transformPoints -region "$region" -translate "$transVector" || exit 1
+#         done
     fi
 
     if [[ $flagParallel -eq 1 ]]; then
