@@ -16,7 +16,7 @@ FoamFile
 
 // ************************* SIMLUTAITON TIMES ***************************** //
 
-application         interTrackEddyCurrentFoam;
+application         newInterTrackEddyCurrentFoam;
 
 startFrom           latestTime;
 
