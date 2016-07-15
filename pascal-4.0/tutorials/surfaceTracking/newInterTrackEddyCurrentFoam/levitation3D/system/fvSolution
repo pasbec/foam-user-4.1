@@ -34,7 +34,8 @@ EDDYCURRENT
 {
     interface          "trackedSurface";
 
-    nCorrectors        5;
+    nCorrectors        10;
+    nSubCorrectors     1000;
 
     residualControl
     {

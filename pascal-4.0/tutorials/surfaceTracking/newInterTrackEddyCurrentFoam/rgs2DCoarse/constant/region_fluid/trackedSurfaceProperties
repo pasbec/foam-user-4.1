@@ -14,35 +14,37 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids                       no;
+twoFluids                                    no;
 
-cleanInterface                  yes;
+cleanInterface                               yes;
 
-normalMotionDir                 no;
+normalMotionDir                              no;
 
-motionDir                       (0 0 1);
+motionDir                                    (0 0 1);
 
-fixedTrackedSurfacePatches      0();
+fixedTrackedSurfacePatches                   0();
 
-// pointNormalsCorrectionPatches   2(fixedWall frontAndBack);
-pointNormalsCorrectionPatches   1(frontAndBack);
+// pointNormalsCorrectionPatches                2(fixedWall frontAndBack); // no contactAngle given
+pointNormalsCorrectionPatches                1(frontAndBack);              // contactAngle given
 
-nTrackedSurfaceCorrectors       1;
+nTrackedSurfaceCorrectors                    1;
 
-// useSubMesh                      yes;
+interfaceDeformationLimit                    0.2;
 
-correctVolume                   yes;
+// useSubMesh                                   yes;
 
-resetControlPoints              yes;
+correctVolume                                yes;
 
-// smoothing                       yes;
+resetControlPoints                           yes;
 
-// freeContactAngle                yes;
+// smoothing                                 yes;
 
-// correctPointNormals             yes;
-// correctDisplacement             yes;
-// correctCurvature                yes;
+// freeContactAngle                          yes;
+
+// correctPointNormals                       yes;
+// correctDisplacement                       yes;
+// correctCurvature                          yes;
 //
-// fvcNGradUn                      yes;
+// fvcNGradUn                                yes;
 
 // ************************************************************************* //
