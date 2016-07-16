@@ -31,7 +31,7 @@ dictionaryReplacement
 //         {
 //             type            directMappedPatch;
 //             sampleMode      nearestPatchFace;
-//             sampleRegion    region_dynamic;
+//             sampleRegion    region_buffer;
 //             samplePatch     fixedMesh;
 //             offset          (0 0 0);
 //         }

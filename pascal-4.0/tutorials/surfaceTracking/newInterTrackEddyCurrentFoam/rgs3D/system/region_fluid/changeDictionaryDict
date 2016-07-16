@@ -22,7 +22,7 @@ dictionaryReplacement
         {
             type            directMappedPatch;
             sampleMode      nearestPatchFace;
-            sampleRegion    region_dynamic;
+            sampleRegion    region_buffer;
             samplePatch     trackedSurface;
             offset          (0 0 0);
         }
@@ -40,7 +40,7 @@ dictionaryReplacement
         {
             type            directMappedWall;
             sampleMode      nearestPatchFace;
-            sampleRegion    region_dynamic;
+            sampleRegion    region_buffer;
             samplePatch     fixedWall;
             offset          (0 0 0);
         }
