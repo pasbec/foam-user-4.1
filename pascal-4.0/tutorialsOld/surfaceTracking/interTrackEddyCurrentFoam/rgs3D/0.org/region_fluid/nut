@@ -49,7 +49,7 @@ boundaryField
     "procBoundary.*"
     {
         type            processor;
-        value           uniform 0;
+        value           $internalField;
     }
 }
 

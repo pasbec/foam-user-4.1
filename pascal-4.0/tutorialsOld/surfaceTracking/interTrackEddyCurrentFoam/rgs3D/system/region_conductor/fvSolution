@@ -14,4 +14,20 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+solvers
+{
+    V
+    {
+        solver                   deflatedPCG;
+
+        tolerance                1e-04;
+        relTol                   0;
+
+        minIter                  0;
+        maxIter                  300;
+
+        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC, GAMG, SymGaussSeidel, diagonal, none
+    }
+}
+
 // ************************************************************************* //

@@ -24,22 +24,22 @@ boundaryField
     {
         type            slip;
 //         type            calculated;
-//         value           uniform 0;
+//         value           $internalField;
     }
     movingWall
     {
         type            nuSgsWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
     fixedWall
     {
         type            nuSgsWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
     "procBoundary.*"
     {
         type            processor;
-        value           uniform 0;
+        value           $internalField;
     }
 }
 

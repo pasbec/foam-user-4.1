@@ -38,7 +38,7 @@ boundaryField
     "procBoundary.*"
     {
         type            processor;
-        value           uniform (0 0 0);
+        value           $internalField;
     }
     global
     {

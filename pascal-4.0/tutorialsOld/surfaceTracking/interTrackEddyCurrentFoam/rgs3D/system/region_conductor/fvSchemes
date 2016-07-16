@@ -16,32 +16,41 @@ FoamFile
 
 ddtSchemes
 {
-    default    none;
+    default                           none;
 }
 
 gradSchemes
 {
-    default    none;
+    default                           none;
+
+    grad(sigma)                       leastSquares;
+
+    grad(VRe)                         leastSquares;
+    grad(VIm)                         leastSquares;
+
+    snGradCorr(VRe)                   leastSquares;
+    snGradCorr(VIm)                   leastSquares;
 }
 
 divSchemes
 {
-    default    none;
+    default                           none;
+
+    div(ARe)                          leastSquares;
+    div(AIm)                          leastSquares;
 }
 
 laplacianSchemes
 {
-    default    none;
+    default                           none;
+
+    laplacian(sigma,VRe)              Gauss linear corrected;
+    laplacian(sigma,VIm)              Gauss linear corrected;
 }
 
 interpolationSchemes
 {
-    default    none;
-}
-
-snGradSchemes
-{
-    default    none;
+    default                           none;
 }
 
 // ************************************************************************* //

@@ -159,8 +159,9 @@ cellSet cellSet_region_dynamic            add    setToCell      cellSet_geometry
 cellSet cellSet_region_dynamic_old        remove
 
 cellSet cellSet_region_static             new    setToCell      cellSet_geometry_all
-cellSet cellSet_region_static             delete setToCell      cellSet_region_fluid
-cellSet cellSet_region_static             delete setToCell      cellSet_region_dynamic
+cellSet cellSet_region_static             delete setToCell      cellSet_geometry_fluid_dynamic
+cellSet cellSet_region_static             delete setToCell      cellSet_geometry_frame_dynamic
+cellSet cellSet_region_static             delete setToCell      cellSet_geometry_free_dynamic
 cellSet cellSet_region_static_old         remove
 
 cellSet cellSet_region_conductor          new    setToCell      cellSet_geometry_fluid
@@ -172,6 +173,8 @@ cellSet cellSet_region_conductor_old      remove
 cellSet cellSet_region_space              new    setToCell      cellSet_geometry_all
 cellSet cellSet_region_space              delete setToCell      cellSet_region_conductor
 cellSet cellSet_region_space_old          remove
+
+
 
 ### End
 

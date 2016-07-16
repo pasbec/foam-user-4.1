@@ -21,6 +21,11 @@ regions
     conductor    region_conductor;
 }
 
+patches
+{
+    interface    region_conductor_to_region_space;
+}
+
 frequency        frequency [ 0 0 -1 0 0 0 0 ] 10000.0;
 
 // ************************************************************************* //
