@@ -73,16 +73,16 @@ expressions
     keepPatches   true;
   }
 
-  jsRe_coil_reset
+  j0Re_coil_reset
   {
-    field         jsRe;
+    field         j0Re;
     expression    "vector (0,0,0)";
     keepPatches   true;
   }
 
-  jsRe_coil_x_plus
+  j0Re_coil_x_plus
   {
-    field         jsRe;
+    field         j0Re;
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().x>=0                 \
@@ -91,9 +91,9 @@ expressions
     keepPatches   true;
   }
 
-  jsRe_coil_x_minus
+  j0Re_coil_x_minus
   {
-    field         jsRe;
+    field         j0Re;
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().x<=0                 \
@@ -102,9 +102,9 @@ expressions
     keepPatches   true;
   }
 
-  jsRe_coil_y_plus
+  j0Re_coil_y_plus
   {
-    field         jsRe;
+    field         j0Re;
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().y>=0                 \
@@ -113,9 +113,9 @@ expressions
     keepPatches   true;
   }
 
-  jsRe_coil_y_minus
+  j0Re_coil_y_minus
   {
-    field         jsRe;
+    field         j0Re;
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().y<=0                 \
@@ -124,9 +124,9 @@ expressions
     keepPatches   true;
   }
 
-  jsRe_coil_x_plus_y_plus
+  j0Re_coil_x_plus_y_plus
   {
-    field         jsRe;
+    field         j0Re;
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().x>=coil_rx0          \
@@ -139,9 +139,9 @@ expressions
     keepPatches   true;
   }
 
-  jsRe_coil_x_minus_y_plus
+  j0Re_coil_x_minus_y_plus
   {
-    field         jsRe;
+    field         j0Re;
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().x<=-coil_rx0         \
@@ -154,9 +154,9 @@ expressions
     keepPatches   true;
   }
 
-  jsRe_coil_x_plus_y_minus
+  j0Re_coil_x_plus_y_minus
   {
-    field         jsRe;
+    field         j0Re;
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().x>=coil_rx0          \
@@ -169,9 +169,9 @@ expressions
     keepPatches   true;
   }
 
-  jsRe_coil_x_minus_y_plus
+  j0Re_coil_x_minus_y_plus
   {
-    field         jsRe;
+    field         j0Re;
     variables     $conductorData;
     condition     "   set(cellSet_geometry_coil) \
                    && pos().x<=-coil_rx0         \
