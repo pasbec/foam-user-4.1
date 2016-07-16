@@ -87,7 +87,7 @@ PIMPLE
 
     volumeCorrectionByHeight
     {
-        heightCoord              2;
+        heightCoord              -1;
         relThreshold             0;
     }
 

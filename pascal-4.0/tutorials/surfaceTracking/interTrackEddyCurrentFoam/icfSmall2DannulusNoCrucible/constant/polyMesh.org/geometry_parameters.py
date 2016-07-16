@@ -47,7 +47,8 @@ axi_y2 = geo_x2 * axi_phiHalfSin
 axi_y3 = geo_x3 * axi_phiHalfSin
 axi_y4 = geo_x4 * axi_phiHalfSin
 
-n_scale = 0.25
+#n_scale = 0.25
+n_scale = 0.5
 #n_scale = 1.0
 
 n_x0 = int(m.ceil(n_scale*geo_x0))

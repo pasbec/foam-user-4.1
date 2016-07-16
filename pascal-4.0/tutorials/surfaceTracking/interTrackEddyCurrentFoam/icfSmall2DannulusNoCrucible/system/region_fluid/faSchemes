@@ -50,6 +50,7 @@ interpolationSchemes
 {
     default              none;
     interpolate(Us)      linear;
+    interpolate(deltaH)  linear;
 }
 
 snGradSchemes

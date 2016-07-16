@@ -24,12 +24,16 @@ motionDir                                    (0 0 1);
 
 fixedTrackedSurfacePatches                   0();
 
-pointNormalsCorrectionPatches                4(axis fixedWallSide front back);
-// pointNormalsCorrectionPatches                2(axis fixedWallSide);
+// pointNormalsCorrectionPatches                4(axis fixedWallSide front back);
+pointNormalsCorrectionPatches                3(axis front back);
 
 nTrackedSurfaceCorrectors                    1;
 
-smoothing                                    yes;
+useSubMesh                                   yes;
+
+smoothing                                    no;
+
+// freeContactAngle                             yes;
 
 correctPointNormals                          no;
 correctDisplacement                          no;

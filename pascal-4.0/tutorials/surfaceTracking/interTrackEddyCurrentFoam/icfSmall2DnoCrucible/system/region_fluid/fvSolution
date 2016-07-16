@@ -80,14 +80,14 @@ PIMPLE
     nMinOuterCorr                2;
     maxRelVolErr                 1e-03;
 
-    maxConvectiveCo              0.1;
-    maxInterfaceCo               0.6;
+    maxConvectiveCo              0.3;
+    maxInterfaceCo               0.3;
 
     removeSwirl                  -1;
 
     volumeCorrectionByHeight
     {
-        heightCoord              2;
+        heightCoord              -1;
         relThreshold             0;
     }
 

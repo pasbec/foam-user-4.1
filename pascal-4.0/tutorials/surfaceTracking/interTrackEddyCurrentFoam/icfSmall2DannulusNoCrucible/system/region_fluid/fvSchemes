@@ -78,6 +78,8 @@ gradSchemes
 //     snGradCorr(nuTilda)                   cellLimited leastSquares 1.0;
 //     grad(pB)                              cellLimited leastSquares 1.0;
 //     snGradCorr(cellMotionU)               cellLimited leastSquares 1.0;
+
+    grad(volIntegrate(phi)) Gauss linear;
 }
 
 divSchemes
@@ -117,6 +119,12 @@ laplacianSchemes
     laplacian(DepsilonEff,epsilon)        Gauss linear corrected;
     laplacian(DnuTildaEff,nuTilda)        Gauss linear corrected;
     laplacian(diffusivity,cellMotionU)    Gauss linear corrected;
+//     laplacian(nuEff,U)                    Gauss linear limited 0.3333;
+//     laplacian(DkEff,k)                    Gauss linear limited 0.3333;
+//     laplacian(DomegaEff,omega)            Gauss linear limited 0.3333;
+//     laplacian(DepsilonEff,epsilon)        Gauss linear limited 0.3333;
+//     laplacian(DnuTildaEff,nuTilda)        Gauss linear limited 0.3333;
+//     laplacian(diffusivity,cellMotionU)    Gauss linear limited 0.3333;
 //     laplacian(nuEff,U)                    Gauss linear skewCorrected 0.3333;
 //     laplacian(DkEff,k)                    Gauss linear skewCorrected 0.3333;
 //     laplacian(DomegaEff,omega)            Gauss linear skewCorrected 0.3333;
