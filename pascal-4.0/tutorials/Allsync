@@ -2,5 +2,5 @@
 
 rsync -Avax $FOAM_USER_TUTORIALS/ $FOAM_USER_RUN/tutorials
 
-rm $FOAM_USER_RUN/Allsync &> /dev/null
+rm $FOAM_USER_RUN/tutorials/Allsync &> /dev/null
 
