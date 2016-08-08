@@ -24,7 +24,15 @@ bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin python-all mayavi2
 ```
-##### Ubuntu 15.10 <a name="ubuntu1510"></a> ([Ubuntu 14.04](#ubuntu1404))
+##### Ubuntu 15.10 <a name="ubuntu1510"></a>
+```bash
+sudo apt-get update
+sudo apt-get install git-core build-essential binutils-dev cmake flex \
+zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
+libxt-dev rpm mercurial graphviz
+sudo apt-get install openmpi-bin python-all mayavi2
+```
+##### Ubuntu 16.04 <a name="ubuntu1604"></a> ([Ubuntu 15.10](#ubuntu1510))
 
 ### Download/Clone root repository
 
@@ -91,10 +99,12 @@ cd "$HOME/foam/foam-extend-3.2"
 #
 # Template
 cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
-# Bison 2.7
+# Bison 2.7 (only [Ubuntu 16.04](#ubuntu1510) and [Ubuntu 16.04](#ubuntu1604))
 sed -i "s/#\(export WM_THIRD_PARTY_USE_BISON_27=1\)/\1/g" 'etc/prefs.sh'
 # System qmake
 sed -i "/#export QT_BIN_DIR=\$QT_DIR\/bin/a export QT_BIN_DIR=$(dirname $(which qmake))" 'etc/prefs.sh'
+# Fix for flex (only [Ubuntu 16.04](#ubuntu1604))
+find src applications -name "*.L" -type f | xargs sed -i -e 's=\(YY\_FLEX\_SUBMINOR\_VERSION\)=YY_FLEX_MINOR_VERSION < 6 \&\& \1='
 cd -
 ```
 #### Source environment
