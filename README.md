@@ -99,11 +99,11 @@ cd "$HOME/foam/foam-extend-3.2"
 #
 # Template
 cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
-# Bison 2.7 (only [Ubuntu 16.04](#ubuntu1510) and [Ubuntu 16.04](#ubuntu1604))
+# Bison 2.7 (only Ubuntu 15.10+)
 sed -i "s/#\(export WM_THIRD_PARTY_USE_BISON_27=1\)/\1/g" 'etc/prefs.sh'
 # System qmake
 sed -i "/#export QT_BIN_DIR=\$QT_DIR\/bin/a export QT_BIN_DIR=$(dirname $(which qmake))" 'etc/prefs.sh'
-# Fix for flex (only [Ubuntu 16.04](#ubuntu1604))
+# Fix for flex (only Ubuntu 16.04)
 find src applications -name "*.L" -type f | xargs sed -i -e 's=\(YY\_FLEX\_SUBMINOR\_VERSION\)=YY_FLEX_MINOR_VERSION < 6 \&\& \1='
 cd -
 ```
