@@ -13,7 +13,7 @@ sudo apt-get update
 sudo apt-get install git-core build-essential binutils-dev flex \
 bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev \
 libxt-dev rpm mercurial graphviz
-sudo apt-get install openmpi-bin python-all mayavi2
+sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
 ```
 ##### Ubuntu 13.10 <a name="ubuntu1310"></a> ([Ubuntu 12.04](#ubuntu1204))
 ##### Ubuntu 14.04 <a name="ubuntu1404"></a>
@@ -22,7 +22,7 @@ sudo apt-get update
 sudo apt-get install git-core build-essential binutils-dev cmake flex \
 bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
 libxt-dev rpm mercurial graphviz
-sudo apt-get install openmpi-bin python-all mayavi2
+sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
 ```
 ##### Ubuntu 15.10 <a name="ubuntu1510"></a>
 ```bash
@@ -30,7 +30,7 @@ sudo apt-get update
 sudo apt-get install git-core build-essential binutils-dev cmake flex \
 zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
 libxt-dev rpm mercurial graphviz
-sudo apt-get install openmpi-bin python-all mayavi2
+sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
 ```
 ##### Ubuntu 16.04 <a name="ubuntu1604"></a> ([Ubuntu 15.10](#ubuntu1510))
 
