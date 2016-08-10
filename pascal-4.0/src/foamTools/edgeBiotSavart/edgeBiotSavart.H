@@ -36,16 +36,16 @@ SourceFiles
 #define edgeBiotSavart_H
 
 #include "IOdictionary.H"
+#include "NamedEnum.H"
 #include "fvMesh.H"
 #include "volFields.H"
 #include "featureEdgeMesh.H"
 #include "OFstream.H"
-
-// TODO: Use named enums!
-
-// TODO: Hybrid calculation
-
-// TODO: Special patchField for automatic calculation
+#include "fvc.H"
+#include "fvMatrices.H"
+#include "fvm.H"
+#include "calculatedFvPatchFields.H"
+#include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,7 +63,7 @@ class edgeBiotSavart
 public:
 
     //- Real/Imaginary part enums
-    enum ComplexPart
+    enum complexPart
     {
         REAL = 0,
         IMAG = 1
@@ -83,6 +83,8 @@ public:
 private:
 
     // Private data
+
+        static const NamedEnum<complexPart, 2> complexPartNames_;
 
         //- Mesh
         const fvMesh& mesh_;
@@ -111,7 +113,7 @@ private:
                 tmp<vectorField> calcA
                 (
                     const pointField& points,
-                    ComplexPart part = REAL
+                    complexPart part = REAL
                 ) const;
 
             // Magnetic field density
@@ -120,7 +122,7 @@ private:
                 tmp<vectorField> calcB
                 (
                     const pointField& points,
-                    ComplexPart part = REAL
+                    complexPart part = REAL
                 ) const;
 
 
@@ -143,72 +145,82 @@ public:
 
             //- Calculate A for internal cell centres
             //  Parameter part may be used to respect
-            //  corresponding phase angle
+            //  corresponding phase angle.
             tmp<vectorField> internalA
             (
-                ComplexPart part = REAL
+                complexPart part = REAL
             ) const;
 
             //- Calculate A for boundary patch faces centres
             //  Parameter part may be used to respect
-            //  corresponding phase angle
+            //  corresponding phase angle.
             tmp<vectorField> boundaryPatchA
             (
                 const label& patchI,
-                ComplexPart part = REAL
+                complexPart part = REAL
             ) const;
 
             //- Calculate A for boundary patch faces centres
             //  Parameter part may be used to respect
-            //  corresponding phase angle
+            //  corresponding phase angle.
             tmp<vectorField> boundaryPatchA
             (
                 const word& patchName,
-                ComplexPart part = REAL
+                complexPart part = REAL
             ) const;
 
             //- Calculate A
             //  Parameter part may be used to respect
-            //  corresponding phase angle
+            //  corresponding phase angle.
             tmp<volVectorField> A
             (
-                ComplexPart part = REAL
+                complexPart part = REAL
+            ) const;
+
+            //- Calculate A based on Biot-Savart on bc and
+            //  laplacian solution for internal field.
+            //  Parameter part may be used to respect
+            //  corresponding phase angle.
+            tmp<volVectorField> A
+            (
+                const word& name,
+                complexPart part = REAL
             ) const;
 
         // Magnetic field density
 
             //- Calculate B for internal cell centres
             //  Parameter part may be used to respect
-            //  corresponding phase angle
+            //  corresponding phase angle.
             tmp<vectorField> internalB
             (
-                ComplexPart part = REAL
+                complexPart part = REAL
             ) const;
 
             //- Calculate B for boundary patch faces centres
             //  Parameter part may be used to respect
-            //  corresponding phase angle
+            //  corresponding phase angle.
             tmp<vectorField> boundaryPatchB
             (
                 const label& patchI,
-                ComplexPart part = REAL
+                complexPart part = REAL
             ) const;
 
             //- Calculate B for boundary patch faces centres
             //  Parameter part may be used to respect
-            //  corresponding phase angle
+            //  corresponding phase angle.
             tmp<vectorField> boundaryPatchB
             (
                 const word& patchName,
-                ComplexPart part = REAL
+                complexPart part = REAL
             ) const;
 
             //- Calculate B
             //  Parameter part may be used to respect
-            //  corresponding phase angle
+            //  corresponding phase angle.
             tmp<volVectorField> B
             (
-                ComplexPart part = REAL
+                complexPart part = REAL
             ) const;
 
         //- Write inductor/mesh data to vtk

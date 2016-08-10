@@ -30,12 +30,24 @@ License
 defineTypeNameAndDebug(Foam::edgeBiotSavart, 0);
 
 
+template<>
+const char* Foam::NamedEnum<Foam::edgeBiotSavart::complexPart, 2>::names[] =
+{
+    "real",
+    "imaginary"
+};
+
+
+const Foam::NamedEnum<Foam::edgeBiotSavart::complexPart, 2>
+    Foam::edgeBiotSavart::complexPartNames_;
+
+
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::calcA
 (
     const pointField& points,
-    ComplexPart part
+    complexPart part
 ) const
 {
     tmp<vectorField> tA
@@ -51,7 +63,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::calcA
         const scalar current = inductorData_[inductorI].current;
         const bool reverse = inductorData_[inductorI].reverse;
         const scalar phase = inductorData_[inductorI].phase/180.0 * M_PI;
-        scalar complex = int(part)*sin(phase) - int(part-1)*cos(phase);
+        scalar complex = int(part)*sin(phase) + int(1-part)*cos(phase);
         if (complex < SMALL) complex = 0;
 
         const scalar factor = 1.0E-7 * current * complex;
@@ -115,7 +127,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::calcA
 Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::calcB
 (
     const pointField& points,
-    ComplexPart part
+    complexPart part
 ) const
 {
     tmp<vectorField> tB
@@ -131,7 +143,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::calcB
         const scalar current = inductorData_[inductorI].current;
         const bool reverse = inductorData_[inductorI].reverse;
         const scalar phase = inductorData_[inductorI].phase/180.0 * M_PI;
-        scalar complex = int(part)*sin(phase) - int(part-1)*cos(phase);
+        scalar complex = int(part)*sin(phase) + int(1-part)*cos(phase);
         if (complex < SMALL) complex = 0;
 
         const scalar factor = 1.0E-7 * current * complex;
@@ -260,7 +272,7 @@ Foam::edgeBiotSavart::~edgeBiotSavart()
 
 Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::internalA
 (
-    ComplexPart part
+    complexPart part
 ) const
 {
     Info << "Biot-Savart for A on internal field"
@@ -274,7 +286,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::internalA
 Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
 (
     const label& patchI,
-    ComplexPart part
+    complexPart part
 ) const
 {
     Info << "Biot-Savart for A on boundary field"
@@ -289,7 +301,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
 Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
 (
     const word& patchName,
-    ComplexPart part
+    complexPart part
 ) const
 {
     label patchI = mesh_.boundaryMesh().findPatchID(patchName);
@@ -305,7 +317,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
 
 Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
 (
-    ComplexPart part
+    complexPart part
 ) const
 {
     tmp<volVectorField> tA
@@ -334,7 +346,53 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
 
     volVectorField& A = tA();
 
+    forAll (A.boundaryField(), patchI)
+    {
+        const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+
+        if (!patch.coupled())
+        {
+            A.boundaryField()[patchI] = boundaryPatchA(patchI, part);
+        }
+    }
+
     A.internalField() = internalA(part);
+
+    return tA;
+}
+
+
+Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
+(
+    const word& name,
+    complexPart part
+) const
+{
+    tmp<volVectorField> tA
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                name,
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime/dimLength,
+                vector::zero
+            ),
+            fixedValueFvPatchVectorField::typeName
+        )
+    );
+
+    volVectorField& A = tA();
 
     forAll (A.boundaryField(), patchI)
     {
@@ -345,6 +403,14 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
             A.boundaryField()[patchI] == boundaryPatchA(patchI, part);
         }
     }
+    int nCorr = readInt(this->lookup("nNonOrthogonalCorrectors"));
+
+    for (int corr=0; corr<nCorr; corr++)
+    {
+        fvVectorMatrix AEqn(fvm::laplacian(A));
+
+        AEqn.solve();
+    }
 
     return tA;
 }
@@ -352,7 +418,7 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
 
 Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::internalB
 (
-    ComplexPart part
+    complexPart part
 ) const
 {
     Info << "Biot-Savart for B on internal field"
@@ -366,7 +432,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::internalB
 Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
 (
     const label& patchI,
-    ComplexPart part
+    complexPart part
 ) const
 {
     Info << "Biot-Savart for B on boundary field"
@@ -381,7 +447,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
 Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
 (
     const word& patchName,
-    ComplexPart part
+    complexPart part
 ) const
 {
     label patchI = mesh_.boundaryMesh().findPatchID(patchName);
@@ -397,7 +463,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
 
 Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::B
 (
-    ComplexPart part
+    complexPart part
 ) const
 {
     tmp<volVectorField> tB
@@ -426,17 +492,17 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::B
 
     volVectorField& B = tB();
 
-    B.internalField() = internalB(part);
-
     forAll (B.boundaryField(), patchI)
     {
         const polyPatch& patch = mesh_.boundaryMesh()[patchI];
 
         if (!patch.coupled())
         {
-            B.boundaryField()[patchI] == boundaryPatchB(patchI, part);
+            B.boundaryField()[patchI] = boundaryPatchB(patchI, part);
         }
     }
+
+    B.internalField() = internalB(part);
 
     return tB;
 }
