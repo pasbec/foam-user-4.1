@@ -1,7 +1,11 @@
 
+regionAddressings/addressingTypes/addressingTypes.C
+regionAddressings/procAddressing/procAddressing.C
+regionAddressings/regionAddressing/regionAddressing.C
+regionAddressings/regionToRegionAddressing/regionToRegionAddressing.C
+
 regionPolyMesh/regionPolyMesh.C
 regionPolyMesh/regionPolyMeshMapping.C
-regionPolyMesh/makeRegionPolyMeshData.C
 
 regionPointMesh/regionPointMesh.C
 

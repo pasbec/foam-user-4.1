@@ -40,9 +40,8 @@ SourceFiles
 
 #include "regionFvMesh.H"
 
-// TODO [High]: Destructor
-
-// TODO [Low]: What if neighbour regions do se different motion solver types?
+// TODO [Low]: What happens if neighbouring regions do see different motion
+//             solver types?
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,12 +60,6 @@ private:
 
     // Private data
 
-        //- Meshes data
-        mutable List<autoPtr<dynamicFvMesh>*> dynamicFvMeshesData_;
-
-        //- Meshes access pointers
-        mutable List<dynamicFvMesh*> dynamicFvMeshes_;
-
         //- Finite element motion solver type
         mutable boolList isFeMotionSolver_;
 
@@ -84,20 +77,20 @@ private:
         // Helper functions for constructor
 
             //- Create new mesh for region with index regionI
-            autoPtr<dynamicFvMesh>* newMesh(const label& regionI) const;
+            dynamicFvMesh* newMesh(label regionI) const;
 
 
 protected:
 
     // Protected Member Functions
 
-        // Helper functions for constructor
+        // Helper functions
 
-            //- Resize lists storing data
-            virtual void resizeLists() const;
+            //- Init meshes
+            virtual void initMeshMeshes() const;
 
-            //- Init regions
-            virtual void initMeshes(const wordList& regionNames) const;
+            //- Init shared
+            virtual void initMeshShared() const;
 
 
 public:
@@ -124,58 +117,70 @@ public:
 
     // Destructor
 
-        virtual ~regionDynamicFvMesh() {};
+        virtual ~regionDynamicFvMesh();
 
     // Member Functions
 
         // Access
 
+            //- Return reference to this mesh
+            inline const regionDynamicFvMesh& rmesh() const
+            {
+                return *this;
+            };
+
             //- Return reference to mesh
-            inline dynamicFvMesh& mesh(const label& regionI) const
+            inline dynamicFvMesh& mesh
+            (
+                label regionI
+            ) const
             {
                 return operator[](regionI);
             }
 
             //- Return reference to mesh
-            inline dynamicFvMesh& mesh(const word& regionName) const
+            inline dynamicFvMesh& mesh
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
             {
-                return operator[](regionIndex(regionName));
-            }
-
-            //- Return refrence to fe motion solver list
-            inline const boolList& isFeMotionSolver() const
-            {
-                return isFeMotionSolver_;
+                return operator[](regions()[regionName]);
             }
 
             //- Return true if motion solver type is fe
-            inline bool isFeMotionSolver(const label& regionI) const
+            inline bool isFeMotionSolver
+            (
+                label regionI
+            ) const
             {
                 return isFeMotionSolver_[regionI];
             }
 
             //- Return true if motion solver type is fe
-            inline bool isFeMotionSolver(const word& regionName) const
+            inline bool isFeMotionSolver
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
             {
-                return isFeMotionSolver_[regionIndex(regionName)];
-            }
-
-            //- Return refrence to fv motion solver list
-            inline const boolList& isFvMotionSolver() const
-            {
-                return isFvMotionSolver_;
+                return isFeMotionSolver_[regions()[regionName]];
             }
 
             //- Return true if motion solver type is fv
-            inline bool isFvMotionSolver(const label& regionI) const
+            inline bool isFvMotionSolver
+            (
+                label regionI
+            ) const
             {
                 return isFvMotionSolver_[regionI];
             }
 
             //- Return true if motion solver type is fv
-            inline bool isFvMotionSolver(const word& regionName) const
+            inline bool isFvMotionSolver
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
             {
-                return isFvMotionSolver_[regionIndex(regionName)];
+                return isFvMotionSolver_[regions()[regionName]];
             }
 
         // Mapping
@@ -184,8 +189,8 @@ public:
             //  two neighbour-regions based on directMappedPatch
             void patchMapMeshVelocityDirectMapped
             (
-                const label& fromRegionI,
-                const label& toRegionI
+                label fromRegionI,
+                label toRegionI
             ) const;
 
             //- Map boundary field of mesh velocity between
@@ -196,20 +201,27 @@ public:
                 const word& toRegionName
             ) const;
 
-    // Member operators
+    // Member Operators
 
         //- Mesh access operator by index
-        virtual dynamicFvMesh& operator[](const label& regionI) const
+        virtual dynamicFvMesh& operator[]
+        (
+            label regionI
+        ) const
         {
-            return *dynamicFvMeshes_[regionI];
+            return static_cast<dynamicFvMesh&>(meshPtrs_[regionI]);
         }
 
         //- Mesh access operator by regionName
-        inline dynamicFvMesh& operator[](const word& regionName) const
+        inline dynamicFvMesh& operator[]
+        (
+            const word& regionName
+        ) const
         {
-            return operator[](regionIndex(regionName));
+            return operator[](regions()[regionName]);
         }
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

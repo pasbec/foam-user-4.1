@@ -43,15 +43,15 @@ namespace Foam
 void regionPolyMesh::map
 (
     pointField& givenPoints,
-    const label& regionI,
+    label regionI,
     const word& patchName
 ) const
 {
-    label regionI0 = regionIndex(polyMesh::defaultRegion);
+    label regionI0 = regions()[polyMesh::defaultRegion];
 
     const pointField& points = mesh(regionI0).points();
 
-    const labelIOList& map = pointMap(regionI);
+    const labelList& map = typeMap(addressingTypes::POINT, regionI);
 
     if (patchName == "")
     {
@@ -72,7 +72,7 @@ void regionPolyMesh::map
             FatalErrorIn("regionPolyMesh::rmap(...)")
                 << "Given patch name " << patchName
                 << " for point mapping does not exist in"
-                << " region " << regionName(regionI)
+                << " region " << regions()[regionI]
                 << abort(FatalError);
         }
 
@@ -89,6 +89,7 @@ void regionPolyMesh::map
     }
 }
 
+
 void regionPolyMesh::map
 (
     pointField& givenPoints,
@@ -99,14 +100,15 @@ void regionPolyMesh::map
     map
     (
         givenPoints,
-        regionIndex(regionName),
+        regions()[regionName],
         patchName
     );
 }
 
+
 tmp<pointField> regionPolyMesh::map
 (
-    const label& regionI,
+    label regionI,
     const word& patchName
 ) const
 {
@@ -127,6 +129,7 @@ tmp<pointField> regionPolyMesh::map
     return tNewPoints;
 }
 
+
 tmp<pointField> regionPolyMesh::map
 (
     const word& regionName,
@@ -135,21 +138,22 @@ tmp<pointField> regionPolyMesh::map
 {
     return map
     (
-        regionIndex(regionName),
+        regions()[regionName],
         patchName
     );
 }
 
+
 void regionPolyMesh::rmap
 (
     pointField& givenPoints,
-    const label& regionI,
+    label regionI,
     const word& patchName
 ) const
 {
     const pointField& points = mesh(regionI).points();
 
-    const labelIOList& map = pointMap(regionI);
+    const labelList& map = typeMap(addressingTypes::POINT, regionI);
 
     if (patchName == "")
     {
@@ -170,7 +174,7 @@ void regionPolyMesh::rmap
             FatalErrorIn("regionPolyMesh::rmap(...)")
                 << "Given patch name " << patchName
                 << " for point mapping does not exist in"
-                << " region " << regionName(regionI)
+                << " region " << regions()[regionI]
                 << abort(FatalError);
         }
 
@@ -187,6 +191,7 @@ void regionPolyMesh::rmap
     }
 }
 
+
 void regionPolyMesh::rmap
 (
     pointField& givenPoints,
@@ -197,18 +202,19 @@ void regionPolyMesh::rmap
     rmap
     (
         givenPoints,
-        regionIndex(regionName),
+        regions()[regionName],
         patchName
     );
 }
 
+
 tmp<pointField> regionPolyMesh::rmap
 (
-    const label& regionI,
+    label regionI,
     const word& patchName
 ) const
 {
-    label regionI0 = regionIndex(polyMesh::defaultRegion);
+    label regionI0 = regions()[polyMesh::defaultRegion];
 
     tmp<pointField> tNewPoints
     (
@@ -227,6 +233,7 @@ tmp<pointField> regionPolyMesh::rmap
     return tNewPoints;
 }
 
+
 tmp<pointField> regionPolyMesh::rmap
 (
     const word& regionName,
@@ -235,15 +242,16 @@ tmp<pointField> regionPolyMesh::rmap
 {
     return rmap
     (
-        regionIndex(regionName),
+        regions()[regionName],
         patchName
     );
 }
 
+
 labelListList regionPolyMesh::patchMapDirectMapped
 (
-    const label& fromRegionI,
-    const label& toRegionI
+    label fromRegionI,
+    label toRegionI
 ) const
 {
     const polyMesh& fromMesh = mesh(fromRegionI);
@@ -295,14 +303,15 @@ labelListList regionPolyMesh::patchMapDirectMapped
     return pmap;
 }
 
+
 labelListList regionPolyMesh::patchMapDirectMapped
 (
     const word& fromRegionName,
     const word& toRegionName
 ) const
 {
-    label fromRegionI = regionIndex(fromRegionName);
-    label toRegionI = regionIndex(toRegionName);
+    label fromRegionI = regions()[fromRegionName];
+    label toRegionI = regions()[toRegionName];
 
     return patchMapDirectMapped
     (
@@ -310,6 +319,7 @@ labelListList regionPolyMesh::patchMapDirectMapped
         toRegionI
     );
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

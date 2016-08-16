@@ -41,11 +41,6 @@ if ((gf1).mesh() != (gf2).mesh())                                   \
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template
@@ -53,11 +48,11 @@ template
     class Type, template<class> class PatchField, class GeoMesh,
     class RegionGeoMesh
 >
-const IOobject
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+const Foam::IOobject
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionIO
 (
-    const label& regionI,
+    label regionI,
     const IOobject& io
 ) const
 {
@@ -81,7 +76,7 @@ template
     class Type, template<class> class PatchField, class GeoMesh,
     class RegionGeoMesh
 >
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionGeometricField
 (
     const IOobject& io,
@@ -102,38 +97,40 @@ regionGeometricField
             true
         )
     ),
-    size_(regionMesh.size()),
-    regionNames_(regionMesh.regionNames()),
     regionMesh_(regionMesh),
-    fields_(List<GeometricField<Type, PatchField, GeoMesh>*>(size_,NULL))
+    fieldPtrs_(regionMesh.size())
 {
-    forAll (regionNames_, regionI)
+    forAll (*this, regionI)
     {
         if (debug)
         {
-            Info << "regionGeometricField::regionGeometricField(...) : "
+            Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
                 << "Create field for region "
-                << regionMesh_.regionName(regionI)
+                << regionMesh_.regions()[regionI]
                 << endl;
         }
 
-        fields_[regionI] =
+        fieldPtrs_.set
+        (
+            regionI,
             new GeometricField<Type, PatchField, GeoMesh>
             (
                 regionIO(regionI, io),
                 regionMesh_[regionI],
                 dim,
                 patchFieldType
-            );
+            )
+        );
     }
 }
+
 
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
     class RegionGeoMesh
 >
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionGeometricField
 (
     const IOobject& io,
@@ -154,38 +151,40 @@ regionGeometricField
             true
         )
     ),
-    size_(regionMesh.size()),
-    regionNames_(regionMesh.regionNames()),
     regionMesh_(regionMesh),
-    fields_(List<GeometricField<Type, PatchField, GeoMesh>*>(size_,NULL))
+    fieldPtrs_(regionMesh.size())
 {
-    forAll (regionNames_, regionI)
+    forAll (*this, regionI)
     {
         if (debug)
         {
-            Info << "regionGeometricField::regionGeometricField(...) : "
+            Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
                 << "Create field for region "
-                << regionMesh_.regionName(regionI)
+                << regionMesh_.regions()[regionI]
                 << endl;
         }
 
-        fields_[regionI] =
+        fieldPtrs_.set
+        (
+            regionI,
             new GeometricField<Type, PatchField, GeoMesh>
             (
                 regionIO(regionI, io),
                 regionMesh_[regionI],
                 dim,
                 patchFieldTypes
-            );
+            )
+        );
     }
 }
+
 
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
     class RegionGeoMesh
 >
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionGeometricField
 (
     const IOobject& io,
@@ -204,43 +203,44 @@ regionGeometricField
             true
         )
     ),
-    size_(regionMesh.size()),
-    regionNames_(regionMesh.regionNames()),
     regionMesh_(regionMesh),
-    fields_(List<GeometricField<Type, PatchField, GeoMesh>*>(size_,NULL))
+    fieldPtrs_(regionMesh.size())
 {
-    forAll (regionNames_, regionI)
+    forAll (*this, regionI)
     {
         if (debug)
         {
-            Info << "regionGeometricField::regionGeometricField(...) : "
+            Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
                 << "Create field for region "
-                << regionMesh_.regionName(regionI)
+                << regionMesh_.regions()[regionI]
                 << endl;
         }
 
-        fields_[regionI] =
+        fieldPtrs_.set
+        (
+            regionI,
             new GeometricField<Type, PatchField, GeoMesh>
             (
                 regionIO(regionI, io),
                 regionMesh_[regionI]
-            );
+            )
+        );
     }
 }
+
 
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
     class RegionGeoMesh
 >
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionGeometricField
 (
     const IOobject& io,
     const regionGeometricField
     <
-        Type, PatchField, GeoMesh,
-        RegionGeoMesh
+        Type, PatchField, GeoMesh, RegionGeoMesh
     >& rgf
 )
 :
@@ -256,27 +256,28 @@ regionGeometricField
             true
         )
     ),
-    size_(rgf.mesh().size()),
-    regionNames_(rgf.mesh().regionNames()),
     regionMesh_(rgf.mesh()),
-    fields_(List<GeometricField<Type, PatchField, GeoMesh>*>(size_,NULL))
+    fieldPtrs_(rgf.mesh().size())
 {
-    forAll (regionNames_, regionI)
+    forAll (*this, regionI)
     {
         if (debug)
         {
-            Info << "regionGeometricField::regionGeometricField(...) : "
+            Info<< "Foam::regionGeometricField<>::regionGeometricField(...) : "
                 << "Create field for region "
-                << regionMesh_.regionName(regionI)
+                << regionMesh_.regions()[regionI]
                 << endl;
         }
 
-        fields_[regionI] =
+        fieldPtrs_.set
+        (
+            regionI,
             new GeometricField<Type, PatchField, GeoMesh>
             (
                 regionIO(regionI, io),
                 rgf.field(regionI)
-            );
+            )
+        );
     }
 }
 
@@ -288,21 +289,10 @@ template
     class Type, template<class> class PatchField, class GeoMesh,
     class RegionGeoMesh
 >
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 ~regionGeometricField()
 {
-    forAll (regionNames_, regionI)
-    {
-        if (debug)
-        {
-            Info << "regionGeometricField::~regionGeometricField() : "
-                << "Delete field for region "
-                << regionMesh_.regionName(regionI)
-                << endl;
-        }
-
-        delete fields_[regionI];
-    }
+    fieldPtrs_.clear();
 }
 
 
@@ -314,14 +304,11 @@ template
     class RegionGeoMesh
 >
 void
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 (
     const regionGeometricField
         <
-            Type,
-            PatchField,
-            GeoMesh,
-            RegionGeoMesh
+            Type, PatchField, GeoMesh, RegionGeoMesh
         >& rgf
 )
 {
@@ -329,9 +316,8 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
     {
         FatalErrorIn
         (
-            "regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator="
-            "(const regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>&)"
-        )   << "attempted assignment to self"
+            "Foam::regionGeometricField<>::operator=(...)"
+        )   << "Attempted assignment to self"
             << abort(FatalError);
     }
 
@@ -351,20 +337,20 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
     }
 }
 
+
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
     class RegionGeoMesh
 >
 void
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 (
     const tmp
     <
         regionGeometricField
         <
-            Type, PatchField, GeoMesh,
-            RegionGeoMesh
+            Type, PatchField, GeoMesh, RegionGeoMesh
         >
     >& trgf
 )
@@ -373,9 +359,8 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
     {
         FatalErrorIn
         (
-            "regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator="
-            "(const tmp<regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh> >&)"
-        )   << "attempted assignment to self"
+            "Foam::regionGeometricField<>::operator=(...)"
+        )   << "Attempted assignment to self"
             << abort(FatalError);
     }
 
@@ -409,6 +394,9 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
     trgf.clear();
 }
 
+
+// * * * * * * * * * * * * * * * * Mapping * * * * * * * * * * * * * * * * * //
+
 // TODO: Parallel?
 template
 <
@@ -416,9 +404,10 @@ template
     class RegionGeoMesh
 >
 void
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::mapBoundaryField
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+mapBoundaryField
 (
-    const label& regionI
+    label regionI
 ) const
 {
     const GeometricField<Type, PatchField, GeoMesh>& vf0 =
@@ -454,7 +443,8 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::mapBoundaryField
                 Field<Type>& patchField = vf.boundaryField()[patchI];
                 label patchStart = patch.start();
 
-                const labelList& fmap = mesh().faceMap(regionI);
+                const labelList& fmap =
+                    mesh().typeMap(addressingTypes::FACE, regionI);
 
                 forAll (patchField, facei)
                 {
@@ -491,9 +481,10 @@ template
     class RegionGeoMesh
 >
 void
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::copyInternalBoundaryField
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+copyInternalBoundaryField
 (
-    const label& regionI
+    label regionI
 ) const
 {
     GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
@@ -523,9 +514,10 @@ template
     class RegionGeoMesh
 >
 void
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::interpolateBoundaryField
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+interpolateBoundaryField
 (
-    const label& regionI
+    label regionI
 ) const
 {
     const GeometricField<Type, PatchField, GeoMesh>& vf0 =
@@ -599,9 +591,10 @@ template
     class RegionGeoMesh
 >
 void
-regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::extrapolateBoundaryField
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+extrapolateBoundaryField
 (
-    const label& regionI
+    label regionI
 ) const
 {
     GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
@@ -609,9 +602,5 @@ regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::extrapolateBound
     fvc::extrapolate(vf);
 };
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

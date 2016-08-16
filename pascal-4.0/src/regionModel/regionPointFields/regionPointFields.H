@@ -43,10 +43,15 @@ SourceFiles
 #include "regionGeoMesh.H"
 #include "regionPointMesh.H"
 
+// TODO [Low]: Implement template specializations for the currently
+//             not-implemented membemer functions for point mapping
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 typedef regionGeometricField
     <scalar, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh> >

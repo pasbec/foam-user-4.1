@@ -42,13 +42,16 @@ SourceFiles
 #include "regionGeoMesh.H"
 #include "regionPolyMesh.H"
 
-// TODO [High]: Finish parallel face mapping
-// FIXME [High]: faceRegionAddressing and faceMap does not seem to be the same (flip-sign!!!)
+// TODO [Low]: This is a template class. Capitalize first letter!
 
-// TODO [High]: Realize patch mapping for volFields as template specialization
+// TODO [High]: Test parallel mapping
+
+// TODO [High]: Implement template specializations for the currently
+//              hard coded membemer functions for boundary field mapping of volFields
 //              in regionVolFieldMapping.C
 
-// TODO [High]: Make this class demand-driven and allow all fields to be region-fields
+// TODO [Idea]: Make this class demand-driven and allow all fields to be region-fields
+// TODO [Idea]: Allow default region to be absent. WE NEED A LOT OF CHECKS!!!
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,17 +83,11 @@ private:
 
     // Private data
 
-        //- Global region count
-        const label& size_;
-
-        //- List of all region names
-        const List<word>& regionNames_;
-
         //- Reference to regionMesh
         const RegionMesh& regionMesh_;
 
-        //- Fields
-        List<GeometricField<Type, PatchField, GeoMesh>*> fields_;
+        //- Field pointers
+        mutable PtrList<GeometricField<Type, PatchField, GeoMesh> > fieldPtrs_;
 
     // Private Member Functions
 
@@ -100,7 +97,7 @@ private:
             const IOobject
             regionIO
             (
-                const label& regionI,
+                label regionI,
                 const IOobject& io
             ) const;
 
@@ -167,71 +164,53 @@ public:
 
         // Access
 
+            //- Return const reference to global region count
+            inline label size() const
+            {
+                return regionMesh_.size();
+            };
+
+            //- Return const reference to regions
+            inline const regionList& regions() const
+            {
+                return regionMesh_.regions();
+            };
+
             //- Return const reference to region mesh
-            const RegionMesh& mesh() const
+            inline const RegionMesh& mesh() const
             {
                 return regionMesh_;
             };
 
             //- Return dimensions
-            const dimensionSet& dimensions() const
+            inline const dimensionSet& dimensions() const
             {
-                return fields_
-                [
-                    mesh().regionIndex(polyMesh::defaultRegion)
-                ]->dimensions();
-            };
-
-            //- Return reference to field of default region
-            GeometricField<Type, PatchField, GeoMesh>&
-            field() const
-            {
-                return *fields_
-                [
-                    mesh().regionIndex(polyMesh::defaultRegion)
-                ];
+                return operator[]
+                (
+                    regions()[polyMesh::defaultRegion]
+                ).dimensions();
             };
 
             //- Return reference to field
-            GeometricField<Type, PatchField, GeoMesh>&
-            field(const label& regionI) const
+            inline GeometricField<Type, PatchField, GeoMesh>& field
+            (
+                label regionI
+            ) const
             {
-                return *fields_[regionI];
+                return operator[](regionI);
             };
 
             //- Return reference to field
-            GeometricField<Type, PatchField, GeoMesh>&
-            field(const word& regionName) const
+            inline GeometricField<Type, PatchField, GeoMesh>& field
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
             {
-                return *fields_[mesh().regionIndex(regionName)];
-            };
-
-            //- Return const pointer to field of default region
-            const GeometricField<Type, PatchField, GeoMesh>*
-            fieldPtr() const
-            {
-                return fields_
-                [
-                    mesh().regionIndex(polyMesh::defaultRegion)
-                ];
-            };
-
-            //- Return const pointer to field
-            const GeometricField<Type, PatchField, GeoMesh>*
-            fieldPtr(const label& regionI) const
-            {
-                return fields_[regionI];
-            };
-
-            //- Return const pointer to field
-            const GeometricField<Type, PatchField, GeoMesh>*
-            fieldPtr(const word& regionName) const
-            {
-                return fields_[mesh().regionIndex(regionName)];
+                return operator[](regions()[regionName]);
             };
 
             //- WriteData member function required by regIOobject
-            bool writeData(Ostream&) const
+            inline bool writeData(Ostream&) const
             {
                 return false;
             };
@@ -239,46 +218,46 @@ public:
         // Internal field data processing
 
             //- Internal field forward mapping
-            void mapInteralField(const label& regionI) const
+            void mapInteralField(label regionI) const
             {
                 notImplemented(type() + "::mapInteralField()");
             };
 
             //- Internal field reverse mapping
-            void rmapInteralField(const label& regionI) const
+            void rmapInteralField(label regionI) const
             {
                 notImplemented(type() + "::rmapInteralField()");
             };
 
         // Boundary field data processing
 
-            //- TODO: Boundary field mapping where possible
-            //- TODO: Parallel?
-            void mapBoundaryField(const label& regionI) const
+//- TODO: Boundary field mapping where possible
+//- TODO: Parallel?
+            void mapBoundaryField(label regionI) const
             ;
 //             {
 //                 notImplemented(type() + "::mapBoundaryField()");
 //             };
 
-            //- TODO FIXME: Boundary field copy from internal field
-            //- TODO: Parallel?
-            void copyInternalBoundaryField(const label& regionI) const
+//- TODO: Boundary field copy from internal field
+//- TODO: Parallel?
+            void copyInternalBoundaryField(label regionI) const
             ;
 //             {
 //                 notImplemented(type() + "::copyInternalBoundaryField()");
 //             };
 
-            //- TODO: Boundary field interpolation
-            //- TODO: Parallel?
-            void interpolateBoundaryField(const label& regionI) const
+//- TODO: Boundary field interpolation
+//- TODO: Parallel?
+            void interpolateBoundaryField(label regionI) const
             ;
 //             {
 //                 notImplemented(type() + "::interpolateBoundaryField()");
 //             };
 
-            //- TODO: Boundary field extrapolation
-            //- TODO: Parallel?
-            void extrapolateBoundaryField(const label& regionI) const
+//- TODO: Boundary field extrapolation
+//- TODO: Parallel?
+            void extrapolateBoundaryField(label regionI) const
             ;
 //             {
 //                 notImplemented(type() + "::extrapolateBoundaryField()");
@@ -301,7 +280,7 @@ public:
             };
 
             //- Map field from default region to non-default region
-            void map(const label& regionI) const
+            void map(label regionI) const
             {
                 mapInteralField(regionI);
                 mapBoundaryField(regionI);
@@ -310,7 +289,7 @@ public:
             //- Map field from default region to non-default region
             void map(const word& regionName) const
             {
-                map(mesh().regionIndex(regionName));
+                map(regions()[regionName]);
             };
 
             //- Map field from all non-default regions to default region
@@ -328,7 +307,7 @@ public:
             };
 
             //- Map field from non-default region to default region
-            void rmap(const label& regionI) const
+            void rmap(label regionI) const
             {
                 rmapInteralField(regionI);
             };
@@ -336,7 +315,7 @@ public:
             //- Map field from non-default region to default region
             void rmap(const word& regionName) const
             {
-                rmap(mesh().regionIndex(regionName));
+                rmap(regions()[regionName]);
             };
 
         // Mapping with patch internal values
@@ -356,7 +335,7 @@ public:
             };
 
             //- Map/Interpolate field from default region to non-default region
-            void mapCopyInternal(const label& regionI) const
+            void mapCopyInternal(label regionI) const
             {
                 map(regionI);
                 copyInternalBoundaryField(regionI);
@@ -365,7 +344,7 @@ public:
             //- Map/Interpolate field from default region to non-default region
             void mapCopyInternal(const word& regionName) const
             {
-                mapCopyInternal(mesh().regionIndex(regionName));
+                mapCopyInternal(regions()[regionName]);
             };
 
         // Mapping with patch interpolation
@@ -385,7 +364,7 @@ public:
             };
 
             //- Map/Interpolate field from default region to non-default region
-            void mapInterpolate(const label& regionI) const
+            void mapInterpolate(label regionI) const
             {
                 map(regionI);
                 interpolateBoundaryField(regionI);
@@ -394,7 +373,7 @@ public:
             //- Map/Interpolate field from default region to non-default region
             void mapInterpolate(const word& regionName) const
             {
-                mapInterpolate(mesh().regionIndex(regionName));
+                mapInterpolate(regions()[regionName]);
             };
 
         // Mapping with patch extrapolation
@@ -414,7 +393,7 @@ public:
             };
 
             //- Map/Extrapolate field from default region to non-default region
-            void mapExtrapolate(const label& regionI) const
+            void mapExtrapolate(label regionI) const
             {
                 map(regionI);
                 extrapolateBoundaryField(regionI);
@@ -423,31 +402,34 @@ public:
             //- Map/Extrapolate field from default region to non-default region
             void mapExtrapolate(const word& regionName) const
             {
-                mapExtrapolate(mesh().regionIndex(regionName));
+                mapExtrapolate(regions()[regionName]);
             };
 
-    // Member operators
+    // Member Operators
 
         //- Field access operator by index
-        GeometricField<Type, PatchField, GeoMesh>&
-        operator[](const label& regionI) const
+        inline GeometricField<Type, PatchField, GeoMesh>& operator[]
+        (
+            label regionI
+        ) const
         {
-            return field(regionI);
+            return fieldPtrs_[regionI];
         }
 
         //- Field access operator by regionName
-        GeometricField<Type, PatchField, GeoMesh>&
-        operator[](const word& regionName) const
+        inline GeometricField<Type, PatchField, GeoMesh>& operator[]
+        (
+            const word& regionName
+        ) const
         {
-            return field(regionName);
+            return fieldPtrs_[regions()[regionName]];
         }
 
         void operator=
         (
             const regionGeometricField
             <
-                Type, PatchField, GeoMesh,
-                RegionGeoMesh
+                Type, PatchField, GeoMesh, RegionGeoMesh
             >&
         );
 
@@ -457,8 +439,7 @@ public:
             <
                 regionGeometricField
                 <
-                    Type, PatchField, GeoMesh,
-                    RegionGeoMesh
+                    Type, PatchField, GeoMesh, RegionGeoMesh
                 >
             >&
         );

@@ -33,40 +33,25 @@ License
 
 #include "regionDynamicFvMesh.H"
 
-// TODO [High]: What if directMapped patches have been manually modified be changeDictionary?
-
-// TODO [High]: What happens on parallel ( hint: mappedpatchBase::distribute() )
-
-// TODO [High]: What happens on parallel ( remember "preserveFaceZones" )
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
+void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
 (
-    const label& fromRegionI,
-    const label& toRegionI
+    label fromRegionI,
+    label toRegionI
 ) const
 {
     if (isFeMotionSolver(toRegionI))
     {
         tetPointVectorField& toMotionU =
-        const_cast<tetPointVectorField&>
-        (
-            mesh(toRegionI).objectRegistry::
-            lookupObject<tetPointVectorField>
+            const_cast<tetPointVectorField&>
             (
-                "motionU"
-            )
-        );
+                mesh(toRegionI).objectRegistry::
+                lookupObject<tetPointVectorField>
+                (
+                    "motionU"
+                )
+            );
 
         labelList patchMap =
             regionPolyMesh::patchMapDirectMapped
@@ -126,14 +111,14 @@ void regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
     {
         // Mesh velocity field
         pointVectorField& toPointMotionU =
-        const_cast<pointVectorField&>
-        (
-            mesh(toRegionI).objectRegistry::
-            lookupObject<pointVectorField>
+            const_cast<pointVectorField&>
             (
-                "pointMotionU"
-            )
-        );
+                mesh(toRegionI).objectRegistry::
+                lookupObject<pointVectorField>
+                (
+                    "pointMotionU"
+                )
+            );
 
         labelList patchMap =
             patchMapDirectMapped
@@ -180,14 +165,15 @@ void regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
     }
 }
 
-void regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
+
+void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
 (
     const word& fromRegionName,
     const word& toRegionName
 ) const
 {
-    label fromRegionI = regionIndex(fromRegionName);
-    label toRegionI = regionIndex(toRegionName);
+    label fromRegionI = regions()[fromRegionName];
+    label toRegionI = regions()[toRegionName];
 
     return patchMapMeshVelocityDirectMapped
     (
@@ -196,10 +182,6 @@ void regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
     );
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 

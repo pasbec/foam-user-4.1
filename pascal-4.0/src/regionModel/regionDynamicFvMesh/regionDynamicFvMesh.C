@@ -28,97 +28,89 @@ License
 
 #include "regionDynamicFvMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(regionDynamicFvMesh, 0);
+    defineTypeNameAndDebug(regionDynamicFvMesh, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-autoPtr<dynamicFvMesh>*
-regionDynamicFvMesh::newMesh(const label& regionI) const
+Foam::dynamicFvMesh* Foam::regionDynamicFvMesh::newMesh(label regionI) const
 {
-    return new autoPtr<dynamicFvMesh>
-    (
-        dynamicFvMesh::New
+    autoPtr<dynamicFvMesh>* meshAutoPtr = new autoPtr<dynamicFvMesh>
         (
-            IOobject
+            dynamicFvMesh::New
             (
-                regionNames_[regionI],
-                time_.timeName(),
-                time_,
-                IOobject::MUST_READ
+                IOobject
+                (
+                    regions_[regionI],
+                    time_.timeName(),
+                    time_,
+                    IOobject::MUST_READ
+                )
             )
-        )
-    );
+        );
+
+    return meshAutoPtr->ptr();
 }
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void regionDynamicFvMesh::resizeLists() const
+void Foam::regionDynamicFvMesh::initMeshMeshes() const
 {
-    regionFvMesh::resizeLists();
-
-    isFeMotionSolver_.resize(size_, NULL);
-    isFvMotionSolver_.resize(size_, NULL);
-
-    dynamicFvMeshesData_.resize(size_, NULL);
-    dynamicFvMeshes_.resize(size_, NULL);
-}
-
-void regionDynamicFvMesh::initMeshes(const wordList& regionNames) const
-{
-    size_ = regionNames.size();
-    regionNames_ = regionNames;
-
-    resizeLists();
-
-    forAll (regionNames_, regionI)
+    forAll (*this, regionI)
     {
         if (debug)
         {
-            Info << "regionDynamicFvMesh::regionDynamicFvMesh(...) : "
+            Info << "Foam::regionDynamicFvMesh::regionDynamicFvMesh(...) : "
                 << "Create mesh for region "
-                << regionName(regionI)
+                << regions()[regionI]
                 << endl;
         }
 
         // Create mesh
-        dynamicFvMeshesData_[regionI] = newMesh(regionI);
+        meshPtrs_.set
+        (
+            regionI,
+            static_cast<polyMesh*>(newMesh(regionI))
+        );
+    }
+}
 
-        // Link access pointer
-        dynamicFvMeshes_[regionI] = dynamicFvMeshesData_[regionI]->operator->();
+
+void Foam::regionDynamicFvMesh::initMeshShared() const
+{
+    regionFvMesh::initMeshShared();
+
+    forAll (*this, regionI)
+    {
+        isFeMotionSolver_.resize(regions_.size(), NULL);
+        isFvMotionSolver_.resize(regions_.size(), NULL);
 
         // Remember if type of motion solver is fe
-        isFeMotionSolver_[regionI] = dynamicFvMeshes_[regionI]
-            ->objectRegistry::foundObject<tetPointVectorField>
+        isFeMotionSolver_[regionI] =
+            meshPtrs_[regionI].objectRegistry::foundObject<tetPointVectorField>
             (
                 "motionU"
             );
 
         // Remember if type of motion solver is fv
-        isFvMotionSolver_[regionI] = dynamicFvMeshes_[regionI]
-            ->objectRegistry::foundObject<pointVectorField>
+        isFvMotionSolver_[regionI] =
+            meshPtrs_[regionI].objectRegistry::foundObject<pointVectorField>
             (
                 "pointMotionU"
             );
     }
-
-    setParallelSplitRegions();
-
-    initialized_ = true;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-regionDynamicFvMesh::regionDynamicFvMesh
+Foam::regionDynamicFvMesh::regionDynamicFvMesh
 (
     const Time& runTime,
     bool init
@@ -129,15 +121,14 @@ regionDynamicFvMesh::regionDynamicFvMesh
         runTime,
         false
     ),
-    dynamicFvMeshesData_(List<autoPtr<dynamicFvMesh>*>(0)),
-    dynamicFvMeshes_(List<dynamicFvMesh*>(0)),
-    isFeMotionSolver_(boolList(0)),
-    isFvMotionSolver_(boolList(0))
+    isFeMotionSolver_(boolList()),
+    isFvMotionSolver_(boolList())
 {
-    if(init) initMeshes(readRegionNames());
+    if(init) this->init(readRegionNames());
 }
 
-regionDynamicFvMesh::regionDynamicFvMesh
+
+Foam::regionDynamicFvMesh::regionDynamicFvMesh
 (
     const Time& runTime,
     const wordList& regionNames,
@@ -149,18 +140,18 @@ regionDynamicFvMesh::regionDynamicFvMesh
         runTime,
         false
     ),
-    dynamicFvMeshesData_(List<autoPtr<dynamicFvMesh>*>(0)),
-    dynamicFvMeshes_(List<dynamicFvMesh*>(0)),
-    isFeMotionSolver_(boolList(0)),
-    isFvMotionSolver_(boolList(0))
+    isFeMotionSolver_(boolList()),
+    isFvMotionSolver_(boolList())
 {
-    if(init) initMeshes(regionNames);
+    if(init) this->init(regionNames);
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::regionDynamicFvMesh::~regionDynamicFvMesh()
+{}
+
 
 // ************************************************************************* //
 

@@ -39,11 +39,7 @@ SourceFiles
 
 #include "regionPolyMesh.H"
 
-// TODO [High]: Destructor
-
-// TODO [High]: Derive regionPointMesh from regionGeoMesh<regionPolyMesh>
-
-// TODO [High]: Implement access functions for point mapping
+// TODO [Low]: Derive regionPointMesh from regionGeoMesh<regionPolyMesh>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,10 +59,8 @@ private:
         //- Reference to regionPolyMesh
         const regionPolyMesh& rpMesh_;
 
-        //- Meshes
-        List<pointMesh*> pointMeshes_;
-
-    // Private demand-driven data
+        //- Mesh pointers
+        mutable PtrList<pointMesh> meshPtrs_;
 
     // Private Member Functions
 
@@ -79,7 +73,7 @@ private:
         // Helper functions for constructor
 
             //- Create new mesh for region with index regionI
-            pointMesh* newMesh(const label& regionI) const;
+            pointMesh* newMesh(label regionI) const;
 
 
 public:
@@ -102,112 +96,106 @@ public:
 
     // Destructor
 
-        virtual ~regionPointMesh() {};
+        virtual ~regionPointMesh();
 
     // Member Functions
 
         // Access
 
             //- Return reference to regionPolyMesh
-            const regionPolyMesh& rpmesh() const
+            inline const regionPolyMesh& rpmesh() const
             {
                 return rpMesh_;
             };
 
+            //- Return reference to this mesh
+            inline const regionPointMesh& rmesh() const
+            {
+                return *this;
+            }
+
+            //- Return the object registry
+            inline const objectRegistry& thisDb() const
+            {
+                return rpMesh_.thisDb();
+            }
+
             //- Return const reference to time
-            const Time& time() const
+            inline const Time& time() const
             {
                 return rpMesh_.time();
             };
 
             //- Return const reference to global region count
-            const label& size() const
+            inline label size() const
             {
                 return rpMesh_.size();
             };
 
-            //- Return const reference to the list of all region names
-            const List<word>& regionNames() const
+            //- Return const reference to regions
+            inline const regionList& regions() const
             {
-                return rpMesh_.regionNames();
+                return rpMesh_.regions();
             };
-
-            //- Return name of region with index regionI
-            word regionName(const label& regionI) const
-            {
-                return rpMesh_.regionName(regionI);
-            };
-
-            //- Return region index for region with regionName
-            label regionIndex(const word& regionName) const
-            {
-                return rpMesh_.regionIndex(regionName);
-            };
-
-            //- Return reference to default mesh
-            const pointMesh& mesh() const
-            {
-                return operator[](regionIndex(polyMesh::defaultRegion));
-            }
 
             //- Return reference to mesh
-            const pointMesh& mesh(const label& regionI) const
+            inline const pointMesh& mesh
+            (
+                label regionI
+            ) const
             {
                 return operator[](regionI);
             }
 
             //- Return reference to mesh
-            const pointMesh& mesh(const word& regionName) const
+            inline const pointMesh& mesh
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
             {
-                return operator[](regionIndex(regionName));
-            }
-
-            //- Return the object registry
-            const objectRegistry& thisDb() const
-            {
-                return rpMesh_.thisDb();
+                return operator[](regions()[regionName]);
             }
 
         // Mapping
 
-        // Demand-driven access
-
-            //- Return const reference to mesh cell mapping
-            const labelIOList& cellMap(const label& regionI) const
+            //- Return const reference map of given type and region name
+            inline const labelList& typeMap
+            (
+                addressingTypes::addressingType type,
+                label regionI
+            ) const
             {
-                return rpMesh_.cellMap(regionI);
-            };
+                return rpMesh_.typeMap(type, regionI);
+            }
 
-            //- Return const reference to mesh cell mapping
-            const labelIOList& cellMap(const word& regionName) const
+            //- Return const reference map of given type and region name
+            inline const labelList& typeMap
+            (
+                addressingTypes::addressingType type,
+                const word& regionName
+            ) const
             {
-                return rpMesh_.cellMap(regionName);
-            };
+                return typeMap(type, regions()[regionName]);
+            }
 
-            //- Return const reference to mesh point mapping
-            const labelIOList& pointMap(const label& regionI) const
-            {
-                return rpMesh_.pointMap(regionI);
-            };
-
-            //- Return const reference to mesh point mapping
-            const labelIOList& pointMap(const word& regionName) const
-            {
-                return rpMesh_.pointMap(regionName);
-            };
-
-    // Member operators
+    // Member Operators
 
         //- Mesh access operator by index (direct)
-        pointMesh& operator[](const label& regionI) const
+        inline pointMesh& operator[]
+        (
+            label regionI
+        ) const
         {
-            return *pointMeshes_[regionI];
+            return meshPtrs_[regionI];
         }
 
         //- Mesh access operator by regionName
-        pointMesh& operator[](const word& regionName) const
+        inline pointMesh& operator[]
+        (
+            const word& regionName
+        ) const
         {
-            return operator[](regionIndex(regionName));
+            return operator[](regions()[regionName]);
         }
 
         bool operator!=(const regionPointMesh&) const;

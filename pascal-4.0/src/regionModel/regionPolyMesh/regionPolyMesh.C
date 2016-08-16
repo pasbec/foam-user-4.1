@@ -25,25 +25,23 @@ License
 
 #include "regionPolyMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(regionPolyMesh, 0);
+    defineTypeNameAndDebug(regionPolyMesh, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-polyMesh* regionPolyMesh::newMesh(const label& regionI) const
+Foam::polyMesh* Foam::regionPolyMesh::newMesh(label regionI) const
 {
     return new polyMesh
     (
         IOobject
         (
-            regionNames_[regionI],
+            regions_[regionI],
             time_.timeName(),
             time_,
             IOobject::MUST_READ
@@ -54,7 +52,7 @@ polyMesh* regionPolyMesh::newMesh(const label& regionI) const
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-wordList regionPolyMesh::readRegionNames() const
+Foam::wordList Foam::regionPolyMesh::readRegionNames() const
 {
     wordIOList regionNames
     (
@@ -71,121 +69,78 @@ wordList regionPolyMesh::readRegionNames() const
     return regionNames;
 }
 
-void regionPolyMesh::resizeLists() const
-{
-    polyMeshes_.resize(size_, NULL);
 
-    cellRegionMap_.resize(size_, NULL);
-    pointRegionMap_.resize(size_, NULL);
-    faceRegionMap_.resize(size_, NULL);
-    cellProcMap_.resize(size_, NULL);
-    pointProcMap_.resize(size_, NULL);
-    faceProcMap_.resize(size_, NULL);
-    cellRegionProcMap_.resize(size_, NULL);
-    pointRegionProcMap_.resize(size_, NULL);
-    faceRegionProcMap_.resize(size_, NULL);
-    cellMap_.resize(size_, NULL);
-    pointMap_.resize(size_, NULL);
-    faceMap_.resize(size_, NULL);
+void Foam::regionPolyMesh::initMeshInitialize(const wordList& regionNames) const
+{
+    initialized_ = false;
+
+    regions_ = regionList(regionNames);
+
+    meshPtrs_.clear();
+    meshPtrs_.resize(regions_.size());
+
+    addressingPtrs_.clear();
+    addressingPtrs_.resize(regions_.size());
 }
 
-void regionPolyMesh::initMeshes(const wordList& regionNames) const
+
+void Foam::regionPolyMesh::initMeshMeshes() const
 {
-    size_ = regionNames.size();
-    regionNames_ = regionNames;
-
-    resizeLists();
-
-    forAll (regionNames_, regionI)
+    forAll (*this, regionI)
     {
         if (debug)
         {
-            Info << "regionPolyMesh::regionPolyMesh(...) : "
+            Info << "Foam::regionPolyMesh::regionPolyMesh(...) : "
                 << "Create mesh for region "
-                << regionName(regionI)
+                << regions()[regionI]
                 << endl;
         }
 
         // Create mesh
-        polyMeshes_[regionI] = newMesh(regionI);
+        meshPtrs_.set
+        (
+            regionI,
+            newMesh(regionI)
+        );
     }
-
-    setParallelSplitRegions();
-
-    initialized_ = true;
 }
 
-void regionPolyMesh::setParallelSplitRegions() const
+
+void Foam::regionPolyMesh::initMeshAddressings() const
 {
-    if (parallel())
+    forAll (*this, regionI)
     {
-        forAll (regionNames(), regionI)
+        if (debug)
         {
-            IOobject faceProcAddObj
-            (
-                "faceProcAddressing",
-                time().constant(),
-                polyMesh::meshSubDir,
-                mesh(regionI),
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE,
-                false
-            );
-
-            IOobject cellProcAddObj
-            (
-                "cellProcAddressing",
-                time().constant(),
-                polyMesh::meshSubDir,
-                mesh(regionI),
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE,
-                false
-            );
-
-            IOobject pointProcAddObj
-            (
-                "pointProcAddressing",
-                time().constant(),
-                polyMesh::meshSubDir,
-                mesh(regionI),
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE,
-                false
-            );
-
-            IOobject boundaryProcAddObj
-            (
-                "boundaryProcAddressing",
-                time().constant(),
-                polyMesh::meshSubDir,
-                mesh(regionI),
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE,
-                false
-            );
-
-            // If any mesh does not contain processor addressing,
-            // assume the mesh was split AFTER decomposition
-            if
-            (
-                !faceProcAddObj.headerOk()
-             || !cellProcAddObj.headerOk()
-             || !pointProcAddObj.headerOk()
-             || !boundaryProcAddObj.headerOk()
-            )
-            {
-                parallelSplitRegions_ = 1;
-                break;
-            }
+            Info << "Foam::regionPolyMesh::regionPolyMesh(...) : "
+                << "Create addressing for region "
+                << regions()[regionI]
+                << endl;
         }
+
+        // Create addressings
+        addressingPtrs_.set
+        (
+            regionI,
+            new regionToRegionAddressing(meshPtrs_[regionI])
+        );
     }
+}
+
+
+void Foam::regionPolyMesh::initMeshShared() const
+{}
+
+
+void Foam::regionPolyMesh::initMeshFinalize() const
+{
+    initialized_ = true;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-regionPolyMesh::regionPolyMesh
+Foam::regionPolyMesh::regionPolyMesh
 (
     const Time& runTime,
     bool init
@@ -201,30 +156,17 @@ regionPolyMesh::regionPolyMesh
             IOobject::NO_WRITE
         )
     ),
-    polyMeshes_(List<polyMesh*>(0)),
     time_(runTime),
-    parallel_(runTime.processorCase()),
-    size_(0),
-    regionNames_(List<word>(0)),
-    parallelSplitRegions_(0),
-    initialized_(false),
-    cellRegionMap_(List<labelIOList*>(0)),
-    pointRegionMap_(List<labelIOList*>(0)),
-    faceRegionMap_(List<labelIOList*>(0)),
-    cellProcMap_(List<labelIOList*>(0)),
-    pointProcMap_(List<labelIOList*>(0)),
-    faceProcMap_(List<labelIOList*>(0)),
-    cellRegionProcMap_(List<labelIOList*>(0)),
-    pointRegionProcMap_(List<labelIOList*>(0)),
-    faceRegionProcMap_(List<labelIOList*>(0)),
-    cellMap_(List<labelIOList*>(0)),
-    pointMap_(List<labelIOList*>(0)),
-    faceMap_(List<labelIOList*>(0))
+    regions_(),
+    meshPtrs_(),
+    addressingPtrs_(),
+    initialized_(false)
 {
-    if(init) initMeshes(readRegionNames());
+    if(init) this->init(readRegionNames());
 }
 
-regionPolyMesh::regionPolyMesh
+
+Foam::regionPolyMesh::regionPolyMesh
 (
     const Time& runTime,
     const wordList& regionNames,
@@ -241,60 +183,24 @@ regionPolyMesh::regionPolyMesh
             IOobject::NO_WRITE
         )
     ),
-    polyMeshes_(List<polyMesh*>(0)),
     time_(runTime),
-    parallel_(runTime.processorCase()),
-    size_(regionNames.size()),
-    regionNames_(regionNames),
-    parallelSplitRegions_(0),
-    initialized_(false),
-    cellRegionMap_(List<labelIOList*>(0)),
-    pointRegionMap_(List<labelIOList*>(0)),
-    faceRegionMap_(List<labelIOList*>(0)),
-    cellProcMap_(List<labelIOList*>(0)),
-    pointProcMap_(List<labelIOList*>(0)),
-    faceProcMap_(List<labelIOList*>(0)),
-    cellRegionProcMap_(List<labelIOList*>(0)),
-    pointRegionProcMap_(List<labelIOList*>(0)),
-    faceRegionProcMap_(List<labelIOList*>(0)),
-    cellMap_(List<labelIOList*>(0)),
-    pointMap_(List<labelIOList*>(0)),
-    faceMap_(List<labelIOList*>(0))
+    regions_(regionNames),
+    meshPtrs_(),
+    addressingPtrs_(),
+    initialized_(false)
 {
-    if(init) initMeshes(regionNames);
+    if(init) this->init(regionNames);
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-label regionPolyMesh::regionIndex(const word& regionName) const
+Foam::regionPolyMesh::~regionPolyMesh()
 {
-    label regionID = -1;
-
-    forAll (*this, regionI)
-    {
-        if(regionNames()[regionI] == regionName)
-        {
-            regionID = regionI;
-        }
-    }
-
-    // TODO: Catch default region here and return -1
-    if(regionID == -1)
-    {
-        FatalErrorIn("regionPolyMesh::regionIndex(...)")
-            << "Region " << regionName
-            << " is not part of this regionPolyMesh!"
-            << abort(FatalError);
-    }
-
-    return regionID;
+    meshPtrs_.clear();
+    addressingPtrs_.clear();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 

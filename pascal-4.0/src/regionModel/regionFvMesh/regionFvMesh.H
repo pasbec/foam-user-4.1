@@ -39,8 +39,6 @@ SourceFiles
 
 #include "regionPolyMesh.H"
 
-// TODO [High]: Destructor
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -56,11 +54,6 @@ class regionFvMesh
 {
 private:
 
-    // Private data
-
-        //- Meshes data
-        mutable List<fvMesh*> fvMeshes_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -72,22 +65,20 @@ private:
         // Helper functions for constructor
 
             //- Create new mesh for region with index regionI
-            fvMesh* newMesh(const label& regionI) const;
+            fvMesh* newMesh(label regionI) const;
 
 
 protected:
 
-    // Protected data
+    // Protected Member Functions
 
-    // Private Member Functions
+        // Helper functions
 
-        // Helper functions for constructor
+            //- Init meshes
+            virtual void initMeshMeshes() const;
 
-            //- Resize lists storing data
-            virtual void resizeLists() const;
-
-            //- Init regions
-            virtual void initMeshes(const wordList& regionNames) const;
+            //- Init shared
+            virtual void initMeshShared() const;
 
 
 public:
@@ -119,54 +110,72 @@ public:
 
     // Destructor
 
-        virtual ~regionFvMesh() {};
+        virtual ~regionFvMesh();
 
     // Member Functions
 
         // Access
 
+            //- Return reference to this mesh
+            inline const regionFvMesh& rmesh() const
+            {
+                return *this;
+            };
+
             //- Return reference to mesh
-            inline fvMesh& mesh(const label& regionI) const
+            inline fvMesh& mesh
+            (
+                label regionI
+            ) const
             {
                 return operator[](regionI);
             }
 
             //- Return reference to mesh
-            inline fvMesh& mesh(const word& regionName) const
+            inline fvMesh& mesh
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
             {
-                return operator[](regionIndex(regionName));
+                return operator[](regions()[regionName]);
             }
 
-            //- Return reference to default solution dict
-            inline fvSolution& solutionDict() const
-            {
-                return mesh(regionIndex(polyMesh::defaultRegion)).solutionDict();
-            };
-
             //- Return reference to solution dict
-            inline fvSolution& solutionDict(const label& regionI) const
+            inline fvSolution& solutionDict
+            (
+                label regionI
+            ) const
             {
                 return mesh(regionI).solutionDict();
             };
 
             //- Return reference to solution dict
-            inline fvSolution& solutionDict(const word& regionName) const
+            inline fvSolution& solutionDict
+            (
+                const word& regionName = polyMesh::defaultRegion
+            ) const
             {
-                return mesh(regionIndex(regionName)).solutionDict();
+                return mesh(regions()[regionName]).solutionDict();
             };
 
-    // Member operators
+    // Member Operators
 
         //- Mesh access operator by index
-        virtual fvMesh& operator[](const label& regionI) const
+        virtual fvMesh& operator[]
+        (
+            label regionI
+        ) const
         {
-            return *fvMeshes_[regionI];
+            return static_cast<fvMesh&>(meshPtrs_[regionI]);
         }
 
         //- Mesh access operator by regionName
-        inline fvMesh& operator[](const word& regionName) const
+        inline fvMesh& operator[]
+        (
+            const word& regionName
+        ) const
         {
-            return operator[](regionIndex(regionName));
+            return operator[](regions()[regionName]);
         }
 
         bool operator!=(const regionFvMesh&) const;

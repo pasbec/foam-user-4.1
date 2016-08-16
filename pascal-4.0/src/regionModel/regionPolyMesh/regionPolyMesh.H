@@ -30,7 +30,6 @@ Description
 SourceFiles
     regionPolyMesh.C
     regionPolyMeshMapping.C
-    makeRegionPolyMeshData.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,24 +42,17 @@ SourceFiles
 #include "foamTime.H"
 #include "wordIOList.H"
 
-// TODO [High]: Destructor
+#include "regionList.H"
+#include "addressingTypes.H"
+#include "regionToRegionAddressing.H"
 
-// TODO [High]: Finish parallel face mapping
-// TODO [High]: faceRegionAddressing and faceMap does not seem to be the same (flip-sign!!!)
-// TODO [High]: How to deal with faceRegionAddressing and faceMap, properly?
-
-// TODO [High]: Sort that parallel clutter out (remove local maps
-//              and return maps based on if)!!!
-
-// TODO [High]: Remove heaps of duplicated code
-
-// TODO [High]: Remove copies of makeRegionPolyMeshData functions
+// TODO [Idea]: Use HashPtrTable instead of PtrList???
 
 // TODO [High]: Allow default region to be absent. WE NEED A LOT OF CHECKS!!!
 
 // TODO [High]: Check if all region names are unique
 
-// TODO [High]: Check regionI != defaultRegionI for maps!!!
+// TODO [Low]: Remove readRegionNames()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,11 +69,6 @@ class regionPolyMesh
 {
 private:
 
-    // Private data
-
-        //- Meshes data
-        mutable List<polyMesh*> polyMeshes_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -93,7 +80,7 @@ private:
         // Helper functions for constructor
 
             //- Create new mesh for region with index regionI
-            polyMesh* newMesh(const label& regionI) const;
+            polyMesh* newMesh(label regionI) const;
 
 
 protected:
@@ -103,129 +90,40 @@ protected:
         //- Reference to time
         const Time& time_;
 
-        //- Processor mesh?
-        bool parallel_;
+        //- List of regions
+        mutable regionList regions_;
 
-        //- Global region count
-        mutable label size_;
+        //- Mesh pointers
+        mutable PtrList<polyMesh> meshPtrs_;
 
-        //- List of all region names
-        mutable wordList regionNames_;
-
-        //- Processor mesh: Was the mesh split into regions
-        //  AFTER parallel decomposition of processors?
-        mutable bool parallelSplitRegions_;
+        //- Region to region addressings
+        mutable PtrList<regionToRegionAddressing> addressingPtrs_;
 
         // - Is mesh initialized?
         mutable bool initialized_;
 
-    // Protected demand-driven data
-
-        //- Region cell mapping
-        mutable List<labelIOList*> cellRegionMap_;
-
-        //- Region point mapping
-        mutable List<labelIOList*> pointRegionMap_;
-
-        //- Region face mapping
-        mutable List<labelIOList*> faceRegionMap_;
-
-        //- Processor cell mapping
-        mutable List<labelIOList*> cellProcMap_;
-
-        //- Processor point mapping
-        mutable List<labelIOList*> pointProcMap_;
-
-        //- Processor face mapping
-        mutable List<labelIOList*> faceProcMap_;
-
-        //- Region-processor cell mapping
-        //  (if split in order region->proc)
-        mutable List<labelIOList*> cellRegionProcMap_;
-
-        //- Region-processor point mapping
-        //  (if split in order region->proc)
-        mutable List<labelIOList*> pointRegionProcMap_;
-
-        //- Region-processor face mapping
-        //  (if split in order region->proc)
-        mutable List<labelIOList*> faceRegionProcMap_;
-
-        //- Local cell mapping
-        mutable List<labelIOList*> cellMap_;
-
-        //- Local point mapping
-        mutable List<labelIOList*> pointMap_;
-
-        //- Local face mapping
-        mutable List<labelIOList*> faceMap_;
-
     // Protected Member Functions
 
-        // Helper functions for constructor
+        // Helper functions
 
+// TODO: Remove readRegionNames()
             //- Read region names from file
             wordList readRegionNames() const;
 
-            //- Resize lists storing data
-            virtual void resizeLists() const;
+            //- Init initialize
+            void initMeshInitialize(const wordList& regionNames) const;
 
-            //- Init regions
-            virtual void initMeshes(const wordList& regionNames) const;
+            //- Init meshes
+            virtual void initMeshMeshes() const;
 
-            //- Set parallel split type
-            void setParallelSplitRegions() const;
+            //- Init addressings
+            void initMeshAddressings() const;
 
-        // Make demand-driven data
+            //- Init shared
+            virtual void initMeshShared() const;
 
-            //- Region maps
-            void makeCellRegionMap(const label& regionI) const;
-            void makePointRegionMap(const label& regionI) const;
-            void makeFaceRegionMap(const label& regionI) const;
-
-            //- Processor maps
-            void makeCellProcMap(const label& regionI) const;
-            void makePointProcMap(const label& regionI) const;
-// TODO            void makeFaceProcMap(const label& regionI) const;
-
-            //- Region-processor maps
-            void makeCellRegionProcMap(const label& regionI) const;
-            void makePointRegionProcMap(const label& regionI) const;
-// TODO            void makeFaceRegionProcMap(const label& regionI) const;
-
-            //- Maps
-            void makeCellMap(const label& regionI) const;
-            void makePointMap(const label& regionI) const;
-            void makeFaceMap(const label& regionI) const;
-
-        // Helper functions for demand-driven data
-
-            //- Create new region map
-            //  for mesh of region with index regionI
-            labelIOList* newRegionMap
-            (
-                const label& regionI,
-                const word& topoType
-            ) const;
-
-            //- Create new processor map
-            //  for mesh of region with index regionI
-            labelIOList* newProcMap
-            (
-                const label& regionI,
-                const word& topoType
-            ) const;
-
-            //- Create new region-processor map
-            //  for mesh of region with index regionI
-            labelIOList* newCellRegionProcMap
-            (
-                const label& regionI
-            ) const;
-            labelIOList* newPointRegionProcMap
-            (
-                const label& regionI
-            ) const;
+            //- Init finalize
+            void initMeshFinalize() const;
 
 
 public:
@@ -257,7 +155,7 @@ public:
 
     // Destructor
 
-        virtual ~regionPolyMesh() {};
+        virtual ~regionPolyMesh();
 
     // Member Functions
 
@@ -266,7 +164,14 @@ public:
             //- Init meshes
             void init(const wordList& regionNames) const
             {
-                if (!initialized()) initMeshes(regionNames);
+                if (!initialized())
+                {
+                    initMeshInitialize(regionNames);
+                    initMeshMeshes();
+                    initMeshAddressings();
+                    initMeshShared();
+                    initMeshFinalize();
+                }
             };
 
             inline bool initialized() const
@@ -276,11 +181,17 @@ public:
 
         // Access
 
-            //- Return reference to regionPolyMesh
-            inline const regionPolyMesh& rpmesh() const
+            //- Return reference to this mesh
+            inline const regionPolyMesh& rmesh() const
             {
                 return *this;
             };
+
+            //- Return the object registry
+            inline const objectRegistry& thisDb() const
+            {
+                return *this;
+            }
 
             //- Return const reference to time
             inline const Time& time() const
@@ -289,45 +200,22 @@ public:
             };
 
             //- Return const reference to global region count
-            inline const label& size() const
+            inline label size() const
             {
-                return size_;
+                return regions_.size();
             };
 
-            //- Return const reference to the list of all region names
-            inline const List<word>& regionNames() const
+            //- Return const reference to regions
+            inline const regionList& regions() const
             {
-                return regionNames_;
+                return regions_;
             };
-
-            //- Return name of region with index regionI
-            inline word regionName(const label& regionI) const
-            {
-                return regionNames_[regionI];
-            }
-
-// TODO: Use hash table
-            //- Return region index for region with regionName
-            label regionIndex
-            (
-                const word& regionName = polyMesh::defaultRegion
-            ) const;
-
-            //- Return whether this is a processor mesh
-            inline const bool& parallel() const
-            {
-                return parallel_;
-            }
-
-            //- Return whether mesh was split into regions
-            //  AFTER parallel decomposition of processors
-            inline const bool& parallelSplitRegions() const
-            {
-                return parallelSplitRegions_;
-            }
 
             //- Return reference to mesh
-            inline polyMesh& mesh(const label& regionI) const
+            inline polyMesh& mesh
+            (
+                label regionI
+            ) const
             {
                 return operator[](regionI);
             }
@@ -338,19 +226,16 @@ public:
                 const word& regionName = polyMesh::defaultRegion
             ) const
             {
-                return operator[](regionIndex(regionName));
-            }
-
-            //- Return the object registry
-            inline const objectRegistry& thisDb() const
-            {
-                return *this;
+                return operator[](regions()[regionName]);
             }
 
         // Active mesh data
 
             //- Return the vector of geometric directions in mesh
-            inline const Vector<label>& geometricD(const label& regionI) const
+            inline const Vector<label>& geometricD
+            (
+                label regionI
+            ) const
             {
                 return operator[](regionI).geometricD();
             };
@@ -361,11 +246,14 @@ public:
                 const word& regionName = polyMesh::defaultRegion
             ) const
             {
-                return operator[](regionIndex(regionName)).geometricD();
+                return operator[](regions()[regionName]).geometricD();
             };
 
             //- Return the number of valid geometric dimensions in the mesh
-            inline label nGeometricD(const label& regionI) const
+            inline label nGeometricD
+            (
+                label regionI
+            ) const
             {
                 return operator[](regionI).nGeometricD();
             };
@@ -376,11 +264,14 @@ public:
                 const word& regionName = polyMesh::defaultRegion
             ) const
             {
-                return operator[](regionIndex(regionName)).nGeometricD();
+                return operator[](regions()[regionName]).nGeometricD();
             };
 
             //- Return the vector of solved-for directions in mesh
-            inline const Vector<label>& solutionD(const label& regionI) const
+            inline const Vector<label>& solutionD
+            (
+                label regionI
+            ) const
             {
                 return operator[](regionI).solutionD();
             };
@@ -391,11 +282,14 @@ public:
                 const word& regionName = polyMesh::defaultRegion
             ) const
             {
-                return operator[](regionIndex(regionName)).solutionD();
+                return operator[](regions()[regionName]).solutionD();
             };
 
             //- Return the number of valid solved-for dimensions in the mesh
-            inline label nSolutionD(const label& regionI) const
+            inline label nSolutionD
+            (
+                label regionI
+            ) const
             {
                 return operator[](regionI).nSolutionD();
             };
@@ -406,7 +300,7 @@ public:
                 const word& regionName = polyMesh::defaultRegion
             ) const
             {
-                return operator[](regionIndex(regionName)).nSolutionD();
+                return operator[](regions()[regionName]).nSolutionD();
             };
 
         // Mapping
@@ -416,7 +310,7 @@ public:
             void map
             (
                 pointField& givenPoints,
-                const label& regionI,
+                label regionI,
                 const word& patchName = ""
             ) const;
 
@@ -433,7 +327,7 @@ public:
             //  to a new point field for non-default region
             tmp<pointField> map
             (
-                const label& regionI,
+                label regionI,
                 const word& patchName = ""
             ) const;
 
@@ -450,7 +344,7 @@ public:
             void rmap
             (
                 pointField& givenPoints,
-                const label& regionI,
+                label regionI,
                 const word& patchName = ""
             ) const;
 
@@ -467,7 +361,7 @@ public:
             //  to a new point field for default region
             tmp<pointField> rmap
             (
-                const label& regionI,
+                label regionI,
                 const word& patchName = ""
             ) const;
 
@@ -483,8 +377,8 @@ public:
             //  based on directMappedPatch
             labelListList patchMapDirectMapped
             (
-                const label& fromRegionI,
-                const label& toRegionI
+                label fromRegionI,
+                label toRegionI
             ) const;
 
             //- Return patch mapping between two neighbour-regions
@@ -495,38 +389,48 @@ public:
                 const word& toRegionName
             ) const;
 
-        // Demand-driven access
+            //- Return const reference map of given type and region index
+            inline const labelList& typeMap
+            (
+                addressingTypes::addressingType type,
+                label regionI
+            ) const
+            {
+                return addressingPtrs_[regionI].typeMap
+                    (
+                        type,
+                        polyMesh::defaultRegion
+                    );
+            }
 
-            //- Return const reference to mesh cell mapping
-            const labelIOList& cellMap(const label& regionI) const;
+            //- Return const reference map of given type and region name
+            inline const labelList& typeMap
+            (
+                addressingTypes::addressingType type,
+                const word& regionName
+            ) const
+            {
+                return typeMap(type, regions()[regionName]);
+            }
 
-            //- Return const reference to mesh cell mapping
-            const labelIOList& cellMap(const word& regionName) const;
-
-            //- Return const reference to mesh point mapping
-            const labelIOList& pointMap(const label& regionI) const;
-
-            //- Return const reference to mesh point mapping
-            const labelIOList& pointMap(const word& regionName) const;
-
-            //- Return const reference to mesh face mapping
-            const labelIOList& faceMap(const label& regionI) const;
-
-            //- Return const reference to mesh face mapping
-            const labelIOList& faceMap(const word& regionName) const;
-
-    // Member operators
+    // Member Operators
 
         //- Mesh access operator by index
-        virtual polyMesh& operator[](const label& regionI) const
+        virtual polyMesh& operator[]
+        (
+            label regionI
+        ) const
         {
-            return *polyMeshes_[regionI];
+            return meshPtrs_[regionI];
         }
 
         //- Mesh access operator by regionName
-        inline polyMesh& operator[](const word& regionName) const
+        inline polyMesh& operator[]
+        (
+            const word& regionName
+        ) const
         {
-            return operator[](regionIndex(regionName));
+            return operator[](regions()[regionName]);
         }
 };
 

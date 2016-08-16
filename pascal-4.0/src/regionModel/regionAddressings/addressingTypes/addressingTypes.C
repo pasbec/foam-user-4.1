@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     | Version:     3.2
+   \\    /   O peration     | Version:     4.0
     \\  /    A nd           | Web:         http://www.foam-extend.org
      \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
@@ -23,16 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "regionPointFields.H"
+#include "addressingTypes.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+template<>
+const char* Foam::NamedEnum<Foam::addressingTypes::addressingType, 4>::names[] =
 {
-    defineTemplateTypeNameAndDebug(regionPointScalarField, 0);
-    defineTemplateTypeNameAndDebug(regionPointVectorField, 0);
-    defineTemplateTypeNameAndDebug(regionPointTensorField, 0);
-}
+    "point",
+    "face",
+    "cell",
+    "boundary"
+};
+
+
+const Foam::NamedEnum<Foam::addressingTypes::addressingType, 4>
+    Foam::addressingTypes::addressingTypeName;
 
 
 // ************************************************************************* //

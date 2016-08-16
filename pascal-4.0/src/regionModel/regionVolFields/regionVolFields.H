@@ -44,9 +44,11 @@ SourceFiles
 #include "regionGeoMesh.H"
 #include "regionFvMesh.H"
 
+// TODO [Low]: Implement template specializations for the currently
+//             not-implemented membemer functions for boundary field mapping
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// TODO declare template specialization for volField mapping functions
 # define declareRegionVolFieldMapping(Type)                                   \
                                                                               \
 template<>                                                                    \
@@ -55,7 +57,7 @@ void regionGeometricField                                                     \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
 >::mapInteralField                                                            \
 (                                                                             \
-    const label& regionI                                                      \
+    label regionI                                                             \
 ) const;                                                                      \
                                                                               \
                                                                               \
@@ -65,13 +67,15 @@ void regionGeometricField                                                     \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
 >::rmapInteralField                                                           \
 (                                                                             \
-    const label& regionI                                                      \
+    label regionI                                                             \
 ) const;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 declareRegionVolFieldMapping(scalar);
 declareRegionVolFieldMapping(vector);

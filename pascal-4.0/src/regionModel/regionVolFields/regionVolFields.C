@@ -27,23 +27,20 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTemplateTypeNameAndDebug(regionVolScalarField, 0);
-defineTemplateTypeNameAndDebug(regionVolVectorField, 0);
-defineTemplateTypeNameAndDebug(regionVolSphericalTensorField, 0);
-defineTemplateTypeNameAndDebug(regionVolSymmTensorField, 0);
-defineTemplateTypeNameAndDebug(regionVolSymmTensor4thOrderField, 0);
-defineTemplateTypeNameAndDebug(regionVolDiagTensorField, 0);
-defineTemplateTypeNameAndDebug(regionVolTensorField, 0);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    defineTemplateTypeNameAndDebug(regionVolScalarField, 0);
+    defineTemplateTypeNameAndDebug(regionVolVectorField, 0);
+    defineTemplateTypeNameAndDebug(regionVolSphericalTensorField, 0);
+    defineTemplateTypeNameAndDebug(regionVolSymmTensorField, 0);
+    defineTemplateTypeNameAndDebug(regionVolSymmTensor4thOrderField, 0);
+    defineTemplateTypeNameAndDebug(regionVolDiagTensorField, 0);
+    defineTemplateTypeNameAndDebug(regionVolTensorField, 0);
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

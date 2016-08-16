@@ -25,19 +25,17 @@ License
 
 #include "regionPointMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(regionPointMesh, 0);
+    defineTypeNameAndDebug(regionPointMesh, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-pointMesh* regionPointMesh::newMesh(const label& regionI) const
+Foam::pointMesh* Foam::regionPointMesh::newMesh(label regionI) const
 {
     return new pointMesh(rpMesh_[regionI]);
 }
@@ -45,46 +43,55 @@ pointMesh* regionPointMesh::newMesh(const label& regionI) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-regionPointMesh::regionPointMesh
+Foam::regionPointMesh::regionPointMesh
 (
     const regionPolyMesh& rpMesh
 )
 :
     rpMesh_(rpMesh),
-    pointMeshes_(List<pointMesh*>(rpMesh_.size(),NULL))
+    meshPtrs_()
 {
-    forAll (regionNames(), regionI)
+    forAll (*this, regionI)
     {
         if (debug)
         {
-            Info << "regionPolyMesh::regionPolyMesh(...) : "
+            Info << "Foam::regionPointMesh::regionPointMesh(...) : "
                 << "Create mesh for region "
-                << regionName(regionI)
+                << regions()[regionI]
                 << endl;
         }
 
         // Create mesh
-        pointMeshes_[regionI] = newMesh(regionI);
+        meshPtrs_.set
+        (
+            regionI,
+            newMesh(regionI)
+        );
     }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::regionPointMesh::~regionPointMesh()
+{
+    meshPtrs_.clear();
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-bool regionPointMesh::operator!=(const regionPointMesh& brm) const
+bool Foam::regionPointMesh::operator!=(const regionPointMesh& brm) const
 {
     return &brm != this;
 }
 
-bool regionPointMesh::operator==(const regionPointMesh& brm) const
+
+bool Foam::regionPointMesh::operator==(const regionPointMesh& brm) const
 {
     return &brm == this;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 

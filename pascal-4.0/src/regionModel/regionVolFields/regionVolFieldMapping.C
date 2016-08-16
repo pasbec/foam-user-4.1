@@ -27,7 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// TODO define template specialization for volField mapping functions
 # define defineRegionVolFieldMapping(Type)                                    \
                                                                               \
 template<>                                                                    \
@@ -36,7 +35,7 @@ void regionGeometricField                                                     \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
 >::mapInteralField                                                            \
 (                                                                             \
-    const label& regionI                                                      \
+    label regionI                                                             \
 ) const                                                                       \
 {                                                                             \
     const GeometricField<Type, fvPatchField, volMesh>& vf0 =                  \
@@ -44,7 +43,7 @@ void regionGeometricField                                                     \
                                                                               \
     GeometricField<Type, fvPatchField, volMesh>& vf = field(regionI);         \
                                                                               \
-    const labelIOList& map = mesh().cellMap(regionI);                         \
+    const labelList& map = mesh().typeMap(addressingTypes::CELL, regionI);    \
                                                                               \
     forAll (vf, celli)                                                        \
     {                                                                         \
@@ -59,7 +58,7 @@ void regionGeometricField                                                     \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
 >::rmapInteralField                                                           \
 (                                                                             \
-    const label& regionI                                                      \
+    label regionI                                                             \
 ) const                                                                       \
 {                                                                             \
     GeometricField<Type, fvPatchField, volMesh>& vf0 =                        \
@@ -67,7 +66,7 @@ void regionGeometricField                                                     \
                                                                               \
     const GeometricField<Type, fvPatchField, volMesh>& vf = field(regionI);   \
                                                                               \
-    const labelIOList& map = mesh().cellMap(regionI);                         \
+    const labelList& map = mesh().typeMap(addressingTypes::CELL, regionI);    \
                                                                               \
     forAll (vf, celli)                                                        \
     {                                                                         \
@@ -77,25 +76,23 @@ void regionGeometricField                                                     \
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-defineRegionVolFieldMapping(scalar);
-defineRegionVolFieldMapping(vector);
-defineRegionVolFieldMapping(sphericalTensor);
-defineRegionVolFieldMapping(symmTensor);
-defineRegionVolFieldMapping(symmTensor4thOrder);
-defineRegionVolFieldMapping(diagTensor);
-defineRegionVolFieldMapping(tensor);
+namespace Foam
+{
+    defineRegionVolFieldMapping(scalar);
+    defineRegionVolFieldMapping(vector);
+    defineRegionVolFieldMapping(sphericalTensor);
+    defineRegionVolFieldMapping(symmTensor);
+    defineRegionVolFieldMapping(symmTensor4thOrder);
+    defineRegionVolFieldMapping(diagTensor);
+    defineRegionVolFieldMapping(tensor);
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

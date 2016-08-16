@@ -25,25 +25,23 @@ License
 
 #include "regionFvMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(regionFvMesh, 0);
+    defineTypeNameAndDebug(regionFvMesh, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-fvMesh* regionFvMesh::newMesh(const label& regionI) const
+Foam::fvMesh* Foam::regionFvMesh::newMesh(label regionI) const
 {
     return new fvMesh
     (
         IOobject
         (
-            regionNames_[regionI],
+            regions_[regionI],
             time_.timeName(),
             time_,
             IOobject::MUST_READ
@@ -54,43 +52,37 @@ fvMesh* regionFvMesh::newMesh(const label& regionI) const
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void regionFvMesh::resizeLists() const
+void Foam::regionFvMesh::initMeshMeshes() const
 {
-    regionPolyMesh::resizeLists();
-
-    fvMeshes_.resize(size_, NULL);
-}
-
-void regionFvMesh::initMeshes(const wordList& regionNames) const
-{
-    size_ = regionNames.size();
-    regionNames_ = regionNames;
-
-    resizeLists();
-
-    forAll (regionNames_, regionI)
+    forAll (*this, regionI)
     {
         if (debug)
         {
-            Info << "regionFvMesh::regionFvMesh(...) : "
+            Info<< "Foam::regionFvMesh::regionFvMesh(...) : "
                 << "Create mesh for region "
-                << regionName(regionI)
+                << regions()[regionI]
                 << endl;
         }
 
         // Create mesh
-        fvMeshes_[regionI] = newMesh(regionI);
+        meshPtrs_.set
+        (
+            regionI,
+            static_cast<polyMesh*>(newMesh(regionI))
+        );
     }
+}
 
-    setParallelSplitRegions();
 
-    initialized_ = true;
+void Foam::regionFvMesh::initMeshShared() const
+{
+    regionPolyMesh::initMeshShared();
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-regionFvMesh::regionFvMesh
+Foam::regionFvMesh::regionFvMesh
 (
     const Time& runTime,
     bool init
@@ -100,13 +92,13 @@ regionFvMesh::regionFvMesh
     (
         runTime,
         false
-    ),
-    fvMeshes_(List<fvMesh*>(0))
+    )
 {
-    if(init) initMeshes(readRegionNames());
+    if(init) this->init(readRegionNames());
 }
 
-regionFvMesh::regionFvMesh
+
+Foam::regionFvMesh::regionFvMesh
 (
     const Time& runTime,
     const wordList& regionNames,
@@ -117,29 +109,31 @@ regionFvMesh::regionFvMesh
     (
         runTime,
         false
-    ),
-    fvMeshes_(List<fvMesh*>(0))
+    )
 {
-    if(init) initMeshes(regionNames);
+    if(init) this->init(regionNames);
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::regionFvMesh::~regionFvMesh()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-bool regionFvMesh::operator!=(const regionFvMesh& brm) const
+bool Foam::regionFvMesh::operator!=(const regionFvMesh& brm) const
 {
     return &brm != this;
 }
 
-bool regionFvMesh::operator==(const regionFvMesh& brm) const
+
+bool Foam::regionFvMesh::operator==(const regionFvMesh& brm) const
 {
     return &brm == this;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 
