@@ -1,18 +1,13 @@
 #!/bin/bash
 
-flagClean=0; flagPrepare=0; flagParallel=0; flagParallel2=0; flagReset=0; flagRun=0
+flagClean=0; flagPrepare=0; flagParallel=0; flagReset=0; flagRun=0
 
 flagRenumberMesh=0
 
 while [[ $# -gt 0 ]]; do
     if   [[ $1 == 'clean' ]];   then flagClean=1
     elif [[ $1 == 'prepare' ]]; then flagPrepare=1
-    elif [[ $1 == 'parallel' ]]; then
-        flagParallel=1
-        flagParallel2=0
-    elif [[ $1 == 'parallel2' ]]; then
-        flagParallel2=1
-        flagParallel=0
+    elif [[ $1 == 'parallel' ]]; then flagParallel=1
     elif [[ $1 == 'reset' ]];   then flagReset=1
     elif [[ $1 == 'start' ]];   then
         flagPrepare=1
@@ -66,73 +61,63 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     rm 'constant/polyMesh/faceZones' > /dev/null 2>&1
     rm 'constant/polyMesh/pointZones' > /dev/null 2>&1
 
-    if [[ $flagParallel2 -eq 1 ]]; then
+    # Create new topoSets
+    runApplication \
+        setSet -noVTK -batch 'system/setSetBatch' || exit 1
 
-        # TODO?
-        echo "Parallel 2 not supported!"
-        exit 1
+    # Create new patches
+    runApplication \
+        createPatch -overwrite || exit 1
 
-    else
+    # Change dictionaries
+    runApplication \
+        changeDictionary || exit 1
 
-        # Create new topoSets
-        runApplication \
-            setSet -noVTK -batch 'system/setSetBatch' || exit 1
+    # Create subset meshes
+    # for regions
+    for region in $regionlist; do
 
-        # Create new patches
-        runApplication \
-            createPatch -overwrite || exit 1
+        runApplication -r "$region" \
+            subsetMesh "cellSet_$region" -overwrite || exit 1
 
-        # Change dictionaries
-        runApplication \
-            changeDictionary || exit 1
+        mkdir 'constant/setSubset' > /dev/null 2>&1
+        mkdir 'constant/setSubset/polyMesh' > /dev/null 2>&1
+        mv "0/setSubset/polyMesh/"* "constant/setSubset/polyMesh/"
+        mkdir "constant/$region" > /dev/null 2>&1
+        mkdir "constant/$region/polyMesh" > /dev/null 2>&1
+        mv "constant/setSubset/polyMesh/"* "constant/$region/polyMesh"
+        rm -rf "0/setSubset"
+        rm -rf "constant/setSubset"
+        rm -rf "system/setSubset"
 
-        # Create subset meshes
-        # for regions
-        for region in $regionlist; do
+        runApplication -r "$region" \
+            createPatch -region "$region" -overwrite || exit 1
 
-            runApplication -r "$region" \
-                subsetMesh "cellSet_$region" -overwrite || exit 1
+    done
 
-            mkdir 'constant/setSubset' > /dev/null 2>&1
-            mkdir 'constant/setSubset/polyMesh' > /dev/null 2>&1
-            mv "0/setSubset/polyMesh/"* "constant/setSubset/polyMesh/"
-            mkdir "constant/$region" > /dev/null 2>&1
-            mkdir "constant/$region/polyMesh" > /dev/null 2>&1
-            mv "constant/setSubset/polyMesh/"* "constant/$region/polyMesh"
-            rm -rf "0/setSubset"
-            rm -rf "constant/setSubset"
-            rm -rf "system/setSubset"
+    # Add fields to 0 from org backup
+    addZeroOrg
 
-            runApplication -r "$region" \
-                createPatch -region "$region" -overwrite || exit 1
+    # Move polyMesh from 0 to constant
+    # for regions
+    for region in $regionlist; do
+        moveZeroToConstantPolyMesh "$region"
+    done
 
-        done
+    # Add fields to 0 from org backup
+    # for regions
+    for region in $regionlist; do
+        addZeroOrg "$region"
+    done
 
-        # Add fields to 0 from org backup
-        addZeroOrg
+    runApplication \
+        funkySetFields -time '0' || exit 1
 
-        # Move polyMesh from 0 to constant
-        # for regions
-        for region in $regionlist; do
-            moveZeroToConstantPolyMesh "$region"
-        done
-
-        # Add fields to 0 from org backup
-        # for regions
-        for region in $regionlist; do
-            addZeroOrg "$region"
-        done
-
-        runApplication \
-            funkySetFields -time '0' || exit 1
-
-        # Touch paraFoam files
-        paraviewTouchOpenFOAM
-        for region in $regionlist; do
-            paraviewTouchOpenFOAM "$region"
-        done
-
-    fi
+    # Touch paraFoam files
+    paraviewTouchOpenFOAM
+    for region in $regionlist; do
+        paraviewTouchOpenFOAM "$region"
+    done
 
     if [[ $flagParallel -eq 1 ]]; then
 
@@ -145,6 +130,20 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         for region in $regionlist; do
             runApplication -r "$region" \
                 decomposePar -region $region || exit 1
+        done
+
+        # Decompose sets
+        # for regions
+        for region in $regionlist; do
+            runApplication -r "$region" \
+                decomposeSets -region $region || exit 1
+        done
+
+        # Decompose region addressings
+        # for regions
+        for region in $regionlist; do
+            runApplication -r "$region" \
+                decomposeRegionAddressing -region $region || exit 1
         done
 
         # Touch paraFoam files
