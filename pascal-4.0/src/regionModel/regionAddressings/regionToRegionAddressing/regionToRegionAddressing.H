@@ -47,6 +47,10 @@ SourceFiles
 #include "procAddressing.H"
 #include "regionAddressing.H"
 
+// TODO: Improve implementation of self-maps (maybe put it in adressingTypes.H)
+
+// TODO: Improve the case of (mesh().name() == regionName)
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

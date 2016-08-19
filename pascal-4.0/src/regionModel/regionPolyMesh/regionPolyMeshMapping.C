@@ -51,7 +51,8 @@ void regionPolyMesh::map
 
     const pointField& points = mesh(regionI0).points();
 
-    const labelList& map = typeMap(addressingTypes::POINT, regionI);
+    const labelList& map =
+        typeMap(addressingTypes::POINT, regionI, regionI0);
 
     if (patchName == "")
     {
@@ -151,9 +152,12 @@ void regionPolyMesh::rmap
     const word& patchName
 ) const
 {
+    label regionI0 = regions()[polyMesh::defaultRegion];
+
     const pointField& points = mesh(regionI).points();
 
-    const labelList& map = typeMap(addressingTypes::POINT, regionI);
+    const labelList& map =
+        typeMap(addressingTypes::POINT, regionI, regionI0);
 
     if (patchName == "")
     {

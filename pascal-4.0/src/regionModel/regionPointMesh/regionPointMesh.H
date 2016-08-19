@@ -39,6 +39,8 @@ SourceFiles
 
 #include "regionPolyMesh.H"
 
+// TODO [Low]: Implement mapping
+
 // TODO [Low]: Derive regionPointMesh from regionGeoMesh<regionPolyMesh>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -154,28 +156,6 @@ public:
             ) const
             {
                 return operator[](regions()[regionName]);
-            }
-
-        // Mapping
-
-            //- Return const reference map of given type and region name
-            inline const labelList& typeMap
-            (
-                addressingTypes::addressingType type,
-                label regionI
-            ) const
-            {
-                return rpMesh_.typeMap(type, regionI);
-            }
-
-            //- Return const reference map of given type and region name
-            inline const labelList& typeMap
-            (
-                addressingTypes::addressingType type,
-                const word& regionName
-            ) const
-            {
-                return typeMap(type, regions()[regionName]);
             }
 
     // Member Operators

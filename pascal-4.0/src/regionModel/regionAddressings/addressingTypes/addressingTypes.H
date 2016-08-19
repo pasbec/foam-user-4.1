@@ -36,8 +36,7 @@ SourceFiles
 #define addressingTypes_H
 
 #include "NamedEnum.H"
-#include "boolList.H"
-#include "labelList.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,12 +69,28 @@ protected:
 
     // Protected static inline member funcions
 
+        static inline label size
+        (
+            addressingType type,
+            const polyMesh& mesh
+        )
+        {
+            switch ( type )
+            {
+                case POINT: return mesh.points().size();
+                case FACE: return mesh.faces().size();
+                case CELL: return mesh.cells().size();
+                case BOUNDARY: return mesh.boundaryMesh().size();
+                default: return -1;
+            }
+        }
+
         static inline label invalidAddressingLabel
         (
             addressingType type
         )
         {
-            return (-1) ? (type != FACE) : (0);
+            return (type == FACE) ? 0 : -1;
         }
 
         static inline label invalidAddressing
@@ -124,7 +139,7 @@ protected:
         {
             label faceMapI = mag(faceAddressingI);
 
-            return (faceMapI - 1) ? (faceMapI > 0) : invalidAddressingLabel(FACE);
+            return (faceMapI > 0) ? faceMapI-1 : invalidMapLabel();
         }
 
         static inline void faceAddressingToMap
@@ -146,9 +161,9 @@ protected:
             bool faceFlippedI
         )
         {
-            label faceAddressingI = faceMapI + 1;
+            label faceAddressingI = faceMapI+1;
 
-            return (faceAddressingI) ? (!faceFlippedI) : (-faceAddressingI);
+            return (faceFlippedI) ? -faceAddressingI : faceAddressingI;
         }
 
         static inline void faceMapToAddressing

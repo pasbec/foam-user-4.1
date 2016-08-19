@@ -48,6 +48,9 @@ SourceFiles
 
 // TODO [Idea]: Use HashPtrTable instead of PtrList???
 
+// TODO [High]: Check toRegionI and toRegionName of regionToRegionAddressing for
+//              existence!
+
 // TODO [High]: Allow default region to be absent. WE NEED A LOT OF CHECKS!!!
 
 // TODO [High]: Check if all region names are unique
@@ -389,28 +392,70 @@ public:
                 const word& toRegionName
             ) const;
 
-            //- Return const reference map of given type and region index
-            inline const labelList& typeMap
+            //- Return const reference addressing of given type
+            //  and given region indices
+            inline const labelList& typeAddressing
             (
                 addressingTypes::addressingType type,
-                label regionI
+                label fromRegionI,
+                label toRegionI
             ) const
             {
-                return addressingPtrs_[regionI].typeMap
-                    (
-                        type,
-                        polyMesh::defaultRegion
-                    );
+                return addressingPtrs_[fromRegionI].typeAddressing
+                (
+                    type,
+                    regions()[toRegionI]
+                );
             }
 
-            //- Return const reference map of given type and region name
+            //- Return const reference addressing of given type
+            //  and given region names
+            inline const labelList& typeAddressing
+            (
+                addressingTypes::addressingType type,
+                const word& fromRegionName,
+                const word& toRegionName = polyMesh::defaultRegion
+            ) const
+            {
+                return typeAddressing
+                (
+                    type,
+                    regions()[fromRegionName],
+                    regions()[toRegionName]
+                );
+            }
+
+            //- Return const reference map of given type
+            //  and given region indices
             inline const labelList& typeMap
             (
                 addressingTypes::addressingType type,
-                const word& regionName
+                label fromRegionI,
+                label toRegionI
             ) const
             {
-                return typeMap(type, regions()[regionName]);
+                return addressingPtrs_[fromRegionI].typeMap
+                (
+                    type,
+                    regions()[toRegionI]
+                );
+            }
+
+            //- Return const reference map of given type
+            //  and given region names
+            inline const labelList& typeMap
+            (
+                addressingTypes::addressingType type,
+                const word& fromRegionName,
+                const word& toRegionName = polyMesh::defaultRegion
+            ) const
+            {
+                return typeMap
+                (
+                    type,
+                    regions()[fromRegionName],
+                    regions()[toRegionName]
+                );
             }
 
     // Member Operators

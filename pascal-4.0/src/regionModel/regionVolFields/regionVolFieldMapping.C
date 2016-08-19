@@ -38,12 +38,14 @@ void regionGeometricField                                                     \
     label regionI                                                             \
 ) const                                                                       \
 {                                                                             \
-    const GeometricField<Type, fvPatchField, volMesh>& vf0 =                  \
-        field(polyMesh::defaultRegion);                                       \
+    label regionI0 = regions()[polyMesh::defaultRegion];                      \
+                                                                              \
+    const GeometricField<Type, fvPatchField, volMesh>& vf0 = field(regionI0); \
                                                                               \
     GeometricField<Type, fvPatchField, volMesh>& vf = field(regionI);         \
                                                                               \
-    const labelList& map = mesh().typeMap(addressingTypes::CELL, regionI);    \
+    const labelList& map =                                                    \
+        mesh().typeMap(addressingTypes::CELL, regionI, regionI0);             \
                                                                               \
     forAll (vf, celli)                                                        \
     {                                                                         \
@@ -61,12 +63,14 @@ void regionGeometricField                                                     \
     label regionI                                                             \
 ) const                                                                       \
 {                                                                             \
-    GeometricField<Type, fvPatchField, volMesh>& vf0 =                        \
-        field(polyMesh::defaultRegion);                                       \
+    label regionI0 = regions()[polyMesh::defaultRegion];                      \
+                                                                              \
+    GeometricField<Type, fvPatchField, volMesh>& vf0 = field(regionI0);       \
                                                                               \
     const GeometricField<Type, fvPatchField, volMesh>& vf = field(regionI);   \
                                                                               \
-    const labelList& map = mesh().typeMap(addressingTypes::CELL, regionI);    \
+    const labelList& map =                                                    \
+        mesh().typeMap(addressingTypes::CELL, regionI, regionI0);             \
                                                                               \
     forAll (vf, celli)                                                        \
     {                                                                         \

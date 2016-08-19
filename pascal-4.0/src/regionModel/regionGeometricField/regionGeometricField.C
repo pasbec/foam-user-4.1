@@ -410,8 +410,9 @@ mapBoundaryField
     label regionI
 ) const
 {
-    const GeometricField<Type, PatchField, GeoMesh>& vf0 =
-        field(polyMesh::defaultRegion);
+    label regionI0 = regions()[polyMesh::defaultRegion];
+
+    const GeometricField<Type, PatchField, GeoMesh>& vf0 = field(regionI0);
 
     GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
 
@@ -444,7 +445,7 @@ mapBoundaryField
                 label patchStart = patch.start();
 
                 const labelList& fmap =
-                    mesh().typeMap(addressingTypes::FACE, regionI);
+                    mesh().typeMap(addressingTypes::FACE, regionI, regionI0);
 
                 forAll (patchField, facei)
                 {
@@ -520,8 +521,9 @@ interpolateBoundaryField
     label regionI
 ) const
 {
-    const GeometricField<Type, PatchField, GeoMesh>& vf0 =
-        field(polyMesh::defaultRegion);
+    label regionI0 = regions()[polyMesh::defaultRegion];
+
+    const GeometricField<Type, PatchField, GeoMesh>& vf0 = field(regionI0);
 
     GeometricField<Type, PatchField, GeoMesh>& vf = field(regionI);
 
@@ -555,7 +557,8 @@ interpolateBoundaryField
                 Field<Type>& patchField = vf.boundaryField()[patchI];
                 label patchStart = patch.start();
 
-                const labelList& fmap = mesh().faceMap(regionI);
+                const labelList& fmap =
+                    mesh().typeMap(addressingTypes::FACE, regionI, regionI0);
 
                 forAll (patchField, facei)
                 {

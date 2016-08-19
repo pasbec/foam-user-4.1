@@ -131,7 +131,7 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
 
         Map<label> defaultToHashMap;
 
-        // Create hash map with all valid type labels in the default (serial!)
+        // Create hash map with all valid type labels in the default serial
         // region as key and type label of the region where we would like to
         // get our addressing to
         forAll (toMap, toTypeI)
@@ -156,29 +156,12 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
             }
             else
             {
-                // In the serial case we use a simple self-map (**)
-                switch ( type )
-                {
-                    case POINT:
-                        fromSelfMapPtr =
-                            new labelList(mesh().points().size(), -1);
-                        break;
-
-                    case FACE:
-                        fromSelfMapPtr =
-                            new labelList(mesh().faces().size(), -1);
-                        break;
-
-                    case CELL:
-                        fromSelfMapPtr =
-                            new labelList(mesh().cells().size(), -1);
-                        break;
-
-                    case BOUNDARY:
-                        fromSelfMapPtr =
-                            new labelList(mesh().boundaryMesh().size(), -1);
-                        break;
-                }
+                // In the serial case we use a simple self-map here (**)
+                fromSelfMapPtr = new labelList
+                    (
+                        size(type, mesh()),
+                        invalidMapLabel()
+                    );
 
                 labelList& fromSelfMap = *fromSelfMapPtr;
 
@@ -199,12 +182,12 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
 
 
         // Create a region to region map
-        labelList* mapPtr = new labelList(fromMap.size(), -1);
+        labelList* mapPtr = new labelList(fromMap.size(), invalidMapLabel());
 
         labelList& map = *mapPtr;
 
         // Loop over all type labels of this region, get the the corresponding
-        // label in the (serial!) default region in try to find the latter in
+        // label in the serial default region, and try to find the latter in
         // the hash map from the other region. If found, grab the corresponding
         // label from the other region
         forAll (map, fromTypeI)
@@ -222,15 +205,10 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
             }
         }
 
-        // Delete self-map pointer if it was assigned
-        if (fromSelfMapPtr)
-        {
-            delete fromSelfMapPtr;
-        }
 
         // Region to region addressing is the same as region to region mapping
-        // except for faces! So lets just create a new pointer as alias to make
-        // that clear
+        // except for faces. So lets just create a new pointer as alias to make
+        // that clear. Face addressing correction will be made later
         labelList* addressingPtr = mapPtr;
 
         labelList& addressing = *addressingPtr;
@@ -242,8 +220,8 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
 
             if (regionName == polyMesh::defaultRegion)
             {
-                // We do not have to test whether we have a serial case
-                // here, as this will never be reached then. Instead, we
+                // We do not have to check whether we have a serial case
+                // here as this will never be reached then. Instead, we
                 // already had returned the clean region addressing from
                 // above (c.f. *)
                 toAddressingPtr =
@@ -270,8 +248,9 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
                 }
                 else
                 {
-                    // In the serial case we re-use the self-map from
-                    // above (c.f. **) and turn it into a face self-addressing
+                    // In the serial case we will now re-use the self-map from
+                    // above (c.f. **) and turn it into a face self-addressing.
+                    // This effectively means that we shift all labels up by 1.
                     fromSelfAddressingPtr = new labelList(*fromSelfMapPtr);
 
                     faceMapToAddressing
@@ -302,10 +281,10 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
                 // Check if face exists in other region
                 if (invalidMap(toFaceI))
                 {
-                    // Face does not exist in the other region. For face
-                    // addressing, invalid entries need to be replaced
-                    // with 0 instead of -1
-                    addressing[fromFaceI] = invalidAddressingLabel(FACE);
+                    // Face does not exist in the other region. Replace
+                    // the invalid map label with th invalid addressing
+                    // label
+                    addressing[fromFaceI] = invalidAddressingLabel(type);
                 }
                 else
                 {
@@ -318,7 +297,7 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
                         faceMapToAddressingI
                         (
                             toFaceI,
-                            defaultFromFaceI == defaultToFaceI
+                            defaultFromFaceI != defaultToFaceI
                         );
                 }
             }
@@ -328,6 +307,13 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
             {
                 delete fromSelfAddressingPtr;
             }
+        }
+
+
+        // Delete self-map pointer if it was assigned
+        if (fromSelfMapPtr)
+        {
+            delete fromSelfMapPtr;
         }
 
         // Clear all proc and region addressings
@@ -467,11 +453,33 @@ const Foam::labelList& Foam::regionToRegionAddressing::typeAddressing
             }
 
             // Read addressing from dictionary
+            Istream& is = dict.lookup(regionName);
+
+            label size = readLabel(is);
+
+            is.readBeginList("regionToRegionAddressing");
+
             ptrs.set
             (
                 regionName,
-                new labelList(dict.lookup(regionName))
+                new labelList(size, readLabel(is)) // index 0
             );
+
+            token it(is); // index 1, may also be end of list
+
+            if (it.isLabel())
+            {
+                labelList& addressing = *ptrs[regionName];
+
+                addressing[1] = it.labelToken();
+
+                for (label typeI = 2; typeI < addressing.size(); typeI++)
+                {
+                    addressing[typeI] = readLabel(is);
+                }
+
+                is.readEndList("regionToRegionAddressing");
+            }
         }
         else
         {
@@ -529,11 +537,33 @@ const Foam::labelList& Foam::regionToRegionAddressing::typeMap
                 }
 
                 // Read face map from dictionary
+                Istream& is = dict.lookup(regionName);
+    
+                label size = readLabel(is);
+    
+                is.readBeginList("regionToRegionMap");
+    
                 ptrs.set
                 (
                     regionName,
-                    new labelList(dict.lookup(regionName))
+                    new labelList(size, readLabel(is)) // index 0
                 );
+    
+                token it(is); // index 1, may also be end of list
+    
+                if (it.isLabel())
+                {
+                    labelList& map = *ptrs[regionName];
+    
+                    map[1] = it.labelToken();
+    
+                    for (label typeI = 2; typeI < map.size(); typeI++)
+                    {
+                        map[typeI] = readLabel(is);
+                    }
+    
+                    is.readEndList("regionToRegionMap");
+                }
             }
             else
             {
