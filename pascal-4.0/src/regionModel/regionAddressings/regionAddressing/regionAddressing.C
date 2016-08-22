@@ -40,8 +40,6 @@ Foam::labelIOList* Foam::regionAddressing::readAddressing
     addressingType type
 ) const
 {
-    word addressingName = addressingTypeName[type]+word("RegionAddressing");
-
     fileName meshDir = regionName()/polyMesh::meshSubDir;
 
     if (regionName() == polyMesh::defaultRegion)
@@ -53,7 +51,7 @@ Foam::labelIOList* Foam::regionAddressing::readAddressing
         (
             IOobject
             (
-                addressingName,
+                addressingTypeName[type]+word("RegionAddressing"),
                 time().findInstance(meshDir, "faces"),
                 meshDir,
                 time(),
@@ -67,19 +65,64 @@ Foam::labelIOList* Foam::regionAddressing::readAddressing
     else
     {
         // For parallel cases, addressings need to be decomposed!
-        return new labelIOList
+
+        const word facesInstance = time().findInstance(meshDir, "faces");
+
+        IOobject typeAddressingObj
         (
-            IOobject
-            (
-                addressingName,
-                time().findInstance(meshDir, "faces"),
-                meshDir,
-                time(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
+            addressingTypeName[type]+word("RegionAddressing"),
+            facesInstance,
+            meshDir,
+            time(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE,
+            false
         );
+
+        IOobject typeMapObj
+        (
+            addressingTypeName[type]+word("Map"),
+            facesInstance,
+            meshDir,
+            time(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        if (type == BOUNDARY) typeMapObj.rename(word("patchMap"));
+
+        // Do we have to recover the addressing from map?
+        bool fromMap = false;
+
+        if (!typeAddressingObj.headerOk() && typeMapObj.headerOk())
+        {
+            typeAddressingObj = typeMapObj;
+
+            fromMap = true;
+        }
+
+        typeAddressingObj.readOpt() = IOobject::MUST_READ;
+
+        labelIOList* addressingPtr = new labelIOList
+            (
+                typeAddressingObj
+            );
+
+        // Convert facemap to face addressing if recovering from map
+        if (fromMap && (type == FACE))
+        {
+            labelList& addressing = *addressingPtr;
+
+            faceMapToAddressing
+            (
+                addressing,
+                boolList(addressing.size(), false)
+            );
+
+        }
+
+        return addressingPtr;
     }
 }
 

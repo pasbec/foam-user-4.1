@@ -79,6 +79,8 @@ int main(int argc, char *argv[])
 
 #   include "createNamedMesh.H"
 
+    const word facesInstance = mesh.facesInstance();
+
     // Set all times on processor meshes equal to decomposed mesh
     forAll (databases, procI)
     {
@@ -92,7 +94,7 @@ int main(int argc, char *argv[])
     IOobject pointRegionAddObj
     (
         "pointRegionAddressing",
-        mesh.facesInstance(),
+        facesInstance,
         mesh.meshSubDir,
         mesh,
         IOobject::READ_IF_PRESENT,
@@ -100,9 +102,26 @@ int main(int argc, char *argv[])
         false
     );
 
+    IOobject pointMapObj
+    (
+        "pointMap",
+        facesInstance,
+        mesh.meshSubDir,
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (!pointRegionAddObj.headerOk() && pointMapObj.headerOk())
+    {
+        pointRegionAddObj = pointMapObj;
+    }
+
+
     if (pointRegionAddObj.headerOk())
     {
-        Info<< "Decompose pointRegionAddressing ... ";
+        Info<< "Decompose " << pointRegionAddObj.name() << " ... ";
 
         pointRegionAddObj.readOpt() = IOobject::MUST_READ;
 
@@ -155,7 +174,7 @@ int main(int argc, char *argv[])
     IOobject faceRegionAddObj
     (
         "faceRegionAddressing",
-        mesh.facesInstance(),
+        facesInstance,
         mesh.meshSubDir,
         mesh,
         IOobject::READ_IF_PRESENT,
@@ -163,9 +182,25 @@ int main(int argc, char *argv[])
         false
     );
 
+    IOobject faceMapObj
+    (
+        "faceMap",
+        facesInstance,
+        mesh.meshSubDir,
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (!faceRegionAddObj.headerOk() && faceMapObj.headerOk())
+    {
+        faceRegionAddObj = faceMapObj;
+    }
+
     if (faceRegionAddObj.headerOk())
     {
-        Info<< "Decompose faceRegionAddressing ... ";
+        Info<< "Decompose " << faceRegionAddObj.name() << " ... ";
 
         faceRegionAddObj.readOpt() = IOobject::MUST_READ;
 
@@ -209,6 +244,14 @@ int main(int argc, char *argv[])
                 procRegionFaceAdd[procFaceI] = regionFaceAdd[faceI];
             }
 
+            if (regionFaceAdd.name() == "faceMap")
+            {
+                forAll (procRegionFaceAdd, procFaceI)
+                {
+                    procRegionFaceAdd[procFaceI] += 1;
+                }
+            }
+
             procRegionFaceAdd.write();
         }
 
@@ -220,7 +263,7 @@ int main(int argc, char *argv[])
     IOobject cellRegionAddObj
     (
         "cellRegionAddressing",
-        mesh.facesInstance(),
+        facesInstance,
         mesh.meshSubDir,
         mesh,
         IOobject::READ_IF_PRESENT,
@@ -228,9 +271,25 @@ int main(int argc, char *argv[])
         false
     );
 
+    IOobject cellMapObj
+    (
+        "cellMap",
+        facesInstance,
+        mesh.meshSubDir,
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (!cellRegionAddObj.headerOk() && cellMapObj.headerOk())
+    {
+        cellRegionAddObj = cellMapObj;
+    }
+
     if (cellRegionAddObj.headerOk())
     {
-        Info<< "Decompose cellRegionAddressing ... ";
+        Info<< "Decompose " << cellRegionAddObj.name() << " ... ";
 
         cellRegionAddObj.readOpt() = IOobject::MUST_READ;
 
@@ -283,7 +342,7 @@ int main(int argc, char *argv[])
     IOobject boundaryRegionAddObj
     (
         "boundaryRegionAddressing",
-        mesh.facesInstance(),
+        facesInstance,
         mesh.meshSubDir,
         mesh,
         IOobject::READ_IF_PRESENT,
@@ -291,9 +350,25 @@ int main(int argc, char *argv[])
         false
     );
 
+    IOobject patchMapObj
+    (
+        "patchMap",
+        facesInstance,
+        mesh.meshSubDir,
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (!boundaryRegionAddObj.headerOk() && patchMapObj.headerOk())
+    {
+        boundaryRegionAddObj = patchMapObj;
+    }
+
     if (boundaryRegionAddObj.headerOk())
     {
-        Info<< "Decompose boundaryRegionAddressing ... ";
+        Info<< "Decompose " << boundaryRegionAddObj.name() << " ... ";
 
         boundaryRegionAddObj.readOpt() = IOobject::MUST_READ;
 

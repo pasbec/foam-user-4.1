@@ -40,8 +40,6 @@ Foam::labelIOList* Foam::procAddressing::readAddressing
     addressingType type
 ) const
 {
-    word addressingName = addressingTypeName[type]+word("ProcAddressing");
-
     fileName meshDir = regionName()/polyMesh::meshSubDir;
 
     if (regionName() == polyMesh::defaultRegion)
@@ -53,7 +51,7 @@ Foam::labelIOList* Foam::procAddressing::readAddressing
     (
         IOobject
         (
-            addressingName,
+            addressingTypeName[type]+word("ProcAddressing"),
             time().findInstance(meshDir, "faces"),
             meshDir,
             time(),

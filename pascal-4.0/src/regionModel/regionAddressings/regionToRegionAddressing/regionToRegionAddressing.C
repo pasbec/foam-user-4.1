@@ -255,9 +255,8 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
 
                     faceMapToAddressing
                     (
-                        *fromSelfMapPtr,
-                        boolList(fromSelfMapPtr->size(), false),
-                        *fromSelfAddressingPtr
+                        *fromSelfAddressingPtr,
+                        boolList(fromSelfMapPtr->size(), false)
                     );
 
                     fromAddressingPtr = fromSelfAddressingPtr;
@@ -538,30 +537,30 @@ const Foam::labelList& Foam::regionToRegionAddressing::typeMap
 
                 // Read face map from dictionary
                 Istream& is = dict.lookup(regionName);
-    
+
                 label size = readLabel(is);
-    
+
                 is.readBeginList("regionToRegionMap");
-    
+
                 ptrs.set
                 (
                     regionName,
                     new labelList(size, readLabel(is)) // index 0
                 );
-    
+
                 token it(is); // index 1, may also be end of list
-    
+
                 if (it.isLabel())
                 {
                     labelList& map = *ptrs[regionName];
-    
+
                     map[1] = it.labelToken();
-    
+
                     for (label typeI = 2; typeI < map.size(); typeI++)
                     {
                         map[typeI] = readLabel(is);
                     }
-    
+
                     is.readEndList("regionToRegionMap");
                 }
             }

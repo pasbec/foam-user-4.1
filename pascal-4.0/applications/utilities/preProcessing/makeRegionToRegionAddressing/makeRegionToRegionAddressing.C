@@ -38,6 +38,10 @@ Usage
     @param -toRegions wordList \n
     Specify particular regions as target regions
 
+    E.g.
+    - makeRegionToRegionAddressing -fromRegions "(region0 region_fluid)"
+                                   -toRegions "(region0 region_fluid)"
+
 
 Author
     Pascal Beckstein

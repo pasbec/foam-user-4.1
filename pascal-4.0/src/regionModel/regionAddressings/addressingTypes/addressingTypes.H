@@ -168,14 +168,13 @@ protected:
 
         static inline void faceMapToAddressing
         (
-            const labelList& faceMap,
-            const boolList& faceFlipped,
-            labelList& faceAddressing
+            labelList& faceMap,
+            const boolList& faceFlipped
         )
         {
             forAll (faceMap, faceI)
             {
-                faceAddressing[faceI] =
+                faceMap[faceI] =
                     faceMapToAddressingI(faceMap[faceI], faceFlipped[faceI]);
             }
         }
