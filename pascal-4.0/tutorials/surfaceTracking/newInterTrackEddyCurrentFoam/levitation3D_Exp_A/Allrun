@@ -196,7 +196,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
             createPatch -overwrite -region "$region" || exit 1
 
         rm "0/$region/cellToRegion" > /dev/null 2>&1
-        rm "constant/$region/polyMesh/boundaryRegionAddressing" > /dev/null 2>&1
+#         rm "constant/$region/polyMesh/boundaryRegionAddressing" > /dev/null 2>&1
     done
 
 # TODO [Low]: Fix boundaryRegionAddressing for all regions

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-flagClean=0; flagPrepare=0; flagParallel=0; flagParallel2=0; flagReset=0; flagRun=0
+flagClean=0; flagPrepare=0; flagParallel=0; flagReset=0; flagRun=0
 
 flagRenumberMesh=0
 
