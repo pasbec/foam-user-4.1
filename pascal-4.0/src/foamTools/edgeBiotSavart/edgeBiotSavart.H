@@ -181,9 +181,9 @@ public:
             //  laplacian solution for internal field.
             //  Parameter part may be used to respect
             //  corresponding phase angle.
-            tmp<volVectorField> A
+            void A
             (
-                const word& name,
+                volVectorField& vf,
                 complexPart part = REAL
             ) const;
 

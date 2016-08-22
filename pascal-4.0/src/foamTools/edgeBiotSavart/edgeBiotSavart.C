@@ -27,7 +27,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::edgeBiotSavart, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(Foam::edgeBiotSavart, 0);
+}
 
 
 template<>
@@ -362,9 +365,9 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
 }
 
 
-Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
+void Foam::edgeBiotSavart::A
 (
-    const word& name,
+    volVectorField& vf,
     complexPart part
 ) const
 {
@@ -374,7 +377,7 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
         (
             IOobject
             (
-                name,
+                vf.name(),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -410,9 +413,11 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
         fvVectorMatrix AEqn(fvm::laplacian(A));
 
         AEqn.solve();
+
+        A.correctBoundaryConditions();
     }
 
-    return tA;
+    vf == tA;
 }
 
 

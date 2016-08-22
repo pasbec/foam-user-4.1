@@ -138,7 +138,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create
                 dimVoltage*dimTime/dimLength,
                 vector::zero
             ),
-            fixedValueFvPatchVectorField::typeName
+            calculatedFvPatchVectorField::typeName
         )
     );
 }
@@ -166,7 +166,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create
                 dimVoltage*dimTime/dimLength,
                 vector::zero
             ),
-            fixedValueFvPatchVectorField::typeName
+            calculatedFvPatchVectorField::typeName
         )
     );
 }
