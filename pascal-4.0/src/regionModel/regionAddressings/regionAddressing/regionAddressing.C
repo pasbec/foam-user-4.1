@@ -110,16 +110,23 @@ Foam::labelIOList* Foam::regionAddressing::readAddressing
             );
 
         // Convert facemap to face addressing if recovering from map
-        if (fromMap && (type == FACE))
+        if (fromMap)
         {
-            labelList& addressing = *addressingPtr;
-
-            faceMapToAddressing
+            typeAddressingObj.rename
             (
-                addressing,
-                boolList(addressing.size(), false)
+                addressingTypeName[type]+word("RegionAddressing")
             );
 
+            if (type == FACE)
+            {
+                labelList& addressing = *addressingPtr;
+
+                faceMapToAddressing
+                (
+                    addressing,
+                    boolList(addressing.size(), false)
+                );
+            }
         }
 
         return addressingPtr;
