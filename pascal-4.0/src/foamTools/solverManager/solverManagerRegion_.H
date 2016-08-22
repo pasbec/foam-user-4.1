@@ -34,7 +34,9 @@ Description
 
 #include "solverManagerWrapper.H"
 
-// TODO: Check if region is enabled or disabled!!
+// TODO [Low]: These are all template classes. Capitalize first letters!
+
+// TODO [High]: Check if region is enabled or disabled!!
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

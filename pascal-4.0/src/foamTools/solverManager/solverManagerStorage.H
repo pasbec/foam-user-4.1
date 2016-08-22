@@ -34,6 +34,8 @@ Description
 
 #include "solverManagerWrapper.H"
 
+// TODO [Low]: These are all template classes. Capitalize first letters!
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_STORAGE_NEW_START(WRAPPER)                                        \

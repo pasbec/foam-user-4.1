@@ -25,9 +25,8 @@ License
 
 #include "solverPerformanceData.H"
 #include "token.H"
-#include "IStringStream.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member operators  * * * * * * * * * * * * * //
 
 bool Foam::solverPerformanceData::operator!=
 (
@@ -46,6 +45,8 @@ bool Foam::solverPerformanceData::operator!=
     );
 }
 
+
+// * * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>
 (
@@ -130,6 +131,8 @@ Foam::Istream& Foam::operator>>
     return is;
 }
 
+
+// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (

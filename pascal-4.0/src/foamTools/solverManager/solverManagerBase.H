@@ -39,6 +39,8 @@ Description
 #include "autoPtr.H"
 #include "HashTable.H"
 
+// TODO [Low]: These are all template classes. Capitalize first letters!
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

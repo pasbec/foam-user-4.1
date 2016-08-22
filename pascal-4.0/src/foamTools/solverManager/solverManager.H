@@ -50,6 +50,11 @@ SourceFiles
 #include "solverManagerRegion_.H"
 #include "solverManagerRegions.H"
 
+// TODO [Low]: This is a template class. Capitalize first letter!
+
+// TODO [HIGH]: Pre-compile specialized versions of solverManager for all
+//              meshes
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_MANAGERSCOPE()                                                    \

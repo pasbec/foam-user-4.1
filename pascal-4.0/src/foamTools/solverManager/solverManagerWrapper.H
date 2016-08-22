@@ -38,6 +38,8 @@ Description
 
 #include "solverManagerBase.H"
 
+// TODO [Low]: These are all template classes. Capitalize first letters!
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 # define SM_WRAPPER_NEW_START(WRAPPER, NAME)                                  \

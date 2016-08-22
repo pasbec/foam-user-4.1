@@ -27,15 +27,10 @@ License
 #include "dimensionSet.H"
 #include "polyMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template <class MESH>
-void solverManager<MESH>::errorIfNotMaster() const
+void Foam::solverManager<MESH>::errorIfNotMaster() const
 {
     if (!master())
     {
@@ -48,7 +43,7 @@ void solverManager<MESH>::errorIfNotMaster() const
 
 
 template <class MESH>
-void solverManager<MESH>::readParameters
+void Foam::solverManager<MESH>::readParameters
 (
     Parameters& parameters
 ) const
@@ -60,7 +55,7 @@ void solverManager<MESH>::readParameters
 
 
 template <class MESH>
-void solverManager<MESH>::readTimeParameters
+void Foam::solverManager<MESH>::readTimeParameters
 (
     TimeParameters& timePar
 ) const
@@ -81,7 +76,7 @@ void solverManager<MESH>::readTimeParameters
 
 
 template <class MESH>
-void solverManager<MESH>::calcDeltaT
+void Foam::solverManager<MESH>::calcDeltaT
 (
     scalar& deltaT
 ) const
@@ -111,7 +106,7 @@ void solverManager<MESH>::calcDeltaT
 
 
 template <class MESH>
-void solverManager<MESH>::applyDeltaT() const
+void Foam::solverManager<MESH>::applyDeltaT() const
 {
     errorIfNotMaster();
 
@@ -160,7 +155,7 @@ void solverManager<MESH>::applyDeltaT() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class MESH>
-solverManager<MESH>::solverManager
+Foam::solverManager<MESH>::solverManager
 (
     const argList& args,
     Time& time,
@@ -197,8 +192,8 @@ solverManager<MESH>::solverManager
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template <class MESH>
-const typename solverManager<MESH>::Parameters&
-solverManager<MESH>::parameters() const
+const typename Foam::solverManager<MESH>::Parameters&
+Foam::solverManager<MESH>::parameters() const
 {
     errorIfNotMaster();
 
@@ -215,8 +210,8 @@ solverManager<MESH>::parameters() const
 
 
 template <class MESH>
-const typename solverManager<MESH>::Messages&
-solverManager<MESH>::messages() const
+const typename Foam::solverManager<MESH>::Messages&
+Foam::solverManager<MESH>::messages() const
 {
     errorIfNotMaster();
 
@@ -233,7 +228,7 @@ solverManager<MESH>::messages() const
 
 
 template <class MESH>
-void solverManager<MESH>::read() const
+void Foam::solverManager<MESH>::read() const
 {
     settings().checkRead();
     regions().checkRead();
@@ -241,7 +236,7 @@ void solverManager<MESH>::read() const
 
 
 template <class MESH>
-void solverManager<MESH>::init() const
+void Foam::solverManager<MESH>::init() const
 {
     storage().checkInit();
     regions().checkInit();
@@ -249,7 +244,7 @@ void solverManager<MESH>::init() const
 
 
 template <class MESH>
-bool solverManager<MESH>::once() const
+bool Foam::solverManager<MESH>::once() const
 {
     errorIfNotMaster();
 
@@ -293,7 +288,7 @@ bool solverManager<MESH>::once() const
 
 
 template <class MESH>
-bool solverManager<MESH>::loop() const
+bool Foam::solverManager<MESH>::loop() const
 {
     errorIfNotMaster();
 
@@ -347,7 +342,7 @@ bool solverManager<MESH>::loop() const
 
 
 template <class MESH>
-bool solverManager<MESH>::run() const
+bool Foam::solverManager<MESH>::run() const
 {
     errorIfNotMaster();
 
@@ -403,10 +398,6 @@ bool solverManager<MESH>::run() const
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
 
