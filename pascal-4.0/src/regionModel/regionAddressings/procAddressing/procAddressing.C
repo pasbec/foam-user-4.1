@@ -63,56 +63,17 @@ Foam::labelIOList* Foam::procAddressing::readAddressing
 }
 
 
-Foam::labelIOList* Foam::procAddressing::readOrCalcFaceMap() const
+Foam::labelList* Foam::procAddressing::calcFaceMap() const
 {
-    fileName meshDir = regionName()/polyMesh::meshSubDir;
+    const labelList& faceAddressing = typeAddressing(FACE);
 
-    if (regionName() == polyMesh::defaultRegion)
-    {
-        meshDir = polyMesh::meshSubDir;
-    }
-
-    IOobject faceMapObj
-    (
-        "faceMap",
-        time().findInstance(meshDir, "faces"),
-        meshDir,
-        time(),
-        IOobject::NO_READ,
-        IOobject::NO_WRITE,
-        false
-    );
-
-    // Create face map pointer
-    labelIOList* faceMapPtr = NULL;
-
-    if (faceMapObj.headerOk())
-    {
-        // Read face map
-        faceMapObj.readOpt() = IOobject::MUST_READ;
-
-        faceMapPtr = new labelIOList
+    labelList* faceMapPtr = new labelList
         (
-            faceMapObj
+            faceAddressing.size(),
+            invalidMapLabel()
         );
-    }
-    else
-    {
-        // Create new face map
-        const labelList& faceAddressing = typeAddressing(FACE);
 
-        faceMapPtr = new labelIOList
-            (
-                faceMapObj,
-                labelList(faceAddressing.size(), invalidMapLabel())
-            );
-
-        labelIOList& faceMap = *faceMapPtr;
-
-        faceAddressingToMap(faceAddressing, faceMap);
-
-        faceMap.write();
-    }
+    faceAddressingToMap(faceAddressing, *faceMapPtr);
 
     return faceMapPtr;
 }
@@ -212,14 +173,14 @@ const Foam::labelList& Foam::procAddressing::typeMap
             if (debug)
             {
                 Info<< "Foam::procAddressing::typeMap(...) : "
-                    << "Read/Calculate proc face-map"
+                    << "Calculate proc face-map"
                     << " (" << regionName() << ")"
                     << endl;
             }
 
             faceMapPtr_.set
             (
-                readOrCalcFaceMap()
+                calcFaceMap()
             );
         }
 

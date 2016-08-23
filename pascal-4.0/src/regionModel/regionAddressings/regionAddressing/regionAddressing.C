@@ -134,76 +134,19 @@ Foam::labelIOList* Foam::regionAddressing::readAddressing
 }
 
 
-Foam::labelIOList* Foam::regionAddressing::readOrCalcFaceMap() const
+Foam::labelList* Foam::regionAddressing::calcFaceMap() const
 {
-    fileName meshDir = regionName()/polyMesh::meshSubDir;
+    const labelList& faceAddressing = typeAddressing(FACE);
 
-    if (regionName() == polyMesh::defaultRegion)
-    {
-        meshDir = polyMesh::meshSubDir;
-
-        // Empty list for default region
-        return new labelIOList
+    labelList* faceMapPtr = new labelList
         (
-            IOobject
-            (
-                "faceMap",
-                time().findInstance(meshDir, "faces"),
-                meshDir,
-                time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            labelList()
-        );
-    }
-    else
-    {
-        IOobject faceMapObj
-        (
-            "faceMap",
-            time().findInstance(meshDir, "faces"),
-            meshDir,
-            time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            faceAddressing.size(),
+            invalidMapLabel()
         );
 
-        // Create face map pointer
-        labelIOList* faceMapPtr = NULL;
+    faceAddressingToMap(faceAddressing, *faceMapPtr);
 
-        if (faceMapObj.headerOk())
-        {
-            // Read face map
-            faceMapObj.readOpt() = IOobject::MUST_READ;
-
-            faceMapPtr = new labelIOList
-            (
-                faceMapObj
-            );
-        }
-        else
-        {
-            // Create new face map
-            const labelList& faceAddressing = typeAddressing(FACE);
-
-            faceMapPtr = new labelIOList
-                (
-                    faceMapObj,
-                    labelList(faceAddressing.size(), invalidMapLabel())
-                );
-
-            labelIOList& faceMap = *faceMapPtr;
-
-            faceAddressingToMap(faceAddressing, faceMap);
-
-            faceMap.write();
-        }
-
-        return faceMapPtr;
-    }
+    return faceMapPtr;
 }
 
 
@@ -310,7 +253,7 @@ const Foam::labelList& Foam::regionAddressing::typeMap
 
             faceMapPtr_.set
             (
-                readOrCalcFaceMap()
+                calcFaceMap()
             );
         }
 

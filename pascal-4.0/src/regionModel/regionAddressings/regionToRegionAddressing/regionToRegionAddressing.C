@@ -337,9 +337,7 @@ Foam::labelList* Foam::regionToRegionAddressing::calcFaceMap
             invalidMapLabel()
         );
 
-    labelList& faceMap = *faceMapPtr;
-
-    faceAddressingToMap(faceAddressing, faceMap);
+    faceAddressingToMap(faceAddressing, *faceMapPtr);
 
     return faceMapPtr;
 }
@@ -359,8 +357,7 @@ Foam::regionToRegionAddressing::regionToRegionAddressing
     regionAddressingPtrs_(),
     addressingPtrs_(4, HashPtrTable<labelList>()),
     addressingDictPtrs_(4, autoPtr<IOdictionary>()),
-    faceMapPtr_(),
-    faceMapsDictPtr_()
+    faceMapPtr_()
 {
     forAll (addressingDictPtrs_, type)
     {
@@ -384,24 +381,6 @@ Foam::regionToRegionAddressing::regionToRegionAddressing
             )
         );
     }
-
-    faceMapsDictPtr_.set
-    (
-        new IOdictionary
-        (
-            IOobject
-            (
-                "faceRegionToRegionMap",
-                mesh_.facesInstance(),
-                mesh_.meshSubDir,
-                mesh_,
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE,
-                false
-            ),
-            dictionary()
-        )
-    );
 }
 
 
@@ -422,7 +401,6 @@ Foam::regionToRegionAddressing::~regionToRegionAddressing()
     }
 
     faceMapPtr_.clear();
-    faceMapsDictPtr_.clear();
 }
 
 
@@ -520,74 +498,22 @@ const Foam::labelList& Foam::regionToRegionAddressing::typeMap
     if (type == FACE)
     {
         HashPtrTable<labelList>& ptrs = faceMapPtr_;
-        IOdictionary& dict = faceMapsDictPtr_();
 
         if (!ptrs.found(regionName))
         {
-            if (dict.found(regionName))
+            if (debug)
             {
-                if (debug)
-                {
-                    Info<< "Foam::regionToRegionAddressing::typeMap(...) : "
-                        << "Read region-to-region face-map"
-                        << " (" << mesh().name() << " -> " << regionName << ")"
-                        << " from dictionary"
-                        << endl;
-                }
-
-                // Read face map from dictionary
-                Istream& is = dict.lookup(regionName);
-
-                label size = readLabel(is);
-
-                is.readBeginList("regionToRegionMap");
-
-                ptrs.set
-                (
-                    regionName,
-                    new labelList(size, readLabel(is)) // index 0
-                );
-
-                token it(is); // index 1, may also be end of list
-
-                if (it.isLabel())
-                {
-                    labelList& map = *ptrs[regionName];
-
-                    map[1] = it.labelToken();
-
-                    for (label typeI = 2; typeI < map.size(); typeI++)
-                    {
-                        map[typeI] = readLabel(is);
-                    }
-
-                    is.readEndList("regionToRegionMap");
-                }
+                Info<< "Foam::regionToRegionAddressing::typeMap(...) : "
+                    << "Calculate new region-to-region face-map"
+                    << " (" << mesh().name() << " -> " << regionName << ")"
+                    << endl;
             }
-            else
-            {
-                if (debug)
-                {
-                    Info<< "Foam::regionToRegionAddressing::typeMap(...) : "
-                        << "Calculate new region-to-region face-map"
-                        << " (" << mesh().name() << " -> " << regionName << ")"
-                        << endl;
-                }
 
-                // Calculate new face map
-                ptrs.set
-                (
-                    regionName,
-                    calcFaceMap(regionName)
-                );
-
-                // Write face map to dictionary
-                if (mesh().name() != regionName)
-                {
-                    dict.set(regionName, *ptrs[regionName]);
-                    dict.regIOobject::write();
-                }
-            }
+            ptrs.set
+            (
+                regionName,
+                calcFaceMap(regionName)
+            );
         }
 
         return *ptrs[regionName];

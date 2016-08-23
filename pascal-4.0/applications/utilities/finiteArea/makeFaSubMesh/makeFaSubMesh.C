@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
 #   include "createNamedMesh.H"
 #   include "createFaMesh.H"
 
-    Switch debug(true);
+    Switch debug(false);
 
     // Base mesh data
     meshData bMdata(mesh);

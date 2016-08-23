@@ -67,7 +67,7 @@ private:
         mutable List<autoPtr<labelIOList> > addressingPtrs_;
 
         //- Face map
-        mutable autoPtr<labelIOList> faceMapPtr_;
+        mutable autoPtr<labelList> faceMapPtr_;
 
     // Private Member Functions
 
@@ -82,8 +82,8 @@ private:
             //- Read addressing
             labelIOList* readAddressing(addressingType type) const;
 
-            //- Read or calculate/write face map
-            labelIOList* readOrCalcFaceMap() const;
+            //- Calculate face map
+            labelList* calcFaceMap() const;
 
 
 public:

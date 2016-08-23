@@ -84,9 +84,8 @@ private:
         mutable List<HashPtrTable<labelList> > addressingPtrs_;
         mutable List<autoPtr<IOdictionary> > addressingDictPtrs_;
 
-        //- Face map dictionary and pointer hash table
+        //- Face map pointer hash table
         mutable HashPtrTable<labelList> faceMapPtr_;
-        mutable autoPtr<IOdictionary> faceMapsDictPtr_;
 
     // Private Member Functions
 
