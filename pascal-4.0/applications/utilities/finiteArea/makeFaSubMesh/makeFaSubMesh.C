@@ -961,10 +961,13 @@ int main(int argc, char *argv[])
         faMesh sAmesh(sMesh, fileName("faMeshDefinition"));
         sAmesh.write();
 
+    // Maps
 
-    // TODO: Point-, face-, edge- and patch-maps
+// TODO: Point-, face-, edge- and patch-maps
 
-    return(0);
+    Info<< "End.\n" << endl;
+
+    return 0 ;
 }
 
 // ************************************************************************* //
