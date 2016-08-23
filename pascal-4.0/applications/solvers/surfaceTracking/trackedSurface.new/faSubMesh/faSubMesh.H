@@ -42,6 +42,8 @@ SourceFiles
 #include "polyPatch.H"
 #include "faCFD.H"
 #include "faMesh.H"
+#include "addressingTypes.H"
+#include "regionToRegionAddressing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,14 +67,8 @@ class faSubMesh
         //- Sub polyMesh
         mutable polyMesh subPolyMesh_;
 
-        //- Sub polyMesh pointMap
-        const labelIOList subPolyMeshPointMap_;
-
-        //- Sub polyMesh faceMap
-        const labelIOList subPolyMeshFaceMap_;
-
-        //- Sub polyMesh cellMap
-        const labelIOList subPolyMeshCellMap_;
+        //- Sub polyMesh addressing
+        const regionToRegionAddressing subToBaseAddressing_;
 
         //- Sub faMesh
         mutable faMesh subAreaMesh_;
@@ -171,6 +167,38 @@ public:
             const pointField& subFacePoints() const
             {
                 return subFacePoints_;
+            }
+
+        // Mapping
+
+            //- Sub-to-base point map
+            const labelList& pointSubToBaseMap() const
+            {
+                return  subToBaseAddressing_.typeMap
+                (
+                    addressingTypes::POINT,
+                    basePolyMesh_.name()
+                );
+            }
+
+            //- Sub-to-base face map
+            const labelList& faceSubToBaseMap() const
+            {
+                return  subToBaseAddressing_.typeMap
+                (
+                    addressingTypes::FACE,
+                    basePolyMesh_.name()
+                );
+            }
+
+            //- Sub-to-base cell map
+            const labelList& cellSubToBaseMap() const
+            {
+                return  subToBaseAddressing_.typeMap
+                (
+                    addressingTypes::CELL,
+                    basePolyMesh_.name()
+                );
             }
 
         // Mesh motion and mophing

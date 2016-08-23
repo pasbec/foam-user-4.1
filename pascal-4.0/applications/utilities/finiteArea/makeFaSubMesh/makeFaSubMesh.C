@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
 #   include "createNamedMesh.H"
 #   include "createFaMesh.H"
 
-    Switch debug(false);
+    Switch debug(true);
 
     // Base mesh data
     meshData bMdata(mesh);
@@ -778,108 +778,302 @@ int main(int argc, char *argv[])
         // Write subMesh
         Info << "Write subMesh ... ";
         sMesh.write();
-        Info << "Done" << endl;
+        Info << "Done" << endl << endl;
 
 
     // Maps
 
-        labelIOList pointMap
-        (
-            IOobject
+        {
+            labelIOList pointMap
             (
-                "pointMap",
-                sMesh.facesInstance(),
-                polyMesh::meshSubDir,
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            labelList(points.size(), -1)
-        );
-        forAll (usedCMpoints, pointI)
-        {
-            label cMpointI = usedCMpoints[pointI];
-            label bMpointI = usedCMpointsBMmap[cMpointI];
+                IOobject
+                (
+                    "pointMap",
+                    sMesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    sMesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                labelList(points.size(), -1)
+            );
+            forAll (usedCMpoints, pointI)
+            {
+                label cMpointI = usedCMpoints[pointI];
+                label bMpointI = usedCMpointsBMmap[cMpointI];
 
-            pointMap[pointI] = bMpointI;
-        }
-        forAll (aBMdata.meshPoints, pointI)
-        {
-            pointMap[usedCMpoints.size() + pointI] = pointI;
-        }
-        forAll (aBMdata.faceLabels, pointI)
-        {
-            pointMap[usedCMpoints.size() + aBMdata.meshPoints.size() + pointI] = pointI;
-        }
-        Info << "Write pointMap ... ";
-        pointMap.write();
-        Info << "Done" << endl;
+                pointMap[pointI] = bMpointI;
+            }
+            forAll (aBMdata.meshPoints, pointI)
+            {
+                pointMap[usedCMpoints.size() + pointI] = pointI;
+            }
+            forAll (aBMdata.faceLabels, pointI)
+            {
+                pointMap[usedCMpoints.size() + aBMdata.meshPoints.size() + pointI] = pointI;
+            }
 
-        labelIOList faceMap
-        (
-            IOobject
+            if (mesh.name() != polyMesh::defaultRegion)
+            {
+                IOobject pointRegionAddressingObj
+                (
+                    "pointRegionAddressing",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE,
+                    false
+                );
+
+                IOobject pointRegionMapObj
+                (
+                    "pointMap",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE,
+                    false
+                );
+
+                if (!pointRegionAddressingObj.headerOk() && pointRegionMapObj.headerOk())
+                {
+                    pointRegionAddressingObj = pointRegionMapObj;
+                }
+
+                pointRegionAddressingObj.readOpt() = IOobject::MUST_READ;
+
+                labelIOList pointRegionMap = labelIOList(pointRegionAddressingObj);
+
+                forAll (usedCMpoints, pointI)
+                {
+                    if (pointMap[pointI] != -1)
+                    {
+                        pointMap[pointI] = pointRegionMap[pointMap[pointI]];
+                    }
+                }
+            }
+
+            Info << "Write pointMap ... ";
+            pointMap.write();
+            Info << "Done" << endl;
+        }
+
+        {
+            labelIOList faceMap
             (
-                "faceMap",
-                sMesh.facesInstance(),
-                polyMesh::meshSubDir,
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            labelList(faces.size(), -1)
-        );
-        forAll (usedCMfaces, faceI)
-        {
-            label cMfaceI = usedCMfaces[faceI];
-            label bMfaceI = usedCMfacesBMmap[cMfaceI];
+                IOobject
+                (
+                    "faceMap",
+                    sMesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    sMesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                labelList(faces.size(), -1)
+            );
+            forAll (usedCMfaces, faceI)
+            {
+                label cMfaceI = usedCMfaces[faceI];
+                label bMfaceI = usedCMfacesBMmap[cMfaceI];
 
-            faceMap[faceI] = bMfaceI;
-        }
-        forAll (aBMtri.faces(), faceI)
-        {
-            faceMap[usedCMfaces.size() + faceI] = aBMdata.faceLabels[aBMtri.faceMap()[faceI]];
-        }
-        Info << "Write faceMap ... ";
-        faceMap.write();
-        Info << "Done" << endl;
+                faceMap[faceI] = bMfaceI;
+            }
+            forAll (aBMtri.faces(), faceI)
+            {
+                faceMap[usedCMfaces.size() + faceI] = aBMdata.faceLabels[aBMtri.faceMap()[faceI]];
+            }
 
-        labelIOList cellMap
-        (
-            IOobject
+            if (mesh.name() != polyMesh::defaultRegion)
+            {
+                IOobject faceRegionAddressingObj
+                (
+                    "faceRegionAddressing",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE,
+                    false
+                );
+
+                IOobject faceRegionMapObj
+                (
+                    "faceMap",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE,
+                    false
+                );
+
+                bool fromMap = false;
+
+                if (!faceRegionAddressingObj.headerOk() && faceRegionMapObj.headerOk())
+                {
+                    faceRegionAddressingObj = faceRegionMapObj;
+
+                    fromMap = true;
+                }
+
+                faceRegionAddressingObj.readOpt() = IOobject::MUST_READ;
+
+                labelIOList faceRegionMap = labelIOList(faceRegionAddressingObj);
+
+                if (!fromMap)
+                {
+                    forAll (faceRegionMap, faceI)
+                    {
+                        label magFaceRegionMap = mag(faceRegionMap[faceI]);
+
+                        faceRegionMap[faceI] = magFaceRegionMap - 1;
+                    }
+                }
+
+                forAll (usedCMfaces, faceI)
+                {
+                    if (faceMap[faceI] != -1)
+                    {
+                        faceMap[faceI] = faceRegionMap[faceMap[faceI]];
+                    }
+                }
+            }
+
+            Info << "Write faceMap ... ";
+            faceMap.write();
+            Info << "Done" << endl;
+        }
+
+        {
+            labelIOList cellMap
             (
-                "cellMap",
-                sMesh.facesInstance(),
-                polyMesh::meshSubDir,
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            cMeshSubset.cellMap()
-        );
-        Info << "Write cellMap ... ";
-        cellMap.write();
-        Info << "Done" << endl << endl;
+                IOobject
+                (
+                    "cellMap",
+                    sMesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    sMesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                cMeshSubset.cellMap()
+            );
 
-        labelIOList patchMap
-        (
-            IOobject
-            (
-                "patchMap",
-                sMesh.facesInstance(),
-                polyMesh::meshSubDir,
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            labelList(patchLabels.size(), -1)
-        );
-        forAll (patchMap, patchI)
-        {
-            patchMap[patchI] = patchLabels[patchI];
+            if (mesh.name() != polyMesh::defaultRegion)
+            {
+                IOobject cellRegionAddressingObj
+                (
+                    "cellRegionAddressing",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE,
+                    false
+                );
+
+                IOobject cellRegionMapObj
+                (
+                    "cellMap",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE,
+                    false
+                );
+
+                if (!cellRegionAddressingObj.headerOk() && cellRegionMapObj.headerOk())
+                {
+                    cellRegionAddressingObj = cellRegionMapObj;
+                }
+
+                cellRegionAddressingObj.readOpt() = IOobject::MUST_READ;
+
+                labelIOList cellRegionMap = labelIOList(cellRegionAddressingObj);
+
+                forAll (cellMap, cellI)
+                {
+                    if (cellMap[cellI] != -1)
+                    {
+                        cellMap[cellI] = cellRegionMap[cellMap[cellI]];
+                    }
+                }
+            }
+
+            Info << "Write cellMap ... ";
+            cellMap.write();
+            Info << "Done" << endl;
         }
-        Info << "Write patchMap ... ";
-        patchMap.write();
-        Info << "Done" << endl;
+
+        {
+            labelIOList patchMap
+            (
+                IOobject
+                (
+                    "patchMap",
+                    sMesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    sMesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                labelList(patchLabels.size(), -1)
+            );
+            forAll (patchMap, patchI)
+            {
+                patchMap[patchI] = patchLabels[patchI];
+            }
+
+            if (mesh.name() != polyMesh::defaultRegion)
+            {
+                IOobject boundaryRegionAddressingObj
+                (
+                    "boundaryRegionAddressing",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE,
+                    false
+                );
+
+                IOobject patchRegionMapObj
+                (
+                    "patchMap",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE,
+                    false
+                );
+
+                if (!boundaryRegionAddressingObj.headerOk() && patchRegionMapObj.headerOk())
+                {
+                    boundaryRegionAddressingObj = patchRegionMapObj;
+                }
+
+                boundaryRegionAddressingObj.readOpt() = IOobject::MUST_READ;
+
+                labelIOList patchRegionMap = labelIOList(boundaryRegionAddressingObj);
+
+                forAll (patchMap, patchI)
+                {
+                    if (patchMap[patchI] != -1)
+                    {
+                        patchMap[patchI] = patchRegionMap[patchMap[patchI]];
+                    }
+                }
+            }
+
+            Info << "Write patchMap ... ";
+            patchMap.write();
+            Info << "Done" << endl;
+        }
 
 
 // subAreaMesh
@@ -965,7 +1159,7 @@ int main(int argc, char *argv[])
 
 // TODO: Point-, face-, edge- and patch-maps
 
-    Info<< "End.\n" << endl;
+    Info<< endl << "End.\n" << endl;
 
     return 0 ;
 }

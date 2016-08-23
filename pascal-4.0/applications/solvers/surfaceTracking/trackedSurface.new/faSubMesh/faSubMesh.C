@@ -53,8 +53,6 @@ tmp<pointField> faSubMesh::calcNewPoints() const
     const pointField& baseAreaMeshPoints = baseAreaMesh().points();
     const pointField& splitPoints = subFacePoints();
 
-    const labelList& pointMap = subPolyMeshPointMap_;
-
     tmp<pointField> tpoints
     (
         new pointField(subPolyMesh().points())
@@ -65,7 +63,7 @@ tmp<pointField> faSubMesh::calcNewPoints() const
     for (label pointI = 0; pointI < nUsedBasePolyMeshPoints; pointI++)
     {
         points[pointI] =
-            basePolyMeshPoints[pointMap[pointI]];
+            basePolyMeshPoints[pointSubToBaseMap()[pointI]];
     }
 
     // Used vertices from base area mesh come second
@@ -120,39 +118,7 @@ subPolyMesh_
         IOobject::MUST_READ
     )
 ),
-subPolyMeshPointMap_
-(
-    IOobject
-    (
-        "pointMap",
-        subPolyMesh_.facesInstance(),
-        polyMesh::meshSubDir,
-        subPolyMesh_,
-        IOobject::MUST_READ
-    )
-),
-subPolyMeshFaceMap_
-(
-    IOobject
-    (
-        "faceMap",
-        subPolyMesh_.facesInstance(),
-        polyMesh::meshSubDir,
-        subPolyMesh_,
-        IOobject::MUST_READ
-    )
-),
-subPolyMeshCellMap_
-(
-    IOobject
-    (
-        "cellMap",
-        subPolyMesh_.facesInstance(),
-        polyMesh::meshSubDir,
-        subPolyMesh_,
-        IOobject::MUST_READ
-    )
-),
+subToBaseAddressing_(subPolyMesh_),
 subAreaMesh_(subPolyMesh_),
 subFacePoints_(subFacePoints),
 faceCurvaturesPtr_(NULL)
