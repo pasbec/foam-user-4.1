@@ -625,6 +625,7 @@ int main(int argc, char *argv[])
     label patchI = -1;
     label lastPatchID = -1;
     label lastPatchStart = 0;
+    Map<label> patchLabels;
     Map<word> patchTypes;
     Map<word> patchNames;
     Map<label> patchSizes;
@@ -648,6 +649,7 @@ int main(int argc, char *argv[])
             if (lastPatchID != curPatchID)
             {
                 patchI++;
+                patchLabels.insert(patchI, curPatchID);
                 patchTypes.insert(patchI, cMesh.boundary()[curPatchID].type());
                 patchNames.insert(patchI, cMesh.boundary()[curPatchID].name());
                 if (patchI > 0)
@@ -666,6 +668,8 @@ int main(int argc, char *argv[])
     // Add/Modify patch data for triangulated area base-mesh
     nBoundaryFaces += aBMtri.faces().size();
     ++patchI;
+// TODO: Which patch label(s) for triangulatedFaces? May be more then one patch...
+    patchLabels.insert(patchI, -1);
     patchTypes.insert(patchI, "patch");
     patchNames.insert(patchI, "triangulatedFaces");
     patchStarts.insert(patchI, usedCMfaces.size());
@@ -856,7 +860,26 @@ int main(int argc, char *argv[])
         cellMap.write();
         Info << "Done" << endl << endl;
 
-// TODO: patchMap
+        labelIOList patchMap
+        (
+            IOobject
+            (
+                "patchMap",
+                sMesh.facesInstance(),
+                polyMesh::meshSubDir,
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            labelList(patchLabels.size(), -1)
+        );
+        forAll (patchMap, patchI)
+        {
+            patchMap[patchI] = patchLabels[patchI];
+        }
+        Info << "Write patchMap ... ";
+        patchMap.write();
+        Info << "Done" << endl;
 
 
 // subAreaMesh
