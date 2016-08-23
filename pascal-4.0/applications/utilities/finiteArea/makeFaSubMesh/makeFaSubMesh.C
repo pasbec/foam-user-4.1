@@ -799,45 +799,17 @@ int main(int argc, char *argv[])
 
             pointMap[pointI] = bMpointI;
         }
-        pointMap.write();
-
-        labelIOList pointAreaMap
-        (
-            IOobject
-            (
-                "pointAreaMap",
-                sMesh.facesInstance(),
-                polyMesh::meshSubDir,
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            labelList(points.size(), -1)
-        );
         forAll (aBMdata.meshPoints, pointI)
         {
-            pointAreaMap[usedCMpoints.size() + pointI] = pointI;
+            pointMap[usedCMpoints.size() + pointI] = pointI;
         }
-        pointAreaMap.write();
-
-        labelIOList pointTriMap
-        (
-            IOobject
-            (
-                "pointTriMap",
-                sMesh.facesInstance(),
-                polyMesh::meshSubDir,
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            labelList(points.size(), -1)
-        );
         forAll (aBMdata.faceLabels, pointI)
         {
-            pointTriMap[usedCMpoints.size() + aBMdata.meshPoints.size() + pointI] = pointI;
+            pointMap[usedCMpoints.size() + aBMdata.meshPoints.size() + pointI] = pointI;
         }
-        pointTriMap.write();
+        Info << "Write pointMap ... ";
+        pointMap.write();
+        Info << "Done" << endl;
 
         labelIOList faceMap
         (
@@ -859,7 +831,13 @@ int main(int argc, char *argv[])
 
             faceMap[faceI] = bMfaceI;
         }
+        forAll (aBMtri.faces(), faceI)
+        {
+            faceMap[usedCMfaces.size() + faceI] = aBMdata.faceLabels[aBMtri.faceMap()[faceI]];
+        }
+        Info << "Write faceMap ... ";
         faceMap.write();
+        Info << "Done" << endl;
 
         labelIOList cellMap
         (
@@ -874,7 +852,9 @@ int main(int argc, char *argv[])
             ),
             cMeshSubset.cellMap()
         );
+        Info << "Write cellMap ... ";
         cellMap.write();
+        Info << "Done" << endl << endl;
 
 // TODO: patchMap
 
@@ -959,43 +939,7 @@ int main(int argc, char *argv[])
         sAmesh.write();
 
 
-    // TODO: Maps
-
-//         labelIOList faFaceMap
-//         (
-//             IOobject
-//             (
-//                 "faceMap",
-//                 sMesh.facesInstance(),
-//                 faMesh::meshSubDir,
-//                 sMesh,
-//                 IOobject::NO_READ,
-//                 IOobject::NO_WRITE
-//             ),
-//             aBMtri.faceMap()
-//         );
-//         faFaceMap.write();
-//
-//         labelListIOList faFaceRmap
-//         (
-//             IOobject
-//             (
-//                 "faceRmap",
-//                 sMesh.facesInstance(),
-//                 polyMesh::meshSubDir,
-//                 sMesh,
-//                 IOobject::NO_READ,
-//                 IOobject::NO_WRITE
-//             ),
-//             labelListList(aBMtri.faces().size())
-//         );
-//         forAll (aBMtri.faces(), faceI)
-//         {
-//             faFaceRmap[faceI] = aBMtri.faceRmap()[faceI].toc();
-//         }
-//         faFaceRmap.write();
-
-// TODO: patchMap
+    // TODO: Point-, face-, edge- and patch-maps
 
     return(0);
 }

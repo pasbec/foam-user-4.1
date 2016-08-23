@@ -68,12 +68,6 @@ class faSubMesh
         //- Sub polyMesh pointMap
         const labelIOList subPolyMeshPointMap_;
 
-        //- Sub polyMesh pointAreaMap
-        const labelIOList subPolyMeshPointAreaMap_;
-
-        //- Sub polyMesh pointAreaMap
-        const labelIOList subPolyMeshPointTriMap_;
-
         //- Sub polyMesh faceMap
         const labelIOList subPolyMeshFaceMap_;
 

@@ -42,39 +42,46 @@ defineTypeNameAndDebug(faSubMesh, 0);
 
 tmp<pointField> faSubMesh::calcNewPoints() const
 {
+    const int nSubPolyMeshPoints = subPolyMesh().points().size();
+    const int nSubAreaMeshPoints = subAreaMesh().points().size();
+
+    const int nUsedBasePolyMeshPoints =
+        nSubPolyMeshPoints - nSubAreaMeshPoints;
+    const int nUsedBaseAreaMeshPoints = baseAreaMesh().points().size();
+
     const pointField& basePolyMeshPoints = basePolyMesh().points();
     const pointField& baseAreaMeshPoints = baseAreaMesh().points();
     const pointField& splitPoints = subFacePoints();
 
+    const labelList& pointMap = subPolyMeshPointMap_;
+
     tmp<pointField> tpoints
     (
-        new pointField(subPolyMesh().allPoints())
+        new pointField(subPolyMesh().points())
     );
     pointField& points = tpoints();
 
-// TODO: Optimize without if statements by knowing the sizes of each sublist
-    forAll(subPolyMesh().points(), pointI)
+    // Used vertices from base polyMesh come first
+    for (label pointI = 0; pointI < nUsedBasePolyMeshPoints; pointI++)
     {
-        label basePolyMeshPointI = subPolyMeshPointMap_[pointI];
-        label baseAreaMeshPointI = subPolyMeshPointAreaMap_[pointI];
-        label splitPointI = subPolyMeshPointTriMap_[pointI];
+        points[pointI] =
+            basePolyMeshPoints[pointMap[pointI]];
+    }
 
-        if (basePolyMeshPointI > -1)
-        {
-            points[pointI] = basePolyMeshPoints[basePolyMeshPointI];
-        }
-        else if (baseAreaMeshPointI > -1)
-        {
-            points[pointI] = baseAreaMeshPoints[baseAreaMeshPointI];
-        }
-        else if (splitPointI > -1)
-        {
-            points[pointI] = splitPoints[splitPointI];
-        }
-        else
-        {
-            // FatalError
-        }
+    // Used vertices from base area mesh come second
+    for (label pointI = 0; pointI < nUsedBaseAreaMeshPoints; pointI++)
+    {
+        // Point map is not necessary here, as points are ordered identically
+        points[nUsedBasePolyMeshPoints + pointI] =
+            baseAreaMeshPoints[pointI];
+    }
+
+    // Split points come last
+    forAll(splitPoints, pointI)
+    {
+        // Point map is not necessary here, as points are ordered identically
+        points[nUsedBasePolyMeshPoints + nUsedBaseAreaMeshPoints + pointI] =
+            splitPoints[pointI];
     }
 
     return tpoints;
@@ -118,28 +125,6 @@ subPolyMeshPointMap_
     IOobject
     (
         "pointMap",
-        subPolyMesh_.facesInstance(),
-        polyMesh::meshSubDir,
-        subPolyMesh_,
-        IOobject::MUST_READ
-    )
-),
-subPolyMeshPointAreaMap_
-(
-    IOobject
-    (
-        "pointAreaMap",
-        subPolyMesh_.facesInstance(),
-        polyMesh::meshSubDir,
-        subPolyMesh_,
-        IOobject::MUST_READ
-    )
-),
-subPolyMeshPointTriMap_
-(
-    IOobject
-    (
-        "pointTriMap",
         subPolyMesh_.facesInstance(),
         polyMesh::meshSubDir,
         subPolyMesh_,
