@@ -74,10 +74,13 @@ class faSubMesh
         mutable faMesh subAreaMesh_;
 
         //- Split points
-        const pointField& subFacePoints_;
+        const pointField& subSplitPoints_;
 
 
     // Demand-driven data
+
+        //- Sub to base face map for finite area meshes
+        mutable labelList* faceSubToBaseAreaMapPtr_;
 
         //- Face curvatures
         mutable areaScalarField* faceCurvaturesPtr_;
@@ -101,6 +104,9 @@ class faSubMesh
 
         // Demand-driven data
 
+            //- Make sub to base face map for finite area meshes
+            void makeFaceSubToBaseAreaMap() const;
+
             //- Make face curvatures
             void makeFaceCurvatures() const;
 
@@ -122,7 +128,7 @@ public:
         faSubMesh
         (
             const faMesh& baseAreaMesh,
-            const pointField& subFacePoints
+            const pointField& subSplitPoints
         );
 
 
@@ -140,39 +146,39 @@ public:
         // Access
 
             //- Return access to base polyMesh
-            const polyMesh& basePolyMesh() const
+            inline const polyMesh& basePolyMesh() const
             {
                 return basePolyMesh_;
             }
 
             //- Return access to base faMesh
-            const faMesh& baseAreaMesh() const
+            inline const faMesh& baseAreaMesh() const
             {
                 return baseAreaMesh_;
             }
 
             //- Return access to sub polyMesh
-            polyMesh& subPolyMesh() const
+            inline polyMesh& subPolyMesh() const
             {
                 return subPolyMesh_;
             }
 
             //- Return access to sub faMesh
-            faMesh& subAreaMesh() const
+            inline faMesh& subAreaMesh() const
             {
                 return subAreaMesh_;
             }
 
             //- Return points to split faces of base mesh
-            const pointField& subFacePoints() const
+            inline const pointField& subSplitPoints() const
             {
-                return subFacePoints_;
+                return subSplitPoints_;
             }
 
         // Mapping
 
             //- Sub-to-base point map
-            const labelList& pointSubToBaseMap() const
+            inline const labelList& pointSubToBaseMap() const
             {
                 return  subToBaseAddressing_.typeMap
                 (
@@ -182,7 +188,7 @@ public:
             }
 
             //- Sub-to-base face map
-            const labelList& faceSubToBaseMap() const
+            inline const labelList& faceSubToBaseMap() const
             {
                 return  subToBaseAddressing_.typeMap
                 (
@@ -191,26 +197,16 @@ public:
                 );
             }
 
-            //- Sub-to-base cell map
-            const labelList& cellSubToBaseMap() const
-            {
-                return  subToBaseAddressing_.typeMap
-                (
-                    addressingTypes::CELL,
-                    basePolyMesh_.name()
-                );
-            }
-
         // Mesh motion and mophing
 
             //- Is sub polyMesh moving
-            bool moving() const
+            inline bool moving() const
             {
                 return subPolyMesh().moving();
             }
 
             //- Move points and update faMesh
-            bool movePoints() const
+            inline bool movePoints() const
             {
                 clearGeom();
 
@@ -225,6 +221,9 @@ public:
         // Mapping
 
         // Demand-driven data
+
+            //- Return sub to base face map for finite area meshes
+            const labelList& faceSubToBaseAreaMap() const;
 
             //- Return face curvatures calculated on sub faMesh
             //  interpolated to base faMesh

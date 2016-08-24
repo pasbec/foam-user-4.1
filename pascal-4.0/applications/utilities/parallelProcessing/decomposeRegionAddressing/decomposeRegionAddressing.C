@@ -244,14 +244,6 @@ int main(int argc, char *argv[])
                 procRegionFaceAdd[procFaceI] = regionFaceAdd[faceI];
             }
 
-            if (regionFaceAdd.name() == "faceMap")
-            {
-                forAll (procRegionFaceAdd, procFaceI)
-                {
-                    procRegionFaceAdd[procFaceI] += 1;
-                }
-            }
-
             procRegionFaceAdd.write();
         }
 

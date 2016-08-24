@@ -41,12 +41,66 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void faSubMesh::makeFaceSubToBaseAreaMap() const
+{
+    if (debug)
+    {
+        Info<< "faSubMesh::makeFaceCurvatures() : "
+            << "making sub to base face map for finite area meshes"
+            << endl;
+    }
+
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (faceSubToBaseAreaMapPtr_)
+    {
+        FatalErrorIn("faSubMesh::makeFaceCurvatures()")
+            << "sub to base face map field already exists"
+                << abort(FatalError);
+    }
+
+    const labelList& baseAreaFaceLabels = baseAreaMesh().faceLabels();
+    const labelList& subAreaFaceLabels = subAreaMesh().faceLabels();
+
+    faceSubToBaseAreaMapPtr_ = new labelList(subAreaFaceLabels.size(), -1);
+
+    labelList& faceSubToBaseAreaMap = *faceSubToBaseAreaMapPtr_;
+
+    Map<label> basePolyFaceHashMap;
+    forAll (baseAreaFaceLabels, baseAreaFaceI)
+    {
+        label basePolyFaceI = baseAreaFaceLabels[baseAreaFaceI];
+
+        if (basePolyFaceI != -1)
+        {
+            basePolyFaceHashMap.insert(basePolyFaceI, baseAreaFaceI);
+        }
+    }
+
+    forAll (subAreaFaceLabels, subAreaFaceI)
+    {
+        label subPolyFaceI = subAreaFaceLabels[subAreaFaceI];
+        label basePolyFaceI = faceSubToBaseMap()[subPolyFaceI];
+
+        Map<label>::iterator iter =
+            basePolyFaceHashMap.find(basePolyFaceI);
+
+        if (iter != basePolyFaceHashMap.end())
+        {
+            label baseAreaFaceI = iter();
+
+            faceSubToBaseAreaMap[subAreaFaceI] = baseAreaFaceI;
+        }
+    }
+}
+
 void faSubMesh::makeFaceCurvatures() const
 {
     if (debug)
     {
         Info<< "faSubMesh::makeFaceCurvatures() : "
-            << "making surface normal derivative of normal velocity"
+            << "making face curvatures"
             << endl;
     }
 
@@ -82,56 +136,87 @@ void faSubMesh::makeFaceCurvatures() const
             )
         );
 
-    areaScalarField& K = *faceCurvaturesPtr_;
-
-    scalarField& KIn = K.internalField();
+    areaScalarField& baseK = *faceCurvaturesPtr_;
+    scalarField& baseKin = baseK.internalField();
 
     const areaScalarField& subK = subAreaMesh().faceCurvatures();
+    const scalarField& subKin = subK.internalField();
 
-    const pointField& subPoints = subAreaMesh().points();
-    const vectorField& subFaceCentres = subAreaMesh().areaCentres();
-    const labelListList& subPointFaces = subAreaMesh().patch().pointFaces();
+    scalarField baseKinWeights(baseKin, 0);
 
-    forAll (KIn, facei)
+    forAll (subKin, subFaceI)
     {
-        label subPointI = baseAreaMesh().nPoints() + facei;
+        label baseFaceI = faceSubToBaseAreaMap()[subFaceI];
 
-// TODO: This might fail for most cases!
-// WARNING
-//
-// subPointI is a GLOBAL point index, but
-// subPointFaces takes LOCAL point indices from
-// this patch!!!
-// Use baseAreaMesh().patch().meshPointMap() which is SLOW!!!!
-// Or find some other way..
+        baseKin[baseFaceI] += subKin[subFaceI];
 
-        const labelList& subFacesI = subPointFaces[subPointI];
-
-        scalar wSum = 0.0;
-
-        forAll (subFacesI, subFacei)
-        {
-            label subFaceI = subFacesI[subFacei];
-
-            scalar wI = 1.0
-                / (mag(subFaceCentres[subFaceI]-subPoints[subPointI]) + SMALL);
-
-            wSum += wI;
-
-            KIn[facei] += wI * subK[subFaceI];
-
-        }
-
-        KIn[facei] /= wSum + SMALL;
+// TODO: Use signed distance weights!
+        baseKinWeights[baseFaceI] += 1.0;
     }
-// Pout << "K.boundaryField() = " << K.boundaryField() << endl;
-// Pout << "subK.boundaryField() = " << subK.boundaryField() << endl;
-// TODO: This is totally wrong!
-//     K.boundaryField() == subK.boundaryField();
+
+    baseKin /= baseKinWeights;
+
+// TODO: What about the boundaryField? Is this actually necessary for trackedSurface?
+
+
+
+
+
+// TODO: Remove later
+//     const pointField& subPoints = subAreaMesh().points();
+//     const vectorField& subFaceCentres = subAreaMesh().areaCentres();
+//     const labelListList& subPointFaces = subAreaMesh().patch().pointFaces();
+//
+//     forAll (KIn, facei)
+//     {
+//         label subPointI = baseAreaMesh().nPoints() + facei;
+//
+// // TODO: This might fail for most cases!
+// // WARNING
+// //
+// // subPointI is a GLOBAL point index, but
+// // subPointFaces takes LOCAL point indices from
+// // this patch!!!
+// // Use baseAreaMesh().patch().meshPointMap() which is SLOW!!!!
+// // Or find some other way..
+//
+//         const labelList& subFacesI = subPointFaces[subPointI];
+//
+//         scalar wSum = 0.0;
+//
+//         forAll (subFacesI, subFacei)
+//         {
+//             label subFaceI = subFacesI[subFacei];
+//
+//             scalar wI = 1.0
+//                 / (mag(subFaceCentres[subFaceI]-subPoints[subPointI]) + SMALL);
+//
+//             wSum += wI;
+//
+//             KIn[facei] += wI * subK[subFaceI];
+//
+//         }
+//
+//         KIn[facei] /= wSum + SMALL;
+//     }
+// // Pout << "K.boundaryField() = " << K.boundaryField() << endl;
+// // Pout << "subK.boundaryField() = " << subK.boundaryField() << endl;
+// // TODO: This is totally wrong!
+// //     K.boundaryField() == subK.boundaryField();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const labelList& faSubMesh::faceSubToBaseAreaMap() const
+{
+    if (!faceSubToBaseAreaMapPtr_)
+    {
+       makeFaceSubToBaseAreaMap();
+    }
+
+    return *faceSubToBaseAreaMapPtr_;
+}
 
 const areaScalarField& faSubMesh::faceCurvatures() const
 {

@@ -51,7 +51,7 @@ tmp<pointField> faSubMesh::calcNewPoints() const
 
     const pointField& basePolyMeshPoints = basePolyMesh().points();
     const pointField& baseAreaMeshPoints = baseAreaMesh().points();
-    const pointField& splitPoints = subFacePoints();
+    const pointField& splitPoints = subSplitPoints();
 
     tmp<pointField> tpoints
     (
@@ -103,7 +103,7 @@ void faSubMesh::clearOut() const
 faSubMesh::faSubMesh
 (
     const faMesh& baseAreaMesh,
-    const pointField& subFacePoints
+    const pointField& subSplitPoints
 )
 :
 basePolyMesh_(baseAreaMesh.mesh()),
@@ -120,7 +120,8 @@ subPolyMesh_
 ),
 subToBaseAddressing_(subPolyMesh_),
 subAreaMesh_(subPolyMesh_),
-subFacePoints_(subFacePoints),
+subSplitPoints_(subSplitPoints),
+faceSubToBaseAreaMapPtr_(NULL),
 faceCurvaturesPtr_(NULL)
 {}
 

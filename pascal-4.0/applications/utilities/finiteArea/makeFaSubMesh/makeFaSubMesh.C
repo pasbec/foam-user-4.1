@@ -806,11 +806,11 @@ int main(int argc, char *argv[])
             }
             forAll (aBMdata.meshPoints, pointI)
             {
-                pointMap[usedCMpoints.size() + pointI] = pointI;
+                pointMap[usedCMpoints.size() + pointI] = aBMdata.meshPoints[pointI];
             }
             forAll (aBMdata.faceLabels, pointI)
             {
-                pointMap[usedCMpoints.size() + aBMdata.meshPoints.size() + pointI] = pointI;
+                pointMap[usedCMpoints.size() + aBMdata.meshPoints.size() + pointI] = -1;
             }
 
             if (mesh.name() != polyMesh::defaultRegion)
@@ -846,7 +846,7 @@ int main(int argc, char *argv[])
 
                 labelIOList pointRegionMap = labelIOList(pointRegionAddressingObj);
 
-                forAll (usedCMpoints, pointI)
+                forAll (pointMap, pointI)
                 {
                     if (pointMap[pointI] != -1)
                     {
@@ -933,7 +933,7 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                forAll (usedCMfaces, faceI)
+                forAll (faceMap, faceI)
                 {
                     if (faceMap[faceI] != -1)
                     {

@@ -246,7 +246,7 @@ const Foam::labelList& Foam::regionAddressing::typeMap
             if (debug)
             {
                 Info<< "Foam::regionAddressing::typeMap(...) : "
-                    << "Read/Calculate region face map"
+                    << "Calculate region face-map"
                     << " (" << regionName() << ")"
                     << endl;
             }

@@ -107,14 +107,6 @@ int main(int argc, char *argv[])
                     toRegionNames[toRegionI]
                 );
             }
-
-            // Calc faceMap
-            regionMesh.typeMap
-            (
-                addressingTypes::FACE,
-                regionMesh.regions()[fromRegionI],
-                toRegionNames[toRegionI]
-            );
         }
     }
 
