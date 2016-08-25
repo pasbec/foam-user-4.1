@@ -112,8 +112,10 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacianSource
     // Mesh data
     const unallocLabelList& own = mesh.owner();
     const unallocLabelList& nei = mesh.neighbour();
-    const scalarField& w = mesh.weights();
-    const scalarField& magSf = mesh.magSf();
+    const surfaceScalarField& w = mesh.weights();
+    const scalarField& wIn = w.internalField();
+    const surfaceScalarField& magSf = mesh.magSf();
+    const scalarField& magSfIn = magSf.internalField();
 
     tmp<Field<Type> > tsource(new Field<Type>(sigma.size(), pTraits<Type>::zero));
     Field<Type>& source = tsource();
@@ -127,20 +129,61 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacianSource
         label neiFaceI = nei[faceI];
 
         // Interpolation weights
-        scalar wP = w[faceI];
+        scalar wP = wIn[faceI];
         scalar wN = 1.0 - wP;
 
         // Cell sigma
-        // TODO: This is currently only a workaround to avoid
-        //       template specializations for different types
+// TODO: The 'mag' is currently only a workaround to avoid
+//       template specializations for different types
         scalar sigmaOwn = mag(sigmaIn[ownFaceI]);
         scalar sigmaNei = mag(sigmaIn[neiFaceI]);
 
         source[ownFaceI] -= gammaMagSfIn[faceI]
-          * (1.0 - sigmaOwn/sigmaNei) * wP * ddtAfluxIn[faceI]/magSf[faceI];
+          * (1.0 - sigmaOwn/sigmaNei) * wP
+          * ddtAfluxIn[faceI]/magSfIn[faceI];
 
         source[neiFaceI] -= gammaMagSfIn[faceI]
-          * (sigmaNei/sigmaOwn - 1.0) * wN * ddtAfluxIn[faceI]/magSf[faceI];
+          * (sigmaNei/sigmaOwn - 1.0) * wN
+          * ddtAfluxIn[faceI]/magSfIn[faceI];
+    }
+
+    // Boundary contributions from jump conditions
+    forAll (mesh.boundary(), patchI)
+    {
+        const fvPatch& patch = mesh.boundary()[patchI];
+
+        // Coupled patches
+// TODO: Is this enough? What if there are symmetry, periodic
+//       empty or other special bc?
+        if (patch.coupled())
+        {
+            const unallocLabelList& faceCells = patch.patch().faceCells();
+
+            const scalarField& gammaMagSfPatch = gammaMagSf.boundaryField()[patchI];
+            const scalarField& wPatch = w.boundaryField()[patchI];
+            const scalarField& magSfPatch = magSf.boundaryField()[patchI];
+            const Field<GType>& sigmaPatch = sigma.boundaryField()[patchI];
+            const Field<Type>& ddtAfluxPatch = ddtAflux.boundaryField()[patchI];
+
+            forAll (patch, faceI)
+            {
+                // Cell label
+                const label ownFaceI = faceCells[faceI];
+
+                // Interpolation weights
+                scalar wP = wPatch[faceI];
+
+                // Cell sigma
+// TODO: The 'mag' is currently only a workaround to avoid
+//       template specializations for different types
+                scalar sigmaOwn = mag(sigmaIn[ownFaceI]);
+                scalar sigmaNei = mag(sigmaPatch[faceI]);
+
+                source[ownFaceI] -= gammaMagSfPatch[faceI]
+                  * (1.0 - sigmaOwn/sigmaNei) * wP
+                  * ddtAfluxPatch[faceI]/magSfPatch[faceI];
+            }
+        }
     }
 
     return tsource;

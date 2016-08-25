@@ -52,6 +52,8 @@ electricPotentialGrad<scalar>::calcGrad
 {
     const fvMesh& mesh = vsf.mesh();
 
+    const scalarField& vsfIn = vsf.internalField();
+
     // Prepare gradient field
     tmp<volVectorField> tgrad
     (
@@ -99,10 +101,14 @@ electricPotentialGrad<scalar>::calcGrad
     // Mesh data
     const unallocLabelList& own = mesh.owner();
     const unallocLabelList& nei = mesh.neighbour();
-    const scalarField& w = mesh.weights();
-    const scalarField& d = mesh.deltaCoeffs();
-    const scalarField& magSf = mesh.magSf();
-    const vectorField& Sf = mesh.Sf();
+    const surfaceScalarField& w = mesh.weights();
+    const scalarField& wIn = w.internalField();
+    const surfaceScalarField& d = mesh.deltaCoeffs();
+    const scalarField& dIn = d.internalField();
+    const surfaceScalarField& magSf = mesh.magSf();
+    const scalarField& magSfIn = magSf.internalField();
+    const surfaceVectorField& Sf = mesh.Sf();
+    const vectorField& SfIn = Sf.internalField();
 
     if (baseScheme() == GAUSS)
     {
@@ -114,7 +120,7 @@ electricPotentialGrad<scalar>::calcGrad
             label neiFaceI = nei[faceI];
 
             // Interpolation weights
-            scalar wP = w[faceI];
+            scalar wP = wIn[faceI];
             scalar wN = 1.0 - wP;
 
             // Cell sigma
@@ -123,50 +129,115 @@ electricPotentialGrad<scalar>::calcGrad
             scalar sigmaOff = sigmaNei - sigmaOwn;
 
             // Face value based on jump conditions
-            scalar ssv = sigmaOwn * wP * vsf[ownFaceI]
-                       + sigmaNei * wN * vsf[neiFaceI]
+            scalar ssv = sigmaOwn * wP * vsfIn[ownFaceI]
+                       + sigmaNei * wN * vsfIn[neiFaceI]
 // TODO FIXME: deltaCoeffs should come from snGradscheme! Otherwise this is not consistent with
 //             the corresponding laplacian operator. Thus, currently only an uncorrected version
 //             of the electricPotentialLaplacian exists
-                       + sigmaOff * wP * wN * ddtAfluxIn[faceI]/magSf[faceI] / d[faceI];
+                       + sigmaOff * wP * wN * ddtAfluxIn[faceI]/magSfIn[faceI] / dIn[faceI];
 
             ssv /= sigmaMeanIn[faceI];
 
             // Gradient contributions
-            gradIn[ownFaceI] += Sf[faceI] * ssv;
-            gradIn[neiFaceI] -= Sf[faceI] * ssv;
+            gradIn[ownFaceI] += SfIn[faceI] * ssv;
+            gradIn[neiFaceI] -= SfIn[faceI] * ssv;
+        }
+
+        // Boundary contributions from jump conditions
+        forAll (mesh.boundary(), patchI)
+        {
+            const fvPatch& patch = mesh.boundary()[patchI];
+
+            const unallocLabelList& faceCells = patch.patch().faceCells();
+
+            const scalarField& vsfPatch = vsf.boundaryField()[patchI];
+
+            const vectorField& SfPatch = Sf.boundaryField()[patchI];
+
+            // Coupled patches
+// TODO: Is this enough? What if there are symmetry, periodic
+//       empty or other special bc?
+            if (patch.coupled())
+            {
+                const scalarField& wPatch = w.boundaryField()[patchI];
+                const scalarField& sigmaPatch = sigma.boundaryField()[patchI];
+                const scalarField& ddtAfluxPatch = ddtAflux.boundaryField()[patchI];
+                const scalarField& magSfPatch = magSf.boundaryField()[patchI];
+                const scalarField& dPatch = d.boundaryField()[patchI];
+                const scalarField& sigmaMeanPatch = sigmaMean.boundaryField()[patchI];
+
+                forAll (patch, faceI)
+                {
+                    // Cell label
+                    const label ownFaceI = faceCells[faceI];
+
+                    // Interpolation weights
+                    scalar wP = wPatch[faceI];
+                    scalar wN = 1.0 - wP;
+
+                    // Cell sigma
+                    scalar sigmaOwn = sigmaIn[ownFaceI];
+                    scalar sigmaNei = sigmaPatch[faceI];
+                    scalar sigmaOff = sigmaNei - sigmaOwn;
+
+                    // Face value based on jump conditions
+                    scalar ssv = sigmaOwn * wP * vsfIn[ownFaceI]
+                               + sigmaNei * wN * vsfPatch[faceI]
+// TODO FIXME: deltaCoeffs should come from snGradscheme! Otherwise this is not consistent with
+//             the corresponding laplacian operator. Thus, currently only an uncorrected version
+//             of the electricPotentialLaplacian exists
+                               + sigmaOff * wP * wN * ddtAfluxPatch[faceI]/magSfPatch[faceI] / dPatch[faceI];
+
+                    ssv /= sigmaMeanPatch[faceI];
+
+                    // Gradient contributions
+                    gradIn[ownFaceI] += SfPatch[faceI] * ssv;
+                }
+            }
+            else
+            {
+                forAll (patch, faceI)
+                {
+                    // Cell label
+                    const label ownFaceI = faceCells[faceI];
+
+                    // Gradient contributions
+                    gradIn[ownFaceI] += SfPatch[faceI] * vsfPatch[faceI];
+
+                }
+            }
         }
 
         tsigmaMean.clear();
 
-        // Boundary contributions
-        // TODO: How can we do this without another interpolation?
-        // TODO: Is this enough? What if there are symmetry,
-        //       empty or other special bc?
-        {
-            tmp<surfaceScalarField> tssf
-            (
-                linearInterpolate(vsf)
-            );
-            surfaceScalarField& ssf = tssf();
-
-            forAll(mesh.boundary(), patchi)
-            {
-                const unallocLabelList& pFaceCells =
-                    mesh.boundary()[patchi].faceCells();
-
-                const vectorField& pSf = mesh.Sf().boundaryField()[patchi];
-
-                const fvsPatchScalarField& pssf = ssf.boundaryField()[patchi];
-
-                forAll(mesh.boundary()[patchi], facei)
-                {
-                    grad[pFaceCells[facei]] += pSf[facei]*pssf[facei];
-                }
-            }
-
-            tssf.clear();
-        }
+//         // Boundary contributions
+// // TODO: Is this enough? What if there are symmetry, periodic
+// //       empty or other special bc?
+// // TODO: How can we do this without another interpolation?
+//         {
+//             tmp<surfaceScalarField> tssf
+//             (
+//                 linearInterpolate(vsf)
+//             );
+//             surfaceScalarField& ssf = tssf();
+//
+//             forAll(mesh.boundary(), patchi)
+//             {
+//                 const unallocLabelList& pFaceCells =
+//                     mesh.boundary()[patchi].faceCells();
+//
+//                 const vectorField& pSf = mesh.Sf().boundaryField()[patchi];
+//
+//                 const fvsPatchScalarField& pssf = ssf.boundaryField()[patchi];
+//
+//                 forAll(mesh.boundary()[patchi], facei)
+//                 {
+//                     grad[pFaceCells[facei]] += pSf[facei]*pssf[facei];
+//                 }
+//             }
+//
+//             tssf.clear();
+//         }
 
         gradIn /= mesh.V();
     }

@@ -21,5 +21,8 @@
                 storage.ddtARePhi() += omega0*(fvc::interpolate(globalStorage.A0Re()[CONDUCTOR]) & mesh.Sf());
                 storage.ddtAImPhi() -= omega0*(fvc::interpolate(globalStorage.A0Im()[CONDUCTOR]) & mesh.Sf());
             }
+
+            storage.ddtARePhi().correctBoundaryConditions();
+            storage.ddtAImPhi().correctBoundaryConditions();
         }
     }
