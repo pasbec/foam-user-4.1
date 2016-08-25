@@ -51,6 +51,7 @@ cleanPolyMesh ()
            "$baseDir/polyMesh/refinementHistory"* \
            "$baseDir/polyMesh/surfaceIndex"* \
            "$baseDir/cellToRegion" \
+           "$baseDir/cellDecomposition" \
            "$baseDir/polyMesh/sets/" \
            > /dev/null 2>&1
 }
