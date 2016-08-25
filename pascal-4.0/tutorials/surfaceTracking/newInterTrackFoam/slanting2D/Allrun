@@ -49,7 +49,12 @@ if [[ $1 != 'clean' ]]; then
     # Copy all data from 0.org to initial time folder
     cp -r 0.org/* 0 || exit 1
 
+    # Create fa sub mesh
+    runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'
+
     # Start solver
-    runApplication $application
+    #runApplication $application
 
 fi
+
+#decomposePar -cellDist && makeRegionCellDecomposition -region region0_faSubMesh && decomposePar -region region0_faSubMesh && decomposeRegionAddressing -region region0_faSubMesh

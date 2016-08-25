@@ -1,9 +1,9 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     3.2                                |
+|  \\    /   O peration     | Version:     4.0                                |
 |   \\  /    A nd           | Web:         http://www.foam-extend.org         |
-|    \\/     M anipulation  |                                                 |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
@@ -22,42 +22,27 @@ motionDir (0 1 0);
 
 cleanInterface yes;
 
-muFluidA muFluidA [ 1 -1 -1 0 0 0 0 ] 0.01;
-
-muFluidB muFluidB [ 1 -1 -1 0 0 0 0 ] 0.00001;
-
-rhoFluidA rhoFluidA [ 1 -3  0 0 0 0 0 ] 1;
-
-rhoFluidB rhoFluidB [ 1 -3  0 0 0 0 0 ] 0.001;
-
-surfaceTension surfaceTension [ 1 0 -2 0 0 0 0 ] 0.1 ;
-
-// g g [ 0 1 -2 0 0 0 0 ] ( 0 0 0 );
-g g [ 0 1 -2 0 0 0 0 ] ( 0 -9.81 0 );
-
 fixedTrackedSurfacePatches 0();
 
-pointNormalsCorrectionPatches 1( sideWalls );
+// pointNormalsCorrectionPatches 1( sideWalls );
+pointNormalsCorrectionPatches 0();
 
 nTrackedSurfaceCorrectors 1;
 
-smoothing   yes;
+useSubMesh          yes;
 
-surfactantProperties
-{
-bulkConc            bulkConc            [ 0 -3  0 0  1 0 0 ] 1.0e-2;
+correctVolume       yes;
 
-saturatedConc       saturatedSurfConc   [ 0 -2  0 0  1 0 0 ] 5.0e-6;
+// resetControlPoints  yes;
 
-adsorptionCoeff     adsorptionCoeff     [ 0  3 -1 0 -1 0 0 ] 40.0;
+// smoothing           yes;
 
-desorptionCoeff     desorptionCoeff     [ 0 -3  0 0  1 0 0 ] 8.93e-2;
+// freeContactAngle    yes;
 
-bulkDiffusion       bulkDiffusion       [ 0  2 -1 0  0 0 0 ] 1.0e-9;
-
-diffusion           diffusion           [ 0  2 -1 0  0 0 0 ] 1.0e-9;
-
-temperature         temperature         [ 0  0  0 1  0 0 0 ] 293.0;
-}
+// correctPointNormals yes;
+// correctDisplacement yes;
+// correctCurvature    yes;
+//
+// fvcNGradUn          yes;
 
 // ************************************************************************* //

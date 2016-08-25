@@ -18,3 +18,7 @@ cleanHistoryFolder ()
 cleanHistoryFolder
 cleanTimeDirectories
 cleanFaMesh
+
+rm -rf processor*
+rm -rf system/region0_faSubMesh;
+rm -rf constant/region0_faSubMesh

@@ -207,9 +207,15 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     runApplication -r 'region_fluid' \
         makeFaMesh -region 'region_fluid' || exit 1
 
+    regionlist="$regionlist_split region_fluid_faSubMesh"
+
+    runApplication -r 'region_fluid' \
+        makeFaSubMesh -region 'region_fluid' || exit 1
+
     # Touch paraFoam files
+    paraviewTouchFoam
     paraviewTouchOpenFOAM
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         paraviewTouchOpenFOAM "$region"
     done
 
@@ -217,32 +223,41 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
 
         # Decompose mesh
         runApplication \
-            decomposePar || exit 1
+            decomposePar -cellDist || exit 1
+
+        # Split cell decompositions
+        for region in $regionlist; do
+            runApplication -r "$region" \
+                makeRegionCellDecomposition -region $region || exit 1
+        done
 
         # Decompose mesh
         # for regions
-        for region in $regionlist_split; do
+        for region in $regionlist; do
+            cp 'system/decomposeParDict.region' "system/$region/decomposeParDict"
+
             runApplication -r "$region" \
                 decomposePar -region $region || exit 1
         done
 
         # Decompose sets
         # for regions
-        for region in $regionlist_split; do
+        for region in $regionlist; do
             runApplication -r "$region" \
                 decomposeSets -region $region || exit 1
         done
 
         # Decompose region addressings
         # for regions
-        for region in $regionlist_split; do
+        for region in $regionlist; do
             runApplication -r "$region" \
                 decomposeRegionAddressing -region $region || exit 1
         done
 
         # Touch paraFoam files
+        paraviewTouchFoamParallel
         paraviewTouchOpenFOAMParallel
-        for region in $regionlist_split; do
+        for region in $regionlist; do
             paraviewTouchOpenFOAMParallel "$region"
         done
     fi

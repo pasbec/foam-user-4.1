@@ -24,8 +24,8 @@ settings
         turbulence          true;
 
         UpCoupled           false;
-        UEqnVolumeForce     true;
-        snGradpFromFlux     false;
+        UEqnVolumeForce     false;
+        snGradpFromFlux     true;
     }
 }
 

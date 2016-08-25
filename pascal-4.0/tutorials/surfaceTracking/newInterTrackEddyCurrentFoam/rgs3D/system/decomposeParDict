@@ -14,36 +14,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains    4;
+#include "decomposeParDict.include"
 
-method               simple;
-
-simpleCoeffs
-{
-    n                (2 2 1);
-    delta            0.001;
-}
-
-hierarchicalCoeffs
-{
-}
-
-metisCoeffs
-{
-}
-
-scotchCoeffs
-{
-}
-
-manualCoeffs
-{
-}
-
-distributed     no;
-
-roots
-(
-);
+method   simple;
 
 // ************************************************************************* //

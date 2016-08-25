@@ -1,0 +1,35 @@
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+numberOfSubdomains   4;
+
+simpleCoeffs
+{
+    n                (2 2 1);
+    delta            0.001;
+}
+
+hierarchicalCoeffs
+{
+}
+
+metisCoeffs
+{
+}
+
+scotchCoeffs
+{
+}
+
+manualCoeffs
+{
+    dataFile         "cellDecomposition";
+}
+
+distributed          no;
+
+roots
+(
+);
+
+// ************************************************************************* //

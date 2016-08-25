@@ -123,7 +123,22 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
 
         # Decompose mesh
         runApplication \
-            decomposePar || exit 1
+            decomposePar -cellDist || exit 1
+
+        # Split cell decompositions
+        for region in $regionlist; do
+            runApplication -r "$region" \
+                makeRegionCellDecomposition -region $region || exit 1
+        done
+
+        # Decompose mesh
+        # for regions
+        for region in $regionlist; do
+            cp 'system/decomposeParDict.region' "system/$region/decomposeParDict"
+
+            runApplication -r "$region" \
+                decomposePar -region $region || exit 1
+        done
 
         # Decompose mesh
         # for regions
@@ -156,8 +171,7 @@ fi
 
 if [[ $flagReset -eq 1 ]]; then
 
-    if [[ $flagParallel -eq 1 ]] || \
-       [[ $flagParallel2 -eq 1 ]]; then
+    if [[ $flagParallel -eq 1 ]]; then
 
         # Clean time directories
         cleanTimeDirectoriesParallel
@@ -175,8 +189,8 @@ if [[ $flagReset -eq 1 ]]; then
 fi
 
 if [[ $flagRun -eq 1 ]]; then
-    if [[ $flagParallel -eq 1 ]] || \
-       [[ $flagParallel2 -eq 1 ]]; then
+
+    if [[ $flagParallel -eq 1 ]]; then
 
         np=$(ls -1d processor* | wc -l)
         runParallel $np \

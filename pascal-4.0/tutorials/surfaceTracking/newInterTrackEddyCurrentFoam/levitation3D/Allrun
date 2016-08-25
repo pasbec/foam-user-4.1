@@ -214,6 +214,15 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         addZeroOrg "$region"
     done
 
+#     # Translate mesh points
+#     transVector='(0 0 -0.0003)'
+# #     runApplication \
+#         transformPoints -translate "$transVector" || exit 1
+#     for region in $regionlist_split; do
+# #         runApplication -r "$region" \
+#         transformPoints -region "$region" -translate "$transVector" || exit 1
+#     done
+
     runApplication \
         funkySetFields -time '0' || exit 1
 
@@ -226,51 +235,57 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     runApplication -r 'region_fluid' \
         makeFaMesh -region 'region_fluid' || exit 1
 
+    regionlist="$regionlist_split region_fluid_faSubMesh"
+
+    runApplication -r 'region_fluid' \
+        makeFaSubMesh -region 'region_fluid' || exit 1
+
     # Touch paraFoam files
+    paraviewTouchFoam
     paraviewTouchOpenFOAM
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         paraviewTouchOpenFOAM "$region"
     done
-
-#     # Translate mesh points
-#     transVector='(0 0 -0.0003)'
-# #     runApplication \
-#         transformPoints -translate "$transVector" || exit 1
-#     for region in $regionlist_split; do
-# #         runApplication -r "$region" \
-#         transformPoints -region "$region" -translate "$transVector" || exit 1
-#     done
 
     if [[ $flagParallel -eq 1 ]]; then
 
         # Decompose mesh
         runApplication \
-            decomposePar || exit 1
+            decomposePar -cellDist || exit 1
+
+        # Split cell decompositions
+        for region in $regionlist; do
+            runApplication -r "$region" \
+                makeRegionCellDecomposition -region $region || exit 1
+        done
 
         # Decompose mesh
         # for regions
-        for region in $regionlist_split; do
+        for region in $regionlist; do
+            cp 'system/decomposeParDict.region' "system/$region/decomposeParDict"
+
             runApplication -r "$region" \
                 decomposePar -region $region || exit 1
         done
 
         # Decompose sets
         # for regions
-        for region in $regionlist_split; do
+        for region in $regionlist; do
             runApplication -r "$region" \
                 decomposeSets -region $region || exit 1
         done
 
         # Decompose region addressings
         # for regions
-        for region in $regionlist_split; do
+        for region in $regionlist; do
             runApplication -r "$region" \
                 decomposeRegionAddressing -region $region || exit 1
         done
 
         # Touch paraFoam files
+        paraviewTouchFoamParallel
         paraviewTouchOpenFOAMParallel
-        for region in $regionlist_split; do
+        for region in $regionlist; do
             paraviewTouchOpenFOAMParallel "$region"
         done
     fi
@@ -278,8 +293,7 @@ fi
 
 if [[ $flagReset -eq 1 ]]; then
 
-    if [[ $flagParallel -eq 1 ]] || \
-       [[ $flagParallel2 -eq 1 ]]; then
+    if [[ $flagParallel -eq 1 ]]; then
 
         # Clean time directories
         cleanTimeDirectoriesParallel
@@ -297,8 +311,8 @@ if [[ $flagReset -eq 1 ]]; then
 fi
 
 if [[ $flagRun -eq 1 ]]; then
-    if [[ $flagParallel -eq 1 ]] || \
-       [[ $flagParallel2 -eq 1 ]]; then
+
+    if [[ $flagParallel -eq 1 ]]; then
 
         np=$(ls -1d processor* | wc -l)
         runParallel $np \
