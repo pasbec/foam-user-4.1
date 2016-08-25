@@ -140,13 +140,6 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
                 decomposePar -region $region || exit 1
         done
 
-        # Decompose mesh
-        # for regions
-        for region in $regionlist; do
-            runApplication -r "$region" \
-                decomposePar -region $region || exit 1
-        done
-
         # Decompose sets
         # for regions
         for region in $regionlist; do
