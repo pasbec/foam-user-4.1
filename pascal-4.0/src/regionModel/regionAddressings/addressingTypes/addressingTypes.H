@@ -137,9 +137,7 @@ protected:
             label faceAddressingI
         )
         {
-            label faceMapI = mag(faceAddressingI);
-
-            return (faceMapI > 0) ? faceMapI-1 : invalidMapLabel();
+            return mag(faceAddressingI) - 1;
         }
 
         static inline void faceAddressingToMap
@@ -161,7 +159,7 @@ protected:
             bool faceFlippedI
         )
         {
-            label faceAddressingI = faceMapI+1;
+            label faceAddressingI = faceMapI + 1;
 
             return (faceFlippedI) ? -faceAddressingI : faceAddressingI;
         }
