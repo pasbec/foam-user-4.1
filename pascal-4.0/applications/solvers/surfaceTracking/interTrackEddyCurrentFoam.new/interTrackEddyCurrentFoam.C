@@ -57,6 +57,9 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    multiManager.read();
+    multiManager.init();
+
 // TODO: Make this nicer!
     // Init eddyCurrentApp
     {

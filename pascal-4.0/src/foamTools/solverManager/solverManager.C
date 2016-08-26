@@ -252,6 +252,7 @@ bool Foam::solverManager<MESH>::once() const
 
     if (prePhase())
     {
+        read();
         init();
 
         if (!args().optionFound("overwrite"))
@@ -296,6 +297,7 @@ bool Foam::solverManager<MESH>::loop() const
 
     if (prePhase())
     {
+        read();
         init();
 
         messages().newLine();
@@ -350,6 +352,7 @@ bool Foam::solverManager<MESH>::run() const
 
     if (prePhase())
     {
+        read();
         init();
 
         messages().newLine();

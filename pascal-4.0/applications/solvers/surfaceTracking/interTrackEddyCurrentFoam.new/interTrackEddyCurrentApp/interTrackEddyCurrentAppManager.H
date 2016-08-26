@@ -151,11 +151,11 @@ public:
             //- Set Courant Number
             virtual bool setCoNum(scalar& CoNum) const;
 
-            //- Init sequence
-            virtual void init() const;
-
             //- Read sequence
             virtual void read() const;
+
+            //- Init sequence
+            virtual void init() const;
 
             //- Next sequence
             virtual void next() const;

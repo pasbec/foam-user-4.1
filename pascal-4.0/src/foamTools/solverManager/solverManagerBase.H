@@ -113,7 +113,17 @@ private:
             virtual void create(const word& ccase) const = 0;
 
 
-public:
+protected:
+
+    // Protected member Functions
+
+        // Evolution
+
+            //- Set created
+            inline void setCreated() const
+            {
+                created_ = true;
+            };
 
     // Constructor
 
@@ -144,9 +154,11 @@ public:
                     created_ = true;
 
                     create(ccase);
+
+                    return true;
                 }
 
-                return created_;
+                return false;
             };
 };
 
@@ -219,6 +231,16 @@ private:
 
 protected:
 
+    // Protected member Functions
+
+        // Evolution
+
+            //- Set initialized
+            inline void setInitialized() const
+            {
+                initialized_ = true;
+            };
+
     // Constructor
 
         Init() : initialized_(false) {};
@@ -248,9 +270,11 @@ public:
                     initialized_ = true;
 
                     init();
+
+                    return true;
                 }
 
-                return initialized_;
+                return false;
             };
 };
 
@@ -640,12 +664,6 @@ protected:
 
         // Item Data
 
-            //- Return auto pointer of item
-            inline autoPtr<TYPE>& get() const
-            {
-                return dataPtr_;
-            };
-
             //- Set auto pointer content of item
             inline void set(TYPE* pointer) const
             {
@@ -656,6 +674,12 @@ protected:
             inline void set(autoPtr<TYPE> autoPointer) const
             {
                 dataPtr_ = autoPointer;
+            };
+
+            //- Return auto pointer of item
+            inline autoPtr<TYPE>& get() const
+            {
+                return dataPtr_;
             };
 
     // Constructor
@@ -761,8 +785,8 @@ public:
                     return dataPtr_.operator->();
                 };
 
-                //- Return raw pointer
-                inline TYPE* rawPtr() const
+                //- Return auto pointer content of item
+                inline TYPE* getPtr() const
                 {
                     if (valid())
                     {

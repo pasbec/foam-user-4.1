@@ -203,9 +203,6 @@ Foam::interTrackEddyCurrentApp::Manager::Manager
             this->messages().newLine();
         }
     }
-
-    this->read();
-    this->init();
 }
 
 
@@ -267,21 +264,23 @@ bool Foam::interTrackEddyCurrentApp::Manager::setCoNum
 }
 
 
-void Foam::interTrackEddyCurrentApp::Manager::init() const
-{
-    interTrackAppManager().init();
-    eddyCurrentAppManager().init();
-    storage().checkInit();
-    regions().checkInit();
-}
-
-
 void Foam::interTrackEddyCurrentApp::Manager::read() const
 {
     interTrackAppManager().read();
     eddyCurrentAppManager().read();
+
     settings().checkRead();
     regions().checkRead();
+}
+
+
+void Foam::interTrackEddyCurrentApp::Manager::init() const
+{
+    interTrackAppManager().init();
+    eddyCurrentAppManager().init();
+
+    storage().checkInit();
+    regions().checkInit();
 }
 
 

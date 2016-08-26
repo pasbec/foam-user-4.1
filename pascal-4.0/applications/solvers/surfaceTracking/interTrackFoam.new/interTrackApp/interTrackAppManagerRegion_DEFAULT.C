@@ -349,9 +349,9 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::crea
             storage().p(),
             storage().phi(),
             NULL,
-            storage().item_g().rawPtr(),
-            storage().item_transport().rawPtr(),
-            storage().item_turbulence().rawPtr(),
+            storage().item_g().getPtr(),
+            storage().item_transport().getPtr(),
+            storage().item_turbulence().getPtr(),
             NULL,
             interfacePrefix
         )

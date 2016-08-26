@@ -135,10 +135,7 @@ Foam::interTrackApp::Manager::Manager
     (
         args, time, mesh, master, name
     )
-{
-    this->read();
-    this->init();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
