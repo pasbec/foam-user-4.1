@@ -478,9 +478,6 @@ Foam::eddyCurrentApp::Manager::Manager
             this->messages().newLine();
         }
     }
-
-    this->read();
-    this->init();
 }
 
 

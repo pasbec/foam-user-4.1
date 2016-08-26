@@ -60,6 +60,9 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    manager.read();
+    manager.init();
+
     uniformDimensionedScalarField& omega0 = globalStorage.omega0();
 
     while(manager.once())

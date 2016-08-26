@@ -195,8 +195,8 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create
     item_ddtARePhi().enable();
     item_ddtAImPhi().enable();
 
-    item_VRe().enable();
-    item_VIm().enable();
+    item_VRe().setState(control().meshIs3D());
+    item_VIm().setState(control().meshIs3D());
 
     item_jRe().enable();
     item_jIm().enable();
