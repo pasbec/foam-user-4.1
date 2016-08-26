@@ -191,24 +191,6 @@ public:
                 ).dimensions();
             };
 
-            //- Return reference to field
-            inline GeometricField<Type, PatchField, GeoMesh>& field
-            (
-                label regionI
-            ) const
-            {
-                return operator[](regionI);
-            };
-
-            //- Return reference to field
-            inline GeometricField<Type, PatchField, GeoMesh>& field
-            (
-                const word& regionName = polyMesh::defaultRegion
-            ) const
-            {
-                return operator[](regions()[regionName]);
-            };
-
             //- WriteData member function required by regIOobject
             inline bool writeData(Ostream&) const
             {
@@ -414,7 +396,7 @@ public:
         ) const
         {
             return fieldPtrs_[regionI];
-        }
+        };
 
         //- Field access operator by regionName
         inline GeometricField<Type, PatchField, GeoMesh>& operator[]
@@ -423,7 +405,25 @@ public:
         ) const
         {
             return fieldPtrs_[regions()[regionName]];
-        }
+        };
+
+        //- Field access operator by index
+        inline const GeometricField<Type, PatchField, GeoMesh>* operator()
+        (
+            label regionI
+        ) const
+        {
+            return fieldPtrs_(regionI);
+        };
+
+        //- Field access operator by regionName
+        inline const GeometricField<Type, PatchField, GeoMesh>* operator()
+        (
+            const word& regionName
+        ) const
+        {
+            return fieldPtrs_(regions()[regionName]);
+        };
 
         void operator=
         (

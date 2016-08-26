@@ -180,7 +180,7 @@ public:
             inline bool initialized() const
             {
                 return initialized_;
-            }
+            };
 
         // Access
 
@@ -194,7 +194,7 @@ public:
             inline const objectRegistry& thisDb() const
             {
                 return *this;
-            }
+            };
 
             //- Return const reference to time
             inline const Time& time() const
@@ -213,24 +213,6 @@ public:
             {
                 return regions_;
             };
-
-            //- Return reference to mesh
-            inline polyMesh& mesh
-            (
-                label regionI
-            ) const
-            {
-                return operator[](regionI);
-            }
-
-            //- Return reference to mesh
-            inline polyMesh& mesh
-            (
-                const word& regionName = polyMesh::defaultRegion
-            ) const
-            {
-                return operator[](regions()[regionName]);
-            }
 
         // Active mesh data
 
@@ -406,7 +388,7 @@ public:
                     type,
                     regions()[toRegionI]
                 );
-            }
+            };
 
             //- Return const reference addressing of given type
             //  and given region names
@@ -423,7 +405,7 @@ public:
                     regions()[fromRegionName],
                     regions()[toRegionName]
                 );
-            }
+            };
 
             //- Return const reference map of given type
             //  and given region indices
@@ -439,7 +421,7 @@ public:
                     type,
                     regions()[toRegionI]
                 );
-            }
+            };
 
             //- Return const reference map of given type
             //  and given region names
@@ -456,7 +438,7 @@ public:
                     regions()[fromRegionName],
                     regions()[toRegionName]
                 );
-            }
+            };
 
     // Member Operators
 
@@ -467,7 +449,7 @@ public:
         ) const
         {
             return meshPtrs_[regionI];
-        }
+        };
 
         //- Mesh access operator by regionName
         inline polyMesh& operator[]
@@ -476,7 +458,7 @@ public:
         ) const
         {
             return operator[](regions()[regionName]);
-        }
+        };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

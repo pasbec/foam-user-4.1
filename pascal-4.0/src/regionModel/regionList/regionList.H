@@ -135,19 +135,19 @@ public:
         {
             regionNames_ = rl.names();
             regionIndices_ = rl.indices();
-        }
+        };
 
         //- Return region name for given index
         inline const word& operator[](label index) const
         {
             return name(index);
-        }
+        };
 
         //- Return region index for given name
         inline label operator[](const word& name) const
         {
             return index(name);
-        }
+        };
 };
 
 

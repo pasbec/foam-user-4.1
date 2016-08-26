@@ -122,31 +122,13 @@ public:
                 return *this;
             };
 
-            //- Return reference to mesh
-            inline fvMesh& mesh
-            (
-                label regionI
-            ) const
-            {
-                return operator[](regionI);
-            }
-
-            //- Return reference to mesh
-            inline fvMesh& mesh
-            (
-                const word& regionName = polyMesh::defaultRegion
-            ) const
-            {
-                return operator[](regions()[regionName]);
-            }
-
             //- Return reference to solution dict
             inline fvSolution& solutionDict
             (
                 label regionI
             ) const
             {
-                return mesh(regionI).solutionDict();
+                return operator[](regionI).solutionDict();
             };
 
             //- Return reference to solution dict
@@ -155,7 +137,7 @@ public:
                 const word& regionName = polyMesh::defaultRegion
             ) const
             {
-                return mesh(regions()[regionName]).solutionDict();
+                return operator[](regions()[regionName]).solutionDict();
             };
 
     // Member Operators
@@ -167,7 +149,7 @@ public:
         ) const
         {
             return static_cast<fvMesh&>(meshPtrs_[regionI]);
-        }
+        };
 
         //- Mesh access operator by regionName
         inline fvMesh& operator[]
@@ -176,7 +158,7 @@ public:
         ) const
         {
             return operator[](regions()[regionName]);
-        }
+        };
 
         bool operator!=(const regionFvMesh&) const;
         bool operator==(const regionFvMesh&) const;

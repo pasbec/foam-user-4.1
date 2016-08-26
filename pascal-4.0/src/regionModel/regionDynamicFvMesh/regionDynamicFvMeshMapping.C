@@ -46,7 +46,7 @@ void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
         tetPointVectorField& toMotionU =
             const_cast<tetPointVectorField&>
             (
-                mesh(toRegionI).objectRegistry::
+                operator[](toRegionI).objectRegistry::
                 lookupObject<tetPointVectorField>
                 (
                     "motionU"
@@ -60,17 +60,17 @@ void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
                 toRegionI
             )[0];
 
-        forAll (mesh(fromRegionI).boundary(), fromPatchI)
+        forAll (operator[](fromRegionI).boundary(), fromPatchI)
         {
             label toPatchI = patchMap[fromPatchI];
 
             if (toPatchI != -1)
             {
                 const polyPatch& fromPolyPatch =
-                    mesh(fromRegionI).boundaryMesh()[fromPatchI];
+                    operator[](fromRegionI).boundaryMesh()[fromPatchI];
 
                 const polyPatch& toPolyPatch =
-                    mesh(toRegionI).boundaryMesh()[toPatchI];
+                    operator[](toRegionI).boundaryMesh()[toPatchI];
 
                 tmp<vectorField> ttoTotalDisplacement
                 (
@@ -113,7 +113,7 @@ void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
         pointVectorField& toPointMotionU =
             const_cast<pointVectorField&>
             (
-                mesh(toRegionI).objectRegistry::
+                operator[](toRegionI).objectRegistry::
                 lookupObject<pointVectorField>
                 (
                     "pointMotionU"
@@ -127,17 +127,17 @@ void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
                 toRegionI
             )[0];
 
-        forAll (mesh(fromRegionI).boundary(), fromPatchI)
+        forAll (operator[](fromRegionI).boundary(), fromPatchI)
         {
             label toPatchI = patchMap[fromPatchI];
 
             if (toPatchI != -1)
             {
                 const polyPatch& fromPolyPatch =
-                    mesh(fromRegionI).boundaryMesh()[fromPatchI];
+                    operator[](fromRegionI).boundaryMesh()[fromPatchI];
 
                 const polyPatch& toPolyPatch =
-                    mesh(toRegionI).boundaryMesh()[toPatchI];
+                    operator[](toRegionI).boundaryMesh()[toPatchI];
 
                 tmp<vectorField> ttoTotalDisplacement
                 (

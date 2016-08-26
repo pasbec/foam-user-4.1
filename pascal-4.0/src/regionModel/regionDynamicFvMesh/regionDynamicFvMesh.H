@@ -129,24 +129,6 @@ public:
                 return *this;
             };
 
-            //- Return reference to mesh
-            inline dynamicFvMesh& mesh
-            (
-                label regionI
-            ) const
-            {
-                return operator[](regionI);
-            }
-
-            //- Return reference to mesh
-            inline dynamicFvMesh& mesh
-            (
-                const word& regionName = polyMesh::defaultRegion
-            ) const
-            {
-                return operator[](regions()[regionName]);
-            }
-
             //- Return true if motion solver type is fe
             inline bool isFeMotionSolver
             (
@@ -154,7 +136,7 @@ public:
             ) const
             {
                 return isFeMotionSolver_[regionI];
-            }
+            };
 
             //- Return true if motion solver type is fe
             inline bool isFeMotionSolver
@@ -163,7 +145,7 @@ public:
             ) const
             {
                 return isFeMotionSolver_[regions()[regionName]];
-            }
+            };
 
             //- Return true if motion solver type is fv
             inline bool isFvMotionSolver
@@ -172,7 +154,7 @@ public:
             ) const
             {
                 return isFvMotionSolver_[regionI];
-            }
+            };
 
             //- Return true if motion solver type is fv
             inline bool isFvMotionSolver
@@ -181,7 +163,7 @@ public:
             ) const
             {
                 return isFvMotionSolver_[regions()[regionName]];
-            }
+            };
 
         // Mapping
 
@@ -210,7 +192,7 @@ public:
         ) const
         {
             return static_cast<dynamicFvMesh&>(meshPtrs_[regionI]);
-        }
+        };
 
         //- Mesh access operator by regionName
         inline dynamicFvMesh& operator[]
@@ -219,7 +201,7 @@ public:
         ) const
         {
             return operator[](regions()[regionName]);
-        }
+        };
 };
 
 

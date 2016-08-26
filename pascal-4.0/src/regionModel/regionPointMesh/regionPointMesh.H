@@ -114,13 +114,13 @@ public:
             inline const regionPointMesh& rmesh() const
             {
                 return *this;
-            }
+            };
 
             //- Return the object registry
             inline const objectRegistry& thisDb() const
             {
                 return rpMesh_.thisDb();
-            }
+            };
 
             //- Return const reference to time
             inline const Time& time() const
@@ -140,24 +140,6 @@ public:
                 return rpMesh_.regions();
             };
 
-            //- Return reference to mesh
-            inline const pointMesh& mesh
-            (
-                label regionI
-            ) const
-            {
-                return operator[](regionI);
-            }
-
-            //- Return reference to mesh
-            inline const pointMesh& mesh
-            (
-                const word& regionName = polyMesh::defaultRegion
-            ) const
-            {
-                return operator[](regions()[regionName]);
-            }
-
     // Member Operators
 
         //- Mesh access operator by index (direct)
@@ -167,7 +149,7 @@ public:
         ) const
         {
             return meshPtrs_[regionI];
-        }
+        };
 
         //- Mesh access operator by regionName
         inline pointMesh& operator[]
@@ -176,7 +158,7 @@ public:
         ) const
         {
             return operator[](regions()[regionName]);
-        }
+        };
 
         bool operator!=(const regionPointMesh&) const;
         bool operator==(const regionPointMesh&) const;

@@ -40,9 +40,11 @@ void regionGeometricField                                                     \
 {                                                                             \
     label regionI0 = regions()[polyMesh::defaultRegion];                      \
                                                                               \
-    const GeometricField<Type, fvPatchField, volMesh>& vf0 = field(regionI0); \
+    const GeometricField<Type, fvPatchField, volMesh>& vf0 =                  \
+        operator[](regionI0);                                                 \
                                                                               \
-    GeometricField<Type, fvPatchField, volMesh>& vf = field(regionI);         \
+    GeometricField<Type, fvPatchField, volMesh>& vf =                         \
+        operator[](regionI);                                                  \
                                                                               \
     const labelList& map =                                                    \
         mesh().typeMap(addressingTypes::CELL, regionI, regionI0);             \
@@ -65,9 +67,11 @@ void regionGeometricField                                                     \
 {                                                                             \
     label regionI0 = regions()[polyMesh::defaultRegion];                      \
                                                                               \
-    GeometricField<Type, fvPatchField, volMesh>& vf0 = field(regionI0);       \
+    GeometricField<Type, fvPatchField, volMesh>& vf0 =                        \
+        operator[](regionI0);                                                 \
                                                                               \
-    const GeometricField<Type, fvPatchField, volMesh>& vf = field(regionI);   \
+    const GeometricField<Type, fvPatchField, volMesh>& vf =                   \
+        operator[](regionI);                                                  \
                                                                               \
     const labelList& map =                                                    \
         mesh().typeMap(addressingTypes::CELL, regionI, regionI0);             \

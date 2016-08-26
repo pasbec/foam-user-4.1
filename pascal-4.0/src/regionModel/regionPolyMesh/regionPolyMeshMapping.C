@@ -49,7 +49,7 @@ void regionPolyMesh::map
 {
     label regionI0 = regions()[polyMesh::defaultRegion];
 
-    const pointField& points = mesh(regionI0).points();
+    const pointField& points = operator[](regionI0).points();
 
     const labelList& map =
         typeMap(addressingTypes::POINT, regionI, regionI0);
@@ -64,7 +64,7 @@ void regionPolyMesh::map
     else
     {
         const polyBoundaryMesh& boundaryMesh =
-            mesh(regionI).boundaryMesh();
+            operator[](regionI).boundaryMesh();
 
         label patchI = boundaryMesh.findPatchID(patchName);
 
@@ -115,7 +115,7 @@ tmp<pointField> regionPolyMesh::map
 {
     tmp<pointField> tNewPoints
     (
-        new pointField(mesh(regionI).points())
+        new pointField(operator[](regionI).points())
     );
 
     pointField& newPoints = tNewPoints();
@@ -154,7 +154,7 @@ void regionPolyMesh::rmap
 {
     label regionI0 = regions()[polyMesh::defaultRegion];
 
-    const pointField& points = mesh(regionI).points();
+    const pointField& points = operator[](regionI).points();
 
     const labelList& map =
         typeMap(addressingTypes::POINT, regionI, regionI0);
@@ -169,7 +169,7 @@ void regionPolyMesh::rmap
     else
     {
         const polyBoundaryMesh& boundaryMesh =
-            mesh(regionI).boundaryMesh();
+            operator[](regionI).boundaryMesh();
 
         label patchI = boundaryMesh.findPatchID(patchName);
 
@@ -222,7 +222,7 @@ tmp<pointField> regionPolyMesh::rmap
 
     tmp<pointField> tNewPoints
     (
-        new pointField(mesh(regionI0).points())
+        new pointField(operator[](regionI0).points())
     );
 
     pointField& newPoints = tNewPoints();
@@ -258,8 +258,8 @@ labelListList regionPolyMesh::patchMapDirectMapped
     label toRegionI
 ) const
 {
-    const polyMesh& fromMesh = mesh(fromRegionI);
-    const polyMesh& toMesh = mesh(toRegionI);
+    const polyMesh& fromMesh = operator[](fromRegionI);
+    const polyMesh& toMesh = operator[](toRegionI);
 
     label pmapSize = fromMesh.boundaryMesh().size();
 
