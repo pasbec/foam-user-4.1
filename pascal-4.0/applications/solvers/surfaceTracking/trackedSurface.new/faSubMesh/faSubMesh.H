@@ -42,6 +42,7 @@ SourceFiles
 #include "polyPatch.H"
 #include "faCFD.H"
 #include "faMesh.H"
+#include "demandDrivenData.H"
 #include "addressingTypes.H"
 #include "regionToRegionAddressing.H"
 

@@ -26,6 +26,14 @@ mkdir 'constant/polyMesh' > /dev/null 2>&1
 rm -rf 'constant/faMesh' > /dev/null 2>&1
 mkdir 'constant/faMesh' > /dev/null 2>&1
 
+find -name *Map -delete > /dev/null 2>&1
+find -name *Map.gz -delete > /dev/null 2>&1
+find -name *Addressing -delete > /dev/null 2>&1
+find -name *Addressing.gz -delete > /dev/null 2>&1
+find -name *RegionToRegionAddressing -delete > /dev/null 2>&1
+find -name *RegionToRegionAddressing.gz -delete > /dev/null 2>&1
+
+
 # Remove initial time folder
 rm -rf 0
 

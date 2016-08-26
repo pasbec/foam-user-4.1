@@ -50,6 +50,7 @@ SourceFiles
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
 #include "surfactantProperties.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

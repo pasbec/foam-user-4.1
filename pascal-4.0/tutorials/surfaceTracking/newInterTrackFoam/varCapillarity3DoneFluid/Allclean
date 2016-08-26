@@ -19,6 +19,13 @@ cleanHistoryFolder
 cleanTimeDirectories
 cleanFaMesh
 
-rm -rf processor*
-rm -rf system/region0_faSubMesh;
-rm -rf constant/region0_faSubMesh
+find -name *Map -delete > /dev/null 2>&1
+find -name *Map.gz -delete > /dev/null 2>&1
+find -name *Addressing -delete > /dev/null 2>&1
+find -name *Addressing.gz -delete > /dev/null 2>&1
+find -name *RegionToRegionAddressing -delete > /dev/null 2>&1
+find -name *RegionToRegionAddressing.gz -delete > /dev/null 2>&1
+
+rm -rf processor* > /dev/null 2>&1
+rm -rf system/region0_faSubMesh > /dev/null 2>&1
+rm -rf constant/region0_faSubMesh > /dev/null 2>&1

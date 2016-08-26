@@ -35,7 +35,8 @@ cleanPolyMesh ()
     baseDir='constant'
     [[ ! -z "$1" ]] && baseDir="${baseDir}/$1"
 
-    rm -rf "$baseDir/polyMesh/allOwner"* \
+    rm -rf "$baseDir/polyMesh/sets/" \
+           "$baseDir/polyMesh/allOwner"* \
            "$baseDir/polyMesh/cell"* \
            "$baseDir/polyMesh/face"* \
            "$baseDir/polyMesh/meshModifiers"* \
@@ -44,15 +45,20 @@ cleanPolyMesh ()
            "$baseDir/polyMesh/point"* \
            "$baseDir/polyMesh/edge"* \
            "$baseDir/polyMesh/zoneToPatchName" \
-           "$baseDir/cellLevel" \
-           "$baseDir/polyMesh/cellLevel"* \
-           "$baseDir/pointLevel" \
            "$baseDir/polyMesh/pointLevel"* \
            "$baseDir/polyMesh/refinementHistory"* \
            "$baseDir/polyMesh/surfaceIndex"* \
+           "$baseDir/polyMesh/cellLevel"* \
+           "$baseDir/pointMap/"*'Addressing'* \
+           "$baseDir/pointMap/"*'Map'* \
+           "$baseDir/cellLevel" \
+           "$baseDir/cellLevel.gz" \
+           "$baseDir/pointLevel" \
+           "$baseDir/pointLevel.gz" \
            "$baseDir/cellToRegion" \
+           "$baseDir/cellToRegion.gz" \
            "$baseDir/cellDecomposition" \
-           "$baseDir/polyMesh/sets/" \
+           "$baseDir/cellDecomposition.gz" \
            > /dev/null 2>&1
 }
 

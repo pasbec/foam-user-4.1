@@ -25,9 +25,6 @@ License
 
 #include "faSubMesh.H"
 
-#include "triSurface.H"
-#include "Xfer.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

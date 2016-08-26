@@ -714,6 +714,13 @@ int main(int argc, char *argv[])
         faceNeighbour[faceI] = cMesh.faceNeighbour()[cMfaceI];
     }
 
+    if (debug)
+    {
+        Info << "DEBUG | faceOwner.size() = " << faceOwner.size() << endl;
+        Info << "DEBUG | faceNeighbour.size() = " << faceNeighbour.size() << endl;
+        Info << endl;
+    }
+
 
 // subPolyMesh
 
