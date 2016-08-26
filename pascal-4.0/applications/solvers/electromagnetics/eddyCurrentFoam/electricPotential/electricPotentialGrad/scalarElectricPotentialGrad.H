@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     | Version:     3.2
+   \\    /   O peration     | Version:     4.0
     \\  /    A nd           | Web:         http://www.foam-extend.org
      \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
@@ -30,12 +30,29 @@ Description
 SourceFiles
     scalarElectricPotentialGrad.C
 
+Author
+    Pascal Beckstein
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef scalarElectricPotentialGrad_H
 #define scalarElectricPotentialGrad_H
 
 #include "electricPotentialGrad.H"
+
+// TODO: Realize this with simple interpolation scheme instead of a
+//       dedicated gradient scheme?
+//       Is it possible to implement an implicit block-matrix version in that
+//       case?
+
+// TODO: Implicit gradient
+
+// TODO: Check delta coeffs and consistency with electricPotentialLaplacian
+//
+
+// TODO: Check boundary contributions for boundaries with transformation!!
+//       Currently boundary contributions are simply realized to work with
+//       coupled processor patches
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

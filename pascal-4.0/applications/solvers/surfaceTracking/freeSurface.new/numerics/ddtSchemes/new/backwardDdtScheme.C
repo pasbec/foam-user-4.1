@@ -1,26 +1,25 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
-     \\/     M anipulation  |
+  \\      /  F ield         | foam-extend: Open Source CFD
+   \\    /   O peration     | Version:     4.0
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
+    This file is part of foam-extend.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
+    foam-extend is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
+    Free Software Foundation, either version 3 of the License, or (at your
     option) any later version.
 
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    foam-extend is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -149,38 +148,38 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
          && phi.dimensions() == dimVelocity*dimArea
         )
         {
-            surfaceVectorField U0 = 
+            surfaceVectorField U0 =
                 fvc::interpolate(U.oldTime());
 
-            surfaceVectorField U00 = 
+            surfaceVectorField U00 =
                 fvc::interpolate(U.oldTime().oldTime());
 
 
-//             surfaceVectorField dU0 = 
+//             surfaceVectorField dU0 =
 //                 fvc::interpolate(U.oldTime());
 //             forAll(dU0.boundaryField(), patchI)
 //             {
 //                 if (!U.boundaryField()[patchI].coupled())
 //                 {
-//                     dU0.boundaryField()[patchI] = 
+//                     dU0.boundaryField()[patchI] =
 //                         U.oldTime().boundaryField()[patchI]
 //                        .patchInternalField();
 //                 }
 //             }
 
-//             surfaceVectorField dU00 = 
+//             surfaceVectorField dU00 =
 //                 fvc::interpolate(U.oldTime().oldTime());
 //             forAll(dU00.boundaryField(), patchI)
 //             {
 //                 if (!U.boundaryField()[patchI].coupled())
 //                 {
-//                     dU00.boundaryField()[patchI] = 
+//                     dU00.boundaryField()[patchI] =
 //                         U.oldTime().oldTime().boundaryField()[patchI]
 //                        .patchInternalField();
 //                 }
 //             }
 
-            const surfaceVectorField& Sf = 
+            const surfaceVectorField& Sf =
                 mesh().objectRegistry::lookupObject<surfaceVectorField>
                 (
                     "Sf"
@@ -227,7 +226,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
                                 coefft0*fvc::interpolate(V0oV)*U0
                               - coefft00*fvc::interpolate(V00oV)*U00
                             ) & mesh().Sf()
-                        ) 
+                        )
                       - (
                             fvc::interpolate
                             (
@@ -252,7 +251,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
 //                        *fvc::interpolate(V00oV)
 //                        *(mesh().Sf()&dU00)
 //                     )
-//                    /fvc::interpolate(1.0/rA) 
+//                    /fvc::interpolate(1.0/rA)
 //                 )
 //             );
         }
@@ -275,25 +274,25 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
          && phi.dimensions() == dimVelocity*dimArea
         )
         {
-            surfaceVectorField dU0 = 
+            surfaceVectorField dU0 =
                 fvc::interpolate(U.oldTime());
             forAll(dU0.boundaryField(), patchI)
             {
                 if (!U.boundaryField()[patchI].coupled())
                 {
-                    dU0.boundaryField()[patchI] = 
+                    dU0.boundaryField()[patchI] =
                         U.oldTime().boundaryField()[patchI]
                        .patchInternalField();
                 }
             }
 
-            surfaceVectorField dU00 = 
+            surfaceVectorField dU00 =
                 fvc::interpolate(U.oldTime().oldTime());
             forAll(dU00.boundaryField(), patchI)
             {
                 if (!U.boundaryField()[patchI].coupled())
                 {
-                    dU00.boundaryField()[patchI] = 
+                    dU00.boundaryField()[patchI] =
                         U.oldTime().oldTime().boundaryField()[patchI]
                        .patchInternalField();
                 }
@@ -323,7 +322,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
                         coefft0*(mesh().Sf()&dU0)
                       - coefft00*(mesh().Sf()&dU00)
                     )
-                   /fvc::interpolate(1.0/rA) 
+                   /fvc::interpolate(1.0/rA)
                 )
             );
         }
@@ -439,14 +438,14 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
                 ddtPhiCoeff.boundaryField()[patchI] = 0.0;
             }
 
-//             if 
+//             if
 //             (
 //                 U.boundaryField()[patchI].fixesValue()
 //             )
 //             {
 //                 ddtPhiCoeff.boundaryField()[patchI] = 0.0;
 //             }
-//             else if 
+//             else if
 //             (
 //                 U.boundaryField()[patchI].type()
 //              == slipFvPatchVectorField::typeName
@@ -454,7 +453,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
 //             {
 //                 ddtPhiCoeff.boundaryField()[patchI] = 0.0;
 //             }
-//             else if 
+//             else if
 //             (
 //                 U.boundaryField()[patchI].type()
 //              == symmetryFvPatchVectorField::typeName
@@ -462,7 +461,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
 //             {
 //                 ddtPhiCoeff.boundaryField()[patchI] = 0.0;
 //             }
-//             else if 
+//             else if
 //             (
 //                 U.boundaryField()[patchI].type()
 //              == wedgeFvPatchVectorField::typeName
@@ -485,7 +484,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
             {
                 if (!U.boundaryField()[patchI].coupled())
                 {
-                    dU0.boundaryField()[patchI] = 
+                    dU0.boundaryField()[patchI] =
                         U.oldTime().boundaryField()[patchI]
                        .patchInternalField();
                 }
@@ -496,7 +495,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
             {
                 if (!U.boundaryField()[patchI].coupled())
                 {
-                    dU00.boundaryField()[patchI] = 
+                    dU00.boundaryField()[patchI] =
                         U.oldTime().oldTime().boundaryField()[patchI]
                        .patchInternalField();
                 }
@@ -506,7 +505,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
             {
                 Info << "ZT, backwardDdtPhiCorr" << endl;
 
-                const surfaceVectorField& Sf = 
+                const surfaceVectorField& Sf =
                     mesh().objectRegistry::lookupObject<surfaceVectorField>
                     (
                         "Sf"
@@ -558,11 +557,11 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
                        *fvc::interpolate(rho.oldTime().oldTime()*V00oV)
                        *(mesh().Sf()&dU00)
                     )
-                   /fvc::interpolate(1.0/rA) 
+                   /fvc::interpolate(1.0/rA)
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == dimVelocity
          && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea
@@ -570,7 +569,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
         {
             if(mesh().objectRegistry::foundObject<surfaceVectorField>("Sf"))
             {
-                const surfaceVectorField& Sf = 
+                const surfaceVectorField& Sf =
                     mesh().objectRegistry::lookupObject<surfaceVectorField>
                     (
                         "Sf"
@@ -580,7 +579,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
                 U0 -= (Sf.oldTime()&U0)*Sf.oldTime()/magSqr(Sf.oldTime());
                 U0 += phi.oldTime()*Sf.oldTime()/magSqr(Sf.oldTime());
 
-                surfaceVectorField U00 = 
+                surfaceVectorField U00 =
                     fvc::interpolate(U.oldTime().oldTime());
                 U00 -= (Sf.oldTime().oldTime()&U00)*Sf.oldTime().oldTime()
                     /magSqr(Sf.oldTime().oldTime());
@@ -640,7 +639,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == rho.dimensions()*dimVelocity
          && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea
@@ -648,7 +647,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
         {
             if(mesh().objectRegistry::foundObject<surfaceVectorField>("Sf"))
             {
-                const surfaceVectorField& Sf = 
+                const surfaceVectorField& Sf =
                     mesh().objectRegistry::lookupObject<surfaceVectorField>
                     (
                         "Sf"
@@ -658,14 +657,14 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
                 U0 -= (Sf.oldTime()&U0)*Sf.oldTime()/magSqr(Sf.oldTime());
                 U0 += phi.oldTime()*Sf.oldTime()/magSqr(Sf.oldTime());
 
-                surfaceVectorField U00 = 
+                surfaceVectorField U00 =
                     fvc::interpolate(U.oldTime().oldTime());
                 U00 -= (Sf.oldTime().oldTime()&U00)*Sf.oldTime().oldTime()
                     /magSqr(Sf.oldTime().oldTime());
                 U00 += phi.oldTime().oldTime()*Sf.oldTime().oldTime()
                     /magSqr(Sf.oldTime().oldTime());
 
-                
+
                 return tmp<surfaceScalarField>
                 (
                     new surfaceScalarField
@@ -754,7 +753,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == dimVelocity
          && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea
@@ -793,7 +792,7 @@ backwardDdtScheme<vector>::fvcDdtPhiCorr
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == rho.dimensions()*dimVelocity
          && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea

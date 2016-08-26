@@ -22,11 +22,11 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    makeRegionToRegionAddressing
+    initTurbulenceValues
 
 Description
     Initialize turbulence values based on dimensional values given in
-    subDict "init" of turbulenceProperties
+    subDict "init" of turbulenceProperties.
 
 Author
     Pascal Beckstein
@@ -34,6 +34,8 @@ Author
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 using namespace Foam;
 
@@ -179,4 +181,4 @@ int main(int argc, char *argv[])
     return(0);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //

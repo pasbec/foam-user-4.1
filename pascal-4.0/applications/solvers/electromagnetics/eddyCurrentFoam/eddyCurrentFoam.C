@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     |
-    \\  /    A nd           | For copyright notice see file Copyright
-     \\/     M anipulation  |
+   \\    /   O peration     | Version:     4.0
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
     This file is part of foam-extend.
@@ -27,12 +27,17 @@ Application
 Description
     ...
 
+Author
+    Pascal Beckstein
+
 \*---------------------------------------------------------------------------*/
 
 #include "eddyCurrentApp.H"
 
 // TODO: Derived gradient boundary condition for VRe/VIm in conductor region
-// TODO: Remove interfaceLabel? Use alias of calculatedFvPatchField or special patchField
+
+// TODO: Remove interfaceLabel? Use alias of calculatedFvPatchField or special
+//       patchField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

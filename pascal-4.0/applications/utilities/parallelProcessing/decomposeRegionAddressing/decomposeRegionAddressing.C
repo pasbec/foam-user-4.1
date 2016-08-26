@@ -25,12 +25,18 @@ Application
     decomposeRegionAddressing
 
 Description
-    Decompose region addressings after the case has been decomposed
+    Decompose region addressings after the case has been decomposed.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "processorMeshes.H"
+
+// TODO: Think about this agein. Currently we are "just" decomposing the region
+//       addressings for all processors. But the labels are still addressing the
+//       serial region! This is currently the INTENDED behaviour as it is needed
+//       for the region-to-region addressing. Maybe it is not very intuitive and
+//       should be revised together with the regionToRegionAddressing class!
 
 // TODO: Warning/Exit if region option is not used (for defaultRegion). It
 //       simply does not make any sense.
@@ -417,6 +423,5 @@ int main(int argc, char *argv[])
 
     return(0);
 }
-
 
 // ************************************************************************* //

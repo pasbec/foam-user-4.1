@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     | Version:     3.2
+   \\    /   O peration     | Version:     4.0
     \\  /    A nd           | Web:         http://www.foam-extend.org
      \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
@@ -32,6 +32,9 @@ SourceFiles
     faSubMesh.C
     faSubMeshDemandDrivenData.C
 
+Author
+    Pascal Beckstein
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef faSubMesh_H
@@ -45,6 +48,11 @@ SourceFiles
 #include "demandDrivenData.H"
 #include "addressingTypes.H"
 #include "regionToRegionAddressing.H"
+
+// TODO [High]: Curvature at boundaries (interpolation values AND
+//              point-normal correction)?
+// TODO [High]: Curvature weighting factors?
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -140,10 +148,6 @@ public:
 
     // Member Functions
 
-        // Helpers
-
-        // Database
-
         // Access
 
             //- Return access to base polyMesh
@@ -219,8 +223,6 @@ public:
                 return true;
             }
 
-        // Mapping
-
         // Demand-driven data
 
             //- Return sub to base face map for finite area meshes
@@ -229,12 +231,6 @@ public:
             //- Return face curvatures calculated on sub faMesh
             //  interpolated to base faMesh
             const areaScalarField& faceCurvatures() const;
-
-        //- Write mesh
-//         virtual bool write() const;
-
-
-    // Member Operators
 };
 
 

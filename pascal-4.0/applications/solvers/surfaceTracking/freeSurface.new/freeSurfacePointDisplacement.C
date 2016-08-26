@@ -1,26 +1,25 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2005 OpenCFD Ltd.
-     \\/     M anipulation  |
+  \\      /  F ield         | foam-extend: Open Source CFD
+   \\    /   O peration     | Version:     4.0
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
+    This file is part of foam-extend.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
+    foam-extend is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
+    Free Software Foundation, either version 3 of the License, or (at your
     option) any later version.
 
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    foam-extend is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -75,7 +74,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
             const labelListList& fFaces = aMesh().patch().faceFaces();
             const vectorField& fCentres =
                 aMesh().areaCentres().internalField();
-            
+
             forAll(eFaces, edgeI)
             {
                 const label& curFace = eFaces[edgeI];
@@ -87,7 +86,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                 forAll(curFaceFaces, faceI)
                 {
                     label index = findIndex(eFaces, curFaceFaces[faceI]);
-                    
+
                     if (index == -1)
                     {
                         H +=
@@ -100,7 +99,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                         counter++;
                     }
                 }
-                
+
                 H /= counter;
 
                 controlPoints()[curFace] =
@@ -119,7 +118,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
             vector::zero
         )
     );
-    
+
     vectorField& displacement = tdisplacement();
 
 
@@ -139,22 +138,22 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
         for (label i=0; i<curPointFaces.size(); i++)
         {
             label curFace = curPointFaces[i];
-            
+
             lsPoints[i] = controlPoints()[curFace];
         }
-       
-        vectorField pointAndNormal = 
+
+        vectorField pointAndNormal =
             lsPlanePointAndNormal
             (
-                lsPoints, 
-                points[curPoint], 
+                lsPoints,
+                points[curPoint],
                 pointNormals[curPoint]
             );
 
         vector& P = pointAndNormal[0];
         vector& N = pointAndNormal[1];
 
-        displacement[curPoint] = 
+        displacement[curPoint] =
             pointsDisplacementDir()[curPoint]
            *((P - points[curPoint])&N)
            /(pointsDisplacementDir()[curPoint]&N);
@@ -169,7 +168,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
     const labelList& meshPoints = aMesh().patch().meshPoints();
     forAll(oldPoints, pI)
     {
-        oldPoints[pI] = 
+        oldPoints[pI] =
             mesh().oldPoints()[meshPoints[pI]];
     }
 
@@ -185,7 +184,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
             )
         );
 
-        vectorField N = 
+        vectorField N =
             aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
 
         const labelList& eFaces =
@@ -194,7 +193,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
         // Correct N according to specified contact angle
         if (contactAnglePtr_)
         {
-            label ngbPolyPatchID = 
+            label ngbPolyPatchID =
                 aMesh().boundary()[patchI].ngbPolyPatchIndex();
 
             if (ngbPolyPatchID != -1)
@@ -205,7 +204,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                  == wallFvPatch::typeName
                 )
                 {
-                    scalar rotAngle = 
+                    scalar rotAngle =
                         average
                         (
                             90
@@ -229,7 +228,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
 //                         vector e = patchEdges[edgeI].vec(aMesh().points());
 
                         // Adjust direction
-                        rotationAxis[edgeI] = 
+                        rotationAxis[edgeI] =
                             e*(e&rotationAxis[edgeI])
                            /mag((e&rotationAxis[edgeI]));
                     }
@@ -238,11 +237,11 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                     vectorField rotationAxis2 = rotationAxis;
                     forAll(rotationAxis2, edgeI)
                     {
-                        rotationAxis2[edgeI] = 
+                        rotationAxis2[edgeI] =
                             (N[edgeI]^facesDisplacementDir()[eFaces[edgeI]]);
-                        
+
                         // Adjust direction
-                        rotationAxis2[edgeI] = 
+                        rotationAxis2[edgeI] =
                             rotationAxis2[edgeI]
                            *(rotationAxis2[edgeI]&rotationAxis[edgeI])
                            /mag((rotationAxis2[edgeI]&rotationAxis[edgeI]));
@@ -257,7 +256,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                     N /= mag(N);
 
                     N = (rotationAxis^N);
-                    
+
                     N = (N^rotationAxis2);
 
                     N /= mag(N);
@@ -278,7 +277,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
         vectorField peCentres(pEdges.size(), vector::zero);
         forAll(peCentres, edgeI)
         {
-            peCentres[edgeI] = 
+            peCentres[edgeI] =
                 edges[pEdges[edgeI]].centre(points);
         }
 
@@ -286,12 +285,12 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
             vectorField(controlPoints(), peFaces)
           - peCentres;
 
-        patchMirrorPoints[patchI] = 
+        patchMirrorPoints[patchI] =
             peCentres + ((I - 2*N*N)&delta);
     }
 
 
-    // Calculate displacement of boundary points 
+    // Calculate displacement of boundary points
     labelList boundaryPoints = aMesh().boundaryPoints();
 
     const labelListList& edgeFaces = aMesh().patch().edgeFaces();
@@ -300,7 +299,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
     forAll (boundaryPoints, pointI)
     {
         label curPoint = boundaryPoints[pointI];
-        
+
         if (motionPointsMask()[curPoint] == 1)
         {
             // Calculating mirror points
@@ -309,7 +308,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
             vectorField mirrorPoints(2, vector::zero);
 
             label counter = -1;
-        
+
             forAll (curPointEdges, edgeI)
             {
                 label curEdge = curPointEdges[edgeI];
@@ -331,20 +330,20 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                         }
                     }
 
-                    mirrorPoints[++counter] = 
+                    mirrorPoints[++counter] =
                         patchMirrorPoints[patchID][edgeID];
                 }
             }
 
             // Calculating LS plane fit
             const labelList& curPointFaces = pointFaces[curPoint];
-        
+
             vectorField lsPoints
             (
-                curPointFaces.size() + mirrorPoints.size(), 
+                curPointFaces.size() + mirrorPoints.size(),
                 vector::zero
             );
-                
+
             counter = -1;
 
             for (label i=0; i<curPointFaces.size(); i++)
@@ -359,18 +358,18 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                 lsPoints[++counter] = mirrorPoints[i];
             }
 
-            vectorField pointAndNormal = 
+            vectorField pointAndNormal =
                 lsPlanePointAndNormal
                 (
-                    lsPoints, 
-                    points[curPoint], 
+                    lsPoints,
+                    points[curPoint],
                     pointNormals[curPoint]
                 );
 
             vector& P = pointAndNormal[0];
             vector& N = pointAndNormal[1];
 
-            displacement[curPoint] = 
+            displacement[curPoint] =
                 pointsDisplacementDir()[curPoint]
                *((P - points[curPoint])&N)
                /(pointsDisplacementDir()[curPoint]&N);
@@ -383,7 +382,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
     {
         if
         (
-            aMesh().boundary()[patchI].type() 
+            aMesh().boundary()[patchI].type()
          == wedgeFaPatch::typeName
         )
         {
@@ -409,7 +408,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
 //             if(wedgePatch.axisPoint() > -1)
 //             {
 //                 label axisPoint = wedgePatch.axisPoint();
-                
+
 //                 displacement[axisPoint] =
 //                     pointsDisplacementDir()[axisPoint]
 //                    *(
@@ -429,7 +428,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
     {
         if
         (
-            aMesh().boundary()[patchI].type() 
+            aMesh().boundary()[patchI].type()
          == processorFaPatch::typeName
         )
         {
@@ -445,7 +444,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                 lsPoints.set(pointI, new vectorField(0, vector::zero));
             }
 
-            const labelList& nonGlobalPatchPoints = 
+            const labelList& nonGlobalPatchPoints =
                 procPatch.nonGlobalPatchPoints();
 
             forAll(nonGlobalPatchPoints, pointI)
@@ -453,7 +452,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                 label curPatchPoint =
                     nonGlobalPatchPoints[pointI];
 
-                label curPoint = 
+                label curPoint =
                     patchPointLabels[curPatchPoint];
 
                 const labelList& curPointFaces = pointFaces[curPoint];
@@ -476,7 +475,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
 //                 lsPointsSize +=
 //                     2*lsPoints[pointI].size()*sizeof(vector);
 //             }
-            
+
             // Parallel data exchange
             {
                 OPstream toNeighbProc
@@ -504,10 +503,10 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
 
             forAll(nonGlobalPatchPoints, pointI)
             {
-                label curPatchPoint = 
+                label curPatchPoint =
                     nonGlobalPatchPoints[pointI];
 
-                label curPoint = 
+                label curPoint =
                     patchPointLabels[curPatchPoint];
 
                 label curNgbPoint = procPatch.neighbPoints()[curPatchPoint];
@@ -518,7 +517,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                   + ngbLsPoints[curNgbPoint].size(),
                     vector::zero
                 );
-                
+
                 label counter = -1;
                 forAll(lsPoints[curPatchPoint], pointI)
                 {
@@ -529,20 +528,20 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                     allLsPoints[++counter] = ngbLsPoints[curNgbPoint][pointI];
                 }
 
-                vectorField pointAndNormal = 
+                vectorField pointAndNormal =
                     lsPlanePointAndNormal
                     (
-                        allLsPoints, 
-                        points[curPoint], 
+                        allLsPoints,
+                        points[curPoint],
                         pointNormals[curPoint]
                     );
 
                 vector& P = pointAndNormal[0];
                 vector& N = pointAndNormal[1];
-                    
+
                 if (motionPointsMask()[curPoint] != 0)
                 {
-                    displacement[curPoint] = 
+                    displacement[curPoint] =
                         pointsDisplacementDir()[curPoint]
                        *((P - points[curPoint])&N)
                        /(pointsDisplacementDir()[curPoint]&N);
@@ -572,25 +571,25 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
 
                 const labelList& curPointFaces = pointFaces[curPoint];
 
-                procLsPoints[Pstream::myProcNo()] = 
+                procLsPoints[Pstream::myProcNo()] =
                     List<vector>(curPointFaces.size());
 
                 forAll (curPointFaces, faceI)
                 {
                     label curFace = curPointFaces[faceI];
 
-                    procLsPoints[Pstream::myProcNo()][faceI] = 
+                    procLsPoints[Pstream::myProcNo()][faceI] =
                         controlPoints()[curFace];
                 }
             }
 
             Pstream::gatherList(procLsPoints);
             Pstream::scatterList(procLsPoints);
-                
+
             if (curSharedPointIndex != -1)
             {
                 label curPoint = spLabels[curSharedPointIndex];
-                
+
                 label nAllPoints = 0;
                 forAll(procLsPoints, procI)
                 {
@@ -609,18 +608,18 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
                     }
                 }
 
-                vectorField pointAndNormal = 
+                vectorField pointAndNormal =
                     lsPlanePointAndNormal
                     (
-                        allPoints, 
-                        points[curPoint], 
+                        allPoints,
+                        points[curPoint],
                         pointNormals[curPoint]
                     );
 
                 const vector& P = pointAndNormal[0];
                 const vector& N = pointAndNormal[1];
 
-                displacement[curPoint] = 
+                displacement[curPoint] =
                     pointsDisplacementDir()[curPoint]
                    *((P - points[curPoint])&N)
                    /(pointsDisplacementDir()[curPoint]&N);
@@ -630,7 +629,7 @@ tmp<vectorField> freeSurface::pointDisplacement(const scalarField& deltaH)
 
     return tdisplacement;
 }
-    
+
 
 
 tmp<vectorField> freeSurface::lsPlanePointAndNormal
@@ -719,7 +718,7 @@ tmp<vectorField> freeSurface::lsPlanePointAndNormal
 //             vector::zero
 //         )
 //     );
-    
+
 //     vectorField& displacement = tdisplacement();
 
 
@@ -740,12 +739,12 @@ tmp<vectorField> freeSurface::lsPlanePointAndNormal
 //             );
 
 //             displacement[pointI] += weight*controlPoints()[curFace];
-            
+
 //             weightsSum += weight;
 //         }
 
 //         displacement[pointI] /= weightsSum;
-        
+
 //         displacement[pointI] -= points[pointI];
 //     }
 

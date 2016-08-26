@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     | Version:     3.2
+   \\    /   O peration     | Version:     4.0
     \\  /    A nd           | Web:         http://www.foam-extend.org
      \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
@@ -21,17 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "faSubMesh.H"
-
-// TODO: Test in parallel!
-// TODO: Fix indexing (Load faMesh mappings)
-// TODO: Fix boundary curvatures
-// TODO: Fix contactAngle (adjust pointNormals)
-//
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -157,52 +149,6 @@ void faSubMesh::makeFaceCurvatures() const
     baseKin /= baseKinWeights;
 
 // TODO: What about the boundaryField? Is this actually necessary for trackedSurface?
-
-
-
-
-
-// TODO: Remove later
-//     const pointField& subPoints = subAreaMesh().points();
-//     const vectorField& subFaceCentres = subAreaMesh().areaCentres();
-//     const labelListList& subPointFaces = subAreaMesh().patch().pointFaces();
-//
-//     forAll (KIn, facei)
-//     {
-//         label subPointI = baseAreaMesh().nPoints() + facei;
-//
-// // TODO: This might fail for most cases!
-// // WARNING
-// //
-// // subPointI is a GLOBAL point index, but
-// // subPointFaces takes LOCAL point indices from
-// // this patch!!!
-// // Use baseAreaMesh().patch().meshPointMap() which is SLOW!!!!
-// // Or find some other way..
-//
-//         const labelList& subFacesI = subPointFaces[subPointI];
-//
-//         scalar wSum = 0.0;
-//
-//         forAll (subFacesI, subFacei)
-//         {
-//             label subFaceI = subFacesI[subFacei];
-//
-//             scalar wI = 1.0
-//                 / (mag(subFaceCentres[subFaceI]-subPoints[subPointI]) + SMALL);
-//
-//             wSum += wI;
-//
-//             KIn[facei] += wI * subK[subFaceI];
-//
-//         }
-//
-//         KIn[facei] /= wSum + SMALL;
-//     }
-// // Pout << "K.boundaryField() = " << K.boundaryField() << endl;
-// // Pout << "subK.boundaryField() = " << subK.boundaryField() << endl;
-// // TODO: This is totally wrong!
-// //     K.boundaryField() == subK.boundaryField();
 }
 
 

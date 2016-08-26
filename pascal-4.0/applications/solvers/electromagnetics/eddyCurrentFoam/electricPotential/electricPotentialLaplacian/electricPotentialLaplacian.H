@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     | Version:     3.2
+   \\    /   O peration     | Version:     4.0
     \\  /    A nd           | Web:         http://www.foam-extend.org
      \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
@@ -27,11 +27,14 @@ Class
 Description
     ...
 
+    NOTE: Currently it is NOT SUPPORTED or even tested to put the
+          conducting region on any type of boundary
+
 SourceFiles
     electricPotentialLaplacian.C
 
-// TODO: Currently it is NOT SUPPORTED or even tested to put the
-//       conducting region on any type of boundary
+Author
+    Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,6 +46,23 @@ SourceFiles
 #include "harmonic.H"
 #include "snGradScheme.H"
 #include "uncorrectedSnGrad.H"
+
+// TODO: Think about CORRECT implementation with snGrad correction. The
+//       corrected (explicit) gradient may not be interpolated from the cell
+//       values using linear interpolation!!! We MUST use the
+//       electricPotentialGrad or a corresponding interpolation scheme to
+//       calculate the gradient correction.
+
+// TODO: Check consistency with electricPotentialGrad!
+
+// TODO: Proper template specialisation? The electrical conductivity may be
+//       any GType. Specialization is necessary for e.g. tensors. Currently
+//       we simply use the mag-function as workaraound and in order to avoid
+//       having to create these.
+
+// TODO: Check boundary contributions for boundaries with transformation!!
+//       Currently boundary contributions are simply realized to work with
+//       coupled processor patches
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -25,7 +25,10 @@ Application
     zonesToSets
 
 Description
-    Convert zones to sets with topSet-specific prefix
+    Convert zones to sets with topSet-specific prefix.
+
+Author
+    Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 

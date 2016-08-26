@@ -1,29 +1,25 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
-     \\/     M anipulation  |
+  \\      /  F ield         | foam-extend: Open Source CFD
+   \\    /   O peration     | Version:     4.0
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
+    This file is part of foam-extend.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
+    foam-extend is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
+    Free Software Foundation, either version 3 of the License, or (at your
     option) any later version.
 
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    foam-extend is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
-Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 \*----------------------------------------------------------------------------*/
 
@@ -78,13 +74,13 @@ Foam::dropletHistory::dropletHistory
         if (!time_.processorCase())
         {
             mkDir
-            ( 
+            (
                 time_.path()
                /"history"
                /time_.timeName()
             );
-        
-            historyFilePtr_ = 
+
+            historyFilePtr_ =
                 new OFstream
                 (
                     time_.path()
@@ -96,12 +92,12 @@ Foam::dropletHistory::dropletHistory
         else
         {
             mkDir
-            ( 
+            (
                 time_.path()/".."/"history"
                /time_.timeName()
             );
-        
-            historyFilePtr_ = 
+
+            historyFilePtr_ =
                 new OFstream
                 (
                     time_.path()/".."
@@ -111,8 +107,8 @@ Foam::dropletHistory::dropletHistory
                 );
         }
 
-        (*historyFilePtr_) 
-            << "Time" << tab 
+        (*historyFilePtr_)
+            << "Time" << tab
                 << "Cx" << tab
                 << "Cy" << tab
                 << "Cz" << tab
@@ -130,7 +126,7 @@ Foam::dropletHistory::dropletHistory
 
     const fvMesh& mesh =
         time_.lookupObject<fvMesh>(regionName_);
-    
+
     freeSurfacePatchID_ = mesh.boundaryMesh().findPatchID("freeSurface");
 
     if (freeSurfacePatchID_ == -1)
@@ -158,7 +154,7 @@ bool Foam::dropletHistory::start()
 
     scalar V = gSum(mesh.V());
 
-    const freeSurface& fs = 
+    const freeSurface& fs =
         mesh.lookupObject<freeSurface>("freeSurfaceProperties");
 
     vector totalForce = fs.totalViscousForce() + fs.totalPressureForce();
@@ -167,7 +163,7 @@ bool Foam::dropletHistory::start()
     {
         historyFilePtr_->precision(12);
 
-        (*historyFilePtr_) << time_.value() << tab 
+        (*historyFilePtr_) << time_.value() << tab
             << C.x() << tab
             << C.y() << tab
             << C.z() << tab
@@ -176,7 +172,7 @@ bool Foam::dropletHistory::start()
             << box.min().y() << tab
             << box.max().y() << tab
             << box.min().z() << tab
-            << box.max().z() << tab 
+            << box.max().z() << tab
             << mag(1.0 - V/V0_) << tab
             << totalForce.x() << tab
             << totalForce.y() << tab
@@ -200,7 +196,7 @@ bool Foam::dropletHistory::execute()
 
     scalar V = gSum(mesh.V());
 
-    const freeSurface& fs = 
+    const freeSurface& fs =
         mesh.lookupObject<freeSurface>("freeSurfaceProperties");
 
     vector totalForce = fs.totalViscousForce() + fs.totalPressureForce();
@@ -209,7 +205,7 @@ bool Foam::dropletHistory::execute()
     {
         historyFilePtr_->precision(12);
 
-        (*historyFilePtr_) << time_.value() << tab 
+        (*historyFilePtr_) << time_.value() << tab
             << C.x() << tab
             << C.y() << tab
             << C.z() << tab
@@ -218,7 +214,7 @@ bool Foam::dropletHistory::execute()
             << box.min().y() << tab
             << box.max().y() << tab
             << box.min().z() << tab
-            << box.max().z() << tab 
+            << box.max().z() << tab
             << mag(1.0 - V/V0_) << tab
             << totalForce.x() << tab
             << totalForce.y() << tab

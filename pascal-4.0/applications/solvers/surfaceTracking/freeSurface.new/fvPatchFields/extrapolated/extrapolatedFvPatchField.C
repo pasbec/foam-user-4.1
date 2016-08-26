@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     |
-    \\  /    A nd           | For copyright notice see file Copyright
-     \\/     M anipulation  |
+   \\    /   O peration     | Version:     4.0
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
     This file is part of foam-extend.
@@ -161,7 +161,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
     const Field<Type>& phiI = this->internalField();
 
-    word fieldName = 
+    word fieldName =
         this->dimensionedInternalField().name();
 
     const GeometricField<Type, fvPatchField, volMesh>& phi =
@@ -204,7 +204,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                     )
                   + phiI[neighbour[curFace]]
                 );
-                
+
                 vector curFaceIntersection =
                     weights[curFace]
                    *(
@@ -212,7 +212,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                      - cellCentres[neighbour[curFace]]
                     )
                   + cellCentres[neighbour[curFace]];
-                
+
                 iPoint.append(curFaceIntersection);
             }
             else
@@ -227,7 +227,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                     label start = mesh.boundaryMesh()[patchID].start();
                     label localFaceID = curFace - start;
 
-                    const unallocLabelList& cycPatchCells = 
+                    const unallocLabelList& cycPatchCells =
                         mesh.boundaryMesh()[patchID].faceCells();
 
                     label sizeby2 = cycPatchCells.size()/2;
@@ -257,7 +257,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                             [
                                 cycPatchCells[localFaceID + sizeby2]
                             ];
-                
+
                         iPoint.append(curFaceIntersection);
                     }
                     else
@@ -285,7 +285,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                             [
                                 cycPatchCells[localFaceID - sizeby2]
                             ];
-                
+
                         iPoint.append(curFaceIntersection);
                     }
                 }
@@ -298,7 +298,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                     label start = mesh.boundaryMesh()[patchID].start();
                     label localFaceID = curFace - start;
 
-                    const unallocLabelList& procPatchCells = 
+                    const unallocLabelList& procPatchCells =
                         mesh.boundaryMesh()[patchID].faceCells();
 
                     iPhi.append
@@ -318,7 +318,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                           - mesh.C().boundaryField()[patchID][localFaceID]
                         )
                       + mesh.C().boundaryField()[patchID][localFaceID];
-                
+
                     iPoint.append(curFaceIntersection);
                 }
                 else if
@@ -335,8 +335,8 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
         Type avgPhi = average(iPhi);
         vector avgPoint = average(iPoint);
-        
-        // Weights 
+
+        // Weights
         scalarField W(iPoint.size(), 1.0);
 
         label nCoeffs = 3;
@@ -418,7 +418,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
         }
 
         vector dr = C[faceI] - avgPoint;
-        
+
         patchPhi[faceI] =
             avgPhi
           + coeffs[0]*dr.x()
@@ -434,11 +434,11 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
     }
     else
     {
-        this->gradient() = 
+        this->gradient() =
             (patchPhi - this->patchInternalField())
            *this->patch().deltaCoeffs();
     }
-    
+
     fvPatchField<Type>::evaluate();
 }
 

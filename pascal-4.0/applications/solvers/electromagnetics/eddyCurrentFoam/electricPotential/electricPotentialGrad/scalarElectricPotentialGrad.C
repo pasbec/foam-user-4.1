@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     | Version:     3.2
+   \\    /   O peration     | Version:     4.0
     \\  /    A nd           | Web:         http://www.foam-extend.org
      \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
@@ -20,9 +20,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
-
-Description
-    Specialisation of electricPotentialGrad for scalars.
 
 \*---------------------------------------------------------------------------*/
 
@@ -209,35 +206,6 @@ electricPotentialGrad<scalar>::calcGrad
         }
 
         tsigmaMean.clear();
-
-//         // Boundary contributions
-// // TODO: Is this enough? What if there are symmetry, periodic
-// //       empty or other special bc?
-// // TODO: How can we do this without another interpolation?
-//         {
-//             tmp<surfaceScalarField> tssf
-//             (
-//                 linearInterpolate(vsf)
-//             );
-//             surfaceScalarField& ssf = tssf();
-//
-//             forAll(mesh.boundary(), patchi)
-//             {
-//                 const unallocLabelList& pFaceCells =
-//                     mesh.boundary()[patchi].faceCells();
-//
-//                 const vectorField& pSf = mesh.Sf().boundaryField()[patchi];
-//
-//                 const fvsPatchScalarField& pssf = ssf.boundaryField()[patchi];
-//
-//                 forAll(mesh.boundary()[patchi], facei)
-//                 {
-//                     grad[pFaceCells[facei]] += pSf[facei]*pssf[facei];
-//                 }
-//             }
-//
-//             tssf.clear();
-//         }
 
         gradIn /= mesh.V();
     }

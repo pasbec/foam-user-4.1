@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     | Version:     3.2
+   \\    /   O peration     | Version:     4.0
     \\  /    A nd           | Web:         http://www.foam-extend.org
      \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
@@ -26,15 +26,14 @@ Application
 
 Description
 
+Author
+    Pascal Beckstein
+
 \*---------------------------------------------------------------------------*/
 
 #include "interTrackApp.H"
 
 // TODO: Coupled solution of U and p?
-
-// TODO: Read Zhang S., Zhao, X., General formulations for Rhie-Chow
-//       interpolation, ASME Heat Transfer/Fluids Engineering Summer
-//       Conference, HT-FED04, Charlotte, USA, 2004
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

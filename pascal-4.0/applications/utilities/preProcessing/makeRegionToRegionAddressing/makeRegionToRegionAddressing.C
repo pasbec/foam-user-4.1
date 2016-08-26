@@ -42,13 +42,8 @@ Usage
     - makeRegionToRegionAddressing -fromRegions "(region0 region_fluid)"
                                    -toRegions "(region0 region_fluid)"
 
-
 Author
     Pascal Beckstein
-
-// TODO: Force presence of parameters
-
-// TODO: Check sense and dependency of from and to
 
 \*---------------------------------------------------------------------------*/
 
@@ -64,6 +59,10 @@ Author
 
 #include "addressingTypes.H"
 #include "regionModelling.H"
+
+// TODO: Force presence of parameters
+
+// TODO: Revise parameter usage and dependency of from and to
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     |
-    \\  /    A nd           | For copyright notice see file Copyright
-     \\/     M anipulation  |
+   \\    /   O peration     | Version:     4.0
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
     This file is part of foam-extend.
@@ -30,6 +30,9 @@ Description
 SourceFiles
     interTrackAppManager.C
     interTrackAppManagerRegion_DEFAULT.C
+
+Author
+    Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 

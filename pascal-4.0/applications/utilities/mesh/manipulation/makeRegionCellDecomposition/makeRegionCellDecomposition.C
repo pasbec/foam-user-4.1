@@ -25,7 +25,10 @@ Application
     makeRegionCellDecomposition
 
 Description
-    Make cellDecomposition for regions
+    Make cellDecomposition for regions.
+
+Author
+    Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 

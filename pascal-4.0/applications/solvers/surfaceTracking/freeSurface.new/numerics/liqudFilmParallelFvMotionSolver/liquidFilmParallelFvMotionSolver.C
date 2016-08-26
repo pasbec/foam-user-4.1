@@ -1,26 +1,25 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
-     \\/     M anipulation  |
+  \\      /  F ield         | foam-extend: Open Source CFD
+   \\    /   O peration     | Version:     4.0
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
+    This file is part of foam-extend.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
+    foam-extend is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
+    Free Software Foundation, either version 3 of the License, or (at your
     option) any later version.
 
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    foam-extend is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -81,7 +80,7 @@ Foam::liquidFilmParallelFvMotionSolver::liquidFilmParallelFvMotionSolver
     max_ = (motionDirection_&box.max());
     min_ = (motionDirection_&box.min());
 
-    // Check free surface patch 
+    // Check free surface patch
     if(freeSurfacePatchID_ == -1)
     {
         FatalErrorIn
@@ -103,7 +102,7 @@ Foam::liquidFilmParallelFvMotionSolver::liquidFilmParallelFvMotionSolver
 
     const vectorField& points = fvMesh_.points();
 
-    vectorField fzLocalPoints = 
+    vectorField fzLocalPoints =
         mesh.faceZones()[freeSurfaceZoneID_]().localPoints();
 
     forAll(pointPoint_, pointI)
@@ -130,7 +129,7 @@ Foam::liquidFilmParallelFvMotionSolver::liquidFilmParallelFvMotionSolver
 
     if(Pstream::parRun())
     {
-        vectorField fzGlobalPoints = 
+        vectorField fzGlobalPoints =
             mesh.faceZones()[freeSurfaceZoneID_]().localPoints();
 
         //- set all slave points to zero because only the master order is used
@@ -146,13 +145,13 @@ Foam::liquidFilmParallelFvMotionSolver::liquidFilmParallelFvMotionSolver
        	//- every proc must now find the mapping from their local FZ points to
         //- the global FZ points
 
-        vectorField fzLocalPoints = 
+        vectorField fzLocalPoints =
             mesh.faceZones()[freeSurfaceZoneID_]().localPoints();
 
-        const edgeList& fzLocalEdges = 
+        const edgeList& fzLocalEdges =
             mesh.faceZones()[freeSurfaceZoneID_]().edges();
 
-        const labelListList& fzPointEdges = 
+        const labelListList& fzPointEdges =
             mesh.faceZones()[freeSurfaceZoneID_]().pointEdges();
 
         scalarField minEdgeLength(fzLocalPoints.size(), GREAT);
@@ -179,7 +178,7 @@ Foam::liquidFilmParallelFvMotionSolver::liquidFilmParallelFvMotionSolver
                 (
                     mag
                     (
-                        fzLocalPoints[procPointI] 
+                        fzLocalPoints[procPointI]
                       - fzGlobalPoints[globalPointI]
                     )
                   < 1e-4*minEdgeLength[procPointI]
@@ -199,7 +198,7 @@ Foam::liquidFilmParallelFvMotionSolver::liquidFilmParallelFvMotionSolver
                 (
                     "liquidFilmParallelFvMotionSolver(...)"
                 )
-                    << "Global FZ map is not correct" 
+                    << "Global FZ map is not correct"
                         << abort(FatalError);
             }
         }
@@ -245,7 +244,7 @@ Foam::liquidFilmParallelFvMotionSolver::curPoints() const
     forAll(fzMotionPointU, globalPointI)
     {
         label localPoint = procToGlobalFZmap_[globalPointI];
-	    
+
         if(fzMeshPoints[localPoint] < fvMesh_.nPoints())
         {
             label procPoint = fzMeshPoints[localPoint];
@@ -278,7 +277,7 @@ Foam::liquidFilmParallelFvMotionSolver::curPoints() const
     forAll(fzMotionPointU, globalPointI)
     {
         label localPoint = procToGlobalFZmap_[globalPointI];
-	    
+
         fzLocalMotionPointU[localPoint] = fzMotionPointU[globalPointI];
         fzLocalPoints[localPoint] = fzPoints[globalPointI];
     }
@@ -300,9 +299,9 @@ Foam::liquidFilmParallelFvMotionSolver::curPoints() const
                     )
                    /(
                         (
-                            motionDirection_ 
+                            motionDirection_
                           & fzLocalPoints[pointPoint_[pointI]]
-                        ) 
+                        )
                       - min_
                     )
                 );
@@ -313,13 +312,13 @@ Foam::liquidFilmParallelFvMotionSolver::curPoints() const
                 fzLocalMotionPointU[pointPoint_[pointI]]
                *(
                     (
-                        max_ 
+                        max_
                       - (motionDirection_ & oldPoints[pointI])
                     )
                    /(
-                        max_ 
+                        max_
                       - (
-                            motionDirection_ 
+                            motionDirection_
                           & fzLocalPoints[pointPoint_[pointI]]
                         )
                     )
@@ -341,11 +340,11 @@ Foam::liquidFilmParallelFvMotionSolver::curPoints() const
     {
         if (fzMeshPoints[pointI] >= fvMesh_.nPoints())
         {
-            newPoints[fzMeshPoints[pointI]] += 
+            newPoints[fzMeshPoints[pointI]] +=
                 deltaT*fzLocalMotionPointU[pointI];
         }
     }
- 
+
 //     Pout << "end-1a" << endl;
 //     ::sleep(5);
 

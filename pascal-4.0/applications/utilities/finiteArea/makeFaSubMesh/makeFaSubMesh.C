@@ -22,10 +22,16 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    makeFaSubPolyMesh
+    makeFaSubMesh
 
 Description
-    A mesh generator for a polyMesh (without cells) from a triangulated faMesh
+    A mesh generator for a sub-polyMesh and corresponding sub-faMesh from a
+    triangulation of a base-faMesh as part of base-polyMesh. Creation of
+    the sub-polyMesh is based on a (1 cell) carrier mesh layer as fvMeshSubset
+    of the base-polyMesh.
+
+Author
+    Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,7 +52,18 @@ Description
 #include "directMappedWallPolyPatch.H"
 #include "emptyFaPatch.H"
 
+// TODO: Point ordering correct?
+
+// TODO: Think about patchmap og sub-polyMesh: The new patch
+//       'triangulatedFaces' comprises all faces from base-faMesh. So it may
+//       consist of more then one patch from the base-polyMesh
+
+// TODO: Point-, face-, edge- and patch-maps for sub-faMesh is missing
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 using namespace Foam;
+
 
 struct meshData
 {
@@ -77,6 +94,7 @@ struct meshData
         nInactiveFaces = mesh.nFaces() - nActiveFaces;
     }
 };
+
 
 struct aMeshData
 {
@@ -181,6 +199,7 @@ struct aMeshData
         faCells.Foam::regIOobject::write();
     }
 };
+
 
 class aMeshTriangulation
 {
@@ -1168,7 +1187,7 @@ int main(int argc, char *argv[])
 
     Info<< endl << "End.\n" << endl;
 
-    return 0 ;
+    return (0);
 }
 
 // ************************************************************************* //
