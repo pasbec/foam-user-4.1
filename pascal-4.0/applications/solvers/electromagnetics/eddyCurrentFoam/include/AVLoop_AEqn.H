@@ -8,16 +8,13 @@
         volVectorField& ARe = globalStorage.ARe()[DEFAULT];
         volVectorField& AIm = globalStorage.AIm()[DEFAULT];
 
-        volVectorField& VReGrad = globalStorage.VReGrad()[DEFAULT];
-        volVectorField& VImGrad = globalStorage.VImGrad()[DEFAULT];
-
         // Assemble base-matrices for A
         fvVectorMatrix AReEqn
         (
             physicalConstant::rMu0 * fvm::laplacian(ARe)
 //        - physicalConstant::rMu0 * fvc::grad(fvc::div(ARe))
 //        + sigma * omega0 * AIm
-//        - sigma * VReGrad
+//        - sigma * VReGrad()[DEFAULT].component(cmpt)
 //        + j0Re
 //        + sigma * omega0 * A0Im
         );
@@ -26,7 +23,7 @@
             physicalConstant::rMu0 * fvm::laplacian(AIm)
 //        - physicalConstant::rMu0 * fvc::grad(fvc::div(AIm))
 //        - sigma * omega0 * ARe
-//        - sigma * VImGrad
+//        - sigma * VImGrad()[DEFAULT].component(cmpt)
 //        + j0Im
 //        - sigma * omega0 * A0Re
         );
@@ -137,9 +134,12 @@
             AImCmptEqn.boundaryCoeffs() = AImEqn.boundaryCoeffs().component(cmpt);
             AImCmptEqn.source() = AImEqn.source().component(cmpt);
 
-            // Add explicit gradient terms of electric scalar potential V
-            AReCmptEqn -= sigma * VReGrad.component(cmpt);
-            AImCmptEqn -= sigma * VImGrad.component(cmpt);
+            if (control.meshIs3D())
+            {
+                // Add explicit gradient terms of electric scalar potential V
+                AReCmptEqn -= sigma * globalStorage.VReGrad()[DEFAULT].component(cmpt);
+                AImCmptEqn -= sigma * globalStorage.VImGrad()[DEFAULT].component(cmpt);
+            }
 
             // Prepare block system for current component
             fvBlockMatrix<vector2> AcmptEqn(ACmpt);

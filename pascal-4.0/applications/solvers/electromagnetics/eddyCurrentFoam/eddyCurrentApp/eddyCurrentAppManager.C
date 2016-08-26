@@ -395,8 +395,8 @@ void Foam::eddyCurrentApp::Manager::Storage::create(const word& ccase) const
     item_ARe().enable();
     item_AIm().enable();
 
-    item_VReGrad().enable();
-    item_VImGrad().enable();
+    item_VReGrad().setState(control().meshIs3D());
+    item_VImGrad().setState(control().meshIs3D());
 
     item_BRe().enable();
     item_BIm().enable();
