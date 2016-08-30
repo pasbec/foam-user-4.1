@@ -38,7 +38,7 @@ const char* Foam::NamedEnum<Foam::addressingTypes::addressingType, 4>::names[] =
 
 
 const Foam::NamedEnum<Foam::addressingTypes::addressingType, 4>
-    Foam::addressingTypes::addressingTypeName;
+    Foam::addressingTypes::addressingNames;
 
 
 // ************************************************************************* //

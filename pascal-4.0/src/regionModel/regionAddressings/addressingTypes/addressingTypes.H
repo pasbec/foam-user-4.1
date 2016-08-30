@@ -62,7 +62,7 @@ public:
 
     // Static data
 
-        static const NamedEnum<addressingType, 4> addressingTypeName;
+        static const NamedEnum<addressingType, 4> addressingNames;
 
 
 protected:

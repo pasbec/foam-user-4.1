@@ -51,7 +51,7 @@ Foam::labelIOList* Foam::regionAddressing::readAddressing
         (
             IOobject
             (
-                addressingTypeName[type]+word("RegionAddressing"),
+                addressingNames[type]+word("RegionAddressing"),
                 time().findInstance(meshDir, "faces"),
                 meshDir,
                 time(),
@@ -70,7 +70,7 @@ Foam::labelIOList* Foam::regionAddressing::readAddressing
 
         IOobject typeAddressingObj
         (
-            addressingTypeName[type]+word("RegionAddressing"),
+            addressingNames[type]+word("RegionAddressing"),
             facesInstance,
             meshDir,
             time(),
@@ -81,7 +81,7 @@ Foam::labelIOList* Foam::regionAddressing::readAddressing
 
         IOobject typeMapObj
         (
-            addressingTypeName[type]+word("Map"),
+            addressingNames[type]+word("Map"),
             facesInstance,
             meshDir,
             time(),
@@ -114,7 +114,7 @@ Foam::labelIOList* Foam::regionAddressing::readAddressing
         {
             typeAddressingObj.rename
             (
-                addressingTypeName[type]+word("RegionAddressing")
+                addressingNames[type]+word("RegionAddressing")
             );
 
             if (type == FACE)
@@ -219,7 +219,7 @@ const Foam::labelList& Foam::regionAddressing::typeAddressing
         {
             Info<< "Foam::regionAddressing::typeAddressing(...) : "
                 << "Read region "
-                << addressingTypeName[type] << "-addressing"
+                << addressingNames[type] << "-addressing"
                 << " (" << regionName() << ")"
                 << endl;
         }

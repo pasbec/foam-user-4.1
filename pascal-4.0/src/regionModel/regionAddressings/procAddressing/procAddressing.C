@@ -51,7 +51,7 @@ Foam::labelIOList* Foam::procAddressing::readAddressing
     (
         IOobject
         (
-            addressingTypeName[type]+word("ProcAddressing"),
+            addressingNames[type]+word("ProcAddressing"),
             time().findInstance(meshDir, "faces"),
             meshDir,
             time(),
@@ -146,7 +146,7 @@ const Foam::labelList& Foam::procAddressing::typeAddressing
         {
             Info<< "Foam::procAddressing::typeAddressing(...) : "
                 << "Read proc "
-                << addressingTypeName[type] << "-addressing"
+                << addressingNames[type] << "-addressing"
                 << " (" << regionName() << ")"
                 << endl;
         }

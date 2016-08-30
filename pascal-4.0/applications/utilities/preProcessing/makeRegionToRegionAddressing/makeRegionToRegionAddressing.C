@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
         {
             // Loop over point, face, cell, boundary
             wordList addressingTypeNames =
-                addressingTypes::addressingTypeName.toc();
+                addressingTypes::addressingNames.toc();
 
             // Calc addressings
             forAll (addressingTypeNames, addressingTypeI)
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 
                 regionMesh.typeAddressing
                 (
-                    addressingTypes::addressingTypeName[addressingTypeName],
+                    addressingTypes::addressingNames[addressingTypeName],
                     regionMesh.regions()[fromRegionI],
                     toRegionNames[toRegionI]
                 );

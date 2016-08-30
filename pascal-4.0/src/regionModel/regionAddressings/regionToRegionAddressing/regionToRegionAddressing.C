@@ -369,7 +369,7 @@ Foam::regionToRegionAddressing::regionToRegionAddressing
             (
                 IOobject
                 (
-                    addressingTypeName[type]+word("RegionToRegionAddressing"),
+                    addressingNames[type]+word("RegionToRegionAddressing"),
                     mesh_.facesInstance(),
                     mesh_.meshSubDir,
                     mesh_,
@@ -423,7 +423,7 @@ const Foam::labelList& Foam::regionToRegionAddressing::typeAddressing
             {
                 Info<< "Foam::regionToRegionAddressing::typeAddressing(...) : "
                     << "Read region-to-region "
-                    << addressingTypeName[type] << "-addressing"
+                    << addressingNames[type] << "-addressing"
                     << " (" << mesh().name() << " -> " << regionName << ")"
                     << " from dictionary"
                     << endl;
@@ -464,7 +464,7 @@ const Foam::labelList& Foam::regionToRegionAddressing::typeAddressing
             {
                 Info<< "Foam::regionToRegionAddressing::typeAddressing(...) : "
                     << "Calculate new region-to-region "
-                    << addressingTypeName[type] << "-addressing"
+                    << addressingNames[type] << "-addressing"
                     << " (" << mesh().name() << " -> " << regionName << ")"
                     << endl;
             }
