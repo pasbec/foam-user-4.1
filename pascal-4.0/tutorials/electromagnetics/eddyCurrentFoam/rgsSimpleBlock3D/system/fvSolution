@@ -55,8 +55,8 @@ EDDYCURRENT
 {
     interface          "oldInternalFaces";
 
-    nCorrectors        10;
-    nSubCorrectors     1000;
+    nCorrectors        1;
+    nSubCorrectors     50;
 
     residualControl
     {

@@ -16,6 +16,12 @@ FoamFile
 
 #include "decomposeParDict.include"
 
-method   simple;
+method      simple;
+
+simpleCoeffs
+{
+    n       (2 1 2);
+    delta   0.001;
+}
 
 // ************************************************************************* //

@@ -46,9 +46,6 @@ if [[ $flagClean -eq 1 ]]; then
         wipePolyMesh "$region"
     done
 
-    # Clean tools
-    cleanTools
-
 fi
 
 if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
@@ -65,7 +62,8 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     directions="x y z"
     for d in $directions; do
 
-        cp "system/mirrorMeshDict.$d" 'system/mirrorMeshDict'
+        cp "system/mirrorMeshDict.$d" \
+            'system/mirrorMeshDict'
 
         runApplication -l "log.mirrorMesh.$d" \
             mirrorMesh || exit 1
@@ -75,10 +73,8 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     # Move polyMesh into constant
     moveZeroToConstantPolyMesh
 
-    # Remove all zones
-    rm 'constant/polyMesh/cellZones' > /dev/null 2>&1
-    rm 'constant/polyMesh/faceZones' > /dev/null 2>&1
-    rm 'constant/polyMesh/pointZones' > /dev/null 2>&1
+    # Remove all sets and zones
+    cleanPolyMeshSetsAndZones
 
     # Create new topoSets
     runApplication \
@@ -133,6 +129,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         funkySetFields -time '0' || exit 1
 
     # Touch paraFoam files
+    paraviewTouchFoam
     paraviewTouchOpenFOAM
 
     if [[ $flagParallel -eq 1 ]]; then
@@ -150,7 +147,8 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         # Decompose mesh
         # for regions
         for region in $regionlist; do
-            cp 'system/decomposeParDict.region' "system/$region/decomposeParDict"
+            cp 'system/decomposeParDict.region' \
+                "system/$region/decomposeParDict"
 
             runApplication -r "$region" \
                 decomposePar -region $region || exit 1
@@ -171,6 +169,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         done
 
         # Touch paraFoam files
+        paraviewTouchFoamParallel
         paraviewTouchOpenFOAMParallel
     fi
 fi

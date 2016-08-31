@@ -30,27 +30,55 @@
 #
 #------------------------------------------------------------------------------
 
+cleanPolyMeshSets ()
+{
+    baseDir='constant'
+    [[ ! -z "$1" ]] && baseDir="${baseDir}/$1"
+
+    rm "$baseDir/polyMesh/sets/"* > /dev/null 2>&1
+}
+
+
+cleanPolyMeshZones ()
+{
+    baseDir='constant'
+    [[ ! -z "$1" ]] && baseDir="${baseDir}/$1"
+
+    rm "$baseDir/polyMesh/cellZones" > /dev/null 2>&1
+    rm "$baseDir/polyMesh/faceZones" > /dev/null 2>&1
+    rm "$baseDir/polyMesh/pointZones" > /dev/null 2>&1
+}
+
+
+cleanPolyMeshSetsAndZones ()
+{
+    cleanPolyMeshSets "$1"
+    cleanPolyMeshZones "$1"
+}
+
+
 cleanPolyMesh ()
 {
     baseDir='constant'
     [[ ! -z "$1" ]] && baseDir="${baseDir}/$1"
 
-    rm -rf "$baseDir/polyMesh/sets/" \
-           "$baseDir/polyMesh/allOwner"* \
+    cleanPolyMeshSetsAndZones "$1"
+
+    rm -rf "$baseDir/polyMesh/allOwner"* \
            "$baseDir/polyMesh/cell"* \
            "$baseDir/polyMesh/face"* \
-           "$baseDir/polyMesh/meshModifiers"* \
+           "$baseDir/polyMesh/point"* \
            "$baseDir/polyMesh/owner"* \
            "$baseDir/polyMesh/neighbour"* \
-           "$baseDir/polyMesh/point"* \
            "$baseDir/polyMesh/edge"* \
+           "$baseDir/polyMesh/meshModifiers"* \
            "$baseDir/polyMesh/zoneToPatchName" \
            "$baseDir/polyMesh/pointLevel"* \
            "$baseDir/polyMesh/refinementHistory"* \
            "$baseDir/polyMesh/surfaceIndex"* \
            "$baseDir/polyMesh/cellLevel"* \
-           "$baseDir/pointMap/"*'Addressing'* \
-           "$baseDir/pointMap/"*'Map'* \
+           "$baseDir/polyMesh/"*'Addressing'* \
+           "$baseDir/polyMesh/"*'Map'* \
            "$baseDir/cellLevel" \
            "$baseDir/cellLevel.gz" \
            "$baseDir/pointLevel" \
@@ -62,6 +90,7 @@ cleanPolyMesh ()
            > /dev/null 2>&1
 }
 
+
 cleanFaMesh ()
 {
     baseDir='constant'
@@ -70,6 +99,7 @@ cleanFaMesh ()
     rm -rf "$baseDir/faMesh/faceLabels"* > /dev/null 2>&1
     rm -rf "$baseDir/faMesh/faBoundary"* > /dev/null 2>&1
 }
+
 
 cleanTimeDirectories ()
 {
@@ -87,6 +117,7 @@ cleanTimeDirectories ()
     rm -rf ./[1-9]* ./-[1-9]* > /dev/null 2>&1
 }
 
+
 cleanTimeDirectoriesParallel ()
 {
     [[ "$1" != 'silent' ]] && echo "Cleaning $PWD time directories"
@@ -103,6 +134,7 @@ cleanTimeDirectoriesParallel ()
     rm -rf processor*/[1-9]* processor*/-[1-9]* > /dev/null 2>&1
 }
 
+
 cleanCase ()
 {
     if [[ -z "$1" ]]; then
@@ -112,6 +144,7 @@ cleanCase ()
     fi
 
     cleanPolyMesh "$1"
+    cleanPolyMeshSetsAndZones "$1"
     cleanFaMesh "$1"
 
     if [[ -z "$1" ]]; then
@@ -153,27 +186,6 @@ cleanCase ()
 #####
 
 
-cleanToolsComsol ()
-{
-    rm -rf 'tools/comsol/log' > /dev/null 2>&1
-    rm -rf 'tools/comsol/tmp' > /dev/null 2>&1
-    rm -rf 'tools/comsol/'*'.class' > /dev/null 2>&1
-    rm -rf 'tools/comsol/'*'.class.status' > /dev/null 2>&1
-}
-
-cleanTools ()
-{
-    cleanToolsComsol
-
-    rm -rf 'tools/'*'.pyc' \
-           'PlyParser_FoamFileParser_parsetab.py' \
-            > /dev/null 2>&1
-}
-
-
-#####
-
-
 wipePolyMesh ()
 {
     baseDir='constant'
@@ -181,6 +193,7 @@ wipePolyMesh ()
 
     rm -rf "$baseDir/polyMesh" > /dev/null 2>&1
 }
+
 
 wipeFaMesh ()
 {
@@ -190,10 +203,12 @@ wipeFaMesh ()
     rm -rf "$baseDir/faMesh" > /dev/null 2>&1
 }
 
+
 wipeZero ()
 {
     rm -rf '0' > /dev/null 2>&1
 }
+
 
 wipeFaMeshParallel ()
 {
@@ -219,6 +234,7 @@ wipeOrgCopyPolyMesh ()
     [[ -d "$baseDir/polyMesh.org" ]] && wipePolyMesh "$1"
 }
 
+
 wipeOrgCopyFaMesh ()
 {
     baseDir='constant'
@@ -232,20 +248,13 @@ wipeOrgCopyZero ()
     [[ -d '0.org' ]] && wipeZero
 }
 
+
 wipeOrgCopy ()
 {
     wipeOrgCopyPolyMesh "$1"
     wipeOrgCopyFaMesh "$1"
 
     [[ -z "$1" ]] && wipeOrgCopyZero
-}
-
-# DEPRECATED
-wipeOrg ()
-{
-    echo "[DEPRECATED]: The 'wipeOrg'-function is deprecated as its name is misleading."
-    echo "              Please use the new 'wipeOrgCopy'-function instead!"
-    wipeOrgCopy "$1"
 }
 
 
@@ -261,6 +270,7 @@ restorePolyMeshOrg ()
     mkdir "$baseDir/polyMesh" > /dev/null 2>&1
     cp -r "$baseDir/polyMesh.org/"* 'constant/polyMesh' > /dev/null 2>&1
 }
+
 
 restoreZeroOrg ()
 {
@@ -298,6 +308,7 @@ restoreFaMeshOrg ()
     cp -r "$baseDirConstant/faMesh.org/"* "$baseDir/faMesh" > /dev/null 2>&1
 }
 
+
 restoreFaMeshOrgParallel ()
 {
     wipeFaMeshParallel "$1"
@@ -330,9 +341,24 @@ moveZeroToConstantPolyMesh ()
         baseDirConstant="${baseDirConstant}/$1"
     fi
 
-    [[ ! -d "$baseDirConstant" ]] && mkdir "$baseDirConstant" > /dev/null 2>&1
-    mv  "$baseDirZero/polyMesh" "$baseDirConstant/" > /dev/null 2>&1
+    [[ ! -d "$baseDirConstant" ]] && mkdir "$baseDirConstant"
+
+    if [[ ! -d "$baseDirConstant/polyMesh" ]]; then
+        mv  "$baseDirZero/polyMesh" "$baseDirConstant/"
+    else
+        if [[ -d "$baseDirZero/polyMesh" ]]; then
+
+            for f in $(ls -1 "$baseDirZero/polyMesh"); do
+                rm -rf "$baseDirConstant/polyMesh/$f"
+                mv "$baseDirZero/polyMesh/$f" "$baseDirConstant/polyMesh/$f"
+            done
+
+            rmdir "$baseDirZero/polyMesh"
+
+        fi
+    fi
 }
+
 
 moveZeroToConstantPolyMeshParallel ()
 {
@@ -346,8 +372,22 @@ moveZeroToConstantPolyMeshParallel ()
             baseDirConstant="${baseDirConstant}/$1"
         fi
 
-        [[ ! -d "$baseDirConstant" ]] && mkdir "$baseDirConstant" > /dev/null 2>&1
-        mv  "$baseDirZero/polyMesh" "$baseDirConstant/" > /dev/null 2>&1
+        [[ ! -d "$baseDirConstant" ]] && mkdir "$baseDirConstant"
+
+        if [[ ! -d "$baseDirConstant/polyMesh" ]]; then
+            mv  "$baseDirZero/polyMesh" "$baseDirConstant/"
+        else
+            if [[ -d "$baseDirZero/polyMesh" ]]; then
+
+                for f in $(ls -1 "$baseDirZero/polyMesh"); do
+                    rm -rf "$baseDirConstant/polyMesh/$f"
+                    mv "$baseDirZero/polyMesh/$f" "$baseDirConstant/polyMesh/$f"
+                done
+
+                rmdir "$baseDirZero/polyMesh"
+
+            fi
+        fi
 
     done
 }
@@ -373,6 +413,7 @@ addZeroOrg ()
         fi
     done
 }
+
 
 addZeroOrgParallel ()
 {
@@ -410,6 +451,7 @@ backupToPolyMeshOrg ()
     done
 }
 
+
 backupToFaMeshOrg ()
 {
     baseDir='constant'
@@ -419,6 +461,7 @@ backupToFaMeshOrg ()
         cp "$baseDir/faMesh/$f" "$baseDir/faMesh.org" > /dev/null 2>&1
     done
 }
+
 
 backupToZeroOrg ()
 {

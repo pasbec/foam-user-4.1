@@ -68,24 +68,19 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     directions="x y z"
     for d in $directions; do
 
-        cp "system/mirrorMeshDict.$d" 'system/mirrorMeshDict'
+        cp "system/mirrorMeshDict.$d" \
+            'system/mirrorMeshDict'
 
         runApplication -l "log.mirrorMesh.$d" \
             mirrorMesh || exit 1
 
     done
 
-    # Move polyMesh into constant
-    mv '0/polyMesh/'* 'constant/polyMesh/'
-    rm -rf '0/polyMesh' > /dev/null 2>&1
+    # Move polyMesh from 0 to constant
+    moveZeroToConstantPolyMesh
 
-    # Remove all zones
-    rm 'constant/polyMesh/cellZones' > /dev/null 2>&1
-    rm 'constant/polyMesh/faceZones' > /dev/null 2>&1
-    rm 'constant/polyMesh/pointZones' > /dev/null 2>&1
-
-    # Remove all sets
-    rm "constant/polyMesh/sets/"* > /dev/null 2>&1
+    # Remove all sets and zones
+    cleanPolyMeshSetsAndZones
 
     # Create new topoSets
     runApplication \
@@ -114,16 +109,6 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         # Remove all topoSets
         rm 'constant/polyMesh/sets/'* > /dev/null 2>&1
 
-        # Restore faceSets
-        cp 'constant/polyMesh/sets/bak/faceSet_'* \
-            'constant/polyMesh/sets/' \
-            > /dev/null 2>&1
-
-        # Restore pointSets
-        cp 'constant/polyMesh/sets/bak/pointSet_'* \
-            'constant/polyMesh/sets/' \
-            > /dev/null 2>&1
-
         # Restore cellSets for this step of splitMeshRegions
         for region in $regionlist; do
             cp "constant/polyMesh/sets/bak/cellSet_$region" \
@@ -131,9 +116,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         done
 
         # Remove all zones
-        rm -f 'constant/polyMesh/cellZones' > /dev/null 2>&1
-        rm -f 'constant/polyMesh/faceZones' > /dev/null 2>&1
-        rm -f 'constant/polyMesh/pointZones' > /dev/null 2>&1
+        cleanPolyMeshZones
 
         # Create zones for restored topoSets
         runApplication -l "log.setsToZones.$n" \
@@ -144,34 +127,19 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         sed -i 's/faceSet_//g' 'constant/polyMesh/faceZones' > /dev/null 2>&1
         sed -i 's/pointSet_//g' 'constant/polyMesh/pointZones' > /dev/null 2>&1
 
-        # Restore all topoSets
-        cp 'constant/polyMesh/sets/bak/'* \
-            'constant/polyMesh/sets/' \
-            > /dev/null 2>&1
-
         # Split regions
         runApplication -l "log.splitMeshRegions.$n" \
             splitMeshRegions -overwrite -cellZonesOnly || exit 1
 
         # Remove cellToRegion
-        rm -f '0/cellToRegion' > /dev/null 2>&1
-        rm -f 'constant/cellToRegion' > /dev/null 2>&1
-# TODO [Low]: Recreate boundaryRegionAddressing for all regions
+        find -name 'cellToRegion' -delete > /dev/null 2>&1
+
     done
 
-    # Remove all zones
-    rm -f 'constant/polyMesh/cellZones' > /dev/null 2>&1
-    rm -f 'constant/polyMesh/faceZones' > /dev/null 2>&1
-    rm -f 'constant/polyMesh/pointZones' > /dev/null 2>&1
-
-    # Create zones for all topoSets
-    runApplication \
-        setsToZones || exit 1
-
-    # Remove topoSet prefixes from topoZones
-    sed -i 's/cellSet_//g' 'constant/polyMesh/cellZones' > /dev/null 2>&1
-    sed -i 's/faceSet_//g' 'constant/polyMesh/faceZones' > /dev/null 2>&1
-    sed -i 's/pointSet_//g' 'constant/polyMesh/pointZones' > /dev/null 2>&1
+    # Restore all topoSets
+    cp 'constant/polyMesh/sets/bak/'* \
+        'constant/polyMesh/sets/' \
+        > /dev/null 2>&1
 
     # Add fields to 0 from org backup
     addZeroOrg
@@ -182,11 +150,11 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         moveZeroToConstantPolyMesh "$region"
     done
 
-    # Recreate topoSets from zones
+    # Create sets
     # for regions
     for region in $regionlist_split; do
         runApplication -r "$region" \
-            zonesToSets -region "$region" || exit 1
+            makeRegionSets -region "$region" || exit 1
     done
 
     # Create new patches and cleanup
@@ -195,12 +163,9 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         runApplication -r "$region" \
             createPatch -overwrite -region "$region" || exit 1
 
-        rm "0/$region/cellToRegion" > /dev/null 2>&1
 #         rm "constant/$region/polyMesh/boundaryRegionAddressing" > /dev/null 2>&1
-    done
-
 # TODO [Low]: Fix boundaryRegionAddressing for all regions
-# TODO [Low]: Fix cellToRegion for all regions
+    done
 
     # Change dictionaries
     # for regions
@@ -224,6 +189,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
 #         transformPoints -region "$region" -translate "$transVector" || exit 1
 #     done
 
+    # Change fields according to funkySetFieldsDict
     runApplication \
         funkySetFields -time '0' || exit 1
 
@@ -236,8 +202,13 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     runApplication -r 'region_fluid' \
         makeFaMesh -region 'region_fluid' || exit 1
 
+    # Add faSubMesh to region list
     regionlist="$regionlist_split region_fluid_faSubMesh"
 
+    # Clean old faSubMesh
+    cleanPolyMesh 'region_fluid_faSubMesh'
+
+    # Create faSubMesh
     runApplication -r 'region_fluid' \
         makeFaSubMesh -region 'region_fluid' || exit 1
 
@@ -263,7 +234,8 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         # Decompose mesh
         # for regions
         for region in $regionlist; do
-            cp 'system/decomposeParDict.region' "system/$region/decomposeParDict"
+            cp 'system/decomposeParDict.region' \
+                "system/$region/decomposeParDict"
 
             runApplication -r "$region" \
                 decomposePar -region $region || exit 1

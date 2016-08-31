@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
+    Info<< "Time = " << runTime.timeName() << endl;
+
     labelIOList cellDecomposition
     (
         IOobject

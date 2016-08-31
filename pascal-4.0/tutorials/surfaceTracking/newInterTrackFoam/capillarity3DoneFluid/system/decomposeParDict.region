@@ -16,6 +16,11 @@ FoamFile
 
 #include "../decomposeParDict.include"
 
-method   manual;
+method         manual;
+
+manualCoeffs
+{
+    dataFile   "cellDecomposition";
+}
 
 // ************************************************************************* //

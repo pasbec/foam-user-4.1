@@ -870,13 +870,13 @@ int main(int argc, char *argv[])
 
                 pointRegionAddressingObj.readOpt() = IOobject::MUST_READ;
 
-                labelIOList pointRegionMap = labelIOList(pointRegionAddressingObj);
+                labelIOList pointRegionAdd = labelIOList(pointRegionAddressingObj);
 
                 forAll (pointMap, pointI)
                 {
                     if (pointMap[pointI] != -1)
                     {
-                        pointMap[pointI] = pointRegionMap[pointMap[pointI]];
+                        pointMap[pointI] = pointRegionAdd[pointMap[pointI]];
                     }
                 }
             }
@@ -947,15 +947,15 @@ int main(int argc, char *argv[])
 
                 faceRegionAddressingObj.readOpt() = IOobject::MUST_READ;
 
-                labelIOList faceRegionMap = labelIOList(faceRegionAddressingObj);
+                labelIOList faceRegionAdd = labelIOList(faceRegionAddressingObj);
 
                 if (!fromMap)
                 {
-                    forAll (faceRegionMap, faceI)
+                    forAll (faceRegionAdd, faceI)
                     {
-                        label magFaceRegionMap = mag(faceRegionMap[faceI]);
+                        label magFaceRegionMap = mag(faceRegionAdd[faceI]);
 
-                        faceRegionMap[faceI] = magFaceRegionMap - 1;
+                        faceRegionAdd[faceI] = magFaceRegionMap - 1;
                     }
                 }
 
@@ -963,7 +963,7 @@ int main(int argc, char *argv[])
                 {
                     if (faceMap[faceI] != -1)
                     {
-                        faceMap[faceI] = faceRegionMap[faceMap[faceI]];
+                        faceMap[faceI] = faceRegionAdd[faceMap[faceI]];
                     }
                 }
             }
@@ -1019,13 +1019,13 @@ int main(int argc, char *argv[])
 
                 cellRegionAddressingObj.readOpt() = IOobject::MUST_READ;
 
-                labelIOList cellRegionMap = labelIOList(cellRegionAddressingObj);
+                labelIOList cellRegionAdd = labelIOList(cellRegionAddressingObj);
 
                 forAll (cellMap, cellI)
                 {
                     if (cellMap[cellI] != -1)
                     {
-                        cellMap[cellI] = cellRegionMap[cellMap[cellI]];
+                        cellMap[cellI] = cellRegionAdd[cellMap[cellI]];
                     }
                 }
             }
@@ -1085,13 +1085,13 @@ int main(int argc, char *argv[])
 
                 boundaryRegionAddressingObj.readOpt() = IOobject::MUST_READ;
 
-                labelIOList patchRegionMap = labelIOList(boundaryRegionAddressingObj);
+                labelIOList boundaryRegionAdd = labelIOList(boundaryRegionAddressingObj);
 
                 forAll (patchMap, patchI)
                 {
                     if (patchMap[patchI] != -1)
                     {
-                        patchMap[patchI] = patchRegionMap[patchMap[patchI]];
+                        patchMap[patchI] = boundaryRegionAdd[patchMap[patchI]];
                     }
                 }
             }

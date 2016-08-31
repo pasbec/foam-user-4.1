@@ -42,6 +42,7 @@ setCdTrap ()
     trap setCdTrapFct INT TERM EXIT
 }
 
+
 setErrorTrap ()
 {
     setErrorTrapFct ()
@@ -104,6 +105,7 @@ runApplication ()
     fi
 }
 
+
 runParallel ()
 {
     APP_PROCS=$1; shift
@@ -165,25 +167,30 @@ getApplication ()
     getDictValueByKey 'application' 'system/controlDict'
 }
 
+
 getDictValueByKey ()
 {
     grep "$1" "$2" | sed "s/$1\s\+\(\S*\);/\1/"
 }
+
 
 foamDictSubstituteByMatchAllKeys ()
 {
     sed -i "s/\($1\s\+\)\($2\)\(\s*;\)/\1$3\3/g"  "$4"
 }
 
+
 foamDictSetAllKeys ()
 {
     sed -i "s/\($1\s\+\)\(\S\+\)\(\s*;\)/\1$2\3/g"  "$3"
 }
 
+
 controlDictAscii ()
 {
     foamDictSetAllKeys 'writeFormat' 'ascii' 'system/controlDict'
 }
+
 
 controlDictBinary ()
 {
@@ -221,6 +228,7 @@ paraviewTouchOpenFOAMParallel ()
     done
 }
 
+
 paraviewTouchFoam ()
 {
     if [[ -z "$1" ]]; then
@@ -231,37 +239,12 @@ paraviewTouchFoam ()
     fi
 }
 
+
 paraviewTouchFoamParallel ()
 {
     for p in $(ls -1d 'processor'*); do
         cd "$p" > /dev/null 2>&1
         paraviewTouchFoam "$1"
         cd - > /dev/null 2>&1
-    done
-}
-
-# DEPRECATED
-paraviewTouchAllOpenFOAM ()
-{
-    echo "[DEPRECATED]: The 'paraviewTouchAllOpenFOAM'-function is deprecated as"
-    echo "              it requires regions to have the prefix 'region_'."
-    echo "              Please use the new 'paraviewTouchOpenFOAM'-function instead!"
-    touch "$(basename $PWD).blockMesh"
-    touch "$(basename $PWD).OpenFOAM"
-    for region in $(ls -1d "constant/region_"*); do
-        touch "$(basename $PWD){$(basename $region)}.OpenFOAM"
-    done
-}
-
-# DEPRECATED
-paraviewTouchAllFoam ()
-{
-    echo "[DEPRECATED]: The 'paraviewTouchAllFoam'-function is deprecated as"
-    echo "              it requires regions to have the prefix 'region_'."
-    echo "              Please use the new 'paraviewTouchFoam'-function instead!"
-    touch "$(basename $PWD).blockMesh"
-    touch "$(basename $PWD).foam"
-    for region in $(ls -1d "constant/region_"*); do
-        touch "$(basename $PWD){$(basename $region)}.foam"
     done
 }

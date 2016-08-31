@@ -46,9 +46,6 @@ if [[ $flagClean -eq 1 ]]; then
         wipePolyMesh "$region"
     done
 
-    # Clean tools
-    cleanTools
-
 fi
 
 if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
@@ -56,10 +53,8 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     # Restore polymesh from org backup
     restorePolyMeshOrg
 
-    # Remove all zones
-    rm 'constant/polyMesh/cellZones' > /dev/null 2>&1
-    rm 'constant/polyMesh/faceZones' > /dev/null 2>&1
-    rm 'constant/polyMesh/pointZones' > /dev/null 2>&1
+    # Remove all sets and zones
+    cleanPolyMeshSetsAndZones
 
     # Create new topoSets
     runApplication \
@@ -114,6 +109,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         funkySetFields -time '0' || exit 1
 
     # Touch paraFoam files
+    paraviewTouchFoam
     paraviewTouchOpenFOAM
     for region in $regionlist; do
         paraviewTouchOpenFOAM "$region"
@@ -134,7 +130,8 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         # Decompose mesh
         # for regions
         for region in $regionlist; do
-            cp 'system/decomposeParDict.region' "system/$region/decomposeParDict"
+            cp 'system/decomposeParDict.region' \
+                "system/$region/decomposeParDict"
 
             runApplication -r "$region" \
                 decomposePar -region $region || exit 1
@@ -155,6 +152,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         done
 
         # Touch paraFoam files
+        paraviewTouchFoamParallel
         paraviewTouchOpenFOAMParallel
         for region in $regionlist; do
             paraviewTouchOpenFOAMParallel "$region"

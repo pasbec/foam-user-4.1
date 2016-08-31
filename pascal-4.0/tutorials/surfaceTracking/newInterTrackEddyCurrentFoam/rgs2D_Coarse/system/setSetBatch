@@ -27,12 +27,16 @@ cellSet cellSet_geometry_frame_buffer_l   new    boxToCell      (-0.04500 -1.000
 cellSet cellSet_geometry_frame_buffer_r   new    boxToCell      ( 0.03500 -1.00000  0.00000) ( 0.04500  1.00000  0.05000)
 cellSet cellSet_geometry_frame_buffer     new    setToCell      cellSet_geometry_frame_buffer_l
 cellSet cellSet_geometry_frame_buffer     add    setToCell      cellSet_geometry_frame_buffer_r
+cellSet cellSet_geometry_frame_buffer_l   remove
+cellSet cellSet_geometry_frame_buffer_r   remove
 cellSet cellSet_geometry_frame_buffer_old remove
 
 cellSet cellSet_geometry_frame_static_l   new    boxToCell      (-0.04500 -1.00000  0.05000) (-0.03500  1.00000  0.09000)
 cellSet cellSet_geometry_frame_static_r   new    boxToCell      ( 0.03500 -1.00000  0.05000) ( 0.04500  1.00000  0.09000)
 cellSet cellSet_geometry_frame_static     new    setToCell      cellSet_geometry_frame_static_l
 cellSet cellSet_geometry_frame_static     add    setToCell      cellSet_geometry_frame_static_r
+cellSet cellSet_geometry_frame_static_l   remove
+cellSet cellSet_geometry_frame_static_r   remove
 cellSet cellSet_geometry_frame_static_old remove
 
 cellSet cellSet_geometry_frame            new    setToCell      cellSet_geometry_frame_buffer
@@ -111,9 +115,9 @@ cellSet cellSet_material_air              new    setToCell      cellSet_geometry
 
 cellSet cellSet_region_fluid              new    setToCell      cellSet_geometry_fluid_buffer
 
-cellSet cellSet_region_buffer            new    setToCell      cellSet_geometry_frame_buffer
-cellSet cellSet_region_buffer            add    setToCell      cellSet_geometry_free_buffer
-cellSet cellSet_region_buffer_old        remove
+cellSet cellSet_region_buffer             new    setToCell      cellSet_geometry_frame_buffer
+cellSet cellSet_region_buffer             add    setToCell      cellSet_geometry_free_buffer
+cellSet cellSet_region_buffer_old         remove
 
 cellSet cellSet_region_static             new    setToCell      cellSet_geometry_all
 cellSet cellSet_region_static             delete setToCell      cellSet_geometry_fluid_buffer
@@ -130,6 +134,30 @@ cellSet cellSet_region_conductor_old      remove
 cellSet cellSet_region_space              new    setToCell      cellSet_geometry_all
 cellSet cellSet_region_space              delete setToCell      cellSet_region_conductor
 cellSet cellSet_region_space_old          remove
+
+faceSet faceSet_regions1                  new    cellToFace     cellSet_region_fluid all
+faceSet faceSet_regions1                  delete cellToFace     cellSet_region_fluid both
+faceSet faceSet_regions1                  add    cellToFace     cellSet_region_buffer all
+faceSet faceSet_regions1                  delete cellToFace     cellSet_region_buffer both
+faceSet faceSet_regions1                  add    cellToFace     cellSet_region_static all
+faceSet faceSet_regions1                  delete cellToFace     cellSet_region_static both
+faceSet faceSet_regions1_old              remove
+
+faceSet faceSet_regions2                  new    cellToFace     cellSet_region_conductor all
+faceSet faceSet_regions2                  delete cellToFace     cellSet_region_conductor both
+faceSet faceSet_regions2                  add    cellToFace     cellSet_region_space all
+faceSet faceSet_regions2                  delete cellToFace     cellSet_region_space both
+faceSet faceSet_regions2_old              remove
+
+faceSet faceSet_regions                   new    setToFace      faceSet_regions1
+faceSet faceSet_regions                   add    setToFace      faceSet_regions2
+faceSet faceSet_regions                   delete setToFace      faceSet_frontAndBack
+faceSet faceSet_regions                   delete setToFace      faceSet_infinity
+faceSet faceSet_regions1                  remove
+faceSet faceSet_regions2                  remove
+faceSet faceSet_regions_old               remove
+
+
 
 ### End
 

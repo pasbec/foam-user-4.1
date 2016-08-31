@@ -8,4 +8,4 @@ runApplication makeFaMesh
 runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'
 #runApplication $application
 
-#decomposePar -cellDist && makeRegionCellDecomposition -region region0_faSubMesh && decomposePar -region region0_faSubMesh && decomposeRegionAddressing -region region0_faSubMesh
+#./Allclean && ./Allrun && decomposePar -cellDist && makeRegionCellDecomposition -region region0_faSubMesh && decomposePar -region region0_faSubMesh && decomposeRegionAddressing -region region0_faSubMesh

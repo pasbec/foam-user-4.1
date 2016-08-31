@@ -16,6 +16,28 @@ FoamFile
 
 #include "decomposeParDict.include"
 
-method   simple;
+preserveFaceSets        (faceSet_regions);
+
+method                  metis;
+
+metisCoeffs
+{
+    method              k-way; // recursive
+
+//     imbalanceTolerances (1.01);
+
+    regionBalancing     yes;
+
+    regionCellSets
+    (
+        cellSet_region_fluid
+        cellSet_region_buffer
+        cellSet_region_static
+        cellSet_region_conductor
+        cellSet_region_space
+    );
+
+    regionWeightFactors (10.0);
+}
 
 // ************************************************************************* //
