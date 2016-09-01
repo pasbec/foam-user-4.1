@@ -22,9 +22,7 @@ method                  metis;
 
 metisCoeffs
 {
-    method              k-way; // recursive
-
-//     imbalanceTolerances (1.01);
+//     method              recursive; // k-way
 
     regionBalancing      yes;
 
@@ -34,7 +32,9 @@ metisCoeffs
         cellSet_region_space
     );
 
-    regionWeightFactors  (10.0);
+    regionWeightFactors (10.0);
+
+    imbalanceTolerances (1.003);
 }
 
 // ************************************************************************* //

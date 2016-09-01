@@ -22,10 +22,10 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    makeRegionCellDecomposition
+    makeCellSetFromRegion
 
 Description
-    Make cellDecomposition for regions.
+    Make a cell set from a named region
 
 Author
     Pascal Beckstein
@@ -36,6 +36,10 @@ Author
 #include "foamTime.H"
 #include "polyMesh.H"
 #include "meshTools.H"
+#include "cellSet.H"
+#include "faceSet.H"
+#include "pointSet.H"
+#include "IOobjectList.H"
 
 // TODO: Warning/Exit if region option is not used (for defaultRegion). It
 //       simply does not make any sense.
@@ -48,31 +52,21 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
 #   include "addRegionOption.H"
+    argList::validOptions.insert("cellSetName", "word");
 
 #   include "setRootCase.H"
-#   include "createTime.H"
 
-    labelIOList cellDecomposition
-    (
-        IOobject
-        (
-            "cellDecomposition",
-            runTime.findInstance(polyMesh::meshSubDir, "faces"),
-            runTime,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
+#   include "createTime.H"
 
 #   include "createNamedPolyMesh.H"
 
-    const word facesInstance = mesh.facesInstance();
+    word cellSetName = mesh.name();
+    args.optionReadIfPresent("cellSetName", cellSetName);
 
     IOobject cellRegionAddObj
     (
         "cellRegionAddressing",
-        facesInstance,
+        mesh.facesInstance(),
         mesh.meshSubDir,
         mesh,
         IOobject::READ_IF_PRESENT,
@@ -83,7 +77,7 @@ int main(int argc, char *argv[])
     IOobject cellMapObj
     (
         "cellMap",
-        facesInstance,
+        mesh.facesInstance(),
         mesh.meshSubDir,
         mesh,
         IOobject::READ_IF_PRESENT,
@@ -100,31 +94,27 @@ int main(int argc, char *argv[])
 
     labelIOList cellRegionAdd = labelIOList(cellRegionAddObj);
 
-    Info<< "Split cellDecomposition ... ";
 
-    labelIOList regionCellDecomposition
+    cellSet cs
     (
         IOobject
         (
-            "cellDecomposition",
-            facesInstance,
-            mesh,
+            cellSetName,
+            runTime.findInstance(polyMesh::meshSubDir, "faces"),
+            polyMesh::meshSubDir/"sets",
+            runTime,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
-        ),
-        labelList(mesh.cells().size())
+        )
     );
 
-    forAll (regionCellDecomposition, cellI)
+    forAll (cellRegionAdd, cellI)
     {
-        regionCellDecomposition[cellI] =
-            cellDecomposition[cellRegionAdd[cellI]];
+        cs.insert(cellRegionAdd[cellI]);
     }
 
-    regionCellDecomposition.write();
-
-    Info<< "OK" << endl;
+    cs.write();
 
     Info << "\nEnd\n" << endl;
 

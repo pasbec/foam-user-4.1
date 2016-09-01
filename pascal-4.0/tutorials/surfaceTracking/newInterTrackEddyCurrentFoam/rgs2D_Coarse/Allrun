@@ -183,6 +183,11 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     runApplication -r 'region_fluid' \
         makeFaSubMesh -region 'region_fluid' || exit 1
 
+    # Create cell set for faSubMesh
+    runApplication -r 'region_fluid_faSubMesh' \
+        makeCellSetFromRegion -region 'region_fluid_faSubMesh' \
+            -cellSetName 'cellSet_region_fluid_faSubMesh' || exit 1
+
     # Touch paraFoam files
     paraviewTouchFoam
     paraviewTouchOpenFOAM

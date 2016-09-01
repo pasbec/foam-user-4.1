@@ -51,8 +51,6 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    Info<< "Time = " << runTime.timeName() << endl;
-
     // Determine the processor count directly
     label nProcs = 0;
     while (isDir(args.path()/(word("processor") + name(nProcs))))
