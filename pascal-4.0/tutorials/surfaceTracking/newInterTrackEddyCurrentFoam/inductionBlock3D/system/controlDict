@@ -16,39 +16,37 @@ FoamFile
 
 // ************************* SIMLUTAITON TIMES ***************************** //
 
-application         newInterTrackEddyCurrentFoam;
+application         eddyCurrentFoam;
 
 startFrom           latestTime;
 
-startTime           0.0;
+startTime           0;
 
 stopAt              endTime;
 
-endTime             600.0;
+endTime             2;
 
 // *************************** TIME STEPPING ******************************* //
 
-deltaT              0.001;
+deltaT              1;
 
 adjustTimeStep      yes;
 
 maxCo               0.3;
 
-maxDeltaT           0.001;
+maxDeltaT           1;
 
 // *************************** OUTPUT SETTINGS ***************************** //
 
 writeControl        adjustableRunTime;
-// writeControl        timeStep;
 
-writeInterval       0.01;
-// writeInterval       1;
+writeInterval       1;
 
 purgeWrite          0;
 
 cycleWrite          0;
 
-//writeFormat         binary; // ascii
+// writeFormat         binary; // ascii
 writeFormat         ascii;
 
 writePrecision      8;

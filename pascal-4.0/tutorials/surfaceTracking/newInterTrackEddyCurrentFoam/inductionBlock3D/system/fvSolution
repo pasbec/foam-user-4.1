@@ -14,4 +14,70 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+solvers
+{
+    "(Ax|Ay|Az)"
+    {
+        solver                   BiCGStab;
+
+        tolerance                1e-05;
+        relTol                   0.5;
+
+        minIter                  0;
+        maxIter                  300;
+
+        preconditioner           Cholesky;
+    }
+//     {
+//         solver          AMG;
+//         cycle           V-cycle;
+//         coarseningType  AAMG;
+//         norm            componentNorm;
+//         normComponent   0;
+//
+//         nPreSweeps      2;
+//         nPostSweeps     2;
+//         groupSize       2;
+//         minCoarseEqns   4;
+//         nMaxLevels      100;
+//         scale           on;
+//         coarseSmoother  ILU;
+//         fineSmoother    ILU;
+//
+//         minIter         0;
+//         maxIter         100;
+//         tolerance       1e-05;
+//         relTol          0.5;
+//     }
+}
+
+EDDYCURRENT
+{
+    interface          "oldInternalFaces";
+
+    nCorrectors        1;
+    nSubCorrectors     50;
+
+    residualControl
+    {
+        "(Ax|Ay|Az)"
+        {
+            tolerance  1e-05;
+//             tolerance  1e-03;
+            relTol     0.1;
+        }
+
+        "(VRe|VIm)"
+        {
+            tolerance  1e-05;
+//             tolerance  1e-03;
+            relTol     0.1;
+        }
+     }
+}
+
+relaxationFactors
+{
+}
+
 // ************************************************************************* //

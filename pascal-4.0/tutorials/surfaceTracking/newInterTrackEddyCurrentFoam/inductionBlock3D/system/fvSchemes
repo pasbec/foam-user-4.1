@@ -22,6 +22,16 @@ ddtSchemes
 gradSchemes
 {
     default                           none;
+
+//     curl(ARe)                         Gauss linear;
+//     curl(AIm)                         Gauss linear;
+    curl(ARe)                         leastSquares;
+    curl(AIm)                         leastSquares;
+
+//     grad(ARe)                         Gauss linear;
+//     grad(AIm)                         Gauss linear;
+    grad(ARe)                         leastSquares;
+    grad(AIm)                         leastSquares;
 }
 
 divSchemes
@@ -32,11 +42,17 @@ divSchemes
 laplacianSchemes
 {
     default                           none;
+
+    laplacian(ARe)                    Gauss linear corrected;
+    laplacian(AIm)                    Gauss linear corrected;
 }
 
 interpolationSchemes
 {
     default                           none;
+
+    interpolate(grad(ARe))            linear;
+    interpolate(grad(AIm))            linear;
 }
 
 // ************************************************************************* //
