@@ -56,26 +56,6 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     # Restore polymesh folder from org backup
     restorePolyMeshOrg
 
-    # Create polyMesh with blockMesh
-    ./constant/polyMesh/blockMeshDict.py
-    runApplication \
-        blockMesh || exit 1
-
-    # Mirror mesh in all directions
-    directions="x y z"
-    for d in $directions; do
-
-        cp "system/mirrorMeshDict.$d" \
-            'system/mirrorMeshDict'
-
-        runApplication -l "log.mirrorMesh.$d" \
-            mirrorMesh || exit 1
-
-    done
-
-    # Move polyMesh from 0 to constant
-    moveZeroToConstantPolyMesh
-
     # Remove all sets and zones
     cleanPolyMeshSetsAndZones
 

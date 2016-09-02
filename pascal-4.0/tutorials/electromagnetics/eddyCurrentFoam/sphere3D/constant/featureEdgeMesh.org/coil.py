@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# June 2016
+# July 2015
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
 # --------------------------------------------------------------------------- #
@@ -8,7 +8,7 @@
 
 import os, sys
 
-from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
+from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFooter
 
 import math as m
 
@@ -150,7 +150,7 @@ for bottom in range(bottom_n):
 
     # Write
     fileName = fileNameBase + str(bottom) + '.eMesh'
-    with open(fileName,'w') as f:
+    with open(fileGetPath(fileName),'w') as f:
 
         f.write(objectHeader(fileName, 'featureEdgeMesh'))
 

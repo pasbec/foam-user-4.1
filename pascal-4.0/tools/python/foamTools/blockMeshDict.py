@@ -9,7 +9,7 @@
 
 import os, sys
 
-from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
+from foamTools.ioInfo import fileGetScriptPath, fileGetPath, objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Class definitions ----------------------------------------------------- #
@@ -56,7 +56,7 @@ class ioBase(object):
 
     def _getScriptPath(self):
 
-        return os.path.dirname(os.path.realpath(sys.argv[0]))
+        return fileGetScriptPath()
 
     # ----------------------------------------------------------------------- #
 
@@ -64,13 +64,7 @@ class ioBase(object):
 
         if not self.fileName == None:
 
-            if os.path.isabs(self.fileName):
-
-                return self.fileName
-
-            else:
-
-                return self._getScriptPath() + "/" + self.fileName
+            return fileGetPath(self.fileName)
 
         else:
 

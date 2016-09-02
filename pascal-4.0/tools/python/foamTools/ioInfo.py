@@ -21,6 +21,22 @@ import re
 # --- Function definitions -------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
+def fileGetScriptPath():
+
+    return os.path.dirname(os.path.realpath(sys.argv[0]))
+
+
+
+def fileGetPath(fileName):
+
+    if os.path.isabs(fileName):
+
+        return fileName
+
+    else:
+
+        return fileGetScriptPath() + "/" + fileName
+
 
 
 def objectIndent(cString, iLevel=0, iChar=' ', iCount=4):
@@ -52,9 +68,9 @@ def objectHeader(name, cl, time=""):
     r += i(0, '/*--------------------------------*- C++ -*----------------------------------*\\')
     r += i(0, '| =========                 |                                                 |')
     r += i(0, '| \\\\      /  F ield         | foam-extend: Open Source CFD                    |')
-    r += i(0, '|  \\\\    /   O peration     | Version:     3.2                                |')
+    r += i(0, '|  \\\\    /   O peration     | Version:     4.0                                |')
     r += i(0, '|   \\\\  /    A nd           | Web:         http://www.extend-project.de       |')
-    r += i(0, '|    \\\\/     M anipulation  |                                                 |')
+    r += i(0, '|    \\\\/     M anipulation  | For copyright notice see file Copyright         |')
     r += i(0, '\*---------------------------------------------------------------------------*/')
     r += i(0, 'FoamFile')
     r += i(0, '{')

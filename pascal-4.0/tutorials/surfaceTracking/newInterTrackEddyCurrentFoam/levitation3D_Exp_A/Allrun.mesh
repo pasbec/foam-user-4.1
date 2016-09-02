@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Remove old polyMesh
+rm -rf '0/polyMesh'
+rm -rf 'constant/polyMesh'
+
+# Get blockMeshDict.py script from storage folder
+mkdir 'constant/polyMesh'
+cp -r 'constant/polyMesh.org/blockMeshDict.py' 'constant/polyMesh/'
+
+# Create blockMeshDict
+./constant/polyMesh/blockMeshDict.py
+
+# Run blockMesh
+blockMesh
+
+# Mirror mesh in all directions
+directions="x y z"
+for d in $directions; do
+
+    cp "system/mirrorMeshDict.$d" \
+        'system/mirrorMeshDict'
+
+    mirrorMesh
+
+done
+
+# Move new polyMesh files to storage folder
+mv '0/polyMesh/boundary' \
+   '0/polyMesh/faces' \
+   '0/polyMesh/neighbour' \
+   '0/polyMesh/owner' \
+   '0/polyMesh/points' \
+   'constant/polyMesh.org/'
+
+# Remove polyMesh
+rm -rf '0/polyMesh'
+rm -rf 'constant/polyMesh'

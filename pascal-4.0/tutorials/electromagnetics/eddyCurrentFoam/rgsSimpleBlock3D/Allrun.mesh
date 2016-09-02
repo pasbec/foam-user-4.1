@@ -2,8 +2,17 @@
 
 # NOTE: To be used only with OpenFOAM 2.2.0 +
 
+# Check if we are running OpenFOAM
+if [[ ! -d "$FOAM_SRC/OpenFOAM" ]]; then
+
+    echo "Please make sure that the environment for OpenFOAM is set correctly."
+    echo "In order to create this mesh with snappyHexMesh, OpenFOAM 2.2.0 or newer is necessary."
+    echo "Maybe you are using foam-extend?"
+    exit
+fi
+
 # Remove old polyMesh
-rm -rf constant/polyMesh
+rm -rf 'constant/polyMesh'
 
 # Get blockMeshDict.py script from storage folder
 mkdir 'constant/polyMesh'
@@ -34,11 +43,13 @@ rm -rf 'constant/cellLevel' \
 # Remove empty patches
 createPatch -overwrite
 
-# Copy new polyMesh files to storage folder
-cp 'constant/polyMesh/blockMeshDict' \
-   'constant/polyMesh/boundary' \
+# Move new polyMesh files to storage folder
+mv 'constant/polyMesh/boundary' \
    'constant/polyMesh/faces' \
    'constant/polyMesh/neighbour' \
    'constant/polyMesh/owner' \
    'constant/polyMesh/points' \
    'constant/polyMesh.org/'
+
+# Remove polyMesh
+rm -rf 'constant/polyMesh'

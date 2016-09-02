@@ -8,7 +8,7 @@
 
 import os, sys
 
-from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
+from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFooter
 
 import math as m
 
@@ -65,27 +65,29 @@ for top in range(top_n):
 
             points.append([x, y, z])
 
-        # Points string
-        for pointi in range(len(points)-bundle*arc_n):
+        shift = bundle*arc_n
 
-            pointI = pointi + bundle*arc_n
+        # Points string
+        for pointi in range(len(points)-shift):
+
+            pointI = pointi + shift
 
             point = points[pointI]
 
             p += i(1, '('+str(point[0])+' '+str(point[1])+' '+str(point[2])+')')
 
         # Edges string
-        for pointi in range(len(points)-1-bundle*arc_n):
+        for pointi in range(len(points)-1-shift):
 
-            pointI = pointi + bundle*arc_n
+            pointI = pointi + shift
 
             e += i(1, '('+str(pointI)+' '+str(pointI+1)+')')
 
-        e += i(1, '('+str(len(points)-1)+' '+str(bundle*arc_n)+')')
+        e += i(1, '('+str(len(points)-1)+' '+str(shift)+')')
 
     # Write
     fileName = fileNameBase + str(top) + '.eMesh'
-    with open(fileName,'w') as f:
+    with open(fileGetPath(fileName),'w') as f:
 
         f.write(objectHeader(fileName, 'featureEdgeMesh'))
 
@@ -130,27 +132,29 @@ for bottom in range(bottom_n):
 
             points.append([x, y, z])
 
-        # Points string
-        for pointi in range(len(points)-bundle*arc_n):
+        shift = bundle*arc_n
 
-            pointI = pointi + bundle*arc_n
+        # Points string
+        for pointi in range(len(points)-shift):
+
+            pointI = pointi + shift
 
             point = points[pointI]
 
             p += i(1, '('+str(point[0])+' '+str(point[1])+' '+str(point[2])+')')
 
         # Edges string
-        for pointi in range(len(points)-1-bundle*arc_n):
+        for pointi in range(len(points)-1-shift):
 
-            pointI = pointi + bundle*arc_n
+            pointI = pointi + shift
 
             e += i(1, '('+str(pointI)+' '+str(pointI+1)+')')
 
-        e += i(1, '('+str(len(points)-1)+' '+str(bundle*arc_n)+')')
+        e += i(1, '('+str(len(points)-1)+' '+str(shift)+')')
 
     # Write
     fileName = fileNameBase + str(bottom) + '.eMesh'
-    with open(fileName,'w') as f:
+    with open(fileGetPath(fileName),'w') as f:
 
         f.write(objectHeader(fileName, 'featureEdgeMesh'))
 
