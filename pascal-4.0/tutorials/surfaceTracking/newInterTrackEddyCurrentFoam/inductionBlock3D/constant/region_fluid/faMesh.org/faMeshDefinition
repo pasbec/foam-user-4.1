@@ -9,27 +9,21 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      ARe;
+    class       dictionary;
+    object      faMeshDefinition;
 }
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************** //
 
-dimensions      [1 1 -2 0 0 -1 0];
+polyMeshPatches               1(trackedSurface);
 
-internalField   uniform (0 0 0);
-
-boundaryField
+boundary
 {
-    conductorSurface
+    sideWall
     {
-        type            calculated;
-        value           $internalField;
-    }
-    "procBoundary.*"
-    {
-        type            processor;
-        value           $internalField;
+        type                  patch;
+        ownerPolyPatch        trackedSurface;
+        neighbourPolyPatch    sideWall;
     }
 }
 
-// ************************************************************************* //
+// ************************************************************************** //

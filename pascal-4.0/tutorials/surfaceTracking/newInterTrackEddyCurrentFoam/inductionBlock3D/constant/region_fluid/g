@@ -9,27 +9,12 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      ARe;
+    class       uniformDimensionedVectorField;
+    object      g;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 1 -2 0 0 -1 0];
-
-internalField   uniform (0 0 0);
-
-boundaryField
-{
-    conductorSurface
-    {
-        type            calculated;
-        value           $internalField;
-    }
-    "procBoundary.*"
-    {
-        type            processor;
-        value           $internalField;
-    }
-}
+dimensions    [0 1 -2 0 0 0 0];
+value         (0 0 -9.81);
 
 // ************************************************************************* //

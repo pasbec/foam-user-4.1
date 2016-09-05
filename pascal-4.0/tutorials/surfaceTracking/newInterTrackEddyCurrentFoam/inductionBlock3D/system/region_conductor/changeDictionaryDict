@@ -18,15 +18,15 @@ dictionaryReplacement
 {
     boundary
     {
-//         trackedSurface
+//         conductorSurface
 //         {
 //             type            directMappedPatch;
 //             sampleMode      nearestPatchFace;
 //             sampleRegion    region_space;
-//             samplePatch     trackedSurface;
+//             samplePatch     conductorSurface;
 //             offset          (0 0 0);
 //         }
-        trackedSurface
+        conductorSurface
         {
             type            patch;
         }

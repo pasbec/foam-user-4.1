@@ -9,26 +9,32 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      ARe;
+    class       dictionary;
+    object      interTrackProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 1 -2 0 0 -1 0];
-
-internalField   uniform (0 0 0);
-
-boundaryField
+settings
 {
-    conductorSurface
+//     debug                   1;
+
+    region_fluid
     {
-        type            calculated;
-        value           $internalField;
+        volumeForce         true;
+        turbulence          true;
+
+        UpCoupled           false;
+        UEqnVolumeForce     false;
+        snGradpFromFlux     true;
     }
-    "procBoundary.*"
+}
+
+storage
+{
+    region_fluid
     {
-        type            processor;
-        value           $internalField;
+        F                  "calculated";
+        turbulence         "default";
     }
 }
 

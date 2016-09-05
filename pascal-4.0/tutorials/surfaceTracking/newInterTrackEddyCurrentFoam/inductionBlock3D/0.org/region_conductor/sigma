@@ -20,7 +20,7 @@ internalField   uniform 0;
 
 boundaryField
 {
-    trackedSurface
+    conductorSurface
     {
         type            calculated;
         value           $internalField;

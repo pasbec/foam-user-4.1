@@ -20,7 +20,7 @@ internalField   uniform 0;
 
 boundaryField
 {
-    trackedSurface
+    conductorSurface
     {
         type            fixedGradient;
         gradient        uniform 0;

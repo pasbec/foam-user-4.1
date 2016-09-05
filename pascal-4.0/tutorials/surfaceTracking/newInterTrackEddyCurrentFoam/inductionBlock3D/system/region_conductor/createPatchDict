@@ -21,7 +21,7 @@ pointSync                true;
 patchInfo
 (
     {
-        name             trackedSurface;
+        name             conductorSurface;
         constructFrom    patches;
         patches          (region_conductor_to_region_space);
 
