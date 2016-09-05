@@ -25,8 +25,8 @@ motionDir                                    (0 0 1);
 
 fixedTrackedSurfacePatches                   0();
 
-// pointNormalsCorrectionPatches                1(fixedWall); // no contactAngle given
-pointNormalsCorrectionPatches                0(); // contactAngle given
+pointNormalsCorrectionPatches                1(sideWall); // no contactAngle given
+// pointNormalsCorrectionPatches                0(); // contactAngle given
 
 nTrackedSurfaceCorrectors                    1;
 

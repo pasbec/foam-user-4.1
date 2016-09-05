@@ -22,7 +22,7 @@ inductors
     {
         file       "coil0.eMesh";
         reverse    false;
-        current    1414.2136;
+        current    39.2837 // = 1414.2136 / (4*9);
         phase      0.0;
     }
 
@@ -30,7 +30,7 @@ inductors
     {
         file       "coil1.eMesh";
         reverse    false;
-        current    1414.2136;
+        current    39.2837 // = 1414.2136 / (4*9);
         phase      0.0;
     }
 
@@ -38,7 +38,7 @@ inductors
     {
         file       "coil2.eMesh";
         reverse    false;
-        current    1414.2136;
+        current    39.2837 // = 1414.2136 / (4*9);
         phase      0.0;
     }
 
@@ -46,7 +46,7 @@ inductors
     {
         file       "coil3.eMesh";
         reverse    false;
-        current    1414.2136;
+        current    39.2837 // = 1414.2136 / (4*9);
         phase      0.0;
     }
 }
