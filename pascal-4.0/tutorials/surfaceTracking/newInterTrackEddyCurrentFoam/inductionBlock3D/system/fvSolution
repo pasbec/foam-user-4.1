@@ -21,7 +21,7 @@ solvers
         solver                   BiCGStab;
 
         tolerance                1e-05;
-        relTol                   0.5;
+        relTol                   0.1;
 
         minIter                  0;
         maxIter                  300;
@@ -53,24 +53,22 @@ solvers
 
 EDDYCURRENT
 {
-    interface          "oldInternalFaces";
+    interface          "trackedSurface";
 
-    nCorrectors        1;
-    nSubCorrectors     50;
+    nCorrectors        10;
+    nSubCorrectors     1000;
 
     residualControl
     {
         "(Ax|Ay|Az)"
         {
             tolerance  1e-05;
-//             tolerance  1e-03;
             relTol     0.1;
         }
 
         "(VRe|VIm)"
         {
             tolerance  1e-05;
-//             tolerance  1e-03;
             relTol     0.1;
         }
      }

@@ -20,7 +20,7 @@ internalField   uniform 0;
 
 boundaryField
 {
-    oldInternalFaces
+    trackedSurface
     {
         type            fixedGradient;
         gradient        uniform 0;

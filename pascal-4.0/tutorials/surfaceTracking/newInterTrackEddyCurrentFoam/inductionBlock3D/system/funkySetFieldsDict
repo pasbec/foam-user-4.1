@@ -19,6 +19,9 @@ materialProperties
   "sigma_silicon_liquid=1.2e+6;"    // Conductivity of liquid silicon in [S/m]
   "sigma_silicon_solid=8.3e+4;"     // Conductivity of solid silicon in [S/m]
   "sigma_graphite=1.25e+5;"         // Conductivity of graphite in [S/m]
+  "sigma_stainlessSteel=1.43e+6;"   // Conductivity of stainless steel in [S/m]
+  "sigma_woodsMetal=1.0e+6;"        // Conductivity of woods metal in [S/m]
+  "sigma_copper=5.8e+7;"            // Conductivity of copper in [S/m]
 );
 
 expressions
@@ -31,20 +34,12 @@ expressions
     expression    "0";
     keepPatches   true;
   }
-  sigma_conductor_y_le_0
+  sigma_conductor
   {
     field         sigma;
     variables     $materialProperties;
-    condition     "set(cellSet_material_conductor) && pos().y<=0";
+    condition     "set(cellSet_material_liquidMetal)";
     expression    "sigma_silicon_liquid";
-    keepPatches   true;
-  }
-  sigma_conductor_y_gt_0
-  {
-    field         sigma;
-    variables     $materialProperties;
-    condition     "set(cellSet_material_conductor) && pos().y>0";
-    expression    "sigma_silicon_liquid/12";
     keepPatches   true;
   }
 );

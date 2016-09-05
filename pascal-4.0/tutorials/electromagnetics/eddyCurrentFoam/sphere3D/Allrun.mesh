@@ -26,14 +26,14 @@ for d in $directions; do
 done
 
 # Move new polyMesh files to storage folder
-mv '0/polyMesh/boundary' \
-   '0/polyMesh/faces' \
-   '0/polyMesh/neighbour' \
-   '0/polyMesh/owner' \
-   '0/polyMesh/points' \
+meshFolder='0/polyMesh'
+[[ ! -e "$meshFolder" ]] && meshFolder='constant/polyMesh'
+mv "$meshFolder/boundary" \
+   "$meshFolder/faces" \
+   "$meshFolder/neighbour" \
+   "$meshFolder/owner" \
+   "$meshFolder/points" \
    'constant/polyMesh.org/'
 
-# Remove polyMesh
-rm -rf '0/polyMesh'
-rm -rf 'constant/polyMesh'
-
+# # Remove polyMesh
+# rm -rf "$meshFolder"

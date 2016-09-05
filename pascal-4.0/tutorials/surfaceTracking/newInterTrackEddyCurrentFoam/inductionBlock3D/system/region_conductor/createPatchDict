@@ -14,17 +14,22 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-matchTolerance 1e-12;
+matchTolerance           1e-6;
 
-pointSync true;
+pointSync                true;
 
 patchInfo
 (
-);
+    {
+        name             trackedSurface;
+        constructFrom    patches;
+        patches          (region_conductor_to_region_space);
 
-// OpenFOAM syntax
-patches
-(
+        dictionary
+        {
+            type         patch;
+        }
+    }
 );
 
 // ************************************************************************* //

@@ -27,25 +27,25 @@ setErrorTrap
 regionlist_splitn=2
 regionlist_split1="region_fluid region_buffer region_static"
 regionlist_split2="region_conductor region_space"
-regionlist_split="$regionlist_split1 $regionlist_split2"
+regionlist="$regionlist_split1 $regionlist_split2"
 
 if [[ $flagClean -eq 1 ]]; then
 
     # Cleanup
     cleanCase
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         cleanCase "$region"
     done
 
     # Wipe folders with org backup
     wipeOrgCopy
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         wipeOrgCopy "$region"
     done
 
     # Wipe polymesh for regions
     wipePolyMesh
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         wipePolyMesh "$region"
     done
 
@@ -53,14 +53,15 @@ fi
 
 if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
 
-    # Restore polymesh from org backup
+    # Restore polymesh folder from org backup
     restorePolyMeshOrg
-
-    # Remove all sets and zones
-    cleanPolyMeshSetsAndZones
 
     # Create 2D mesh
     runApplication extrudeMesh || exit 1
+
+
+    # Remove all sets and zones
+    cleanPolyMeshSetsAndZones
 
     # Create new topoSets
     runApplication \
@@ -84,13 +85,13 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     # Create meshes
     for n in $(eval echo "{1..$regionlist_splitn}"); do
 
-        regionlist=$(eval echo \$regionlist_split$n)
+        regionlist_split=$(eval echo \$regionlist_split$n)
 
         # Remove all topoSets
         rm 'constant/polyMesh/sets/'* > /dev/null 2>&1
 
         # Restore cellSets for this step of splitMeshRegions
-        for region in $regionlist; do
+        for region in $regionlist_split; do
             cp "constant/polyMesh/sets/bak/cellSet_$region" \
             'constant/polyMesh/sets/' || exit 1
         done
@@ -102,17 +103,16 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         runApplication -l "log.setsToZones.$n" \
             setsToZones || exit 1
 
-        # Remove topoSet prefixes from topoZones
+        # Remove cellSet prefixes from cellZones
         sed -i 's/cellSet_//g' 'constant/polyMesh/cellZones' > /dev/null 2>&1
-        sed -i 's/faceSet_//g' 'constant/polyMesh/faceZones' > /dev/null 2>&1
-        sed -i 's/pointSet_//g' 'constant/polyMesh/pointZones' > /dev/null 2>&1
 
         # Split regions
         runApplication -l "log.splitMeshRegions.$n" \
             splitMeshRegions -overwrite -cellZonesOnly || exit 1
 
-        # Remove cellToRegion
+        # Remove cellToRegion and cellZones
         find -name 'cellToRegion' -delete > /dev/null 2>&1
+        find -name 'cellZones' -delete > /dev/null 2>&1
 
     done
 
@@ -126,20 +126,20 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
 
     # Move polyMesh from 0 to constant
     # for regions
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         moveZeroToConstantPolyMesh "$region"
     done
 
     # Create sets
     # for regions
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         runApplication -r "$region" \
             makeRegionSets -region "$region" || exit 1
     done
 
     # Create new patches and cleanup
     # for regions
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         runApplication -r "$region" \
             createPatch -overwrite -region "$region" || exit 1
 
@@ -149,14 +149,14 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
 
     # Change dictionaries
     # for regions
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         runApplication -r "$region" \
             changeDictionary -region "$region" || exit 1
     done
 
     # Add fields to 0 from org backup
     # for regions
-    for region in $regionlist_split; do
+    for region in $regionlist; do
         addZeroOrg "$region"
     done
 
@@ -174,7 +174,7 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         makeFaMesh -region 'region_fluid' || exit 1
 
     # Add faSubMesh to region list
-    regionlist="$regionlist_split region_fluid_faSubMesh"
+    regionlist="$regionlist region_fluid_faSubMesh"
 
     # Clean old faSubMesh
     cleanPolyMesh 'region_fluid_faSubMesh'
@@ -237,7 +237,6 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
         for region in $regionlist; do
             paraviewTouchOpenFOAMParallel "$region"
         done
-
     fi
 fi
 

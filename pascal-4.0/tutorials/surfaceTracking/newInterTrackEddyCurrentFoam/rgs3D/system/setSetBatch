@@ -190,8 +190,7 @@ faceSet faceSet_regions2_old              remove
 
 faceSet faceSet_regions                   new    setToFace      faceSet_regions1
 faceSet faceSet_regions                   add    setToFace      faceSet_regions2
-faceSet faceSet_regions                   delete setToFace      faceSet_frontAndBack
-faceSet faceSet_regions                   delete setToFace      faceSet_infinity
+faceSet faceSet_regions                   delete setToFace      faceSet_geometry_infinity
 faceSet faceSet_regions1                  remove
 faceSet faceSet_regions2                  remove
 faceSet faceSet_regions_old               remove
