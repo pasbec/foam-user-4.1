@@ -49,10 +49,7 @@ Author
 #include "addressingTypes.H"
 #include "regionToRegionAddressing.H"
 
-// TODO [High]: Curvature at boundaries (interpolation values AND
-//              point-normal correction)?
 // TODO [High]: Curvature weighting factors?
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

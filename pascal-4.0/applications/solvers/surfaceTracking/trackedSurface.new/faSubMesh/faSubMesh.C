@@ -92,6 +92,8 @@ void faSubMesh::clearGeom() const
 void faSubMesh::clearOut() const
 {
     clearGeom();
+
+    deleteDemandDrivenData(faceSubToBaseAreaMapPtr_);
 }
 
 

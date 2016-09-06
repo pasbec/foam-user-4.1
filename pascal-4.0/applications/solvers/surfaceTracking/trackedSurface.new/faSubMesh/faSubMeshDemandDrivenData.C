@@ -119,17 +119,12 @@ void faSubMesh::makeFaceCurvatures() const
                 IOobject::NO_WRITE,
                 false
             ),
-            baseAreaMesh(),
-            dimensionedScalar
-            (
-                word(),
-                dimless/dimLength,
-                0
-            )
+            baseAreaMesh().faceCurvatures()
         );
 
     areaScalarField& baseK = *faceCurvaturesPtr_;
     scalarField& baseKin = baseK.internalField();
+    baseKin = scalarField(baseK.size(), 0);
 
     const areaScalarField& subK = subAreaMesh().faceCurvatures();
     const scalarField& subKin = subK.internalField();
@@ -148,7 +143,7 @@ void faSubMesh::makeFaceCurvatures() const
 
     baseKin /= baseKinWeights;
 
-// TODO: What about the boundaryField? Is this actually necessary for trackedSurface?
+    baseK.correctBoundaryConditions();
 }
 
 
