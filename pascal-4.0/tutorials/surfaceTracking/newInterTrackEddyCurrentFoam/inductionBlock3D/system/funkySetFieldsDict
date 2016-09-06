@@ -22,6 +22,7 @@ materialProperties
   "sigma_stainlessSteel=1.43e+6;"   // Conductivity of stainless steel in [S/m]
   "sigma_woodsMetal=1.0e+6;"        // Conductivity of woods metal in [S/m]
   "sigma_copper=5.8e+7;"            // Conductivity of copper in [S/m]
+  "sigma_GaInSi=3.3e+6;"            // Conductivity of GaInSi in [S/m] at 25°C
 );
 
 expressions
@@ -39,7 +40,7 @@ expressions
     field         sigma;
     variables     $materialProperties;
     condition     "set(cellSet_material_liquidMetal)";
-    expression    "sigma_silicon_liquid";
+    expression    "sigma_GaInSi";
     keepPatches   true;
   }
 );

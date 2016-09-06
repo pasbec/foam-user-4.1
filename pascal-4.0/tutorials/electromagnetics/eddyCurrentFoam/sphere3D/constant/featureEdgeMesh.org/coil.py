@@ -85,7 +85,7 @@ for top in range(top_n):
 
     # Write
     fileName = fileNameBase + str(top) + '.eMesh'
-    with open(fileName,'w') as f:
+    with open(fileGetPath(fileName),'w') as f:
 
         f.write(objectHeader(fileName, 'featureEdgeMesh'))
 

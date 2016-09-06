@@ -16,14 +16,16 @@ FoamFile
 
 settings
 {
-//     debug                   1;
+//     debug              1;
 
-    biotSavart              false;
+    biotSavart         false;
+
+    lorentzForce       true;
 }
 
 regions
 {
-    conductor               region_conductor;
+    conductor          "region_conductor";
 }
 
 storage
