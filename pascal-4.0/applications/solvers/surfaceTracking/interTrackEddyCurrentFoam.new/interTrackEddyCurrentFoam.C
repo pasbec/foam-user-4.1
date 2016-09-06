@@ -39,8 +39,6 @@ int main(int argc, char *argv[])
 {
     using namespace Foam;
 
-    argList::validOptions.insert("prefix", "name");
-
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createRegionDynamicFvMeshUninitialized.H"
@@ -90,32 +88,17 @@ int main(int argc, char *argv[])
         using namespace interTrackEddyCurrentApp::Region;
 
         eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
-        eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);
 
-        multiManager.storage().emPrevC() =
-            multiManager.mesh()[Region::CONDUCTOR].C();
-    }
+// TODO: Use pointer instead of copy!
+        interTrackAppManager.regions().region_DEFAULT().storage().F() =
+            eddyCurrentAppManager.storage().FL()[Region::FLUID];
 
-
-// TODO: Make this nicer!
-    // Init interTrackApp
-    {
-        using namespace interTrackApp;
-        using namespace interTrackApp::Region;
-
-        Manager& manager = interTrackAppManager;
-
-        SM_GLOBALREGIONSCOPE(DEFAULT);
-
-        const volVectorField& FL =
-            eddyCurrentAppManager.storage().FL()[Region::DEFAULT];
-        const volScalarField& pB =
-            eddyCurrentAppManager.storage().pB()[Region::DEFAULT];
-
-        // Use Lorentz force as volume force in fluid region
-        storage.F() = FL;
-
-// // TODO: Magnetic pressure?
+// TODO: Magnetic pressure?
+//         eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);
+//
+//         const volScalarField& pB =
+//             eddyCurrentAppManager.storage().pB()[Region::FLUID];
+//
 //         pB *= lorentzForceRotationalFactor;
 //
 //         F = FL + fvc::grad(pB);
@@ -139,11 +122,17 @@ int main(int argc, char *argv[])
         // Check for magnetic update
         Switch emUpdate = multiManager.control().loop();
 
-        // Update mesh in buffer region
+        // Update meshes in buffer, default and conducting region
         if (emUpdate)
         {
             using namespace interTrackEddyCurrentApp;
             using namespace interTrackEddyCurrentApp::Region;
+
+            // Create new points
+            pointField newPoints;
+
+            // Update mesh in buffer region
+            // ~~~~~~
 
             // Calculate mesh velocity at fluid/buffer-interface
             // in buffer region from current boundary displacement
@@ -155,7 +144,7 @@ int main(int argc, char *argv[])
             );
 
             // Grab current points of buffer region as new point field
-            pointField newPoints = multiManager.mesh()[Region::BUFFER].points();
+            newPoints = multiManager.mesh()[Region::BUFFER].points();
 
             // Correct points for 2D-motion of buffer region
             twoDPointCorrector bTwoDPointCorr(multiManager.mesh()[Region::BUFFER]);
@@ -164,17 +153,13 @@ int main(int argc, char *argv[])
             // Use motionSolver to move and update mesh of buffer region
             multiManager.mesh()[Region::BUFFER].movePoints(newPoints);
             multiManager.mesh()[Region::BUFFER].update();
-        }
 
-        // Update mesh of default region
-        if (emUpdate)
-        {
-            using namespace interTrackEddyCurrentApp;
-            using namespace interTrackEddyCurrentApp::Region;
+            // Update mesh in default region
+            // ~~~~~~
 
             // Create new point field for default region
             // with current point positions of fluid region
-            pointField newPoints = multiManager.mesh().rmap(Region::FLUID);
+            newPoints = multiManager.mesh().rmap(Region::FLUID);
 
             // Replace point positions of buffer region in
             // new point field for default region
@@ -183,17 +168,13 @@ int main(int argc, char *argv[])
             // Move and update mesh of default region
             multiManager.mesh()[Region::DEFAULT].movePoints(newPoints);
             multiManager.mesh()[Region::DEFAULT].update();
-        }
 
-        // Update mesh of conductor region
-        if (emUpdate)
-        {
-            using namespace interTrackEddyCurrentApp;
-            using namespace interTrackEddyCurrentApp::Region;
+            // Update mesh in conducting region
+            // ~~~~~~
 
             // Create new point field for conductor region
             // with current points of default region
-            pointField newPoints = multiManager.mesh().map(Region::CONDUCTOR);
+            newPoints = multiManager.mesh().map(Region::CONDUCTOR);
 
             // Move and update mesh of conductor region
             multiManager.mesh()[Region::CONDUCTOR].movePoints(newPoints);
@@ -223,42 +204,31 @@ int main(int argc, char *argv[])
             }
         }
 
-        // Map/Extrpolate volume force to fluid region
+        // Map/Extrapolate and update volume force in fluid region
         if (emUpdate)
         {
             using namespace interTrackEddyCurrentApp;
             using namespace interTrackEddyCurrentApp::Region;
 
             eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
-            eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);
-        }
 
-        // Update volume force in fluid region
-        if (emUpdate)
-        {
-            using namespace interTrackApp;
-            using namespace interTrackApp::Region;
-
-            Manager& manager = interTrackAppManager;
-
-            SM_GLOBALREGIONSCOPE(DEFAULT);
-
-            const volVectorField& FL =
-                eddyCurrentAppManager.storage().FL()[Region::DEFAULT];
-            const volScalarField& pB =
-                eddyCurrentAppManager.storage().pB()[Region::DEFAULT];
-
-            // Use Lorentz force as volume force in fluid region
-            storage.F() = FL;
+// TODO: Use pointer instead of copy!
+            interTrackAppManager.regions().region_DEFAULT().storage().F() =
+                eddyCurrentAppManager.storage().FL()[Region::FLUID];
 
 // TODO: Magnetic pressure?
+//             eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);
+//
+//             const volScalarField& pB =
+//                 eddyCurrentAppManager.storage().pB()[Region::FLUID];
+//
 //             pB *= lorentzForceRotationalFactor;
 //
 //             F = FL + fvc::grad(pB);
 //             F *= lorentzForceVolumeFactor;
         }
 
-        // Solve fluid flow in fluid region
+        // Solve fluid flow
         {
             using namespace interTrackApp;
             using namespace interTrackApp::Region;

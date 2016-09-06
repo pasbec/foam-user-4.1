@@ -5,18 +5,12 @@
 
         volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];
 
-        volVectorField& ARe = globalStorage.ARe()[CONDUCTOR];
-        volVectorField& AIm = globalStorage.AIm()[CONDUCTOR];
-
-        volVectorField& FL = globalStorage.FL()[CONDUCTOR];
-        volScalarField& pB = globalStorage.pB()[CONDUCTOR];
-
         volVectorField& BRe = globalStorage.BRe()[CONDUCTOR];
         volVectorField& BIm = globalStorage.BIm()[CONDUCTOR];
 
         // Eddy current density
-        storage.jRe() =   omega0 * sigma * AIm;
-        storage.jIm() = - omega0 * sigma * ARe;
+        storage.jRe() =   omega0 * sigma * globalStorage.AIm()[CONDUCTOR];
+        storage.jIm() = - omega0 * sigma * globalStorage.ARe()[CONDUCTOR];
 
         if (control.meshIs3D())
         {
@@ -30,19 +24,32 @@
             storage.jIm() -= omega0 * sigma * globalStorage.A0Re()[CONDUCTOR];
         }
 
-        // Time-averaged Lorentz-force
-        FL = 0.5 * ( (storage.jRe() ^ BRe)
-                   + (storage.jIm() ^ BIm) );
+        if (globalStorage.item_FL().enabled())
+        {
+            // Time-averaged Lorentz-force
+            globalStorage.FL()[CONDUCTOR] = 0.5 * ( (storage.jRe() ^ BRe)
+                                                  + (storage.jIm() ^ BIm) );
 
-        // Time-averaged magnetic pressure
-        pB = 0.5 * physicalConstant::rMu0
-           * 0.5 * ( (BRe & BRe)
-                   + (BIm & BIm) );
-    }
+            globalStorage.FL().rmap(CONDUCTOR);
+        }
 
-    // Derived fields in default region
-    {
-        globalStorage.FL().rmap(CONDUCTOR);
-        globalStorage.pB().rmap(CONDUCTOR);
+        if (globalStorage.item_pB().enabled())
+        {
+            // Time-averaged magnetic pressure
+            globalStorage.pB()[CONDUCTOR] = 0.5 * physicalConstant::rMu0
+                                          * 0.5 * ( (BRe & BRe)
+                                                  + (BIm & BIm) );
+
+            globalStorage.pB().rmap(CONDUCTOR);
+        }
+
+        if (globalStorage.item_Q().enabled())
+        {
+            // Time-averaged joule heating
+            globalStorage.Q()[CONDUCTOR] = 0.5 / sigma * ( (storage.jRe() & storage.jRe())
+                                                         + (storage.jIm() & storage.jIm()) );
+
+            globalStorage.Q().rmap(CONDUCTOR);
+        }
     }
 

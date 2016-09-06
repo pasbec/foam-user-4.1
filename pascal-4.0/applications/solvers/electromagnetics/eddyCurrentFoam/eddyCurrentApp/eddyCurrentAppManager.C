@@ -49,6 +49,10 @@ void Foam::eddyCurrentApp::Manager::Settings::read() const
         );
 
     biotSavart = dict().lookupOrDefault("biotSavart", false);
+
+    lorentzForce = dict().lookupOrDefault("lorentzForce", false);
+    magneticPressure = dict().lookupOrDefault("magneticPressure", false);
+    jouleHeat = dict().lookupOrDefault("jouleHeat", false);
 }
 
 
@@ -382,6 +386,34 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_pB::create
 }
 
 
+void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create
+(const word& init) const
+{
+    set
+    (
+        new regionVolScalarField
+        (
+            IOobject
+            (
+                "Q",
+                time().timeName(),
+                mesh(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimEnergy/dimTime/dimVolume,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName
+        )
+    );
+}
+
+
 void Foam::eddyCurrentApp::Manager::Storage::create(const word& ccase) const
 {
     item_f0().enable();
@@ -401,8 +433,9 @@ void Foam::eddyCurrentApp::Manager::Storage::create(const word& ccase) const
     item_BRe().enable();
     item_BIm().enable();
 
-    item_FL().enable();
-    item_pB().enable();
+    item_FL().setState(settings().lorentzForce);
+    item_pB().setState(settings().magneticPressure);
+    item_Q().setState(settings().jouleHeat);
 }
 
 

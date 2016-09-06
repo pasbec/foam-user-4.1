@@ -41,8 +41,6 @@ int main(int argc, char *argv[])
 {
     using namespace Foam;
 
-    argList::validOptions.insert("prefix", "name");
-
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createDynamicFvMesh.H"

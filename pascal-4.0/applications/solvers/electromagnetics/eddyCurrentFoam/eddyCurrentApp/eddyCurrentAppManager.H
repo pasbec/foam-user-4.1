@@ -79,6 +79,15 @@ public:
             //- Switch to set wether Biot-Savart is used
             SM_SETTINGS_MEMBER_ADD(Switch, biotSavart);
 
+            //- Lorentz force switch
+            SM_SETTINGS_MEMBER_ADD(Switch, lorentzForce);
+
+            //- Magnetic pressure switch
+            SM_SETTINGS_MEMBER_ADD(Switch, magneticPressure);
+
+            //- Joul heat switch
+            SM_SETTINGS_MEMBER_ADD(Switch, jouleHeat);
+
         SM_GLOBALSETTINGS_ADD();
 
 
@@ -114,6 +123,9 @@ public:
 
             //- Magnetic pressure (time-averaged)
             SM_GLOBALITEM_ADD(regionVolScalarField, pB);
+
+            //- Joule heating (time-averaged)
+            SM_GLOBALITEM_ADD(regionVolScalarField, Q);
 
         SM_GLOBALSTORAGE_ADD();
 

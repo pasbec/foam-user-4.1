@@ -267,6 +267,9 @@ Foam::interTrackEddyCurrentApp::Control::Control
     )
 {
     read();
+
+    prevC_ = mesh_[Region::CONDUCTOR].C();
+    prevC_.correctBoundaryConditions();
 }
 
 
