@@ -62,13 +62,6 @@ class edgeBiotSavart
 {
 public:
 
-    //- Real/Imaginary part enums
-    enum complexPart
-    {
-        REAL = 0,
-        IMAG = 1
-    };
-
     //- Inductor data
     struct InductorData
     {
@@ -79,12 +72,21 @@ public:
         scalar phase;
     };
 
+    //- Real/Imaginary part enums
+    enum complexPart
+    {
+        REAL = 0,
+        IMAG = 1
+    };
+
+    //- Static data
+
+        static const NamedEnum<complexPart, 2> complexPartNames;
+
 
 private:
 
     // Private data
-
-        static const NamedEnum<complexPart, 2> complexPartNames_;
 
         //- Mesh
         const fvMesh& mesh_;

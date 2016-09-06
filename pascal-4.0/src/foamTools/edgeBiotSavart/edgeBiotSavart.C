@@ -42,7 +42,7 @@ const char* Foam::NamedEnum<Foam::edgeBiotSavart::complexPart, 2>::names[] =
 
 
 const Foam::NamedEnum<Foam::edgeBiotSavart::complexPart, 2>
-    Foam::edgeBiotSavart::complexPartNames_;
+    Foam::edgeBiotSavart::complexPartNames;
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -279,7 +279,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::internalA
 ) const
 {
     Info << "Biot-Savart for A on internal field"
-        << " (" << part << ")"
+        << " (" << complexPartNames[part] << ")"
         << endl;
 
     return calcA(mesh_.C().internalField(), part);
@@ -294,7 +294,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
 {
     Info << "Biot-Savart for A on boundary field"
         << " of patch " << "'" << mesh_.boundaryMesh()[patchI].name() << "'"
-        << " (" << part << ")"
+        << " (" << complexPartNames[part] << ")"
         << endl;
 
     return calcA(mesh_.C().boundaryField()[patchI], part);
@@ -311,7 +311,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
 
     Info << "Biot-Savart for A on boundary field "
         << " of patch " << "'" << patchName << "'"
-        << " (" << part << ")"
+        << " (" << complexPartNames[part] << ")"
         << endl;
 
     return calcA(mesh_.C().boundaryField()[patchI], part);
@@ -427,7 +427,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::internalB
 ) const
 {
     Info << "Biot-Savart for B on internal field"
-        << " (" << part << ")"
+        << " (" << complexPartNames[part] << ")"
         << endl;
 
     return calcB(mesh_.C().internalField(), part);
@@ -442,7 +442,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
 {
     Info << "Biot-Savart for B on boundary field"
         << " of patch " << "'" << mesh_.boundaryMesh()[patchI].name() << "'"
-        << " (" << part << ")"
+        << " (" << complexPartNames[part] << ")"
         << endl;
 
     return calcB(mesh_.C().boundaryField()[patchI], part);
@@ -459,7 +459,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
 
     Info << "Biot-Savart for B on boundary field "
         << " of patch " << "'" << patchName << "'"
-        << " (" << part << ")"
+        << " (" << complexPartNames[part] << ")"
         << endl;
 
     return boundaryPatchB(patchI, part);
