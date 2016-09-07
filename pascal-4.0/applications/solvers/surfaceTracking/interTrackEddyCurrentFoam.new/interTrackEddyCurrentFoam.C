@@ -45,18 +45,18 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    interTrackEddyCurrentApp::Manager multiManager(args, runTime, regionMesh);
+    interTrackEddyCurrentApp::Manager masterManager(args, runTime, regionMesh);
 
     eddyCurrentApp::Manager& eddyCurrentAppManager =
-        multiManager.eddyCurrentAppManager();
+        masterManager.eddyCurrentAppManager();
 
     interTrackApp::Manager& interTrackAppManager =
-        multiManager.interTrackAppManager();
+        masterManager.interTrackAppManager();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    multiManager.read();
-    multiManager.init();
+    masterManager.read();
+    masterManager.init();
 
 // TODO: Make this nicer!
     // Init eddyCurrentApp
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 //         F *= lorentzForceVolumeFactor;
     }
 
-    while (multiManager.run())
+    while (masterManager.run())
     {
         // Update mesh in fluid region and predict interface points
         {
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         }
 
         // Check for magnetic update
-        Switch emUpdate = multiManager.control().loop();
+        Switch emUpdate = masterManager.control().loop();
 
         // Update meshes in buffer, default and conducting region
         if (emUpdate)
@@ -137,48 +137,48 @@ int main(int argc, char *argv[])
             // Calculate mesh velocity at fluid/buffer-interface
             // in buffer region from current boundary displacement
             // in fluid region
-            multiManager.mesh().patchMapMeshVelocityDirectMapped
+            masterManager.mesh().patchMapMeshVelocityDirectMapped
             (
                 Region::FLUID,
                 Region::BUFFER
             );
 
             // Grab current points of buffer region as new point field
-            newPoints = multiManager.mesh()[Region::BUFFER].points();
+            newPoints = masterManager.mesh()[Region::BUFFER].points();
 
             // Correct points for 2D-motion of buffer region
-            twoDPointCorrector bTwoDPointCorr(multiManager.mesh()[Region::BUFFER]);
+            twoDPointCorrector bTwoDPointCorr(masterManager.mesh()[Region::BUFFER]);
             bTwoDPointCorr.correctPoints(newPoints);
 
             // Use motionSolver to move and update mesh of buffer region
-            multiManager.mesh()[Region::BUFFER].movePoints(newPoints);
-            multiManager.mesh()[Region::BUFFER].update();
+            masterManager.mesh()[Region::BUFFER].movePoints(newPoints);
+            masterManager.mesh()[Region::BUFFER].update();
 
             // Update mesh in default region
             // ~~~~~~
 
             // Create new point field for default region
             // with current point positions of fluid region
-            newPoints = multiManager.mesh().rmap(Region::FLUID);
+            newPoints = masterManager.mesh().rmap(Region::FLUID);
 
             // Replace point positions of buffer region in
             // new point field for default region
-            multiManager.mesh().rmap(newPoints, Region::BUFFER);
+            masterManager.mesh().rmap(newPoints, Region::BUFFER);
 
             // Move and update mesh of default region
-            multiManager.mesh()[Region::DEFAULT].movePoints(newPoints);
-            multiManager.mesh()[Region::DEFAULT].update();
+            masterManager.mesh()[Region::DEFAULT].movePoints(newPoints);
+            masterManager.mesh()[Region::DEFAULT].update();
 
             // Update mesh in conducting region
             // ~~~~~~
 
             // Create new point field for conductor region
             // with current points of default region
-            newPoints = multiManager.mesh().map(Region::CONDUCTOR);
+            newPoints = masterManager.mesh().map(Region::CONDUCTOR);
 
             // Move and update mesh of conductor region
-            multiManager.mesh()[Region::CONDUCTOR].movePoints(newPoints);
-            multiManager.mesh()[Region::CONDUCTOR].update();
+            masterManager.mesh()[Region::CONDUCTOR].movePoints(newPoints);
+            masterManager.mesh()[Region::CONDUCTOR].update();
         }
 
         // Solve eddy-current problem

@@ -1359,6 +1359,9 @@ void trackedSurface::updateMesh()
             moveMeshPoints();
 
             moveUpdate();
+
+            // Always reset control points after whole mesh movement
+            controlPoints() = aMesh().areaCentres().internalField();
         }
     }
 }
@@ -1868,6 +1871,163 @@ scalar trackedSurface::maxCourantNumber()
     }
 
     return CoNum;
+}
+
+
+// TODO
+void trackedSurface::smoothCurvature()
+{
+    areaScalarField& oldK =
+        const_cast<areaScalarField&>
+        (
+// TEST: Sub-mesh
+            curvature()
+        );
+
+    areaScalarField K
+    (
+        IOobject
+        (
+            "K",
+            DB().timeName(),
+            mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        aMesh(),
+        dimless/dimLength,
+        fixedGradientFaPatchScalarField::typeName
+    );
+
+    K.internalField() = oldK.internalField();
+
+    forAll (K.boundaryField(), patchI)
+    {
+        if
+        (
+            K.boundaryField()[patchI].type()
+         == fixedGradientFaPatchScalarField::typeName
+        )
+        {
+            fixedGradientFaPatchScalarField& Kp =
+                refCast<fixedGradientFaPatchScalarField>
+                (
+                    K.boundaryField()[patchI]
+                );
+
+            Kp.gradient() = 0;
+        }
+    }
+
+    K.correctBoundaryConditions();
+
+
+    label counter = 0;
+
+    // Set gradient
+    do
+    {
+        counter++;
+
+        areaVectorField gradK = fac::grad(K);
+
+        forAll (K.boundaryField(), patchI)
+        {
+            if
+            (
+                K.boundaryField()[patchI].type()
+             == fixedGradientFaPatchScalarField::typeName
+            )
+            {
+                fixedGradientFaPatchScalarField& Kp =
+                    refCast<fixedGradientFaPatchScalarField>
+                    (
+                        K.boundaryField()[patchI]
+                    );
+
+                Kp.gradient() =
+                (
+                    aMesh().boundary()[patchI].edgeNormals()
+                   &gradK.boundaryField()[patchI].patchInternalField()
+                );
+            }
+        }
+
+        K.correctBoundaryConditions();
+    }
+    while(counter<5);
+
+
+    areaScalarField indicator =
+        fac::div
+        (
+            fac::lnGrad(K)*aMesh().magLe()
+          - (aMesh().Le()&fac::interpolate(fac::grad(K)))
+        );
+
+    scalar minIndicator = GREAT;
+    label refFace = -1;
+
+    forAll (indicator, faceI)
+    {
+        if (mag(indicator[faceI]) < minIndicator)
+        {
+            minIndicator = mag(indicator[faceI]);
+            refFace = faceI;
+        }
+    }
+
+    scalar gMinIndicator =
+        returnReduce<scalar>(minIndicator, minOp<scalar>());
+
+    bool procHasRef = false;
+    if (mag(minIndicator - gMinIndicator) < SMALL)
+    {
+        procHasRef = true;
+    }
+
+    label procID = Pstream::nProcs();
+    if (procHasRef)
+    {
+        procID = Pstream::myProcNo();
+    }
+
+    label minProcID =
+        returnReduce<label>(procID, minOp<label>());
+
+    if (procID != minProcID)
+    {
+        procHasRef = false;
+    }
+
+//     scalar refK = K[refFace];
+
+    counter = 0;
+
+    do
+    {
+        counter++;
+
+        faScalarMatrix KEqn
+        (
+            fam::laplacian(K)
+         == fac::div(aMesh().Le()&fac::interpolate(fac::grad(K)))
+        );
+
+//         KEqn.setReference(refFace, refK);
+        if (K.needReference() && procHasRef)
+        {
+            KEqn.source()[refFace] +=
+                KEqn.diag()[refFace]*K[refFace];
+
+            KEqn.diag()[refFace] +=
+                KEqn.diag()[refFace];
+        }
+        KEqn.solve();
+    }
+    while(counter<2);
+
+    oldK = K;
 }
 
 
@@ -2531,163 +2691,6 @@ void trackedSurface::correctContactLinePointNormals()
             }
         }
     }
-}
-
-
-// TODO
-void trackedSurface::smoothCurvature()
-{
-    areaScalarField& oldK =
-        const_cast<areaScalarField&>
-        (
-// TEST: Sub-mesh
-            curvature()
-        );
-
-    areaScalarField K
-    (
-        IOobject
-        (
-            "K",
-            DB().timeName(),
-            mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        aMesh(),
-        dimless/dimLength,
-        fixedGradientFaPatchScalarField::typeName
-    );
-
-    K.internalField() = oldK.internalField();
-
-    forAll (K.boundaryField(), patchI)
-    {
-        if
-        (
-            K.boundaryField()[patchI].type()
-         == fixedGradientFaPatchScalarField::typeName
-        )
-        {
-            fixedGradientFaPatchScalarField& Kp =
-                refCast<fixedGradientFaPatchScalarField>
-                (
-                    K.boundaryField()[patchI]
-                );
-
-            Kp.gradient() = 0;
-        }
-    }
-
-    K.correctBoundaryConditions();
-
-
-    label counter = 0;
-
-    // Set gradient
-    do
-    {
-        counter++;
-
-        areaVectorField gradK = fac::grad(K);
-
-        forAll (K.boundaryField(), patchI)
-        {
-            if
-            (
-                K.boundaryField()[patchI].type()
-             == fixedGradientFaPatchScalarField::typeName
-            )
-            {
-                fixedGradientFaPatchScalarField& Kp =
-                    refCast<fixedGradientFaPatchScalarField>
-                    (
-                        K.boundaryField()[patchI]
-                    );
-
-                Kp.gradient() =
-                (
-                    aMesh().boundary()[patchI].edgeNormals()
-                   &gradK.boundaryField()[patchI].patchInternalField()
-                );
-            }
-        }
-
-        K.correctBoundaryConditions();
-    }
-    while(counter<5);
-
-
-    areaScalarField indicator =
-        fac::div
-        (
-            fac::lnGrad(K)*aMesh().magLe()
-          - (aMesh().Le()&fac::interpolate(fac::grad(K)))
-        );
-
-    scalar minIndicator = GREAT;
-    label refFace = -1;
-
-    forAll (indicator, faceI)
-    {
-        if (mag(indicator[faceI]) < minIndicator)
-        {
-            minIndicator = mag(indicator[faceI]);
-            refFace = faceI;
-        }
-    }
-
-    scalar gMinIndicator =
-        returnReduce<scalar>(minIndicator, minOp<scalar>());
-
-    bool procHasRef = false;
-    if (mag(minIndicator - gMinIndicator) < SMALL)
-    {
-        procHasRef = true;
-    }
-
-    label procID = Pstream::nProcs();
-    if (procHasRef)
-    {
-        procID = Pstream::myProcNo();
-    }
-
-    label minProcID =
-        returnReduce<label>(procID, minOp<label>());
-
-    if (procID != minProcID)
-    {
-        procHasRef = false;
-    }
-
-//     scalar refK = K[refFace];
-
-    counter = 0;
-
-    do
-    {
-        counter++;
-
-        faScalarMatrix KEqn
-        (
-            fam::laplacian(K)
-         == fac::div(aMesh().Le()&fac::interpolate(fac::grad(K)))
-        );
-
-//         KEqn.setReference(refFace, refK);
-        if (K.needReference() && procHasRef)
-        {
-            KEqn.source()[refFace] +=
-                KEqn.diag()[refFace]*K[refFace];
-
-            KEqn.diag()[refFace] +=
-                KEqn.diag()[refFace];
-        }
-        KEqn.solve();
-    }
-    while(counter<2);
-
-    oldK = K;
 }
 
 
