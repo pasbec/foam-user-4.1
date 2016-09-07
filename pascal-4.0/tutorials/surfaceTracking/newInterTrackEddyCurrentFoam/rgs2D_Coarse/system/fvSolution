@@ -20,8 +20,8 @@ solvers
     {
         solver                   BiCGStab;
 
-        tolerance                1e-05;
-        relTol                   0.5;
+        tolerance                1e-08;
+        relTol                   0.1;
 
         minIter                  0;
         maxIter                  300;
@@ -46,8 +46,8 @@ solvers
 //
 //         minIter         0;
 //         maxIter         100;
-//         tolerance       1e-05;
-//         relTol          0.5;
+//         tolerance       1e-08;
+//         relTol          0.1;
 //     }
 }
 
@@ -56,20 +56,20 @@ EDDYCURRENT
     interface          "conductorSurface";
 
     nCorrectors        10;
-    nSubCorrectors     1000;
+    nSubCorrectors     100;
 
     residualControl
     {
         "(Ax|Ay|Az)"
         {
             tolerance  1e-05;
-            relTol     0.1;
+            relTol     1e-02;
         }
 
         "(VRe|VIm)"
         {
             tolerance  1e-05;
-            relTol     0.1;
+            relTol     1e-02;
         }
      }
 }

@@ -76,18 +76,18 @@ INTERTRACK
     {
         Up
         {
-                tolerance  1e-03;
+                tolerance  1e-05;
                 relTol     1e-02;
         }
 
 //         U
 //         {
-//                 tolerance  1e-08;
+//                 tolerance  1e-05;
 //                 relTol     1e-02;
 //         }
         p
         {
-                tolerance  1e-03;
+                tolerance  1e-05;
                 relTol     1e-02;
         }
      }
