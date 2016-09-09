@@ -131,7 +131,7 @@ Foam::interTrackApp::Manager::Manager
     const word& name
 )
 :
-    solverManager<dynamicFvMesh>
+    dynamicFvSolverManager
     (
         args, time, mesh, master, name
     )

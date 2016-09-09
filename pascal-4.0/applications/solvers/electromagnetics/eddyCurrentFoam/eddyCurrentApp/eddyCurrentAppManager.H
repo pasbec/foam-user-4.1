@@ -43,7 +43,7 @@ Author
 #include "eddyCurrentAppInclude.H"
 #include "eddyCurrentAppControl.H"
 
-#include "solverManager.H"
+#include "solverManagers.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +59,7 @@ namespace eddyCurrentApp
 
 class Manager
 :
-    public solverManager<regionFvMesh>
+    public regionFvSolverManager
 {
 public:
 

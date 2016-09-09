@@ -42,7 +42,7 @@ Author
 #include "interTrackAppInclude.H"
 #include "interTrackAppControl.H"
 
-#include "solverManager.H"
+#include "solverManagers.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ namespace interTrackApp
 
 class Manager
 :
-    public solverManager<dynamicFvMesh>
+    public dynamicFvSolverManager
 {
 public:
 

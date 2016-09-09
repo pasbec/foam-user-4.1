@@ -23,4 +23,6 @@ snGradSchemes/skewModCorrectedSnGrad/skewModCorrectedSnGrads.C
 
 solverPerformanceData/solverPerformanceData.C
 
+solverManagers/solverManagers.C
+
 LIB = $(FOAM_USER_LIBBIN)/libfoamTools

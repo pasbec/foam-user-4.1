@@ -139,7 +139,7 @@ Foam::interTrackEddyCurrentApp::Manager::Manager
     const word& name
 )
 :
-    solverManager<regionDynamicFvMesh>
+    regionDynamicFvSolverManager
     (
         args, time, mesh, master, name
     )

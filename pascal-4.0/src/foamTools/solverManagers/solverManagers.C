@@ -23,23 +23,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "regionVolFields.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "solverManagers.H"
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(regionVolScalarField, 0);
-    defineTemplateTypeNameAndDebug(regionVolVectorField, 0);
-    defineTemplateTypeNameAndDebug(regionVolSphericalTensorField, 0);
-    defineTemplateTypeNameAndDebug(regionVolSymmTensorField, 0);
-    defineTemplateTypeNameAndDebug(regionVolSymmTensor4thOrderField, 0);
-    defineTemplateTypeNameAndDebug(regionVolDiagTensorField, 0);
-    defineTemplateTypeNameAndDebug(regionVolTensorField, 0);
+    defineTemplateTypeNameAndDebug(polySolverManager, 0);
+    defineTemplateTypeNameAndDebug(fvSolverManager, 0);
+    defineTemplateTypeNameAndDebug(dynamicFvSolverManager, 0);
+    defineTemplateTypeNameAndDebug(regionPolySolverManager, 0);
+    defineTemplateTypeNameAndDebug(regionFvSolverManager, 0);
+    defineTemplateTypeNameAndDebug(regionDynamicFvSolverManager, 0);
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#   include "regionVolFieldMapping.C"
 
 // ************************************************************************* //

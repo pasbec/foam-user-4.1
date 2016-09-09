@@ -459,7 +459,7 @@ Foam::eddyCurrentApp::Manager::Manager
     const word& name
 )
 :
-    solverManager<regionFvMesh>
+    regionFvSolverManager
     (
         args, time, mesh, master, name
     )

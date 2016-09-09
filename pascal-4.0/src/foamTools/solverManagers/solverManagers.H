@@ -21,25 +21,45 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    solverManagers
+
+Description
+    ...
+
+SourceFiles
+    solverManagers.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "regionVolFields.H"
+#ifndef solverManagers_H
+#define solverManagers_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTemplateTypeNameAndDebug(regionVolScalarField, 0);
-    defineTemplateTypeNameAndDebug(regionVolVectorField, 0);
-    defineTemplateTypeNameAndDebug(regionVolSphericalTensorField, 0);
-    defineTemplateTypeNameAndDebug(regionVolSymmTensorField, 0);
-    defineTemplateTypeNameAndDebug(regionVolSymmTensor4thOrderField, 0);
-    defineTemplateTypeNameAndDebug(regionVolDiagTensorField, 0);
-    defineTemplateTypeNameAndDebug(regionVolTensorField, 0);
-}
+#include "solverManager.H"
+#include "dynamicFvMesh.H"
+#include "regionDynamicFvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "regionVolFieldMapping.C"
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+typedef solverManager<polyMesh> polySolverManager;
+typedef solverManager<fvMesh> fvSolverManager;
+typedef solverManager<dynamicFvMesh> dynamicFvSolverManager;
+typedef solverManager<regionPolyMesh> regionPolySolverManager;
+typedef solverManager<regionFvMesh> regionFvSolverManager;
+typedef solverManager<regionDynamicFvMesh> regionDynamicFvSolverManager;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

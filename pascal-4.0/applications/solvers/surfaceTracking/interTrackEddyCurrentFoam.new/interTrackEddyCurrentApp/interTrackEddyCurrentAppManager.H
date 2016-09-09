@@ -59,7 +59,7 @@ namespace interTrackEddyCurrentApp
 
 class Manager
 :
-    public solverManager<regionDynamicFvMesh>
+    public regionDynamicFvSolverManager
 {
 public:
 

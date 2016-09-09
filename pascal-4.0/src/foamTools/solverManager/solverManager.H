@@ -252,6 +252,9 @@ private:
 
 public:
 
+    //- Runtime type information
+    TypeName("solverManager");
+
     // Constructor
 
         solverManager
