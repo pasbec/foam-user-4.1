@@ -122,7 +122,10 @@ subAreaMesh_(subPolyMesh_),
 subSplitPoints_(subSplitPoints),
 faceSubToBaseAreaMapPtr_(NULL),
 faceCurvaturesPtr_(NULL)
-{}
+{
+    subAreaMesh_.correctPatchPointNormals() =
+        baseAreaMesh_.correctPatchPointNormals();
+}
 
 
 // * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * * //

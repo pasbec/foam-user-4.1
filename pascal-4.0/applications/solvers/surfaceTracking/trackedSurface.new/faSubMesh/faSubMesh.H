@@ -49,6 +49,8 @@ Author
 #include "addressingTypes.H"
 #include "regionToRegionAddressing.H"
 
+// TODO [High]: Points normal correction if contact angle is specified?
+
 // TODO [High]: Curvature weighting factors?
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
