@@ -53,6 +53,15 @@ Foam::eddyCurrentApp::Control::interfaceLabel() const
 };
 
 
+inline bool
+Foam::eddyCurrentApp::Control::switchV() const
+{
+    switchV_ = !switchV_;
+
+    return switchV_;
+};
+
+
 inline Foam::label
 Foam::eddyCurrentApp::Control::subCorr() const
 {

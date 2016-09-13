@@ -12,14 +12,40 @@
 
         volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];
 
-        volVectorField& ARe = globalStorage.ARe()[CONDUCTOR];
-        volVectorField& AIm = globalStorage.AIm()[CONDUCTOR];
+        label complexSign = 0;
+        volScalarField* VPtr = NULL;
+        volVectorField* APtr = NULL;
+        volVectorField* A0Ptr = NULL;
+        surfaceScalarField* ddtAPhiPtr = NULL;
 
-        surfaceScalarField& ddtARePhi = storage.ddtARePhi();
-        surfaceScalarField& ddtAImPhi = storage.ddtAImPhi();
+        if (control.switchV())
+        {
+            complexSign = 1;
+            VPtr = &storage.VRe();
+            APtr = &globalStorage.AIm()[CONDUCTOR];
+            ddtAPhiPtr = &storage.ddtAImPhi();
 
-        volScalarField& VRe = storage.VRe();
-        volScalarField& VIm = storage.VIm();
+            if (globalSettings.biotSavart)
+            {
+                A0Ptr = &globalStorage.A0Im()[CONDUCTOR];
+            }
+        }
+        else
+        {
+            complexSign = -1;
+            VPtr = &storage.VIm();
+            APtr = &globalStorage.ARe()[CONDUCTOR];
+            ddtAPhiPtr = &storage.ddtARePhi();
+
+            if (globalSettings.biotSavart)
+            {
+                A0Ptr = &globalStorage.A0Re()[CONDUCTOR];
+            }
+        }
+
+        volScalarField& V = *VPtr;
+        volVectorField& A = *APtr;
+        surfaceScalarField& ddtAPhi = *ddtAPhiPtr;
 
 // TODO: Use dedicated boundary condition?
         // Update gradient boundary condition for V
@@ -28,43 +54,25 @@
 
             if
             (
-                VRe.boundaryField()[patchI].type()
+                V.boundaryField()[patchI].type()
              == fixedGradientFvPatchField<scalar>::typeName
             )
             {
-                fixedGradientFvPatchField<scalar>& VReP =
+                fixedGradientFvPatchField<scalar>& VP =
                     refCast<fixedGradientFvPatchField<scalar> >
                     (
-                        VRe.boundaryField()[patchI]
+                        V.boundaryField()[patchI]
                     );
 
                 // Set correct gradient
-                VReP.gradient() = -ddtAImPhi.boundaryField()[patchI]/VReP.patch().magSf();
+                VP.gradient() = -ddtAPhi.boundaryField()[patchI]/VP.patch().magSf();
             }
 
-            if
-            (
-                VIm.boundaryField()[patchI].type()
-             == fixedGradientFvPatchField<scalar>::typeName
-            )
-            {
-                fixedGradientFvPatchField<scalar>& VImP =
-                    refCast<fixedGradientFvPatchField<scalar> >
-                    (
-                        VIm.boundaryField()[patchI]
-                    );
-
-                // Set correct gradient
-                VImP.gradient() = -ddtARePhi.boundaryField()[patchI]/VImP.patch().magSf();
-            }
-
-            VRe.correctBoundaryConditions();
-            VIm.correctBoundaryConditions();
+            V.correctBoundaryConditions();
         }
 
-        // Prepare V-equations
-        fvScalarMatrix VReEqn(fvm::laplacian(sigma, VRe));
-        fvScalarMatrix VImEqn(fvm::laplacian(sigma, VIm));
+        // Prepare V-equation
+        fvScalarMatrix VEqn(fvm::laplacian(sigma, V));
 
         // TODO: Apply electricPotentialLaplacian only for given faceSet?
         //       In this case we'd need a special electricConducivityGrad
@@ -76,62 +84,32 @@
             (
                 mesh.schemesDict().laplacianScheme
                 (
-                    "laplacian(" + sigma.name() + "," + VRe.name() + ")"
+                    "laplacian(" + sigma.name() + "," + V.name() + ")"
                 )
             ) != "electricPotentialLaplacian"
         )
         {
             volVectorField sigmaGrad = fvc::grad(sigma);
 
-            // Explicit source term for VRe due to variable sigma
+            // Explicit source term for V due to variable sigma
             // in conducting region with implied condition div(A)=0
-            VReEqn -= omega0 * (sigmaGrad & AIm);
-//          VReEqn -= omega0 * sigma * fvc::div(AIm);
+            VEqn -= complexSign * omega0 * (sigmaGrad & A);
+//          VEqn -= complexSign * omega0 * sigma * fvc::div(A);
 
             if (globalSettings.biotSavart)
             {
-                VReEqn -= omega0 * (sigmaGrad & globalStorage.A0Im()[CONDUCTOR]);
-//              VReEqn -= omega0 * sigma * fvc::div(globalStorage.A0Im()[CONDUCTOR]);
+                volVectorField& A0 = *A0Ptr;
+
+                VEqn -= complexSign * omega0 * (sigmaGrad & A0);
             }
         }
 
-        // TODO: Apply electricPotentialLaplacian only for given faceSet?
-        //       In this case we'd need a special electricConducivityGrad
-        //       which evaluates to zero in normal direction to corresponding
-        //       faces
-        if
-        (
-            word
-            (
-                mesh.schemesDict().laplacianScheme
-                (
-                    "laplacian(" + sigma.name() + "," + VIm.name() + ")"
-                )
-            ) != "electricPotentialLaplacian"
-        )
-        {
-            volVectorField sigmaGrad = fvc::grad(sigma);
-
-            // Explicit source term for VIm due to variable sigma
-            // in conducting region with implied condition div(A)=0
-            VImEqn += omega0 * (sigmaGrad & ARe);
-//          VImEqn += omega0 * sigma * fvc::div(ARe);
-
-            if (globalSettings.biotSavart)
-            {
-                VImEqn += omega0 * (sigmaGrad & globalStorage.A0Re()[CONDUCTOR]);
-//              VImEqn += omega0 * sigma * fvc::div(globalStorage.A0Re()[CONDUCTOR]);
-            }
-        }
-
-        // Solve V-equations
+        // Solve V-equation
         // NOTE: Currently a deflated solver is necessary
         //       as both matrices are kept singluar!
 // TODO: Warning if no deflated solver is used!
-        VReEqn.solve(control.subDict(Region::CONDUCTOR, VRe.name()));
-        VImEqn.solve(control.subDict(Region::CONDUCTOR, VIm.name()));
+        VEqn.solve(control.subDict(Region::CONDUCTOR, V.name()));
 
         // Correct boundary conditions
-        VRe.correctBoundaryConditions();
-        VIm.correctBoundaryConditions();
+        V.correctBoundaryConditions();
     }

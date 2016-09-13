@@ -98,6 +98,9 @@ protected:
             //- Maximum number of EDDYCURRENT sub-correctors
             label nSubCorrEDDYCURRENT_;
 
+            //- Switch
+            mutable Switch switchV_;
+
         // Sub-iteration
 
             // Evolution
@@ -160,6 +163,9 @@ public:
 
             //- Return conductor interface ID
             inline label interfaceLabel() const;
+
+            //- Switch for rotatory solution of VRe/VIm
+            inline bool switchV() const;
 
         // Evolution
 

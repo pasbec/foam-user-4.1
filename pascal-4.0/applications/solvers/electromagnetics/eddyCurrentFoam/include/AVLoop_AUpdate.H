@@ -4,12 +4,26 @@
     {
         SM_REGIONSCOPE(CONDUCTOR);
 
-        // Update sigma in conductor region
+        // Update sigma
         globalStorage.sigma().mapCopyInternal(CONDUCTOR);
 
-        // Update A in conductor region
-        globalStorage.ARe().mapExtrapolate(CONDUCTOR);
-        globalStorage.AIm().mapExtrapolate(CONDUCTOR);
+// TODO: Use relaxation?
+//         volVectorField& ARe = globalStorage.ARe()[CONDUCTOR];
+//         volVectorField& AIm = globalStorage.AIm()[CONDUCTOR];
+
+// TODO: Use relaxation?
+//         ARe.storePrevIter();
+//         AIm.storePrevIter();
+
+        // Update A
+//         globalStorage.ARe().mapExtrapolate(CONDUCTOR);
+//         globalStorage.AIm().mapExtrapolate(CONDUCTOR);
+        globalStorage.ARe().mapInterpolate(CONDUCTOR);
+        globalStorage.AIm().mapInterpolate(CONDUCTOR);
+
+// TODO: Use relaxation?
+//         ARe.relax(0.5);
+//         AIm.relax(0.5);
 
         // Update rate of change of flux of A
         {
@@ -21,8 +35,5 @@
                 storage.ddtARePhi() += omega0*(fvc::interpolate(globalStorage.A0Re()[CONDUCTOR]) & mesh.Sf());
                 storage.ddtAImPhi() -= omega0*(fvc::interpolate(globalStorage.A0Im()[CONDUCTOR]) & mesh.Sf());
             }
-
-            storage.ddtARePhi().correctBoundaryConditions();
-            storage.ddtAImPhi().correctBoundaryConditions();
         }
     }

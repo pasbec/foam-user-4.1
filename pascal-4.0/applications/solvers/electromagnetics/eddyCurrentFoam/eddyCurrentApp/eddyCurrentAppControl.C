@@ -191,6 +191,7 @@ Foam::eddyCurrentApp::Control::Control
     ),
     nCorrEDDYCURRENT_(-1),
     nSubCorrEDDYCURRENT_(-1),
+    switchV_(false),
     subCorr_(0),
     subScale_(1.0)
 {

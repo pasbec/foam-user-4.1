@@ -1,17 +1,26 @@
 
     // Update gradient of V in default region
     // from data in conductor region
-    //
-    // Hint: The electric scalar potential is only necessary
-    // in case of a three-dimensional mesh
-    //
     if (control.meshIs3D())
     {
         SM_REGIONSCOPE(CONDUCTOR);
 
-        globalStorage.VReGrad()[CONDUCTOR] = fvc::grad(storage.VRe());
-        globalStorage.VImGrad()[CONDUCTOR] = fvc::grad(storage.VIm());
+        volVectorField& VReGrad = globalStorage.VReGrad()[CONDUCTOR];
+        volVectorField& VImGrad = globalStorage.VImGrad()[CONDUCTOR];
 
+// TODO: Use relaxation?
+//         VReGrad.storePrevIter();
+//         VImGrad.storePrevIter();
+
+        // Calculate gradient of V
+        VReGrad = fvc::grad(storage.VRe());
+        VImGrad = fvc::grad(storage.VIm());
+
+// TODO: Use relaxation?
+//         VReGrad.relax(0.5);
+//         VImGrad.relax(0.5);
+
+        // Update gradient of V
         globalStorage.VReGrad().rmap(CONDUCTOR);
         globalStorage.VImGrad().rmap(CONDUCTOR);
     }
