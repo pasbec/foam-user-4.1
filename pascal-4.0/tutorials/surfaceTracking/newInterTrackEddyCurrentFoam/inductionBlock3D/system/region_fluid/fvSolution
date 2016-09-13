@@ -88,7 +88,7 @@ INTERTRACK
         p
         {
                 tolerance  1e-05;
-                relTol     1e-02;
+                relTol     5e-02;
         }
      }
 }

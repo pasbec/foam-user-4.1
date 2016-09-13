@@ -21,8 +21,6 @@ settings
     biotSavart         true;
 
     lorentzForce       true;
-    magneticPressure   true;
-    jouleHeat          true;
 }
 
 regions

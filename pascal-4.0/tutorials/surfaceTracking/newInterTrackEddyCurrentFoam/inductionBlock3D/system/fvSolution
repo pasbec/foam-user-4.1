@@ -20,8 +20,8 @@ solvers
     {
         solver                   BiCGStab;
 
-        tolerance                1e-08;
-        relTol                   0.1;
+        tolerance                1e-05;
+        relTol                   0.5;
 
         minIter                  0;
         maxIter                  300;
@@ -62,13 +62,13 @@ EDDYCURRENT
     {
         "(Ax|Ay|Az)"
         {
-            tolerance  1e-05;
+            tolerance  1e-04;
             relTol     1e-02;
         }
 
         "(VRe|VIm)"
         {
-            tolerance  1e-05;
+            tolerance  1e-04;
             relTol     1e-02;
         }
      }
