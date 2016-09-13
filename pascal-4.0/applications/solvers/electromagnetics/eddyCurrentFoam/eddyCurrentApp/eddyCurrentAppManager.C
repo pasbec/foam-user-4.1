@@ -34,19 +34,21 @@ defineTypeNameAndDebug(Foam::eddyCurrentApp::Manager, 0);
 
 void Foam::eddyCurrentApp::Manager::Settings::read() const
 {
-    Foam::eddyCurrentApp::Manager::debug =
+    eddyCurrentApp::Manager::debug =
         dict().lookupOrDefault
         (
             "debug",
-            Foam::eddyCurrentApp::Manager::debug()
+            eddyCurrentApp::Manager::debug()
         );
 
-    Foam::eddyCurrentApp::Control::debug =
+    eddyCurrentApp::Control::debug =
         dict().lookupOrDefault
         (
             "debug",
-            Foam::eddyCurrentApp::Control::debug()
+            eddyCurrentApp::Control::debug()
         );
+
+    tolScale = dict().lookupOrDefault("tolScale", false);
 
     biotSavart = dict().lookupOrDefault("biotSavart", false);
 
@@ -213,6 +215,58 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create
                 IOobject::AUTO_WRITE
             ),
             mesh()
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Storage::Item_Anormf::create
+(const word& init) const
+{
+    set
+    (
+        new uniformDimensionedVectorField
+        (
+            IOobject
+            (
+                "Anormf",
+                time().timeName(),
+                time(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            dimensionedVector
+            (
+                word(),
+                dimless,
+                vector::one
+            )
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Storage::Item_Ascale::create
+(const word& init) const
+{
+    set
+    (
+        new uniformDimensionedVectorField
+        (
+            IOobject
+            (
+                "Ascale",
+                time().timeName(),
+                time(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            dimensionedVector
+            (
+                word(),
+                dimless,
+                vector::one
+            )
         )
     );
 }
@@ -426,6 +480,9 @@ void Foam::eddyCurrentApp::Manager::Storage::create(const word& ccase) const
 
     item_ARe().enable();
     item_AIm().enable();
+
+    item_Anormf().setState(settings().tolScale);
+    item_Ascale().setState(settings().tolScale);
 
     item_VReGrad().setState(control().meshIs3D());
     item_VImGrad().setState(control().meshIs3D());

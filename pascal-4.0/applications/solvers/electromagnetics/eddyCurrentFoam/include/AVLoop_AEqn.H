@@ -33,13 +33,42 @@
         {
             AReEqn += storage.j0Re();
             AImEqn += storage.j0Im();
+
+            if (Control::debug)
+            {
+                Info << "eddyCurrentApp::Control | AEqn.H : "
+                    << "Add source current density to AEqn"
+                    << endl;
+            }
         }
         else
         {
             AReEqn += sigma * omega0 * globalStorage.A0Im()[DEFAULT];
             AImEqn -= sigma * omega0 * globalStorage.A0Re()[DEFAULT];
+
+            if (Control::debug)
+            {
+                Info << "eddyCurrentApp::Control | AEqn.H : "
+                    << "Add impressed vector potenial to AEqn"
+                    << endl;
+            }
         }
 
+        // Add explicit gradient terms of electric scalar potential V
+        if (control.meshIs3D())
+        {
+            AReEqn -= sigma * globalStorage.VReGrad()[DEFAULT];
+            AImEqn -= sigma * globalStorage.VImGrad()[DEFAULT];
+
+            if (Control::debug)
+            {
+                Info << "eddyCurrentApp::Control | AEqn.H : "
+                    << "Add gradient of electric scalar potential to AEqn"
+                    << endl;
+            }
+        }
+
+// TODO Coupled and tangential magnetic bc?
         // Create list with boundary types
         wordList ARePatchTypes(mesh.boundary().size());
         wordList AImPatchTypes(mesh.boundary().size());
@@ -134,13 +163,6 @@
             AImCmptEqn.boundaryCoeffs() = AImEqn.boundaryCoeffs().component(cmpt);
             AImCmptEqn.source() = AImEqn.source().component(cmpt);
 
-            if (control.meshIs3D())
-            {
-                // Add explicit gradient terms of electric scalar potential V
-                AReCmptEqn -= sigma * globalStorage.VReGrad()[DEFAULT].component(cmpt);
-                AImCmptEqn -= sigma * globalStorage.VImGrad()[DEFAULT].component(cmpt);
-            }
-
             // Prepare block system for current component
             fvBlockMatrix<vector2> AcmptEqn(ACmpt);
 
@@ -166,11 +188,64 @@
             AcmptEqn.insertEquationCoupling(0, 1,  omega0 * sigma);
             AcmptEqn.insertEquationCoupling(1, 0, -omega0 * sigma);
 
-            // Solve A
-            // and prevent segfault for "0"-Solution
-            scalar preResidual= gMax(mag(AcmptEqn.residual(ACmpt, AcmptEqn.source())));
+            // Solve A but prevent segfault for homogenous solution
+            scalar preResidual = mag(gSum(cmptMag(AcmptEqn.residual(ACmpt, AcmptEqn.source()))));
             if (preResidual > 0)
             {
+                // Store norm factors as being used by BlockIterativeSolver
+                if (globalSettings.tolScale)
+                {
+
+                    if (Control::debug)
+                    {
+                        Info << "eddyCurrentApp::Control | AEqn.H : "
+                            << "Scaling tolerances depending on solver norm factor"
+                            << endl;
+                    }
+
+                    uniformDimensionedVectorField& Anormf = globalStorage.Anormf();
+                    uniformDimensionedVectorField& Ascale = globalStorage.Ascale();
+
+                    const BlockLduMatrix<vector2>& matrix = AcmptEqn;
+                    const vector2Field& x = ACmpt;
+                    const vector2Field& b = AcmptEqn.source();
+
+                    // Calculate the normalisation factor
+                    const label nRows = x.size();
+
+                    vector2Field pA(nRows);
+                    vector2Field wA(nRows);
+
+                    // Calculate reference value of x
+                    vector2 xRef = gAverage(x);
+
+                    // Calculate A.x
+                    matrix.Amul(wA, x);
+
+                    // Calculate A.xRef, temporarily using pA for storage
+                    matrix.Amul
+                    (
+                        pA,
+                        vector2Field(nRows, xRef)
+                    );
+
+//                     scalar normFactor = gSum(mag(wA - pA) + mag(b - pA)) + VSMALL;
+                    scalar normFactor = 2*gSumMag(b) + VSMALL;
+
+                    Ascale.replace(2, min(mag(Anormf.value()) / normFactor, 100.0));
+                    Anormf.replace(cmpt, normFactor);
+
+                    control.setTolScale(ACmpt.name(), Ascale.component(cmpt).value());
+
+                    if (Control::debug)
+                    {
+                        Info << "eddyCurrentApp::Control | AEqn.H : "
+                            << "Anormf = " << Anormf << endl
+                            << "Ascale = " << Ascale << endl
+                            << endl;
+                    }
+                }
+
                 AcmptEqn.solve(control.subDict(Region::DEFAULT, ACmpt.name()));
             }
 

@@ -1,0 +1,85 @@
+
+    // TODO: Remove interfaceLabel? Use alias of calculatedFvPatchField or special patchField
+
+    // Solve V
+    //
+    // Hint: The electric scalar potential is only necessary
+    // in case of a three-dimensional mesh
+    //
+    if (control.meshIs3D())
+    {
+        SM_REGIONSCOPE(CONDUCTOR);
+
+        volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];
+
+        volVectorField& ARe = globalStorage.ARe()[CONDUCTOR];
+
+        surfaceScalarField& ddtARePhi = storage.ddtARePhi();
+
+        volScalarField& VIm = storage.VIm();
+
+// TODO: Use dedicated boundary condition?
+        // Update gradient boundary condition for V
+        {
+            label patchI = control.interfaceLabel();
+
+            if
+            (
+                VIm.boundaryField()[patchI].type()
+             == fixedGradientFvPatchField<scalar>::typeName
+            )
+            {
+                fixedGradientFvPatchField<scalar>& VImP =
+                    refCast<fixedGradientFvPatchField<scalar> >
+                    (
+                        VIm.boundaryField()[patchI]
+                    );
+
+                // Set correct gradient
+                VImP.gradient() = -ddtARePhi.boundaryField()[patchI]/VImP.patch().magSf();
+            }
+
+            VIm.correctBoundaryConditions();
+        }
+
+        // Prepare V-equations
+        fvScalarMatrix VImEqn(fvm::laplacian(sigma, VIm));
+
+        // TODO: Apply electricPotentialLaplacian only for given faceSet?
+        //       In this case we'd need a special electricConducivityGrad
+        //       which evaluates to zero in normal direction to corresponding
+        //       faces
+        if
+        (
+            word
+            (
+                mesh.schemesDict().laplacianScheme
+                (
+                    "laplacian(" + sigma.name() + "," + VIm.name() + ")"
+                )
+            ) != "electricPotentialLaplacian"
+        )
+        {
+            volVectorField sigmaGrad = fvc::grad(sigma);
+
+            // Explicit source term for VIm due to variable sigma
+            // in conducting region with implied condition div(A)=0
+            VImEqn += omega0 * (sigmaGrad & ARe);
+//          VImEqn += omega0 * sigma * fvc::div(ARe);
+
+            if (globalSettings.biotSavart)
+            {
+                VImEqn += omega0 * (sigmaGrad & globalStorage.A0Re()[CONDUCTOR]);
+//              VImEqn += omega0 * sigma * fvc::div(globalStorage.A0Re()[CONDUCTOR]);
+            }
+        }
+
+        // Solve V-equations
+        // NOTE: Currently a deflated solver is necessary
+        //       as both matrices are kept singluar!
+// TODO: Warning if no deflated solver is used!
+        VImEqn.solve(control.subDict(Region::CONDUCTOR, VIm.name()));
+
+        // Correct boundary conditions
+        VIm.correctBoundaryConditions();
+    }

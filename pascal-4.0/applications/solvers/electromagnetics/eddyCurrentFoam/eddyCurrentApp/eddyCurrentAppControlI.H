@@ -54,7 +54,7 @@ Foam::eddyCurrentApp::Control::interfaceLabel() const
 
 
 inline bool
-Foam::eddyCurrentApp::Control::switchV() const
+Foam::eddyCurrentApp::Control::switchV()
 {
     switchV_ = !switchV_;
 

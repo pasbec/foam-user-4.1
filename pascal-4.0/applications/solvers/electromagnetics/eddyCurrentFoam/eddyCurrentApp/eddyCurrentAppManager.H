@@ -76,6 +76,9 @@ public:
 
         SM_GLOBALSETTINGS_NEW();
 
+            //- Switch to set wether tolerance scaling is used
+            SM_SETTINGS_MEMBER_ADD(Switch, tolScale);
+
             //- Switch to set wether Biot-Savart is used
             SM_SETTINGS_MEMBER_ADD(Switch, biotSavart);
 
@@ -109,6 +112,10 @@ public:
             //- Magnetic vector potential
             SM_GLOBALITEM_ADD(regionVolVectorField, ARe);
             SM_GLOBALITEM_ADD(regionVolVectorField, AIm);
+
+            //- TODO
+            SM_GLOBALITEM_ADD(uniformDimensionedVectorField, Anormf);
+            SM_GLOBALITEM_ADD(uniformDimensionedVectorField, Ascale);
 
             //- Gradient of electric scalar potential
             SM_GLOBALITEM_ADD(regionVolVectorField, VReGrad);

@@ -72,7 +72,13 @@ bool Foam::eddyCurrentApp::Control::criteriaSatisfied()
 
                 checked = true;
 
-                bool absCheck = residual < residualControl_[fieldI].absTol;
+                scalar absTol = residualControl_[fieldI].absTol;
+                if (tolScales_.found(variableName))
+                {
+                    absTol = min(tolScales_[variableName] * absTol, 0.1);
+                }
+
+                bool absCheck = residual < absTol;
                 achieved = achieved && absCheck;
 
                 if (debug)
@@ -81,7 +87,7 @@ bool Foam::eddyCurrentApp::Control::criteriaSatisfied()
 
                     Info<< "    " << variableName
                         << ": res = " << residual
-                        << " (" << residualControl_[fieldI].absTol << ")"
+                        << " (" << absTol << ")"
                         << endl;
                 }
             }
@@ -192,6 +198,7 @@ Foam::eddyCurrentApp::Control::Control
     nCorrEDDYCURRENT_(-1),
     nSubCorrEDDYCURRENT_(-1),
     switchV_(false),
+    tolScales_(),
     subCorr_(0),
     subScale_(1.0)
 {
@@ -296,6 +303,15 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
     scalar relTolScale = VGREAT;
     scalar progressLeft;
 
+    scalar tolerance = readScalar(dict.lookup("tolerance"));
+    scalar tolScale = 1.0;
+    scalar scaledTol = tolerance;
+    if (tolScales_.found(name))
+    {
+        tolScale = tolScales_[name];
+        scaledTol = min(tolScale * tolerance, 0.1);
+    }
+
     if ((corr_ == 1) && (subCorr_ == 1))
     {
         progressLeft = 1.0;
@@ -313,18 +329,19 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
             {
                 const word& variableName = iter().keyword();
                 const label fieldI = applyToField(variableName);
-                if (fieldI != -1)
+                if (variableName == name)
                 {
                     const List<solverPerformanceData> spd = iter().stream();
 
                     const scalar residual = spd.last().maxInitialResidual();
 
+                    scalar absTol = tolScale * residualControl_[fieldI].absTol;
+
                     // Residual difference from target residual
-                    scalar residualDiff =
-                        residual-residualControl_[fieldI].absTol;
+                    scalar residualDiff = residual - absTol;
 
                     // Relative tolerance scaling depending on absolute tol
-                    relTolScale = pow(residualControl_[fieldI].absTol, -1);
+                    relTolScale = pow(absTol, -1);
 
                     // Linear convergence progress left
                     progressLeft =
@@ -352,6 +369,13 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
         subRelTol
     );
 
+    // Overwrite tolerance in dictionary
+    dict.set<scalar>
+    (
+        "tolerance",
+        scaledTol
+    );
+
     if (debug)
     {
         Info<< algorithmName_ << " sub-loop:" << endl;
@@ -361,10 +385,22 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
             << ": progress left = " << progressLeft
             << ", rel tol scale = " << relTolScale
             << ", rel tol = " << subRelTol << "/" << relTol
+            << ", tol scale = " << tolScale
+            << ", tol = " << scaledTol << "/" << tolerance
             << endl;
     }
 
     return dict;
+};
+
+
+void Foam::eddyCurrentApp::Control::setTolScale
+(
+    const word& name,
+    const scalar& tolScale
+)
+{
+    tolScales_.set(name, tolScale);
 };
 
 

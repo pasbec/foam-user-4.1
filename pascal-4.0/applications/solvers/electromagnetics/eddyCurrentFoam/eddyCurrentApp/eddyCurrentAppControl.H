@@ -99,7 +99,10 @@ protected:
             label nSubCorrEDDYCURRENT_;
 
             //- Switch
-            mutable Switch switchV_;
+            Switch switchV_;
+
+            //- Tolerance scale
+            HashTable<scalar> tolScales_;
 
         // Sub-iteration
 
@@ -165,7 +168,7 @@ public:
             inline label interfaceLabel() const;
 
             //- Switch for rotatory solution of VRe/VIm
-            inline bool switchV() const;
+            inline bool switchV();
 
         // Evolution
 
@@ -185,6 +188,13 @@ public:
                     label regionI,
                     const word& name
                 ) const;
+
+                //- Set tolerance scale
+                void setTolScale
+                (
+                    const word& name,
+                    const scalar& tolScale = 1.0
+                );
 
             // Evolution
 
