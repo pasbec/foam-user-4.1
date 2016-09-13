@@ -34,18 +34,18 @@ defineTypeNameAndDebug(Foam::interTrackEddyCurrentApp::Manager, 0);
 
 void Foam::interTrackEddyCurrentApp::Manager::Settings::read() const
 {
-    Foam::interTrackEddyCurrentApp::Manager::debug =
+    interTrackEddyCurrentApp::Manager::debug =
         dict().lookupOrDefault
         (
             "debug",
-            Foam::interTrackEddyCurrentApp::Manager::debug()
+            interTrackEddyCurrentApp::Manager::debug()
         );
 
-    Foam::interTrackEddyCurrentApp::Control::debug =
+    interTrackEddyCurrentApp::Control::debug =
         dict().lookupOrDefault
         (
             "debug",
-            Foam::interTrackEddyCurrentApp::Control::debug()
+            interTrackEddyCurrentApp::Control::debug()
         );
 }
 

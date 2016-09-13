@@ -23,9 +23,9 @@
     && !settings.UEqnVolumeForce
     )
     {
-        if (Manager::debug)
+        if (Control::debug)
         {
-            Info << "interTrackManager | pEqn.H : "
+            Info << "interTrackApp::Control | pEqn.H : "
                 << "Adding volume force flux from F to phiHbyA."
                 << endl;
         }
@@ -57,9 +57,9 @@
 //       but I have the feeling, that it is NOT!
     if (control.consistent())
     {
-        if (Manager::debug)
+        if (Control::debug)
         {
-            Info << "interTrackManager | pEqn.H : "
+            Info << "interTrackApp::Control | pEqn.H : "
                 << "Applying consistent PIMPLE correction."
                 << endl;
         }
@@ -114,9 +114,9 @@
 
                     if (!settings.snGradpFromFlux)
                     {
-                        if (Manager::debug)
+                        if (Control::debug)
                         {
-                            Info << "interTrackManager | pEqn.H : "
+                            Info << "interTrackApp::Control | pEqn.H : "
                                 << "Correcting pressure at patch "
                                 << mesh.boundary()[patchI].name() << "."
                                 << endl;
@@ -130,9 +130,9 @@
                     }
                     else
                     {
-                        if (Manager::debug)
+                        if (Control::debug)
                         {
-                            Info << "interTrackManager | pEqn.H : "
+                            Info << "interTrackApp::Control | pEqn.H : "
                                 << "Correcting pressure at patch "
                                 << mesh.boundary()[patchI].name()
                                 << " from flux-difference."
@@ -155,7 +155,7 @@
                 else
                 {
 // TODO: Do not use fixedGradient
-                    WarningIn("interTrackManager | pEqn.H")
+                    WarningIn("interTrackApp::Control | pEqn.H")
                         << "The pressure boundary condition for "
                         << "wall-patch named '"
                         << mesh.boundary()[patchI].name() << "' is '"
