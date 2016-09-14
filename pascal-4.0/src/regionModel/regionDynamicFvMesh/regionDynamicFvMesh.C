@@ -121,8 +121,8 @@ Foam::regionDynamicFvMesh::regionDynamicFvMesh
         runTime,
         false
     ),
-    isFeMotionSolver_(boolList()),
-    isFvMotionSolver_(boolList())
+    isFeMotionSolver_(),
+    isFvMotionSolver_()
 {
     if(init) this->init(readRegionNames());
 }
@@ -140,10 +140,29 @@ Foam::regionDynamicFvMesh::regionDynamicFvMesh
         runTime,
         false
     ),
-    isFeMotionSolver_(boolList()),
-    isFvMotionSolver_(boolList())
+    isFeMotionSolver_(),
+    isFvMotionSolver_()
 {
     if(init) this->init(regionNames);
+}
+
+
+Foam::regionDynamicFvMesh::regionDynamicFvMesh
+(
+    const Time& runTime,
+    const HashTable<label>& regionNameHashTable,
+    bool init
+)
+:
+    regionFvMesh::regionFvMesh
+    (
+        runTime,
+        false
+    ),
+    isFeMotionSolver_(),
+    isFvMotionSolver_()
+{
+    if(init) this->init(regionNameHashTable);
 }
 
 

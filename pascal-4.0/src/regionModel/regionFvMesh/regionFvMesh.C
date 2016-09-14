@@ -115,6 +115,23 @@ Foam::regionFvMesh::regionFvMesh
 }
 
 
+Foam::regionFvMesh::regionFvMesh
+(
+    const Time& runTime,
+    const HashTable<label>& regionNameHashTable,
+    bool init
+)
+:
+    regionPolyMesh::regionPolyMesh
+    (
+        runTime,
+        false
+    )
+{
+    if(init) this->init(regionNameHashTable);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::regionFvMesh::~regionFvMesh()

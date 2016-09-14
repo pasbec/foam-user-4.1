@@ -156,6 +156,14 @@ public:
             bool init = true
         );
 
+        //- Construct from time and label hash table
+        regionPolyMesh
+        (
+            const Time& runTime,
+            const HashTable<label>& regionNameHashTable,
+            bool init = true
+        );
+
     // Destructor
 
         virtual ~regionPolyMesh();
@@ -164,8 +172,21 @@ public:
 
         // Initialization
 
+            //- Init meshes from hash table
+            inline void init(const HashTable<label>& regionNameHashTable) const
+            {
+                wordList regionNames = wordList(regionNameHashTable.size());
+
+                forAllConstIter(HashTable<label>, regionNameHashTable, iter)
+                {
+                    regionNames[iter()] = iter.key();
+                }
+
+                init(regionNames);
+            };
+
             //- Init meshes
-            void init(const wordList& regionNames) const
+            inline void init(const wordList& regionNames) const
             {
                 if (!initialized())
                 {

@@ -89,10 +89,6 @@ int main(int argc, char *argv[])
 
         eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
 
-// TODO: Use pointer instead of copy!
-        interTrackAppManager.regions().region_DEFAULT().storage().F() =
-            eddyCurrentAppManager.storage().FL()[Region::FLUID];
-
 // TODO: Magnetic pressure?
 //         eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);
 //
@@ -211,10 +207,6 @@ int main(int argc, char *argv[])
             using namespace interTrackEddyCurrentApp::Region;
 
             eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
-
-// TODO: Use pointer instead of copy!
-            interTrackAppManager.regions().region_DEFAULT().storage().F() =
-                eddyCurrentAppManager.storage().FL()[Region::FLUID];
 
 // TODO: Magnetic pressure?
 //             eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);

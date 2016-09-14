@@ -230,49 +230,28 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_mu::create
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create
 (const word& ccase) const
 {
-    if (ccase == "default")
-    {
-        set
+    set
+    (
+        new volVectorField
         (
-            new volVectorField
+            IOobject
             (
-                IOobject
-                (
-                    "F",
-                    time().timeName(),
-                    mesh(),
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh()
-            )
-        );
-    }
-    else if (ccase == "calculated")
-    {
-        set
-        (
-            new volVectorField
-            (
-                IOobject
-                (
-                    "F",
-                    time().timeName(),
-                    mesh(),
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
+                "F",
+                time().timeName(),
                 mesh(),
-                dimensionedVector
-                (
-                    word(),
-                    dimForce/dimVolume,
-                    vector::zero
-                ),
-                calculatedFvPatchVectorField::typeName
-            )
-        );
-    }
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimForce/dimVolume,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
 }
 
 
@@ -330,13 +309,6 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_turbulence::cre
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::create
 (const word& ccase) const
 {
-    word interfacePrefix;
-
-    if (!args().optionReadIfPresent("prefix", interfacePrefix))
-    {
-        interfacePrefix = trackedSurface::typeName;
-    }
-
 // TODO: Add more constructors and simplify
 //       Make it use real rho and mu fields!
     set
@@ -352,8 +324,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::crea
             storage().item_g().getPtr(),
             storage().item_transport().getPtr(),
             storage().item_turbulence().getPtr(),
-            NULL,
-            interfacePrefix
+            NULL
         )
     );
 }

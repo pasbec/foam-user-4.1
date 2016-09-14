@@ -50,22 +50,61 @@ template
 >
 const Foam::IOobject
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
-regionIO
+regionIOobject
 (
     label regionI,
-    const IOobject& io
+    const IOobject& IOo
 ) const
 {
     const objectRegistry& db = regionMesh_[regionI].thisDb();
 
     return IOobject
     (
-        io.name(),
-        io.time().timeName(),
+        IOo.name(),
+        IOo.time().timeName(),
         db,
-        io.readOpt(),
-        io.writeOpt()
+        IOo.readOpt(),
+        IOo.writeOpt()
     );
+}
+
+
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+bool
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
+linkFieldPtr
+(
+    label regionI,
+    const IOobject& IOo
+) const
+{
+    const objectRegistry& dbI = regionMesh_[regionI].thisDb();
+
+    if
+    (
+        dbI.foundObject<GeometricFieldType>(IOo.name())
+    )
+    {
+        GeometricFieldType& fieldRefI =
+            const_cast<GeometricFieldType&>
+            (
+                dbI.lookupObject<GeometricFieldType>(IOo.name())
+            );
+
+        fieldPtrs_[regionI] = &fieldRefI;
+
+        fieldLinked_[regionI] = true;
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
@@ -79,18 +118,18 @@ template
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionGeometricField
 (
-    const IOobject& io,
+    const IOobject& IOo,
     const RegionMesh& regionMesh,
     const dimensioned<Type>& dim,
-    const word& patchFieldType
+    const HashTable<IOobject> IOoOverride
 )
 :
     regIOobject
     (
         IOobject
         (
-            io.name(),
-            io.time().timeName(),
+            IOo.name(),
+            IOo.time().timeName(),
             regionMesh.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -98,29 +137,66 @@ regionGeometricField
         )
     ),
     regionMesh_(regionMesh),
-    fieldPtrs_(regionMesh.size())
+    fieldPtrs_(regionMesh.size(), NULL),
+    fieldActive_(regionMesh.size(), true),
+    fieldLinked_(regionMesh.size(), false)
 {
+    if (debug)
+    {
+        Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+            << "Create region field " << IOo.name()
+            << endl;
+    }
+
     forAll (*this, regionI)
     {
-        if (debug)
+        IOobject regionIOoI = regionIOobject(regionI, IOo);
+
+        if (IOoOverride.found(regions()[regionI]))
         {
-            Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
-                << "Create field for region "
-                << regionMesh_.regions()[regionI]
-                << endl;
+            regionIOoI = IOoOverride[regions()[regionI]];
         }
 
-        fieldPtrs_.set
-        (
-            regionI,
-            new GeometricField<Type, PatchField, GeoMesh>
-            (
-                regionIO(regionI, io),
-                regionMesh_[regionI],
-                dim,
-                patchFieldType
-            )
-        );
+        if (linkFieldPtr(regionI, regionIOoI))
+        {
+            if (debug)
+            {
+                Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+                    << "Linked existing field " << regionIOoI.name() << " for region "
+                    << regionMesh_.regions()[regionI]
+                    << endl;
+            }
+        }
+        else
+        {
+            if (debug)
+            {
+                Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+                    << "Create new field " << regionIOoI.name() << " for region "
+                    << regionMesh_.regions()[regionI]
+                    << endl;
+            }
+
+            if (regionIOoI.readOpt() == IOobject::MUST_READ)
+            {
+                fieldPtrs_[regionI] =
+                    new GeometricFieldType
+                    (
+                        regionIOoI,
+                        regionMesh_[regionI]
+                    );
+            }
+            else
+            {
+                fieldPtrs_[regionI] =
+                    new GeometricFieldType
+                    (
+                        regionIOoI,
+                        regionMesh_[regionI],
+                        dim
+                    );
+            }
+        }
     }
 }
 
@@ -133,18 +209,19 @@ template
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionGeometricField
 (
-    const IOobject& io,
+    const IOobject& IOo,
     const RegionMesh& regionMesh,
     const dimensioned<Type>& dim,
-    const wordList& patchFieldTypes
+    const word& patchFieldType,
+    const HashTable<IOobject> IOoOverride
 )
 :
     regIOobject
     (
         IOobject
         (
-            io.name(),
-            io.time().timeName(),
+            IOo.name(),
+            IOo.time().timeName(),
             regionMesh.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -152,29 +229,67 @@ regionGeometricField
         )
     ),
     regionMesh_(regionMesh),
-    fieldPtrs_(regionMesh.size())
+    fieldPtrs_(regionMesh.size(), NULL),
+    fieldActive_(regionMesh.size(), true),
+    fieldLinked_(regionMesh.size(), false)
 {
+    if (debug)
+    {
+        Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+            << "Create region field " << IOo.name()
+            << endl;
+    }
+
     forAll (*this, regionI)
     {
-        if (debug)
+        IOobject regionIOoI = regionIOobject(regionI, IOo);
+
+        if (IOoOverride.found(regions()[regionI]))
         {
-            Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
-                << "Create field for region "
-                << regionMesh_.regions()[regionI]
-                << endl;
+            regionIOoI = IOoOverride[regions()[regionI]];
         }
 
-        fieldPtrs_.set
-        (
-            regionI,
-            new GeometricField<Type, PatchField, GeoMesh>
-            (
-                regionIO(regionI, io),
-                regionMesh_[regionI],
-                dim,
-                patchFieldTypes
-            )
-        );
+        if (linkFieldPtr(regionI, regionIOoI))
+        {
+            if (debug)
+            {
+                Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+                    << "Linked existing field " << regionIOoI.name() << " for region "
+                    << regionMesh_.regions()[regionI]
+                    << endl;
+            }
+        }
+        else
+        {
+            if (debug)
+            {
+                Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+                    << "Create new field " << regionIOoI.name() << " for region "
+                    << regionMesh_.regions()[regionI]
+                    << endl;
+            }
+
+            if (regionIOoI.readOpt() == IOobject::MUST_READ)
+            {
+                fieldPtrs_[regionI] =
+                    new GeometricFieldType
+                    (
+                        regionIOoI,
+                        regionMesh_[regionI]
+                    );
+            }
+            else
+            {
+                fieldPtrs_[regionI] =
+                    new GeometricFieldType
+                    (
+                        regionIOoI,
+                        regionMesh_[regionI],
+                        dim,
+                        patchFieldType
+                    );
+            }
+        }
     }
 }
 
@@ -187,16 +302,19 @@ template
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionGeometricField
 (
-    const IOobject& io,
-    const RegionMesh& regionMesh
+    const IOobject& IOo,
+    const RegionMesh& regionMesh,
+    const dimensioned<Type>& dim,
+    const wordList& patchFieldTypes,
+    const HashTable<IOobject> IOoOverride
 )
 :
     regIOobject
     (
         IOobject
         (
-            io.name(),
-            io.time().timeName(),
+            IOo.name(),
+            IOo.time().timeName(),
             regionMesh.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -204,27 +322,67 @@ regionGeometricField
         )
     ),
     regionMesh_(regionMesh),
-    fieldPtrs_(regionMesh.size())
+    fieldPtrs_(regionMesh.size(), NULL),
+    fieldActive_(regionMesh.size(), true),
+    fieldLinked_(regionMesh.size(), false)
 {
+    if (debug)
+    {
+        Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+            << "Create region field " << IOo.name()
+            << endl;
+    }
+
     forAll (*this, regionI)
     {
-        if (debug)
+        IOobject regionIOoI = regionIOobject(regionI, IOo);
+
+        if (IOoOverride.found(regions()[regionI]))
         {
-            Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
-                << "Create field for region "
-                << regionMesh_.regions()[regionI]
-                << endl;
+            regionIOoI = IOoOverride[regions()[regionI]];
         }
 
-        fieldPtrs_.set
-        (
-            regionI,
-            new GeometricField<Type, PatchField, GeoMesh>
-            (
-                regionIO(regionI, io),
-                regionMesh_[regionI]
-            )
-        );
+        if (linkFieldPtr(regionI, regionIOoI))
+        {
+            if (debug)
+            {
+                Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+                    << "Linked existing field " << regionIOoI.name() << " for region "
+                    << regionMesh_.regions()[regionI]
+                    << endl;
+            }
+        }
+        else
+        {
+            if (debug)
+            {
+                Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+                    << "Create field " << regionIOoI.name() << " for region "
+                    << regionMesh_.regions()[regionI]
+                    << endl;
+            }
+
+            if (regionIOoI.readOpt() == IOobject::MUST_READ)
+            {
+                fieldPtrs_[regionI] =
+                    new GeometricFieldType
+                    (
+                        regionIOoI,
+                        regionMesh_[regionI]
+                    );
+            }
+            else
+            {
+                fieldPtrs_[regionI] =
+                    new GeometricFieldType
+                    (
+                        regionIOoI,
+                        regionMesh_[regionI],
+                        dim,
+                        patchFieldTypes
+                    );
+            }
+        }
     }
 }
 
@@ -237,19 +395,20 @@ template
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionGeometricField
 (
-    const IOobject& io,
+    const IOobject& IOo,
     const regionGeometricField
     <
         Type, PatchField, GeoMesh, RegionGeoMesh
-    >& rgf
+    >& rgf,
+    const HashTable<IOobject> IOoOverride
 )
 :
     regIOobject
     (
         IOobject
         (
-            io.name(),
-            io.time().timeName(),
+            IOo.name(),
+            IOo.time().timeName(),
             rgf.mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -257,27 +416,65 @@ regionGeometricField
         )
     ),
     regionMesh_(rgf.mesh()),
-    fieldPtrs_(rgf.mesh().size())
+    fieldPtrs_(rgf.mesh().size(), NULL),
+    fieldActive_(rgf.mesh().size(), true),
+    fieldLinked_(rgf.mesh().size(), false)
 {
+    if (debug)
+    {
+        Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+            << "Create region field " << IOo.name()
+            << endl;
+    }
+
     forAll (*this, regionI)
     {
-        if (debug)
+        IOobject regionIOoI = regionIOobject(regionI, IOo);
+
+        if (IOoOverride.found(regions()[regionI]))
         {
-            Info<< "Foam::regionGeometricField<>::regionGeometricField(...) : "
-                << "Create field for region "
-                << regionMesh_.regions()[regionI]
-                << endl;
+            regionIOoI = IOoOverride[regions()[regionI]];
         }
 
-        fieldPtrs_.set
-        (
-            regionI,
-            new GeometricField<Type, PatchField, GeoMesh>
-            (
-                regionIO(regionI, io),
-                rgf.field(regionI)
-            )
-        );
+        if (linkFieldPtr(regionI, regionIOoI))
+        {
+            if (debug)
+            {
+                Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+                    << "Linked existing field " << regionIOoI.name() << " for region "
+                    << regionMesh_.regions()[regionI]
+                    << endl;
+            }
+        }
+        else
+        {
+            if (debug)
+            {
+                Info<< "Foam::regionGeometricField::regionGeometricField(...) : "
+                    << "Create field " << regionIOoI.name() << " for region "
+                    << regionMesh_.regions()[regionI]
+                    << endl;
+            }
+
+            if (regionIOoI.readOpt() == IOobject::MUST_READ)
+            {
+                fieldPtrs_[regionI] =
+                    new GeometricFieldType
+                    (
+                        regionIOoI,
+                        regionMesh_[regionI]
+                    );
+            }
+            else
+            {
+                fieldPtrs_[regionI] =
+                    new GeometricFieldType
+                    (
+                        regionIOoI,
+                        rgf.field(regionI)
+                    );
+            }
+        }
     }
 }
 
@@ -292,7 +489,18 @@ template
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 ~regionGeometricField()
 {
-    fieldPtrs_.clear();
+    forAll (*this, regionI)
+    {
+        if
+        (
+             fieldActive_[regionI]
+         && !fieldLinked_[regionI]
+         &&  fieldPtrs_[regionI]
+        )
+        {
+            delete fieldPtrs_[regionI];
+        }
+    }
 }
 
 
@@ -397,7 +605,6 @@ Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 
 // * * * * * * * * * * * * * * * * Mapping * * * * * * * * * * * * * * * * * //
 
-// TODO: Parallel?
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
@@ -412,9 +619,9 @@ mapBoundaryField
 {
     label regionI0 = regions()[polyMesh::defaultRegion];
 
-    const GeometricField<Type, PatchField, GeoMesh>& vf0 = operator[](regionI0);
+    const GeometricFieldType& vf0 = operator[](regionI0);
 
-    GeometricField<Type, PatchField, GeoMesh>& vf = operator[](regionI);
+    GeometricFieldType& vf = operator[](regionI);
 
     const polyBoundaryMesh& pbm0 = vf0.mesh().boundaryMesh();
     const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
@@ -488,7 +695,7 @@ copyInternalBoundaryField
     label regionI
 ) const
 {
-    GeometricField<Type, PatchField, GeoMesh>& vf = operator[](regionI);
+    GeometricFieldType& vf = operator[](regionI);
     const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
 
     forAll (pbm, patchI)
@@ -508,7 +715,6 @@ copyInternalBoundaryField
 };
 
 
-// TODO: Parallel?
 template
 <
     class Type, template<class> class PatchField, class GeoMesh,
@@ -523,9 +729,9 @@ interpolateBoundaryField
 {
     label regionI0 = regions()[polyMesh::defaultRegion];
 
-    const GeometricField<Type, PatchField, GeoMesh>& vf0 = operator[](regionI0);
+    const GeometricFieldType& vf0 = operator[](regionI0);
 
-    GeometricField<Type, PatchField, GeoMesh>& vf = operator[](regionI);
+    GeometricFieldType& vf = operator[](regionI);
 
     const polyBoundaryMesh& pbm0 = vf0.mesh().boundaryMesh();
     const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
@@ -600,7 +806,7 @@ extrapolateBoundaryField
     label regionI
 ) const
 {
-    GeometricField<Type, PatchField, GeoMesh>& vf = operator[](regionI);
+    GeometricFieldType& vf = operator[](regionI);
 
     fvc::extrapolate(vf);
 };

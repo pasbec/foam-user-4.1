@@ -108,6 +108,14 @@ public:
             bool init = true
         );
 
+        //- Construct from time and label hash table
+        regionFvMesh
+        (
+            const Time& runTime,
+            const HashTable<label>& regionNameHashTable,
+            bool init = true
+        );
+
     // Destructor
 
         virtual ~regionFvMesh();

@@ -184,7 +184,7 @@ Foam::regionPolyMesh::regionPolyMesh
         )
     ),
     time_(runTime),
-    regions_(regionNames),
+    regions_(),
     meshPtrs_(),
     addressingPtrs_(),
     initialized_(false)
@@ -192,6 +192,32 @@ Foam::regionPolyMesh::regionPolyMesh
     if(init) this->init(regionNames);
 }
 
+
+Foam::regionPolyMesh::regionPolyMesh
+(
+    const Time& runTime,
+    const HashTable<label>& regionNameHashTable,
+    bool init
+)
+:
+    objectRegistry(
+        IOobject
+        (
+            "regions[]",
+            runTime.constant(),
+            runTime.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    time_(runTime),
+    regions_(),
+    meshPtrs_(),
+    addressingPtrs_(),
+    initialized_(false)
+{
+    if(init) this->init(regionNameHashTable);
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

@@ -186,19 +186,7 @@ Foam::interTrackEddyCurrentApp::Manager::Manager
                 Region::BUFFER
             );
 
-            wordList regionNames =
-                wordList
-                (
-                    regionNameHashTable.size(),
-                    word("MISSING_REGION_NAME")
-                );
-
-            forAllConstIter(HashTable<label>, regionNameHashTable, iter)
-            {
-                regionNames[iter()] = iter.key();
-            }
-
-            mesh.init(regionNames);
+            mesh.init(regionNameHashTable);
 
             this->messages().newLine();
         }
@@ -277,7 +265,11 @@ void Foam::interTrackEddyCurrentApp::Manager::read() const
 void Foam::interTrackEddyCurrentApp::Manager::init() const
 {
     interTrackAppManager().init();
+// TODO: How to do this more conveniently? The renaming is currently used to make
+//       the regionGeometricField link the fluid region!
+    interTrackAppManager().regions().region_DEFAULT().storage().F().rename("FL");
     eddyCurrentAppManager().init();
+    interTrackAppManager().regions().region_DEFAULT().storage().F().rename("F");
 
     storage().checkInit();
     regions().checkInit();

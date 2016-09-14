@@ -44,8 +44,6 @@ SourceFiles
 
 // TODO [Low]: This is a template class. Capitalize first letter!
 
-// TODO [High]: Test parallel mapping
-
 // TODO [High]: Implement template specializations for the currently
 //              hard coded membemer functions for boundary field mapping of volFields
 //              in regionVolFieldMapping.C
@@ -78,6 +76,8 @@ public:
 
         typedef typename RegionGeoMesh::Mesh RegionMesh;
 
+        typedef GeometricField<Type, PatchField, GeoMesh> GeometricFieldType;
+
 
 private:
 
@@ -87,18 +87,30 @@ private:
         const RegionMesh& regionMesh_;
 
         //- Field pointers
-        mutable PtrList<GeometricField<Type, PatchField, GeoMesh> > fieldPtrs_;
+        mutable List<GeometricFieldType*> fieldPtrs_;
+
+        //- Field active state
+        mutable List<bool> fieldActive_;
+
+        //- Field link state
+        mutable List<bool> fieldLinked_;
 
     // Private Member Functions
 
         // Helper functions for constructor
 
             //- Return IOobject for region with index regionI
-            const IOobject
-            regionIO
+            const IOobject regionIOobject
             (
                 label regionI,
-                const IOobject& io
+                const IOobject& IOo
+            ) const;
+
+            //- Try to link field pointer
+            bool linkFieldPtr
+            (
+                label regionI,
+                const IOobject& IOo
             ) const;
 
 
@@ -119,41 +131,45 @@ public:
     // Constructors
 
         //- Constructor given IOobject, mesh, dimensioned<Type>
+        regionGeometricField
+        (
+            const IOobject& IOo,
+            const RegionMesh& regionMesh,
+            const dimensioned<Type>& dim,
+            const HashTable<IOobject> IOoOverride = HashTable<IOobject>()
+        );
+
+        //- Constructor given IOobject, mesh, dimensioned<Type>
         //  and patch type.
         regionGeometricField
         (
-            const IOobject& io,
+            const IOobject& IOo,
             const RegionMesh& regionMesh,
             const dimensioned<Type>& dim,
-            const word& patchFieldType
+            const word& patchFieldType,
+            const HashTable<IOobject> IOoOverride = HashTable<IOobject>()
         );
 
         //- Constructor given IOobject, mesh, dimensioned<Type>
         //  and patch types.
         regionGeometricField
         (
-            const IOobject& io,
+            const IOobject& IOo,
             const RegionMesh& regionMesh,
             const dimensioned<Type>& dim,
-            const wordList& patchFieldTypes
-        );
-
-        //- Construct and read given IOobject
-        regionGeometricField
-        (
-            const IOobject& io,
-            const RegionMesh& regionMesh
+            const wordList& patchFieldTypes,
+            const HashTable<IOobject> IOoOverride = HashTable<IOobject>()
         );
 
         //- Construct as copy resetting IO parameters
         regionGeometricField
         (
-            const IOobject& io,
+            const IOobject& IOo,
             const regionGeometricField
             <
-                Type, PatchField, GeoMesh,
-                RegionGeoMesh
-            >& rgf
+                Type, PatchField, GeoMesh, RegionGeoMesh
+            >& rgf,
+            const HashTable<IOobject> IOoOverride = HashTable<IOobject>()
         );
 
     // Destructor
@@ -390,7 +406,25 @@ public:
     // Member Operators
 
         //- Field access operator by index
-        inline GeometricField<Type, PatchField, GeoMesh>& operator[]
+        inline GeometricFieldType& operator[]
+        (
+            label regionI
+        ) const
+        {
+            return *fieldPtrs_[regionI];
+        };
+
+        //- Field access operator by regionName
+        inline GeometricFieldType& operator[]
+        (
+            const word& regionName
+        ) const
+        {
+            return *fieldPtrs_[regions()[regionName]];
+        };
+
+        //- Field access operator by index
+        inline const GeometricFieldType* operator()
         (
             label regionI
         ) const
@@ -399,30 +433,12 @@ public:
         };
 
         //- Field access operator by regionName
-        inline GeometricField<Type, PatchField, GeoMesh>& operator[]
+        inline const GeometricFieldType* operator()
         (
             const word& regionName
         ) const
         {
             return fieldPtrs_[regions()[regionName]];
-        };
-
-        //- Field access operator by index
-        inline const GeometricField<Type, PatchField, GeoMesh>* operator()
-        (
-            label regionI
-        ) const
-        {
-            return fieldPtrs_(regionI);
-        };
-
-        //- Field access operator by regionName
-        inline const GeometricField<Type, PatchField, GeoMesh>* operator()
-        (
-            const word& regionName
-        ) const
-        {
-            return fieldPtrs_(regions()[regionName]);
         };
 
         void operator=

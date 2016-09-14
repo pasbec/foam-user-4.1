@@ -104,19 +104,48 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_omega0::create
 void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create
 (const word& ccase) const
 {
+    IOobject definedIOo
+    (
+        "sigma",
+        time().timeName(),
+        mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::DEFAULT],
+        definedIOo
+    );
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        definedIOo
+    );
+
     set
     (
         new regionVolScalarField
         (
             IOobject
             (
-                "sigma",
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
+                definedIOo.name(),
+                definedIOo.instance(),
+                definedIOo.db()
             ),
-            mesh()
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimCurrent/dimVoltage,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName,
+            IOoOverride
         )
     );
 }
@@ -125,17 +154,38 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create
 void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create
 (const word& ccase) const
 {
+    IOobject definedIOo
+    (
+        "A0Re",
+        time().timeName(),
+        mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    );
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::DEFAULT],
+        definedIOo
+    );
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        definedIOo
+    );
+
     set
     (
         new regionVolVectorField
         (
             IOobject
             (
-                "A0Re",
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
+                definedIOo.name(),
+                definedIOo.instance(),
+                definedIOo.db()
             ),
             mesh(),
             dimensionedVector
@@ -144,7 +194,8 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create
                 dimVoltage*dimTime/dimLength,
                 vector::zero
             ),
-            calculatedFvPatchVectorField::typeName
+            calculatedFvPatchVectorField::typeName,
+            IOoOverride
         )
     );
 }
@@ -153,17 +204,38 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create
 void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create
 (const word& ccase) const
 {
+    IOobject definedIOo
+    (
+        "A0Im",
+        time().timeName(),
+        mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    );
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::DEFAULT],
+        definedIOo
+    );
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        definedIOo
+    );
+
     set
     (
         new regionVolVectorField
         (
             IOobject
             (
-                "A0Im",
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
+                definedIOo.name(),
+                definedIOo.instance(),
+                definedIOo.db()
             ),
             mesh(),
             dimensionedVector
@@ -172,7 +244,8 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create
                 dimVoltage*dimTime/dimLength,
                 vector::zero
             ),
-            calculatedFvPatchVectorField::typeName
+            calculatedFvPatchVectorField::typeName,
+            IOoOverride
         )
     );
 }
@@ -181,19 +254,48 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create
 void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create
 (const word& ccase) const
 {
+    IOobject definedIOo
+    (
+        "ARe",
+        time().timeName(),
+        mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::DEFAULT],
+        definedIOo
+    );
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        definedIOo
+    );
+
     set
     (
         new regionVolVectorField
         (
             IOobject
             (
-                "ARe",
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
+                definedIOo.name(),
+                definedIOo.instance(),
+                definedIOo.db()
             ),
-            mesh()
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime/dimLength,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName,
+            IOoOverride
         )
     );
 }
@@ -202,19 +304,48 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create
 void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create
 (const word& ccase) const
 {
+    IOobject definedIOo
+    (
+        "AIm",
+        time().timeName(),
+        mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::DEFAULT],
+        definedIOo
+    );
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        definedIOo
+    );
+
     set
     (
         new regionVolVectorField
         (
             IOobject
             (
-                "AIm",
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
+                definedIOo.name(),
+                definedIOo.instance(),
+                definedIOo.db()
             ),
-            mesh()
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime/dimLength,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName,
+            IOoOverride
         )
     );
 }
@@ -340,7 +471,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BRe::create
                 "BRe",
                 time().timeName(),
                 mesh(),
-                IOobject::NO_READ,
+                IOobject::READ_IF_PRESENT,
                 IOobject::AUTO_WRITE
             ),
             mesh(),
@@ -368,7 +499,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BIm::create
                 "BIm",
                 time().timeName(),
                 mesh(),
-                IOobject::NO_READ,
+                IOobject::READ_IF_PRESENT,
                 IOobject::AUTO_WRITE
             ),
             mesh(),
@@ -551,19 +682,7 @@ Foam::eddyCurrentApp::Manager::Manager
                 Region::CONDUCTOR
             );
 
-            wordList regionNames =
-                wordList
-                (
-                    regionNameHashTable.size(),
-                    word("MISSING_REGION_NAME")
-                );
-
-            forAllConstIter(HashTable<label>, regionNameHashTable, iter)
-            {
-                regionNames[iter()] = iter.key();
-            }
-
-            mesh.init(regionNames);
+            mesh.init(regionNameHashTable);
 
             this->messages().newLine();
         }

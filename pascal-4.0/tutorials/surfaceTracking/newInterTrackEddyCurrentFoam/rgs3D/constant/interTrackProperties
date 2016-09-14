@@ -33,8 +33,6 @@ storage
 {
     region_fluid
     {
-        F                  "calculated";
-        turbulence         "default";
     }
 }
 
