@@ -83,7 +83,7 @@ void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emPrevC::create
 
 // TODO: Move to conductor region
 void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emRelDeltaA::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (

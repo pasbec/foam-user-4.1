@@ -61,7 +61,7 @@ void Foam::eddyCurrentApp::Manager::Settings::read() const
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_f0::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -81,7 +81,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_f0::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_omega0::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -102,7 +102,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_omega0::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -179,7 +179,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -200,7 +200,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -221,7 +221,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_Anormf::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -247,7 +247,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Anormf::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_Ascale::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -273,7 +273,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Ascale::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -301,7 +301,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -385,7 +385,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BIm::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_FL::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -413,7 +413,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_FL::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_pB::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
@@ -441,7 +441,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_pB::create
 
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create
-(const word& init) const
+(const word& ccase) const
 {
     set
     (
