@@ -23,7 +23,7 @@ cp -r "$fromCase/constant" "$toCase"
 cp -r "$fromCase/system" "$toCase"
 cp -r "$fromCase/tools" "$toCase"
 
-cp "$fromCase/Allrun" "$toCase"
+cp "$fromCase/Allrun"* "$toCase"
 cp "$fromCase/Allclean" "$toCase"
 
 cd "$toCase"
