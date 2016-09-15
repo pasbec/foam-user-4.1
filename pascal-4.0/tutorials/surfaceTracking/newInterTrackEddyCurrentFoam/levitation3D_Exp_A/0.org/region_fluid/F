@@ -10,17 +10,17 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    object      ARe;
+    object      F;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 1 -2 0 0 -1 0];
+dimensions      [1 -2 -2 0 0 0 0];
 
 internalField   uniform (0 0 0);
 
 boundaryField
 {
-    oldInternalFaces
+    trackedSurface
     {
         type            calculated;
         value           $internalField;

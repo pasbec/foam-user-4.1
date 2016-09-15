@@ -123,12 +123,6 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create() const
         IOo
     );
 
-    IOoOverride.set
-    (
-        mesh().regions()[Region::CONDUCTOR],
-        IOo
-    );
-
     set
     (
         new regionVolScalarField
@@ -143,7 +137,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create() const
             dimensionedScalar
             (
                 word(),
-                dimCurrent/dimVoltage,
+                dimCurrent/dimVoltage/dimLength,
                 0
             ),
             calculatedFvPatchScalarField::typeName,
@@ -170,12 +164,6 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create() const
     }
 
     HashTable<IOobject> IOoOverride;
-
-    IOoOverride.set
-    (
-        mesh().regions()[Region::DEFAULT],
-        IOo
-    );
 
     IOoOverride.set
     (
@@ -224,12 +212,6 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create() const
     }
 
     HashTable<IOobject> IOoOverride;
-
-    IOoOverride.set
-    (
-        mesh().regions()[Region::DEFAULT],
-        IOo
-    );
 
     IOoOverride.set
     (
@@ -285,12 +267,6 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create() const
         IOo
     );
 
-    IOoOverride.set
-    (
-        mesh().regions()[Region::CONDUCTOR],
-        IOo
-    );
-
     set
     (
         new regionVolVectorField
@@ -336,12 +312,6 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create() const
     IOoOverride.set
     (
         mesh().regions()[Region::DEFAULT],
-        IOo
-    );
-
-    IOoOverride.set
-    (
-        mesh().regions()[Region::CONDUCTOR],
         IOo
     );
 
