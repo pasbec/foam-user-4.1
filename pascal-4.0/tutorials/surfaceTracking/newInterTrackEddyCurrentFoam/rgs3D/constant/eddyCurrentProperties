@@ -23,10 +23,29 @@ settings
 {
     biotSavart         false;
     lorentzForce       true;
+    magneticPressure   false;
+    jouleHeat          false;
 }
 
 storage
 {
+    "(BRe|BIm)"
+    {
+        write          false;
+    }
+
+    "FL"
+    {
+        write          false;
+    }
+
+    region_conductor
+    {
+        "(jRe|jIm)"
+        {
+            write      false;
+        }
+    }
 }
 
 // ************************************************************************* //

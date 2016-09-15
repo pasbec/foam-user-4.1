@@ -129,18 +129,25 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create(
 
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jRe::create() const
 {
+    IOobject IOo
+    (
+        "jRe",
+        time().timeName(),
+        mesh(),
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", true))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
     set
     (
         new volVectorField
         (
-            IOobject
-            (
-                "jRe",
-                time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
+            IOo,
             mesh(),
             dimensionedVector
             (
@@ -156,18 +163,25 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jRe::create(
 
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create() const
 {
+    IOobject IOo
+    (
+        "jIm",
+        time().timeName(),
+        mesh(),
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", true))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
     set
     (
         new volVectorField
         (
-            IOobject
-            (
-                "jIm",
-                time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
+            IOo,
             mesh(),
             dimensionedVector
             (

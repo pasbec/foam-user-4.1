@@ -22,7 +22,6 @@ regions
 settings
 {
     biotSavart         true;
-    lorentzForce       true;
 }
 
 storage
