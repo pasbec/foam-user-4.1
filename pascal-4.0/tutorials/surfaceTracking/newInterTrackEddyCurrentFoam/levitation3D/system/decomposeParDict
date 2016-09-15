@@ -28,8 +28,9 @@ metisCoeffs
 
     regionCellSets
     (
-        cellSet_region_conductor
-        cellSet_region_space
+        cellSet_region_fluid
+        cellSet_region_fluid_faSubMesh
+        cellSet_region_buffer
     );
 
     regionWeightFactors (10.0);
