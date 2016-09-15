@@ -33,8 +33,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtARePhi::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtARePhi::create() const
 {
     set
     (
@@ -61,8 +60,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtARePhi::c
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtAImPhi::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtAImPhi::create() const
 {
     set
     (
@@ -89,8 +87,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtAImPhi::c
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create() const
 {
     set
     (
@@ -110,8 +107,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create() const
 {
     set
     (
@@ -131,8 +127,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jRe::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jRe::create() const
 {
     set
     (
@@ -159,8 +154,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jRe::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create() const
 {
     set
     (
@@ -189,8 +183,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create() const
 {
     item_ddtARePhi().enable();
     item_ddtAImPhi().enable();

@@ -52,13 +52,13 @@ void Foam::interTrackApp::Manager::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::interTrackApp::Manager::Storage::create(const word& ccase) const
+void Foam::interTrackApp::Manager::Storage::create() const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::interTrackApp::Manager::Regions::create(const word& ccase) const
+void Foam::interTrackApp::Manager::Regions::create() const
 {
     region_DEFAULT().enable();
 }

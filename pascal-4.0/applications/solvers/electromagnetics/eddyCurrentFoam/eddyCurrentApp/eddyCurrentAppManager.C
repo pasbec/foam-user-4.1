@@ -60,8 +60,7 @@ void Foam::eddyCurrentApp::Manager::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_f0::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_f0::create() const
 {
     set
     (
@@ -80,8 +79,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_f0::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_omega0::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_omega0::create() const
 {
     set
     (
@@ -101,8 +99,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_omega0::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create() const
 {
     IOobject definedIOo
     (
@@ -151,8 +148,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create() const
 {
     IOobject definedIOo
     (
@@ -201,8 +197,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create() const
 {
     IOobject definedIOo
     (
@@ -251,8 +246,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create() const
 {
     IOobject definedIOo
     (
@@ -301,8 +295,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create() const
 {
     IOobject definedIOo
     (
@@ -351,8 +344,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_Anormf::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_Anormf::create() const
 {
     set
     (
@@ -377,8 +369,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Anormf::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_Ascale::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_Ascale::create() const
 {
     set
     (
@@ -403,8 +394,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Ascale::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create() const
 {
     set
     (
@@ -431,8 +421,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create() const
 {
     set
     (
@@ -459,8 +448,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_BRe::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_BRe::create() const
 {
     set
     (
@@ -487,8 +475,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BRe::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_BIm::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_BIm::create() const
 {
     set
     (
@@ -515,8 +502,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BIm::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_FL::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_FL::create() const
 {
     set
     (
@@ -543,8 +529,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_FL::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_pB::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_pB::create() const
 {
     set
     (
@@ -571,8 +556,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_pB::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create() const
 {
     set
     (
@@ -599,7 +583,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::create(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Storage::create() const
 {
     item_f0().enable();
     item_omega0().enable();
@@ -629,7 +613,7 @@ void Foam::eddyCurrentApp::Manager::Storage::create(const word& ccase) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Regions::create(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Regions::create() const
 {
     region_DEFAULT().enable();
     region_CONDUCTOR().enable();

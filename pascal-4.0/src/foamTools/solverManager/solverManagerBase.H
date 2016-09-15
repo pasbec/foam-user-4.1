@@ -110,7 +110,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
 
 protected:
@@ -147,13 +147,13 @@ public:
             };
 
             //- Create sequence wrapper
-            inline bool checkCreate(const word& ccase = "default") const
+            inline bool checkCreate() const
             {
                 if (!created_)
                 {
                     created_ = true;
 
-                    create(ccase);
+                    create();
 
                     return true;
                 }
@@ -423,6 +423,11 @@ public:
 
             //- Mesh
             virtual MESH& mesh() const = 0;
+
+        // Dictionaries
+
+            //- Settings dictionary
+            virtual const dictionary& dict() const = 0;
 };
 
 
@@ -451,7 +456,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
             //- Init sequence
             virtual void init() const = 0;
@@ -579,9 +584,7 @@ private:
                         << " for region " << mesh().name()
                         << endl;
 
-                    word init = dict().lookupOrDefault(name(), word("default"));
-
-                    this->checkCreate(init);
+                    this->checkCreate();
 
                     this->lockedSwitch() = false;
                 }
@@ -645,7 +648,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
 
             //- Init sequence (empty)
@@ -705,7 +708,7 @@ public:
 
         // Dictionaries
 
-            //- Storage dictionary
+            //- Item dictionary
             virtual const dictionary& dict() const = 0;
 
         // Enabling/Disabling
@@ -863,7 +866,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
             //- Init all regions in hash table
             virtual void init() const
@@ -912,6 +915,11 @@ public:
 
             //- Mesh
             virtual MESH& mesh() const = 0;
+
+        // Dictionaries
+
+            //- Storage dictionary
+            virtual const dictionary& dict() const = 0;
 
     // Member Operators
 
@@ -1125,7 +1133,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
             //- Read all regions in hash table
             virtual void read() const

@@ -371,6 +371,12 @@ public:
                 return time().controlDict();
             }
 
+            //- Empty dictionary
+            inline const dictionary& emptyDict() const
+            {
+                return manager().emptyDict();
+            };
+
             //- Properties dictionary
             inline const dictionary& propertiesDict() const
             {
@@ -379,19 +385,19 @@ public:
 
             inline const dictionary& regionsDict() const
             {
-                return propertiesDict().subDict("regions");
+                return manager().regionsDict();
             };
 
             //- Settings dictionary
             inline const dictionary& settingsDict() const
             {
-                return propertiesDict().subDict("settings");
+                return manager().settingsDict();
             };
 
             //- Storage dictionary
             inline const dictionary& storageDict() const
             {
-                return propertiesDict().subDict("storage");
+                return manager().storageDict();
             };
 };
 

@@ -45,7 +45,7 @@ Description
 
 # define SM_REGIONS_NEW_INTERFACES()                                          \
                                                                               \
-        private: virtual void create(const word& ccase = "default") const;
+        private: virtual void create() const;
 
 
 # define SM_REGIONS_NEW()                                                     \
@@ -119,7 +119,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
 
 public:

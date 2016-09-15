@@ -171,6 +171,7 @@ Foam::solverManager<MESH>::solverManager
     time_(time),
     mesh_(mesh),
     master_(master),
+    emptyDict_(),
     propertiesDict_
     (
         IOdictionary

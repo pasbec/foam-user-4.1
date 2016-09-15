@@ -251,19 +251,33 @@ public:
             //- Settings dictionary
             inline const dictionary& settingsDict() const
             {
-                return this->Wrapper::settingsDict().subDict
-                (
-                    this->Wrapper::mesh().name()
-                );
+                const dictionary& dict = this->Wrapper::settingsDict();
+                word regionName = this->Wrapper::mesh().name();
+
+                if (dict.found(regionName))
+                {
+                    return dict.subDict(regionName);
+                }
+                else
+                {
+                    return this->Wrapper::emptyDict();
+                }
             };
 
             //- Storage dictionary
             inline const dictionary& storageDict() const
             {
-                return this->Wrapper::storageDict().subDict
-                (
-                    this->Wrapper::mesh().name()
-                );
+                const dictionary& dict = this->Wrapper::storageDict();
+                word regionName = this->Wrapper::mesh().name();
+
+                if (dict.found(regionName))
+                {
+                    return dict.subDict(regionName);
+                }
+                else
+                {
+                    return this->Wrapper::emptyDict();
+                }
             };
 };
 

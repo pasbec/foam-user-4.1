@@ -57,8 +57,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_g::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_g::create() const
 {
     set
     (
@@ -77,8 +76,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_g::create
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p::create() const
 {
     set
     (
@@ -100,8 +98,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p::create
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U::create() const
 {
     set
     (
@@ -121,8 +118,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U::create
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Up::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Up::create() const
 {
     set
     (
@@ -148,8 +144,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Up::create
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_phi::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_phi::create() const
 {
     set
     (
@@ -171,8 +166,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_phi::create
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_rho::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
 {
     set
     (
@@ -199,8 +193,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_rho::create
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_mu::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_mu::create() const
 {
     set
     (
@@ -227,8 +220,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_mu::create
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create() const
 {
     set
     (
@@ -255,8 +247,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_fluidIndicator::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_fluidIndicator::create() const
 {
     set
     (
@@ -276,8 +267,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_fluidIndicator:
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_transport::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_transport::create() const
 {
     set
     (
@@ -291,8 +281,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_transport::crea
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_turbulence::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_turbulence::create() const
 {
     set
     (
@@ -306,8 +295,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_turbulence::cre
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::create() const
 {
 // TODO: Add more constructors and simplify
 //       Make it use real rho and mu fields!
@@ -330,8 +318,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::crea
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create
-(const word& ccase) const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
 {
     item_g().enable();
     item_p().enable();

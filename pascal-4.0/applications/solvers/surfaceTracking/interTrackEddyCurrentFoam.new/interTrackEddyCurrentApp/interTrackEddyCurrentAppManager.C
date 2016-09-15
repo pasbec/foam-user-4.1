@@ -53,8 +53,7 @@ void Foam::interTrackEddyCurrentApp::Manager::Settings::read() const
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // TODO: Move to conductor region
-void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emPrevC::create
-(const word& ccase) const
+void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emPrevC::create() const
 {
     set
     (
@@ -82,8 +81,7 @@ void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emPrevC::create
 
 
 // TODO: Move to conductor region
-void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emRelDeltaA::create
-(const word& ccase) const
+void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emRelDeltaA::create() const
 {
     set
     (
@@ -109,10 +107,7 @@ void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emRelDeltaA::create
     );
 }
 
-void Foam::interTrackEddyCurrentApp::Manager::Storage::create
-(
-    const word& ccase
-) const
+void Foam::interTrackEddyCurrentApp::Manager::Storage::create() const
 {
     item_emPrevC().enable();
     item_emRelDeltaA().enable();
@@ -121,10 +116,7 @@ void Foam::interTrackEddyCurrentApp::Manager::Storage::create
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::interTrackEddyCurrentApp::Manager::Regions::create
-(
-    const word& ccase
-) const
+void Foam::interTrackEddyCurrentApp::Manager::Regions::create() const
 {}
 
 

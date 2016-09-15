@@ -33,8 +33,7 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create() const
 {
     set
     (
@@ -61,8 +60,7 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create() const
 {
     set
     (
@@ -89,8 +87,7 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create
-(const word& ccase) const
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create() const
 {
     item_j0Re().setState(!globalSettings().biotSavart);
     item_j0Im().setState(!globalSettings().biotSavart);

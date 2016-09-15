@@ -199,7 +199,7 @@ public:
         // Dictionaries
 
             //- Dictionary
-            inline const dictionary& dict() const
+            virtual const dictionary& dict() const
             {
                 return settingsDict();
             };
@@ -247,19 +247,33 @@ private:
             //- Settings dictionary
             virtual const dictionary& settingsDict() const
             {
-                return this->Wrapper::settingsDict().subDict
-                (
-                    this->Parent::mesh().name()
-                );
+                const dictionary& dict = this->Wrapper::settingsDict();
+                word regionName = this->Parent::mesh().name();
+
+                if (dict.found(regionName))
+                {
+                    return dict.subDict(regionName);
+                }
+                else
+                {
+                    return this->Wrapper::emptyDict();
+                }
             };
 
             //- Storage dictionary
             virtual const dictionary& storageDict() const
             {
-                return this->Wrapper::storageDict().subDict
-                (
-                    this->Parent::mesh().name()
-                );
+                const dictionary& dict = this->Wrapper::storageDict();
+                word regionName = this->Parent::mesh().name();
+
+                if (dict.found(regionName))
+                {
+                    return dict.subDict(regionName);
+                }
+                else
+                {
+                    return this->Wrapper::emptyDict();
+                }
             };
 
         // Evolution

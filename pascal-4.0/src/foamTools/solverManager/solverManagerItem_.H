@@ -52,7 +52,7 @@ Description
 
 # define SM_ITEM_ADD_DECLARATION_INTERFACES(NAME)                             \
                                                                               \
-        private: virtual void create(const word& ccase = "default") const;
+        private: virtual void create() const;
 
 
 # define SM_ITEM_ADD_DECLARATION_INTERFACES_REGION(NAME)                      \
@@ -201,7 +201,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
 
 public:
@@ -241,6 +241,17 @@ public:
             //- Dictionary
             virtual const dictionary& dict() const
             {
+                const dictionary& dict = storageDict();
+                word itemName = this->name();
+
+                if (dict.found(itemName))
+                {
+                    return dict.subDict(itemName);
+                }
+                else
+                {
+                    return this->Wrapper::emptyDict();
+                }
                 return storageDict();
             };
 };
@@ -287,25 +298,39 @@ private:
             //- Settings dictionary
             virtual const dictionary& settingsDict() const
             {
-                return this->Wrapper::settingsDict().subDict
-                (
-                    this->Parent::mesh().name()
-                );
+                const dictionary& dict = this->Wrapper::settingsDict();
+                word regionName = this->Parent::mesh().name();
+
+                if (dict.found(regionName))
+                {
+                    return dict.subDict(regionName);
+                }
+                else
+                {
+                    return this->Wrapper::emptyDict();
+                }
             };
 
             //- Storage dictionary
             virtual const dictionary& storageDict() const
             {
-                return this->Wrapper::storageDict().subDict
-                (
-                    this->Parent::mesh().name()
-                );
+                const dictionary& dict = this->Wrapper::storageDict();
+                word regionName = this->Parent::mesh().name();
+
+                if (dict.found(regionName))
+                {
+                    return dict.subDict(regionName);
+                }
+                else
+                {
+                    return this->Wrapper::emptyDict();
+                }
             };
 
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
 
 public:
@@ -408,7 +433,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
 
 public:

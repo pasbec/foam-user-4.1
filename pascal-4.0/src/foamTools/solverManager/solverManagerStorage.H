@@ -45,7 +45,7 @@ Description
 
 # define SM_STORAGE_NEW_INTERFACES()                                          \
                                                                               \
-        private: virtual void create(const word& ccase) const;
+        private: virtual void create() const;
 
 
 # define SM_STORAGE_NEW_INTERFACES_REGION()                                   \
@@ -158,7 +158,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
 
 public:
@@ -192,7 +192,7 @@ public:
         // Dictionaries
 
             //- Dictionary
-            inline const dictionary& dict() const
+            virtual const dictionary& dict() const
             {
                 return storageDict();
             };
@@ -239,25 +239,39 @@ private:
             //- Settings dictionary
             virtual const dictionary& settingsDict() const
             {
-                return this->Wrapper::settingsDict().subDict
-                (
-                    this->Parent::mesh().name()
-                );
+                const dictionary& dict = this->Wrapper::settingsDict();
+                word regionName = this->Parent::mesh().name();
+
+                if (dict.found(regionName))
+                {
+                    return dict.subDict(regionName);
+                }
+                else
+                {
+                    return this->Wrapper::emptyDict();
+                }
             };
 
             //- Storage dictionary
             virtual const dictionary& storageDict() const
             {
-                return this->Wrapper::storageDict().subDict
-                (
-                    this->Parent::mesh().name()
-                );
+                const dictionary& dict = this->Wrapper::storageDict();
+                word regionName = this->Parent::mesh().name();
+
+                if (dict.found(regionName))
+                {
+                    return dict.subDict(regionName);
+                }
+                else
+                {
+                    return this->Wrapper::emptyDict();
+                }
             };
 
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
 
 public:
@@ -351,7 +365,7 @@ private:
         // Evolution
 
             //- Create sequence
-            virtual void create(const word& ccase) const = 0;
+            virtual void create() const = 0;
 
 
 public:

@@ -208,6 +208,9 @@ private:
 
         // Dictionaries
 
+            //- Empty dictionary
+            const dictionary emptyDict_;
+
             //- Properties dictionary
             mutable IOdictionary propertiesDict_;
 
@@ -324,6 +327,12 @@ public:
                 return time_.controlDict();
             }
 
+            //- Empty dictionary
+            inline const dictionary& emptyDict() const
+            {
+                return emptyDict_;
+            };
+
             //- Properties dictionary
             inline const dictionary& propertiesDict() const
             {
@@ -332,18 +341,39 @@ public:
 
             inline const dictionary& regionsDict() const
             {
-                return propertiesDict_.subDict("regions");
+                if (propertiesDict_.found("regions"))
+                {
+                    return propertiesDict_.subDict("regions");
+                }
+                else
+                {
+                    return emptyDict_;
+                }
             };
 
             inline const dictionary& settingsDict() const
             {
-                return propertiesDict_.subDict("settings");
+                if (propertiesDict_.found("settings"))
+                {
+                    return propertiesDict_.subDict("settings");
+                }
+                else
+                {
+                    return emptyDict_;
+                }
             };
 
             //- Storage dictionary
             inline const dictionary& storageDict() const
             {
-                return propertiesDict_.subDict("storage");
+                if (propertiesDict_.found("storage"))
+                {
+                    return propertiesDict_.subDict("storage");
+                }
+                else
+                {
+                    return emptyDict_;
+                }
             };
 
 
