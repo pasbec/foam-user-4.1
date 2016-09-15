@@ -341,39 +341,18 @@ public:
 
             inline const dictionary& regionsDict() const
             {
-                if (propertiesDict_.found("regions"))
-                {
-                    return propertiesDict_.subDict("regions");
-                }
-                else
-                {
-                    return emptyDict_;
-                }
+                return propertiesDict_.subDict("regions");
             };
 
             inline const dictionary& settingsDict() const
             {
-                if (propertiesDict_.found("settings"))
-                {
-                    return propertiesDict_.subDict("settings");
-                }
-                else
-                {
-                    return emptyDict_;
-                }
+                return propertiesDict_.subDict("settings");
             };
 
             //- Storage dictionary
             inline const dictionary& storageDict() const
             {
-                if (propertiesDict_.found("storage"))
-                {
-                    return propertiesDict_.subDict("storage");
-                }
-                else
-                {
-                    return emptyDict_;
-                }
+                return propertiesDict_.subDict("storage");
             };
 
 

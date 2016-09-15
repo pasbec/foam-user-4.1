@@ -16,8 +16,6 @@ FoamFile
 
 settings
 {
-//     debug                   1;
-
     region_fluid
     {
         volumeForce         true;
@@ -31,9 +29,6 @@ settings
 
 storage
 {
-    region_fluid
-    {
-    }
 }
 
 // ************************************************************************* //

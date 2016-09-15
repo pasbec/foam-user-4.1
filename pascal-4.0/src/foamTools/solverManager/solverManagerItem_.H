@@ -241,12 +241,12 @@ public:
             //- Dictionary
             virtual const dictionary& dict() const
             {
-                const dictionary& dict = storageDict();
+                const dictionary& parentDict = storageDict();
                 word itemName = this->name();
 
-                if (dict.found(itemName))
+                if (parentDict.found(itemName))
                 {
-                    return dict.subDict(itemName);
+                    return parentDict.subDict(itemName);
                 }
                 else
                 {
@@ -298,12 +298,12 @@ private:
             //- Settings dictionary
             virtual const dictionary& settingsDict() const
             {
-                const dictionary& dict = this->Wrapper::settingsDict();
+                const dictionary& parentDict = this->Wrapper::settingsDict();
                 word regionName = this->Parent::mesh().name();
 
-                if (dict.found(regionName))
+                if (parentDict.found(regionName))
                 {
-                    return dict.subDict(regionName);
+                    return parentDict.subDict(regionName);
                 }
                 else
                 {
@@ -314,12 +314,12 @@ private:
             //- Storage dictionary
             virtual const dictionary& storageDict() const
             {
-                const dictionary& dict = this->Wrapper::storageDict();
+                const dictionary& parentDict = this->Wrapper::storageDict();
                 word regionName = this->Parent::mesh().name();
 
-                if (dict.found(regionName))
+                if (parentDict.found(regionName))
                 {
-                    return dict.subDict(regionName);
+                    return parentDict.subDict(regionName);
                 }
                 else
                 {

@@ -14,29 +14,19 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
-{
-//     debug              1;
-
-    biotSavart         false;
-
-    lorentzForce       true;
-}
-
 regions
 {
-    conductor          "region_conductor";
+    conductor          region_conductor;
+}
+
+settings
+{
+    biotSavart         false;
+    lorentzForce       true;
 }
 
 storage
 {
-    region0
-    {
-    }
-
-    region_conductor
-    {
-    }
 }
 
 // ************************************************************************* //
