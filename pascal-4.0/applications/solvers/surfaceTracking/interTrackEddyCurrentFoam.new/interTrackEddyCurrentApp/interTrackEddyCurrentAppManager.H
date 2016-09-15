@@ -29,6 +29,7 @@ Description
 
 SourceFiles
     interTrackEddyCurrentAppManager.C
+    interTrackEddyCurrentAppManagerRegion_CONDUCTOR.C
 
 Author
     Pascal Beckstein
@@ -84,16 +85,33 @@ public:
 
         SM_GLOBALSTORAGE_NEW();
 
-            //- Cell centres from last electromagnetic update
-            SM_GLOBALITEM_ADD(volVectorField, emPrevC);
-
-            //- Relative change of A amplitude
-            SM_GLOBALITEM_ADD(volScalarField, emRelDeltaA);
-
         SM_GLOBALSTORAGE_ADD();
 
 
+        SM_REGION_NEW(CONDUCTOR);
+
+            SM_REGIONCONTROL_ADD_GLOBALCONTROL();
+
+            SM_REGIONSETTINGS_NEW();
+            SM_REGIONSETTINGS_ADD();
+
+            SM_REGIONSTORAGE_NEW();
+
+                //- Cell centres from last electromagnetic update
+                SM_REGIONITEM_ADD(volVectorField, emPrevC);
+
+                //- Relative change of A amplitude
+                SM_REGIONITEM_ADD(volScalarField, emRelDeltaA);
+
+            SM_REGIONSTORAGE_ADD();
+
+        SM_REGION_END();
+
+
         SM_REGIONS_NEW();
+
+            SM_REGIONS_REGION_ADD(CONDUCTOR, mesh()[Region::CONDUCTOR]);
+
         SM_REGIONS_ADD();
 
 
@@ -180,6 +198,7 @@ public:
 
 #ifdef NoRepository
 #   include "interTrackEddyCurrentAppManager.C"
+#   include "interTrackEddyCurrentAppManagerRegion_CONDUCTOR.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

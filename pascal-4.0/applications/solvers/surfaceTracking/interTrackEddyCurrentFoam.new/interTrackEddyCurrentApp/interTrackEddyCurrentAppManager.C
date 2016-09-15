@@ -32,92 +32,16 @@ defineTypeNameAndDebug(Foam::interTrackEddyCurrentApp::Manager, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::interTrackEddyCurrentApp::Manager::Settings::read() const
-{
-    interTrackEddyCurrentApp::Manager::debug =
-        dict().lookupOrDefault
-        (
-            "debug",
-            interTrackEddyCurrentApp::Manager::debug()
-        );
-
-    interTrackEddyCurrentApp::Control::debug =
-        dict().lookupOrDefault
-        (
-            "debug",
-            interTrackEddyCurrentApp::Control::debug()
-        );
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// TODO: Move to conductor region
-void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emPrevC::create() const
-{
-    set
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                "emPrevC",
-                time().timeName(),
-                mesh()[Region::CONDUCTOR],
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh()[Region::CONDUCTOR],
-            dimensionedVector
-            (
-                word(),
-                dimLength,
-                vector::zero
-            ),
-            zeroGradientFvPatchVectorField::typeName
-        )
-    );
-}
-
-
-// TODO: Move to conductor region
-void Foam::interTrackEddyCurrentApp::Manager::Storage::Item_emRelDeltaA::create() const
-{
-    set
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "emRelDeltaA",
-                time().timeName(),
-                mesh()[Region::CONDUCTOR],
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh()[Region::CONDUCTOR],
-            dimensionedScalar
-            (
-                word(),
-                dimless,
-                0.0
-            ),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-}
-
 void Foam::interTrackEddyCurrentApp::Manager::Storage::create() const
-{
-    item_emPrevC().enable();
-    item_emRelDeltaA().enable();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::interTrackEddyCurrentApp::Manager::Regions::create() const
-{}
+{
+    region_CONDUCTOR().enable();
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

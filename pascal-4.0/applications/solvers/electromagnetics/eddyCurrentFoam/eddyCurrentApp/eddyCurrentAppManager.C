@@ -695,6 +695,8 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create() const
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 void Foam::eddyCurrentApp::Manager::Storage::create() const
 {
     item_f0().enable();

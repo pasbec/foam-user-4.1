@@ -23,17 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "eddyCurrentAppManager.H"
+#include "interTrackEddyCurrentAppManager.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
+void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Settings::read() const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create() const
+void Foam::interTrackEddyCurrentApp::Manager::Settings::read() const
+{
+    interTrackEddyCurrentApp::Manager::debug =
+        dict().lookupOrDefault
+        (
+            "debug",
+            interTrackEddyCurrentApp::Manager::debug()
+        );
+
+    interTrackEddyCurrentApp::Control::debug =
+        dict().lookupOrDefault
+        (
+            "debug",
+            interTrackEddyCurrentApp::Control::debug()
+        );
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emPrevC::create() const
 {
     set
     (
@@ -41,47 +61,47 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create()
         (
             IOobject
             (
-                "j0Re",
+                "emPrevC",
                 time().timeName(),
                 mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
             ),
             mesh(),
             dimensionedVector
             (
                 word(),
-                dimCurrent/dimArea,
+                dimLength,
                 vector::zero
             ),
-            calculatedFvPatchVectorField::typeName
+            zeroGradientFvPatchVectorField::typeName
         )
     );
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create() const
+void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emRelDeltaA::create() const
 {
     set
     (
-        new volVectorField
+        new volScalarField
         (
             IOobject
             (
-                "j0Im",
+                "emRelDeltaA",
                 time().timeName(),
                 mesh(),
-                IOobject::READ_IF_PRESENT,
+                IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),
             mesh(),
-            dimensionedVector
+            dimensionedScalar
             (
                 word(),
-                dimCurrent/dimArea,
-                vector::zero
+                dimless,
+                0.0
             ),
-            calculatedFvPatchVectorField::typeName
+            zeroGradientFvPatchScalarField::typeName
         )
     );
 }
@@ -89,10 +109,10 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create() const
+void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create() const
 {
-    item_j0Re().setState(!globalSettings().biotSavart);
-    item_j0Im().setState(!globalSettings().biotSavart);
+    item_emPrevC().enable();
+    item_emRelDeltaA().enable();
 }
 
 

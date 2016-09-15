@@ -231,7 +231,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create() con
                 "F",
                 time().timeName(),
                 mesh(),
-                IOobject::READ_IF_PRESENT,
+                IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
             mesh(),
@@ -317,6 +317,8 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::crea
     );
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
 {
