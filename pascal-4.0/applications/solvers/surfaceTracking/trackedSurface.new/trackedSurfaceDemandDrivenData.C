@@ -422,7 +422,7 @@ void trackedSurface::makeTotalDisplacement()
     if (debug)
     {
         Info << "trackedSurface::makeTotalDisplacement() : "
-            << "Making zero total points displacement."
+            << "Making total points displacement."
             << endl;
     }
 

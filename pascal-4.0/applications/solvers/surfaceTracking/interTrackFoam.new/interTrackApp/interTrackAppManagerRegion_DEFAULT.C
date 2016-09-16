@@ -65,7 +65,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_g::create() con
         (
             IOobject
             (
-                "g",
+                name(),
                 time().constant(),
                 mesh(),
                 IOobject::MUST_READ,
@@ -84,7 +84,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p::create() con
         (
             IOobject
             (
-                "p",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::MUST_READ,
@@ -106,7 +106,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U::create() con
         (
             IOobject
             (
-                "U",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::MUST_READ,
@@ -126,7 +126,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Up::create() co
         (
             IOobject
             (
-                "Up",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -152,7 +152,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_phi::create() c
         (
             IOobject
             (
-                "phi",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::READ_IF_PRESENT,
@@ -174,7 +174,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_rho::create() c
         (
             IOobject
             (
-                "rho",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -201,7 +201,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_mu::create() co
         (
             IOobject
             (
-                "mu",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -228,7 +228,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create() con
         (
             IOobject
             (
-                "F",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::MUST_READ,
@@ -255,7 +255,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_fluidIndicator:
         (
             IOobject
             (
-                "fluidIndicator",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::MUST_READ,

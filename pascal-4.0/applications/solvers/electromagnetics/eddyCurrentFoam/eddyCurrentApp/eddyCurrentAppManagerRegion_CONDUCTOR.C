@@ -41,7 +41,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtARePhi::c
         (
             IOobject
             (
-                "ddtARePhi",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -68,7 +68,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtAImPhi::c
         (
             IOobject
             (
-                "ddtAImPhi",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -95,7 +95,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create(
         (
             IOobject
             (
-                "VRe",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::MUST_READ,
@@ -115,7 +115,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create(
         (
             IOobject
             (
-                "VIm",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::MUST_READ,
@@ -131,7 +131,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jRe::create(
 {
     IOobject IOo
     (
-        "jRe",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::NO_READ,
@@ -165,7 +165,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create(
 {
     IOobject IOo
     (
-        "jIm",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::NO_READ,

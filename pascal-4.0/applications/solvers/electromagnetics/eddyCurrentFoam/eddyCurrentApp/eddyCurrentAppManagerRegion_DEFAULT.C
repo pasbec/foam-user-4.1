@@ -41,7 +41,7 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create()
         (
             IOobject
             (
-                "j0Re",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::READ_IF_PRESENT,
@@ -68,7 +68,7 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create()
         (
             IOobject
             (
-                "j0Im",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::READ_IF_PRESENT,

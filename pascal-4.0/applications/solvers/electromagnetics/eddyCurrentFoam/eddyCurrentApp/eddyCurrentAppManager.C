@@ -68,7 +68,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_f0::create() const
         (
             IOobject
             (
-                "f0",
+                name(),
                 time().constant(),
                 time(),
                 IOobject::MUST_READ,
@@ -87,7 +87,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_omega0::create() const
         (
             IOobject
             (
-                "omega0",
+                name(),
                 time().constant(),
                 time(),
                 IOobject::NO_READ,
@@ -103,7 +103,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create() const
 {
     IOobject IOo
     (
-        "sigma",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::MUST_READ,
@@ -151,7 +151,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create() const
 {
     IOobject IOo
     (
-        "A0Re",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::READ_IF_PRESENT,
@@ -199,7 +199,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create() const
 {
     IOobject IOo
     (
-        "A0Im",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::READ_IF_PRESENT,
@@ -247,7 +247,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create() const
 {
     IOobject IOo
     (
-        "ARe",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::MUST_READ,
@@ -295,7 +295,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create() const
 {
     IOobject IOo
     (
-        "AIm",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::MUST_READ,
@@ -347,7 +347,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Anormf::create() const
         (
             IOobject
             (
-                "Anormf",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::READ_IF_PRESENT,
@@ -372,7 +372,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Ascale::create() const
         (
             IOobject
             (
-                "Ascale",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::READ_IF_PRESENT,
@@ -397,7 +397,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create() const
         (
             IOobject
             (
-                "VReGrad",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -424,7 +424,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create() const
         (
             IOobject
             (
-                "VImGrad",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -447,7 +447,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BRe::create() const
 {
     IOobject IOo
     (
-        "BRe",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::NO_READ,
@@ -501,7 +501,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BIm::create() const
 {
     IOobject IOo
     (
-        "BIm",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::NO_READ,
@@ -555,7 +555,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_FL::create() const
 {
     IOobject IOo
     (
-        "FL",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::NO_READ,
@@ -603,7 +603,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_pB::create() const
 {
     IOobject IOo
     (
-        "pB",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::NO_READ,
@@ -651,7 +651,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create() const
 {
     IOobject IOo
     (
-        "Q",
+        name(),
         time().timeName(),
         mesh(),
         IOobject::NO_READ,

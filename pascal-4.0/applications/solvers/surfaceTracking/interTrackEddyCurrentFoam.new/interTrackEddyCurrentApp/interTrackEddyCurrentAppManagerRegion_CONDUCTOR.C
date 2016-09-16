@@ -61,7 +61,7 @@ void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_em
         (
             IOobject
             (
-                "emPrevC",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -88,7 +88,7 @@ void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_em
         (
             IOobject
             (
-                "emRelDeltaA",
+                name(),
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
