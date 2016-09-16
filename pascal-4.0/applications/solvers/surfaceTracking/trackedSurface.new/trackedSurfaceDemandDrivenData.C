@@ -426,7 +426,6 @@ void trackedSurface::makeTotalDisplacement()
             << endl;
     }
 
-
     // It is an error to attempt to recalculate
     // if the pointer is already set
     if (totalDisplacementPtr_)
@@ -480,6 +479,45 @@ void trackedSurface::makeTotalDisplacement()
                 )
             );
     }
+}
+
+
+// TEST: Move always from start
+void trackedSurface::makeTotal0Displacement()
+{
+    if (debug)
+    {
+        Info << "trackedSurface::makeTotalDisplacement() : "
+            << "Making total0 points displacement."
+            << endl;
+    }
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (total0DisplacementPtr_)
+    {
+        FatalErrorIn("trackedSurface::makeTotal0Displacement()")
+            << "Total0 points displacement field already exists."
+            << abort(FatalError);
+    }
+
+	total0DisplacementPtr_ =
+		new vectorIOField
+		(
+			IOobject
+			(
+				"total0Displacement",
+				DB().timeName(),
+				mesh(),
+				IOobject::READ_IF_PRESENT,
+				IOobject::AUTO_WRITE
+			),
+			vectorField
+			(
+				mesh().boundaryMesh()[aPatchID()].nPoints(),
+				vector::zero
+			)
+		);
 }
 
 
@@ -1213,6 +1251,17 @@ vectorField& trackedSurface::totalDisplacement()
     }
 
     return *totalDisplacementPtr_;
+}
+
+
+vectorField& trackedSurface::total0Displacement()
+{
+    if (!total0DisplacementPtr_)
+    {
+        makeTotal0Displacement();
+    }
+
+    return *total0DisplacementPtr_;
 }
 
 

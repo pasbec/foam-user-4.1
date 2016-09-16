@@ -77,11 +77,7 @@ class trackedSurface
         word Prefix_;
 
 // TEST: Volume conservation
-        //-
-        scalar oldVolA_;
-
-        //-
-        scalar curVolA_;
+        scalar vol0_;
 
         //- Reference to fvMesh
         dynamicFvMesh& mesh_;
@@ -186,6 +182,9 @@ class trackedSurface
         //- Apply correction to flux to conserve total volume
         Switch correctVolume_;
 
+// TEST: Move always from start
+        Switch total0Update_;
+
         //- Reset control points at the begining of time step
         Switch resetControlPoints_;
 
@@ -246,6 +245,12 @@ class trackedSurface
         //  in one time step
         mutable vectorIOField* totalDisplacementPtr_;
 
+// TEST: Move always from start
+        mutable pointField* points0Ptr_;
+
+// TEST: Move always from start
+        mutable vectorIOField* total0DisplacementPtr_;
+
         //- Finite area mesh which consists
         //  surface side A faces
         mutable faMesh* aMeshPtr_;
@@ -305,6 +310,8 @@ class trackedSurface
             void makeMotionPointsMask();
             void makeDirections();
             void makeTotalDisplacement();
+// TEST: Move always from start
+            void makeTotal0Displacement();
             void makeFaMesh() const;
 // TEST: Sub-mesh
             void makeFaSubMesh() const;
@@ -685,6 +692,15 @@ public:
 
         //- Return total points displacement
         vectorField& totalDisplacement();
+
+        //- Return points0
+        vectorField& points0()
+        {
+            return *points0Ptr_;
+        }
+
+        //- Return total0 points displacement
+        vectorField& total0Displacement();
 
         //- Return reference to finite area mesh
         faMesh& aMesh();

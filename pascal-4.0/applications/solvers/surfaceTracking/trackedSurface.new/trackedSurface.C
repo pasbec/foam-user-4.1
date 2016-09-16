@@ -74,7 +74,12 @@ void trackedSurface::clearOut()
     deleteDemandDrivenData(pointsDisplacementDirPtr_);
     deleteDemandDrivenData(facesDisplacementDirPtr_);
     deleteDemandDrivenData(totalDisplacementPtr_);
+// TEST: Move always from start
+    deleteDemandDrivenData(points0Ptr_);
+// TEST: Move always from start
+    deleteDemandDrivenData(total0DisplacementPtr_);
     deleteDemandDrivenData(aMeshPtr_);
+// TEST: Sub-mesh
     deleteDemandDrivenData(aSubMeshPtr_);
     deleteDemandDrivenData(UsPtr_);
     deleteDemandDrivenData(phisPtr_);
@@ -344,7 +349,6 @@ void trackedSurface::initControlPointsPosition()
 
 // TEST: Volume conservation
 // TODO: Check this implementation in parallel
-// TODO: Improve implementation of "curVolA_" and "oldVolA_"
 void trackedSurface::correctInterfacePhi(scalarField& interfacePhi)
 {
     if(correctVolume_)
@@ -380,10 +384,10 @@ void trackedSurface::correctInterfacePhi(scalarField& interfacePhi)
             }
         }
 
-        curVolA_ =  fvc::domainIntegrate(fluidIndicator()).value();
+        scalar vol =  fvc::domainIntegrate(fluidIndicator()).value();
 
         scalar phiAsumDomain =
-            (curVolA_ - oldVolA_) / DB().deltaT().value();
+            (vol - vol0_) / DB().deltaT().value();
 
 // TODO: Think about best weights for distributing the volume correction.
         const scalarField& weights = aMesh().S();
@@ -397,7 +401,7 @@ void trackedSurface::correctInterfacePhi(scalarField& interfacePhi)
         scalar volDiffDomainRel =
             (phiAsumDomain - phiAsumPatchesNotAB)
         * DB().deltaT().value()
-        / oldVolA_;
+        / vol0_;
 
         if (debug > 1)
         {
@@ -754,7 +758,15 @@ void trackedSurface::moveMeshPoints(const pointField& displacement)
 
 void trackedSurface::moveMeshPoints()
 {
-    moveMeshPoints(totalDisplacement());
+// TEST: Move always from start
+    if (total0Update_)
+    {
+        moveMeshPoints(total0Displacement());
+    }
+    else
+    {
+        moveMeshPoints(totalDisplacement());
+    }
 
     deleteDemandDrivenData(totalDisplacementPtr_);
 }
@@ -886,8 +898,7 @@ trackedSurface::trackedSurface
     prefix_(prefix),
     Prefix_(word(toupper(prefix_[0])) + word(prefix_.substr(1))),
 // TEST: Volume conservation
-    oldVolA_(0.0),
-    curVolA_(0.0),
+    vol0_(0.0),
     mesh_(m),
     rho_(rho),
     U_(Ub),
@@ -939,8 +950,11 @@ trackedSurface::trackedSurface
     (
         readInt(this->lookup("n" + Prefix_ + "Correctors"))
     ),
+// TEST: Sub-mesh
     useSubMesh_(false),
     correctVolume_(false),
+// TEST: Move always from start
+    total0Update_(false),
     resetControlPoints_(false),
     smoothing_(false),
     freeContactAngle_(false),
@@ -958,7 +972,12 @@ trackedSurface::trackedSurface
     pointsDisplacementDirPtr_(NULL),
     facesDisplacementDirPtr_(NULL),
     totalDisplacementPtr_(NULL),
+// TEST: Move always from start
+    points0Ptr_(NULL),
+// TEST: Move always from start
+    total0DisplacementPtr_(NULL),
     aMeshPtr_(NULL),
+// TEST: Sub-mesh
     aSubMeshPtr_(NULL),
     UsPtr_(NULL),
     phisPtr_(NULL),
@@ -982,9 +1001,7 @@ trackedSurface::trackedSurface
     initProperties();
 
 // TEST: Volume conservation
-// TODO: Shift once per time step or never?
-//     curVolA_ = fvc::domainIntegrate(fluidIndicator()).value();
-    oldVolA_ = fvc::domainIntegrate(fluidIndicator()).value();
+    vol0_ = fvc::domainIntegrate(fluidIndicator()).value();
 
     // Init motion direction
     if (!normalMotionDir_)
@@ -1006,6 +1023,7 @@ trackedSurface::trackedSurface
      || freeContactAngle_
     )
     {
+// TODO
         makeContactAngle();
         updateContactAngle();
     }
@@ -1044,9 +1062,20 @@ trackedSurface::trackedSurface
         ).headerOk()
     )
     {
+// TODO
         makeTotalDisplacement();
     }
 
+// TEST: Move always from start
+    if (total0Update_)
+    {
+        points0Ptr_ = new pointField(m.allPoints());
+
+// TODO
+//        readTotal0Displacement();
+    }
+
+// TODO
     // Init control points position
     initControlPointsPosition();
 
@@ -1081,7 +1110,7 @@ trackedSurface::~trackedSurface()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-
+// TODO: Why not use .lookupOrDefault() ????
 void trackedSurface::updateProperties()
 {
     if (transportPtr_)
@@ -1141,6 +1170,12 @@ void trackedSurface::updateProperties()
     if (this->found("correctVolume"))
     {
         correctVolume_ = Switch(this->lookup("correctVolume"));
+    };
+
+    // Check if total0Update switch is set
+    if (this->found("total0Update"))
+    {
+        total0Update_ = Switch(this->lookup("total0Update"));
     };
 
     // Check if reset control points switch is set
@@ -1315,6 +1350,11 @@ void trackedSurface::movePoints(const scalarField& interfacePhi)
 
     totalDisplacement() += displacement;
 
+    if (total0Update_)
+    {
+        total0Displacement() += displacement;
+    }
+
     pointField newMeshPoints = calcNewMeshPoints(displacement);
 
     mesh().movePoints(newMeshPoints);
@@ -1352,9 +1392,17 @@ void trackedSurface::updateMesh()
                     << endl;
             }
 
-            pointField newMeshPoints = calcNewMeshPoints();
+// TEST: Move always from start
+            if (total0Update_)
+            {
+                mesh().movePoints(points0());
+            }
+            else
+            {
+                pointField newMeshPoints = calcNewMeshPoints();
 
-            mesh().movePoints(newMeshPoints);
+                mesh().movePoints(newMeshPoints);
+            }
 
             moveMeshPoints();
 
@@ -1418,8 +1466,7 @@ void trackedSurface::smoothing()
     {
     // Reset control points
 
-        resetControlPoints_ = true;
-        resetControlPoints();
+        controlPoints() = aMesh().areaCentres().internalField();
 
 
     // Smoothing step 1
@@ -1429,6 +1476,11 @@ void trackedSurface::smoothing()
         vectorField displacement = pointDisplacement(deltaH);
 
         totalDisplacement() += displacement;
+
+        if (total0Update_)
+        {
+            total0Displacement() += displacement;
+        }
 
         vectorField newMeshPoints = calcNewMeshPoints(displacement);
 
@@ -1443,6 +1495,11 @@ void trackedSurface::smoothing()
         displacement = pointDisplacement(deltaH);
 
         totalDisplacement() += displacement;
+
+        if (total0Update_)
+        {
+            total0Displacement() += displacement;
+        }
 
         newMeshPoints = calcNewMeshPoints(displacement);
 
