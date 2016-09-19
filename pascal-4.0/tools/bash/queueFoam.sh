@@ -26,10 +26,12 @@ Prepare und submit job with PBS.
 Needs a 'run.conf' file in a 'qRun' sub-directory
 with the following variables set:
  - myPBS_walltime
+ - myPBS_nodes
  - myPBS_savetime
  - myPBS_queue
  - myPBS_jobname
  - myPBS_solver
+ - myPBS_env
 
 Requirements:
 bash
@@ -241,6 +243,8 @@ cat << EOF > "$VAR_PBS_VARS"
 
 myPBS_savetime_s=\$(echo \$myPBS_savetime | awk -F: '{ print (\$1 * 3600) + (\$2 * 60) + \$3 }')
 myPBS_np=\$(dictLookup 'system/decomposeParDict' 'numberOfSubdomains')
+myPBS_np_include=\$(dictLookup 'system/decomposeParDict.include' 'numberOfSubdomains')
+[[ -z \$myPBS_np ]] && myPBS_np=\$myPBS_np_include
 myPBS_stopAt_orig=\$(dictLookup 'system/controlDict' 'stopAt')
 myPBS_runTimeModifiable_orig=\$(dictLookup 'system/controlDict' 'runTimeModifiable')
 
@@ -381,8 +385,8 @@ cat << EOF > "$VAR_PBS_RUN"
 #!/bin/bash
 
 #PBS -d $PWD
-#PBS -l walltime=$myPBS_walltime,nodes=1:ppn=$myPBS_np
-#PBS -N $myPBS_jobname
+#PBS -l walltime=$myPBS_walltime,$myPBS_nodes
+#PBS -N ${myPBS_jobname:-"$(basename $PWD)"}
 #PBS -q $myPBS_queue
 #PBS -S /bin/bash
 
@@ -393,8 +397,12 @@ cat << EOF > "$VAR_PBS_RUN"
 exitcode=0
 exitcodesum=0
 
-# Change to PBS dir
-cd \$PBS_O_WORKDIR
+# Load environment
+. ~/.bashrc
+eval "$myPBS_env"
+
+# Change into working directory
+cd $PWD
 
 # Include library files
 . '$VAR_OPENFOAM_VARS'
@@ -410,8 +418,10 @@ echo '##########################################################################
 writeLog '$VAR_PBS_JOB_LOG' "Starting job \$myPBS_jobname aka \$PBS_JOBID"
 writeLog '$VAR_PBS_JOB_LOG' "- Queue: \$myPBS_queue"
 writeLog '$VAR_PBS_JOB_LOG' "- Walltime: \$myPBS_walltime"
+writeLog '$VAR_PBS_JOB_LOG' "- Nodes: \$myPBS_nodes"
 writeLog '$VAR_PBS_JOB_LOG' "- Savetime: \$myPBS_savetime (\$myPBS_savetime_s s)"
 writeLog '$VAR_PBS_JOB_LOG' "- Solver: \$myPBS_solver"
+writeLog '$VAR_PBS_JOB_LOG' "- Environment: \$myPBS_env"
 echo '------------------------------------------------------------------------------------------' >> '$VAR_PBS_JOB_LOG'
 
 
@@ -637,10 +647,12 @@ exit 0
 ##########################################################################################
 
 # myPBS_walltime='00:15:00'
+# myPBS_nodes='nodes=1:ppn=8'
 # myPBS_savetime='00:10:00'
 # myPBS_queue='short'
 # myPBS_jobname='myJob'
 # myPBS_solver='icoFoamBF'
+# myPBS_env='fe40'
 # myPBS_sleeptime='30'
 
 ##########################################################################################
