@@ -19,6 +19,7 @@ env_set 'FOAM_USER_UTILITIES' "$WM_PROJECT_USER_DIR/applications/utilities"
 env_set 'FOAM_USER_LIB'       "$WM_PROJECT_USER_DIR/lib"
 env_set 'FOAM_USER_RUN'       "$WM_PROJECT_USER_DIR/run"
 env_set 'FOAM_USER_SRC'       "$WM_PROJECT_USER_DIR/src"
+env_set 'FOAM_USER_TOOLS'     "$WM_PROJECT_USER_DIR/tools"
 env_set 'FOAM_USER_TUTORIALS' "$WM_PROJECT_USER_DIR/tutorials"
 
 # --------------------------------------------------------------------------- #

@@ -619,10 +619,12 @@ fi
 
 # Start intermediate processing
 jobProc 'intermediate'
+exitcode=\$?
+exitcodesum=\$((\$exitcodesum+\$exitcode))
 
 # Exit
 writeLog '$VAR_PBS_JOB_LOG' "Jobscript finished with exit code \$exitcodesum"
-exit \$exitcode
+exit \$exitcodesum
 
 EOF
 chmod +x "$VAR_PBS_JOB"
