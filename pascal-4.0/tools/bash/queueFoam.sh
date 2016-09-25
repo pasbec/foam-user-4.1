@@ -141,12 +141,12 @@ VAR_OPENFOAM_DECOMPOSE_LOG="$VAR_PBS_DIR/log.decompose"
 
 echo '/*---------------------------------------------------------------------------*\'
 echo '| =========                 |                                                 |'
-echo '| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |'
-echo '|  \\    /   O peration     | Version:  2.2.2                                 |'
-echo '|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |'
-echo '|    \\/     M anipulation  |                                                 |'
+echo '| \\      /  F ield         | foam-extend: Open Source CFD                    |'
+echo "|  \\    /   O peration     | Version:     $WM_PROJECT_VERSION                                |"
+echo '|   \\  /    A nd           | Web:         http://www.foam-extend.org         |'
+echo '|    \\/     M anipulation  | For copyright notice see file Copyright         |'
 echo '\*---------------------------------------------------------------------------*/'
-echo 'Build  : 2.2.2 (tool script)'
+echo 'Build  : $WM_PROJECT_VERSION (tool script)'
 echo "Exec   : $(basename $0) $optstore"
 echo "Date   : $(date +'%b %d %Y')"
 echo "Time   : $(date +%X)"
@@ -591,7 +591,7 @@ while [[ -d "/proc/\$solver_pid" ]]; do
 
     # Change controlDict file to writeNow
     [[ ! -e system/controlDict.orig ]] && cp system/controlDict system/controlDict.orig
-    dictChange 'system/controlDict' 'stopAt' 'writeNow'
+    dictChange 'system/controlDict' 'stopAt' 'nextWrite'
 
     # Break while loop
     break
