@@ -56,13 +56,9 @@ void Foam::regionFvMesh::initMeshMeshes() const
 {
     forAll (*this, regionI)
     {
-        if (debug)
-        {
-            Info<< "Foam::regionFvMesh::regionFvMesh(...) : "
-                << "Create mesh for region "
-                << regions()[regionI]
-                << endl;
-        }
+        Info << "Create mesh for region "
+            << regions()[regionI]
+            << endl;
 
         // Create mesh
         meshPtrs_.set
