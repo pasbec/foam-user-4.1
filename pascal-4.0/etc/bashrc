@@ -75,6 +75,14 @@ fe40 ()
         # Load new environment
         feLoad
 
+        case "$HOSTNAME" in
+
+            hydra*|cn*|intel*|fluid*)
+                env_remove 'LD_LIBRARY_PATH' '/usr/lib'
+            ;;
+
+        esac
+
     else
 
         local msg
