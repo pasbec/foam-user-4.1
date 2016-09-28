@@ -195,9 +195,11 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
             if(mesh.isInternalFace(curFace))
             {
+                scalar w = weights.internalField()[curFace];
+
                 iPhi.append
                 (
-                    weights[curFace]
+                    w
                    *(
                        phiI[owner[curFace]]
                      - phiI[neighbour[curFace]]
@@ -206,7 +208,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                 );
 
                 vector curFaceIntersection =
-                    weights[curFace]
+                    w
                    *(
                        cellCentres[owner[curFace]]
                      - cellCentres[neighbour[curFace]]
@@ -218,6 +220,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
             else
             {
                 label patchID = mesh.boundaryMesh().whichPatch(curFace);
+
                 if
                 (
                     mesh.boundaryMesh()[patchID].type()
@@ -227,6 +230,8 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                     label start = mesh.boundaryMesh()[patchID].start();
                     label localFaceID = curFace - start;
 
+                    scalar w = weights.boundaryField()[patchID][localFaceID];
+
                     const unallocLabelList& cycPatchCells =
                         mesh.boundaryMesh()[patchID].faceCells();
 
@@ -234,57 +239,49 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
                     if (localFaceID < sizeby2)
                     {
+                        label otherFaceID = localFaceID + sizeby2;
+
                         iPhi.append
                         (
-                            weights.boundaryField()[patchID][localFaceID]
+                            w
                            *(
                                phiI[cycPatchCells[localFaceID]]
-                             - phiI[cycPatchCells[localFaceID + sizeby2]]
+                             - phiI[cycPatchCells[otherFaceID]]
                             )
-                          + phiI[cycPatchCells[localFaceID + sizeby2]]
+                          + phiI[cycPatchCells[otherFaceID]]
                         );
 
                         vector curFaceIntersection =
-                            weights[curFace]
+                            w
                            *(
                                 cellCentres[cycPatchCells[localFaceID]]
-                              - cellCentres
-                                [
-                                    cycPatchCells[localFaceID + sizeby2]
-                                ]
+                              - cellCentres[cycPatchCells[otherFaceID]]
                             )
-                          + cellCentres
-                            [
-                                cycPatchCells[localFaceID + sizeby2]
-                            ];
+                          + cellCentres[cycPatchCells[otherFaceID]];
 
                         iPoint.append(curFaceIntersection);
                     }
                     else
                     {
+                        label otherFaceID = localFaceID - sizeby2;
+
                         iPhi.append
                         (
-                            weights.boundaryField()[patchID][localFaceID]
+                            w
                            *(
                                phiI[cycPatchCells[localFaceID]]
-                             - phiI[cycPatchCells[localFaceID - sizeby2]]
+                             - phiI[cycPatchCells[otherFaceID]]
                             )
-                          + phiI[cycPatchCells[localFaceID - sizeby2]]
+                          + phiI[cycPatchCells[otherFaceID]]
                         );
 
                         vector curFaceIntersection =
-                            weights[curFace]
+                            w
                            *(
                                 cellCentres[cycPatchCells[localFaceID]]
-                              - cellCentres
-                                [
-                                    cycPatchCells[localFaceID - sizeby2]
-                                ]
+                              - cellCentres[cycPatchCells[otherFaceID]]
                             )
-                          + cellCentres
-                            [
-                                cycPatchCells[localFaceID - sizeby2]
-                            ];
+                          + cellCentres[cycPatchCells[otherFaceID]];
 
                         iPoint.append(curFaceIntersection);
                     }
@@ -298,13 +295,14 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                     label start = mesh.boundaryMesh()[patchID].start();
                     label localFaceID = curFace - start;
 
+                    scalar w = weights.boundaryField()[patchID][localFaceID];
+
                     const unallocLabelList& procPatchCells =
                         mesh.boundaryMesh()[patchID].faceCells();
 
-// TODO: v This code may throw floating point exceptions! PB, 14/Jun/2016
                     iPhi.append
                     (
-                        weights.boundaryField()[patchID][localFaceID]
+                        w
                        *(
                             phiI[procPatchCells[localFaceID]]
                           - phi.boundaryField()[patchID][localFaceID]
@@ -313,7 +311,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                     );
 
                     vector curFaceIntersection =
-                        weights[curFace]
+                        w
                        *(
                             cellCentres[procPatchCells[localFaceID]]
                           - mesh.C().boundaryField()[patchID][localFaceID]
@@ -321,7 +319,6 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                       + mesh.C().boundaryField()[patchID][localFaceID];
 
                     iPoint.append(curFaceIntersection);
-// TODO: ^ This code may throw floating point exceptions! PB, 14/Jun/2016
                 }
                 else if
                 (
@@ -330,6 +327,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                 )
                 {
                     iPhi.append(phiI[curCell]);
+
                     iPoint.append(faceCentres[curFace]);
                 }
             }

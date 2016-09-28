@@ -37,9 +37,6 @@ SourceFiles
 
 #include "fixedGradientFvPatchField.H"
 
-// TODO: The processorFvPatch part of the evaluate()-function may throw
-//       floating point exceptions! How to fix this? PB, 14/Jun/2016
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
