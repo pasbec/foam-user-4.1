@@ -49,16 +49,17 @@ void regionPolyMesh::map
 {
     label regionI0 = regions()[polyMesh::defaultRegion];
 
-    const pointField& points = operator[](regionI0).points();
+    const pointField& points0 = operator[](regionI0).points();
+    const pointField& points = operator[](regionI).points();
 
     const labelList& map =
         typeMap(addressingTypes::POINT, regionI, regionI0);
 
     if (patchName == "")
     {
-        forAll (givenPoints, pointI)
+        forAll (points, pointI)
         {
-            givenPoints[pointI] = points[map[pointI]];
+            givenPoints[pointI] = points0[map[pointI]];
         }
     }
     else
@@ -79,11 +80,11 @@ void regionPolyMesh::map
 
         const polyPatch& patch = boundaryMesh[patchI];
 
-        labelList mpmap = patch.meshPointMap().toc();
+        const labelList& meshPoints = patch.meshPoints();
 
-        forAll (mpmap, patchPointI)
+        forAll (meshPoints, patchPointI)
         {
-            label pointI = mpmap[patchPointI];
+            label pointI = meshPoints[patchPointI];
 
             givenPoints[pointI] = points[map[pointI]];
         }
@@ -115,7 +116,7 @@ tmp<pointField> regionPolyMesh::map
 {
     tmp<pointField> tNewPoints
     (
-        new pointField(operator[](regionI).points())
+        new pointField(operator[](regionI).allPoints())
     );
 
     pointField& newPoints = tNewPoints();
@@ -184,11 +185,11 @@ void regionPolyMesh::rmap
 
         const polyPatch& patch = boundaryMesh[patchI];
 
-        labelList mpmap = patch.meshPointMap().toc();
+        const labelList& meshPoints = patch.meshPoints();
 
-        forAll (mpmap, patchPointI)
+        forAll (meshPoints, patchPointI)
         {
-            label pointI = mpmap[patchPointI];
+            label pointI = meshPoints[patchPointI];
 
             givenPoints[map[pointI]] = points[pointI];
         }
@@ -222,7 +223,7 @@ tmp<pointField> regionPolyMesh::rmap
 
     tmp<pointField> tNewPoints
     (
-        new pointField(operator[](regionI0).points())
+        new pointField(operator[](regionI0).allPoints())
     );
 
     pointField& newPoints = tNewPoints();

@@ -301,27 +301,27 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                     const unallocLabelList& procPatchCells =
                         mesh.boundaryMesh()[patchID].faceCells();
 
-// TODO: This code may throw floating point exceptioons for parallel runs! PB, 14/Jun/2016
-//                     iPhi.append
-//                     (
-//                         weights.boundaryField()[patchID][localFaceID]
-//                        *(
-//                             phiI[procPatchCells[localFaceID]]
-//                           - phi.boundaryField()[patchID][localFaceID]
-//                         )
-//                       + phi.boundaryField()[patchID][localFaceID]
-//                     );
-//
-//                     vector curFaceIntersection =
-//                         weights[curFace]
-//                        *(
-//                             cellCentres[procPatchCells[localFaceID]]
-//                           - mesh.C().boundaryField()[patchID][localFaceID]
-//                         )
-//                       + mesh.C().boundaryField()[patchID][localFaceID];
-//
-//                     iPoint.append(curFaceIntersection);
-// TODO: Test
+// TODO: v This code may throw floating point exceptioons for parallel runs! PB, 14/Jun/2016
+                    iPhi.append
+                    (
+                        weights.boundaryField()[patchID][localFaceID]
+                       *(
+                            phiI[procPatchCells[localFaceID]]
+                          - phi.boundaryField()[patchID][localFaceID]
+                        )
+                      + phi.boundaryField()[patchID][localFaceID]
+                    );
+
+                    vector curFaceIntersection =
+                        weights[curFace]
+                       *(
+                            cellCentres[procPatchCells[localFaceID]]
+                          - mesh.C().boundaryField()[patchID][localFaceID]
+                        )
+                      + mesh.C().boundaryField()[patchID][localFaceID];
+
+                    iPoint.append(curFaceIntersection);
+// TODO: ^ This code may throw floating point exceptioons for parallel runs! PB, 14/Jun/2016
                     iPhi.append(phiI[curCell]);
                     iPoint.append(faceCentres[curFace]);
                 }

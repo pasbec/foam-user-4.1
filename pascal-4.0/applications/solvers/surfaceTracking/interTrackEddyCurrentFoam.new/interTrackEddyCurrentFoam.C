@@ -124,11 +124,16 @@ int main(int argc, char *argv[])
             using namespace interTrackEddyCurrentApp;
             using namespace interTrackEddyCurrentApp::Region;
 
-            // Create new points
-            pointField newPoints;
 
             // Update mesh in buffer region
-            // ~~~~~~
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            if (Control::debug)
+            {
+                Info << "interTrackEddyCurrentApp::Control : "
+                    << "Update mesh of buffer region."
+                    << endl;
+            }
 
             // Calculate mesh velocity at fluid/buffer-interface
             // in buffer region from current boundary displacement
@@ -139,23 +144,23 @@ int main(int argc, char *argv[])
                 Region::BUFFER
             );
 
-            // Grab current points of buffer region as new point field
-            newPoints = masterManager.mesh()[Region::BUFFER].points();
-
-            // Correct points for 2D-motion of buffer region
-            twoDPointCorrector bTwoDPointCorr(masterManager.mesh()[Region::BUFFER]);
-            bTwoDPointCorr.correctPoints(newPoints);
-
             // Use motionSolver to move and update mesh of buffer region
-            masterManager.mesh()[Region::BUFFER].movePoints(newPoints);
             masterManager.mesh()[Region::BUFFER].update();
 
+
             // Update mesh in default region
-            // ~~~~~~
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            if (Control::debug)
+            {
+                Info << "interTrackEddyCurrentApp::Control : "
+                    << "Update mesh of default region."
+                    << endl;
+            }
 
             // Create new point field for default region
             // with current point positions of fluid region
-            newPoints = masterManager.mesh().rmap(Region::FLUID);
+            pointField newPoints = masterManager.mesh().rmap(Region::FLUID);
 
             // Replace point positions of buffer region in
             // new point field for default region
@@ -165,8 +170,16 @@ int main(int argc, char *argv[])
             masterManager.mesh()[Region::DEFAULT].movePoints(newPoints);
             masterManager.mesh()[Region::DEFAULT].update();
 
+
             // Update mesh in conducting region
-            // ~~~~~~
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            if (Control::debug)
+            {
+                Info << "interTrackEddyCurrentApp::Control : "
+                    << "Update mesh of conducting region."
+                    << endl;
+            }
 
             // Create new point field for conductor region
             // with current points of default region
@@ -205,6 +218,13 @@ int main(int argc, char *argv[])
         {
             using namespace interTrackEddyCurrentApp;
             using namespace interTrackEddyCurrentApp::Region;
+
+            if (Control::debug)
+            {
+                Info << "interTrackEddyCurrentApp::Control : "
+                    << "Map/Extrapolate Lorentz-force in fluid region."
+                    << endl;
+            }
 
             eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
 
