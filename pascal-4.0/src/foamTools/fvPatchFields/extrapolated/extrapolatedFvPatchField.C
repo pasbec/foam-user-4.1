@@ -301,7 +301,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                     const unallocLabelList& procPatchCells =
                         mesh.boundaryMesh()[patchID].faceCells();
 
-// TODO: v This code may throw floating point exceptioons for parallel runs! PB, 14/Jun/2016
+// TODO: v This code may throw floating point exceptions! PB, 14/Jun/2016
                     iPhi.append
                     (
                         weights.boundaryField()[patchID][localFaceID]
@@ -321,9 +321,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                       + mesh.C().boundaryField()[patchID][localFaceID];
 
                     iPoint.append(curFaceIntersection);
-// TODO: ^ This code may throw floating point exceptioons for parallel runs! PB, 14/Jun/2016
-                    iPhi.append(phiI[curCell]);
-                    iPoint.append(faceCentres[curFace]);
+// TODO: ^ This code may throw floating point exceptions! PB, 14/Jun/2016
                 }
                 else if
                 (

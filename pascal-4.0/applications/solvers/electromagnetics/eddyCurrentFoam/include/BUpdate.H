@@ -1,6 +1,13 @@
 
     // Calculate B
     {
+        if (Control::debug)
+        {
+            Info << "eddyCurrentApp::Control | UpLoop.H : "
+                << "Calculate magnetic field."
+                << endl;
+        }
+
         globalStorage.BRe()[DEFAULT] = fvc::curl(globalStorage.ARe()[DEFAULT]);
         globalStorage.BIm()[DEFAULT] = fvc::curl(globalStorage.AIm()[DEFAULT]);
 

@@ -33,26 +33,6 @@ void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Settings::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::interTrackEddyCurrentApp::Manager::Settings::read() const
-{
-    interTrackEddyCurrentApp::Manager::debug =
-        dict().lookupOrDefault
-        (
-            "debug",
-            interTrackEddyCurrentApp::Manager::debug()
-        );
-
-    interTrackEddyCurrentApp::Control::debug =
-        dict().lookupOrDefault
-        (
-            "debug",
-            interTrackEddyCurrentApp::Control::debug()
-        );
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emPrevC::create() const
 {
     set

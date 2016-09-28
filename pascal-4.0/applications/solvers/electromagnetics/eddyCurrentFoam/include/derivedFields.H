@@ -1,6 +1,13 @@
 
     // Derived fields in conductor region
     {
+        if (Control::debug)
+        {
+            Info << "eddyCurrentApp::Control | UpLoop.H : "
+                << "Calculate derived fields."
+                << endl;
+        }
+
         SM_REGIONSCOPE(CONDUCTOR);
 
         volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];

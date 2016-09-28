@@ -95,7 +95,7 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
 
             achieved = achieved && (absCheck || relCheck);
 
-            if (debug)
+            if (debug > 1)
             {
                 Info<< algorithmName_ << " loop:" << endl;
 
@@ -164,7 +164,7 @@ void Foam::interTrackApp::Control::storeResiduals(const word& name)
                 // indicate that the residual has been stored
                 residualStorage_[fieldI].stored = true;
 
-                if (debug)
+                if (debug > 1)
                 {
                     Info<< algorithmName_ << " loop:" << endl;
 
@@ -213,7 +213,7 @@ void Foam::interTrackApp::Control::skipZeroNonOrtho(const word& name)
 
         if (nIter == 0)
         {
-            if (debug)
+            if (debug > 1)
             {
                 Info<< "    " << name
                     << " " << algorithmName_ << " iter " << corr_

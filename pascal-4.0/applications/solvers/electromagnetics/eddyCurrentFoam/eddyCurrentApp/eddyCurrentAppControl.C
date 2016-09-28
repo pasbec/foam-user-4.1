@@ -81,7 +81,7 @@ bool Foam::eddyCurrentApp::Control::criteriaSatisfied()
                 bool absCheck = residual < absTol;
                 achieved = achieved && absCheck;
 
-                if (debug)
+                if (debug > 1)
                 {
                     Info<< algorithmName_ << " abs statistics:" << endl;
 
@@ -155,7 +155,7 @@ bool Foam::eddyCurrentApp::Control::subCriteriaSatisfied()
 
                 achieved = achieved && relCheck;
 
-                if (debug)
+                if (debug > 1)
                 {
                     Info<< algorithmName_ << " rel statistics:" << endl;
 
@@ -250,7 +250,7 @@ bool Foam::eddyCurrentApp::Control::loop()
 
     corr_++;
 
-    if (debug)
+    if (debug > 1)
     {
         Info<< algorithmName_ << " loop: corr = " << corr_ << endl;
     }
@@ -376,7 +376,7 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
         scaledTol
     );
 
-    if (debug)
+    if (debug > 1)
     {
         Info<< algorithmName_ << " sub-loop:" << endl;
 
@@ -408,7 +408,7 @@ bool Foam::eddyCurrentApp::Control::subLoop()
 {
     subCorr_++;
 
-    if (debug)
+    if (debug > 1)
     {
         Info<< algorithmName_ << " sub-loop: corr = " << subCorr_ << endl;
     }

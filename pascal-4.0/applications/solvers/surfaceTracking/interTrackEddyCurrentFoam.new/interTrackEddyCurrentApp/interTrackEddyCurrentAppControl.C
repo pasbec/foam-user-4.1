@@ -197,17 +197,17 @@ bool Foam::interTrackEddyCurrentApp::Control::updateRelDeltaA() const
 
 bool Foam::interTrackEddyCurrentApp::Control::update() const
 {
-    if (debug)
+    if (debug > 1)
     {
         Info << "interTrackEddyCurrentApp::Control::update() : "
             << "updateZeroCounter() = " << updateZeroCounter() << endl;
-        Info << "interTrackEddyCurrentApp::Control::update() : "
+        Info << "                                              "
             << "updateOutputTimeIndex() = " << updateOutputTimeIndex() << endl;
-        Info << "interTrackEddyCurrentApp::Control::update() : "
+        Info << "                                              "
             << "updateTimeIndex() = " << updateTimeIndex() << endl;
-        Info << "interTrackEddyCurrentApp::Control::update() : "
+        Info << "                                              "
             << "updateTime() = " << updateTime() << endl;
-        Info << "interTrackEddyCurrentApp::Control::update() : "
+        Info << "                                              "
             << "updateRelDeltaA() = " << updateRelDeltaA() << endl;
     }
 
