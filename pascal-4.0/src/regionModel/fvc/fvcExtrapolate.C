@@ -87,13 +87,6 @@ extrapolate
         )
     );
 
-    // Make sure initEvaluate/evaluate has been called for
-    // processorFvPatchFields at least once!
-    tvfEx().boundaryField().evaluateCoupled();
-
-    // Force overwrite boundaryField values
-    tvfEx() == vf;
-
     // Extrapolation
     tvfEx().correctBoundaryConditions();
 

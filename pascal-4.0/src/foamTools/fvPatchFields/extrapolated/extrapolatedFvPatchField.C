@@ -28,8 +28,10 @@ License
 #include "dictionary.H"
 #include "emptyPolyPatch.H"
 #include "cyclicPolyPatch.H"
+#include "processorPolyPatch.H"
 #include "scalarMatrices.H"
 #include "volFields.H"
+#include "skewCorrectionVectors.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,6 +48,7 @@ extrapolatedFvPatchField<Type>::extrapolatedFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(p, iF),
+    iPoints_(p.size()),
     zeroGradient_(true)
 {}
 
@@ -60,6 +63,7 @@ extrapolatedFvPatchField<Type>::extrapolatedFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(ptf, p, iF, mapper),
+    iPoints_(p.size()),
     zeroGradient_(ptf.zeroGradient_)
 {}
 
@@ -73,6 +77,7 @@ extrapolatedFvPatchField<Type>::extrapolatedFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(p, iF),
+    iPoints_(p.size()),
     zeroGradient_(true)
 {
     if (dict.found("zeroGradient"))
@@ -80,9 +85,14 @@ extrapolatedFvPatchField<Type>::extrapolatedFvPatchField
         zeroGradient_ = Switch(dict.lookup("zeroGradient"));
     }
 
-    Info << "Zero gradient: " << zeroGradient_ << endl;
-
-    fixedGradientFvPatchField<Type>::evaluate();
+    if (dict.found("value"))
+    {
+        Field<Type>::operator=(Field<Type>("value", dict, p.size()));
+    }
+    else
+    {
+        fixedGradientFvPatchField<Type>::evaluate();
+    }
 }
 
 
@@ -93,6 +103,7 @@ extrapolatedFvPatchField<Type>::extrapolatedFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(ptf),
+    iPoints_(ptf.size()),
     zeroGradient_(ptf.zeroGradient_)
 {}
 
@@ -105,6 +116,7 @@ extrapolatedFvPatchField<Type>::extrapolatedFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(ptf, iF),
+    iPoints_(ptf.size()),
     zeroGradient_(ptf.zeroGradient_)
 {}
 
@@ -118,7 +130,6 @@ void extrapolatedFvPatchField<Type>::autoMap
 )
 {
     fixedGradientFvPatchField<Type>::autoMap(m);
-//     gradient_.autoMap(m);
 }
 
 
@@ -130,11 +141,149 @@ void extrapolatedFvPatchField<Type>::rmap
 )
 {
     fixedGradientFvPatchField<Type>::rmap(ptf, addr);
+}
 
-//     const extrapolatedFvPatchField<Type>& fgptf =
-//         refCast<const extrapolatedFvPatchField<Type> >(ptf);
 
-//     gradient_.rmap(fgptf.gradient_, addr);
+template<class Type>
+void extrapolatedFvPatchField<Type>::updateCoeffs()
+{
+    if (this->updated())
+    {
+        return;
+    }
+
+    const fvMesh& mesh = this->patch().boundaryMesh().mesh();
+
+    const cellList& cells = mesh.cells();
+
+    const unallocLabelList& owner = mesh.owner();
+    const unallocLabelList& neighbour = mesh.neighbour();
+
+    const unallocLabelList& patchCells = this->patch().faceCells();
+
+    const surfaceScalarField& weights = mesh.weights();
+    const vectorField& faceCentres = mesh.faceCentres();
+    const vectorField& cellCentres = mesh.cellCentres();
+
+    iPoints_.clear();
+    iPoints_.setSize(this->patch().size());
+
+    forAll(patchCells, faceI)
+    {
+        iPoints_.set(faceI, new DynamicList<vector>());
+
+        label curCell = patchCells[faceI];
+
+        const labelList& curCellFaces = cells[curCell];
+
+        forAll(curCellFaces, fI)
+        {
+            label curFace = curCellFaces[fI];
+
+            label patchID = mesh.boundaryMesh().whichPatch(curFace);
+
+            if(mesh.isInternalFace(curFace))
+            {
+                iPoints_[faceI].append
+                (
+                    weights.internalField()[curFace]
+                   *(
+                       cellCentres[owner[curFace]]
+                     - cellCentres[neighbour[curFace]]
+                    )
+                  + cellCentres[neighbour[curFace]]
+                );
+            }
+            else if (patchID != this->patch().index())
+            {
+                label start = mesh.boundaryMesh()[patchID].start();
+                label localFaceID = curFace - start;
+
+                const unallocLabelList& patchCells =
+                    mesh.boundaryMesh()[patchID].faceCells();
+
+                if
+                (
+                    mesh.boundaryMesh()[patchID].type()
+                 == cyclicPolyPatch::typeName
+                )
+                {
+                    // Cyclic patch
+                    label sizeby2 = patchCells.size()/2;
+
+                    label otherFaceID = -1;
+                    if (localFaceID < sizeby2)
+                    {
+                        otherFaceID = localFaceID + sizeby2;
+                    }
+                    else
+                    {
+                        otherFaceID = localFaceID - sizeby2;
+                    }
+
+                    iPoints_[faceI].append
+                    (
+                        weights.boundaryField()[patchID][localFaceID]
+                       *(
+                            cellCentres[patchCells[localFaceID]]
+                          - cellCentres[patchCells[otherFaceID]]
+                        )
+                      + cellCentres[patchCells[otherFaceID]]
+                    );
+                }
+                else if
+                (
+                    mesh.boundaryMesh()[patchID].type()
+                 == processorPolyPatch::typeName
+                )
+                {
+                    // Processor patch
+                    // WARNING: In initEvaluate() we make sure thet mesh.C()
+                    // has already been evaluated completely before updateCoeffs()
+                    iPoints_[faceI].append
+                    (
+                        weights.boundaryField()[patchID][localFaceID]
+                       *(
+                            cellCentres[patchCells[localFaceID]]
+                          - mesh.C().boundaryField()[patchID][localFaceID]
+                        )
+                      + mesh.C().boundaryField()[patchID][localFaceID]
+                    );
+                }
+                else if
+                (
+                    mesh.boundaryMesh()[patchID].type()
+                 == emptyPolyPatch::typeName
+                )
+                {
+                    // Empty patch
+                    iPoints_[faceI].append(faceCentres[curFace]);
+                }
+                else
+                {
+                    // Normal patch
+                    iPoints_[faceI].append(faceCentres[curFace]);
+                }
+            }
+        }
+    }
+
+    fixedGradientFvPatchField<Type>::updateCoeffs();
+}
+
+
+template<class Type>
+void extrapolatedFvPatchField<Type>::initEvaluate(const Pstream::commsTypes)
+{
+    const fvMesh& mesh = this->patch().boundaryMesh().mesh();
+
+    // WARNING: We force/ensure the creation of the cell centres
+    // here. This is extremely important to get the prcessor
+    // values correct via initEvaluate/evaluate during construction
+    // BEFORE the extrapolateFvPatchField is actually evaluated!
+    // Otherwise the boundary values of the cell may be wrong, which
+    // may finally lead to segmantation faults and/or memory corruption!
+    mesh.C();
 }
 
 
@@ -156,7 +305,6 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
     const unallocLabelList& patchCells = this->patch().faceCells();
 
     const surfaceScalarField& weights = mesh.weights();
-    const vectorField& faceCentres = mesh.faceCentres();
     const vectorField& cellCentres = mesh.cellCentres();
 
     const Field<Type>& phiI = this->internalField();
@@ -170,8 +318,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
             fieldName
         );
 
-    vectorField n = this->patch().nf();
-    vectorField C = this->patch().Cf();
+    const vectorField& C = this->patch().Cf();
 
     Field<Type> patchPhi(this->patch().size(), pTraits<Type>::zero);
 
@@ -182,44 +329,32 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
         const labelList& curCellFaces = cells[curCell];
 
         DynamicList<Type> iPhi;
-        DynamicList<vector> iPoint;
 
-        // Add first cell centre point
-        iPhi.append(phiI[curCell]);
-        iPoint.append(cellCentres[curCell]);
-
-        // Add face centre points
         forAll(curCellFaces, fI)
         {
             label curFace = curCellFaces[fI];
 
+            label patchID = mesh.boundaryMesh().whichPatch(curFace);
+
             if(mesh.isInternalFace(curFace))
             {
-                scalar w = weights.internalField()[curFace];
-
                 iPhi.append
                 (
-                    w
+                    weights[curFace]
                    *(
                        phiI[owner[curFace]]
                      - phiI[neighbour[curFace]]
                     )
                   + phiI[neighbour[curFace]]
                 );
-
-                vector curFaceIntersection =
-                    w
-                   *(
-                       cellCentres[owner[curFace]]
-                     - cellCentres[neighbour[curFace]]
-                    )
-                  + cellCentres[neighbour[curFace]];
-
-                iPoint.append(curFaceIntersection);
             }
-            else
+            else if (patchID != this->patch().index())
             {
-                label patchID = mesh.boundaryMesh().whichPatch(curFace);
+                label start = mesh.boundaryMesh()[patchID].start();
+                label localFaceID = curFace - start;
+
+                const unallocLabelList& patchCells =
+                    mesh.boundaryMesh()[patchID].faceCells();
 
                 if
                 (
@@ -227,64 +362,28 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                  == cyclicPolyPatch::typeName
                 )
                 {
-                    label start = mesh.boundaryMesh()[patchID].start();
-                    label localFaceID = curFace - start;
+                    // Cyclic patch
+                    label sizeby2 = patchCells.size()/2;
 
-                    scalar w = weights.boundaryField()[patchID][localFaceID];
-
-                    const unallocLabelList& cycPatchCells =
-                        mesh.boundaryMesh()[patchID].faceCells();
-
-                    label sizeby2 = cycPatchCells.size()/2;
-
+                    label otherFaceID = -1;
                     if (localFaceID < sizeby2)
                     {
-                        label otherFaceID = localFaceID + sizeby2;
-
-                        iPhi.append
-                        (
-                            w
-                           *(
-                               phiI[cycPatchCells[localFaceID]]
-                             - phiI[cycPatchCells[otherFaceID]]
-                            )
-                          + phiI[cycPatchCells[otherFaceID]]
-                        );
-
-                        vector curFaceIntersection =
-                            w
-                           *(
-                                cellCentres[cycPatchCells[localFaceID]]
-                              - cellCentres[cycPatchCells[otherFaceID]]
-                            )
-                          + cellCentres[cycPatchCells[otherFaceID]];
-
-                        iPoint.append(curFaceIntersection);
+                        otherFaceID = localFaceID + sizeby2;
                     }
                     else
                     {
-                        label otherFaceID = localFaceID - sizeby2;
-
-                        iPhi.append
-                        (
-                            w
-                           *(
-                               phiI[cycPatchCells[localFaceID]]
-                             - phiI[cycPatchCells[otherFaceID]]
-                            )
-                          + phiI[cycPatchCells[otherFaceID]]
-                        );
-
-                        vector curFaceIntersection =
-                            w
-                           *(
-                                cellCentres[cycPatchCells[localFaceID]]
-                              - cellCentres[cycPatchCells[otherFaceID]]
-                            )
-                          + cellCentres[cycPatchCells[otherFaceID]];
-
-                        iPoint.append(curFaceIntersection);
+                        otherFaceID = localFaceID - sizeby2;
                     }
+
+                    iPhi.append
+                    (
+                        weights.boundaryField()[patchID][localFaceID]
+                       *(
+                           phiI[patchCells[localFaceID]]
+                         - phiI[patchCells[otherFaceID]]
+                        )
+                      + phiI[patchCells[otherFaceID]]
+                    );
                 }
                 else if
                 (
@@ -292,33 +391,16 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                  == processorPolyPatch::typeName
                 )
                 {
-                    label start = mesh.boundaryMesh()[patchID].start();
-                    label localFaceID = curFace - start;
-
-                    scalar w = weights.boundaryField()[patchID][localFaceID];
-
-                    const unallocLabelList& procPatchCells =
-                        mesh.boundaryMesh()[patchID].faceCells();
-
+                    // Processor patch
                     iPhi.append
                     (
-                        w
+                        weights.boundaryField()[patchID][localFaceID]
                        *(
-                            phiI[procPatchCells[localFaceID]]
+                            phiI[patchCells[localFaceID]]
                           - phi.boundaryField()[patchID][localFaceID]
                         )
                       + phi.boundaryField()[patchID][localFaceID]
                     );
-
-                    vector curFaceIntersection =
-                        w
-                       *(
-                            cellCentres[procPatchCells[localFaceID]]
-                          - mesh.C().boundaryField()[patchID][localFaceID]
-                        )
-                      + mesh.C().boundaryField()[patchID][localFaceID];
-
-                    iPoint.append(curFaceIntersection);
                 }
                 else if
                 (
@@ -326,39 +408,48 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
                  == emptyPolyPatch::typeName
                 )
                 {
+                    // Empty patch
                     iPhi.append(phiI[curCell]);
-
-                    iPoint.append(faceCentres[curFace]);
+                }
+                else
+                {
+                    // Normal patch
+                    iPhi.append
+                    (
+                        phi.boundaryField()[patchID][localFaceID]
+                    );
                 }
             }
         }
 
-        Type avgPhi = average(iPhi);
-        vector avgPoint = average(iPoint);
+        Type avgPhi = phiI[curCell];
+        vector avgPoint = cellCentres[curCell];
 
         // Weights
-        scalarField W(iPoint.size(), 1.0);
+        scalarField W(iPoints_[faceI].size(), 1.0);
 
         label nCoeffs = 3;
         scalarRectangularMatrix M
         (
-            iPoint.size(),
+            iPoints_[faceI].size(),
             nCoeffs,
             0.0
         );
 
-        for (label i=0; i<iPoint.size(); i++)
+        scalar L = max(mag(iPoints_[faceI]-avgPoint));
+
+        for (label i=0; i<iPoints_[faceI].size(); i++)
         {
-            scalar X = iPoint[i].x() - avgPoint.x();
-            scalar Y = iPoint[i].y() - avgPoint.y();
-            scalar Z = iPoint[i].z() - avgPoint.z();
+            scalar X = (iPoints_[faceI][i].x() - avgPoint.x())/L;
+            scalar Y = (iPoints_[faceI][i].y() - avgPoint.y())/L;
+            scalar Z = (iPoints_[faceI][i].z() - avgPoint.z())/L;
 
             M[i][0] = X;
             M[i][1] = Y;
             M[i][2] = Z;
         }
 
-        // Applying weights
+        // Apply weights
         for (label i=0; i<M.n(); i++)
         {
             for (label j=0; j<M.m(); j++)
@@ -386,7 +477,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
         scalarRectangularMatrix curInvMatrix
         (
             nCoeffs,
-            iPoint.size(),
+            iPoints_[faceI].size(),
             0.0
         );
 
@@ -402,9 +493,9 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
         }
 
         Field<Type> coeffs(nCoeffs, pTraits<Type>::zero);
-        Field<Type> source(iPoint.size(), pTraits<Type>::zero);
+        Field<Type> source(iPoints_[faceI].size(), pTraits<Type>::zero);
 
-        for (label i=0; i<iPoint.size(); i++)
+        for (label i=0; i<iPoints_[faceI].size(); i++)
         {
             source[i] = iPhi[i] - avgPhi;
         }
@@ -417,7 +508,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
             }
         }
 
-        vector dr = C[faceI] - avgPoint;
+        vector dr = (C[faceI] - avgPoint)/L;
 
         patchPhi[faceI] =
             avgPhi
@@ -439,7 +530,7 @@ void extrapolatedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
            *this->patch().deltaCoeffs();
     }
 
-    fvPatchField<Type>::evaluate();
+    fixedGradientFvPatchField<Type>::evaluate();
 }
 
 
@@ -448,9 +539,10 @@ void extrapolatedFvPatchField<Type>::write(Ostream& os) const
 {
     fixedGradientFvPatchField<Type>::write(os);
 
+    this->writeEntry("value", os);
+
     os.writeKeyword("zeroGradient")
         << zeroGradient_ << token::END_STATEMENT << nl;
-    this->writeEntry("value", os);
 }
 
 

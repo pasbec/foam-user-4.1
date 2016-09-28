@@ -36,6 +36,7 @@ SourceFiles
 #define extrapolatedFvPatchField_H
 
 #include "fixedGradientFvPatchField.H"
+#include "PtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +54,11 @@ class extrapolatedFvPatchField
 {
     // Private data
 
-    Switch zeroGradient_;
+        //- Interpolation points
+        PtrList<DynamicList<vector> > iPoints_;
+
+        //- Return zero gradient
+        Switch zeroGradient_;
 
 public:
 
@@ -125,6 +130,8 @@ public:
 
     // Member functions
 
+        // Access
+
         // Return defining fields
 
 
@@ -146,10 +153,20 @@ public:
 
         // Evaluation functions
 
-            //- Evaluate the patch field
+            //- Update the coefficients associated with the patch field
+            //  Sets Updated to true
+            virtual void updateCoeffs();
+
+            //- Initialise the evaluation of the patch field
+            virtual void initEvaluate
+            (
+                const Pstream::commsTypes commsType = Pstream::defaultComms()
+            );
+
+            //- Evaluate the patch field, sets Updated to false
             virtual void evaluate
             (
-                const Pstream::commsTypes commsType=Pstream::blocking
+                const Pstream::commsTypes commsType = Pstream::defaultComms()
             );
 
         //- Write
