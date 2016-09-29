@@ -106,6 +106,8 @@ void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
                 ttoTotalDisplacement.clear();
             }
         }
+
+        toMotionU.correctBoundaryConditions();
     }
     else if (isFvMotionSolver(toRegionI))
     {
@@ -139,6 +141,9 @@ void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
                 const polyPatch& toPolyPatch =
                     operator[](toRegionI).boundaryMesh()[toPatchI];
 
+                // WARNING: Assuming same point/face/cell ordering on both
+                //          sides of this direct mapped patch!
+
                 tmp<vectorField> ttoTotalDisplacement
                 (
                     new vectorField
@@ -162,6 +167,8 @@ void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
                 ttoTotalDisplacement.clear();
             }
         }
+
+        toPointMotionU.correctBoundaryConditions();
     }
 }
 
@@ -179,6 +186,70 @@ void Foam::regionDynamicFvMesh::patchMapMeshVelocityDirectMapped
     (
         fromRegionI,
         toRegionI
+    );
+}
+
+
+void Foam::regionDynamicFvMesh::patchMapMeshPointsDirectMapped
+(
+    label fromRegionI,
+    label toRegionI,
+    pointField& toPoints
+) const
+{
+    if (toPoints.size() == 0)
+    {
+        toPoints = operator[](toRegionI).allPoints();
+    }
+
+    labelList patchMap =
+        patchMapDirectMapped
+        (
+            fromRegionI,
+            toRegionI
+        )[0];
+
+    forAll (operator[](fromRegionI).boundary(), fromPatchI)
+    {
+        label toPatchI = patchMap[fromPatchI];
+
+        if (toPatchI != -1)
+        {
+            const polyPatch& fromPolyPatch =
+                operator[](fromRegionI).boundaryMesh()[fromPatchI];
+
+            const polyPatch& toPolyPatch =
+                operator[](toRegionI).boundaryMesh()[toPatchI];
+
+            // WARNING: Assuming same point/face/cell ordering on both
+            //          sides of this direct mapped patch!
+
+            forAll (fromPolyPatch.meshPoints(), fromPatchPointI)
+            {
+                label toPointI = toPolyPatch.meshPoints()[fromPatchPointI];
+
+                toPoints[toPointI] = fromPolyPatch.localPoints()[fromPatchPointI];
+            }
+        }
+    }
+}
+
+
+void Foam::regionDynamicFvMesh::patchMapMeshPointsDirectMapped
+(
+    const word& fromRegionName,
+    const word& toRegionName,
+    pointField& toPoints
+) const
+{
+    label fromRegionI = regions()[fromRegionName];
+    label toRegionI = regions()[toRegionName];
+
+    return patchMapMeshPointsDirectMapped
+    (
+        fromRegionI,
+        toRegionI,
+        toPoints
     );
 }
 

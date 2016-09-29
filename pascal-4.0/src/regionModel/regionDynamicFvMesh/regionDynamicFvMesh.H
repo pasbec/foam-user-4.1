@@ -191,6 +191,22 @@ public:
                 const word& toRegionName
             ) const;
 
+            //- TODO
+            void patchMapMeshPointsDirectMapped
+            (
+                label fromRegionI,
+                label toRegionI,
+                pointField& toPoints
+            ) const;
+
+            //- TODO
+            void patchMapMeshPointsDirectMapped
+            (
+                const word& fromRegionName,
+                const word& toRegionName,
+                pointField& toPoints
+            ) const;
+
     // Member Operators
 
         //- Mesh access operator by index

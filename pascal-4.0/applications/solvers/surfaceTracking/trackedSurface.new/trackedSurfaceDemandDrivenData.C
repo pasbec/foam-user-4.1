@@ -413,7 +413,7 @@ void trackedSurface::makeDirections()
         pointsDisplacementDir() = motionDir_;
     }
 
-    updateDisplacementDirections();
+    adjustDisplacementDirections();
 }
 
 

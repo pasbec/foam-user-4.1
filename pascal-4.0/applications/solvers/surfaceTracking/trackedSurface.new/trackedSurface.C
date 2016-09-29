@@ -347,6 +347,83 @@ void trackedSurface::initControlPointsPosition()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void trackedSurface::resetControlPoints(bool force)
+{
+    if (force || resetControlPoints_)
+    {
+        controlPoints() = aMesh().areaCentres().internalField();
+    }
+}
+
+
+void trackedSurface::adjustDisplacementDirections()
+{
+    if (normalMotionDir())
+    {
+        // Update point displacement correction
+        pointsDisplacementDir() = aMesh().pointAreaNormals();
+
+        // Correct point displacement direction
+        // at the "centerline" symmetryPlane which represents the axis
+        // of an axisymmetric case
+        forAll (aMesh().boundary(), patchI)
+        {
+            if (aMesh().boundary()[patchI].type() == wedgeFaPatch::typeName)
+            {
+                const wedgeFaPatch& wedgePatch =
+                    refCast<const wedgeFaPatch>(aMesh().boundary()[patchI]);
+
+                vector axis = wedgePatch.axis();
+
+                label centerLinePatchID =
+                    aMesh().boundary().findPatchID("centerline");
+
+                if (centerLinePatchID != -1)
+                {
+                    const labelList& pointLabels =
+                        aMesh().boundary()[centerLinePatchID].pointLabels();
+
+                    forAll (pointLabels, pointI)
+                    {
+                        vector dir =
+                            pointsDisplacementDir()[pointLabels[pointI]];
+
+                        dir = (dir&axis)*axis;
+                        dir /= mag(dir);
+
+                        pointsDisplacementDir()[pointLabels[pointI]] = dir;
+                    }
+                }
+                else
+                {
+                    WarningIn("trackedSurface::adjustDisplacementDirections()")
+                        << "Centerline polyPatch does not exist. "
+                        << "Surface points displacement directions "
+                        << "will not be corrected at the axis (centerline)"
+                        << endl;
+                }
+
+                break;
+            }
+        }
+
+        // Update face displacement direction
+        facesDisplacementDir() =
+            aMesh().faceAreaNormals().internalField();
+
+        // Correction of control points postion
+        const vectorField& Cf = aMesh().areaCentres().internalField();
+
+        controlPoints() =
+            facesDisplacementDir()
+           *(facesDisplacementDir()&(controlPoints() - Cf))
+          + Cf;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 // TEST: Volume conservation
 // TODO: Check this implementation in parallel
 void trackedSurface::correctInterfacePhi(scalarField& interfacePhi)
@@ -640,6 +717,26 @@ tmp<pointField> trackedSurface::calcNewMeshPoints()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+
+void trackedSurface::movePoints(const scalarField& interfacePhi)
+{
+    vectorField displacement = calcDisplacement(interfacePhi);
+
+    totalDisplacement() += displacement;
+
+    if (total0Update_)
+    {
+        total0Displacement() += displacement;
+    }
+
+    pointField newMeshPoints = calcNewMeshPoints(displacement);
+
+    mesh().movePoints(newMeshPoints);
+
+    moveUpdate();
+}
+
+
 void trackedSurface::moveMeshPoints(const pointField& displacement)
 {
     bool feMotionSolver =
@@ -711,10 +808,12 @@ void trackedSurface::moveMeshPoints(const pointField& displacement)
                     displacement/DB().deltaT().value()
                 );
         }
+
+        motionU.correctBoundaryConditions();
     }
     else if (fvMotionSolver)
     {
-        pointVectorField& motionU =
+        pointVectorField& pointMotionU =
             const_cast<pointVectorField&>
             (
                 mesh().objectRegistry::
@@ -724,13 +823,13 @@ void trackedSurface::moveMeshPoints(const pointField& displacement)
                 )
             );
 
-        fixedValuePointPatchVectorField& motionUaPatch =
+        fixedValuePointPatchVectorField& pointMotionUaPatch =
             refCast<fixedValuePointPatchVectorField>
             (
-                motionU.boundaryField()[aPatchID()]
+                pointMotionU.boundaryField()[aPatchID()]
             );
 
-        motionUaPatch ==
+        pointMotionUaPatch ==
             displacement/DB().deltaT().value();
 
         if (twoFluids_)
@@ -741,15 +840,17 @@ void trackedSurface::moveMeshPoints(const pointField& displacement)
                     displacement
                 );
 
-            fixedValuePointPatchVectorField& motionUbPatch =
+            fixedValuePointPatchVectorField& pointMotionUbPatch =
                 refCast<fixedValuePointPatchVectorField>
                 (
-                    motionU.boundaryField()[bPatchID()]
+                    pointMotionU.boundaryField()[bPatchID()]
                 );
 
-            motionUbPatch ==
+            pointMotionUbPatch ==
                 displacementB/DB().deltaT().value();
         }
+
+        pointMotionU.correctBoundaryConditions();
     }
 
     mesh().update();
@@ -910,6 +1011,7 @@ trackedSurface::trackedSurface
     turbulencePtr_(turbulencePtr),
     p0Ptr_(p0Ptr),
     curTimeIndex_(m.time().timeIndex()),
+    meshMoved_(false),
     twoFluids_
     (
         this->lookup("twoFluids")
@@ -1248,69 +1350,75 @@ void trackedSurface::updateProperties()
 }
 
 
-void trackedSurface::updateDisplacementDirections()
+bool trackedSurface::updateMesh()
 {
-    if (normalMotionDir())
+    if (totalDisplacementPtr_)
     {
-        // Update point displacement correction
-        pointsDisplacementDir() = aMesh().pointAreaNormals();
+        scalar minCellThickness =
+            2*gMin(1.0/mesh().boundary()[aPatchID()].deltaCoeffs());
 
-        // Correct point displacement direction
-        // at the "centerline" symmetryPlane which represents the axis
-        // of an axisymmetric case
-        forAll (aMesh().boundary(), patchI)
+        scalar maxInterfaceDeformation =
+            gMax(mag(totalDisplacement()))/minCellThickness;
+
+        if (debug)
         {
-            if (aMesh().boundary()[patchI].type() == wedgeFaPatch::typeName)
-            {
-                const wedgeFaPatch& wedgePatch =
-                    refCast<const wedgeFaPatch>(aMesh().boundary()[patchI]);
-
-                vector axis = wedgePatch.axis();
-
-                label centerLinePatchID =
-                    aMesh().boundary().findPatchID("centerline");
-
-                if (centerLinePatchID != -1)
-                {
-                    const labelList& pointLabels =
-                        aMesh().boundary()[centerLinePatchID].pointLabels();
-
-                    forAll (pointLabels, pointI)
-                    {
-                        vector dir =
-                            pointsDisplacementDir()[pointLabels[pointI]];
-
-                        dir = (dir&axis)*axis;
-                        dir /= mag(dir);
-
-                        pointsDisplacementDir()[pointLabels[pointI]] = dir;
-                    }
-                }
-                else
-                {
-                    WarningIn("trackedSurface::updateDisplacementDirections()")
-                        << "Centerline polyPatch does not exist. "
-                        << "Surface points displacement directions "
-                        << "will not be corrected at the axis (centerline)"
-                        << endl;
-                }
-
-                break;
-            }
+            Info << "trackedSurface::updateMesh() : "
+                << "Maximal relative interface deformation: "
+                << maxInterfaceDeformation
+                << endl;
         }
 
-        // Update face displacement direction
-        facesDisplacementDir() =
-            aMesh().faceAreaNormals().internalField();
+        // Move whole mesh only if interface deformation limit is exceeded
+        if (maxInterfaceDeformation > interfaceDeformationLimit_)
+        {
+            if (debug)
+            {
+                Info << "trackedSurface::updateMesh() : "
+                    << "Moving whole mesh."
+                    << endl;
+            }
 
-        // Correction of control points postion
-        const vectorField& Cf = aMesh().areaCentres().internalField();
+// TEST: Move always from start
+            if (total0Update_)
+            {
+                mesh().movePoints(points0());
+            }
+            else
+            {
+                pointField newMeshPoints = calcNewMeshPoints();
 
-        controlPoints() =
-            facesDisplacementDir()
-           *(facesDisplacementDir()&(controlPoints() - Cf))
-          + Cf;
+                mesh().movePoints(newMeshPoints);
+            }
+
+            moveMeshPoints();
+
+            moveUpdate();
+
+// TEST: Always reset control points after whole mesh movement
+            resetControlPoints(true);
+
+            adjustDisplacementDirections();
+
+            meshMoved_ = true;
+
+            return meshMoved_;
+        }
     }
+
+    if (debug)
+    {
+        Info << "trackedSurface::updateMesh() : "
+            << "Skipping whole mesh movement."
+            << endl;
+    }
+
+    resetControlPoints();
+
+    adjustDisplacementDirections();
+
+    meshMoved_ = false;
+
+    return meshMoved_;
 }
 
 
@@ -1344,77 +1452,10 @@ void trackedSurface::correctPoints()
 }
 
 
-void trackedSurface::movePoints(const scalarField& interfacePhi)
-{
-    vectorField displacement = calcDisplacement(interfacePhi);
-
-    totalDisplacement() += displacement;
-
-    if (total0Update_)
-    {
-        total0Displacement() += displacement;
-    }
-
-    pointField newMeshPoints = calcNewMeshPoints(displacement);
-
-    mesh().movePoints(newMeshPoints);
-
-    moveUpdate();
-}
+// TODO
 
 
-void trackedSurface::updateMesh()
-{
-    if (totalDisplacementPtr_)
-    {
-        scalar minCellThickness =
-            2*gMin(1.0/mesh().boundary()[aPatchID()].deltaCoeffs());
-
-        scalar maxInterfaceDeformation =
-            gMax(mag(totalDisplacement()))/minCellThickness;
-
-        if (debug)
-        {
-            Info << "trackedSurface::updateMesh() : "
-                << "Maximal relative interface deformation: "
-                << maxInterfaceDeformation
-                << endl;
-        }
-
-
-        // Move whole mesh only if interface deformation limit is exceeded
-        if (maxInterfaceDeformation > interfaceDeformationLimit_)
-        {
-            if (debug)
-            {
-                Info << "trackedSurface::updateMesh() : "
-                    << "Moving whole mesh."
-                    << endl;
-            }
-
-// TEST: Move always from start
-            if (total0Update_)
-            {
-                mesh().movePoints(points0());
-            }
-            else
-            {
-                pointField newMeshPoints = calcNewMeshPoints();
-
-                mesh().movePoints(newMeshPoints);
-            }
-
-            moveMeshPoints();
-
-            moveUpdate();
-
-            // Always reset control points after whole mesh movement
-            controlPoints() = aMesh().areaCentres().internalField();
-        }
-    }
-}
-
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 void trackedSurface::moveFixedPatches(const vectorField& displacement)
 {
     // Take only displacement at fixed patches
@@ -1451,15 +1492,7 @@ void trackedSurface::moveFixedPatches(const vectorField& displacement)
 }
 
 
-void trackedSurface::resetControlPoints()
-{
-    if (resetControlPoints_)
-    {
-        controlPoints() = aMesh().areaCentres().internalField();
-    }
-}
-
-
+// TODO
 void trackedSurface::smoothing()
 {
     if (smoothing_)

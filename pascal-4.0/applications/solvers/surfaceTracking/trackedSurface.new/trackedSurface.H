@@ -112,6 +112,9 @@ class trackedSurface
         //- Current time index for surface
         label curTimeIndex_;
 
+        //- Has the mesh moved?
+        bool meshMoved_;
+
         //- Are there exist two fluids in the surface model
         Switch twoFluids_;
 
@@ -350,7 +353,15 @@ class trackedSurface
             //- Init control points position
             void initControlPointsPosition();
 
-        //- Interface move calculations
+        //- General operations
+
+            //- Reset control points
+            void resetControlPoints(bool force = false);
+
+            //- Update displacement directions
+            void adjustDisplacementDirections();
+
+        //- Move calculations
 
 // TEST: Volume conservation
             //- Correct interface phi for domain volume conservation
@@ -377,7 +388,10 @@ class trackedSurface
             //- Calculate new mesh points from negative total displacement field
             tmp<pointField> calcNewMeshPoints();
 
-        //- Interface move operations
+        //- Move operations
+
+            //- Move only surface points
+            void movePoints(const scalarField& interfacePhi);
 
             //- Move and update all mesh points with motion solver for
             //  total displacement and delete total displacement pointer
@@ -567,6 +581,12 @@ public:
             {
                 return *p0Ptr_;
             }
+
+        //- Has the mesh moved?
+        bool meshMoved() const
+        {
+            return meshMoved_;
+        }
 
         //- Are there exist two fluid
         //  in the surface model
@@ -793,8 +813,8 @@ public:
         //- Update properties
         void updateProperties();
 
-        //- Update displacement directions
-        void updateDisplacementDirections();
+        //- Move all mesh points from total displacement
+        bool updateMesh();
 
         //- Predict interface points position
         void predictPoints();
@@ -802,17 +822,8 @@ public:
         //- Correct interface points position
         void correctPoints();
 
-        //- Move only surface points
-        void movePoints(const scalarField& interfacePhi);
-
-        //- Move all mesh points from total displacement
-        void updateMesh();
-
         //- Correct fixed surface patches
         void moveFixedPatches(const vectorField& displacement);
-
-        //- Reset control points
-        void resetControlPoints();
 
         //- Smoothing interface
         void smoothing();

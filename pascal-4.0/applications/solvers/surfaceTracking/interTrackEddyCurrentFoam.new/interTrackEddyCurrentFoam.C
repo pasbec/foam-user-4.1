@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
     masterManager.read();
     masterManager.init();
 
+// TODO: IDEAS? Buffer region may be out of sync with fluid region on write
 // TODO: Make this nicer!
     // Init eddyCurrentApp
     {
@@ -81,6 +82,7 @@ int main(int argc, char *argv[])
         }
     }
 
+// TODO: IDEAS? Buffer region may be out of sync with fluid region on write
 // TODO: Make this nicer!
     // Init interTrackEddyCurrentApp
     {
@@ -118,6 +120,19 @@ int main(int argc, char *argv[])
         // Check for magnetic update
         Switch emUpdate = masterManager.control().loop();
 
+        if (emUpdate)
+        {
+            using namespace interTrackEddyCurrentApp;
+            using namespace interTrackEddyCurrentApp::Region;
+
+            if (Control::debug)
+            {
+                Info << "interTrackEddyCurrentApp::Control : "
+                    << "Update of electromagntic fields due."
+                    << endl;
+            }
+        }
+
         // Update meshes in buffer, default and conducting region
         if (emUpdate)
         {
@@ -137,7 +152,7 @@ int main(int argc, char *argv[])
 
             // Calculate mesh velocity at fluid/buffer-interface
             // in buffer region from current boundary displacement
-            // in fluid region
+            // difference
             masterManager.mesh().patchMapMeshVelocityDirectMapped
             (
                 Region::FLUID,
@@ -158,17 +173,18 @@ int main(int argc, char *argv[])
                     << endl;
             }
 
-            // Create new point field for default region
-            // with current point positions of fluid region
-            pointField newPoints = masterManager.mesh().rmap(Region::FLUID);
+            {
+                // Create new point field for default region
+                // with current point positions of fluid region
+                pointField newPoints = masterManager.mesh().rmap(Region::FLUID);
 
-            // Replace point positions of buffer region in
-            // new point field for default region
-            masterManager.mesh().rmap(newPoints, Region::BUFFER);
+                // Replace point positions of buffer region in
+                // new point field for default region
+                masterManager.mesh().rmap(newPoints, Region::BUFFER);
 
-            // Move and update mesh of default region
-            masterManager.mesh()[Region::DEFAULT].movePoints(newPoints);
-            masterManager.mesh()[Region::DEFAULT].update();
+                // Move mesh points of default region
+                masterManager.mesh()[Region::DEFAULT].movePoints(newPoints);
+            }
 
 
             // Update mesh in conducting region
@@ -181,13 +197,14 @@ int main(int argc, char *argv[])
                     << endl;
             }
 
-            // Create new point field for conductor region
-            // with current points of default region
-            newPoints = masterManager.mesh().map(Region::CONDUCTOR);
+            {
+                // Create new point field for conductor region
+                // with current points of default region
+                pointField newPoints = masterManager.mesh().map(Region::CONDUCTOR);
 
-            // Move and update mesh of conductor region
-            masterManager.mesh()[Region::CONDUCTOR].movePoints(newPoints);
-            masterManager.mesh()[Region::CONDUCTOR].update();
+                // Move mesh points of conductor region
+                masterManager.mesh()[Region::CONDUCTOR].movePoints(newPoints);
+            }
         }
 
         // Solve eddy-current problem
@@ -253,6 +270,7 @@ int main(int argc, char *argv[])
 #           include "UpLoop.H"
         }
 
+// TODO: IDEAS? Buffer region may be out of sync with fluid region on write
 // TODO: Write
     }
 
