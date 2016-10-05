@@ -492,12 +492,7 @@ Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 {
     forAll (*this, regionI)
     {
-        if
-        (
-             fieldActive_[regionI]
-         && !fieldLinked_[regionI]
-         &&  fieldPtrs_[regionI]
-        )
+        if (fieldActive_[regionI] && !fieldLinked_[regionI])
         {
             deleteDemandDrivenData(fieldPtrs_[regionI]);
         }

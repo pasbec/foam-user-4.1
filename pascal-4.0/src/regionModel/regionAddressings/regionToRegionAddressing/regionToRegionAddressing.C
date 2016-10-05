@@ -303,18 +303,12 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
             }
 
             // Delete face self-addressing pointer if it was assigned
-            if (fromSelfAddressingPtr)
-            {
-                deleteDemandDrivenData(fromSelfAddressingPtr);
-            }
+            deleteDemandDrivenData(fromSelfAddressingPtr);
         }
 
 
         // Delete self-map pointer if it was assigned
-        if (fromSelfMapPtr)
-        {
-            deleteDemandDrivenData(fromSelfMapPtr);
-        }
+        deleteDemandDrivenData(fromSelfMapPtr);
 
         // Clear all proc and region addressings
         procAddressingPtrs_.clear();
