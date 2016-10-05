@@ -31,6 +31,7 @@ Description
 #include "calculatedFaPatchFields.H"
 #include "zeroGradientFaPatchFields.H"
 #include "coupledFaPatchFields.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -339,7 +340,7 @@ faMatrix<Type>::~faMatrix()
 
     if (faceFluxCorrectionPtr_)
     {
-        delete faceFluxCorrectionPtr_;
+        deleteDemandDrivenData(faceFluxCorrectionPtr_);
     }
 }
 

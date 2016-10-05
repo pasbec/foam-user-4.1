@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "regionToRegionAddressing.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -304,7 +305,7 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
             // Delete face self-addressing pointer if it was assigned
             if (fromSelfAddressingPtr)
             {
-                delete fromSelfAddressingPtr;
+                deleteDemandDrivenData(fromSelfAddressingPtr);
             }
         }
 
@@ -312,7 +313,7 @@ Foam::labelList* Foam::regionToRegionAddressing::calcAddressing
         // Delete self-map pointer if it was assigned
         if (fromSelfMapPtr)
         {
-            delete fromSelfMapPtr;
+            deleteDemandDrivenData(fromSelfMapPtr);
         }
 
         // Clear all proc and region addressings

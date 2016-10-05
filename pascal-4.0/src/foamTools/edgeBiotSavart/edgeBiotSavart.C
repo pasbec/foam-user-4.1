@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "edgeBiotSavart.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -266,7 +267,7 @@ Foam::edgeBiotSavart::~edgeBiotSavart()
 {
     forAll (inductorMeshes_, inductorI)
     {
-        delete inductorMeshes_[inductorI];
+        deleteDemandDrivenData(inductorMeshes_[inductorI]);
     }
 }
 

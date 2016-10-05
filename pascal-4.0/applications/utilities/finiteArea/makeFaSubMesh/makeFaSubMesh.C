@@ -51,6 +51,7 @@ Author
 #include "directMappedPolyPatch.H"
 #include "directMappedWallPolyPatch.H"
 #include "emptyFaPatch.H"
+#include "demandDrivenData.H"
 
 // TODO: Point ordering correct?
 
@@ -376,10 +377,10 @@ public:
 
     ~aMeshTriangulation()
     {
-        delete faceRmap_;
-        delete faceMap_;
-        delete faces_;
-        delete points_;
+        deleteDemandDrivenData(faceRmap_);
+        deleteDemandDrivenData(faceMap_);
+        deleteDemandDrivenData(faces_);
+        deleteDemandDrivenData(points_);
     }
 
     const pointField& points() const

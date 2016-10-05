@@ -34,6 +34,7 @@ Author
 
 #include "OFstream.H"
 #include "OStringStream.H"
+#include "demandDrivenData.H"
 
 #include "fvCFD.H"
 
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
     Export = new OStringStream();
     *Export << "# 1:<time>, 2:<iniFluidVolumePhase1>, 3:<iniFluidVolumePhase2>, 4:<curFluidVolumePhase1>, 5:<curFluidVolumePhase2>" << endl;
     if (exportFileOption) { File << Export->str().c_str(); } else { Info << "> " << Export->str().c_str(); }
-    delete Export;
+    deleteDemandDrivenData(Export);
 
     // Init/Reset inital fluid volumes
     scalar iniFluidVolumePhase1 = -1.0;
@@ -218,7 +219,7 @@ int main(int argc, char *argv[])
                 << curFluidVolumePhase1 << " "
                 << curFluidVolumePhase2 << endl;
         if (exportFileOption) { File << Export->str().c_str(); } else { Info << "> " << Export->str().c_str(); }
-        delete Export;
+        deleteDemandDrivenData(Export);
     }
 
     Info << "\nEnd\n" << endl;

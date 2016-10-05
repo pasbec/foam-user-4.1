@@ -26,6 +26,7 @@ License
 #include "regionGeometricField.H"
 #include "fvcExtrapolate.H"
 #include "calculatedFvPatchFields.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -498,7 +499,7 @@ Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
          &&  fieldPtrs_[regionI]
         )
         {
-            delete fieldPtrs_[regionI];
+            deleteDemandDrivenData(fieldPtrs_[regionI]);
         }
     }
 }

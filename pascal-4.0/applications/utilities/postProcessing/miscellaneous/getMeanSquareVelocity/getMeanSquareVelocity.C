@@ -34,6 +34,7 @@ Author
 
 #include "OFstream.H"
 #include "OStringStream.H"
+#include "demandDrivenData.H"
 
 #include "fvCFD.H"
 
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
     Export = new OStringStream();
     *Export << "# 1:<time>, 2:<Ux^2>, 3:<Uy^2>, 4:<Uz^2>" << endl;
     if (exportFileOption) { File << Export->str().c_str(); } else { Info << "> " << Export->str().c_str(); }
-    delete Export;
+    deleteDemandDrivenData(Export);
 
     // Loop over all time instances
     forAll(times, timeI)
@@ -136,7 +137,7 @@ int main(int argc, char *argv[])
             Export = new OStringStream();
             *Export << runTime.timeName() << " " << U2[0]/vol << " " << U2[1]/vol << " " << U2[2]/vol << endl;
             if (exportFileOption) { File << Export->str().c_str(); } else { Info << "> " << Export->str().c_str(); }
-            delete Export;
+            deleteDemandDrivenData(Export);
 
         }
         else
@@ -145,7 +146,7 @@ int main(int argc, char *argv[])
             Export = new OStringStream();
             *Export << "# No velocity data for time " << runTime.timeName() << endl;
             if (exportFileOption) { File << Export->str().c_str(); } else { Info << "> " << Export->str().c_str(); }
-            delete Export;
+            deleteDemandDrivenData(Export);
         }
 
     }
