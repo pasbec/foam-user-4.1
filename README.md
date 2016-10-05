@@ -61,32 +61,32 @@ git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git'
 ```bash
 cd "$HOME/foam"
 #
-git subtree pull -P 'pascal-3.2/etc/bashrc.d' 'dotfiles' 'subtree_dot/bashrc.d' --squash
+git subtree pull -P 'pascal-4.0/etc/bashrc.d' 'dotfiles' 'subtree_dot/bashrc.d' --squash
 ```
 #### Update submodule foam-extend
 ```bash
 cd "$HOME/foam"
 #
-git submodule update --remote 'foam-extend-3.2'
+git submodule update --remote 'foam-extend-4.0'
 ```
 #### User data for submodule foam-extend (optional)
 ```bash
-cd "$HOME/foam/foam-extend-3.2"
+cd "$HOME/foam/foam-extend-4.0"
 #
 git config user.name 'Pascal Beckstein'
 git config user.email 'pascal@becksteins.de'
 ```
 #### Git repositories for submodule foam-extend (optional)
 ```bash
-cd "$HOME/foam/foam-extend-3.2"
+cd "$HOME/foam/foam-extend-4.0"
 #
-git remote add 'upstream' 'git://git.code.sf.net/p/foam-extend/foam-extend-3.2'
-git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-Mirror/foam-extend-foam-extend-3.2.git'
-git remote add 'sf' 'https://p-be@git.code.sf.net/u/p-be/foam-extend-3.2'
+git remote add 'upstream' 'git://git.code.sf.net/p/foam-extend/foam-extend-4.0'
+git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-Mirror/foam-extend-foam-extend-4.0.git'
+git remote add 'sf' 'https://p-be@git.code.sf.net/u/p-be/foam-extend-4.0'
 git remote add 'hzdr' 'https://beckst30@redmine.hzdr.de/git/rgs.foam-extend-user-pascal'
 git remote add 'uts' 'ssh://beckst30@uts.fz-rossendorf.de/home/beckst30/foam'
 
-#git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-3.2'
+#git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-4.0'
 ```
 
 
@@ -95,7 +95,7 @@ git remote add 'uts' 'ssh://beckst30@uts.fz-rossendorf.de/home/beckst30/foam'
 
 #### Prepare preferences from template
 ```bash
-cd "$HOME/foam/foam-extend-3.2"
+cd "$HOME/foam/foam-extend-4.0"
 #
 # Template
 cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
@@ -109,7 +109,7 @@ cd -
 ```
 #### Source environment
 ```bash
-cd "$HOME/foam/foam-extend-3.2"
+cd "$HOME/foam/foam-extend-4.0"
 #
 source 'etc/bashrc'
 ```
@@ -120,7 +120,7 @@ export PATH="/usr/lib/ccache:${PATH}"
 ```
 #### Compilation/Installation
 ```bash
-cd "$HOME/foam/foam-extend-3.2"
+cd "$HOME/foam/foam-extend-4.0"
 #
 ./Allwmake.firstInstall
 ```
@@ -130,17 +130,17 @@ cd "$HOME/foam/foam-extend-3.2"
 
 #### Source environment
 ```bash
-cd "$HOME/foam/pascal-3.2"
+cd "$HOME/foam/pascal-4.0"
 #
-export FE32_FOAM_INST_DIR="$HOME/foam"
-export FE32_FOAM_ETC="$FE32_FOAM_INST_DIR/foam-extend-3.2/etc"
-export FE32_FOAM_USER_ETC="$HOME/foam/$USER-3.2/etc"
-source "$FE32_FOAM_USER_ETC/bashrc"
-fe32
+export FE40_FOAM_INST_DIR="$HOME/foam"
+export FE40_FOAM_ETC="$FE40_FOAM_INST_DIR/foam-extend-4.0/etc"
+export FE40_FOAM_USER_ETC="$HOME/foam/$USER-4.0/etc"
+source "$FE40_FOAM_USER_ETC/bashrc"
+fe40
 ```
 #### Compilation/Installation
 ```bash
-cd "$HOME/foam/pascal-3.2"
+cd "$HOME/foam/pascal-4.0"
 #
 ./Allwmake.firstInstall
 ```
