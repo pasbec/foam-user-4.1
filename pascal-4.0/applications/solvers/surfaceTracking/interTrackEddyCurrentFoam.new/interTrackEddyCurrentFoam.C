@@ -89,6 +89,10 @@ int main(int argc, char *argv[])
         using namespace interTrackEddyCurrentApp;
         using namespace interTrackEddyCurrentApp::Region;
 
+        Manager& manager = masterManager;
+
+        SM_MANAGERSCOPE();
+
         eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
 
 // TODO: Magnetic pressure?
@@ -125,6 +129,10 @@ int main(int argc, char *argv[])
             using namespace interTrackEddyCurrentApp;
             using namespace interTrackEddyCurrentApp::Region;
 
+            Manager& manager = masterManager;
+
+            SM_MANAGERSCOPE();
+
             if (Control::debug)
             {
                 Info << "interTrackEddyCurrentApp::Control : "
@@ -138,6 +146,10 @@ int main(int argc, char *argv[])
         {
             using namespace interTrackEddyCurrentApp;
             using namespace interTrackEddyCurrentApp::Region;
+
+            Manager& manager = masterManager;
+
+            SM_MANAGERSCOPE();
 
 
             // Update mesh in buffer region
@@ -153,14 +165,14 @@ int main(int argc, char *argv[])
             // Calculate mesh velocity at fluid/buffer-interface
             // in buffer region from current boundary displacement
             // difference
-            masterManager.mesh().patchMapMeshVelocityDirectMapped
+            manager.mesh().patchMapMeshVelocityDirectMapped
             (
                 Region::FLUID,
                 Region::BUFFER
             );
 
             // Use motionSolver to move and update mesh of buffer region
-            masterManager.mesh()[Region::BUFFER].update();
+            manager.mesh()[Region::BUFFER].update();
 
 
             // Update mesh in default region
@@ -176,14 +188,14 @@ int main(int argc, char *argv[])
             {
                 // Create new point field for default region
                 // with current point positions of fluid region
-                pointField newPoints = masterManager.mesh().rmap(Region::FLUID);
+                pointField newPoints = manager.mesh().rmap(Region::FLUID);
 
                 // Replace point positions of buffer region in
                 // new point field for default region
-                masterManager.mesh().rmap(newPoints, Region::BUFFER);
+                manager.mesh().rmap(newPoints, Region::BUFFER);
 
                 // Move mesh points of default region
-                masterManager.mesh()[Region::DEFAULT].movePoints(newPoints);
+                manager.mesh()[Region::DEFAULT].movePoints(newPoints);
             }
 
 
@@ -200,10 +212,10 @@ int main(int argc, char *argv[])
             {
                 // Create new point field for conductor region
                 // with current points of default region
-                pointField newPoints = masterManager.mesh().map(Region::CONDUCTOR);
+                pointField newPoints = manager.mesh().map(Region::CONDUCTOR);
 
                 // Move mesh points of conductor region
-                masterManager.mesh()[Region::CONDUCTOR].movePoints(newPoints);
+                manager.mesh()[Region::CONDUCTOR].movePoints(newPoints);
             }
         }
 
@@ -235,6 +247,10 @@ int main(int argc, char *argv[])
         {
             using namespace interTrackEddyCurrentApp;
             using namespace interTrackEddyCurrentApp::Region;
+
+            Manager& manager = masterManager;
+
+            SM_MANAGERSCOPE();
 
             if (Control::debug)
             {
