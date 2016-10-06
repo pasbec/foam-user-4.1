@@ -256,7 +256,6 @@ myPBS_runTimeModifiable_orig=\$(dictLookup 'system/controlDict' 'runTimeModifiab
 if [[ ! -z \$PBS_JOBID ]]; then
 
   myPBS_id="\$(echo \$PBS_JOBID | cut -f1 -d '.')"
-  myPBS_host="\$(echo \$PBS_JOBID | cut -f2 -d '.')"
 
 fi
 
