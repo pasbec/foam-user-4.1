@@ -25,6 +25,7 @@ Function:
 Prepare und submit job with PBS.
 Needs a 'run.conf' file in a 'qRun' sub-directory
 with the following variables set:
+ - myPBS_host
  - myPBS_walltime
  - myPBS_nodes
  - myPBS_savetime
@@ -416,6 +417,7 @@ trap trapFct SIGHUP SIGINT SIGQUIT SIGTERM
 # Write info to logfile
 echo '##########################################################################################' >> '$VAR_PBS_JOB_LOG'
 writeLog '$VAR_PBS_JOB_LOG' "Starting job \$myPBS_jobname aka \$PBS_JOBID"
+writeLog '$VAR_PBS_JOB_LOG' "- Host: \$myPBS_host"
 writeLog '$VAR_PBS_JOB_LOG' "- Queue: \$myPBS_queue"
 writeLog '$VAR_PBS_JOB_LOG' "- Walltime: \$myPBS_walltime"
 writeLog '$VAR_PBS_JOB_LOG' "- Nodes: \$myPBS_nodes"
@@ -502,7 +504,7 @@ fi
 # Restart if not stopped up to now
 if [[ -f '$VAR_PBS_STATE_FINISHED' ]]; then
   writeLog '$VAR_PBS_JOB_LOG' 'Job chain will be continued now'
-  ssh \${PBS_JOBID#*.} "cd \$PWD; \$(which qsub) $VAR_PBS_RUN"
+  ssh $myPBS_host "cd \$PWD; \$(which qsub) $VAR_PBS_RUN"
 fi
 
 # This should not happen
@@ -648,6 +650,7 @@ exit 0
 #                                 Example qFoam.conf                                     #
 ##########################################################################################
 
+# myPBS_host='hydra'
 # myPBS_walltime='00:15:00'
 # myPBS_nodes='nodes=1:ppn=8'
 # myPBS_savetime='00:10:00'
