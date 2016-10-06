@@ -1,9 +1,6 @@
 
-./numerics/liqudFilmFvMotionSolver/liquidFilmFvMotionSolver.C
-./numerics/liqudFilmParallelFvMotionSolver/liquidFilmParallelFvMotionSolver.C
 ./numerics/ddtSchemes/EulerDdtScheme.C
 ./numerics/ddtSchemes/backwardDdtScheme.C
-./numerics/leastSquaresSkewCorrected/leastSquaresSkewCorrected.C
 
 trackedSurface.C
 trackedSurfaceBoundaryConditions.C

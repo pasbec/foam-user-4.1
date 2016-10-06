@@ -128,7 +128,7 @@ class faSubMesh
 public:
 
     // Declare name of the class and it's debug switch
-    ClassName("faSubMesh");
+    TypeName("faSubMesh");
 
 
     // Constructors
@@ -142,7 +142,7 @@ public:
 
     // Destructor
 
-        ~faSubMesh();
+        virtual ~faSubMesh();
 
 
     // Member Functions
