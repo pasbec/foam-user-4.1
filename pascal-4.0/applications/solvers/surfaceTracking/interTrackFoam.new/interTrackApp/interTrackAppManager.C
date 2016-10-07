@@ -79,14 +79,30 @@ bool Foam::interTrackApp::Manager::setCoNum(scalar& CourantNumber) const
     tmp<surfaceScalarField> tphi(storage.phi());
     surfaceScalarField& phi = tphi();
 
+// TODO: Use U to calculate phi for now. Somthing with meshPhi is severly wrong
     // Convective Courant Number
     {
         if (mesh.moving())
         {
             const volVectorField& U = storage.U();
 
+// TODO: Something is wrong with meshPhi
             // Make fluxes relative
             phi -= fvc::meshPhi(U);
+        }
+
+#       include "CourantNo.H"
+    }
+
+// TODO: Use U to calculate phi for now. Somthing with meshPhi is severly wrong
+    // Convective Courant Number
+    {
+        if (mesh.moving())
+        {
+            const volVectorField& U = storage.U();
+
+            // Calculate phi from U
+            phi = fvc::interpolate(U) & mesh.Sf();
         }
 
 #       include "CourantNo.H"

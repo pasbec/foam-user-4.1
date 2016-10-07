@@ -322,6 +322,7 @@ bool Foam::solverManager<MESH>::loop() const
         messages().newLine();
     }
 
+// TODO: Read should go to old time!
     if (runTime.loop())
     {
         propertiesDict_.readIfModified();
