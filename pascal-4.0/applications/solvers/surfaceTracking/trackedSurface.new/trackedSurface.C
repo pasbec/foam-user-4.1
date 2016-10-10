@@ -1395,7 +1395,8 @@ bool trackedSurface::updateMesh()
             moveUpdate();
 
 // TEST: Always reset control points after whole mesh movement
-            resetControlPoints(true);
+            resetControlPoints();
+//             resetControlPoints(true);
 
             adjustDisplacementDirections();
 
