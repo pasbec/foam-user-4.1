@@ -10,6 +10,4 @@
         trackedSurface& interface = storage.interface();
 
         interface.updateMesh(); // abs phi
-
-        interface.predictPoints(); // abs phi
     }

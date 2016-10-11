@@ -118,7 +118,8 @@ int main(int argc, char *argv[])
 
             Manager& manager = interTrackAppManager;
 
-            SM_GLOBALREGIONSCOPE(DEFAULT);
+            SM_MANAGERSCOPE();
+            SM_REGIONSCOPE(DEFAULT);
 
 #           include "meshUpdate.H"
         }

@@ -95,7 +95,7 @@ bool Foam::interTrackApp::Manager::setCoNum(scalar& CourantNumber) const
         CourantNumber = max(CourantNumber, CoNum);
     }
 
-// TODO: Use U to calculate phi for now. Somthing with meshPhi is severly wrong
+// TODO: Use U to calculate phi for now. Something with meshPhi is totally wrong
     // Convective Courant Number?
     {
         if (mesh.moving())

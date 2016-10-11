@@ -859,13 +859,32 @@ void trackedSurface::moveMeshPoints(const pointField& displacement)
 
 void trackedSurface::moveMeshPoints()
 {
+    pointField resetMeshPoints = calcNewMeshPoints();
+
 // TEST: Move always from start
     if (total0Update_)
     {
+        // Reset points to 0 position
+        mesh().movePoints(points0());
+
+        // Update points according to new surface shape
         moveMeshPoints(total0Displacement());
+
+        // Store new point positions
+        pointField newMeshPoints = mesh().allPoints();
+
+        // Reset points to position of last time step
+        mesh().movePoints(resetMeshPoints);
+
+        // Move points back to new position
+        mesh().movePoints(newMeshPoints);
     }
     else
     {
+        // Reset points to position of last time step
+        mesh().movePoints(resetMeshPoints);
+
+        // Update points according to new surface shape
         moveMeshPoints(totalDisplacement());
     }
 
@@ -1378,64 +1397,35 @@ bool trackedSurface::updateMesh()
                     << endl;
             }
 
-// TEST: Move always from start
-            if (total0Update_)
-            {
-                mesh().movePoints(points0());
-            }
-            else
-            {
-                pointField newMeshPoints = calcNewMeshPoints();
-
-                mesh().movePoints(newMeshPoints);
-            }
-
             moveMeshPoints();
 
             moveUpdate();
 
-// TEST: Always reset control points after whole mesh movement
-            resetControlPoints();
-//             resetControlPoints(true);
-
-            adjustDisplacementDirections();
-
             meshMoved_ = true;
-
-            return meshMoved_;
         }
     }
-
-    if (debug)
+    else
     {
-        Info << "trackedSurface::updateMesh() : "
-            << "Skipping whole mesh movement."
-            << endl;
+        if (debug)
+        {
+            Info << "trackedSurface::updateMesh() : "
+                << "Skipping whole mesh movement."
+                << endl;
+        }
+
+        meshMoved_ = false;
     }
+
 
     resetControlPoints();
 
     adjustDisplacementDirections();
 
-    meshMoved_ = false;
-
     return meshMoved_;
 }
 
 
-void trackedSurface::predictPoints()
-{
-    // Reset control points
-    resetControlPoints();
-
-    // Smooth interface
-    smoothing();
-
-//    smoothMesh();
-}
-
-
-void trackedSurface::correctPoints()
+void trackedSurface::updatePoints()
 {
     scalarField& interfacePhi = phi().boundaryField()[aPatchID()];
 

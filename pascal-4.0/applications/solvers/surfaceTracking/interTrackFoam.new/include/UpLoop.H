@@ -18,10 +18,10 @@
             const volScalarField& mu = storage.mu();
             trackedSurface& interface = storage.interface();
 
-            interface.updateBoundaryConditions(); // rel phi
+            interface.updateBoundaryConditions(); // abs phi
 
             // Make the fluxes relative to the mesh motion
-            fvc::makeRelative(phi,U);
+            fvc::makeRelative(phi, U);
 
             autoPtr<fvVector4Matrix> UpEqn;
 
@@ -52,7 +52,7 @@
             // Make the fluxes absolute
             fvc::makeAbsolute(phi, U);
 
-            interface.correctPoints(); // abs phi
+            interface.updatePoints(); // abs phi
 
 // TODO: Continuity errors
 // #           include "trackedSurfaceContinuityErrs.H"

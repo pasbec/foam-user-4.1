@@ -816,11 +816,8 @@ public:
         //- Move all mesh points from total displacement
         bool updateMesh();
 
-        //- Predict interface points position
-        void predictPoints();
-
-        //- Correct interface points position
-        void correctPoints();
+        //- Update interface points position
+        void updatePoints();
 
         //- Correct fixed surface patches
         void moveFixedPatches(const vectorField& displacement);
