@@ -195,27 +195,36 @@ bool Foam::interTrackEddyCurrentApp::Control::updateRelDeltaA() const
     return false;
 }
 
-bool Foam::interTrackEddyCurrentApp::Control::update() const
+bool Foam::interTrackEddyCurrentApp::Control::update()
 {
+    bool uZeroCounter = updateZeroCounter();
+    bool uOutputTimeIndex = updateOutputTimeIndex();
+    bool uTimeIndex = updateTimeIndex();
+    bool uTime = updateTimeIndex();
+    bool uRelDeltaA = updateRelDeltaA(); // WARNING: Must not be called twice!
+
     if (debug > 1)
     {
         Info << "interTrackEddyCurrentApp::Control::update() : "
-            << "updateZeroCounter() = " << updateZeroCounter() << endl;
+            << "updateZeroCounter() = " << uZeroCounter << endl;
         Info << "                                              "
-            << "updateOutputTimeIndex() = " << updateOutputTimeIndex() << endl;
+            << "updateOutputTimeIndex() = " << uOutputTimeIndex << endl;
         Info << "                                              "
-            << "updateTimeIndex() = " << updateTimeIndex() << endl;
+            << "updateTimeIndex() = " << uTimeIndex << endl;
         Info << "                                              "
-            << "updateTime() = " << updateTime() << endl;
+            << "updateTime() = " << uTime << endl;
         Info << "                                              "
-            << "updateRelDeltaA() = " << updateRelDeltaA() << endl;
+            << "updateRelDeltaA() = " << uRelDeltaA << endl;
     }
 
-    return updateZeroCounter()
-        || updateOutputTimeIndex()
-        || updateTimeIndex()
-        || updateTime()
-        || updateRelDeltaA();
+    // Reset outputTimeIndex
+    if (uOutputTimeIndex) emUpdateData_.outputTimeIndex = 0;
+
+    return uZeroCounter
+        || uOutputTimeIndex
+        || uTimeIndex
+        || uTime
+        || uRelDeltaA;
 }
 
 

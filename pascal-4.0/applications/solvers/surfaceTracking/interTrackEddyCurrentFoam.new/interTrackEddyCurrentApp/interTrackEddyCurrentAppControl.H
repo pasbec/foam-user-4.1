@@ -145,7 +145,7 @@ protected:
             bool updateRelDeltaA() const;
 
             //- Update is due
-            bool update() const;
+            bool update();
 
 
 public:
