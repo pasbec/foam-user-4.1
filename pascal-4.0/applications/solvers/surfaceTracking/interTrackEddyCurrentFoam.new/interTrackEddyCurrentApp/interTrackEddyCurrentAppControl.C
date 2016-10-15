@@ -218,7 +218,15 @@ bool Foam::interTrackEddyCurrentApp::Control::update()
     }
 
     // Reset outputTimeIndex
-    if (uOutputTimeIndex) emUpdateData_.outputTimeIndex = 0;
+    if (uOutputTimeIndex)
+    {
+        emUpdateData_.outputTimeIndex = 0;
+        emUpdateDataDict_.set<int>
+        (
+            "outputTimeIndex",
+            emUpdateData_.outputTimeIndex
+        );
+    }
 
     return uZeroCounter
         || uOutputTimeIndex
