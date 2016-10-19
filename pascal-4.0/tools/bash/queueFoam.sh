@@ -143,7 +143,7 @@ VAR_OPENFOAM_DECOMPOSE_LOG="$VAR_PBS_DIR/log.decompose"
 echo '/*---------------------------------------------------------------------------*\'
 echo '| =========                 |                                                 |'
 echo '| \\      /  F ield         | foam-extend: Open Source CFD                    |'
-echo "|  \\    /   O peration     | Version:     $WM_PROJECT_VERSION                                |"
+echo "|  \\\\    /   O peration     | Version:     $WM_PROJECT_VERSION                                |"
 echo '|   \\  /    A nd           | Web:         http://www.foam-extend.org         |'
 echo '|    \\/     M anipulation  | For copyright notice see file Copyright         |'
 echo '\*---------------------------------------------------------------------------*/'
