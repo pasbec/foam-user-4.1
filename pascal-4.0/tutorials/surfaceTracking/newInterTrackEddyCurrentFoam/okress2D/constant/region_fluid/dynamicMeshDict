@@ -22,11 +22,11 @@ twoDMotion                  no;
 
 solver                      velocityLaplacian;
 
-diffusivity                 uniform;
+// diffusivity                 uniform;
 // diffusivity                 inverseDistance 1(trackedSurface);
-// diffusivity                 quadratic inversePointDistance 1(trackedSurface);
+diffusivity                 quadratic inversePointDistance 1(trackedSurface);
 
-frozenDiffusion             yes;
+frozenDiffusion             no;
 
 // ************************************************************************* //
 
