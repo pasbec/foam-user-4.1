@@ -24,8 +24,6 @@ gradSchemes
     default             none;
     grad(Us)            Gauss linear;
     grad(magSqr(Us))    Gauss linear;
-//     grad(Us)            leastSquares;
-//     grad(magSqr(Us))    leastSquares;
 }
 
 divSchemes
