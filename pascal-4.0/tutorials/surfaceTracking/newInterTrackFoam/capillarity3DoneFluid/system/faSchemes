@@ -46,11 +46,6 @@ interpolationSchemes
     interpolate(aPhi) linear;
 }
 
-snGradSchemes
-{
-    default none;
-}
-
 fluxRequired
 {
 }

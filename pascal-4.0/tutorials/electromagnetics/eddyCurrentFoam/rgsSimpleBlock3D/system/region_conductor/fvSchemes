@@ -27,7 +27,7 @@ gradSchemes
     curl(A0Im)                        Gauss linear;
 
     grad(A0Re)                        Gauss linear;
-     grad(A0Im)                       Gauss linear;
+    grad(A0Im)                        Gauss linear;
 
 //     grad(sigma)                       Gauss linear;
 //     grad(sigma)                       Gauss harmonic;

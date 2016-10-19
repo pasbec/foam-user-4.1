@@ -23,16 +23,8 @@ ddtSchemes
 gradSchemes
 {
     default                 none;
+
     grad(psi)               Gauss linear;
-//     grad(psi)               cellMDLimited Gauss linear 1.0;
-//     grad(psi)               leastSquares;
-//     grad(psi)               Gauss skewCorrected quadraticLinearFit 1.0;
-//     grad(psi)               fourth;
-    snGradCorr(psi)         Gauss linear;
-//     snGradCorr(psi)         cellMDLimited Gauss linear 1.0;
-//     snGradCorr(psi)         leastSquares;
-//     snGradCorr(psi)         Gauss skewCorrected quadraticLinearFit 1.0;
-//     snGradCorr(psi)         fourth;
 }
 
 divSchemes
@@ -56,16 +48,8 @@ laplacianSchemes
 interpolationSchemes
 {
     default                 none;
-}
 
-snGradSchemes
-{
-    default                 none;
-//     snGrad(psi)             uncorrected;
-    snGrad(psi)             corrected;
-//     snGrad(psi)             skewCorrected 1.0;
-//     snGrad(psi)             fourth;
-//     snGrad(psi)             patchCorrected;
+    interpolate(grad(psi))  linear;
 }
 
 fluxRequired

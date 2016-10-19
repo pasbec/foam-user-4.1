@@ -48,11 +48,6 @@ interpolationSchemes
     default         linear;
 }
 
-snGradSchemes
-{
-    default         corrected;
-}
-
 fluxRequired
 {
     p;

@@ -39,6 +39,8 @@ gradSchemes
     grad(omega)                           Gauss linear;
     grad(epsilon)                         Gauss linear;
     grad(nuTilda)                         Gauss linear;
+
+    grad(cellMotionU)                     Gauss linear;
 }
 
 divSchemes
@@ -72,6 +74,8 @@ laplacianSchemes
     laplacian(DomegaEff,omega)            Gauss linear corrected;
     laplacian(DepsilonEff,epsilon)        Gauss linear corrected;
     laplacian(DnuTildaEff,nuTilda)        Gauss linear corrected;
+
+    laplacian(diffusivity,cellMotionU)    Gauss linear corrected;
 }
 
 interpolationSchemes
@@ -90,6 +94,9 @@ interpolationSchemes
     interpolate(grad(k))                  linear;
     interpolate(grad(epsilon))            linear;
     interpolate(grad(omega))              linear;
+
+    interpolate(y)                        linear;
+    interpolate(grad(cellMotionU))        linear;
 }
 
 fluxRequired

@@ -39,9 +39,4 @@ interpolationSchemes
     default                               none;
 }
 
-snGradSchemes
-{
-    default                               none;
-}
-
 // ************************************************************************* //

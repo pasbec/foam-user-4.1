@@ -22,6 +22,8 @@ ddtSchemes
 gradSchemes
 {
     default                               none;
+
+    grad(cellMotionU)                     Gauss linear;
 }
 
 divSchemes
@@ -32,16 +34,16 @@ divSchemes
 laplacianSchemes
 {
     default                               none;
+
+    laplacian(diffusivity,cellMotionU)    Gauss linear corrected;
 }
 
 interpolationSchemes
 {
     default                               none;
-}
 
-snGradSchemes
-{
-    default                               none;
+    interpolate(y)                        linear;
+    interpolate(grad(cellMotionU))        linear;
 }
 
 // ************************************************************************* //

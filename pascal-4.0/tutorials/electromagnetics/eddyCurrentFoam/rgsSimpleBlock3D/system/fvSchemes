@@ -23,15 +23,11 @@ gradSchemes
 {
     default                           none;
 
-//     curl(ARe)                         Gauss linear;
-//     curl(AIm)                         Gauss linear;
-    curl(ARe)                         leastSquares;
-    curl(AIm)                         leastSquares;
+    curl(ARe)                         Gauss linear;
+    curl(AIm)                         Gauss linear;
 
-//     grad(ARe)                         Gauss linear;
-//     grad(AIm)                         Gauss linear;
-    grad(ARe)                         leastSquares;
-    grad(AIm)                         leastSquares;
+    grad(ARe)                         Gauss linear;
+    grad(AIm)                         Gauss linear;
 }
 
 divSchemes

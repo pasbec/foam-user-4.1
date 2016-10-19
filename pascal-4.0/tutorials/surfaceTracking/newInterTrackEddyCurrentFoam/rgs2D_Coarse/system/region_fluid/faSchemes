@@ -49,11 +49,6 @@ interpolationSchemes
     interpolate(deltaH) linear;
 }
 
-snGradSchemes
-{
-    default             none;
-}
-
 fluxRequired
 {
     default             none;
