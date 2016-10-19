@@ -1,0 +1,43 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      interTrackEddyCurrentProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+regions
+{
+    conductor               region_conductor;
+    fluid                   region_fluid;
+    buffer                  region_buffer;
+}
+
+settings
+{
+}
+
+storage
+{
+}
+
+emUpdate
+{
+    enabled                 yes;
+
+    outputTimeIndexCycle    5;
+    timeIndexCycle          2147483647;
+    timeCycle               1e+300;
+
+    relDeltaAmax            0.01;
+}
+
+// ************************************************************************* //
