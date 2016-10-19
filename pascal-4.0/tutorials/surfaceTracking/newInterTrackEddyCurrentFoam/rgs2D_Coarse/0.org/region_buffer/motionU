@@ -44,10 +44,6 @@ boundaryField
         type            processor;
         value           $internalField;
     }
-    global
-    {
-        type            global;
-    }
 }
 
 // ************************************************************************* //
