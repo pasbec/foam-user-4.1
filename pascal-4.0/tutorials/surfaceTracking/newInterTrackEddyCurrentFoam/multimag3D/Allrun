@@ -81,8 +81,7 @@ if [[ ! -e 'state.prepared' || $flagForce -eq 1 ]]; then
     # Create new topoSets
     runApplication \
         setSet -noVTK -batch 'system/setSetBatch' || exit 1
-echo "DEV EXIT"
-exit 1
+
     # Create new patches
     runApplication \
         createPatch -overwrite || exit 1
