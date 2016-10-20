@@ -16,23 +16,23 @@ import math as m
 # --- Parameters ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-geo_x = 0.080
-geo_y = 0.100
-geo_r = 0.020
-geo_d = 0.020
-geo_z = 0.000
+coil_x   = 0.050 # half inner width:  100/2.0
+coil_y   = 0.175 # half inner height: 350/2.0
+coil_r   = 0.010 # inner radius
+coil_dxy = 0.045 # thickness
+coil_dz  = 0.060 # height
 
-rmf_r = 0.300
-rmf_z = 0.030
-rmf_n = 6
-rmf_alpha = (2.0*m.pi)/rmf_n
+geo_r = 0.285 - coil_dz/2.0
+geo_z = 0.030
+geo_n = 6
+geo_alpha = (2.0*m.pi)/geo_n
 
 arc_n = 9
 arc_alpha = (m.pi/2.0)/arc_n
 
-bundle_n = 10 # 4*10 - 2 = 38
-bundle_r = geo_r/(bundle_n-1)
-bundle_z = geo_d/(bundle_n-1)
+bundle_n  = 10 # 4*10 - 2 = 38
+bundle_xy = coil_dxy / (bundle_n-1)
+bundle_z  = coil_dz  / (bundle_n-1)
 
 fileNameBase = 'coil'
 
@@ -48,21 +48,61 @@ def transform_rmf(x, y, z, n):
     # Switch coordinates to flip coil into upright position
     x1 = z
     y1 = x
-    z1 = y + rmf_z
+    z1 = y + geo_z
 
     # Rotate coil into rmf direction
-    x2 = m.cos(n*rmf_alpha)*x1 - m.sin(n*rmf_alpha)*y1
-    y2 = m.sin(n*rmf_alpha)*x1 + m.cos(n*rmf_alpha)*y1
+    x2 = m.cos(n*geo_alpha)*x1 - m.sin(n*geo_alpha)*y1
+    y2 = m.sin(n*geo_alpha)*x1 + m.cos(n*geo_alpha)*y1
     z2 = z1
 
     # Shift coil into rmf position
-    xr = x2 + rmf_r * m.cos(n*rmf_alpha)
-    yr = y2 + rmf_r * m.sin(n*rmf_alpha)
+    xr = x2 + geo_r * m.cos(n*geo_alpha)
+    yr = y2 + geo_r * m.sin(n*geo_alpha)
     zr = z2
 
     return xr, yr, zr
 
-for rmf in range(rmf_n):
+
+def a(n): return n*(bundle_n-1)
+
+
+def b(n): return a(n)+1
+
+
+def transform_bundle(n):
+
+    if (n < b(1)):
+
+        bun_x = coil_x + n*bundle_xy
+        bun_y = coil_y + n*bundle_xy
+        bun_r = coil_r + n*bundle_xy
+        bun_z = 0.0
+
+    elif (n > a(1)) and (n < b(2)):
+
+        bun_x = coil_x + a(1)*bundle_xy
+        bun_y = coil_y + a(1)*bundle_xy
+        bun_r = coil_r + a(1)*bundle_xy
+        bun_z = n*bundle_z - a(1)*bundle_z
+
+    elif (n > a(2)) and (n < b(3)):
+
+        bun_x = coil_x + a(3)*bundle_xy - n*bundle_xy
+        bun_y = coil_y + a(3)*bundle_xy - n*bundle_xy
+        bun_r = coil_r + a(3)*bundle_xy - n*bundle_xy
+        bun_z = a(1)*bundle_z
+
+    elif (n > a(3)) and (n < a(4)):
+
+        bun_x = coil_x
+        bun_y = coil_y
+        bun_r = coil_r
+        bun_z = n*bundle_z - a(3)*bundle_z
+
+    return bun_x, bun_y, bun_r, bun_z
+
+
+for geo in range(geo_n):
 
     # Init points
     points = []
@@ -71,38 +111,9 @@ for rmf in range(rmf_n):
     p=''
     e=''
 
-    def a(n): return n*(bundle_n-1)
-    def b(n): return a(n)+1
-
     for bundle in range(a(4)):
 
-        if (bundle < b(1)):
-
-            bun_x = geo_x + bundle*bundle_r
-            bun_y = geo_y + bundle*bundle_r
-            bun_r = geo_r + bundle*bundle_r
-            bun_z = geo_z
-
-        elif (bundle > a(1)) and (bundle < b(2)):
-
-            bun_x = geo_x + a(1)*bundle_r
-            bun_y = geo_y + a(1)*bundle_r
-            bun_r = geo_r + a(1)*bundle_r
-            bun_z = geo_z + bundle*bundle_z - a(1)*bundle_z
-
-        elif (bundle > a(2)) and (bundle < b(3)):
-
-            bun_x = geo_x + a(3)*bundle_r - bundle*bundle_r
-            bun_y = geo_y + a(3)*bundle_r - bundle*bundle_r
-            bun_r = geo_r + a(3)*bundle_r - bundle*bundle_r
-            bun_z = geo_z + a(1)*bundle_z
-
-        elif (bundle > a(3)) and (bundle < a(4)):
-
-            bun_x = geo_x
-            bun_y = geo_y
-            bun_r = geo_r
-            bun_z = geo_z + bundle*bundle_z - a(3)*bundle_z
+        bun_x, bun_y, bun_r, bun_z = transform_bundle(bundle)
 
         # Corner ++
         arc_alpha0 = 0.0
@@ -112,7 +123,7 @@ for rmf in range(rmf_n):
             y =  bun_y - bun_r + bun_r * m.sin(arc_alpha0 + arc*arc_alpha)
             z =  bun_z
 
-            x, y, z = transform_rmf(x, y, z, rmf)
+            x, y, z = transform_rmf(x, y, z, geo)
 
             points.append([x, y, z])
 
@@ -124,7 +135,7 @@ for rmf in range(rmf_n):
             y =  bun_y - bun_r + bun_r * m.sin(arc_alpha0 + arc*arc_alpha)
             z =  bun_z
 
-            x, y, z = transform_rmf(x, y, z, rmf)
+            x, y, z = transform_rmf(x, y, z, geo)
 
             points.append([x, y, z])
 
@@ -136,7 +147,7 @@ for rmf in range(rmf_n):
             y = -bun_y + bun_r + bun_r * m.sin(arc_alpha0 + arc*arc_alpha)
             z =  bun_z
 
-            x, y, z = transform_rmf(x, y, z, rmf)
+            x, y, z = transform_rmf(x, y, z, geo)
 
             points.append([x, y, z])
 
@@ -148,7 +159,7 @@ for rmf in range(rmf_n):
             y = -bun_y + bun_r + bun_r * m.sin(arc_alpha0 + arc*arc_alpha)
             z =  bun_z
 
-            x, y, z = transform_rmf(x, y, z, rmf)
+            x, y, z = transform_rmf(x, y, z, geo)
 
             points.append([x, y, z])
 
@@ -173,7 +184,7 @@ for rmf in range(rmf_n):
         e += i(1, '('+str(len(points)-1)+' '+str(shift)+')')
 
     # Write
-    fileName = fileNameBase + str(rmf) + '.eMesh'
+    fileName = fileNameBase + str(geo) + '.eMesh'
     with open(fileGetPath(fileName),'w') as f:
 
         f.write(objectHeader(fileName, 'featureEdgeMesh'))
