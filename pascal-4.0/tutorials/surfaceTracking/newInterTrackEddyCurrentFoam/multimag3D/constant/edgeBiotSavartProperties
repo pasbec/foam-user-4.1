@@ -54,7 +54,7 @@ inductors
 
     coil4
     {
-        file       "coil2.eMesh";
+        file       "coil4.eMesh";
         reverse    false;
         current    $currentAmplitude;
         phase      240.0;
@@ -62,7 +62,7 @@ inductors
 
     coil5
     {
-        file       "coil3.eMesh";
+        file       "coil5.eMesh";
         reverse    false;
         current    $currentAmplitude;
         phase      300.0;
