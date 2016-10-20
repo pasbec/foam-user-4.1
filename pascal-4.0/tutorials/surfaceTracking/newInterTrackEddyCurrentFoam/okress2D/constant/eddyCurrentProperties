@@ -29,23 +29,23 @@ settings
 
 storage
 {
-//     "(BRe|BIm)"
-//     {
-//         write          false;
-//     }
-//
-//     "FL"
-//     {
-//         write          false;
-//     }
-//
-//     region_conductor
-//     {
-//         "(jRe|jIm)"
-//         {
-//             write      false;
-//         }
-//     }
+    "(BRe|BIm)"
+    {
+        write          false;
+    }
+
+    "FL"
+    {
+        write          false;
+    }
+
+    region_conductor
+    {
+        "(jRe|jIm)"
+        {
+            write      false;
+        }
+    }
 }
 
 // ************************************************************************* //
