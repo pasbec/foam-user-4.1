@@ -23,8 +23,8 @@ gradSchemes
 {
     default                           none;
 
-    curl(A0Re)                        Gauss linear;
-    curl(A0Im)                        Gauss linear;
+    curl(A0Re)                        leastSquares;
+    curl(A0Im)                        leastSquares;
 
     grad(A0Re)                        Gauss linear;
     grad(A0Im)                        Gauss linear;
