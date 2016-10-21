@@ -23,8 +23,8 @@ gradSchemes
 {
     default                           none;
 
-    curl(A0Re)                        Gauss linear;
-    curl(A0Im)                        Gauss linear;
+    curl(A0Re)                        leastSquares;
+    curl(A0Im)                        leastSquares;
 
     grad(A0Re)                        Gauss linear;
     grad(A0Im)                        Gauss linear;
@@ -55,14 +55,14 @@ interpolationSchemes
 {
     default                           none;
 
-    interpolate(A0Re)                 linear;
-    interpolate(A0Im)                 linear;
-
     interpolate(grad(A0Re))           linear;
     interpolate(grad(A0Im))           linear;
 
     interpolate(grad(VRe))            linear;
     interpolate(grad(VIm))            linear;
+
+    interpolate(A0Re)                 linear;
+    interpolate(A0Im)                 linear;
 
     interpolate(ARe)                  linear;
     interpolate(AIm)                  linear;

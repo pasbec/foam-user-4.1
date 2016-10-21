@@ -16,7 +16,26 @@ FoamFile
 
 nNonOrthogonalCorrectors    10;
 
-currentAmplitude            26.3158; // = 1000.0000 / (4*10-2)
+// currentAmplitude            26.3158; // = 1000.0000 / (4*10-2)
+currentAmplitude            8.4770; // = 322.125 / (4*10-2)
+
+
+// We need a current of
+//
+// I = 322.125 A
+//
+// for achieving
+//
+// B=0.4216 mT
+//
+// at centroid of cylinder for
+//
+// Ta=10^5
+//
+// with
+//
+// Ta=sigma*omega*B^2*(H/2)^4/(2*rho*nu^2)
+//
 
 inductors
 {
