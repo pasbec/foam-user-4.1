@@ -26,9 +26,5 @@
             // Update boundary field of B
             globalStorage.BRe().extrapolateBoundaryField(CONDUCTOR);
             globalStorage.BIm().extrapolateBoundaryField(CONDUCTOR);
-
-            // Reverse map the solution of B
-            globalStorage.BRe().rmap(CONDUCTOR);
-            globalStorage.BIm().rmap(CONDUCTOR);
         }
     }
