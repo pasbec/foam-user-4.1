@@ -1002,13 +1002,21 @@ class blocks(object):
 
         for blockLabel in blockLabels:
 
+            label = blockLabel + shift
+
             originVerticeLables = \
                 self.blockVerticeLabels[self.labelIndex[blockLabel]]
 
             shiftedVerticeLables = \
                 [ originVerticeLables[l] + verticeLebelShift for l in range(8)]
 
-            label = blockLabel + shift
+            originDistribution = self.distributions[blockLabel]
+
+            originGrading = self.gradings[blockLabel]
+
+            originZone = self.zones[blockLabel]
+
+            # TODO: How to COPY those values? The above are references...
 
             self.set(label, shiftedVerticeLables)
 
