@@ -35,5 +35,5 @@ mv "$meshFolder/boundary" \
    "$meshFolder/points" \
    'constant/polyMesh.org/'
 
-# # Remove polyMesh
-# rm -rf "$meshFolder"
+# Remove polyMesh
+rm -rf "$meshFolder"
