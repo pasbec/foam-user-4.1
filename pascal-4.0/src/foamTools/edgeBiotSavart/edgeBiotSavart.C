@@ -68,7 +68,6 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::calcA
         const bool reverse = inductorData_[inductorI].reverse;
         const scalar phase = inductorData_[inductorI].phase/180.0 * M_PI;
         scalar complex = int(part)*sin(phase) + int(1-part)*cos(phase);
-        if (complex < SMALL) complex = 0;
 
         const scalar factor = 1.0E-7 * current * complex;
 
@@ -148,7 +147,6 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::calcB
         const bool reverse = inductorData_[inductorI].reverse;
         const scalar phase = inductorData_[inductorI].phase/180.0 * M_PI;
         scalar complex = int(part)*sin(phase) + int(1-part)*cos(phase);
-        if (complex < SMALL) complex = 0;
 
         const scalar factor = 1.0E-7 * current * complex;
 
