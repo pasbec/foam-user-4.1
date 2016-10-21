@@ -364,7 +364,7 @@ void trackedSurface::adjustDisplacementDirections()
         pointsDisplacementDir() = aMesh().pointAreaNormals();
 
         // Correct point displacement direction
-        // at the "centerline" symmetryPlane which represents the axis
+        // at the "axis" symmetryPlane which represents the axis
         // of an axisymmetric case
         forAll (aMesh().boundary(), patchI)
         {
@@ -376,7 +376,7 @@ void trackedSurface::adjustDisplacementDirections()
                 vector axis = wedgePatch.axis();
 
                 label centerLinePatchID =
-                    aMesh().boundary().findPatchID("centerline");
+                    aMesh().boundary().findPatchID("axis");
 
                 if (centerLinePatchID != -1)
                 {
@@ -399,7 +399,7 @@ void trackedSurface::adjustDisplacementDirections()
                     WarningIn("trackedSurface::adjustDisplacementDirections()")
                         << "Centerline polyPatch does not exist. "
                         << "Surface points displacement directions "
-                        << "will not be corrected at the axis (centerline)"
+                        << "will not be corrected at the axis (axis)"
                         << endl;
                 }
 
