@@ -179,14 +179,24 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
     {
         Pout << "Correction: " << ++iCorr << endl;
 
-        volVectorField& U = cellMotionU_;
-
         surfaceScalarField& muf = diffusivityPtr_->operator()()();
         surfaceScalarField lambdaf(word(), muf*(2*nu_/(1 - 2*nu_)));
 
-        volScalarField mu("mu", fvc::average(muf));
-        volScalarField lambda("lambda", fvc::average(lambdaf));
+        volScalarField mu
+        (
+            "mu",
+            fvc::average(muf)
+          / dimensionedScalar(word(), muf.dimensions(), 1.0)
+        );
 
+        volScalarField lambda
+        (
+            "lambda",
+            fvc::average(lambdaf)
+          / dimensionedScalar(word(), lambdaf.dimensions(), 1.0)
+        );
+
+        volVectorField& U = cellMotionU_;
         volTensorField gradU("gradCellMotionU", fvc::grad(U));
 
         Foam::solve
