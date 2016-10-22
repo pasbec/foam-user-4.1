@@ -213,7 +213,7 @@ void Foam::refVelocityPseudoSolidFvMotionSolver::solve()
           + fvc::div
             (
                 mu*gradU.T() + nu_*(I*tr(gradU)) - (mu + nu_)*gradU,
-                "div(sigma)"
+                "div(cellMotionSigma)"
             )
         );
     }
