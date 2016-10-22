@@ -182,8 +182,10 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
         volVectorField& U = cellMotionU_;
 
         surfaceScalarField& muf = diffusivityPtr_->operator()()();
+        surfaceScalarField lambdaf(word(), muf*(2*nu_/(1 - 2*nu_)));
 
-        volScalarField mu("diffusivity", fvc::average(muf));
+        volScalarField mu("mu", fvc::average(muf));
+        volScalarField lambda("lambda", fvc::average(lambdaf));
 
         volTensorField gradU("gradCellMotionU", fvc::grad(U));
 
@@ -191,12 +193,12 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
         (
             fvm::laplacian
             (
-                2*muf + 0.3, U,
+                2*mu + lambda, U,
                 "laplacian(diffusivity,cellMotionU)"
             )
           + fvc::div
             (
-                mu*gradU.T() + nu_*(I*tr(gradU)) - (mu + nu_)*gradU,
+                mu*gradU.T() + lambda*(I*tr(gradU)) - (mu + lambda)*gradU,
                 "div(cellMotionSigma)"
             )
         );
