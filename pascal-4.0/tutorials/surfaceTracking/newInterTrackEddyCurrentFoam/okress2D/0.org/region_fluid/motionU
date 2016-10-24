@@ -22,7 +22,10 @@ boundaryField
 {
     axis
     {
-        type            slip;
+//         type            slip; // broken in combination with wedge?
+        type            componentMixed;
+        refValue        uniform (0 0 0);
+        valueFraction   uniform (1 0 0);
     }
     front
     {
