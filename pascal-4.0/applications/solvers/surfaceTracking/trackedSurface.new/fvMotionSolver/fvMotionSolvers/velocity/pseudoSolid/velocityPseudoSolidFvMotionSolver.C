@@ -179,7 +179,7 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
     {
         Pout << "Correction: " << ++iCorr << endl;
 
-        surfaceScalarField& muf = diffusivityPtr_->operator()()();
+        surfaceScalarField muf = diffusivityPtr_->operator()()();
         surfaceScalarField lambdaf(word(), muf*(2*nu_/(1 - 2*nu_)));
 
         volScalarField mu
@@ -199,7 +199,7 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
         volVectorField& U = cellMotionU_;
         volTensorField gradU("gradCellMotionU", fvc::grad(U));
 
-        Foam::solve
+        fvVectorMatrix motionEqn
         (
             fvm::laplacian
             (
@@ -212,6 +212,11 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
                 "div(cellMotionSigma)"
             )
         );
+
+        // Solve the motion equation
+        initialResidual = motionEqn.solve().initialResidual();
+
+        Pout << "Initial residual: " << initialResidual << endl;
     }
     while (initialResidual > convergenceTolerance_ && iCorr < nCorrectors_);
 }
