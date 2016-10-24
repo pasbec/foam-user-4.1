@@ -4,3 +4,5 @@ set -x
 
 wclean all solvers || exit 1
 wclean all utilities || exit 1
+
+wcleanLnIncludeAll . || exit 1
