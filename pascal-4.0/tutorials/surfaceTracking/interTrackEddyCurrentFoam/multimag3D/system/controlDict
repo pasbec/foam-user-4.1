@@ -10,50 +10,62 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-applicationClass    newInterFreeFoam;
+// ************************* SIMLUTAITON TIMES ***************************** //
+
+application         interTrackEddyCurrentFoam;
 
 startFrom           latestTime;
 
-startTime           0;
+startTime           0.0;
 
 stopAt              endTime;
 
-endTime             20;
+endTime             10.0;
 
-deltaT              0.01;
+// *************************** TIME STEPPING ******************************* //
 
-writeControl        runTime;
+deltaT              0.0001;
 
-writeInterval       0.05;
+adjustTimeStep      yes;
+
+maxCo               0.3;
+
+maxDeltaT           0.0001;
+
+// *************************** OUTPUT SETTINGS ***************************** //
+
+writeControl        adjustableRunTime;
+// writeControl        timeStep;
+
+writeInterval       0.001;
+// writeInterval       1;
+
+purgeWrite          0;
 
 cycleWrite          0;
 
+//writeFormat         binary; // ascii
 writeFormat         ascii;
 
-writeCompression    compressed;
+writePrecision      8;
+
+writeCompression    uncompressed;
 
 timeFormat          general;
 
-timePrecision       6;
+timePrecision       8;
+
+// **************************** OTHER SETTINGS ***************************** //
 
 runTimeModifiable   yes;
 
-//functions
-//(
-//   history
-//   {
-//       type sloshingHistory;
-//       functionObjectLibs
-//       (
-//         "libsloshingHistory.so"
-//       );
-//   }
-//);
+// OptimisationSwitches
+// {
+//     commsType       nonBlocking;
+// }
 
 // ************************************************************************* //
-

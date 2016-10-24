@@ -9,9 +9,8 @@ wclean all freeSurface.new || exit 1
 wclean interFreeFoam || exit 1
 wclean interFreeFoam.new || exit 1
 
+wclean all trackedSurface || exit 1
 
-wclean all trackedSurface.new || exit 1
+wclean interTrackFoam || exit 1
 
-wclean interTrackFoam.new || exit 1
-
-wclean interTrackEddyCurrentFoam.new || exit 1
+wclean interTrackEddyCurrentFoam || exit 1
