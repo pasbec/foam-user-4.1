@@ -16,17 +16,15 @@ FoamFile
 
 nNonOrthogonalCorrectors    10;
 
-// currentAmplitude            26.3158; // = 1000.0000 / (4*10-2)
-currentAmplitude            8.4770; // = 322.125 / (4*10-2)
-
+currentAmplitude            11.9737; // = 455 / (4*10-2)
 
 // We need a current of
 //
-// I = 322.125 A
+// I = 455 A
 //
 // for achieving
 //
-// B=0.4216 mT
+// B=sqrt(Bx^2 + By^2 + Bz)0.4216 mT
 //
 // at centroid of cylinder for
 //
