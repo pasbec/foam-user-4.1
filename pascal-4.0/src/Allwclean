@@ -8,5 +8,3 @@ wclean foamTools || exit 1
 rm -rf regionModel/lnInclude 2>/dev/null
 wclean regionModel || exit 1
 
-rm -rf finiteArea.new/lnInclude 2>/dev/null
-wclean finiteArea.new || exit 1

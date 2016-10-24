@@ -5,5 +5,7 @@
 ../../../.wm_project_dir/src/dynamicMesh/meshMotion/fvMotionSolver/lnInclude
 ../../../.wm_project_dir/src/dynamicMesh/meshMotion/tetMotionSolver/lnInclude
 
+../../../.wm_project_dir/src/finiteArea/lnInclude
+
 ./include
 ./include.new

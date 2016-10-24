@@ -7,8 +7,6 @@
 
 ../../../../.wm_project_dir/src/turbulenceModels/incompressible/turbulenceModel/lnInclude
 
-../../../../src/finiteArea.new/lnInclude
-
 ../../../../src/foamTools/lnInclude
 ../../../../src/regionModel/lnInclude
 
