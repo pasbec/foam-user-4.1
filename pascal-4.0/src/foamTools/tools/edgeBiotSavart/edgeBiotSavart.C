@@ -350,9 +350,9 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
 
     forAll (A.boundaryField(), patchI)
     {
-        const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+        const fvPatchVectorField& pvf = A.boundaryField()[patchI];
 
-        if (!patch.coupled())
+        if (isA<calculatedFvPatchVectorField>(pvf))
         {
             A.boundaryField()[patchI] = boundaryPatchA(patchI, part);
         }
@@ -398,9 +398,9 @@ void Foam::edgeBiotSavart::A
 
     forAll (A.boundaryField(), patchI)
     {
-        const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+        const fvPatchVectorField& pvf = A.boundaryField()[patchI];
 
-        if (!patch.coupled())
+        if (isA<fixedValueFvPatchVectorField>(pvf))
         {
             A.boundaryField()[patchI] == boundaryPatchA(patchI, part);
         }
@@ -498,9 +498,9 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::B
 
     forAll (B.boundaryField(), patchI)
     {
-        const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+        const fvPatchVectorField& pvf = B.boundaryField()[patchI];
 
-        if (!patch.coupled())
+        if (isA<calculatedFvPatchVectorField>(pvf))
         {
             B.boundaryField()[patchI] = boundaryPatchB(patchI, part);
         }

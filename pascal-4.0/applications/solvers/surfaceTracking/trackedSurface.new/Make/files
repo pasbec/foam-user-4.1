@@ -8,7 +8,4 @@ trackedSurfaceWrite.C
 faSubMesh/faSubMesh.C
 faSubMesh/faSubMeshDemandDrivenData.C
 
-fvMotionSolver/fvMotionSolvers/velocity/pseudoSolid/velocityPseudoSolidFvMotionSolver.C
-fvMotionSolver/fvMotionSolvers/velocity/refPseudoSolid/refVelocityPseudoSolidFvMotionSolver.C
-
 LIB = $(FOAM_USER_LIBBIN)/libnewTrackedSurface
