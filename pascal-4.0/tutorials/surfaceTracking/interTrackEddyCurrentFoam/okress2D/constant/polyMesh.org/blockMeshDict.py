@@ -16,7 +16,7 @@ import math as m
 geo_scale = 1e-2
 
 # Background mesh
-geo_rS = 0.1
+geo_rS = 0.01
 geo_r0 = 0.625
 geo_r1 = 1.25
 geo_r2 = 5.0
@@ -40,7 +40,7 @@ axi_y0 = geo_r0 * axi_phiHalfSin
 axi_y1 = geo_r1 * axi_phiHalfSin
 axi_y2 = geo_r2 * axi_phiHalfSin
 
-n_scale = 1.0
+n_scale = 4.0
 
 n0 = int(m.ceil(n_scale*(geo_r0)*5))
 n1 = int(m.ceil(n_scale*(geo_r1-geo_r0)*10))

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# July 2015
+# October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
 # --------------------------------------------------------------------------- #
@@ -7,10 +7,9 @@
 # --------------------------------------------------------------------------- #
 
 import os, sys
+import math as m
 
 from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFooter
-
-import math as m
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -37,11 +36,14 @@ bundle_z  = coil_dz  / (bundle_n-1)
 fileNameBase = 'coil'
 
 # --------------------------------------------------------------------------- #
+# --- Function definitions -------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
 # Define short indented line with line break
 def i(iL,cS,eS='\n'): return objectIndent(cS + eS,iLevel=iL)
 
-# --------------------------------------------------------------------------- #
+
+
 
 def transform_rmf(x, y, z, n):
 
@@ -63,10 +65,13 @@ def transform_rmf(x, y, z, n):
     return xr, yr, zr
 
 
+
 def a(n): return n*(bundle_n-1)
 
 
+
 def b(n): return a(n)+1
+
 
 
 def transform_bundle(n):
@@ -101,6 +106,9 @@ def transform_bundle(n):
 
     return bun_x, bun_y, bun_r, bun_z
 
+# --------------------------------------------------------------------------- #
+# --- Main program sequence ------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
 for geo in range(geo_n):
 
@@ -202,7 +210,6 @@ for geo in range(geo_n):
         f.write(i(0, ')\n'))
 
         f.write(objectFooter())
-
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
