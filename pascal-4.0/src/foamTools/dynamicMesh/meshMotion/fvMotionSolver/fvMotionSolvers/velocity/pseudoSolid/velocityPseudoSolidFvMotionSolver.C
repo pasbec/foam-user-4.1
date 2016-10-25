@@ -177,7 +177,7 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
 
     do
     {
-        Pout << "Correction: " << ++iCorr << endl;
+        Info << "Correction: " << ++iCorr << endl;
 
         surfaceScalarField muf = diffusivityPtr_->operator()()();
         surfaceScalarField lambdaf(word(), muf*(2*nu_/(1 - 2*nu_)));
@@ -216,7 +216,7 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
         // Solve the motion equation
         initialResidual = motionEqn.solve().initialResidual();
 
-        Pout << "Initial residual: " << initialResidual << endl;
+        Info << "Initial residual: " << initialResidual << endl;
     }
     while (initialResidual > convergenceTolerance_ && iCorr < nCorrectors_);
 }

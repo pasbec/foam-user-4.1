@@ -163,8 +163,6 @@ Foam::refVelocityPseudoSolidFvMotionSolver::curPoints() const
 
 void Foam::refVelocityPseudoSolidFvMotionSolver::solve()
 {
-    diffusivityPtr_->correct();
-
     // Move mesh to initial configuration
     pointIOField refAllPoints
     (
@@ -185,6 +183,8 @@ void Foam::refVelocityPseudoSolidFvMotionSolver::solve()
 
     mesh.movePoints(refAllPoints);
 
+    diffusivityPtr_->correct();
+
     // ZT, Problem on symmetry plane
 //     pointMotionU_.boundaryField().updateCoeffs();
 
@@ -193,7 +193,7 @@ void Foam::refVelocityPseudoSolidFvMotionSolver::solve()
 
     do
     {
-        Pout << "Correction: " << ++iCorr << endl;
+        Info << "Correction: " << ++iCorr << endl;
 
         surfaceScalarField muf = diffusivityPtr_->operator()()();
         surfaceScalarField lambdaf(word(), muf*(2*nu_/(1 - 2*nu_)));
@@ -232,7 +232,7 @@ void Foam::refVelocityPseudoSolidFvMotionSolver::solve()
         // Solve the motion equation
         initialResidual = motionEqn.solve().initialResidual();
 
-        Pout << "Initial residual: " << initialResidual << endl;
+        Info << "Initial residual: " << initialResidual << endl;
     }
     while (initialResidual > convergenceTolerance_ && iCorr < nCorrectors_);
 
