@@ -7,10 +7,11 @@
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-import math
+import math as m
 import numpy as np
-import scipy as sp
 from scipy import special as spsp
+
+from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -20,7 +21,7 @@ N = 40
 H0 = 0.03
 R0 = 0.03
 sigma = 3.2906e+06
-omega = 2.0*math.pi*50.0
+omega = 2.0*m.pi*50.0
 B0 = 0.421599e-3
 
 nr = 61
@@ -49,12 +50,12 @@ def f(r,z):
     if (r==0):
         a = 0.0
         for i in range(len(l)):
-            a = a + (l[i]*math.cosh(l[i]*z))/((l[i]*l[i]-1.0)*spsp.jv(1,l[i])*math.cosh(l[i]*H0/R0))
+            a = a + (l[i]*m.cosh(l[i]*z))/((l[i]*l[i]-1.0)*spsp.jv(1,l[i])*m.cosh(l[i]*H0/R0))
         b = r - a*r
     else:
         a = 0.0
         for i in range(len(l)):
-            a = a + (spsp.jv(1,l[i]*r)*math.cosh(l[i]*z))/((l[i]*l[i]-1.0)*spsp.jv(1,l[i])*math.cosh(l[i]*H0/R0))
+            a = a + (spsp.jv(1,l[i]*r)*m.cosh(l[i]*z))/((l[i]*l[i]-1.0)*spsp.jv(1,l[i])*m.cosh(l[i]*H0/R0))
         b = r - 2.0*a
     return b
 
@@ -70,7 +71,7 @@ def fl(r,z):
 # --------------------------------------------------------------------------- #
 
 # Mesh and discretisation
-rl = np.linspace( 0.0,R0,nr)
+rl = np.linspace(0.0,R0,nr)
 zl = np.linspace(0.0,H0,nz)
 
 R,Z = np.meshgrid(rl,zl,indexing='ij')
@@ -78,21 +79,18 @@ F   = np.zeros(R.shape)
 
 
 # Calculate and write data
-
-fileName = 'lorentzForce.dat'
-
-with open(fileName,'w') as lff:
+with open(fileGetPath('lorentzForceAnalytical.dat'),'w') as lff:
 
     lff.write('# Variables: ' + 'r' + ' ' + 'z' + ' ' + 'F' + '\n')
 
     lff.write('# Resolution: ' + 'nr=' + str(nr) + ', ' + 'nz=' + str(nz) + '\n')
 
-    for i in range(len(rl)):
-        for j in range(len(zl)):
+    for ri in range(nr):
+        for zi in range(nz):
 
-            F[i,j] = fl(rl[i],zl[j])
+            F[ri,zi] = fl(rl[ri],zl[zi])
 
-            lff.write(str(rl[i]) + ' ' + str(zl[j]) + ' ' + str(F[i,j]) + '\n')
+            lff.write(str(rl[ri]) + ' ' + str(zl[zi]) + ' ' + str(F[ri,zi]) + '\n')
 
 print "Fmin, Fmax :", str(np.min(F)) + ",", str(np.max(F))
 

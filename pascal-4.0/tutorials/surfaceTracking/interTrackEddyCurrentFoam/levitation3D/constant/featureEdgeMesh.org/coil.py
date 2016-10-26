@@ -6,8 +6,6 @@
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-import os, sys
-
 from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFooter
 
 import math as m
