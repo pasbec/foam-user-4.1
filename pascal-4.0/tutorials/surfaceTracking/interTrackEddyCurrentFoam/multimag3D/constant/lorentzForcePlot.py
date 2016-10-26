@@ -87,7 +87,10 @@ for ri in range(nr):
 
         Z1[ri,zi] = 1000.0 * (Z1[ri,zi] - z0)
 
+        # Magnitude
         #F1[ri,zi] = m.sqrt(F1x[ri,zi]**2 + F1y[ri,zi]**2 + F1z[ri,zi]**2)
+
+        # Phi-component
         F1[ri,zi] = abs(F1y[ri,zi])
 
 fig1, ax1 = plt.subplots()

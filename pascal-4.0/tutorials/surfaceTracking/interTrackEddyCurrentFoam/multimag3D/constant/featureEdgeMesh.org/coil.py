@@ -16,6 +16,7 @@ from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFoot
 
 coil_x   = 0.050 # half inner width:  100/2.0
 coil_y   = 0.175 # half inner height: 350/2.0
+#coil_y   = 500.0 # half inner height: 1000000/2.0
 coil_r   = 0.010 # inner radius
 coil_dxy = 0.045 # thickness
 coil_dz  = 0.060 # height
