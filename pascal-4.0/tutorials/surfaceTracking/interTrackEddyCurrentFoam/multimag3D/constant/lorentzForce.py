@@ -79,7 +79,7 @@ F   = np.zeros(R.shape)
 
 # Calculate and write data
 
-fileName = 'LorentzForce.dat'
+fileName = 'lorentzForce.dat'
 
 with open(fileName,'w') as lff:
 

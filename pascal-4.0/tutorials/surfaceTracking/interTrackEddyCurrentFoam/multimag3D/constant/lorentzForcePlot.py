@@ -34,7 +34,7 @@ print "fontfamily : ", fontfamily
 # --- Main program sequence ------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-data = np.genfromtxt('LorentzForce.dat', comments='#')
+data = np.genfromtxt('lorentzForce.dat', comments='#')
 
 R = data[:,0].reshape(nr,nz)
 Z = data[:,1].reshape(nr,nz)
@@ -54,7 +54,7 @@ ax0.clabel(fc, fc.levels[0::2], inline=True, fmt='%g', fontsize=fontsize)
 
 latexify(fontsize=fontsize, fontfamily=fontfamily)
 
-plt.savefig('LorentzForce.pdf',bbox_inches="tight")
+plt.savefig('lorentzForce.pdf',bbox_inches="tight")
 
 
 #plt.show(block=False)

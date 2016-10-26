@@ -36,7 +36,7 @@ print "nr, nz : ", nr, ",", nz
 rl = np.linspace( 0.0,R0,nr)
 zl = np.linspace(0.0,H0,nz)
 
-fileName = 'LorentzForce.cloud'
+fileName = 'lorentzForce.cloud'
 
 with open(fileName,'w') as cf:
     for i in range(len(rl)):
