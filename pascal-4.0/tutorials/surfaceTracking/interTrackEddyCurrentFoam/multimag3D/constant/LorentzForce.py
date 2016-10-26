@@ -26,8 +26,12 @@ B0 = 0.421599e-3
 nr = 61
 nz = 61
 
+print "N          : %g" % (N)
+print "H0, R0     :", str(H0) + ",", str(R0)
 print "sigma      : %g S/m" % (sigma)
+print "omega      : %g" % (omega)
 print "B0         : %g T" % (B0)
+
 print "nr, nz     :", str(nr) + ",", str(nz)
 
 # --------------------------------------------------------------------------- #
@@ -79,16 +83,16 @@ fileName = 'LorentzForce.dat'
 
 with open(fileName,'w') as lff:
 
-    lff.write('# Variables: ' + 'r' + ' ' + 'z' + ' ' + 'F' + ' \n')
+    lff.write('# Variables: ' + 'r' + ' ' + 'z' + ' ' + 'F' + '\n')
 
-    lff.write('# Resolution: ' + 'nr=' + str(nr) + ', ' + 'nz=' + str(nz) + ' \n')
+    lff.write('# Resolution: ' + 'nr=' + str(nr) + ', ' + 'nz=' + str(nz) + '\n')
 
     for i in range(len(rl)):
         for j in range(len(zl)):
 
             F[i,j] = fl(rl[i],zl[j])
 
-            lff.write(str(rl[i]) + ' ' + str(zl[j]) + ' ' + str(F[i,j]) + ' \n')
+            lff.write(str(rl[i]) + ' ' + str(zl[j]) + ' ' + str(F[i,j]) + '\n')
 
 print "Fmin, Fmax :", str(np.min(F)) + ",", str(np.max(F))
 

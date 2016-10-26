@@ -7,7 +7,7 @@
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from math import sqrt
@@ -16,18 +16,31 @@ from math import sqrt
 # --- Function definitions -------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def latexify(fig_width=None, fig_height=None, columns=1):
+def latexify(
+        fig_width=None, fig_height=None, columns=1,
+        fontsize=10, fontfamily='serif'
+    ):
     """Set up matplotlib's RC params for LaTeX plotting.
     Call this before plotting a figure.
 
     Parameters
     ----------
-    fig_width : float, optional, inches
-    fig_height : float,  optional, inches
-    columns : {1, 2}
+    fig_width : float, optional, cm
+    fig_height : float,  optional, cm
+    columns : {1, 2},
+    fontsize : 10
+    fontfamily : 'serif'
     """
 
-    # code adapted from http://www.scipy.org/Cookbook/Matplotlib/LaTeX_Examples
+    inch = 2.54
+
+    if fig_width is not None:
+        fig_width = fig_width / inch
+
+    if fig_height is not None:
+        fig_height = fig_width / inch
+
+    # Code adapted from http://www.scipy.org/Cookbook/Matplotlib/LaTeX_Examples
 
     # Width and max height in inches for IEEE journals taken from
     # computer.org/cms/Computer.org/Journal%20templates/transactions_art_guide.pdf
@@ -47,20 +60,25 @@ def latexify(fig_width=None, fig_height=None, columns=1):
               "so will reduce to" + MAX_HEIGHT_INCHES + "inches.")
         fig_height = MAX_HEIGHT_INCHES
 
-    params = {'backend': 'ps',
-              'text.latex.preamble': ['\usepackage{gensymb}'],
-              'axes.labelsize': 8, # fontsize for x and y labels (was 10)
-              'axes.titlesize': 8,
-              'text.fontsize': 8, # was 10
-              'legend.fontsize': 8, # was 10
-              'xtick.labelsize': 8,
-              'ytick.labelsize': 8,
-              'text.usetex': True,
-              'figure.figsize': [fig_width,fig_height],
-              'font.family': 'serif'
-    }
+    # Adjust rc parameters
 
-    matplotlib.rcParams.update(params)
+    mpl.rcParams['figure.figsize'] = [fig_width,fig_height]
+
+    mpl.rcParams['backend'] = 'ps'
+
+    mpl.rcParams['text.usetex'] = True
+    mpl.rcParams['text.latex.preamble'] = ['\usepackage{gensymb}']
+
+    mpl.rcParams['font.size'] = fontsize
+    mpl.rcParams['font.family'] = fontfamily
+
+    mpl.rcParams['axes.labelsize'] = fontsize
+    mpl.rcParams['axes.titlesize'] = fontsize
+
+    mpl.rcParams['legend.fontsize'] = fontsize
+
+    mpl.rcParams['xtick.labelsize'] = fontsize
+    mpl.rcParams['ytick.labelsize'] = fontsize
 
 # --------------------------------------------------------------------------- #
 # --- End of module --------------------------------------------------------- #

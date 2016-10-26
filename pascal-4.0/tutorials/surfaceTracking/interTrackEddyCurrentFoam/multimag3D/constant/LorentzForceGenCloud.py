@@ -7,58 +7,42 @@
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-import math
 import numpy as np
-import scipy as sp
-
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-
-from plotTools.latex import latexify
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
+H0 = 0.03
+R0 = 0.03
+
 nr = 61
 nz = 61
 
-fontsize=14
-fontfamily='serif'
+print "H0, R0 :", str(H0) + ",", str(R0)
+print "nr, nz : ", nr, ",", nz
 
-print "nr, nz     : ", nr, ",", nz
-print "fontsize   : ", fontsize
-print "fontfamily : ", fontfamily
+# --------------------------------------------------------------------------- #
+# --- Function definitions -------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+#
 
 # --------------------------------------------------------------------------- #
 # --- Main program sequence ------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-data = np.genfromtxt('LorentzForce.dat', comments='#')
+# Mesh and discretisation
+rl = np.linspace( 0.0,R0,nr)
+zl = np.linspace(0.0,H0,nz)
 
-R = data[:,0].reshape(nr,nz)
-Z = data[:,1].reshape(nr,nz)
-F = data[:,2].reshape(nr,nz)
+fileName = 'LorentzForce.cloud'
 
-fig0, ax0 = plt.subplots()
+with open(fileName,'w') as cf:
+    for i in range(len(rl)):
+        for j in range(len(zl)):
 
-ax0.set_xlim([0.0,0.03])
-ax0.set_ylim([0.0,0.03])
-
-ax0.set_aspect('equal')
-
-#fc = ax0.contour(R, Z, F, colors='black', levels=np.linspace(0.2,2.0,10))
-fc = ax0.contour(R, Z, F, levels=np.linspace(0.2,2.0,10))
-
-ax0.clabel(fc, fc.levels[0::2], inline=True, fmt='%g', fontsize=fontsize)
-
-latexify(fontsize=fontsize, fontfamily=fontfamily)
-
-plt.savefig('LorentzForce.pdf',bbox_inches="tight")
-
-
-#plt.show(block=False)
-#time.sleep(10)
+            cf.write('(' + str(rl[i]) + ' 0.0 ' + str(zl[j]) + ')\n')
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
