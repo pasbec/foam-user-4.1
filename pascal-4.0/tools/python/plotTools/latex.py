@@ -69,7 +69,8 @@ def latexify(
     mpl.rcParams['backend'] = 'ps'
 
     mpl.rcParams['text.usetex'] = True
-    mpl.rcParams['text.latex.preamble'] = ['\usepackage{gensymb}']
+    mpl.rcParams['text.latex.unicode'] = True
+    #mpl.rcParams['text.latex.preamble'] = ['\usepackage{gensymb}']
 
     mpl.rcParams['font.size'] = fontsize
     mpl.rcParams['font.family'] = fontfamily

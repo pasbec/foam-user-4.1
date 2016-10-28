@@ -30,7 +30,7 @@ geo_z4 = 12.0
 a = 2.0**(-0.5)
 f = 1.2
 
-n_scale = 0.25
+n_scale = 1.0
 
 nr0 = int(m.ceil(n_scale*(geo_r0)*7))
 nr1 = int(m.ceil(n_scale*(geo_r1-geo_r0)*10))
