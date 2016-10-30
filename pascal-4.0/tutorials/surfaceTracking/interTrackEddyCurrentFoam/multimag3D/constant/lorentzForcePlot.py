@@ -151,7 +151,7 @@ for key in norms.keys():
 
 # Calculate norms and global maximum
 Dmax = 0.0
-Nmax = 0.0
+Nmax = [ 0.0 for i in range(3)]
 for mesh in meshes[:-1]:
 
     D[set][mesh] = 1.0/float(mesh)
@@ -162,7 +162,7 @@ for mesh in meshes[:-1]:
         for i in range(3):
 
             N[set][key][i][mesh] = norms[key](F[set][meshes[-1]][i], E[set][mesh][i])
-            Nmax = max(Nmax, N[set][key][i][mesh])
+            Nmax[i] = max(Nmax[i], N[set][key][i][mesh])
 
 # Scale norms and mesh delta
 for mesh in meshes[:-1]:
@@ -173,7 +173,7 @@ for mesh in meshes[:-1]:
 
         for i in range(3):
 
-            N[set][key][i][mesh] /= Nmax
+            N[set][key][i][mesh] /= Nmax[i]
 
 #print [ i for k, i in sorted(N[set]['inf'][0].iteritems())]
 #print [ i for k, i in sorted(N[set]['1'][0].iteritems())]
