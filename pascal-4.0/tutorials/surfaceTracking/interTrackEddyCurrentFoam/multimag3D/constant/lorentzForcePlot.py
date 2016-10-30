@@ -36,11 +36,11 @@ baseName = 'lorentzForce'
 # --- Functions ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def vec_mag(x, y, z):
+def norm_inf(r, e): return np.max(np.absolute(e)) / np.max(np.absolute(r))
+def norm_1(r, e): return np.sum(np.absolute(e)) / np.sum(np.absolute(r))
+def norm_2(r, e): return (np.sum(e**2) / np.sum(r**2))**0.5
 
-    return (x**2 + y**2 + z**2)
-
-np_vec_mag = np.vectorize(vec_mag)
+norms = {'inf': norm_inf, '1': norm_1, '2': norm_2}
 
 # --------------------------------------------------------------------------- #
 # --- Data ------------------------------------------------------------------ #
@@ -48,22 +48,16 @@ np_vec_mag = np.vectorize(vec_mag)
 
 data = dict()
 
-R  = dict()
-Z  = dict()
+R = dict()
+Z = dict()
 
 Fr = dict()
 Fa = dict()
 Fz = dict()
 
-FrE = dict()
-FaE = dict()
-FzE = dict()
-
-normX   = dict()
-
-normFrE = dict()
-normFaE = dict()
-normFzE = dict()
+E = dict()
+D = dict()
+N = dict()
 
 # --------------------------------------------------------------------------- #
 
@@ -134,66 +128,60 @@ for mesh in meshes:
 
             Fa[set][mesh][ri,zi] = -Fa[set][mesh][ri,zi]
 
-FrE[set] = dict()
-FaE[set] = dict()
-FzE[set] = dict()
+E[set] = dict()
+D[set] = dict()
+N[set] = dict()
 
 for mesh in meshes[:-1]:
 
-    FrE[set][mesh]  = np.zeros(R[set][mesh].shape)
-    FaE[set][mesh]  = np.zeros(R[set][mesh].shape)
-    FzE[set][mesh]  = np.zeros(R[set][mesh].shape)
+    E[set][mesh] = [np.zeros(R[set][mesh].shape) for i in range(3)]
 
-    # Scale to mm, flip y-axis and extract force
-    for ri in range(nr):
-        for zi in range(nz):
+    # TODO
+    E[set][mesh][0] = abs(Fr[set][meshes[-1]] - Fr[set][mesh])
+    E[set][mesh][1] = abs(Fa[set][meshes[-1]] - Fa[set][mesh])
+    E[set][mesh][2] = abs(Fz[set][meshes[-1]] - Fz[set][mesh])
 
-            FrE[set][mesh][ri,zi] = abs(Fr[set][meshes[-1]][ri,zi] - Fr[set][mesh][ri,zi])
-            FaE[set][mesh][ri,zi] = abs(Fa[set][meshes[-1]][ri,zi] - Fa[set][mesh][ri,zi])
-            FzE[set][mesh][ri,zi] = abs(Fz[set][meshes[-1]][ri,zi] - Fz[set][mesh][ri,zi])
+for key in norms.keys():
 
-normX[set] = dict()
+    N[set][key] = dict()
 
-normFrE[set] = dict()
-normFrE[set]['inf'] = dict()
-normFrE[set]['1'] = dict()
-normFrE[set]['2'] = dict()
-normFaE[set] = dict()
-normFaE[set]['inf'] = dict()
-normFaE[set]['1'] = dict()
-normFaE[set]['2'] = dict()
-normFzE[set] = dict()
-normFzE[set]['inf'] = dict()
-normFzE[set]['1'] = dict()
-normFzE[set]['2'] = dict()
+    for i in range(3):
 
-maxEvalue = 0.0
-maxXvalue = 0.0
+        N[set][key][i] = dict()
+
+Dmax = 0.0
+Nmax = 0.0
 for mesh in meshes[:-1]:
 
-    normX[set][mesh] = 1.0/float(mesh)
+    D[set][mesh] = 1.0/float(mesh)
 
-    maxXvalue = max(maxXvalue, normX[set][mesh])
+    Dmax = max(Dmax, D[set][mesh])
 
-    normFrE[set]['inf'][mesh] = np.max(FrE[set][mesh]) / np.max(np.absolute(Fr[set][meshes[-1]]))
-    normFrE[set]['1'][mesh] = np.sum(FrE[set][mesh]) / np.sum(np.absolute(Fr[set][meshes[-1]]))
-    normFrE[set]['2'][mesh] = m.sqrt(np.sum(FrE[set][mesh])**2 / np.sum(np.absolute(Fr[set][meshes[-1]])**2))
+    for key in norms.keys():
 
-    maxEvalue = max(maxEvalue, normFrE[set]['inf'][mesh])
-    maxEvalue = max(maxEvalue, normFrE[set]['1'][mesh])
-    maxEvalue = max(maxEvalue, normFrE[set]['2'][mesh])
+        # TODO
+        N[set][key][0][mesh] = norms[key](Fr[set][meshes[-1]], E[set][mesh][0])
+        N[set][key][1][mesh] = norms[key](Fa[set][meshes[-1]], E[set][mesh][1])
+        N[set][key][2][mesh] = norms[key](Fz[set][meshes[-1]], E[set][mesh][2])
+
+        for i in range(3):
+
+            Nmax = max(Nmax, N[set][key][i][mesh])
 
 for mesh in meshes[:-1]:
 
-    normX[set][mesh] /= maxXvalue
+    D[set][mesh] /= Dmax
 
-    normFrE[set]['inf'][mesh] /= maxEvalue
-    normFrE[set]['1'][mesh] /= maxEvalue
-    normFrE[set]['2'][mesh] /= maxEvalue
+    for key in norms.keys():
 
+        for i in range(3):
 
-print [ i for k, i in sorted(normFrE[set]['inf'].iteritems())]
-print [ i for k, i in sorted(normX[set].iteritems())]
+            N[set][key][i][mesh] /= Nmax
+
+print [ i for k, i in sorted(N[set]['inf'][0].iteritems())]
+print [ i for k, i in sorted(N[set]['1'][0].iteritems())]
+print [ i for k, i in sorted(N[set]['2'][0].iteritems())]
+print [ i for k, i in sorted(D[set].iteritems())]
 
 # --------------------------------------------------------------------------- #
 # --- Plot settings ----------------------------------------------------------- #
@@ -243,9 +231,9 @@ def fig(p, name):
 
             set = 'EddyCurrentFoam'
 
-            elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFrE[set]['inf'].iteritems())])
-            elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFrE[set]['1'].iteritems())])
-            elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFrE[set]['2'].iteritems())])
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['inf'][0].iteritems())])
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['1'][0].iteritems())])
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['2'][0].iteritems())])
 
         ele(fig, axe, elem, 'norminfty')
 
@@ -254,6 +242,8 @@ def fig(p, name):
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
 fig(plots, 'ErrorFa')
+
+
 
 #def fig(p, name):
 
@@ -281,9 +271,9 @@ fig(plots, 'ErrorFa')
 
             #set = 'EddyCurrentFoam'
 
-            #elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFaE[set]['inf'].iteritems())])
-            #elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFaE[set]['1'].iteritems())])
-            #elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFaE[set]['2'].iteritems())])
+            #elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(normFaE[set]['inf'].iteritems())])
+            #elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(normFaE[set]['1'].iteritems())])
+            #elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(normFaE[set]['2'].iteritems())])
 
         #ele(fig, axe, elem, 'norminfty')
 
