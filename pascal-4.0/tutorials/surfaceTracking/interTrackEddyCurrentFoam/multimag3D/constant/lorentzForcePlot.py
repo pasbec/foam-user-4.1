@@ -189,6 +189,7 @@ latexify(fontsize=fontsize, fontfamily=fontfamily)
 labelR = '$r ~ [\mathrm{mm}]$'
 labelZ = '$z ~ [\mathrm{mm}]$'
 
+labelEref = '$\mathcal{O}(\delta x^2)$'
 labelEinf = '$\mathrm{log}\|E\|_{\infty}$'
 labelE1 = '$\mathrm{log}\|E\|_{1}$'
 labelE2 = '$\mathrm{log}\|E\|_{2}$'
@@ -229,6 +230,9 @@ def fig(p, name):
         axe.set_yscale('log')
 
         def ele(f, a, elements, name):
+
+            ref = np.linspace(1,1e-2,100)
+            elements[name] = a.plot(ref, 0.2*ref**2.0, label=labelEref)
 
             set = 'EddyCurrentFoam'
 
@@ -272,6 +276,9 @@ def fig(p, name):
 
         def ele(f, a, elements, name):
 
+            ref = np.linspace(1,1e-2,100)
+            elements[name] = a.plot(ref, 0.2*ref**2.0, label=labelEref)
+
             set = 'EddyCurrentFoam'
 
             elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['inf'][1].iteritems())], label=labelEinf)
@@ -313,6 +320,9 @@ def fig(p, name):
         axe.set_yscale('log')
 
         def ele(f, a, elements, name):
+
+            ref = np.linspace(1,1e-2,100)
+            elements[name] = a.plot(ref, 0.2*ref**2.0, label=labelEref)
 
             set = 'EddyCurrentFoam'
 
