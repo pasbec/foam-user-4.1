@@ -33,6 +33,16 @@ print "fontfamily : ", fontfamily
 baseName = 'lorentzForce'
 
 # --------------------------------------------------------------------------- #
+# --- Functions ------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+def vec_mag(x, y, z):
+
+    return (x**2 + y**2 + z**2)
+
+np_vec_mag = np.vectorize(vec_mag)
+
+# --------------------------------------------------------------------------- #
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
@@ -44,12 +54,16 @@ Z  = dict()
 Fr = dict()
 Fa = dict()
 Fz = dict()
-F  = dict()
 
+FrE = dict()
 FaE = dict()
 FzE = dict()
-FrE = dict()
-FE  = dict()
+
+normX   = dict()
+
+normFrE = dict()
+normFaE = dict()
+normFzE = dict()
 
 # --------------------------------------------------------------------------- #
 
@@ -82,14 +96,6 @@ Z[set]  = data[set][:,1].reshape(nr,nz)
 Fr[set] = data[set][:,2].reshape(nr,nz)
 Fa[set] = data[set][:,3].reshape(nr,nz)
 Fz[set] = data[set][:,4].reshape(nr,nz)
-F[set]  = np.zeros(R[set].shape)
-
-# Scale to mm and extract force
-for ri in range(nr):
-    for zi in range(nz):
-
-        F[set][ri,zi] = m.sqrt(
-            Fr[set][ri,zi]**2 + Fa[set][ri,zi]**2 + Fz[set][ri,zi]**2)
 
 
 
@@ -104,8 +110,6 @@ Fr[set] = dict()
 Fa[set] = dict()
 Fz[set] = dict()
 
-F[set]  = dict()
-
 meshes = ['0.125', '0.250', '0.375', '0.500', '0.750', '1.000', '1.500', '2.000']
 for mesh in meshes:
 
@@ -119,7 +123,6 @@ for mesh in meshes:
     Fr[set][mesh] = data[set][mesh][:,3].reshape(nr,nz)
     Fa[set][mesh] = data[set][mesh][:,4].reshape(nr,nz)
     Fz[set][mesh] = data[set][mesh][:,5].reshape(nr,nz)
-    F[set][mesh]  = np.zeros(R[set][mesh].shape)
 
     # Scale to mm, flip y-axis and extract force
     for ri in range(nr):
@@ -131,39 +134,69 @@ for mesh in meshes:
 
             Fa[set][mesh][ri,zi] = -Fa[set][mesh][ri,zi]
 
-            F[set][mesh][ri,zi] = m.sqrt(
-                Fr[set][mesh][ri,zi]**2 + Fa[set][mesh][ri,zi]**2 + Fz[set][mesh][ri,zi]**2)
-
 FrE[set] = dict()
 FaE[set] = dict()
 FzE[set] = dict()
 
-FE[set]  = dict()
+for mesh in meshes[:-1]:
 
-for smesh in meshes[:-1]:
-
-    FrE[set][smesh]  = np.zeros(R[set][mesh].shape)
-    FaE[set][smesh]  = np.zeros(R[set][mesh].shape)
-    FzE[set][smesh]  = np.zeros(R[set][mesh].shape)
-    FE[set][smesh]  = np.zeros(R[set][mesh].shape)
+    FrE[set][mesh]  = np.zeros(R[set][mesh].shape)
+    FaE[set][mesh]  = np.zeros(R[set][mesh].shape)
+    FzE[set][mesh]  = np.zeros(R[set][mesh].shape)
 
     # Scale to mm, flip y-axis and extract force
     for ri in range(nr):
         for zi in range(nz):
 
-            FrE[set][smesh][ri,zi] = abs(Fr[set][meshes[-1]][ri,zi] - Fr[set][mesh][ri,zi])
-            FaE[set][smesh][ri,zi] = abs(Fa[set][meshes[-1]][ri,zi] - Fa[set][mesh][ri,zi])
-            FzE[set][smesh][ri,zi] = abs(Fz[set][meshes[-1]][ri,zi] - Fz[set][mesh][ri,zi])
-            FE[set][smesh][ri,zi]  = abs(F[set][meshes[-1]][ri,zi] - F[set][mesh][ri,zi])
+            FrE[set][mesh][ri,zi] = abs(Fr[set][meshes[-1]][ri,zi] - Fr[set][mesh][ri,zi])
+            FaE[set][mesh][ri,zi] = abs(Fa[set][meshes[-1]][ri,zi] - Fa[set][mesh][ri,zi])
+            FzE[set][mesh][ri,zi] = abs(Fz[set][meshes[-1]][ri,zi] - Fz[set][mesh][ri,zi])
+
+normX[set] = dict()
+
+normFrE[set] = dict()
+normFrE[set]['inf'] = dict()
+normFrE[set]['1'] = dict()
+normFrE[set]['2'] = dict()
+normFaE[set] = dict()
+normFaE[set]['inf'] = dict()
+normFaE[set]['1'] = dict()
+normFaE[set]['2'] = dict()
+normFzE[set] = dict()
+normFzE[set]['inf'] = dict()
+normFzE[set]['1'] = dict()
+normFzE[set]['2'] = dict()
+
+maxEvalue = 0.0
+maxXvalue = 0.0
+for mesh in meshes[:-1]:
+
+    normX[set][mesh] = 1.0/float(mesh)
+
+    maxXvalue = max(maxXvalue, normX[set][mesh])
+
+    normFrE[set]['inf'][mesh] = np.max(FrE[set][mesh]) / np.max(np.absolute(Fr[set][meshes[-1]]))
+    normFrE[set]['1'][mesh] = np.sum(FrE[set][mesh]) / np.sum(np.absolute(Fr[set][meshes[-1]]))
+    normFrE[set]['2'][mesh] = m.sqrt(np.sum(FrE[set][mesh])**2 / np.sum(np.absolute(Fr[set][meshes[-1]])**2))
+
+    maxEvalue = max(maxEvalue, normFrE[set]['inf'][mesh])
+    maxEvalue = max(maxEvalue, normFrE[set]['1'][mesh])
+    maxEvalue = max(maxEvalue, normFrE[set]['2'][mesh])
+
+for mesh in meshes[:-1]:
+
+    normX[set][mesh] /= maxXvalue
+
+    normFrE[set]['inf'][mesh] /= maxEvalue
+    normFrE[set]['1'][mesh] /= maxEvalue
+    normFrE[set]['2'][mesh] /= maxEvalue
+
+
+print [ i for k, i in sorted(normFrE[set]['inf'].iteritems())]
+print [ i for k, i in sorted(normX[set].iteritems())]
 
 # --------------------------------------------------------------------------- #
-# --- Error plot ------------------------------------------------------------ #
-# --------------------------------------------------------------------------- #
-
-
-
-# --------------------------------------------------------------------------- #
-# --- Contour plots --------------------------------------------------------- #
+# --- Plot settings ----------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 labelR = '$r ~ [\mathrm{mm}]$'
@@ -180,6 +213,88 @@ latexify(fontsize=fontsize, fontfamily=fontfamily)
 
 plots = dict()
 
+# --------------------------------------------------------------------------- #
+# --- Error plots ----------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+def fig(p, name):
+
+    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    f = p[name]
+
+    fig = f['fig']
+    axes = f['axes']
+
+    def axe(f, axes, name):
+
+        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        a = axes[name]
+
+        axe = a['axe']
+        elem = a['elements']
+
+        axe.set_xlim([1,5e-2])
+        axe.set_ylim([1e-4,1])
+
+        axe.set_xscale('log')
+        axe.set_yscale('log')
+
+        def ele(f, a, elements, name):
+
+            set = 'EddyCurrentFoam'
+
+            elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFrE[set]['inf'].iteritems())])
+            elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFrE[set]['1'].iteritems())])
+            elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFrE[set]['2'].iteritems())])
+
+        ele(fig, axe, elem, 'norminfty')
+
+    axe(fig, axes, 'Fr')
+
+    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+
+fig(plots, 'ErrorFa')
+
+#def fig(p, name):
+
+    #p[name] = {'fig': plt.figure(), 'axes': dict()}
+    #f = p[name]
+
+    #fig = f['fig']
+    #axes = f['axes']
+
+    #def axe(f, axes, name):
+
+        #axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        #a = axes[name]
+
+        #axe = a['axe']
+        #elem = a['elements']
+
+        #axe.set_xlim([1,5e-2])
+        #axe.set_ylim([1e-4,1])
+
+        #axe.set_xscale('log')
+        #axe.set_yscale('log')
+
+        #def ele(f, a, elements, name):
+
+            #set = 'EddyCurrentFoam'
+
+            #elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFaE[set]['inf'].iteritems())])
+            #elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFaE[set]['1'].iteritems())])
+            #elements[name] = a.plot([ i for k, i in sorted(normX[set].iteritems())], [ i for k, i in sorted(normFaE[set]['2'].iteritems())])
+
+        #ele(fig, axe, elem, 'norminfty')
+
+    #axe(fig, axes, 'Fa')
+
+    #fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+
+#fig(plots, 'ErrorFa')
+
+# --------------------------------------------------------------------------- #
+# --- Contour plots --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 def fig(p, name):
@@ -439,8 +554,12 @@ def fig(p, name):
 
         def ele(f, a, elements, name):
 
+            set = 'Opera3D'
+
+            F = (Fr[set]**2 + Fa[set]**2 + Fz[set]**2)**0.5
+
             elements[name] = a.contour(
-                R['Opera3D'], Z['Opera3D'], F['Opera3D'],
+                R[set], Z[set], F,
                 levels=levelsF, colors=colors, linestyles='dashed')
 
         ele(fig, axe, elem, 'cOpera3D')
@@ -450,8 +569,10 @@ def fig(p, name):
             set = 'EddyCurrentFoam'
             mesh = '1.000'
 
+            F = (Fr[set][mesh]**2 + Fa[set][mesh]**2 + Fz[set][mesh]**2)**0.5
+
             elements[name] = a.contour(
-                R[set][mesh], Z[set][mesh], F[set][mesh],
+                R[set][mesh], Z[set][mesh], F,
                 levels=levelsF, colors=colors, linestyles='solid')
 
             e = elements[name]
