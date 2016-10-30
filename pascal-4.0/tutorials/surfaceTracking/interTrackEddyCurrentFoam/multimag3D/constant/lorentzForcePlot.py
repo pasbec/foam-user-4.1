@@ -12,7 +12,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFooter
+from foamTools.ioInfo import fileGetPath
 
 from plotTools.latex import latexify
 
@@ -38,22 +38,28 @@ baseName = 'lorentzForce'
 
 data = dict()
 
-R = dict()
-Z = dict()
+R  = dict()
+Z  = dict()
 
 Fr = dict()
 Fa = dict()
 Fz = dict()
-
 F  = dict()
+
+FaE = dict()
+FzE = dict()
+FrE = dict()
+FE  = dict()
 
 # --------------------------------------------------------------------------- #
 
 set = 'Analytical'
+
 data[set] = np.genfromtxt(fileGetPath(baseName+set+'.dat'), comments='#')
 
 R[set]  = data[set][:,0].reshape(nr,nz)
 Z[set]  = data[set][:,1].reshape(nr,nz)
+
 Fa[set] = data[set][:,2].reshape(nr,nz)
 
 # Scale to mm
@@ -67,14 +73,16 @@ for ri in range(nr):
 
 
 set = 'Opera3D'
+
 data[set] = np.genfromtxt(fileGetPath(baseName+set+'.dat'), comments='#')
 
-R[set]    = data[set][:,0].reshape(nr,nz)
-Z[set]    = data[set][:,1].reshape(nr,nz)
-Fr[set]   = data[set][:,2].reshape(nr,nz)
-Fa[set]   = data[set][:,3].reshape(nr,nz)
-Fz[set]   = data[set][:,4].reshape(nr,nz)
-F[set]    = np.zeros(R[set].shape)
+R[set]  = data[set][:,0].reshape(nr,nz)
+Z[set]  = data[set][:,1].reshape(nr,nz)
+
+Fr[set] = data[set][:,2].reshape(nr,nz)
+Fa[set] = data[set][:,3].reshape(nr,nz)
+Fz[set] = data[set][:,4].reshape(nr,nz)
+F[set]  = np.zeros(R[set].shape)
 
 # Scale to mm and extract force
 for ri in range(nr):
@@ -86,39 +94,86 @@ for ri in range(nr):
 
 
 set = 'EddyCurrentFoam'
-data[set] = np.genfromtxt(fileGetPath(baseName+set+'.dat'), comments='#')
 
-R[set]  = data[set][:,0].reshape(nr,nz)
-Z[set]  = data[set][:,2].reshape(nr,nz)
-Fr[set] = data[set][:,3].reshape(nr,nz)
-Fa[set] = data[set][:,4].reshape(nr,nz)
-Fz[set] = data[set][:,5].reshape(nr,nz)
-F[set]  = np.zeros(R[set].shape)
+data[set] = dict()
 
-# Scale to mm, flip y-axis and extract force
-for ri in range(nr):
-    for zi in range(nz):
+R[set]  = dict()
+Z[set]  = dict()
 
-        R[set][ri,zi] = 1000.0 * (R[set][ri,zi])
+Fr[set] = dict()
+Fa[set] = dict()
+Fz[set] = dict()
 
-        Z[set][ri,zi] = 1000.0 * (Z[set][ri,zi] - 0.03)
+F[set]  = dict()
 
-        Fa[set][ri,zi] = -Fa[set][ri,zi]
+meshes = ['0.125', '0.250', '0.375', '0.500', '0.750', '1.000', '1.500', '2.000']
+for mesh in meshes:
 
-        F[set][ri,zi] = m.sqrt(
-            Fr[set][ri,zi]**2 + Fa[set][ri,zi]**2 + Fz[set][ri,zi]**2)
+    data[set][mesh] = np.genfromtxt(fileGetPath(baseName+set+'_'+mesh+'.dat'), comments='#')
+
+    d = data[set][mesh]
+
+    R[set][mesh]  = data[set][mesh][:,0].reshape(nr,nz)
+    Z[set][mesh]  = data[set][mesh][:,2].reshape(nr,nz)
+
+    Fr[set][mesh] = data[set][mesh][:,3].reshape(nr,nz)
+    Fa[set][mesh] = data[set][mesh][:,4].reshape(nr,nz)
+    Fz[set][mesh] = data[set][mesh][:,5].reshape(nr,nz)
+    F[set][mesh]  = np.zeros(R[set][mesh].shape)
+
+    # Scale to mm, flip y-axis and extract force
+    for ri in range(nr):
+        for zi in range(nz):
+
+            R[set][mesh][ri,zi] = 1000.0 * (R[set][mesh][ri,zi])
+
+            Z[set][mesh][ri,zi] = 1000.0 * (Z[set][mesh][ri,zi] - 0.03)
+
+            Fa[set][mesh][ri,zi] = -Fa[set][mesh][ri,zi]
+
+            F[set][mesh][ri,zi] = m.sqrt(
+                Fr[set][mesh][ri,zi]**2 + Fa[set][mesh][ri,zi]**2 + Fz[set][mesh][ri,zi]**2)
+
+FrE[set] = dict()
+FaE[set] = dict()
+FzE[set] = dict()
+
+FE[set]  = dict()
+
+for smesh in meshes[:-1]:
+
+    FrE[set][smesh]  = np.zeros(R[set][mesh].shape)
+    FaE[set][smesh]  = np.zeros(R[set][mesh].shape)
+    FzE[set][smesh]  = np.zeros(R[set][mesh].shape)
+    FE[set][smesh]  = np.zeros(R[set][mesh].shape)
+
+    # Scale to mm, flip y-axis and extract force
+    for ri in range(nr):
+        for zi in range(nz):
+
+            FrE[set][smesh][ri,zi] = abs(Fr[set][meshes[-1]][ri,zi] - Fr[set][mesh][ri,zi])
+            FaE[set][smesh][ri,zi] = abs(Fa[set][meshes[-1]][ri,zi] - Fa[set][mesh][ri,zi])
+            FzE[set][smesh][ri,zi] = abs(Fz[set][meshes[-1]][ri,zi] - Fz[set][mesh][ri,zi])
+            FE[set][smesh][ri,zi]  = abs(F[set][meshes[-1]][ri,zi] - F[set][mesh][ri,zi])
 
 # --------------------------------------------------------------------------- #
-# --- Plots ----------------------------------------------------------------- #
+# --- Error plot ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-rLabel = '$r ~ [\mathrm{mm}]$'
-zLabel = '$z ~ [\mathrm{mm}]$'
 
-FrLevels = np.linspace(-0.30,-0.05,6)
-FaLevels = np.linspace( 0.20, 2.00,10)
-FzLevels = np.linspace(-0.40,-0.05,8)
-Flevels  = FaLevels
+
+# --------------------------------------------------------------------------- #
+# --- Contour plots --------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+labelR = '$r ~ [\mathrm{mm}]$'
+labelZ = '$z ~ [\mathrm{mm}]$'
+
+levelsFr = np.linspace(-0.30,-0.05,6)
+levelsFa = np.linspace( 0.20, 2.00,10)
+levelsFz = np.linspace(-0.40,-0.05,8)
+levelsF  = levelsFa
+
 colors = 'black'
 
 latexify(fontsize=fontsize, fontfamily=fontfamily)
@@ -135,31 +190,37 @@ def fig(p, name):
     fig = f['fig']
     axes = f['axes']
 
-    def axe(s):
+    def axe(f, axes, name):
 
-        s['0'] = {'axe': fig.add_subplot(111), 'plots': dict()}
-        a = s['0']
+        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        a = axes[name]
 
         axe = a['axe']
+        elem = a['elements']
 
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(rLabel)
-        axe.set_ylabel(zLabel)
+        axe.set_xlabel(labelR)
+        axe.set_ylabel(labelZ)
 
         axe.set_aspect('equal')
 
-        c0 = axe.contour(
-            R['Analytical'], Z['Analytical'], Fa['Analytical'],
-            levels=FaLevels, colors=colors
-            )
+        def ele(f, a, elements, name):
 
-        cl0 = axe.clabel(
-            c0, c0.levels[0::2],
-            inline=True, fmt='%g', fontsize=fontsize)
+            elements[name] = a.contour(
+                R['Analytical'], Z['Analytical'], Fa['Analytical'],
+                levels=levelsFa, colors=colors)
 
-    axe(axes)
+            e = elements[name]
+
+            a.clabel(
+                e, e.levels[0::2],
+                inline=True, fmt='%g', fontsize=fontsize)
+
+        ele(fig, axe, elem, 'contour')
+
+    axe(fig, axes, 'Fa')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -175,36 +236,50 @@ def fig(p, name):
     fig = f['fig']
     axes = f['axes']
 
-    def axe(s):
+    def axe(f, axes, name):
 
-        s['0'] = {'axe': fig.add_subplot(111), 'plots': dict()}
-        a = s['0']
+        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        a = axes[name]
 
         axe = a['axe']
+        elem = a['elements']
 
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(rLabel)
-        axe.set_ylabel(zLabel)
+        axe.set_xlabel(labelR)
+        axe.set_ylabel(labelZ)
 
         axe.set_aspect('equal')
 
-        c1 = axe.contour(
-            R['Opera3D'], Z['Opera3D'], Fr['Opera3D'],
-            levels=FrLevels, colors=colors, linestyles='dashed')
+        def ele(f, a, elements, name):
 
-        c2 = axe.contour(
-            R['EddyCurrentFoam'], Z['EddyCurrentFoam'], Fr['EddyCurrentFoam'],
-            levels=FrLevels, colors=colors, linestyles='solid')
+            elements[name] = a.contour(
+                R['Opera3D'], Z['Opera3D'], Fr['Opera3D'],
+                levels=levelsFr, colors=colors, linestyles='dashed')
 
-        cl2 = axe.clabel(
-            c2, c2.levels[0::2],
-            inline=True, fmt='%g', fontsize=fontsize)
+        ele(fig, axe, elem, 'cOpera3D')
 
-        [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl2]
+        def ele(f, a, elements, name):
 
-    axe(axes)
+            set = 'EddyCurrentFoam'
+            mesh = '1.000'
+
+            elements[name] = a.contour(
+                R[set][mesh], Z[set][mesh], Fr[set][mesh],
+                levels=levelsFr, colors=colors, linestyles='solid')
+
+            e = elements[name]
+
+            cl = a.clabel(
+                e, e.levels[0::2],
+                inline=True, fmt='%g', fontsize=fontsize)
+
+            [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
+
+        ele(fig, axe, elem, 'cEddyCurrentFoam')
+
+    axe(fig, axes,'Fr')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -220,40 +295,58 @@ def fig(p, name):
     fig = f['fig']
     axes = f['axes']
 
-    def axe(s):
+    def axe(f, axes, name):
 
-        s['0'] = {'axe': fig.add_subplot(111), 'plots': dict()}
-        a = s['0']
+        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        a = axes[name]
 
         axe = a['axe']
+        elem = a['elements']
 
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(rLabel)
-        axe.set_ylabel(zLabel)
+        axe.set_xlabel(labelR)
+        axe.set_ylabel(labelZ)
 
         axe.set_aspect('equal')
 
-        c0 = axe.contour(
-            R['Analytical'], Z['Analytical'], Fa['Analytical'],
-            levels=FaLevels, colors=colors, linestyles='dotted')
+        def ele(f, a, elements, name):
 
-        c1 = axe.contour(
-            R['Opera3D'], Z['Opera3D'], Fa['Opera3D'],
-            levels=FaLevels, colors=colors, linestyles='dashed')
+            elements[name] = a.contour(
+                R['Analytical'], Z['Analytical'], Fa['Analytical'],
+                levels=levelsFa, colors=colors, linestyles='dotted')
 
-        c2 = axe.contour(
-            R['EddyCurrentFoam'], Z['EddyCurrentFoam'], Fa['EddyCurrentFoam'],
-            levels=FaLevels, colors=colors, linestyles='solid')
+        ele(fig, axe, elem, 'cAnalytical')
 
-        cl2 = axe.clabel(
-            c2, c2.levels[0::2],
-            inline=True, fmt='%g', fontsize=fontsize)
+        def ele(f, a, elements, name):
 
-        [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl2]
+            elements[name] = a.contour(
+                R['Opera3D'], Z['Opera3D'], Fa['Opera3D'],
+                levels=levelsFa, colors=colors, linestyles='dashed')
 
-    axe(axes)
+        ele(fig, axe, elem, 'cOpera3D')
+
+        def ele(f, a, elements, name):
+
+            set = 'EddyCurrentFoam'
+            mesh = '1.000'
+
+            elements[name] = a.contour(
+                R[set][mesh], Z[set][mesh], Fa[set][mesh],
+                levels=levelsFa, colors=colors, linestyles='solid')
+
+            e = elements[name]
+
+            cl = a.clabel(
+                e, e.levels[0::2],
+                inline=True, fmt='%g', fontsize=fontsize)
+
+            [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
+
+        ele(fig, axe, elem, 'cEddyCurrentFoam')
+
+    axe(fig, axes, 'Fa')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -269,36 +362,50 @@ def fig(p, name):
     fig = f['fig']
     axes = f['axes']
 
-    def axe(s):
+    def axe(f, axes, name):
 
-        s['0'] = {'axe': fig.add_subplot(111), 'plots': dict()}
-        a = s['0']
+        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        a = axes[name]
 
         axe = a['axe']
+        elem = a['elements']
 
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(rLabel)
-        axe.set_ylabel(zLabel)
+        axe.set_xlabel(labelR)
+        axe.set_ylabel(labelZ)
 
         axe.set_aspect('equal')
 
-        c1 = axe.contour(
-            R['Opera3D'], Z['Opera3D'], Fz['Opera3D'],
-            levels=FzLevels, colors=colors, linestyles='dashed')
+        def ele(f, a, elements, name):
 
-        c2 = axe.contour(
-            R['EddyCurrentFoam'], Z['EddyCurrentFoam'], Fz['EddyCurrentFoam'],
-            levels=FzLevels, colors=colors, linestyles='solid')
+            elements[name] = a.contour(
+                R['Opera3D'], Z['Opera3D'], Fz['Opera3D'],
+                levels=levelsFz, colors=colors, linestyles='dashed')
 
-        cl2 = axe.clabel(
-            c2, c2.levels[0::2],
-            inline=True, fmt='%g', fontsize=fontsize)
+        ele(fig, axe, elem, 'cOpera3D')
 
-        [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl2]
+        def ele(f, a, elements, name):
 
-    axe(axes)
+            set = 'EddyCurrentFoam'
+            mesh = '1.000'
+
+            elements[name] = a.contour(
+                R[set][mesh], Z[set][mesh], Fz[set][mesh],
+                levels=levelsFz, colors=colors, linestyles='solid')
+
+            e = elements[name]
+
+            cl = a.clabel(
+                e, e.levels[0::2],
+                inline=True, fmt='%g', fontsize=fontsize)
+
+            [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
+
+        ele(fig, axe, elem, 'cEddyCurrentFoam')
+
+    axe(fig, axes, 'Fz')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -314,40 +421,73 @@ def fig(p, name):
     fig = f['fig']
     axes = f['axes']
 
-    def axe(s):
+    def axe(f, axes, name):
 
-        s['0'] = {'axe': fig.add_subplot(111), 'plots': dict()}
-        a = s['0']
+        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        a = axes[name]
 
         axe = a['axe']
+        elem = a['elements']
 
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(rLabel)
-        axe.set_ylabel(zLabel)
+        axe.set_xlabel(labelR)
+        axe.set_ylabel(labelZ)
 
         axe.set_aspect('equal')
 
-        c1 = axe.contour(
-            R['Opera3D'], Z['Opera3D'], F['Opera3D'],
-            levels=Flevels, colors=colors, linestyles='dashed')
+        def ele(f, a, elements, name):
 
-        c2 = axe.contour(
-            R['EddyCurrentFoam'], Z['EddyCurrentFoam'], F['EddyCurrentFoam'],
-            levels=Flevels, colors=colors, linestyles='solid')
+            elements[name] = a.contour(
+                R['Opera3D'], Z['Opera3D'], F['Opera3D'],
+                levels=levelsF, colors=colors, linestyles='dashed')
 
-        cl2 = axe.clabel(
-            c2, c2.levels[0::2],
-            inline=True, fmt='%g', fontsize=fontsize)
+        ele(fig, axe, elem, 'cOpera3D')
 
-        [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl2]
+        def ele(f, a, elements, name):
 
-    axe(axes)
+            set = 'EddyCurrentFoam'
+            mesh = '1.000'
+
+            elements[name] = a.contour(
+                R[set][mesh], Z[set][mesh], F[set][mesh],
+                levels=levelsF, colors=colors, linestyles='solid')
+
+            e = elements[name]
+
+            cl = a.clabel(
+                e, e.levels[0::2],
+                inline=True, fmt='%g', fontsize=fontsize)
+
+            [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
+
+        ele(fig, axe, elem, 'cEddyCurrentFoam')
+
+    axe(fig, axes, 'F')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
 fig(plots, 'ComparisonF')
+
+
+
+#def fig(p, name):
+
+    #p[name] = {'fig': plt.figure(), 'axes': dict()}
+    #f = p[name]
+
+    #fig = f['fig']
+    #axes = f['axes']
+
+    #axes['Fr'] = {'axe': fig.add_subplot(221), 'elements': p['ComparisonFr']['axes']['Fr']['elements']}
+    #axes['Fa'] = {'axe': fig.add_subplot(222), 'elements': p['ComparisonFa']['axes']['Fa']['elements']}
+    #axes['Fz'] = {'axe': fig.add_subplot(223), 'elements': p['ComparisonFz']['axes']['Fz']['elements']}
+    #axes['F'] = {'axe': fig.add_subplot(224), 'elements': p['ComparisonF']['axes']['F']['elements']}
+
+    #fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+
+#fig(plots, 'Comparison')
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
