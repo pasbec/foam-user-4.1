@@ -48,99 +48,99 @@ norms = {'inf': norm_inf, '1': norm_1, '2': norm_2}
 
 data = dict()
 
-R = dict()
-Z = dict()
+R = dict() # Radius
+Z = dict() # Height
 
-Fr = dict()
-Fa = dict()
-Fz = dict()
+F = dict() # Force
 
-E = dict()
-D = dict()
-N = dict()
+E = dict() # Error
+D = dict() # Delta of grid
+N = dict() # Norm of error
 
 # --------------------------------------------------------------------------- #
 
 set = 'Analytical'
 
-data[set] = np.genfromtxt(fileGetPath(baseName+set+'.dat'), comments='#')
+# Read data
+if True:
 
-R[set]  = data[set][:,0].reshape(nr,nz)
-Z[set]  = data[set][:,1].reshape(nr,nz)
+    data[set] = np.genfromtxt(fileGetPath(baseName+set+'.dat'), comments='#')
 
-Fa[set] = data[set][:,2].reshape(nr,nz)
+    R[set]    = data[set][:,0].reshape(nr,nz)
+    Z[set]    = data[set][:,1].reshape(nr,nz)
 
-# Scale to mm
-for ri in range(nr):
-    for zi in range(nz):
+    F[set]    = [np.zeros(R[set].shape) for i in range(3)]
+    F[set][1] = data[set][:,2].reshape(nr,nz)
 
-        R[set][ri,zi] = 1000.0 * (R[set][ri,zi])
+    # Scale to mm
+    R[set] = 1000.0 * R[set]
+    Z[set] = 1000.0 * Z[set]
 
-        Z[set][ri,zi] = 1000.0 * (Z[set][ri,zi])
-
-
+# --------------------------------------------------------------------------- #
 
 set = 'Opera3D'
 
-data[set] = np.genfromtxt(fileGetPath(baseName+set+'.dat'), comments='#')
+# Read data
+if True:
 
-R[set]  = data[set][:,0].reshape(nr,nz)
-Z[set]  = data[set][:,1].reshape(nr,nz)
+    data[set] = np.genfromtxt(fileGetPath(baseName+set+'.dat'), comments='#')
 
-Fr[set] = data[set][:,2].reshape(nr,nz)
-Fa[set] = data[set][:,3].reshape(nr,nz)
-Fz[set] = data[set][:,4].reshape(nr,nz)
+    R[set]    = data[set][:,0].reshape(nr,nz)
+    Z[set]    = data[set][:,1].reshape(nr,nz)
 
+    F[set]    = [np.zeros(R[set].shape) for i in range(3)]
+    F[set][0] = data[set][:,2].reshape(nr,nz)
+    F[set][1] = data[set][:,3].reshape(nr,nz)
+    F[set][2] = data[set][:,4].reshape(nr,nz)
 
+# --------------------------------------------------------------------------- #
 
 set = 'EddyCurrentFoam'
 
+# Init dictionaries as we are using meshes
 data[set] = dict()
 
-R[set]  = dict()
-Z[set]  = dict()
+R[set] = dict()
+Z[set] = dict()
 
-Fr[set] = dict()
-Fa[set] = dict()
-Fz[set] = dict()
-
-meshes = ['0.125', '0.250', '0.375', '0.500', '0.750', '1.000', '1.500', '2.000']
-for mesh in meshes:
-
-    data[set][mesh] = np.genfromtxt(fileGetPath(baseName+set+'_'+mesh+'.dat'), comments='#')
-
-    d = data[set][mesh]
-
-    R[set][mesh]  = data[set][mesh][:,0].reshape(nr,nz)
-    Z[set][mesh]  = data[set][mesh][:,2].reshape(nr,nz)
-
-    Fr[set][mesh] = data[set][mesh][:,3].reshape(nr,nz)
-    Fa[set][mesh] = data[set][mesh][:,4].reshape(nr,nz)
-    Fz[set][mesh] = data[set][mesh][:,5].reshape(nr,nz)
-
-    # Scale to mm, flip y-axis and extract force
-    for ri in range(nr):
-        for zi in range(nz):
-
-            R[set][mesh][ri,zi] = 1000.0 * (R[set][mesh][ri,zi])
-
-            Z[set][mesh][ri,zi] = 1000.0 * (Z[set][mesh][ri,zi] - 0.03)
-
-            Fa[set][mesh][ri,zi] = -Fa[set][mesh][ri,zi]
+F[set] = dict()
 
 E[set] = dict()
 D[set] = dict()
 N[set] = dict()
 
+meshes = ['0.125', '0.250', '0.375', '0.500', '0.750', '1.000', '1.500', '2.000']
+
+# Read data
+for mesh in meshes:
+
+    data[set][mesh] = np.genfromtxt(fileGetPath(baseName+set+'_'+mesh+'.dat'), comments='#')
+
+    R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
+    Z[set][mesh]    = data[set][mesh][:,2].reshape(nr,nz)
+
+    F[set][mesh]    = [np.zeros(R[set][mesh].shape) for i in range(3)]
+    F[set][mesh][0] = data[set][mesh][:,3].reshape(nr,nz)
+    F[set][mesh][1] = data[set][mesh][:,4].reshape(nr,nz)
+    F[set][mesh][2] = data[set][mesh][:,5].reshape(nr,nz)
+
+    # Scale to mm
+    R[set][mesh]    = 1000.0 * (R[set][mesh])
+    Z[set][mesh]    = 1000.0 * (Z[set][mesh] - 0.03)
+
+    # Flip y-axis
+    F[set][mesh][1] = -F[set][mesh][1]
+
+# Calculate errors with repect to last mesh in list
 for mesh in meshes[:-1]:
 
-    E[set][mesh] = [np.zeros(R[set][mesh].shape) for i in range(3)]
+    E[set][mesh]    = [np.zeros(R[set][mesh].shape) for i in range(3)]
 
-    # TODO
-    E[set][mesh][0] = abs(Fr[set][meshes[-1]] - Fr[set][mesh])
-    E[set][mesh][1] = abs(Fa[set][meshes[-1]] - Fa[set][mesh])
-    E[set][mesh][2] = abs(Fz[set][meshes[-1]] - Fz[set][mesh])
+    for i in range(3):
 
+        E[set][mesh][i] = abs(F[set][meshes[-1]][i] - F[set][mesh][i])
+
+# Init norms
 for key in norms.keys():
 
     N[set][key] = dict()
@@ -149,25 +149,22 @@ for key in norms.keys():
 
         N[set][key][i] = dict()
 
+# Calculate norms and global maximum
 Dmax = 0.0
 Nmax = 0.0
 for mesh in meshes[:-1]:
 
     D[set][mesh] = 1.0/float(mesh)
-
     Dmax = max(Dmax, D[set][mesh])
 
     for key in norms.keys():
 
-        # TODO
-        N[set][key][0][mesh] = norms[key](Fr[set][meshes[-1]], E[set][mesh][0])
-        N[set][key][1][mesh] = norms[key](Fa[set][meshes[-1]], E[set][mesh][1])
-        N[set][key][2][mesh] = norms[key](Fz[set][meshes[-1]], E[set][mesh][2])
-
         for i in range(3):
 
+            N[set][key][i][mesh] = norms[key](F[set][meshes[-1]][i], E[set][mesh][i])
             Nmax = max(Nmax, N[set][key][i][mesh])
 
+# Scale norms and mesh delta
 for mesh in meshes[:-1]:
 
     D[set][mesh] /= Dmax
@@ -178,17 +175,23 @@ for mesh in meshes[:-1]:
 
             N[set][key][i][mesh] /= Nmax
 
-print [ i for k, i in sorted(N[set]['inf'][0].iteritems())]
-print [ i for k, i in sorted(N[set]['1'][0].iteritems())]
-print [ i for k, i in sorted(N[set]['2'][0].iteritems())]
-print [ i for k, i in sorted(D[set].iteritems())]
+#print [ i for k, i in sorted(N[set]['inf'][0].iteritems())]
+#print [ i for k, i in sorted(N[set]['1'][0].iteritems())]
+#print [ i for k, i in sorted(N[set]['2'][0].iteritems())]
+#print [ i for k, i in sorted(D[set].iteritems())]
 
 # --------------------------------------------------------------------------- #
-# --- Plot settings ----------------------------------------------------------- #
+# --- Plot settings --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
+
+latexify(fontsize=fontsize, fontfamily=fontfamily)
 
 labelR = '$r ~ [\mathrm{mm}]$'
 labelZ = '$z ~ [\mathrm{mm}]$'
+
+labelEinf = '$\mathrm{log}\|E\|_{\infty}$'
+labelE1 = '$\mathrm{log}\|E\|_{1}$'
+labelE2 = '$\mathrm{log}\|E\|_{2}$'
 
 levelsFr = np.linspace(-0.30,-0.05,6)
 levelsFa = np.linspace( 0.20, 2.00,10)
@@ -196,8 +199,6 @@ levelsFz = np.linspace(-0.40,-0.05,8)
 levelsF  = levelsFa
 
 colors = 'black'
-
-latexify(fontsize=fontsize, fontfamily=fontfamily)
 
 plots = dict()
 
@@ -231,13 +232,57 @@ def fig(p, name):
 
             set = 'EddyCurrentFoam'
 
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['inf'][0].iteritems())])
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['1'][0].iteritems())])
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['2'][0].iteritems())])
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['inf'][0].iteritems())], label=labelEinf)
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['1'][0].iteritems())], label=labelE1)
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['2'][0].iteritems())], label=labelE2)
 
-        ele(fig, axe, elem, 'norminfty')
+            a.legend()
+
+        ele(fig, axe, elem, 'norms')
 
     axe(fig, axes, 'Fr')
+
+    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+
+fig(plots, 'ErrorFr')
+
+
+
+def fig(p, name):
+
+    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    f = p[name]
+
+    fig = f['fig']
+    axes = f['axes']
+
+    def axe(f, axes, name):
+
+        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        a = axes[name]
+
+        axe = a['axe']
+        elem = a['elements']
+
+        axe.set_xlim([1,5e-2])
+        axe.set_ylim([1e-4,1])
+
+        axe.set_xscale('log')
+        axe.set_yscale('log')
+
+        def ele(f, a, elements, name):
+
+            set = 'EddyCurrentFoam'
+
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['inf'][1].iteritems())], label=labelEinf)
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['1'][1].iteritems())], label=labelE1)
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['2'][1].iteritems())], label=labelE2)
+
+            a.legend()
+
+        ele(fig, axe, elem, 'norms')
+
+    axe(fig, axes, 'Fa')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -245,43 +290,45 @@ fig(plots, 'ErrorFa')
 
 
 
-#def fig(p, name):
+def fig(p, name):
 
-    #p[name] = {'fig': plt.figure(), 'axes': dict()}
-    #f = p[name]
+    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    f = p[name]
 
-    #fig = f['fig']
-    #axes = f['axes']
+    fig = f['fig']
+    axes = f['axes']
 
-    #def axe(f, axes, name):
+    def axe(f, axes, name):
 
-        #axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        #a = axes[name]
+        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        a = axes[name]
 
-        #axe = a['axe']
-        #elem = a['elements']
+        axe = a['axe']
+        elem = a['elements']
 
-        #axe.set_xlim([1,5e-2])
-        #axe.set_ylim([1e-4,1])
+        axe.set_xlim([1,5e-2])
+        axe.set_ylim([1e-4,1])
 
-        #axe.set_xscale('log')
-        #axe.set_yscale('log')
+        axe.set_xscale('log')
+        axe.set_yscale('log')
 
-        #def ele(f, a, elements, name):
+        def ele(f, a, elements, name):
 
-            #set = 'EddyCurrentFoam'
+            set = 'EddyCurrentFoam'
 
-            #elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(normFaE[set]['inf'].iteritems())])
-            #elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(normFaE[set]['1'].iteritems())])
-            #elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(normFaE[set]['2'].iteritems())])
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['inf'][2].iteritems())], label=labelEinf)
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['1'][2].iteritems())], label=labelE1)
+            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['2'][2].iteritems())], label=labelE2)
 
-        #ele(fig, axe, elem, 'norminfty')
+            a.legend()
 
-    #axe(fig, axes, 'Fa')
+        ele(fig, axe, elem, 'norms')
 
-    #fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    axe(fig, axes, 'Fz')
 
-#fig(plots, 'ErrorFa')
+    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+
+fig(plots, 'ErrorFz')
 
 # --------------------------------------------------------------------------- #
 # --- Contour plots --------------------------------------------------------- #
@@ -313,8 +360,10 @@ def fig(p, name):
 
         def ele(f, a, elements, name):
 
+            set = 'Analytical'
+
             elements[name] = a.contour(
-                R['Analytical'], Z['Analytical'], Fa['Analytical'],
+                R[set], Z[set], F[set][1],
                 levels=levelsFa, colors=colors)
 
             e = elements[name]
@@ -359,8 +408,10 @@ def fig(p, name):
 
         def ele(f, a, elements, name):
 
+            set = 'Opera3D'
+
             elements[name] = a.contour(
-                R['Opera3D'], Z['Opera3D'], Fr['Opera3D'],
+                R[set], Z[set], F[set][0],
                 levels=levelsFr, colors=colors, linestyles='dashed')
 
         ele(fig, axe, elem, 'cOpera3D')
@@ -371,7 +422,7 @@ def fig(p, name):
             mesh = '1.000'
 
             elements[name] = a.contour(
-                R[set][mesh], Z[set][mesh], Fr[set][mesh],
+                R[set][mesh], Z[set][mesh], F[set][mesh][0],
                 levels=levelsFr, colors=colors, linestyles='solid')
 
             e = elements[name]
@@ -418,17 +469,21 @@ def fig(p, name):
 
         def ele(f, a, elements, name):
 
+            set = 'Analytical'
+
             elements[name] = a.contour(
-                R['Analytical'], Z['Analytical'], Fa['Analytical'],
+                R[set], Z[set], F[set][1],
                 levels=levelsFa, colors=colors, linestyles='dotted')
 
         ele(fig, axe, elem, 'cAnalytical')
 
         def ele(f, a, elements, name):
 
+            set = 'Opera3D'
+
             elements[name] = a.contour(
-                R['Opera3D'], Z['Opera3D'], Fa['Opera3D'],
-                levels=levelsFa, colors=colors, linestyles='dashed')
+                R[set], Z[set], F[set][1],
+                levels=levelsFr, colors=colors, linestyles='dashed')
 
         ele(fig, axe, elem, 'cOpera3D')
 
@@ -438,7 +493,7 @@ def fig(p, name):
             mesh = '1.000'
 
             elements[name] = a.contour(
-                R[set][mesh], Z[set][mesh], Fa[set][mesh],
+                R[set][mesh], Z[set][mesh], F[set][mesh][1],
                 levels=levelsFa, colors=colors, linestyles='solid')
 
             e = elements[name]
@@ -485,9 +540,11 @@ def fig(p, name):
 
         def ele(f, a, elements, name):
 
+            set = 'Opera3D'
+
             elements[name] = a.contour(
-                R['Opera3D'], Z['Opera3D'], Fz['Opera3D'],
-                levels=levelsFz, colors=colors, linestyles='dashed')
+                R[set], Z[set], F[set][2],
+                levels=levelsFr, colors=colors, linestyles='dashed')
 
         ele(fig, axe, elem, 'cOpera3D')
 
@@ -497,7 +554,7 @@ def fig(p, name):
             mesh = '1.000'
 
             elements[name] = a.contour(
-                R[set][mesh], Z[set][mesh], Fz[set][mesh],
+                R[set][mesh], Z[set][mesh], F[set][mesh][2],
                 levels=levelsFz, colors=colors, linestyles='solid')
 
             e = elements[name]
@@ -546,10 +603,10 @@ def fig(p, name):
 
             set = 'Opera3D'
 
-            F = (Fr[set]**2 + Fa[set]**2 + Fz[set]**2)**0.5
+            magF = (F[set][0]**2 + F[set][1]**2 + F[set][2]**2)**0.5
 
             elements[name] = a.contour(
-                R[set], Z[set], F,
+                R[set], Z[set], magF,
                 levels=levelsF, colors=colors, linestyles='dashed')
 
         ele(fig, axe, elem, 'cOpera3D')
@@ -559,10 +616,10 @@ def fig(p, name):
             set = 'EddyCurrentFoam'
             mesh = '1.000'
 
-            F = (Fr[set][mesh]**2 + Fa[set][mesh]**2 + Fz[set][mesh]**2)**0.5
+            magF = (F[set][mesh][0]**2 + F[set][mesh][1]**2 + F[set][mesh][2]**2)**0.5
 
             elements[name] = a.contour(
-                R[set][mesh], Z[set][mesh], F,
+                R[set][mesh], Z[set][mesh], magF,
                 levels=levelsF, colors=colors, linestyles='solid')
 
             e = elements[name]
