@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
 # June 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
