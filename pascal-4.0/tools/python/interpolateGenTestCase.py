@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
 # Extended inverse distance interpolation script
 # August 2013
 # Dr. Thomas Wondrak (t.wondrak@hzdr.de)[basic program idea/structure]

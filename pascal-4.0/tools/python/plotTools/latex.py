@@ -10,8 +10,6 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from math import sqrt
-
 # --------------------------------------------------------------------------- #
 # --- Function definitions -------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -51,7 +49,7 @@ def latexify(
         #fig_width = 3.39 if columns==1 else 6.9 # width in inches
 
     #if fig_height is None:
-        #golden_mean = (sqrt(5)-1.0)/2.0    # Aesthetic ratio
+        #golden_mean = ((5**0.5)-1.0)/2.0    # Aesthetic ratio
         #fig_height = fig_width*golden_mean # height in inches
 
     #MAX_HEIGHT_INCHES = 8.0

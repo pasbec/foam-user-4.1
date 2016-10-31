@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
 # Init script for foamTools
 # March 2015
 # Pascal Beckstein (p.beckstein@hzdr.de)

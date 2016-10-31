@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
 # Module with helper functions to write a blockdict with python
 # July 2015
 # Pascal Beckstein (p.beckstein@hzdr.de)

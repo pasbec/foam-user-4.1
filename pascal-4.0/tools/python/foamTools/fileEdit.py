@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
 # File modification tools
 # Pascal Beckstein (p.beckstein@hzdr.de)
 

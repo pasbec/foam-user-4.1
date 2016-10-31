@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
 # October 2016
 # Vladimir Galindo (v.galindo@hzdr.de)
 # Pascal Beckstein (p.beckstein@hzdr.de)
@@ -13,8 +15,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from foamTools.ioInfo import fileGetPath
-
-from plotTools.latex import latexify
+import plotTools.latex as latex
+import plotTools.hzdr as hzdr
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -141,13 +143,13 @@ for mesh in meshes[:-1]:
         E[set][mesh][i] = abs(F[set][meshes[-1]][i] - F[set][mesh][i])
 
 # Init norms
-for key in norms.keys():
+for norm in norms.keys():
 
-    N[set][key] = dict()
+    N[set][norm] = dict()
 
     for i in range(3):
 
-        N[set][key][i] = dict()
+        N[set][norm][i] = dict()
 
 # Calculate norms and global maximum
 Dmax = 0.0
@@ -157,23 +159,23 @@ for mesh in meshes[:-1]:
     D[set][mesh] = 1.0/float(mesh)
     Dmax = max(Dmax, D[set][mesh])
 
-    for key in norms.keys():
+    for norm in norms.keys():
 
         for i in range(3):
 
-            N[set][key][i][mesh] = norms[key](F[set][meshes[-1]][i], E[set][mesh][i])
-            Nmax[i] = max(Nmax[i], N[set][key][i][mesh])
+            N[set][norm][i][mesh] = norms[norm](F[set][meshes[-1]][i], E[set][mesh][i])
+            Nmax[i] = max(Nmax[i], N[set][norm][i][mesh])
 
 # Scale norms and mesh delta
 for mesh in meshes[:-1]:
 
     D[set][mesh] /= Dmax
 
-    for key in norms.keys():
+    for norm in norms.keys():
 
         for i in range(3):
 
-            N[set][key][i][mesh] /= Nmax[i]
+            N[set][norm][i][mesh] /= Nmax[i]
 
 #print [ i for k, i in sorted(N[set]['inf'][0].iteritems())]
 #print [ i for k, i in sorted(N[set]['1'][0].iteritems())]
@@ -184,22 +186,32 @@ for mesh in meshes[:-1]:
 # --- Plot settings --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-latexify(fontsize=fontsize, fontfamily=fontfamily)
+latex.latexify(fontsize=fontsize, fontfamily=fontfamily)
 
-labelR = '$r ~ [\mathrm{mm}]$'
-labelZ = '$z ~ [\mathrm{mm}]$'
+hzdr.colors()
 
-labelEref = '$\mathcal{O}(\delta x^2)$'
-labelEinf = '$\mathrm{log}\|E\|_{\infty}$'
-labelE1 = '$\mathrm{log}\|E\|_{1}$'
-labelE2 = '$\mathrm{log}\|E\|_{2}$'
+labelR = r'$r ~ [\mathrm{mm}]$'
+labelZ = r'$z ~ [\mathrm{mm}]$'
 
-levelsFr = np.linspace(-0.30,-0.05,6)
-levelsFa = np.linspace( 0.20, 2.00,10)
-levelsFz = np.linspace(-0.40,-0.05,8)
-levelsF  = levelsFa
+labelE = dict()
+labelE['O1'] = r'$\mathcal{O}(\triangle x)$'
+labelE['O2'] = r'$\mathcal{O}(\triangle x^2)$'
+labelE['inf'] = r'$\mathrm{log}\|E\|_{\infty}$'
+labelE['1'] = r'$\mathrm{log}\|E\|_{1}$'
+labelE['2'] = r'$\mathrm{log}\|E\|_{2}$'
 
-colors = 'black'
+markerE = dict()
+markerE['O1'] = ''
+markerE['O2'] = ''
+markerE['inf'] = '.'
+markerE['1'] = 'x'
+markerE['2'] = '+'
+
+levels = [np.linspace(-0.30,-0.05,6),
+          np.linspace( 0.20, 2.00,10),
+          np.linspace(-0.40,-0.05,8)]
+
+#colors = 'black'
 
 plots = dict()
 
@@ -231,16 +243,20 @@ def fig(p, name):
 
         def ele(f, a, elements, name):
 
-            ref = np.linspace(1,1e-2,100)
-            elements[name] = a.plot(ref, 0.2*ref**2.0, label=labelEref)
+            d = np.linspace(1,1e-2,100)
+            elements[name] = a.plot(d, 1.8*d, label=labelE['O1'],
+                                    marker=markerE['O1'], linestyle='dotted', color='black')
+            elements[name] = a.plot(d, 0.2*d**2.0, label=labelE['O2'],
+                                    marker=markerE['O2'], linestyle='dashed', color='black')
 
             set = 'EddyCurrentFoam'
 
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['inf'][0].iteritems())], label=labelEinf)
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['1'][0].iteritems())], label=labelE1)
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['2'][0].iteritems())], label=labelE2)
+            d = [ i for k, i in sorted(D[set].iteritems())]
+            for norm in sorted(norms.keys()):
+                n = [ i for k, i in sorted(N[set][norm][0].iteritems())]
+                elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-            a.legend()
+            a.legend(loc='lower left')
 
         ele(fig, axe, elem, 'norms')
 
@@ -276,16 +292,20 @@ def fig(p, name):
 
         def ele(f, a, elements, name):
 
-            ref = np.linspace(1,1e-2,100)
-            elements[name] = a.plot(ref, 0.2*ref**2.0, label=labelEref)
+            d = np.linspace(1,1e-2,100)
+            elements[name] = a.plot(d, 1.8*d, label=labelE['O1'],
+                                    marker=markerE['O1'], linestyle='dotted', color='black')
+            elements[name] = a.plot(d, 0.2*d**2.0, label=labelE['O2'],
+                                    marker=markerE['O2'], linestyle='dashed', color='black')
 
             set = 'EddyCurrentFoam'
 
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['inf'][1].iteritems())], label=labelEinf)
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['1'][1].iteritems())], label=labelE1)
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['2'][1].iteritems())], label=labelE2)
+            d = [ i for k, i in sorted(D[set].iteritems())]
+            for norm in sorted(norms.keys()):
+                n = [ i for k, i in sorted(N[set][norm][1].iteritems())]
+                elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-            a.legend()
+            a.legend(loc='lower left')
 
         ele(fig, axe, elem, 'norms')
 
@@ -321,16 +341,20 @@ def fig(p, name):
 
         def ele(f, a, elements, name):
 
-            ref = np.linspace(1,1e-2,100)
-            elements[name] = a.plot(ref, 0.2*ref**2.0, label=labelEref)
+            d = np.linspace(1,1e-2,100)
+            elements[name] = a.plot(d, 1.8*d, label=labelE['O1'],
+                                    marker=markerE['O1'], linestyle='dotted', color='black')
+            elements[name] = a.plot(d, 0.2*d**2.0, label=labelE['O2'],
+                                    marker=markerE['O2'], linestyle='dashed', color='black')
 
             set = 'EddyCurrentFoam'
 
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['inf'][2].iteritems())], label=labelEinf)
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['1'][2].iteritems())], label=labelE1)
-            elements[name] = a.plot([ i for k, i in sorted(D[set].iteritems())], [ i for k, i in sorted(N[set]['2'][2].iteritems())], label=labelE2)
+            d = [ i for k, i in sorted(D[set].iteritems())]
+            for norm in sorted(norms.keys()):
+                n = [ i for k, i in sorted(N[set][norm][2].iteritems())]
+                elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-            a.legend()
+            a.legend(loc='lower left')
 
         ele(fig, axe, elem, 'norms')
 
@@ -374,7 +398,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set], Z[set], F[set][1],
-                levels=levelsFa, colors=colors)
+                levels=levels[1])
 
             e = elements[name]
 
@@ -422,7 +446,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set], Z[set], F[set][0],
-                levels=levelsFr, colors=colors, linestyles='dashed')
+                levels=levels[0], linestyles='dashed')
 
         ele(fig, axe, elem, 'cOpera3D')
 
@@ -433,7 +457,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set][mesh], Z[set][mesh], F[set][mesh][0],
-                levels=levelsFr, colors=colors, linestyles='solid')
+                levels=levels[0], linestyles='solid')
 
             e = elements[name]
 
@@ -483,7 +507,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set], Z[set], F[set][1],
-                levels=levelsFa, colors=colors, linestyles='dotted')
+                levels=levels[1], linestyles='dotted')
 
         ele(fig, axe, elem, 'cAnalytical')
 
@@ -493,7 +517,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set], Z[set], F[set][1],
-                levels=levelsFr, colors=colors, linestyles='dashed')
+                levels=levels[1], linestyles='dashed')
 
         ele(fig, axe, elem, 'cOpera3D')
 
@@ -504,7 +528,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set][mesh], Z[set][mesh], F[set][mesh][1],
-                levels=levelsFa, colors=colors, linestyles='solid')
+                levels=levels[1], linestyles='solid')
 
             e = elements[name]
 
@@ -554,7 +578,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set], Z[set], F[set][2],
-                levels=levelsFr, colors=colors, linestyles='dashed')
+                levels=levels[2], linestyles='dashed')
 
         ele(fig, axe, elem, 'cOpera3D')
 
@@ -565,7 +589,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set][mesh], Z[set][mesh], F[set][mesh][2],
-                levels=levelsFz, colors=colors, linestyles='solid')
+                levels=levels[2], linestyles='solid')
 
             e = elements[name]
 
@@ -617,7 +641,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set], Z[set], magF,
-                levels=levelsF, colors=colors, linestyles='dashed')
+                levels=levels[1], linestyles='dashed')
 
         ele(fig, axe, elem, 'cOpera3D')
 
@@ -630,7 +654,7 @@ def fig(p, name):
 
             elements[name] = a.contour(
                 R[set][mesh], Z[set][mesh], magF,
-                levels=levelsF, colors=colors, linestyles='solid')
+                levels=levels[1], linestyles='solid')
 
             e = elements[name]
 
@@ -647,25 +671,6 @@ def fig(p, name):
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
 fig(plots, 'ComparisonF')
-
-
-
-#def fig(p, name):
-
-    #p[name] = {'fig': plt.figure(), 'axes': dict()}
-    #f = p[name]
-
-    #fig = f['fig']
-    #axes = f['axes']
-
-    #axes['Fr'] = {'axe': fig.add_subplot(221), 'elements': p['ComparisonFr']['axes']['Fr']['elements']}
-    #axes['Fa'] = {'axe': fig.add_subplot(222), 'elements': p['ComparisonFa']['axes']['Fa']['elements']}
-    #axes['Fz'] = {'axe': fig.add_subplot(223), 'elements': p['ComparisonFz']['axes']['Fz']['elements']}
-    #axes['F'] = {'axe': fig.add_subplot(224), 'elements': p['ComparisonF']['axes']['F']['elements']}
-
-    #fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
-
-#fig(plots, 'Comparison')
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

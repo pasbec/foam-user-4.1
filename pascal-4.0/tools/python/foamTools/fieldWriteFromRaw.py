@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
 # Module for writing field data for foam from raw data files
 # March 2015
 # Pascal Beckstein (p.beckstein@hzdr.de)

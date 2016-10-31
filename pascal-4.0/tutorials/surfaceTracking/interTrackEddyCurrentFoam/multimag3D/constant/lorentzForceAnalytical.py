@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
 # October 2016
 # Vladimir Galindo (v.galindo@hzdr.de)
 # Pascal Beckstein (p.beckstein@hzdr.de)
