@@ -190,15 +190,18 @@ latex.latexify(fontsize=fontsize, fontfamily=fontfamily)
 
 hzdr.colors()
 
-labelR = r'$r ~ [\mathrm{mm}]$'
-labelZ = r'$z ~ [\mathrm{mm}]$'
+labelAxisR = r'$r ~ [\mathrm{mm}]$'
+labelAxisZ = r'$z ~ [\mathrm{mm}]$'
+
+labelAxisE = r'$\mathrm{log}\|E\|$'
+labelAxisD = r'$\mathrm{log}(\triangle x /\triangle x_{\mathrm{ref}})$'
 
 labelE = dict()
 labelE['O1'] = r'$\mathcal{O}(\triangle x)$'
 labelE['O2'] = r'$\mathcal{O}(\triangle x^2)$'
-labelE['inf'] = r'$\mathrm{log}\|E\|_{\infty}$'
-labelE['1'] = r'$\mathrm{log}\|E\|_{1}$'
-labelE['2'] = r'$\mathrm{log}\|E\|_{2}$'
+labelE['inf'] = r'$\|E\|_{\infty}$'
+labelE['1'] = r'$\|E\|_{1}$'
+labelE['2'] = r'$\|E\|_{2}$'
 
 markerE = dict()
 markerE['O1'] = ''
@@ -241,6 +244,9 @@ def fig(p, name):
         axe.set_xscale('log')
         axe.set_yscale('log')
 
+        axe.set_xlabel(labelAxisD)
+        axe.set_ylabel(labelAxisE)
+
         def ele(f, a, elements, name):
 
             d = np.linspace(1,1e-2,100)
@@ -251,9 +257,9 @@ def fig(p, name):
 
             set = 'EddyCurrentFoam'
 
-            d = [ i for k, i in sorted(D[set].iteritems())]
+            d = np.array([ i for k, i in sorted(D[set].iteritems())])
             for norm in sorted(norms.keys()):
-                n = [ i for k, i in sorted(N[set][norm][0].iteritems())]
+                n = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
                 elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
             a.legend(loc='lower left')
@@ -290,6 +296,9 @@ def fig(p, name):
         axe.set_xscale('log')
         axe.set_yscale('log')
 
+        axe.set_xlabel(labelAxisD)
+        axe.set_ylabel(labelAxisE)
+
         def ele(f, a, elements, name):
 
             d = np.linspace(1,1e-2,100)
@@ -300,9 +309,9 @@ def fig(p, name):
 
             set = 'EddyCurrentFoam'
 
-            d = [ i for k, i in sorted(D[set].iteritems())]
+            d = np.array([ i for k, i in sorted(D[set].iteritems())])
             for norm in sorted(norms.keys()):
-                n = [ i for k, i in sorted(N[set][norm][1].iteritems())]
+                n = np.array([ i for k, i in sorted(N[set][norm][1].iteritems())])
                 elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
             a.legend(loc='lower left')
@@ -339,6 +348,9 @@ def fig(p, name):
         axe.set_xscale('log')
         axe.set_yscale('log')
 
+        axe.set_xlabel(labelAxisD)
+        axe.set_ylabel(labelAxisE)
+
         def ele(f, a, elements, name):
 
             d = np.linspace(1,1e-2,100)
@@ -349,9 +361,9 @@ def fig(p, name):
 
             set = 'EddyCurrentFoam'
 
-            d = [ i for k, i in sorted(D[set].iteritems())]
+            d = np.array([ i for k, i in sorted(D[set].iteritems())])
             for norm in sorted(norms.keys()):
-                n = [ i for k, i in sorted(N[set][norm][2].iteritems())]
+                n = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
                 elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
             a.legend(loc='lower left')
@@ -363,6 +375,68 @@ def fig(p, name):
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
 fig(plots, 'ErrorFz')
+
+
+
+def fig(p, name):
+
+    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    f = p[name]
+
+    fig = f['fig']
+    axes = f['axes']
+
+    def axe(f, axes, name):
+
+        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
+        a = axes[name]
+
+        axe = a['axe']
+        elem = a['elements']
+
+        axe.set_xlim([1,5e-2])
+        axe.set_ylim([1e-4,1])
+
+        axe.set_xscale('log')
+        axe.set_yscale('log')
+
+        axe.set_xlabel(labelAxisD)
+        axe.set_ylabel(labelAxisE)
+
+        def ele(f, a, elements, name):
+
+            d = np.linspace(1,1e-2,100)
+            elements[name] = a.plot(d, 1.8*d, label=labelE['O1'],
+                                    marker=markerE['O1'], linestyle='dotted', color='black')
+            elements[name] = a.plot(d, 0.2*d**2.0, label=labelE['O2'],
+                                    marker=markerE['O2'], linestyle='dashed', color='black')
+
+            set = 'EddyCurrentFoam'
+
+            d = np.array([ i for k, i in sorted(D[set].iteritems())])
+            magnMax = 0.0
+            magn = dict()
+            for norm in sorted(norms.keys()):
+                n0 = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
+                n1 = np.array([ i for k, i in sorted(N[set][norm][1].iteritems())])
+                n2 = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
+                magn[norm] = (n0**2 + n1**2 + n2**2)**0.5
+                for m in magn[norm]:
+                    magnMax = max(magnMax, m)
+
+            for norm in sorted(norms.keys()):
+                n = magn[norm]/magnMax
+                elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
+
+            a.legend(loc='lower left')
+
+        ele(fig, axe, elem, 'norms')
+
+    axe(fig, axes, 'F')
+
+    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+
+fig(plots, 'ErrorF')
 
 # --------------------------------------------------------------------------- #
 # --- Contour plots --------------------------------------------------------- #
@@ -387,8 +461,8 @@ def fig(p, name):
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(labelR)
-        axe.set_ylabel(labelZ)
+        axe.set_xlabel(labelAxisR)
+        axe.set_ylabel(labelAxisZ)
 
         axe.set_aspect('equal')
 
@@ -401,6 +475,10 @@ def fig(p, name):
                 levels=levels[1])
 
             e = elements[name]
+
+            #for collection in e.collections:
+                #for path in collection.get_paths():
+                    #poly = path.to_polygons()
 
             a.clabel(
                 e, e.levels[0::2],
@@ -435,8 +513,8 @@ def fig(p, name):
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(labelR)
-        axe.set_ylabel(labelZ)
+        axe.set_xlabel(labelAxisR)
+        axe.set_ylabel(labelAxisZ)
 
         axe.set_aspect('equal')
 
@@ -496,8 +574,8 @@ def fig(p, name):
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(labelR)
-        axe.set_ylabel(labelZ)
+        axe.set_xlabel(labelAxisR)
+        axe.set_ylabel(labelAxisZ)
 
         axe.set_aspect('equal')
 
@@ -567,8 +645,8 @@ def fig(p, name):
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(labelR)
-        axe.set_ylabel(labelZ)
+        axe.set_xlabel(labelAxisR)
+        axe.set_ylabel(labelAxisZ)
 
         axe.set_aspect('equal')
 
@@ -628,8 +706,8 @@ def fig(p, name):
         axe.set_xlim([0,30])
         axe.set_ylim([0,30])
 
-        axe.set_xlabel(labelR)
-        axe.set_ylabel(labelZ)
+        axe.set_xlabel(labelAxisR)
+        axe.set_ylabel(labelAxisZ)
 
         axe.set_aspect('equal')
 
