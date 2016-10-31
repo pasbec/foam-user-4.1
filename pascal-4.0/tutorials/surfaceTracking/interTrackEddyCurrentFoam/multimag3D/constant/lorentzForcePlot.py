@@ -224,49 +224,42 @@ plots = dict()
 
 def fig(p, name):
 
-    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    p[name] = {'fig': plt.figure(), 'axs': dict()}
     f = p[name]
 
     fig = f['fig']
-    axes = f['axes']
+    axs = f['axs']
 
-    def axe(f, axes, name):
+    def ax(f, axs, name):
 
-        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        a = axes[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        axe = a['axe']
-        elem = a['elements']
+        ax.set_xlim([1,5e-2])
+        ax.set_ylim([1e-4,1])
 
-        axe.set_xlim([1,5e-2])
-        axe.set_ylim([1e-4,1])
+        ax.set_xscale('log')
+        ax.set_yscale('log')
 
-        axe.set_xscale('log')
-        axe.set_yscale('log')
+        ax.set_xlabel(labelAxisD)
+        ax.set_ylabel(labelAxisE)
 
-        axe.set_xlabel(labelAxisD)
-        axe.set_ylabel(labelAxisE)
+        d = np.linspace(1,1e-2,100)
+        ax.plot(d, 1.8*d, label=labelE['O1'],
+                marker=markerE['O1'], linestyle='dotted', color='black')
+        ax.plot(d, 0.2*d**2.0, label=labelE['O2'],
+                marker=markerE['O2'], linestyle='dashed', color='black')
 
-        def ele(f, a, elements, name):
+        set = 'EddyCurrentFoam'
 
-            d = np.linspace(1,1e-2,100)
-            elements[name] = a.plot(d, 1.8*d, label=labelE['O1'],
-                                    marker=markerE['O1'], linestyle='dotted', color='black')
-            elements[name] = a.plot(d, 0.2*d**2.0, label=labelE['O2'],
-                                    marker=markerE['O2'], linestyle='dashed', color='black')
+        d = np.array([ i for k, i in sorted(D[set].iteritems())])
+        for norm in sorted(norms.keys()):
+            n = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
+            ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-            set = 'EddyCurrentFoam'
+        ax.legend(loc='lower left')
 
-            d = np.array([ i for k, i in sorted(D[set].iteritems())])
-            for norm in sorted(norms.keys()):
-                n = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
-                elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
-
-            a.legend(loc='lower left')
-
-        ele(fig, axe, elem, 'norms')
-
-    axe(fig, axes, 'Fr')
+    ax(fig, axs, 'Fr')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -276,49 +269,42 @@ fig(plots, 'ErrorFr')
 
 def fig(p, name):
 
-    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    p[name] = {'fig': plt.figure(), 'axs': dict()}
     f = p[name]
 
     fig = f['fig']
-    axes = f['axes']
+    axs = f['axs']
 
-    def axe(f, axes, name):
+    def ax(f, axs, name):
 
-        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        a = axes[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        axe = a['axe']
-        elem = a['elements']
+        ax.set_xlim([1,5e-2])
+        ax.set_ylim([1e-4,1])
 
-        axe.set_xlim([1,5e-2])
-        axe.set_ylim([1e-4,1])
+        ax.set_xscale('log')
+        ax.set_yscale('log')
 
-        axe.set_xscale('log')
-        axe.set_yscale('log')
+        ax.set_xlabel(labelAxisD)
+        ax.set_ylabel(labelAxisE)
 
-        axe.set_xlabel(labelAxisD)
-        axe.set_ylabel(labelAxisE)
+        d = np.linspace(1,1e-2,100)
+        ax.plot(d, 1.8*d, label=labelE['O1'],
+                marker=markerE['O1'], linestyle='dotted', color='black')
+        ax.plot(d, 0.2*d**2.0, label=labelE['O2'],
+                marker=markerE['O2'], linestyle='dashed', color='black')
 
-        def ele(f, a, elements, name):
+        set = 'EddyCurrentFoam'
 
-            d = np.linspace(1,1e-2,100)
-            elements[name] = a.plot(d, 1.8*d, label=labelE['O1'],
-                                    marker=markerE['O1'], linestyle='dotted', color='black')
-            elements[name] = a.plot(d, 0.2*d**2.0, label=labelE['O2'],
-                                    marker=markerE['O2'], linestyle='dashed', color='black')
+        d = np.array([ i for k, i in sorted(D[set].iteritems())])
+        for norm in sorted(norms.keys()):
+            n = np.array([ i for k, i in sorted(N[set][norm][1].iteritems())])
+            ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-            set = 'EddyCurrentFoam'
+        ax.legend(loc='lower left')
 
-            d = np.array([ i for k, i in sorted(D[set].iteritems())])
-            for norm in sorted(norms.keys()):
-                n = np.array([ i for k, i in sorted(N[set][norm][1].iteritems())])
-                elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
-
-            a.legend(loc='lower left')
-
-        ele(fig, axe, elem, 'norms')
-
-    axe(fig, axes, 'Fa')
+    ax(fig, axs, 'Fa')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -328,49 +314,42 @@ fig(plots, 'ErrorFa')
 
 def fig(p, name):
 
-    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    p[name] = {'fig': plt.figure(), 'axs': dict()}
     f = p[name]
 
     fig = f['fig']
-    axes = f['axes']
+    axs = f['axs']
 
-    def axe(f, axes, name):
+    def ax(f, axs, name):
 
-        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        a = axes[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        axe = a['axe']
-        elem = a['elements']
+        ax.set_xlim([1,5e-2])
+        ax.set_ylim([1e-4,1])
 
-        axe.set_xlim([1,5e-2])
-        axe.set_ylim([1e-4,1])
+        ax.set_xscale('log')
+        ax.set_yscale('log')
 
-        axe.set_xscale('log')
-        axe.set_yscale('log')
+        ax.set_xlabel(labelAxisD)
+        ax.set_ylabel(labelAxisE)
 
-        axe.set_xlabel(labelAxisD)
-        axe.set_ylabel(labelAxisE)
+        d = np.linspace(1,1e-2,100)
+        ax.plot(d, 1.8*d, label=labelE['O1'],
+                marker=markerE['O1'], linestyle='dotted', color='black')
+        ax.plot(d, 0.2*d**2.0, label=labelE['O2'],
+                marker=markerE['O2'], linestyle='dashed', color='black')
 
-        def ele(f, a, elements, name):
+        set = 'EddyCurrentFoam'
 
-            d = np.linspace(1,1e-2,100)
-            elements[name] = a.plot(d, 1.8*d, label=labelE['O1'],
-                                    marker=markerE['O1'], linestyle='dotted', color='black')
-            elements[name] = a.plot(d, 0.2*d**2.0, label=labelE['O2'],
-                                    marker=markerE['O2'], linestyle='dashed', color='black')
+        d = np.array([ i for k, i in sorted(D[set].iteritems())])
+        for norm in sorted(norms.keys()):
+            n = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
+            ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-            set = 'EddyCurrentFoam'
+        ax.legend(loc='lower left')
 
-            d = np.array([ i for k, i in sorted(D[set].iteritems())])
-            for norm in sorted(norms.keys()):
-                n = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
-                elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
-
-            a.legend(loc='lower left')
-
-        ele(fig, axe, elem, 'norms')
-
-    axe(fig, axes, 'Fz')
+    ax(fig, axs, 'Fz')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -380,59 +359,52 @@ fig(plots, 'ErrorFz')
 
 def fig(p, name):
 
-    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    p[name] = {'fig': plt.figure(), 'axs': dict()}
     f = p[name]
 
     fig = f['fig']
-    axes = f['axes']
+    axs = f['axs']
 
-    def axe(f, axes, name):
+    def ax(f, axs, name):
 
-        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        a = axes[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        axe = a['axe']
-        elem = a['elements']
+        ax.set_xlim([1,5e-2])
+        ax.set_ylim([1e-4,1])
 
-        axe.set_xlim([1,5e-2])
-        axe.set_ylim([1e-4,1])
+        ax.set_xscale('log')
+        ax.set_yscale('log')
 
-        axe.set_xscale('log')
-        axe.set_yscale('log')
+        ax.set_xlabel(labelAxisD)
+        ax.set_ylabel(labelAxisE)
 
-        axe.set_xlabel(labelAxisD)
-        axe.set_ylabel(labelAxisE)
+        d = np.linspace(1,1e-2,100)
+        ax.plot(d, 1.8*d, label=labelE['O1'],
+                marker=markerE['O1'], linestyle='dotted', color='black')
+        ax.plot(d, 0.2*d**2.0, label=labelE['O2'],
+                marker=markerE['O2'], linestyle='dashed', color='black')
 
-        def ele(f, a, elements, name):
+        set = 'EddyCurrentFoam'
 
-            d = np.linspace(1,1e-2,100)
-            elements[name] = a.plot(d, 1.8*d, label=labelE['O1'],
-                                    marker=markerE['O1'], linestyle='dotted', color='black')
-            elements[name] = a.plot(d, 0.2*d**2.0, label=labelE['O2'],
-                                    marker=markerE['O2'], linestyle='dashed', color='black')
+        d = np.array([ i for k, i in sorted(D[set].iteritems())])
+        magnMax = 0.0
+        magn = dict()
+        for norm in sorted(norms.keys()):
+            n0 = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
+            n1 = np.array([ i for k, i in sorted(N[set][norm][1].iteritems())])
+            n2 = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
+            magn[norm] = (n0**2 + n1**2 + n2**2)**0.5
+            for m in magn[norm]:
+                magnMax = max(magnMax, m)
 
-            set = 'EddyCurrentFoam'
+        for norm in sorted(norms.keys()):
+            n = magn[norm]/magnMax
+            ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-            d = np.array([ i for k, i in sorted(D[set].iteritems())])
-            magnMax = 0.0
-            magn = dict()
-            for norm in sorted(norms.keys()):
-                n0 = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
-                n1 = np.array([ i for k, i in sorted(N[set][norm][1].iteritems())])
-                n2 = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
-                magn[norm] = (n0**2 + n1**2 + n2**2)**0.5
-                for m in magn[norm]:
-                    magnMax = max(magnMax, m)
+        ax.legend(loc='lower left')
 
-            for norm in sorted(norms.keys()):
-                n = magn[norm]/magnMax
-                elements[name] = a.plot(d, n, label=labelE[norm], marker=markerE[norm])
-
-            a.legend(loc='lower left')
-
-        ele(fig, axe, elem, 'norms')
-
-    axe(fig, axes, 'F')
+    ax(fig, axs, 'F')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -444,49 +416,32 @@ fig(plots, 'ErrorF')
 
 def fig(p, name):
 
-    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    p[name] = {'fig': plt.figure(), 'axs': dict()}
     f = p[name]
 
     fig = f['fig']
-    axes = f['axes']
+    axs = f['axs']
 
-    def axe(f, axes, name):
+    def ax(f, axs, name):
 
-        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        a = axes[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        axe = a['axe']
-        elem = a['elements']
+        ax.set_xlim([0,30])
+        ax.set_ylim([0,30])
 
-        axe.set_xlim([0,30])
-        axe.set_ylim([0,30])
+        ax.set_xlabel(labelAxisR)
+        ax.set_ylabel(labelAxisZ)
 
-        axe.set_xlabel(labelAxisR)
-        axe.set_ylabel(labelAxisZ)
+        ax.set_aspect('equal')
 
-        axe.set_aspect('equal')
+        set = 'Analytical'
+        c = ax.contour(R[set], Z[set], F[set][1],
+                       levels=levels[1])
+        cl = ax.clabel(c, c.levels[0::2],
+                       inline=True, fmt='%g', fontsize=fontsize)
 
-        def ele(f, a, elements, name):
-
-            set = 'Analytical'
-
-            elements[name] = a.contour(
-                R[set], Z[set], F[set][1],
-                levels=levels[1])
-
-            e = elements[name]
-
-            #for collection in e.collections:
-                #for path in collection.get_paths():
-                    #poly = path.to_polygons()
-
-            a.clabel(
-                e, e.levels[0::2],
-                inline=True, fmt='%g', fontsize=fontsize)
-
-        ele(fig, axe, elem, 'contour')
-
-    axe(fig, axes, 'Fa')
+    ax(fig, axs, 'Fa')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -496,58 +451,39 @@ fig(plots, 'Analytical')
 
 def fig(p, name):
 
-    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    p[name] = {'fig': plt.figure(), 'axs': dict()}
     f = p[name]
 
     fig = f['fig']
-    axes = f['axes']
+    axs = f['axs']
 
-    def axe(f, axes, name):
+    def ax(f, axs, name):
 
-        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        a = axes[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        axe = a['axe']
-        elem = a['elements']
+        ax.set_xlim([0,30])
+        ax.set_ylim([0,30])
 
-        axe.set_xlim([0,30])
-        axe.set_ylim([0,30])
+        ax.set_xlabel(labelAxisR)
+        ax.set_ylabel(labelAxisZ)
 
-        axe.set_xlabel(labelAxisR)
-        axe.set_ylabel(labelAxisZ)
+        ax.set_aspect('equal')
 
-        axe.set_aspect('equal')
+        set = 'Opera3D'
+        c = ax.contour(R[set], Z[set], F[set][0],
+                       levels=levels[0], linestyles='dashed')
 
-        def ele(f, a, elements, name):
+        set = 'EddyCurrentFoam'
+        mesh = '1.000'
+        c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][0],
+                       levels=levels[0], linestyles='solid')
+        cl = ax.clabel(c, c.levels[0::2],
+                       inline=True, fmt='%g', fontsize=fontsize)
 
-            set = 'Opera3D'
+        [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
 
-            elements[name] = a.contour(
-                R[set], Z[set], F[set][0],
-                levels=levels[0], linestyles='dashed')
-
-        ele(fig, axe, elem, 'cOpera3D')
-
-        def ele(f, a, elements, name):
-
-            set = 'EddyCurrentFoam'
-            mesh = '1.000'
-
-            elements[name] = a.contour(
-                R[set][mesh], Z[set][mesh], F[set][mesh][0],
-                levels=levels[0], linestyles='solid')
-
-            e = elements[name]
-
-            cl = a.clabel(
-                e, e.levels[0::2],
-                inline=True, fmt='%g', fontsize=fontsize)
-
-            [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
-
-        ele(fig, axe, elem, 'cEddyCurrentFoam')
-
-    axe(fig, axes,'Fr')
+    ax(fig, axs,'Fr')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -557,68 +493,43 @@ fig(plots, 'ComparisonFr')
 
 def fig(p, name):
 
-    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    p[name] = {'fig': plt.figure(), 'axs': dict()}
     f = p[name]
 
     fig = f['fig']
-    axes = f['axes']
+    axs = f['axs']
 
-    def axe(f, axes, name):
+    def ax(f, axs, name):
 
-        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        a = axes[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        axe = a['axe']
-        elem = a['elements']
+        ax.set_xlim([0,30])
+        ax.set_ylim([0,30])
 
-        axe.set_xlim([0,30])
-        axe.set_ylim([0,30])
+        ax.set_xlabel(labelAxisR)
+        ax.set_ylabel(labelAxisZ)
 
-        axe.set_xlabel(labelAxisR)
-        axe.set_ylabel(labelAxisZ)
+        ax.set_aspect('equal')
 
-        axe.set_aspect('equal')
+        set = 'Analytical'
+        ax.contour(R[set], Z[set], F[set][1],
+                   levels=levels[1], linestyles='dotted')
 
-        def ele(f, a, elements, name):
+        set = 'Opera3D'
+        c = ax.contour(R[set], Z[set], F[set][1],
+                       levels=levels[1], linestyles='dashed')
 
-            set = 'Analytical'
+        set = 'EddyCurrentFoam'
+        mesh = '1.000'
+        c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][1],
+                       levels=levels[1], linestyles='solid')
+        cl = ax.clabel(c, c.levels[0::2],
+                       inline=True, fmt='%g', fontsize=fontsize)
 
-            elements[name] = a.contour(
-                R[set], Z[set], F[set][1],
-                levels=levels[1], linestyles='dotted')
+        [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
 
-        ele(fig, axe, elem, 'cAnalytical')
-
-        def ele(f, a, elements, name):
-
-            set = 'Opera3D'
-
-            elements[name] = a.contour(
-                R[set], Z[set], F[set][1],
-                levels=levels[1], linestyles='dashed')
-
-        ele(fig, axe, elem, 'cOpera3D')
-
-        def ele(f, a, elements, name):
-
-            set = 'EddyCurrentFoam'
-            mesh = '1.000'
-
-            elements[name] = a.contour(
-                R[set][mesh], Z[set][mesh], F[set][mesh][1],
-                levels=levels[1], linestyles='solid')
-
-            e = elements[name]
-
-            cl = a.clabel(
-                e, e.levels[0::2],
-                inline=True, fmt='%g', fontsize=fontsize)
-
-            [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
-
-        ele(fig, axe, elem, 'cEddyCurrentFoam')
-
-    axe(fig, axes, 'Fa')
+    ax(fig, axs, 'Fa')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -628,58 +539,39 @@ fig(plots, 'ComparisonFa')
 
 def fig(p, name):
 
-    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    p[name] = {'fig': plt.figure(), 'axs': dict()}
     f = p[name]
 
     fig = f['fig']
-    axes = f['axes']
+    axs = f['axs']
 
-    def axe(f, axes, name):
+    def ax(f, axs, name):
 
-        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        a = axes[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        axe = a['axe']
-        elem = a['elements']
+        ax.set_xlim([0,30])
+        ax.set_ylim([0,30])
 
-        axe.set_xlim([0,30])
-        axe.set_ylim([0,30])
+        ax.set_xlabel(labelAxisR)
+        ax.set_ylabel(labelAxisZ)
 
-        axe.set_xlabel(labelAxisR)
-        axe.set_ylabel(labelAxisZ)
+        ax.set_aspect('equal')
 
-        axe.set_aspect('equal')
+        set = 'Opera3D'
+        c = ax.contour(R[set], Z[set], F[set][2],
+                       levels=levels[2], linestyles='dashed')
 
-        def ele(f, a, elements, name):
+        set = 'EddyCurrentFoam'
+        mesh = '1.000'
+        c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][2],
+                       levels=levels[2], linestyles='solid')
+        cl = ax.clabel(c, c.levels[0::2],
+                       inline=True, fmt='%g', fontsize=fontsize)
 
-            set = 'Opera3D'
+        [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
 
-            elements[name] = a.contour(
-                R[set], Z[set], F[set][2],
-                levels=levels[2], linestyles='dashed')
-
-        ele(fig, axe, elem, 'cOpera3D')
-
-        def ele(f, a, elements, name):
-
-            set = 'EddyCurrentFoam'
-            mesh = '1.000'
-
-            elements[name] = a.contour(
-                R[set][mesh], Z[set][mesh], F[set][mesh][2],
-                levels=levels[2], linestyles='solid')
-
-            e = elements[name]
-
-            cl = a.clabel(
-                e, e.levels[0::2],
-                inline=True, fmt='%g', fontsize=fontsize)
-
-            [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
-
-        ele(fig, axe, elem, 'cEddyCurrentFoam')
-
-    axe(fig, axes, 'Fz')
+    ax(fig, axs, 'Fz')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
@@ -689,62 +581,41 @@ fig(plots, 'ComparisonFz')
 
 def fig(p, name):
 
-    p[name] = {'fig': plt.figure(), 'axes': dict()}
+    p[name] = {'fig': plt.figure(), 'axs': dict()}
     f = p[name]
 
     fig = f['fig']
-    axes = f['axes']
+    axs = f['axs']
 
-    def axe(f, axes, name):
+    def ax(f, axs, name):
 
-        axes[name] = {'axe': fig.add_subplot(111), 'elements': dict()}
-        a = axes[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        axe = a['axe']
-        elem = a['elements']
+        ax.set_xlim([0,30])
+        ax.set_ylim([0,30])
 
-        axe.set_xlim([0,30])
-        axe.set_ylim([0,30])
+        ax.set_xlabel(labelAxisR)
+        ax.set_ylabel(labelAxisZ)
 
-        axe.set_xlabel(labelAxisR)
-        axe.set_ylabel(labelAxisZ)
+        ax.set_aspect('equal')
 
-        axe.set_aspect('equal')
+        set = 'Opera3D'
+        magF = (F[set][0]**2 + F[set][1]**2 + F[set][2]**2)**0.5
+        c = ax.contour(R[set], Z[set], magF,
+                       levels=levels[1], linestyles='dashed')
 
-        def ele(f, a, elements, name):
+        set = 'EddyCurrentFoam'
+        mesh = '1.000'
+        magF = (F[set][mesh][0]**2 + F[set][mesh][1]**2 + F[set][mesh][2]**2)**0.5
+        c = ax.contour(R[set][mesh], Z[set][mesh], magF,
+                       levels=levels[1], linestyles='solid')
+        cl = ax.clabel(c, c.levels[0::2],
+                       inline=True, fmt='%g', fontsize=fontsize)
 
-            set = 'Opera3D'
+        [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
 
-            magF = (F[set][0]**2 + F[set][1]**2 + F[set][2]**2)**0.5
-
-            elements[name] = a.contour(
-                R[set], Z[set], magF,
-                levels=levels[1], linestyles='dashed')
-
-        ele(fig, axe, elem, 'cOpera3D')
-
-        def ele(f, a, elements, name):
-
-            set = 'EddyCurrentFoam'
-            mesh = '1.000'
-
-            magF = (F[set][mesh][0]**2 + F[set][mesh][1]**2 + F[set][mesh][2]**2)**0.5
-
-            elements[name] = a.contour(
-                R[set][mesh], Z[set][mesh], magF,
-                levels=levels[1], linestyles='solid')
-
-            e = elements[name]
-
-            cl = a.clabel(
-                e, e.levels[0::2],
-                inline=True, fmt='%g', fontsize=fontsize)
-
-            [l.set_bbox(dict(facecolor='white', edgecolor='none', pad=2)) for l in cl]
-
-        ele(fig, axe, elem, 'cEddyCurrentFoam')
-
-    axe(fig, axes, 'F')
+    ax(fig, axs, 'F')
 
     fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
 
