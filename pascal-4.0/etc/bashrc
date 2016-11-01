@@ -90,6 +90,7 @@ fe40 ()
 
         # TODO: Add paraview library to PYTHONPATH
         env_prepend 'PYTHONPATH' "$(echo $PARAVIEW_INCLUDE_DIR | sed 's/include/lib/')/site-packages"
+        env_prepend 'PYTHONPATH' "$(echo $PARAVIEW_INCLUDE_DIR | sed 's/include/lib/')"
 
         # TODO: Add freecad library to PYTHONPATH
         freecadBin="$(which freecad)"
