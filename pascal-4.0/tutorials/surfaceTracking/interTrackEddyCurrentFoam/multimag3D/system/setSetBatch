@@ -2,11 +2,11 @@
 
 # All
 
-cellSet  cellSet_geometry_all             new    boxToCell      (-1 -1 -1) ( 1  1  1)
+cellSet  cellSet_geometry_all             new    boxToCell      (-10 -10 -10) ( 10  10  10)
 
 # Fluid
 
-pointSet pointSet_geometry_fluid          new    surfaceToPoint "constant/triSurface/geometry_fluid.stl" 2e-4 true false
+pointSet pointSet_geometry_fluid          new    surfaceToPoint "constant/triSurface/geometry_region_fluid.stl" 2e-4 true false
 
 cellSet  cellSet_geometry_fluid           new    pointToCell    pointSet_geometry_fluid all
 
@@ -24,7 +24,7 @@ cellSet  cellSet_geometry_space_old       remove
 
 # Buffer
 
-pointSet pointSet_geometry_buffer         new    surfaceToPoint "constant/triSurface/geometry_buffer.stl" 2e-4 true false
+pointSet pointSet_geometry_buffer         new    surfaceToPoint "constant/triSurface/geometry_region_buffer.stl" 2e-4 true false
 
 cellSet  cellSet_geometry_buffer          new    pointToCell    pointSet_geometry_buffer all
 
@@ -38,10 +38,10 @@ cellSet  cellSet_geometry_background      new    setToCell      cellSet_geometry
 
 ### Outer/Inner boundaries
 
-pointSet pointSet_geometry_trackedSurface new    surfaceToPoint "constant/triSurface/geometry_boundary_trackedSurface.stl" 2e-4 false false
-pointSet pointSet_geometry_sideWall       new    surfaceToPoint "constant/triSurface/geometry_boundary_sideWall.stl" 2e-4 false false
-pointSet pointSet_geometry_bottomWall     new    surfaceToPoint "constant/triSurface/geometry_boundary_bottomWall.stl" 2e-4 false false
-pointSet pointSet_geometry_fixedMesh      new    surfaceToPoint "constant/triSurface/geometry_boundary_fixedMesh.stl" 2e-4 false false
+pointSet pointSet_geometry_trackedSurface new    surfaceToPoint "constant/triSurface/geometry_patch_trackedSurface.stl" 2e-4 false false
+pointSet pointSet_geometry_sideWall       new    surfaceToPoint "constant/triSurface/geometry_patch_sideWall.stl" 2e-4 false false
+pointSet pointSet_geometry_bottomWall     new    surfaceToPoint "constant/triSurface/geometry_patch_bottomWall.stl" 2e-4 false false
+pointSet pointSet_geometry_fixedMesh      new    surfaceToPoint "constant/triSurface/geometry_patch_fixedMesh.stl" 2e-4 false false
 
 faceSet  faceSet_geometry_trackedSurface  new    pointToFace    pointSet_geometry_trackedSurface all
 faceSet  faceSet_geometry_sideWall        new    pointToFace    pointSet_geometry_sideWall all

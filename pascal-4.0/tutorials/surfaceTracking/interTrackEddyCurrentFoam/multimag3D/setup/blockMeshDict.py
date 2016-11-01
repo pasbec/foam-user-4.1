@@ -1,71 +1,67 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# June 2016
+# October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-from foamTools.blockMeshDict import blockMeshDict
+import os, sys
+
+csb = os.path.basename(os.path.realpath(sys.argv[0]))
+csd = os.path.dirname(os.path.realpath(sys.argv[0]))
+csn = os.path.splitext(csb)[0]
+
+sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 
 import math as m
+
+from foamTools.blockMeshDict import blockMeshDict
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-geo_scale = 1e-2
-
-# Background mesh
-geo_r0 =  1.5
-geo_r1 =  3.0
-geo_r2 = 12.0
-
-geo_z0 = -6.0
-geo_z1 =  0.0
-geo_z2 =  3.0
-geo_z3 =  6.0
-geo_z4 = 12.0
+import parameters as par
 
 a = 2.0**(-0.5)
-f = 1.2
+f = par.mesh_f
+s = 1e-1
 
-n_scale = 2.0
+nr0 = int(m.ceil(par.mesh_scale*(par.geo_r0)*7*s))
+nr1 = int(m.ceil(par.mesh_scale*(par.geo_r1-par.geo_r0)*10*s))
+nr2 = int(m.ceil(par.mesh_scale*(par.geo_r2-par.geo_r1)*2*s))
 
-nr0 = int(m.ceil(n_scale*(geo_r0)*7))
-nr1 = int(m.ceil(n_scale*(geo_r1-geo_r0)*10))
-nr2 = int(m.ceil(n_scale*((geo_r2-geo_r1)+(geo_r1-geo_r0))/3.0*10))
-
-nz0 = int(m.ceil(n_scale*(geo_z1-geo_z0)*5))
-nz1 = int(m.ceil(n_scale*(geo_z2-geo_z1)*10))
-nz2 = int(m.ceil(n_scale*(geo_z3-geo_z2)*10))
-nz3 = int(m.ceil(n_scale*(geo_z4-geo_z3)*5))
+nz0 = int(m.ceil(par.mesh_scale*(par.geo_z1-par.geo_z0)*2*s))
+nz1 = int(m.ceil(par.mesh_scale*(par.geo_z2-par.geo_z1)*10*s))
+nz2 = int(m.ceil(par.mesh_scale*(par.geo_z3-par.geo_z2)*10*s))
+nz3 = int(m.ceil(par.mesh_scale*(par.geo_z4-par.geo_z3)*2*s))
 
 # --------------------------------------------------------------------------- #
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-d = blockMeshDict("blockMeshDict")
+d = blockMeshDict(par.dir_polyMesh + '/' + 'blockMeshDict')
 
-d.vertices.set(  0, [        0.0,          0,     geo_z0])
-d.vertices.set(  1, [     geo_r0,          0,     geo_z0])
-d.vertices.set(  2, [ f*a*geo_r0, f*a*geo_r0,     geo_z0])
-d.vertices.set(  3, [        0.0,     geo_r0,     geo_z0])
-d.vertices.set(  4, [     geo_r1,          0,     geo_z0])
-d.vertices.set(  5, [   a*geo_r1,   a*geo_r1,     geo_z0])
-d.vertices.set(  6, [        0.0,     geo_r1,     geo_z0])
-d.vertices.set(  7, [     geo_r2,          0,     geo_z0])
-d.vertices.set(  8, [   a*geo_r2,   a*geo_r2,     geo_z0])
-d.vertices.set(  9, [        0.0,     geo_r2,     geo_z0])
+d.vertices.set(  0, [            0.0,              0,     par.geo_z0])
+d.vertices.set(  1, [     par.geo_r0,              0,     par.geo_z0])
+d.vertices.set(  2, [ f*a*par.geo_r0, f*a*par.geo_r0,     par.geo_z0])
+d.vertices.set(  3, [            0.0,     par.geo_r0,     par.geo_z0])
+d.vertices.set(  4, [     par.geo_r1,              0,     par.geo_z0])
+d.vertices.set(  5, [   a*par.geo_r1,   a*par.geo_r1,     par.geo_z0])
+d.vertices.set(  6, [            0.0,     par.geo_r1,     par.geo_z0])
+d.vertices.set(  7, [     par.geo_r2,              0,     par.geo_z0])
+d.vertices.set(  8, [   a*par.geo_r2,   a*par.geo_r2,     par.geo_z0])
+d.vertices.set(  9, [            0.0,     par.geo_r2,     par.geo_z0])
 
 baseVertices = [ i for i in range(len(d.vertices.labels)) ]
 
-d.vertices.copyTranslate( 10, baseVertices, [0.0, 0.0, geo_z1-geo_z0])
-d.vertices.copyTranslate( 20, baseVertices, [0.0, 0.0, geo_z2-geo_z0])
-d.vertices.copyTranslate( 30, baseVertices, [0.0, 0.0, geo_z3-geo_z0])
-d.vertices.copyTranslate( 40, baseVertices, [0.0, 0.0, geo_z4-geo_z0])
+d.vertices.copyTranslate( 10, baseVertices, [0.0, 0.0, par.geo_z1-par.geo_z0])
+d.vertices.copyTranslate( 20, baseVertices, [0.0, 0.0, par.geo_z2-par.geo_z0])
+d.vertices.copyTranslate( 30, baseVertices, [0.0, 0.0, par.geo_z3-par.geo_z0])
+d.vertices.copyTranslate( 40, baseVertices, [0.0, 0.0, par.geo_z4-par.geo_z0])
 
 # Blocks
 
@@ -97,12 +93,12 @@ d.blocks.distribution.set( 30, "z", nz3)
 # Gradings
 
 d.blocks.grading.set( 1, [ 0.5, 1.0, 1.0])
-d.blocks.grading.set( 3, [ 7.5, 1.0, 1.0])
+d.blocks.grading.set( 3, [40.0, 1.0, 1.0])
 
-d.blocks.grading.set( 0, [1.0, 1.0,  0.13333333333333])
+d.blocks.grading.set( 0, [1.0, 1.0,  0.025])
 d.blocks.grading.set(10, [1.0, 1.0,  2.0])
 d.blocks.grading.set(20, [1.0, 1.0,  0.5])
-d.blocks.grading.set(30, [1.0, 1.0,  7.5])
+d.blocks.grading.set(30, [1.0, 1.0, 40.0])
 
 # Boundary faces
 
@@ -157,7 +153,7 @@ d.boundaryFaces.set( 231, "infinity", 34, "y+")
 # --- blockMeshDict --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-d.header(geo_scale)
+d.header(par.geo_scale)
 
 # --------------------------------------------------------------------------- #
 

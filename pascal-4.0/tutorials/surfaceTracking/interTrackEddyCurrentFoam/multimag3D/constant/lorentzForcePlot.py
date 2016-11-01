@@ -2,19 +2,25 @@
 # -*- coding: utf-8 -*-
 #
 # October 2016
-# Vladimir Galindo (v.galindo@hzdr.de)
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
+import os, sys
+
+csb = os.path.basename(os.path.realpath(sys.argv[0]))
+csd = os.path.dirname(os.path.realpath(sys.argv[0]))
+csn = os.path.splitext(csb)[0]
+
+sys.path.append(os.environ['FOAM_USER_TOOLS']+'/python')
+
 import math as m
 import numpy as np
 
 import matplotlib.pyplot as plt
 
-from foamTools.ioInfo import fileGetPath
 import plotTools.latex as latex
 import plotTools.hzdr as hzdr
 
@@ -66,7 +72,7 @@ set = 'Analytical'
 # Read data
 if True:
 
-    data[set] = np.genfromtxt(fileGetPath(baseName+set+'.dat'), comments='#')
+    data[set] = np.genfromtxt(csd+'/'+baseName+set+'.dat', comments='#')
 
     R[set]    = data[set][:,0].reshape(nr,nz)
     Z[set]    = data[set][:,1].reshape(nr,nz)
@@ -85,7 +91,7 @@ set = 'Opera3D'
 # Read data
 if True:
 
-    data[set] = np.genfromtxt(fileGetPath(baseName+set+'.dat'), comments='#')
+    data[set] = np.genfromtxt(csd+'/'+baseName+set+'.dat', comments='#')
 
     R[set]    = data[set][:,0].reshape(nr,nz)
     Z[set]    = data[set][:,1].reshape(nr,nz)
@@ -116,7 +122,7 @@ meshes = ['0.125', '0.250', '0.375', '0.500', '0.750', '1.000', '1.500', '2.000'
 # Read data
 for mesh in meshes:
 
-    data[set][mesh] = np.genfromtxt(fileGetPath(baseName+set+'_'+mesh+'.dat'), comments='#')
+    data[set][mesh] = np.genfromtxt(csd+'/'+baseName+set+'_'+mesh+'.dat', comments='#')
 
     R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
     Z[set][mesh]    = data[set][mesh][:,2].reshape(nr,nz)
@@ -261,7 +267,7 @@ def fig(p, name):
 
     ax(fig, axs, 'Fr')
 
-    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    fig.savefig(csd+'/'+baseName+name+'.pdf', bbox_inches="tight")
 
 fig(plots, 'ErrorFr')
 
@@ -306,7 +312,7 @@ def fig(p, name):
 
     ax(fig, axs, 'Fa')
 
-    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    fig.savefig(csd+'/'+baseName+name+'.pdf', bbox_inches="tight")
 
 fig(plots, 'ErrorFa')
 
@@ -351,7 +357,7 @@ def fig(p, name):
 
     ax(fig, axs, 'Fz')
 
-    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    fig.savefig(csd+'/'+baseName+name+'.pdf', bbox_inches="tight")
 
 fig(plots, 'ErrorFz')
 
@@ -406,7 +412,7 @@ def fig(p, name):
 
     ax(fig, axs, 'F')
 
-    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    fig.savefig(csd+'/'+baseName+name+'.pdf', bbox_inches="tight")
 
 fig(plots, 'ErrorF')
 
@@ -443,7 +449,7 @@ def fig(p, name):
 
     ax(fig, axs, 'Fa')
 
-    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    fig.savefig(csd+'/'+baseName+name+'.pdf', bbox_inches="tight")
 
 fig(plots, 'Analytical')
 
@@ -485,7 +491,7 @@ def fig(p, name):
 
     ax(fig, axs,'Fr')
 
-    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    fig.savefig(csd+'/'+baseName+name+'.pdf', bbox_inches="tight")
 
 fig(plots, 'ComparisonFr')
 
@@ -531,7 +537,7 @@ def fig(p, name):
 
     ax(fig, axs, 'Fa')
 
-    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    fig.savefig(csd+'/'+baseName+name+'.pdf', bbox_inches="tight")
 
 fig(plots, 'ComparisonFa')
 
@@ -573,7 +579,7 @@ def fig(p, name):
 
     ax(fig, axs, 'Fz')
 
-    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    fig.savefig(csd+'/'+baseName+name+'.pdf', bbox_inches="tight")
 
 fig(plots, 'ComparisonFz')
 
@@ -617,7 +623,7 @@ def fig(p, name):
 
     ax(fig, axs, 'F')
 
-    fig.savefig(fileGetPath(baseName+name+'.pdf'), bbox_inches="tight")
+    fig.savefig(csd+'/'+baseName+name+'.pdf', bbox_inches="tight")
 
 fig(plots, 'ComparisonF')
 

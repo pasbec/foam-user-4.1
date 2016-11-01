@@ -33,6 +33,13 @@ feClear ()
     env_removeAll 'foam'
     env_removeAll 'foam-extend'
 
+    # TODO: Remove paraview from pythonpath
+    env_removeAny 'PYTHONPATH' 'ParaView'
+    env_removeAny 'PYTHONPATH' 'paraview'
+
+    # TODO: Remove freecad from pythonpath
+    env_removeAny 'PYTHONPATH' 'freecad'
+
     # Clear alias
     unalias pf &> /dev/null
 
@@ -74,6 +81,23 @@ fe40 ()
 
         # Load new environment
         feLoad
+
+        # Add bin directory to PATH
+        env_prepend 'PATH' "$WM_PROJECT_USER_DIR/bin"
+
+        # TODO: Add python tools to PYTHONPATH
+        env_prepend 'PYTHONPATH' "$WM_PROJECT_USER_DIR/tools/python"
+
+        # TODO: Add paraview library to PYTHONPATH
+        env_prepend 'PYTHONPATH' "$(echo $PARAVIEW_INCLUDE_DIR | sed 's/include/lib/')/site-packages"
+
+        # TODO: Add freecad library to PYTHONPATH
+        freecadBin="$(which freecad)"
+        if [ ! -z "$freecadBin" ]; then
+
+            env_prepend 'PYTHONPATH' "${freecadBin%'/bin/freecad'}/lib/freecad/lib"
+
+        fi
 
         case "$HOSTNAME" in
 
