@@ -18,6 +18,7 @@ sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 
 import math as m
 
+from foamTools.expansion import expansion_de_e, expansion_n_ds
 from foamTools.blockMeshDict import blockMeshDict
 
 # --------------------------------------------------------------------------- #
@@ -28,16 +29,33 @@ import parameters as par
 
 a = 2.0**(-0.5)
 f = par.mesh_f
-s = 1e-1
 
-nr0 = int(m.ceil(par.mesh_scale*(par.geo_r0)*7*s))
-nr1 = int(m.ceil(par.mesh_scale*(par.geo_r1-par.geo_r0)*10*s))
-nr2 = int(m.ceil(par.mesh_scale*(par.geo_r2-par.geo_r1)*2*s))
+lr0 = par.geo_r0
+lr1 = par.geo_r1 - par.geo_r0
+lr2 = par.geo_r2 - par.geo_r1
 
-nz0 = int(m.ceil(par.mesh_scale*(par.geo_z1-par.geo_z0)*2*s))
-nz1 = int(m.ceil(par.mesh_scale*(par.geo_z2-par.geo_z1)*10*s))
-nz2 = int(m.ceil(par.mesh_scale*(par.geo_z3-par.geo_z2)*10*s))
-nz3 = int(m.ceil(par.mesh_scale*(par.geo_z4-par.geo_z3)*2*s))
+lz0 = par.geo_z1-par.geo_z0
+lz1 = par.geo_z2-par.geo_z1
+lz2 = par.geo_z3-par.geo_z2
+lz3 = par.geo_z4-par.geo_z3
+
+nr0 = int(par.mesh_scale*m.ceil(lr0*4))
+nr1 = int(par.mesh_scale*m.ceil(lr1*5))
+#nr2 = int(par.mesh_scale*m.ceil(lr2*2))
+
+#nz0 = int(par.mesh_scale*m.ceil(lz0*2))
+nz1 = int(par.mesh_scale*m.ceil(lz1*5))
+nz2 = int(par.mesh_scale*m.ceil(lz2*5))
+#nz3 = int(par.mesh_scale*m.ceil(lz3*2))
+
+e1 = 0.5
+e2ds = expansion_de_e(nr1, e1,lr1)
+e2de = 9.0*e2ds*lr2/90.0
+e2 = e2de/e2ds
+nr2 = expansion_n_ds(e2, e2ds, lr2)
+
+nz0 = nr2
+nz3 = nr2
 
 # --------------------------------------------------------------------------- #
 # --- Data ------------------------------------------------------------------ #
@@ -92,13 +110,13 @@ d.blocks.distribution.set( 30, "z", nz3)
 
 # Gradings
 
-d.blocks.grading.set( 1, [ 0.5, 1.0, 1.0])
-d.blocks.grading.set( 3, [40.0, 1.0, 1.0])
+d.blocks.grading.set( 1, [ e1, 1.0,    1.0])
+d.blocks.grading.set( 3, [ e2, 1.0,    1.0])
 
-d.blocks.grading.set( 0, [1.0, 1.0,  0.025])
-d.blocks.grading.set(10, [1.0, 1.0,  2.0])
-d.blocks.grading.set(20, [1.0, 1.0,  0.5])
-d.blocks.grading.set(30, [1.0, 1.0, 40.0])
+d.blocks.grading.set( 0, [1.0, 1.0, 1.0/e2])
+d.blocks.grading.set(10, [1.0, 1.0, 1.0/e1])
+d.blocks.grading.set(20, [1.0, 1.0,     e1])
+d.blocks.grading.set(30, [1.0, 1.0,     e2])
 
 # Boundary faces
 

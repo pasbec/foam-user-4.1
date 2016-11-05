@@ -17,6 +17,7 @@ from foamTools import ioInfo
 from foamTools import classInfo
 from foamTools import dictHelper
 from foamTools import fieldWriteFromRaw
+from foamTools import expansion
 from foamTools import blockMeshDict
 
 # --------------------------------------------------------------------------- #
