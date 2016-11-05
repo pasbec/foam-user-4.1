@@ -49,7 +49,7 @@ nz2 = int(par.mesh_scale*m.ceil(lz2*5))
 #nz3 = int(par.mesh_scale*m.ceil(lz3*2))
 
 e1 = 0.5
-e2ds = expansion_de_e(nr1, e1,lr1)
+e2ds = expansion_de_e(nr1, e1, lr1)
 e2de = 9.0*e2ds*lr2/90.0
 e2 = e2de/e2ds
 nr2 = expansion_n_ds(e2, e2ds, lr2)
