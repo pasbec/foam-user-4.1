@@ -88,18 +88,32 @@ if True:
 
 set = 'Opera3D'
 
+# Init dictionaries as we are using meshes
+data[set] = dict()
+
+R[set] = dict()
+Z[set] = dict()
+
+F[set] = dict()
+
+E[set] = dict()
+D[set] = dict()
+N[set] = dict()
+
+meshes = ['coarse', 'fine']
+
 # Read data
-if True:
+for mesh in meshes:
 
-    data[set] = np.genfromtxt(csd+'/'+baseName+set+'.dat', comments='#')
+    data[set][mesh] = np.genfromtxt(csd+'/'+baseName+set+'_'+mesh+'.dat', comments='#')
 
-    R[set]    = data[set][:,0].reshape(nr,nz)
-    Z[set]    = data[set][:,1].reshape(nr,nz)
+    R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
+    Z[set][mesh]    = data[set][mesh][:,1].reshape(nr,nz)
 
-    F[set]    = [np.zeros(R[set].shape) for i in range(3)]
-    F[set][0] = data[set][:,2].reshape(nr,nz)
-    F[set][1] = data[set][:,3].reshape(nr,nz)
-    F[set][2] = data[set][:,4].reshape(nr,nz)
+    F[set][mesh]    = [np.zeros(R[set][mesh].shape) for i in range(3)]
+    F[set][mesh][0] = data[set][mesh][:,2].reshape(nr,nz)
+    F[set][mesh][1] = data[set][mesh][:,3].reshape(nr,nz)
+    F[set][mesh][2] = data[set][mesh][:,4].reshape(nr,nz)
 
 # --------------------------------------------------------------------------- #
 
@@ -182,11 +196,6 @@ for mesh in meshes[:-1]:
         for i in range(3):
 
             N[set][norm][i][mesh] /= Nmax[i]
-
-#print [ i for k, i in sorted(N[set]['inf'][0].iteritems())]
-#print [ i for k, i in sorted(N[set]['1'][0].iteritems())]
-#print [ i for k, i in sorted(N[set]['2'][0].iteritems())]
-#print [ i for k, i in sorted(D[set].iteritems())]
 
 # --------------------------------------------------------------------------- #
 # --- Plot settings --------------------------------------------------------- #
@@ -477,7 +486,8 @@ def fig(p, name):
         ax.set_aspect('equal')
 
         set = 'Opera3D'
-        c = ax.contour(R[set], Z[set], F[set][0],
+        mesh = 'fine'
+        c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][0],
                        levels=levels[0], linestyles='dashed')
 
         set = 'EddyCurrentFoam'
@@ -523,7 +533,8 @@ def fig(p, name):
                    levels=levels[1], linestyles='dotted')
 
         set = 'Opera3D'
-        c = ax.contour(R[set], Z[set], F[set][1],
+        mesh = 'fine'
+        c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][1],
                        levels=levels[1], linestyles='dashed')
 
         set = 'EddyCurrentFoam'
@@ -565,7 +576,8 @@ def fig(p, name):
         ax.set_aspect('equal')
 
         set = 'Opera3D'
-        c = ax.contour(R[set], Z[set], F[set][2],
+        mesh = 'fine'
+        c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][2],
                        levels=levels[2], linestyles='dashed')
 
         set = 'EddyCurrentFoam'
@@ -607,8 +619,9 @@ def fig(p, name):
         ax.set_aspect('equal')
 
         set = 'Opera3D'
-        magF = (F[set][0]**2 + F[set][1]**2 + F[set][2]**2)**0.5
-        c = ax.contour(R[set], Z[set], magF,
+        mesh = 'fine'
+        magF = (F[set][mesh][0]**2 + F[set][mesh][1]**2 + F[set][mesh][2]**2)**0.5
+        c = ax.contour(R[set][mesh], Z[set][mesh], magF,
                        levels=levels[1], linestyles='dashed')
 
         set = 'EddyCurrentFoam'
