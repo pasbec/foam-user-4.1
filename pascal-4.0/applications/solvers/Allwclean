@@ -5,3 +5,4 @@ set -x
 wclean all basic || exit 1
 wclean all electromagnetics || exit 1
 wclean all surfaceTracking || exit 1
+wclean all heatTransfer || exit 1

@@ -48,11 +48,7 @@
         {
             label patchI = control.interfaceLabel();
 
-            if
-            (
-                V.boundaryField()[patchI].type()
-             == fixedGradientFvPatchField<scalar>::typeName
-            )
+            if (isA<fixedGradientFvPatchField<scalar> >(V.boundaryField()[patchI]))
             {
                 fixedGradientFvPatchField<scalar>& VP =
                     refCast<fixedGradientFvPatchField<scalar> >
@@ -99,6 +95,61 @@
                 VEqn -= complexSign * omega0 * (sigmaGrad & A0);
             }
         }
+
+
+// // TODO: Check for fixesValue
+//         // Compatibility check
+//         {
+//             bool singular = true;
+//
+//             forAll(mesh.boundary(), patchI)
+//             {
+//                 if
+//                 (
+//                     !V.boundaryField()[patchI].coupled()
+//                  && V.boundaryField()[patchI].fixesValue()
+//                 )
+//                 {
+//                     singular = false;
+//                 }
+//             }
+//
+//             if (singular)
+//             {
+//                 scalar sourceVolSum = sum(VEqn.source() * mesh.V());
+//                 scalar fluxAreaSum = 0;
+//                 forAll(mesh.boundary(), patchI)
+//                 {
+//                     if (isA<fixedGradientFvPatchField<scalar> >(V.boundaryField()[patchI]))
+//                     {
+//                         fixedGradientFvPatchField<scalar>& VP =
+//                             refCast<fixedGradientFvPatchField<scalar> >
+//                             (
+//                                 V.boundaryField()[patchI]
+//                             );
+// // TODO: Calc fluxAreaSum
+//                     }
+//                 }
+//
+//                 if (Control::debug)
+//                 {
+//                     Pout<< "eddyCurrentApp::Control | VEqn.H : "
+//                         << "Local compatibility check for " << V.name()
+//                         << "Eqn  (domain/boundary): " << sourceVolSum
+//                         << " / " << fluxAreaSum
+//                         << endl;
+//                 }
+//
+//                 scalar sourceVolSumGlobal = returnReduce(sourceVolSum, sumOp<scalar>());
+//                 scalar fluxAreaSumGlobal = returnReduce(fluxAreaSum, sumOp<scalar>());
+//
+//                 Info<< "Global compatibility check for " << V.name()
+//                     << "Eqn (domain/boundary): " << sourceVolSumGlobal
+//                     << " / " << fluxAreaSumGlobal
+//                     << endl;
+//             }
+//         }
+
 
         // Solve V-equation
         // NOTE: Currently a deflated solver is necessary

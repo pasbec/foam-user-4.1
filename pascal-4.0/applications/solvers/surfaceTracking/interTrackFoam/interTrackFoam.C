@@ -33,9 +33,23 @@ Author
 
 #include "interTrackApp.H"
 
-// TODO: Coupled solution of U and p?
+// TODO: Remove coupled solution of U and p?
+
+// TODO: ddtPhiCorr?
 
 // TODO: Fix meshPhi issues!
+
+// TODO: Pressure naming p vs. p_rgh (gh, ghf, hRef, ...)
+
+// TODO: Relaxation of pressure?
+
+// TODO: Pressure boundary conditions (F, fixedFluxPressure)
+
+// TODO: Two fluids
+
+// TODO: Pressure equation reference
+
+// TODO: Continuity errors
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

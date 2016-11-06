@@ -6,3 +6,4 @@ set -x
 wmake all basic || exit 1
 wmake all electromagnetics || exit 1
 wmake all surfaceTracking || exit 1
+wmake all heatTransfer || exit 1

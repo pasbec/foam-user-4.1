@@ -34,8 +34,6 @@ Description
 #include "interTrackEddyCurrentAppControl.H"
 #include "interTrackEddyCurrentAppManager.H"
 
-#include "fvCFD.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

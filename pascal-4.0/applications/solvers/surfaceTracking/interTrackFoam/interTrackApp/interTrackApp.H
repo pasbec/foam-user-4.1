@@ -37,8 +37,6 @@ Author
 #include "interTrackAppControl.H"
 #include "interTrackAppManager.H"
 
-#include "fvCFD.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

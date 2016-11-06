@@ -37,8 +37,6 @@ Author
 #include "eddyCurrentAppControl.H"
 #include "eddyCurrentAppManager.H"
 
-#include "fvCFD.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

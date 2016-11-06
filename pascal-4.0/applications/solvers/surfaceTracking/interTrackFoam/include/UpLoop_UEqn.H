@@ -57,7 +57,13 @@
         }
         else
         {
-            solve(UEqn() == -fvc::grad(p));
+            solve
+            (
+                UEqn() == fvc::reconstruct
+                (
+                - (fvc::snGrad(p)*mesh.magSf())
+                )
+            );
         }
     }
 
