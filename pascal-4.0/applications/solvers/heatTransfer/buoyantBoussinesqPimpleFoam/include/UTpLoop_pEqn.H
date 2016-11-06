@@ -143,11 +143,21 @@
                 fvm::laplacian(rAUf, p) == fvc::div(phi)
             );
 
-// TODO: Read pRefCell and pRefValue with control
-// #           include "setReference.H"
-//             pEqn.setReference(pRefCell, pRefValue);
+            pEqn.setReference(control.pRefCell(), control.pRefValue());
 
             pEqn.solve(mesh.solutionDict().solver(p.select(control.finalInnerIter())));
+
+            // Manually store residuls after first
+            // non-orthogonal iteration
+            if (control.firstInnerIter())
+            {
+                control.storeResiduals(p.name());
+            }
+
+            // Stop non-orthogonal correction after the next (final)
+            // iteration, if the last number of solution iterations
+            // was "0" for the named field
+            control.skipZeroNonOrtho(p.name());
 
             if (control.finalNonOrthogonalIter())
             {

@@ -84,6 +84,12 @@ protected:
 
     // Protected data
 
+        //- Reference cell for p
+        label pRefCell_;
+
+        //- Reference value for p
+        scalar pRefValue_;
+
         //- List of stored residuals per field
         List<residualStorage> residualStorage_;
 
@@ -110,6 +116,20 @@ public:
 
 
     // Member Functions
+
+        // Access
+
+            //- Return reference cell for p
+            inline label pRefCell() const;
+
+            //- Return reference value for p
+            inline const scalar& pRefValue() const;
+
+            //- Set reference cell and value for p from dict
+            inline void setpRefCell(const volScalarField& p);
+
+            //- Set reference cell and value for p directly
+            inline void setpRefCell(label i, const scalar& v);
 
         // Solution control
 

@@ -25,6 +25,27 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline label Foam::pimpleApp::Control::pRefCell() const
+{
+    return pRefCell_;
+}
+
+inline const scalar& Foam::pimpleApp::Control::pRefValue() const
+{
+    return pRefValue_;
+}
+
+inline void Foam::pimpleApp::Control::setpRefCell(const volScalarField& p)
+{
+    setRefCell(p, dict(), pRefCell_, pRefValue_);
+}
+
+inline void Foam::pimpleApp::Control::setpRefCell(label i, const scalar& v)
+{
+    pRefCell_ = i;
+    pRefValue_ = v;
+}
+
 inline bool Foam::pimpleApp::Control::firstInnerIter() const
 {
     return

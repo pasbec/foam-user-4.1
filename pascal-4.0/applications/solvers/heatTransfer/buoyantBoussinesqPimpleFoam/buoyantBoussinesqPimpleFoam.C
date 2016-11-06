@@ -39,8 +39,6 @@ Author
 
 // TODO: Pressure boundary conditions (F, bouyantPressure vs. fixedFluxPressure)
 
-// TODO: Pressure equation reference
-
 // TODO: Continuity errors
 
 // TODO: Wall functions for alphat?

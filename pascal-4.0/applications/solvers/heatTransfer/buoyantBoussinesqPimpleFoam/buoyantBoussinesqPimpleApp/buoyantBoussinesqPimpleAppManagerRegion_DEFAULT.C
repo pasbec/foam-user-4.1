@@ -93,7 +93,8 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_p:
         )
     );
 
-    mesh().schemesDict().setFluxRequired(get()->name());
+    control().setpRefCell(get()());
+    mesh().schemesDict().setFluxRequired(name());
 }
 
 

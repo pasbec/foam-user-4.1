@@ -150,8 +150,7 @@
                 fvm::laplacian(rAUf, p) == fvc::div(phi)
             );
 
-// TODO: Two fluids
-// TODO: Read pRefCell and pRefValue with control
+// TODO: Two fluids: Pressure equation reference
 // #           include "setReference.H"
 //             pEqn.setReference(pRefCell, pRefValue);
 

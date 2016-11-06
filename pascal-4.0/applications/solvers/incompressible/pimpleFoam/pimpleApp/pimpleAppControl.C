@@ -121,6 +121,8 @@ bool Foam::pimpleApp::Control::criteriaSatisfied()
 Foam::pimpleApp::Control::Control(fvMesh& mesh, const word& dictName)
 :
     pimpleControl(mesh, dictName),
+    pRefCell_(0),
+    pRefValue_(0.0),
     residualStorage_(residualControl_.size())
 {
     // init residual storage
@@ -136,7 +138,6 @@ Foam::pimpleApp::Control::Control(fvMesh& mesh, const word& dictName)
 
 Foam::pimpleApp::Control::~Control()
 {}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -180,7 +181,6 @@ void Foam::pimpleApp::Control::storeResiduals(const word& name)
         }
     }
 }
-
 
 void Foam::pimpleApp::Control::skipZeroNonOrtho(const word& name)
 {
@@ -229,6 +229,5 @@ void Foam::pimpleApp::Control::skipZeroNonOrtho(const word& name)
         }
     }
 }
-
 
 // ************************************************************************* //
