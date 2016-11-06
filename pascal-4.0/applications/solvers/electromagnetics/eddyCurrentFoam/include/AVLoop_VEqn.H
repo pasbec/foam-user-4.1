@@ -48,10 +48,10 @@
         {
             label patchI = control.interfaceLabel();
 
-            if (isA<fixedGradientFvPatchField<scalar> >(V.boundaryField()[patchI]))
+            if (isA<fixedGradientFvPatchScalarField>(V.boundaryField()[patchI]))
             {
-                fixedGradientFvPatchField<scalar>& VP =
-                    refCast<fixedGradientFvPatchField<scalar> >
+                fixedGradientFvPatchScalarField& VP =
+                    refCast<fixedGradientFvPatchScalarField>
                     (
                         V.boundaryField()[patchI]
                     );
@@ -120,10 +120,10 @@
 //                 scalar fluxAreaSum = 0;
 //                 forAll(mesh.boundary(), patchI)
 //                 {
-//                     if (isA<fixedGradientFvPatchField<scalar> >(V.boundaryField()[patchI]))
+//                     if (isA<fixedGradientFvPatchScalarField>(V.boundaryField()[patchI]))
 //                     {
-//                         fixedGradientFvPatchField<scalar>& VP =
-//                             refCast<fixedGradientFvPatchField<scalar> >
+//                         fixedGradientFvPatchScalarField& VP =
+//                             refCast<fixedGradientFvPatchScalarField>
 //                             (
 //                                 V.boundaryField()[patchI]
 //                             );

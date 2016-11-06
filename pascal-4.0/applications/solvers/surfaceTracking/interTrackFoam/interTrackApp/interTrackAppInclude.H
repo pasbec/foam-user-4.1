@@ -40,9 +40,9 @@ Author
 #include "turbulenceModel.H"
 #include "fvBlockMatrix.H"
 #include "wallFvPatch.H"
-#include "Switch.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
+#include "Switch.H"
 
 typedef fvBlockMatrix<vector4> fvVector4Matrix;
 

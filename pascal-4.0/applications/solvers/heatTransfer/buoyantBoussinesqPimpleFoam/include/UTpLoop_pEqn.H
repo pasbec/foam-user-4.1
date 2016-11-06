@@ -12,6 +12,104 @@
 
         phi = phiU + rAUf*fvc::interpolate(rhok)*(g & mesh.Sf());
 
+        // Manually correct the boundary conditions for the pressure at walls
+        // if the additional volume forcing is activated. For this, it is
+        // utterly important to use fixedGradient patchFields instead of
+        // the zeroGradient ones at all walls. bouyantPressure may not be used, too
+// TODO: Do not use fixedGradient
+        if
+        (
+            storage.item_F().enabled()
+        )
+        {
+            forAll(p.boundaryField(), patchI)
+            {
+                if (isA<wallFvPatch>(mesh.boundary()[patchI]))
+                {
+                    if
+                    (
+                        p.boundaryField()[patchI].type()
+                     == fixedGradientFvPatchScalarField::typeName
+                    )
+                    {
+                        fixedGradientFvPatchScalarField& pp =
+                            refCast<fixedGradientFvPatchScalarField>
+                            (
+                                p.boundaryField()[patchI]
+                            );
+
+                        // Patch data
+                        const vectorField& Sfp =
+                            mesh.Sf().boundaryField()[patchI];
+                        const scalarField& magSfp =
+                            mesh.magSf().boundaryField()[patchI];
+
+
+                        if (!settings.snGradpFromFlux)
+                        {
+                            if (Control::debug)
+                            {
+                                Info << "buoyantBoussinesqPimpleApp::Control | pEqn.H : "
+                                    << "Correcting pressure at patch "
+                                    << mesh.boundary()[patchI].name() << "."
+                                    << endl;
+                            }
+
+                            // Density
+                            const scalarField& rhokp =
+                                rhok.boundaryField()[patchI];
+
+                            // Direct way by means of F
+                            const vectorField& Fp =
+                                storage.F().boundaryField()[patchI];
+
+                            pp.gradient() = ((rhokp*g.value() + Fp) & Sfp)/magSfp;
+                        }
+//                         else
+//                         {
+//                             if (Control::debug)
+//                             {
+//                                 Info << "buoyantBoussinesqPimpleApp::Control | pEqn.H : "
+//                                     << "Correcting pressure at patch "
+//                                     << mesh.boundary()[patchI].name()
+//                                     << " from flux-difference."
+//                                     << endl;
+//                             }
+//
+//                             // Indirect way by means of fixed flux-pressure
+//                             const scalarField& phiHbyAp =
+//                                 phiHbyA.boundaryField()[patchI];
+//                             const vectorField& Up =
+//                                 U.boundaryField()[patchI];
+//                             const scalarField& rAUfp =
+//                                 rAUf.boundaryField()[patchI];
+//
+//                             pp.gradient() = (phiHbyAp - (Up & Sfp))/(magSfp*rAUfp);
+//                         }
+
+                        pp.updateCoeffs();
+                    }
+                    else
+                    {
+// TODO: Do not use fixedGradient
+                        WarningIn("buoyantBoussinesqPimpleApp::Control | pEqn.H")
+                            << "The pressure boundary condition for "
+                            << "wall-patch named '"
+                            << mesh.boundary()[patchI].name() << "' is '"
+                            << p.boundaryField()[patchI].type() << "',"
+                            << endl << "    "
+                            << "It should be of type 'fixedGradient' "
+                            << "to correctly represent the gradient dp/dn"
+                            << endl << "    "
+                            << "while volume force F is enabled!"
+                            << endl;
+                    }
+                }
+            }
+
+            p.correctBoundaryConditions();
+        }
+
         while (control.correctNonOrthogonal())
         {
             fvScalarMatrix pEqn

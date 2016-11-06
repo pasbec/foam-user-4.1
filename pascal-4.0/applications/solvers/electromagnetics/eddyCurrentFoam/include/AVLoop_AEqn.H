@@ -132,7 +132,7 @@
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedVector2(word(),dimless,vector2::zero)
+                dimensionedVector2(word(), dimless, vector2::zero)
             );
 
             // Init complex vector2 field

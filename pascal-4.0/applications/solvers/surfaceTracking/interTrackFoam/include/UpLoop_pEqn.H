@@ -69,11 +69,11 @@
                     if
                     (
                         p.boundaryField()[patchI].type()
-                    == fixedGradientFvPatchField<scalar>::typeName
+                    == fixedGradientFvPatchScalarField::typeName
                     )
                     {
-                        fixedGradientFvPatchField<scalar>& pp =
-                            refCast<fixedGradientFvPatchField<scalar> >
+                        fixedGradientFvPatchScalarField& pp =
+                            refCast<fixedGradientFvPatchScalarField>
                             (
                                 p.boundaryField()[patchI]
                             );

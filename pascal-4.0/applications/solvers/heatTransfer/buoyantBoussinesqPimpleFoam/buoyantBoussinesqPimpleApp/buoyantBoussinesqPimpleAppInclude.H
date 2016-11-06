@@ -35,6 +35,9 @@ Author
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
+#include "wallFvPatch.H"
+#include "zeroGradientFvPatchFields.H"
+#include "fixedGradientFvPatchFields.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
