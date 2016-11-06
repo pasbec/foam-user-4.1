@@ -94,7 +94,7 @@ protected:
     // Protected data
 
         //- Mesh
-        const regionDynamicFvMesh& mesh_;
+        const regionFvMesh& mesh_;
 
         // Electromagnetic
 
@@ -159,7 +159,7 @@ public:
         //- Construct from mesh and the name of control sub-dictionary
         Control
         (
-            regionDynamicFvMesh& mesh,
+            regionFvMesh& mesh,
             const dictionary& propertiesDict,
             const word& dictName="INTERTRACKEDDYCURRENT"
         );

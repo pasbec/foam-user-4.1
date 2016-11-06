@@ -240,7 +240,7 @@ bool Foam::interTrackEddyCurrentApp::Control::update()
 
 Foam::interTrackEddyCurrentApp::Control::Control
 (
-    regionDynamicFvMesh& mesh,
+    regionFvMesh& mesh,
     const dictionary& propertiesDict,
     const word& dictName
 )
