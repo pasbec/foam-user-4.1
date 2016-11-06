@@ -27,7 +27,6 @@
 
         // Manually correct the boundary conditions for the pressure at walls
 // TODO: Do not use fixedGradient
-// TODO: FIXME Boundary conditions for p if settings.UEqnVolumeForce?
         forAll(p.boundaryField(), patchI)
         {
             if (isA<wallFvPatch>(mesh.boundary()[patchI]))
