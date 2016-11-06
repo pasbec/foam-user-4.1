@@ -7,7 +7,8 @@
 
         surfaceScalarField phiU
         (
-            (fvc::interpolate(U) & mesh.Sf()) + fvc::ddtPhiCorr(rAU, U, phi)
+            (fvc::interpolate(U) & mesh.Sf())
+          + fvc::ddtPhiCorr(rAU, U, phi)
         );
 
         phi = phiU + rAUf*fvc::interpolate(rhok)*(g & mesh.Sf());
@@ -65,27 +66,27 @@
 
                             pp.gradient() = ((rhokp*g.value() + Fp) & Sfp)/magSfp;
                         }
-//                         else
-//                         {
-//                             if (Control::debug)
-//                             {
-//                                 Info << "buoyantBoussinesqPimpleApp::Control | pEqn.H : "
-//                                     << "Correcting pressure at patch "
-//                                     << mesh.boundary()[patchI].name()
-//                                     << " from flux-difference."
-//                                     << endl;
-//                             }
-//
-//                             // Indirect way by means of fixed flux-pressure
-//                             const scalarField& phiHbyAp =
-//                                 phiHbyA.boundaryField()[patchI];
-//                             const vectorField& Up =
-//                                 U.boundaryField()[patchI];
-//                             const scalarField& rAUfp =
-//                                 rAUf.boundaryField()[patchI];
-//
-//                             pp.gradient() = (phiHbyAp - (Up & Sfp))/(magSfp*rAUfp);
-//                         }
+                        else
+                        {
+                            if (Control::debug)
+                            {
+                                Info << "buoyantBoussinesqPimpleApp::Control | pEqn.H : "
+                                    << "Correcting pressure at patch "
+                                    << mesh.boundary()[patchI].name()
+                                    << " from flux-difference."
+                                    << endl;
+                            }
+
+                            // Indirect way by means of fixed flux-pressure
+                            const scalarField& phip =
+                                phi.boundaryField()[patchI];
+                            const vectorField& Up =
+                                U.boundaryField()[patchI];
+                            const scalarField& rAUfp =
+                                rAUf.boundaryField()[patchI];
+
+                            pp.gradient() = ((phip - (Up & Sfp))/rAUfp)/magSfp;
+                        }
 
                         pp.updateCoeffs();
                     }

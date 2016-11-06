@@ -5,18 +5,16 @@
 
 // TODO: Boundary conditions for p if settings.UEqnVolumeForce?
 
-        volVectorField HbyA("HbyA", U);
-        HbyA = rAU*UEqn.H();
+        U = rAU*UEqn.H();
 
-        surfaceScalarField phiHbyA
+        surfaceScalarField phiU
         (
-            "phiHbyA",
-            (fvc::interpolate(HbyA) & mesh.Sf())
+            (fvc::interpolate(U) & mesh.Sf())
 // TODO: Port ddtCorr from OpenFOAM 3.0.x or use new approach from Hrv
-//         + rAUf*fvc::ddtCorr(U, phi)
+//           + fvc::ddtPhiCorr(rAU, U, phi)
         );
 
-        autoPtr<surfaceScalarField> phiF;
+        phi = phiU;
 
         if
         (
@@ -27,20 +25,11 @@
             if (Control::debug)
             {
                 Info << "interTrackApp::Control | pEqn.H : "
-                    << "Adding volume force flux from F to phiHbyA."
+                    << "Adding volume force flux from F to phi."
                     << endl;
             }
 
-            phiF.set
-            (
-                new surfaceScalarField
-                (
-                    "phiF",
-                    rAUf*(fvc::interpolate(storage.F()) & mesh.Sf())
-                )
-            );
-
-            phiHbyA += phiF();
+            phi += rAUf*(fvc::interpolate(storage.F()) & mesh.Sf());
         }
 
 // TODO: Two fluids
@@ -113,14 +102,14 @@
                             }
 
                             // Indirect way by means of fixed flux-pressure
-                            const scalarField& phiHbyAp =
-                                phiHbyA.boundaryField()[patchI];
+                            const scalarField& phip =
+                                phi.boundaryField()[patchI];
                             const vectorField& Up =
                                 U.boundaryField()[patchI];
                             const scalarField& rAUfp =
                                 rAUf.boundaryField()[patchI];
 
-                            pp.gradient() = (phiHbyAp - (Up & Sfp))/(magSfp*rAUfp);
+                            pp.gradient() = ((phip - (Up & Sfp))/rAUfp)/magSfp;
                         }
 
                         pp.updateCoeffs();
@@ -151,7 +140,7 @@
         {
             fvScalarMatrix pEqn
             (
-                fvm::laplacian(rAUf, p) == fvc::div(phiHbyA)
+                fvm::laplacian(rAUf, p) == fvc::div(phi)
             );
 
 // TODO: Two fluids
@@ -175,35 +164,12 @@
 
             if (control.finalNonOrthogonalIter())
             {
-                phi = phiHbyA - pEqn.flux();
-
-                // Explicitly relax pressure for momentum corrector
-                p.relax();
-
-                U = HbyA;
-
-                if
-                (
-                    storage.item_F().enabled()
-                && !settings.UEqnVolumeForce
-                )
-                {
-                    // Correct the momentum source with the pressure gradient
-                    // flux calculated from the relaxed pressure
-                    U += rAU*fvc::reconstruct((phiF() - pEqn.flux())/rAUf);
-
-                    phiF.clear();
-                }
-                else
-                {
-                    // Correct the momentum source with the pressure gradient
-                    // flux calculated from the relaxed pressure
-                    U += rAU*fvc::reconstruct((-pEqn.flux())/rAUf);
-                }
-
-                U.correctBoundaryConditions();
+                phi -= pEqn.flux();
             }
         }
+
+        U += rAU*fvc::reconstruct((phi - phiU)/rAUf);
+        U.correctBoundaryConditions();
 
 // TODO: Continuity errors
 // #       include "continuityErrs.H"
