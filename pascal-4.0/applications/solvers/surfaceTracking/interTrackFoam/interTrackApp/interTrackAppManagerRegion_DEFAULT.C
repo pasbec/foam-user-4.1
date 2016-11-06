@@ -30,28 +30,9 @@ License
 void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
 {
     volumeForce = dict().lookupOrDefault("volumeForce", false);
-    turbulence = dict().lookupOrDefault("turbulence", false);
 
-    UpCoupled = dict().lookupOrDefault("UpCoupled", false);
     UEqnVolumeForce = dict().lookupOrDefault("UEqnVolumeForce", false);
     snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
-
-    if
-    (
-        UpCoupled
-    && !UEqnVolumeForce
-    )
-    {
-        FatalErrorIn
-        (
-            word("Foam::interTrackApp::Manager::")
-          + word("Region_DEFAULT::Settings::read() : ")
-        )
-            << "Both coupled solution of U and p and indirect flux "
-            << "representation of enabled volume force is currently "
-            << "not implemented!"
-            << abort(FatalError);
-    }
 }
 
 
@@ -113,32 +94,6 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U::create() con
                 IOobject::AUTO_WRITE
             ),
             mesh()
-        )
-    );
-}
-
-
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Up::create() const
-{
-    set
-    (
-        new volVector4Field
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh(),
-            dimensionedVector4
-            (
-                word(),
-                dimless,
-                vector4::zero
-            )
         )
     );
 }
@@ -317,7 +272,6 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::crea
     );
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
@@ -325,7 +279,6 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
     item_g().enable();
     item_p().enable();
     item_U().enable();
-    item_Up().setState(settings().UpCoupled);
     item_phi().enable();
     item_rho().enable();
     item_mu().enable();
@@ -340,7 +293,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
     mu() = transport().mu();
     mu().correctBoundaryConditions();
 
-    item_turbulence().setState(settings().turbulence);
+    item_turbulence().enable();
     item_interface().enable();
 }
 

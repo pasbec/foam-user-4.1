@@ -59,7 +59,6 @@ void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_em
     );
 }
 
-
 void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emRelDeltaA::create() const
 {
     set
@@ -85,7 +84,6 @@ void Foam::interTrackEddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_em
         )
     );
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

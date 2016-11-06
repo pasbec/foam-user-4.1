@@ -33,9 +33,7 @@ Author
 
 #include "interTrackApp.H"
 
-// TODO: Remove coupled solution of U and p?
-
-// TODO: ddtPhiCorr?
+// TODO: Port ddtCorr from OpenFOAM 3.0.x or use new approach from Hrv
 
 // TODO: Fix meshPhi issues!
 

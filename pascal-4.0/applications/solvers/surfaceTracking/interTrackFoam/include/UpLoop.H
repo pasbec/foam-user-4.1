@@ -23,28 +23,15 @@
             // Make the fluxes relative to the mesh motion
             fvc::makeRelative(phi, U);
 
-            autoPtr<fvVector4Matrix> UpEqn;
-
 #           include "UpLoop_UEqn.H"
 
-            if (!settings.UpCoupled)
+            // --- Pressure corrector PISO loop
+            while (control.correct())
             {
-                // --- Pressure corrector PISO loop
-                while (control.correct())
-                {
-#                   include "UpLoop_pEqnSegregated.H"
-                }
-            }
-            else
-            {
-#               include "UpLoop_pEqnCoupled.H"
+#               include "UpLoop_pEqn.H"
             }
 
-            if
-            (
-                control.turbCorr()
-            && storage.item_turbulence().enabled()
-            )
+            if (control.turbCorr())
             {
                 storage.turbulence().correct();
             }

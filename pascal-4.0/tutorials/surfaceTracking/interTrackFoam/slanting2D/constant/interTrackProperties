@@ -19,9 +19,6 @@ settings
     region0
     {
         volumeForce         false;
-        turbulence          false;
-
-        UpCoupled           false;
         UEqnVolumeForce     false;
         snGradpFromFlux     true;
     }

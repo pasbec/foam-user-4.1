@@ -1,15 +1,11 @@
 
     tmp<volScalarField> tmuEff(new volScalarField(mu));
 
-    if(storage.item_turbulence().enabled())
-    {
-        tmuEff() += rho*storage.turbulence().nut();
-        tmuEff().rename("muEff");
-    }
-
+    tmuEff() += rho*storage.turbulence().nut();
+    tmuEff().rename("muEff");
     tmuEff().correctBoundaryConditions();
 
-    tmp<fvVectorMatrix> UEqn
+    fvVectorMatrix UEqn
     (
         fvm::ddt(rho, U)
       + fvm::div(fvc::interpolate(rho)*phi, U, "div(phi,U)")
@@ -33,10 +29,10 @@
                 << endl;
         }
 
-        UEqn() -= storage.F();
+        UEqn -= storage.F();
     }
 
-    UEqn().relax();
+    UEqn.relax();
 
     if (control.momentumPredictor())
     {
@@ -48,7 +44,7 @@
         {
             solve
             (
-                UEqn() == fvc::reconstruct
+                UEqn == fvc::reconstruct
                 (
                 - (fvc::snGrad(p)*mesh.magSf())
                 + (fvc::interpolate(storage.F()) & mesh.Sf())
@@ -59,19 +55,10 @@
         {
             solve
             (
-                UEqn() == fvc::reconstruct
+                UEqn == fvc::reconstruct
                 (
                 - (fvc::snGrad(p)*mesh.magSf())
                 )
             );
         }
-    }
-
-    if (settings.UpCoupled)
-    {
-        // Init block matrix
-        UpEqn.set(new fvVector4Matrix(storage.Up()));
-
-        // Add UEqn into block matrix
-        UpEqn().insertEquation(0, UEqn());
     }

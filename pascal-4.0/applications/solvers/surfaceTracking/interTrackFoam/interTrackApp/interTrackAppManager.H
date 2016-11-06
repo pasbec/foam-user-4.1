@@ -91,12 +91,6 @@ public:
                 //- Volume force switch
                 SM_SETTINGS_MEMBER_ADD(Switch, volumeForce);
 
-                //- Turbulence switch
-                SM_SETTINGS_MEMBER_ADD(Switch, turbulence);
-
-                //- Coupled solution of U and p
-                SM_SETTINGS_MEMBER_ADD(Switch, UpCoupled);
-
                 //- Directly inject volume force F in U-equation as
                 //  source term
                 //
@@ -128,9 +122,6 @@ public:
 
                 //- Velocity
                 SM_REGIONITEM_ADD(volVectorField, U);
-
-                //- Velocity/Pressure
-                SM_REGIONITEM_ADD(volVector4Field, Up);
 
                 //- Face flux
                 SM_REGIONITEM_ADD(surfaceScalarField, phi);
