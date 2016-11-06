@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+InNamespace
+    Foam::pimpleApp
+
 Description
     ...
 
@@ -29,16 +32,37 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef buoyantBoussinesqPimpleAppInclude_H
-#define buoyantBoussinesqPimpleAppInclude_H
+#ifndef pimpleAppRegion_H
+#define pimpleAppRegion_H
 
-#include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "turbulenceModel.H"
-#include "wallFvPatch.H"
-#include "zeroGradientFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "fixedFluxPressureFvPatchScalarField.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+namespace pimpleApp
+{
+
+/*---------------------------------------------------------------------------*\
+                    Namespace pimpleApp::Region Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace Region
+{
+    enum Labels
+    {
+        DEFAULT
+    };
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace pimpleApp
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

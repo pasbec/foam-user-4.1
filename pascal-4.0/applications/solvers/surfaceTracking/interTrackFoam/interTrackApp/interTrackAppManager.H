@@ -40,7 +40,7 @@ Author
 #define interTrackAppManager_H
 
 #include "interTrackAppInclude.H"
-#include "interTrackAppControl.H"
+#include "pimpleAppControl.H"
 
 #include "solverManagers.H"
 
@@ -64,13 +64,13 @@ public:
 
     // Public typedefs and forward declarations
 
-        typedef interTrackApp::Control Control;
+        typedef pimpleApp::Control Control;
         class Settings;
         class Storage;
 
     // Solver Manager Construction
 
-        SM_GLOBALCONTROL_ADD_P1(Control, mesh());
+        SM_GLOBALCONTROL_ADD_P2(Control, mesh(), "INTERTRACK");
 
 
         SM_GLOBALSETTINGS_NEW();

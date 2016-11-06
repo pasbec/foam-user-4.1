@@ -21,27 +21,15 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    ...
-
-Author
-    Pascal Beckstein
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef buoyantBoussinesqPimpleAppInclude_H
-#define buoyantBoussinesqPimpleAppInclude_H
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "turbulenceModel.H"
-#include "wallFvPatch.H"
-#include "zeroGradientFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "fixedFluxPressureFvPatchScalarField.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+inline bool Foam::pimpleApp::Control::firstInnerIter() const
+{
+    return
+       corrPISO_ == 1
+    && corrNonOrtho_ == 1;
+}
 
 // ************************************************************************* //

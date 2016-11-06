@@ -34,7 +34,6 @@ Author
 
 #include "interTrackAppInclude.H"
 #include "interTrackAppRegion.H"
-#include "interTrackAppControl.H"
 #include "interTrackAppManager.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

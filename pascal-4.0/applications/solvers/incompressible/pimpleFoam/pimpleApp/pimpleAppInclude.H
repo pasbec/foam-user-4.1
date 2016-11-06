@@ -21,15 +21,27 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    ...
+
+Author
+    Pascal Beckstein
+
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#ifndef interTrackAppInclude_H
+#define interTrackAppInclude_H
 
-inline bool Foam::interTrackApp::Control::firstInnerIter() const
-{
-    return
-       corrPISO_ == 1
-    && corrNonOrtho_ == 1;
-}
+#include "fvCFD.H"
+#include "twoPhaseMixture.H"
+#include "turbulenceModel.H"
+#include "wallFvPatch.H"
+#include "zeroGradientFvPatchFields.H"
+#include "fixedGradientFvPatchFields.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

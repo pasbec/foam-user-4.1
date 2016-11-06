@@ -8,6 +8,8 @@
 ../../../../src/foamTools/lnInclude
 ../../../../src/regionModel/lnInclude
 
+../../incompressible/pimpleFoam/pimpleApp
+
 ./buoyantBoussinesqPimpleApp
 
 ./include

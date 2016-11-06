@@ -41,11 +41,11 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Settings::read() const
             buoyantBoussinesqPimpleApp::Manager::debug()
         );
 
-    pimpleControl::debug =
+    Control::debug =
         dict().lookupOrDefault
         (
             "debug",
-            pimpleControl::debug()
+            Control::debug()
         );
 }
 

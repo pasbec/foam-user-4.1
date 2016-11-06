@@ -40,6 +40,7 @@ Author
 #define buoyantBoussinesqPimpleAppManager_H
 
 #include "buoyantBoussinesqPimpleAppInclude.H"
+#include "pimpleAppControl.H"
 
 #include "solverManagers.H"
 
@@ -52,7 +53,7 @@ namespace buoyantBoussinesqPimpleApp
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class buoyantBoussinesqPimpleApp::Manager Declaration
+             Class buoyantBoussinesqPimpleApp::Manager Declaration
 \*---------------------------------------------------------------------------*/
 
 class Manager
@@ -63,7 +64,7 @@ public:
 
     // Public typedefs and forward declarations
 
-        typedef pimpleControl Control;
+        typedef pimpleApp::Control Control;
         class Settings;
         class Storage;
 

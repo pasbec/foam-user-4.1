@@ -29,16 +29,13 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef buoyantBoussinesqPimpleAppInclude_H
-#define buoyantBoussinesqPimpleAppInclude_H
+#ifndef pimpleApp_H
+#define pimpleApp_H
 
-#include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "turbulenceModel.H"
-#include "wallFvPatch.H"
-#include "zeroGradientFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "fixedFluxPressureFvPatchScalarField.H"
+#include "pimpleAppInclude.H"
+#include "pimpleAppRegion.H"
+#include "pimpleAppControl.H"
+#include "pimpleAppManager.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

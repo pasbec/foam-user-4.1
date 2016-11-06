@@ -22,24 +22,24 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interTrackApp::Control
+    Foam::pimpleApp::Control
 
 Description
-    Specialization of the pimpleControl class for interTrackFoam.
+    Specialization of the pimpleControl class for pimpleFoam.
 
 SourceFiles
-    interTrackAppControlI.H
-    interTrackAppControl.C
+    pimpleAppControlI.H
+    pimpleAppControl.C
 
 Author
     Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackAppControl_H
-#define interTrackAppControl_H
+#ifndef pimpleAppControl_H
+#define pimpleAppControl_H
 
-#include "interTrackAppInclude.H"
+#include "pimpleAppInclude.H"
 
 #include "pimpleControl.H"
 #include "solverPerformanceData.H"
@@ -49,11 +49,11 @@ Author
 namespace Foam
 {
 
-namespace interTrackApp
+namespace pimpleApp
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class interTrackApp::Control Declaration
+                     Class pimpleApp::Control Declaration
 \*---------------------------------------------------------------------------*/
 
 class Control
@@ -96,13 +96,13 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("interTrackApp::Control");
+    TypeName("pimpleApp::Control");
 
 
     // Constructors
 
         //- Construct from mesh and the name of control sub-dictionary
-        Control(fvMesh& mesh, const word& dictName="INTERTRACK");
+        Control(fvMesh& mesh, const word& dictName="PIMPLE");
 
 
     //- Destructor
@@ -113,7 +113,7 @@ public:
 
         // Solution control
 
-            //- Helper function to identify final inner iteration
+            //- Helper function to identify first inner iteration
             inline bool firstInnerIter() const;
 
         // Evolution
@@ -130,7 +130,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace interTrackApp
+} // End namespace pimpleApp
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -139,12 +139,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "interTrackAppControlI.H"
+#include "pimpleAppControlI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interTrackAppControl.C"
+#   include "pimpleAppControl.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

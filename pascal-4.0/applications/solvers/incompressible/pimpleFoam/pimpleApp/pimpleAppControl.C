@@ -23,17 +23,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackAppControl.H"
+#include "pimpleAppControl.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::interTrackApp::Control, 0);
+defineTypeNameAndDebug(Foam::pimpleApp::Control, 0);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 
-bool Foam::interTrackApp::Control::criteriaSatisfied()
+bool Foam::pimpleApp::Control::criteriaSatisfied()
 {
     // no checks on first iteration - nothing has been calculated yet
     if ((corr_ == 1) || residualControl_.empty() || finalIter())
@@ -118,7 +118,7 @@ bool Foam::interTrackApp::Control::criteriaSatisfied()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::interTrackApp::Control::Control(fvMesh& mesh, const word& dictName)
+Foam::pimpleApp::Control::Control(fvMesh& mesh, const word& dictName)
 :
     pimpleControl(mesh, dictName),
     residualStorage_(residualControl_.size())
@@ -134,13 +134,13 @@ Foam::interTrackApp::Control::Control(fvMesh& mesh, const word& dictName)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::interTrackApp::Control::~Control()
+Foam::pimpleApp::Control::~Control()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::interTrackApp::Control::storeResiduals(const word& name)
+void Foam::pimpleApp::Control::storeResiduals(const word& name)
 {
     const dictionary& solverDict =
         mesh_.solutionDict().solverPerformanceDict();
@@ -182,7 +182,7 @@ void Foam::interTrackApp::Control::storeResiduals(const word& name)
 }
 
 
-void Foam::interTrackApp::Control::skipZeroNonOrtho(const word& name)
+void Foam::pimpleApp::Control::skipZeroNonOrtho(const word& name)
 {
     // skip if this is the final non-orthogonal iteration
     if (!finalNonOrthogonalIter())

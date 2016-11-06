@@ -41,11 +41,11 @@ void Foam::interTrackApp::Manager::Settings::read() const
             interTrackApp::Manager::debug()
         );
 
-    interTrackApp::Control::debug =
+    Control::debug =
         dict().lookupOrDefault
         (
             "debug",
-            interTrackApp::Control::debug()
+            Control::debug()
         );
 }
 
