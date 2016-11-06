@@ -2,7 +2,7 @@
     {
         if (Control::debug)
         {
-            Info << "buoyantBoussinesqPimpleApp::Control | UpLoop.H : "
+            Info<< Control::typeName << " | UpLoop.H : "
                 << "Commencing PIMPLE U-T-p loop."
                 << endl;
         }

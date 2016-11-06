@@ -3,7 +3,7 @@
     {
         if (Control::debug)
         {
-            Info << "eddyCurrentApp::Control | UpLoop.H : "
+            Info<< Control::typeName << " | BUpdate.H : "
                 << "Calculate magnetic field."
                 << endl;
         }

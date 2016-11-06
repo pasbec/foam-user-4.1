@@ -27,11 +27,13 @@ boundaryField
     }
     sideWalls
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     bottomWall
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
 }
 

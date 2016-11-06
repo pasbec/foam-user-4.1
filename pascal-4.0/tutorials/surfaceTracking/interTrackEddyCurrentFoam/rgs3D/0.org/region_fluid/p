@@ -27,13 +27,13 @@ boundaryField
     }
     movingWall
     {
-        type            fixedGradient;
-        gradient        uniform 0;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     fixedWall
     {
-        type            fixedGradient;
-        gradient        uniform 0;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     "procBoundary.*"
     {

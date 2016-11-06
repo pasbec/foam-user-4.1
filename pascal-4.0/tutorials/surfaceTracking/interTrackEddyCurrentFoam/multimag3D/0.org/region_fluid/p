@@ -27,13 +27,13 @@ boundaryField
     }
     bottomWall
     {
-        type            fixedGradient;
-        gradient        uniform 0;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     sideWall
     {
-        type            fixedGradient;
-        gradient        uniform 0;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     "procBoundary.*"
     {

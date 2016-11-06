@@ -3,7 +3,7 @@
     {
         if (Control::debug)
         {
-            Info << "interTrackApp::Control | UpLoop.H : "
+            Info<< Control::typeName << " | UpLoop.H : "
                 << "Commencing INTERTRACK U-p loop."
                 << endl;
         }

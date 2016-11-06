@@ -58,6 +58,23 @@
                     if
                     (
                         p.boundaryField()[patchI].type()
+                     == fixedFluxPressureFvPatchScalarField::typeName
+                    )
+                    {
+                        if (Control::debug)
+                        {
+                            Info<< Control::typeName << " | pEqn.H : "
+                                << "Pressure at patch "
+                                << mesh.boundary()[patchI].name()
+                                << "is being corrected by means of a "
+                                << "'fixedFluxPressure' boundary condition. "
+                                << "This is OK."
+                                << endl;
+                        }
+                    }
+                    else if
+                    (
+                        p.boundaryField()[patchI].type()
                     == fixedGradientFvPatchScalarField::typeName
                     )
                     {
@@ -78,7 +95,7 @@
                         {
                             if (Control::debug)
                             {
-                                Info << "interTrackApp::Control | pEqn.H : "
+                                Info<< Control::typeName << " | pEqn.H : "
                                     << "Correcting pressure at patch "
                                     << mesh.boundary()[patchI].name() << "."
                                     << endl;
@@ -94,7 +111,7 @@
                         {
                             if (Control::debug)
                             {
-                                Info << "interTrackApp::Control | pEqn.H : "
+                                Info<< Control::typeName << " | pEqn.H : "
                                     << "Correcting pressure at patch "
                                     << mesh.boundary()[patchI].name()
                                     << " from flux-difference."
@@ -116,17 +133,15 @@
                     }
                     else
                     {
-// TODO: Do not use fixedGradient
-                        WarningIn("interTrackApp::Control | pEqn.H")
+                        WarningIn(Control::typeName + " | pEqn.H")
                             << "The pressure boundary condition for "
                             << "wall-patch named '"
                             << mesh.boundary()[patchI].name() << "' is '"
                             << p.boundaryField()[patchI].type() << "',"
                             << endl << "    "
                             << "It should be of type 'fixedGradient' "
-                            << "to correctly represent the gradient dp/dn"
-                            << endl << "    "
-                            << "while volume force F is enabled!"
+                            << "or 'fixedFluxPressure' "
+                            << "to correctly represent the gradient dp/dn."
                             << endl;
                     }
                 }

@@ -4,7 +4,7 @@
     {
         if (Control::debug)
         {
-            Info << "eddyCurrentApp::Control | A0BiotSavart.H : "
+            Info<< Control::typeName << " | A0BiotSavart.H : "
                 << "Calculate impressed vector potential"
                 << " via Biot-Savart's law."
                 << endl;

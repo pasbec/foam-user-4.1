@@ -42,6 +42,7 @@ Author
 #include "wallFvPatch.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 #include "Switch.H"
 
 typedef fvBlockMatrix<vector4> fvVector4Matrix;

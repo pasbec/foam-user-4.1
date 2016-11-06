@@ -15,7 +15,7 @@
     {
         if (Control::debug)
         {
-            Info << "buoyantBoussinesqPimpleApp::Control | UEqn.H : "
+            Info<< Control::typeName << " | UEqn.H : "
                 << "Adding source term for volume force F in UEqn."
                 << endl;
         }

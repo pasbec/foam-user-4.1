@@ -38,6 +38,7 @@ Author
 #include "wallFvPatch.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

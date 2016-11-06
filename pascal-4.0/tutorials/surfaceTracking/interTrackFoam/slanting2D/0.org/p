@@ -27,11 +27,13 @@ boundaryField
     }
     bottom
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     side
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     frontAndBack
     {

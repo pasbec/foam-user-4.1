@@ -34,6 +34,8 @@ Author
 
 #include "eddyCurrentApp.H"
 
+// TODO: Only do Biot-Savart if mesh is moving or has been changed recently
+
 // TODO: Derived gradient boundary condition for VRe/VIm in conductor region
 
 // TODO: Remove interfaceLabel? Use alias of calculatedFvPatchField or special

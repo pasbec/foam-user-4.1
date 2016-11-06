@@ -3,6 +3,13 @@
     // from data in conductor region
     if (control.meshIs3D())
     {
+        if (Control::debug)
+        {
+            Info<< Control::typeName << " | BUpdate.H : "
+                << "Update gradient of V."
+                << endl;
+        }
+
         SM_REGIONSCOPE(CONDUCTOR);
 
         volVectorField& VReGrad = globalStorage.VReGrad()[CONDUCTOR];

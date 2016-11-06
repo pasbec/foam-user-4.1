@@ -36,7 +36,7 @@
 
             if (Control::debug)
             {
-                Info << "eddyCurrentApp::Control | AEqn.H : "
+                Info<< Control::typeName << " | AEqn.H : "
                     << "Add source current density to AEqn"
                     << endl;
             }
@@ -48,7 +48,7 @@
 
             if (Control::debug)
             {
-                Info << "eddyCurrentApp::Control | AEqn.H : "
+                Info<< Control::typeName << " | AEqn.H : "
                     << "Add impressed vector potenial to AEqn"
                     << endl;
             }
@@ -62,7 +62,7 @@
 
             if (Control::debug)
             {
-                Info << "eddyCurrentApp::Control | AEqn.H : "
+                Info<< Control::typeName << " | AEqn.H : "
                     << "Add gradient of electric scalar potential to AEqn"
                     << endl;
             }
@@ -198,7 +198,7 @@
 
                     if (Control::debug)
                     {
-                        Info << "eddyCurrentApp::Control | AEqn.H : "
+                        Info<< Control::typeName << " | AEqn.H : "
                             << "Scaling tolerances depending on solver norm factor"
                             << endl;
                     }
@@ -239,7 +239,7 @@
 
                     if (Control::debug)
                     {
-                        Info << "eddyCurrentApp::Control | AEqn.H : "
+                        Info<< Control::typeName << " | AEqn.H : "
                             << "Anormf = " << Anormf << endl
                             << "Ascale = " << Ascale << endl
                             << endl;

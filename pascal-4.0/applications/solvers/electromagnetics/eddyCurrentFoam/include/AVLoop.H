@@ -2,7 +2,7 @@
     {
         if (Control::debug)
         {
-            Info << "eddyCurrentApp::Control | UpLoop.H : "
+            Info<< Control::typeName << " | AVLoop.H : "
                 << "Commencing EDDYCURRENT A-V loop."
                 << endl;
         }

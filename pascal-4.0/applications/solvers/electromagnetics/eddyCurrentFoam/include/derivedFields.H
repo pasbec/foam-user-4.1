@@ -3,7 +3,7 @@
     {
         if (Control::debug)
         {
-            Info << "eddyCurrentApp::Control | UpLoop.H : "
+            Info<< Control::typeName << " | derivedFields.H : "
                 << "Calculate derived fields."
                 << endl;
         }

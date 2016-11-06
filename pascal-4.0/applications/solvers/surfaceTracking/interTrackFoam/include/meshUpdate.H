@@ -2,7 +2,7 @@
     {
         if (Control::debug)
         {
-            Info << "interTrackApp::Control | meshUpdate.H : "
+            Info<< Control::typeName << " | meshUpdate.H : "
                 << "Update mesh and predict interface points."
                 << endl;
         }
