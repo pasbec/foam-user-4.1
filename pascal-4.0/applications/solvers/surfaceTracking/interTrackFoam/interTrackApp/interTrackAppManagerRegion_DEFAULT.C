@@ -30,8 +30,6 @@ License
 void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
 {
     volumeForce = dict().lookupOrDefault("volumeForce", false);
-
-    UEqnVolumeForce = dict().lookupOrDefault("UEqnVolumeForce", false);
     snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
 }
 

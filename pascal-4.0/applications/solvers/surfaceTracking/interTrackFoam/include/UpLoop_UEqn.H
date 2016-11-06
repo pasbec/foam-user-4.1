@@ -16,49 +16,16 @@
 
     tmuEff.clear();
 
-    if
-    (
-        storage.item_F().enabled()
-     && settings.UEqnVolumeForce
-    )
-    {
-        if (Control::debug)
-        {
-            Info<< Control::typeName << " | UEqn.H : "
-                << "Adding source term for volume force F in UEqn."
-                << endl;
-        }
-
-        UEqn -= storage.F();
-    }
-
     UEqn.relax();
 
     if (control.momentumPredictor())
     {
-        if
+        solve
         (
-            storage.item_F().enabled()
-        && !settings.UEqnVolumeForce
-        )
-        {
-            solve
+            UEqn == fvc::reconstruct
             (
-                UEqn == fvc::reconstruct
-                (
-                - (fvc::snGrad(p)*mesh.magSf())
-                + (fvc::interpolate(storage.F()) & mesh.Sf())
-                )
-            );
-        }
-        else
-        {
-            solve
-            (
-                UEqn == fvc::reconstruct
-                (
-                - (fvc::snGrad(p)*mesh.magSf())
-                )
-            );
-        }
+              - (fvc::snGrad(p)*mesh.magSf())
+              + (fvc::interpolate(storage.F()) & mesh.Sf())
+            )
+        );
     }

@@ -19,7 +19,6 @@ settings
     region0
     {
         volumeForce         false;
-        UEqnVolumeForce     false;
         snGradpFromFlux     true;
     }
 }

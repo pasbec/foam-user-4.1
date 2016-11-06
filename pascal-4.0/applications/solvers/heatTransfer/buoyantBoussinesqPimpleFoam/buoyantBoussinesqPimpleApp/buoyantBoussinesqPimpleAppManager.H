@@ -90,22 +90,13 @@ public:
                 //- Volume force switch
                 SM_SETTINGS_MEMBER_ADD(Switch, volumeForce);
 
-                //- Directly inject volume force F in U-equation as
-                //  source term
-                //
-                //  * enabled: UEqn -= F
-                //
-                //  * disabled: PhiHbyA += (rAU*F)_f
-                //
-                SM_SETTINGS_MEMBER_ADD(Switch, UEqnVolumeForce);
-
                 //- Use fixed flux-pressure to correct pressure p at
                 //  fixedGradient patches
                 // TODO: Do not use fixedGradient
                 //
-                //  * enabled: dp/dn = (PhiHbyA -(U&Sf))/(magSf*rAUf)
+                //  * enabled: dp/dn = ((phi -(U&Sf))/rAUf)/magSf
                 //
-                //  * disabled: dp/dn = F*n
+                //  * disabled: dp/dn = (rhokp*g + F)&n
                 //
                 SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
 

@@ -13,71 +13,78 @@
 
         phi = phiU + rAUf*fvc::interpolate(rhok)*(g & mesh.Sf());
 
-        // Manually correct the boundary conditions for the pressure at walls
-        // if the additional volume forcing is activated. For this, it is
-        // utterly important to use fixedGradient patchFields instead of
-        // the zeroGradient ones at all walls. bouyantPressure may not be used, too
-// TODO: Do not use fixedGradient
-        if
-        (
-            storage.item_F().enabled()
-        )
+        if (storage.item_F().enabled())
         {
-            forAll(p.boundaryField(), patchI)
+            if (Control::debug)
             {
-                if (isA<wallFvPatch>(mesh.boundary()[patchI]))
+                Info << "interTrackApp::Control | pEqn.H : "
+                    << "Adding volume force flux from F to phi."
+                    << endl;
+            }
+
+            phi += rAUf*(fvc::interpolate(storage.F()) & mesh.Sf());
+        }
+
+        // Manually correct the boundary conditions for the pressure at walls
+// TODO: Do not use fixedGradient
+// TODO: FIXME Boundary conditions for p if settings.UEqnVolumeForce?
+        forAll(p.boundaryField(), patchI)
+        {
+            if (isA<wallFvPatch>(mesh.boundary()[patchI]))
+            {
+                if
+                (
+                    p.boundaryField()[patchI].type()
+                    == fixedFluxPressureFvPatchScalarField::typeName
+                )
                 {
-                    if
-                    (
-                        p.boundaryField()[patchI].type()
-                     == fixedFluxPressureFvPatchScalarField::typeName
-                    )
+                    if (Control::debug)
+                    {
+                        Info<< Control::typeName << " | pEqn.H : "
+                            << "Pressure at patch "
+                            << mesh.boundary()[patchI].name()
+                            << "is being corrected by means of a "
+                            << "'fixedFluxPressure' boundary condition. "
+                            << "This is OK."
+                            << endl;
+                    }
+                }
+                else if
+                (
+                    p.boundaryField()[patchI].type()
+                    == fixedGradientFvPatchScalarField::typeName
+                )
+                {
+                    fixedGradientFvPatchScalarField& pp =
+                        refCast<fixedGradientFvPatchScalarField>
+                        (
+                            p.boundaryField()[patchI]
+                        );
+
+                    // Patch data
+                    const vectorField& Sfp =
+                        mesh.Sf().boundaryField()[patchI];
+                    const scalarField& magSfp =
+                        mesh.magSf().boundaryField()[patchI];
+
+
+                    if (!settings.snGradpFromFlux)
                     {
                         if (Control::debug)
                         {
                             Info<< Control::typeName << " | pEqn.H : "
-                                << "Pressure at patch "
-                                << mesh.boundary()[patchI].name()
-                                << "is being corrected by means of a "
-                                << "'fixedFluxPressure' boundary condition. "
-                                << "This is OK."
+                                << "Correcting pressure at patch "
+                                << mesh.boundary()[patchI].name() << "."
                                 << endl;
                         }
-                    }
-                    else if
-                    (
-                        p.boundaryField()[patchI].type()
-                     == fixedGradientFvPatchScalarField::typeName
-                    )
-                    {
-                        fixedGradientFvPatchScalarField& pp =
-                            refCast<fixedGradientFvPatchScalarField>
-                            (
-                                p.boundaryField()[patchI]
-                            );
 
-                        // Patch data
-                        const vectorField& Sfp =
-                            mesh.Sf().boundaryField()[patchI];
-                        const scalarField& magSfp =
-                            mesh.magSf().boundaryField()[patchI];
-
-
-                        if (!settings.snGradpFromFlux)
-                        {
-                            if (Control::debug)
-                            {
-                                Info<< Control::typeName << " | pEqn.H : "
-                                    << "Correcting pressure at patch "
-                                    << mesh.boundary()[patchI].name() << "."
-                                    << endl;
-                            }
-
-                            // Density
-                            const scalarField& rhokp =
-                                rhok.boundaryField()[patchI];
+                        // Density
+                        const scalarField& rhokp =
+                            rhok.boundaryField()[patchI];
 
                             // Direct way by means of F
+                        if (storage.item_F().enabled())
+                        {
                             const vectorField& Fp =
                                 storage.F().boundaryField()[patchI];
 
@@ -85,46 +92,50 @@
                         }
                         else
                         {
-                            if (Control::debug)
-                            {
-                                Info<< Control::typeName << " | pEqn.H : "
-                                    << "Correcting pressure at patch "
-                                    << mesh.boundary()[patchI].name()
-                                    << " from flux-difference."
-                                    << endl;
-                            }
-
-                            // Indirect way by means of fixed flux-pressure
-                            const scalarField& phip =
-                                phi.boundaryField()[patchI];
-                            const vectorField& Up =
-                                U.boundaryField()[patchI];
-                            const scalarField& rAUfp =
-                                rAUf.boundaryField()[patchI];
-
-                            pp.gradient() = ((phip - (Up & Sfp))/rAUfp)/magSfp;
+                            pp.gradient() = ((rhokp*g.value()) & Sfp)/magSfp;
                         }
-
-                        pp.updateCoeffs();
                     }
                     else
                     {
-                        WarningIn(Control::typeName + " | pEqn.H")
-                            << "The pressure boundary condition for "
-                            << "wall-patch named '"
-                            << mesh.boundary()[patchI].name() << "' is '"
-                            << p.boundaryField()[patchI].type() << "',"
-                            << endl << "    "
-                            << "It should be of type 'fixedGradient' "
-                            << "or 'fixedFluxPressure' "
-                            << "to correctly represent the gradient dp/dn."
-                            << endl;
+                        if (Control::debug)
+                        {
+                            Info<< Control::typeName << " | pEqn.H : "
+                                << "Correcting pressure at patch "
+                                << mesh.boundary()[patchI].name()
+                                << " from flux-difference."
+                                << endl;
+                        }
+
+                        // Indirect way by means of fixed flux-pressure
+                        const scalarField& phip =
+                            phi.boundaryField()[patchI];
+                        const vectorField& Up =
+                            U.boundaryField()[patchI];
+                        const scalarField& rAUfp =
+                            rAUf.boundaryField()[patchI];
+
+                        pp.gradient() = ((phip - (Up & Sfp))/rAUfp)/magSfp;
                     }
+
+                    pp.updateCoeffs();
+                }
+                else
+                {
+                    WarningIn(Control::typeName + " | pEqn.H")
+                        << "The pressure boundary condition for "
+                        << "wall-patch named '"
+                        << mesh.boundary()[patchI].name() << "' is '"
+                        << p.boundaryField()[patchI].type() << "',"
+                        << endl << "    "
+                        << "It should be of type 'fixedGradient' "
+                        << "or 'fixedFluxPressure' "
+                        << "to correctly represent the gradient dp/dn."
+                        << endl;
                 }
             }
-
-            p.correctBoundaryConditions();
         }
+
+        p.correctBoundaryConditions();
 
         while (control.correctNonOrthogonal())
         {

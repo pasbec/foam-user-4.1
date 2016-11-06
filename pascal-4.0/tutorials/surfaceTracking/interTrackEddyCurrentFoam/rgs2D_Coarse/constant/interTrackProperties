@@ -19,7 +19,6 @@ settings
     region_fluid
     {
         volumeForce         true;
-        UEqnVolumeForce     false;
         snGradpFromFlux     true;
     }
 }
