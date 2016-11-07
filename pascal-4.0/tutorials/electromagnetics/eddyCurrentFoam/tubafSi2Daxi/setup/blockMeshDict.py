@@ -17,6 +17,7 @@ csn = os.path.splitext(csb)[0]
 sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 
 import math as m
+import numpy as np
 
 from foamTools.expansion import expansion_de_e, expansion_n_ds
 from foamTools.blockMeshDict import blockMeshDict
@@ -27,17 +28,6 @@ from foamTools.blockMeshDict import blockMeshDict
 
 import parameters as p
 
-axi_Phi        = 5.0
-axi_phi        = m.pi * axi_Phi/180.0
-axi_phiHalf    = axi_phi/2.0
-axi_phiHalfCos = m.cos(axi_phiHalf)
-axi_phiHalfSin = m.sin(axi_phiHalf)
-
-def x(r): return r * axi_phiHalfCos
-def y(r): return r * axi_phiHalfSin
-def ap(v2D): return [  x(v2D[0]),  y(v2D[0]),  v2D[1]]
-def an(v2D): return [  x(v2D[0]), -y(v2D[0]),  v2D[1]]
-
 # --------------------------------------------------------------------------- #
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
@@ -46,27 +36,53 @@ d = blockMeshDict(p.dir_polyMesh + '/' + 'blockMeshDict')
 
 # Vertices
 
-d.vertices.set(  0, ap(p.mesh_O0))
-d.vertices.set(  1, ap(p.mesh_S0))
-d.vertices.set(  2, ap(p.mesh_A0))
-d.vertices.set(  3, ap(p.mesh_Z0))
-d.vertices.set(  4, ap(p.mesh_S1))
-d.vertices.set(  5, ap(p.mesh_A1))
-d.vertices.set(  6, ap(p.mesh_Z1))
+def cr0(r): return np.array([r, 0.0])
+def c0z(z): return np.array([p.mesh_Ra, z])
+def crz(r, z): return np.array([r, z])
+def cla(l, a): return l * np.array([m.cos(a), m.sin(a)])
 
-d.vertices.set(100, an(p.mesh_O0))
-d.vertices.set(101, an(p.mesh_S0))
-d.vertices.set(102, an(p.mesh_A0))
-d.vertices.set(103, an(p.mesh_Z0))
-d.vertices.set(104, an(p.mesh_S1))
-d.vertices.set(105, an(p.mesh_A1))
-d.vertices.set(106, an(p.mesh_Z1))
+v     = dict()
+v[  0] = c0z(0.0)
+v[  6] = c0z(p.geo_Zs)
+v[  3] = 0.5 * v[6]
+v[  4] = crz(p.geo_Rs, p.geo_Zs)
+v[  1] = 0.5 * v[4]
+v[  2] = 1.0/3.0 * (v[0] + v[4] + v[6])
+v[  5] = 1.0/2.0 * (v[4] + v[6])
+v[  7] = crz(p.geo_R0, p.geo_Z5)
+v[  8] = crz(p.geo_R0, p.geo_Z6)
+v[  9] = crz(v[4][0], p.geo_Z6)
+v[ 10] = crz(v[5][0], p.geo_Z6)
+v[ 11] = c0z(p.geo_Z6)
+
+n = len(v)
+
+def vset(n, i, v2D):
+
+    k = n + 1
+
+    def x(r): return r * m.cos(m.pi/180.0 * p.mesh_phi/2.0)
+    def y(r): return r * m.sin(m.pi/180.0 * p.mesh_phi/2.0)
+
+    d.vertices.set(    i, [  x(v2D[0]),  y(v2D[0]),  v2D[1]])
+    d.vertices.set(k + i, [  x(v2D[0]), -y(v2D[0]),  v2D[1]])
+
+for i in range(n): vset(n, i, v[i])
 
 # Blocks
 
-d.blocks.set(  0, [   0,   1,   2,   3, 100, 101, 102, 103], zone="solid")
-d.blocks.set(  1, [   1,   4,   5,   2, 101, 104, 105, 102], zone="solid")
-d.blocks.set(  2, [   3,   2,   5,   6, 103, 102, 105, 106], zone="solid")
+def bset(i, n, vi, **kwargs):
+
+    k = n + 1
+
+    d.blocks.set(i, vi + [k + i for i in vi], **kwargs)
+
+bset( 0, n, [  0,  1,  2,  3], zone="solid")
+bset( 1, n, [  1,  4,  5,  2], zone="solid")
+bset( 2, n, [  3,  2,  5,  6], zone="solid")
+bset( 3, n, [  4,  7,  8,  9], zone="fluid")
+bset( 4, n, [  5,  4,  9, 10], zone="fluid")
+bset( 5, n, [  6,  5, 10, 11], zone="fluid")
 
 # --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
