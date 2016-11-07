@@ -239,6 +239,8 @@ bool Foam::eddyCurrentApp::Control::updateRelDeltaA(label movedRegionI)
         prevC.correctBoundaryConditions();
 
         emUpdateInitialized_ = true;
+
+        return false;
     }
 
     regionVolVectorField C
