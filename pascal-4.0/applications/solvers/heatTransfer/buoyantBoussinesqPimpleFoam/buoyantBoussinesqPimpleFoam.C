@@ -66,9 +66,15 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// TODO: Continuity errors
+// #   include "initContinuityErrs.H"
+
     while (manager.run())
     {
 #       include "UTpLoop.H"
+
+// TODO: Continuity errors
+// #       include "volContinuity.H"
     }
 
     return(0);

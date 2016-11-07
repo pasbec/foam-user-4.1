@@ -18,7 +18,7 @@
         {
             if (Control::debug)
             {
-                Info << "interTrackApp::Control | pEqn.H : "
+                Info<< Control::typeName << " | pEqn.H : "
                     << "Adding volume force flux from F to phi."
                     << endl;
             }

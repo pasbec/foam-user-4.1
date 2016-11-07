@@ -21,27 +21,57 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    pimpleFoam
+
 Description
-    ...
 
 Author
     Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackAppInclude_H
-#define interTrackAppInclude_H
+#include "pimpleApp.H"
 
-#include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "turbulenceModel.H"
-#include "wallFvPatch.H"
-#include "zeroGradientFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "fixedFluxPressureFvPatchScalarField.H"
+// TODO: Relaxation of pressure?
+
+// TODO: Pressure boundary conditions (F, fixedFluxPressure)
+
+// TODO: Continuity errors
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+int main(int argc, char *argv[])
+{
+    using namespace Foam;
+
+#   include "setRootCase.H"
+#   include "createTime.H"
+#   include "createMesh.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    using namespace pimpleApp;
+    using namespace pimpleApp::Region;
+
+    Manager manager(args, runTime, mesh);
+
+    SM_GLOBALREGIONSCOPE(DEFAULT);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// TODO: Continuity errors
+// #   include "initContinuityErrs.H"
+
+    while (manager.run())
+    {
+#       include "UpLoop.H"
+
+// TODO: Continuity errors
+// #       include "volContinuity.H"
+    }
+
+    return(0);
+}
 
 // ************************************************************************* //

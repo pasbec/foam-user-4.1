@@ -22,24 +22,24 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::buoyantBoussinesqPimpleApp::Manager
+    Foam::pimpleApp::Manager
 
 Description
     ...
 
 SourceFiles
-    buoyantBoussinesqPimpleAppManager.C
-    buoyantBoussinesqPimpleAppManagerRegion_DEFAULT.C
+    pimpleAppManager.C
+    pimpleAppManagerRegion_DEFAULT.C
 
 Author
     Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef buoyantBoussinesqPimpleAppManager_H
-#define buoyantBoussinesqPimpleAppManager_H
+#ifndef pimpleAppManager_H
+#define pimpleAppManager_H
 
-#include "buoyantBoussinesqPimpleAppInclude.H"
+#include "pimpleAppInclude.H"
 #include "pimpleAppControl.H"
 
 #include "solverManagers.H"
@@ -49,11 +49,11 @@ Author
 namespace Foam
 {
 
-namespace buoyantBoussinesqPimpleApp
+namespace pimpleApp
 {
 
 /*---------------------------------------------------------------------------*\
-             Class buoyantBoussinesqPimpleApp::Manager Declaration
+             Class pimpleApp::Manager Declaration
 \*---------------------------------------------------------------------------*/
 
 class Manager
@@ -105,12 +105,6 @@ public:
 
             SM_REGIONSTORAGE_NEW();
 
-                //- Gravitational acceleration
-                SM_REGIONITEM_ADD(uniformDimensionedVectorField, g);
-
-                //- Temperatur
-                SM_REGIONITEM_ADD(volScalarField, T);
-
                 //- Pressure
                 SM_REGIONITEM_ADD(volScalarField, p);
 
@@ -126,26 +120,8 @@ public:
                 //- Transport model
                 SM_REGIONITEM_ADD(singlePhaseTransportModel, transport);
 
-                //- Thermal expansion coefficient [1/K]
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, beta);
-
-                //- Reference temperature [K]
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, TRef);
-
-                //- Laminar Prandtl number
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, Pr);
-
-                //- Turbulent Prandtl number
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, Prt);
-
                 //- Turbulence model
                 SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
-
-                //- Kinematic density
-                SM_REGIONITEM_ADD(volScalarField, rhok);
-
-                //- Kinematic turbulent thermal conductivity [m^2/s]
-                SM_REGIONITEM_ADD(volScalarField, alphat);
 
             SM_REGIONSTORAGE_ADD();
 
@@ -173,7 +149,7 @@ private:
 public:
 
     // Runtime type information
-    TypeName("buoyantBoussinesqPimpleApp::Manager");
+    TypeName("pimpleApp::Manager");
 
     // Constructor
 
@@ -183,7 +159,7 @@ public:
             Time& time,
             fvMesh& mesh,
             bool master = true,
-            const word& prefix = "buoyantBoussinesqPimple"
+            const word& prefix = "pimple"
         );
 
     // Destructor
@@ -210,7 +186,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace buoyantBoussinesqPimpleApp
+} // End namespace pimpleApp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -219,8 +195,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "buoyantBoussinesqPimpleAppManager.C"
-#   include "buoyantBoussinesqPimpleAppManagerRegion_DEFAULT.C"
+#   include "pimpleAppManager.C"
+#   include "pimpleAppManagerRegion_DEFAULT.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

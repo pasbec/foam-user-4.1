@@ -11,7 +11,7 @@
           + fvc::ddtPhiCorr(rAU, U, phi)
         );
 
-        phi = phiU + rAUf*fvc::interpolate(rhok)*(g & mesh.Sf());
+        phi = phiU;
 
         if (storage.item_F().enabled())
         {
@@ -77,21 +77,17 @@
                                 << endl;
                         }
 
-                        // Density
-                        const scalarField& rhokp =
-                            rhok.boundaryField()[patchI];
-
                             // Direct way by means of F
                         if (storage.item_F().enabled())
                         {
                             const vectorField& Fp =
                                 storage.F().boundaryField()[patchI];
 
-                            pp.gradient() = ((rhokp*g.value() + Fp) & Sfp)/magSfp;
+                            pp.gradient() = (Fp & Sfp)/magSfp;
                         }
                         else
                         {
-                            pp.gradient() = ((rhokp*g.value()) & Sfp)/magSfp;
+                            pp.gradient() = 0.0;
                         }
                     }
                     else
