@@ -126,7 +126,7 @@ public:
             SM_GLOBALITEM_ADD(regionVolVectorField, BIm);
 
             //- Lorentz Force (time-averaged)
-            SM_GLOBALITEM_ADD(regionVolVectorField, FL);
+            SM_GLOBALITEM_ADD(regionVolVectorField, F);
 
             //- Magnetic pressure (time-averaged)
             SM_GLOBALITEM_ADD(regionVolScalarField, pB);
@@ -175,6 +175,16 @@ public:
                 // Current density
                 SM_REGIONITEM_ADD(volVectorField, jRe);
                 SM_REGIONITEM_ADD(volVectorField, jIm);
+
+#ifdef eddyCurrentAppLink_H
+
+                //- Cell centres from last electromagnetic update
+                SM_REGIONITEM_ADD(volVectorField, emPrevC);
+
+                //- Relative change of A amplitude
+                SM_REGIONITEM_ADD(volScalarField, emRelDeltaA);
+
+#endif
 
             SM_REGIONSTORAGE_ADD();
 

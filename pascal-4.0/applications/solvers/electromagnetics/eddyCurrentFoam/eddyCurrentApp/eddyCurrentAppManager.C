@@ -551,7 +551,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BIm::create() const
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_FL::create() const
+void Foam::eddyCurrentApp::Manager::Storage::Item_F::create() const
 {
     IOobject IOo
     (
@@ -719,7 +719,7 @@ void Foam::eddyCurrentApp::Manager::Storage::create() const
     item_BRe().enable();
     item_BIm().enable();
 
-    item_FL().setState(settings().lorentzForce);
+    item_F().setState(settings().lorentzForce);
     item_pB().setState(settings().magneticPressure);
     item_Q().setState(settings().jouleHeat);
 }

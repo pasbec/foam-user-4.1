@@ -78,7 +78,7 @@ with open(fileGetPath('lorentzForce.samleDict'),'w') as cf:
 
     cf.write(i(0, 'fields '))
     cf.write(i(0, '('))
-    cf.write(i(1, 'FL'))
+    cf.write(i(1, 'F'))
     cf.write(i(0, ');'))
 
     cf.write('\n')

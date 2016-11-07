@@ -195,6 +195,64 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create(
 }
 
 
+#ifdef eddyCurrentAppLink_H
+
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emPrevC::create() const
+{
+    set
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimLength,
+                vector::zero
+            ),
+            zeroGradientFvPatchVectorField::typeName
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emRelDeltaA::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimless,
+                0.0
+            ),
+            zeroGradientFvPatchScalarField::typeName
+        )
+    );
+}
+
+#endif
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create() const
@@ -207,6 +265,13 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create() const
 
     item_jRe().enable();
     item_jIm().enable();
+
+#ifdef eddyCurrentAppLink_H
+
+    item_emPrevC().enable();
+    item_emRelDeltaA().enable();
+
+#endif
 }
 
 

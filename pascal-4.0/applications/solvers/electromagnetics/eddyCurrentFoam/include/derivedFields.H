@@ -31,13 +31,13 @@
             storage.jIm() -= omega0 * sigma * globalStorage.A0Re()[CONDUCTOR];
         }
 
-        if (globalStorage.item_FL().enabled())
+        if (globalStorage.item_F().enabled())
         {
             // Time-averaged Lorentz-force
-            globalStorage.FL()[CONDUCTOR] = 0.5 * ( (storage.jRe() ^ BRe)
-                                                  + (storage.jIm() ^ BIm) );
+            globalStorage.F()[CONDUCTOR] = 0.5 * ( (storage.jRe() ^ BRe)
+                                                 + (storage.jIm() ^ BIm) );
 
-            globalStorage.FL().rmap(CONDUCTOR);
+            globalStorage.F().rmap(CONDUCTOR);
         }
 
         if (globalStorage.item_pB().enabled())

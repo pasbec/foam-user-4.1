@@ -59,9 +59,7 @@ void Foam::interTrackEddyCurrentApp::Manager::Storage::create() const
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::interTrackEddyCurrentApp::Manager::Regions::create() const
-{
-    region_CONDUCTOR().enable();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -201,11 +199,7 @@ void Foam::interTrackEddyCurrentApp::Manager::read() const
 void Foam::interTrackEddyCurrentApp::Manager::init() const
 {
     interTrackAppManager().init();
-// TODO: How to do this more conveniently? The renaming is currently used to make
-//       the regionGeometricField link the fluid region!
-    interTrackAppManager().regions().region_DEFAULT().storage().F().rename("FL");
     eddyCurrentAppManager().init();
-    interTrackAppManager().regions().region_DEFAULT().storage().F().rename("F");
 
     storage().checkInit();
     regions().checkInit();

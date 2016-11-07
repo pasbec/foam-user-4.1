@@ -95,18 +95,7 @@ int main(int argc, char *argv[])
 
         SM_MANAGERSCOPE();
 
-        eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
-
-// TODO: Magnetic pressure?
-//         eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);
-//
-//         const volScalarField& pB =
-//             eddyCurrentAppManager.storage().pB()[Region::FLUID];
-//
-//         pB *= lorentzForceRotationalFactor;
-//
-//         F = FL + fvc::grad(pB);
-//         F *= lorentzForceVolumeFactor;
+        eddyCurrentAppManager.storage().F().mapExtrapolate(Region::FLUID);
     }
 
     while (masterManager.run())
@@ -125,7 +114,11 @@ int main(int argc, char *argv[])
         }
 
         // Check for magnetic update
-        Switch emUpdate = masterManager.control().loop();
+        Switch emUpdate =
+            eddyCurrentAppManager.control().needsUpdate
+            (
+                interTrackEddyCurrentApp::Region::FLUID
+            );
 
         if (emUpdate)
         {
@@ -262,18 +255,7 @@ int main(int argc, char *argv[])
                     << endl;
             }
 
-            eddyCurrentAppManager.storage().FL().mapExtrapolate(Region::FLUID);
-
-// TODO: Magnetic pressure?
-//             eddyCurrentAppManager.storage().pB().mapExtrapolate(Region::FLUID);
-//
-//             const volScalarField& pB =
-//                 eddyCurrentAppManager.storage().pB()[Region::FLUID];
-//
-//             pB *= lorentzForceRotationalFactor;
-//
-//             F = FL + fvc::grad(pB);
-//             F *= lorentzForceVolumeFactor;
+            eddyCurrentAppManager.storage().F().mapExtrapolate(Region::FLUID);
         }
 
         // Solve fluid flow

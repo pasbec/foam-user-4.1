@@ -70,82 +70,15 @@ private:
 
 protected:
 
-    // Protected structs
-
-        //- Electromagnetic settings
-        struct emSettings
-        {
-            Switch enabled;
-            int outputTimeIndexCycle;
-            int timeIndexCycle;
-            scalar timeCycle;
-            scalar relDeltaAmax;
-        };
-
-        //- Electromagnetic update data
-        struct emUpdateData
-        {
-            Switch update;
-            int counter;
-            int outputTimeIndex;
-            scalar lastTime;
-        };
-
     // Protected data
 
         //- Mesh
         const regionFvMesh& mesh_;
 
-        // Electromagnetic
-
-            //- Previous cell centres
-            volVectorField& prevC_;
-
-            //- Estimated relative deviation of A
-            volScalarField& relDeltaA_;
-
-            //- Properties dictionary
-            const dictionary& propertiesDict_;
-
-            //- Electromagnetic settings dictionary
-            const dictionary& emUpdateSettingsDict_;
-
-            //- Electromagnetic settings
-            emSettings emSettings_;
-
-            //- Electromagnetic update dictionary
-            IOdictionary emUpdateDataDict_;
-
-            //- Electromagnetic update data
-            emUpdateData emUpdateData_;
-
     // Protected Member Functions
-
-        //- Read controls
-        virtual void read();
 
         //- Return true if an electromagnetic update is not necessary
         virtual bool criteriaSatisfied();
-
-        // Update checks
-
-            //- Counter is zero
-            inline bool updateZeroCounter() const;
-
-            //- Output time cycle interval is due
-            inline bool updateOutputTimeIndex() const;
-
-            //- Time index cycle interval is due
-            inline bool updateTimeIndex() const;
-
-            //- Time cycle interval is due
-            inline bool updateTime() const;
-
-            //- Relative A deviation has grown to large
-            bool updateRelDeltaA() const;
-
-            //- Update is due
-            bool update();
 
 
 public:
@@ -160,7 +93,6 @@ public:
         Control
         (
             regionFvMesh& mesh,
-            const dictionary& propertiesDict,
             const word& dictName="INTERTRACKEDDYCURRENT"
         );
 
@@ -186,10 +118,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "interTrackEddyCurrentAppControlI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

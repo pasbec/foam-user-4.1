@@ -44,6 +44,12 @@ Author
 #include "solutionControl.H"
 #include "solverPerformanceData.H"
 
+// TODO: Get rid of all preprocessor statements involving eddyCurrentAppLink_H.
+//       But how? Using class hierarchies will get very complicated and needs
+//       derived classes for Region (which is created by macros), Control and
+//       finally the Manager itself. Maybe a switch to turn on/off the
+//       link-functionality would be more appropriate...
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -72,6 +78,31 @@ private:
 
 
 protected:
+
+#ifdef eddyCurrentAppLink_H
+
+    // Protected structs
+
+        //- Electromagnetic settings
+        struct emSettings
+        {
+            Switch enabled;
+            int outputTimeIndexCycle;
+            int timeIndexCycle;
+            scalar timeCycle;
+            scalar relDeltaAmax;
+        };
+
+        //- Electromagnetic update data
+        struct emUpdateData
+        {
+            Switch update;
+            int counter;
+            int outputTimeIndex;
+            scalar lastTime;
+        };
+
+#endif
 
     // Protected data
 
@@ -114,6 +145,27 @@ protected:
                 //- Sub-iteration scale factor
                 scalar subScale_;
 
+#ifdef eddyCurrentAppLink_H
+
+        // Update
+
+            //- Electromgnetic update Init state
+            bool emUpdateInitialized_;
+
+            //- Electromagnetic settings dictionary
+            const dictionary& emUpdateSettingsDict_;
+
+            //- Electromagnetic settings
+            emSettings emSettings_;
+
+            //- Electromagnetic update dictionary
+            IOdictionary emUpdateDataDict_;
+
+            //- Electromagnetic update data
+            emUpdateData emUpdateData_;
+
+#endif
+
     // Protected Member Functions
 
         //- Read controls from fvSolution dictionary
@@ -129,6 +181,30 @@ protected:
 
             //- Return true if all sub-convergence checks are satisfied
             bool subCriteriaSatisfied();
+
+#ifdef eddyCurrentAppLink_H
+
+        // Update
+
+            //- Counter is zero
+            inline bool updateZeroCounter() const;
+
+            //- Output time cycle interval is due
+            inline bool updateOutputTimeIndex() const;
+
+            //- Time index cycle interval is due
+            inline bool updateTimeIndex() const;
+
+            //- Time cycle interval is due
+            inline bool updateTime() const;
+
+            //- Relative A deviation has grown to large
+            bool updateRelDeltaA(label movedRegionI = -1);
+
+            //- Update is due
+            bool update(label movedRegionI = -1);
+
+#endif
 
 
 public:
@@ -200,6 +276,15 @@ public:
 
                 //- Sub control loop
                 bool subLoop();
+
+#ifdef eddyCurrentAppLink_H
+
+        // Update
+
+            //- Check if update is due
+            bool needsUpdate(label movedRegionI = -1);
+
+#endif
 };
 
 

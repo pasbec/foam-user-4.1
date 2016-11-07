@@ -53,25 +53,36 @@ solvers
 
 EDDYCURRENT
 {
-    interface          "conductorSurface";
+    interface                   "conductorSurface";
 
-    nCorrectors        10;
-    nSubCorrectors     100;
+    nCorrectors                 10;
+    nSubCorrectors              100;
 
     residualControl
     {
         "(Ax|Ay|Az)"
         {
-            tolerance  1e-05;
-            relTol     1e-02;
+            tolerance           1e-05;
+            relTol              1e-02;
         }
 
         "(VRe|VIm)"
         {
-            tolerance  1e-05;
-            relTol     1e-02;
+            tolerance           1e-05;
+            relTol              1e-02;
         }
-     }
+    }
+
+    emUpdate
+    {
+        enabled                 yes;
+
+        outputTimeIndexCycle    10;
+        timeIndexCycle          2147483647;
+        timeCycle               1e+300;
+
+        relDeltaAmax            0.10;
+    }
 }
 
 relaxationFactors

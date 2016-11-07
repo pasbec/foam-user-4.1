@@ -69,4 +69,38 @@ Foam::eddyCurrentApp::Control::subCorr() const
 }
 
 
+#ifdef eddyCurrentAppLink_H
+
+inline bool
+Foam::eddyCurrentApp::Control::updateZeroCounter() const
+{
+    return (emUpdateData_.counter == 0);
+}
+
+
+inline bool
+Foam::eddyCurrentApp::Control::updateOutputTimeIndex() const
+{
+    return (emUpdateData_.outputTimeIndex > 0)
+        && (emUpdateData_.outputTimeIndex % emSettings_.outputTimeIndexCycle == 0);
+}
+
+
+inline bool
+Foam::eddyCurrentApp::Control::updateTimeIndex() const
+{
+    return (mesh_.time().timeIndex() > 0)
+        && (mesh_.time().timeIndex() % emSettings_.timeIndexCycle == 0);
+}
+
+
+inline bool
+Foam::eddyCurrentApp::Control::updateTime() const
+{
+    return (mesh_.time().value() - emUpdateData_.lastTime > emSettings_.timeCycle);
+}
+
+#endif
+
+
 // ************************************************************************* //

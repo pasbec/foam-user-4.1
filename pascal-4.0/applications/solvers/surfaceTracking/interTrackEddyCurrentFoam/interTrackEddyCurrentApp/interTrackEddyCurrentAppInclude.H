@@ -30,6 +30,7 @@ Description
 #define interTrackEddyCurrentAppInclude_H
 
 #include "interTrackAppInclude.H"
+#include "eddyCurrentAppLink.H"
 #include "eddyCurrentAppInclude.H"
 
 #include "twoDPointCorrector.H"
