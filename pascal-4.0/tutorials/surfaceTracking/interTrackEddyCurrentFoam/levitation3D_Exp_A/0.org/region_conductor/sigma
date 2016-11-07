@@ -9,37 +9,26 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      funkySetFieldsDict;
+    class       volScalarField;
+    object      sigma;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-materialProperties
-(
-  "sigma_silicon_liquid=1.2e+6;"    // Conductivity of liquid silicon in [S/m]
-  "sigma_silicon_solid=8.3e+4;"     // Conductivity of solid silicon in [S/m]
-  "sigma_graphite=1.25e+5;"         // Conductivity of graphite in [S/m]
-);
+dimensions      [-1 -3 3 0 0 2 0];
 
-expressions
-(
+internalField   uniform 0;
 
-  sigma_reset
-  {
-    field         sigma;
-    variables     $materialProperties;
-    expression    "0";
-    keepPatches   true;
-  }
-
-  sigma_conductor
-  {
-    field         sigma;
-    variables     $materialProperties;
-    condition     "set(cellSet_material_conductor)";
-    expression    "sigma_silicon_liquid";
-    keepPatches   true;
-  }
-);
+boundaryField
+{
+    trackedSurface
+    {
+        type            zeroGradient;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
+    }
+}
 
 // ************************************************************************* //

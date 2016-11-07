@@ -20,14 +20,9 @@ internalField   uniform 0;
 
 boundaryField
 {
-    frontAndBack
+    conductorSurface
     {
-        type            empty;
-    }
-    infinity
-    {
-        type            calculated;
-        value           $internalField;
+        type            zeroGradient;
     }
     "procBoundary.*"
     {

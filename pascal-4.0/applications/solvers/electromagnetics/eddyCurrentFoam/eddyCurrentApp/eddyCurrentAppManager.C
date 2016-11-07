@@ -119,7 +119,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create() const
 
     IOoOverride.set
     (
-        mesh().regions()[Region::DEFAULT],
+        mesh().regions()[Region::CONDUCTOR],
         IOo
     );
 

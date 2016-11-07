@@ -1,16 +1,16 @@
 
-    // Update gradient of V in default region
+    // Update sigma and gradient of V in default region
     // from data in conductor region
     if (control.meshIs3D())
     {
+        SM_REGIONSCOPE(CONDUCTOR);
+
         if (Control::debug)
         {
-            Info<< Control::typeName << " | BUpdate.H : "
+            Info<< Control::typeName << " | VGradUpdate.H : "
                 << "Update gradient of V."
                 << endl;
         }
-
-        SM_REGIONSCOPE(CONDUCTOR);
 
         volVectorField& VReGrad = globalStorage.VReGrad()[CONDUCTOR];
         volVectorField& VImGrad = globalStorage.VImGrad()[CONDUCTOR];

@@ -149,9 +149,6 @@ protected:
 
         // Update
 
-            //- Electromgnetic update Init state
-            bool emUpdateInitialized_;
-
             //- Electromagnetic settings dictionary
             const dictionary& emUpdateSettingsDict_;
 
@@ -163,6 +160,12 @@ protected:
 
             //- Electromagnetic update data
             emUpdateData emUpdateData_;
+
+            //- Electromgnetic update state for relDeltaA
+            bool emUpdateRelDeltaA_;
+
+            //- Electromgnetic update init state for relDeltaA
+            bool emUpdateRelDeltaAInitialized_;
 
 #endif
 

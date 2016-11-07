@@ -20,10 +20,9 @@ internalField   uniform 0;
 
 boundaryField
 {
-    infinity
+    oldInternalFaces
     {
-        type            calculated;
-        value           $internalField;
+        type            zeroGradient;
     }
     "procBoundary.*"
     {

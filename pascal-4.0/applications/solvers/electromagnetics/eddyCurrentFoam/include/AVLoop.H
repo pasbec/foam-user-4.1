@@ -8,6 +8,7 @@
         }
 
         // Init
+#       include "AVLoop_sigmaUpdate.H"
 #       include "AVLoop_AUpdate.H"
 #       include "AVLoop_VGradUpdate.H"
 
@@ -16,6 +17,8 @@
         {
             while (control.subLoop())
             {
+#               include "AVLoop_sigmaUpdate.H"
+
 #               include "AVLoop_AEqn.H"
 
 #               include "AVLoop_AUpdate.H"

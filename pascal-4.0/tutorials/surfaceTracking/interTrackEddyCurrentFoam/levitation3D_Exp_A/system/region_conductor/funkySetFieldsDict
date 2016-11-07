@@ -9,27 +9,37 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      sigma;
+    class       dictionary;
+    object      funkySetFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [-1 -3 3 0 0 2 0];
+materialProperties
+(
+  "sigma_silicon_liquid=1.2e+6;"    // Conductivity of liquid silicon in [S/m]
+  "sigma_silicon_solid=8.3e+4;"     // Conductivity of solid silicon in [S/m]
+  "sigma_graphite=1.25e+5;"         // Conductivity of graphite in [S/m]
+  "sigma_copper1360K=4.693e+6;"    // Conductivity of copper at 1360K in [S/m]
+);
 
-internalField   uniform 0;
+expressions
+(
+  sigma_reset
+  {
+    field         sigma;
+    variables     $materialProperties;
+    expression    "0";
+    keepPatches   true;
+  }
 
-boundaryField
-{
-    infinity
-    {
-        type            calculated;
-        value           $internalField;
-    }
-    "procBoundary.*"
-    {
-        type            processor;
-        value           $internalField;
-    }
-}
+  sigma_conductor
+  {
+    field         sigma;
+    variables     $materialProperties;
+    condition     "set(cellSet_material_conductor)";
+    expression    "sigma_copper1360K";
+    keepPatches   true;
+  }
+);
 
 // ************************************************************************* //

@@ -176,8 +176,18 @@ if [[ ! -e 'state.prepared' || $flagForce -eq 1 ]]; then
     done
 
     # Change fields according to funkySetFieldsDict
-    runApplication \
-        funkySetFields -time '0' || exit 1
+    if [[ -e 'system/funkySetFieldsDict' ]]; then
+        runApplication \
+            funkySetFields -time '0' || exit 1
+    fi
+    for region in $regionlist; do
+        if [[ -e "system/$region/funkySetFieldsDict" ]]; then
+            ln -sf 'funkySetFieldsDict' "system/$region/funkySetFieldsDict.$region"
+            runApplication -r "$region" \
+                funkySetFields -time '0' -region "$region" || exit 1
+            rm "system/$region/funkySetFieldsDict.$region" > /dev/null 2>&1
+        fi
+    done
 
     # Init turbulence values for fluid region
     runApplication \

@@ -20,10 +20,21 @@ internalField   uniform 0;
 
 boundaryField
 {
-    infinity
+    axis
     {
-        type            calculated;
-        value           $internalField;
+        type            zeroGradient;
+    }
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
+    trackedSurface
+    {
+        type            zeroGradient;
     }
     "procBoundary.*"
     {

@@ -74,8 +74,8 @@ int main(int argc, char *argv[])
         uniformDimensionedScalarField& omega0 = globalStorage.omega0();
 
         {
+#           include "AVLoop_sigmaUpdate.H"
 #           include "AVLoop_AUpdate.H"
-
 #           include "AVLoop_VGradUpdate.H"
 
 #           include "BUpdate.H"

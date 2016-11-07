@@ -217,6 +217,8 @@ bool Foam::eddyCurrentApp::Control::subCriteriaSatisfied()
 
 bool Foam::eddyCurrentApp::Control::updateRelDeltaA(label movedRegionI)
 {
+    emUpdateRelDeltaA_ = false;
+
     volVectorField& prevC
     (
         const_cast<volVectorField&>
@@ -225,104 +227,104 @@ bool Foam::eddyCurrentApp::Control::updateRelDeltaA(label movedRegionI)
         )
     );
 
-    volScalarField& relDeltaA
-    (
-        const_cast<volScalarField&>
-        (
-            mesh_[Region::CONDUCTOR].lookupObject<volScalarField> ("emRelDeltaA")
-        )
-    );
-
-    if (!emUpdateInitialized_)
+    if (!emUpdateRelDeltaAInitialized_)
     {
         prevC = mesh_[Region::CONDUCTOR].C();
         prevC.correctBoundaryConditions();
 
-        emUpdateInitialized_ = true;
-
-        return false;
-    }
-
-    regionVolVectorField C
-    (
-        IOobject
-        (
-            "C",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh_,
-        dimensionedVector
-        (
-            word(),
-            dimLength,
-            vector::zero
-        ),
-        calculatedFvPatchVectorField::typeName
-    );
-
-    C[Region::DEFAULT] = mesh_[Region::DEFAULT].C();
-    C[movedRegionI] = mesh_[movedRegionI].C();
-    C.rmapInteralField(movedRegionI);
-    C.mapCopyInternal(Region::CONDUCTOR);
-
-    scalarField magSqrDeltaC =
-        magSqr
-        (
-            C[Region::CONDUCTOR].internalField()
-          - prevC.internalField()
-        );
-
-    const volVectorField& jRe =
-        mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("jRe");
-    const volVectorField& jIm =
-        mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("jIm");
-
-    scalarField magSqrj = magSqr(jRe) + magSqr(jIm);
-
-    const volVectorField& ARe =
-        mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("ARe");
-    const volVectorField& AIm =
-        mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("AIm");
-
-    scalarField magSqrA(mesh_[Region::CONDUCTOR].C().size(),0.0);
-
-    if
-    (
-        mesh_[Region::CONDUCTOR].foundObject<volVectorField>("A0Re")
-     && mesh_[Region::CONDUCTOR].foundObject<volVectorField>("A0Im")
-    )
-    {
-
-        const volVectorField& A0Re =
-            mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("A0Re");
-        const volVectorField& A0Im =
-            mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("A0Im");
-
-        magSqrA = magSqr(ARe+A0Re) + magSqr(AIm+A0Im);
+        emUpdateRelDeltaAInitialized_ = true;
     }
     else
     {
-        magSqrA = magSqr(ARe) + magSqr(AIm);
+        regionVolVectorField C
+        (
+            IOobject
+            (
+                "C",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedVector
+            (
+                word(),
+                dimLength,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        );
+
+        C[Region::DEFAULT] = mesh_[Region::DEFAULT].C();
+        C[movedRegionI] = mesh_[movedRegionI].C();
+        C.rmapInteralField(movedRegionI);
+        C.mapCopyInternal(Region::CONDUCTOR);
+
+        scalarField magSqrDeltaC =
+            magSqr
+            (
+                C[Region::CONDUCTOR].internalField()
+            - prevC.internalField()
+            );
+
+        const volVectorField& jRe =
+            mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("jRe");
+        const volVectorField& jIm =
+            mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("jIm");
+
+        scalarField magSqrj = magSqr(jRe) + magSqr(jIm);
+
+        const volVectorField& ARe =
+            mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("ARe");
+        const volVectorField& AIm =
+            mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("AIm");
+
+        scalarField magSqrA(mesh_[Region::CONDUCTOR].C().size(),0.0);
+
+        if
+        (
+            mesh_[Region::CONDUCTOR].foundObject<volVectorField>("A0Re")
+        && mesh_[Region::CONDUCTOR].foundObject<volVectorField>("A0Im")
+        )
+        {
+
+            const volVectorField& A0Re =
+                mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("A0Re");
+            const volVectorField& A0Im =
+                mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("A0Im");
+
+            magSqrA = magSqr(ARe+A0Re) + magSqr(AIm+A0Im);
+        }
+        else
+        {
+            magSqrA = magSqr(ARe) + magSqr(AIm);
+        }
+
+        volScalarField& relDeltaA
+        (
+            const_cast<volScalarField&>
+            (
+                mesh_[Region::CONDUCTOR].lookupObject<volScalarField> ("emRelDeltaA")
+            )
+        );
+
+        relDeltaA.internalField() =
+            physicalConstant::mu0.value()
+            * magSqrDeltaC * sqrt(magSqrj / (magSqrA + SMALL));
+        relDeltaA.correctBoundaryConditions();
+
+        if (gMax(relDeltaA) > emSettings_.relDeltaAmax)
+        {
+            prevC = mesh_[Region::CONDUCTOR].C();
+            prevC.correctBoundaryConditions();
+
+            emUpdateRelDeltaA_ = true;
+        }
     }
 
-    relDeltaA.internalField() =
-        physicalConstant::mu0.value()
-        * magSqrDeltaC * sqrt(magSqrj / (magSqrA + SMALL));
-    relDeltaA.correctBoundaryConditions();
-
-    if (gMax(relDeltaA) > emSettings_.relDeltaAmax)
-    {
-        prevC = mesh_[Region::CONDUCTOR].C();
-        prevC.correctBoundaryConditions();
-
-        return true;
-    }
-
-    return false;
+    return emUpdateRelDeltaA_;
 }
 
 
@@ -342,15 +344,15 @@ bool Foam::eddyCurrentApp::Control::update(label movedRegionI)
 
     if (debug > 1)
     {
-        Info << "eddyCurrentApp::Control::update() : "
+        Info<< "eddyCurrentApp::Control::update() : "
             << "updateZeroCounter() = " << uZeroCounter << endl;
-        Info << "                                              "
+        Info<< "                                    "
             << "updateOutputTimeIndex() = " << uOutputTimeIndex << endl;
-        Info << "                                              "
+        Info<< "                                    "
             << "updateTimeIndex() = " << uTimeIndex << endl;
-        Info << "                                              "
+        Info<< "                                    "
             << "updateTime() = " << uTime << endl;
-        Info << "                                              "
+        Info<< "                                    "
             << "updateRelDeltaA() = " << uRelDeltaA << endl;
     }
 
@@ -404,7 +406,6 @@ Foam::eddyCurrentApp::Control::Control
     subScale_(1.0)
 #ifdef eddyCurrentAppLink_H
     ,
-    emUpdateInitialized_(false),
     emUpdateSettingsDict_
     (
         dict().subDict("emUpdate")
@@ -421,7 +422,9 @@ Foam::eddyCurrentApp::Control::Control
             IOobject::AUTO_WRITE,
             true
         )
-    )
+    ),
+    emUpdateRelDeltaA_(false),
+    emUpdateRelDeltaAInitialized_(false)
 #endif
 {
     if (interfacePatchLabel_ == -1)

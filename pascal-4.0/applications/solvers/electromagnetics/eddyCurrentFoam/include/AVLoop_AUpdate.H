@@ -1,11 +1,15 @@
 
-    // Update sigma and A in conductor region
+    // Update A in conductor region
     // from data in default region
     {
         SM_REGIONSCOPE(CONDUCTOR);
-
-        // Update sigma
-        globalStorage.sigma().mapCopyInternal(CONDUCTOR);
+        
+        if (Control::debug)
+        {
+            Info<< Control::typeName << " | AUpdate.H : "
+                << "Update A in conductor region."
+                << endl;
+        }
 
 // TODO: Use relaxation?
 //         volVectorField& ARe = globalStorage.ARe()[CONDUCTOR];

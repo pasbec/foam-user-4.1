@@ -4,7 +4,7 @@
         if (Control::debug)
         {
             Info<< Control::typeName << " | BUpdate.H : "
-                << "Calculate magnetic field."
+                << "Calculate B."
                 << endl;
         }
 
