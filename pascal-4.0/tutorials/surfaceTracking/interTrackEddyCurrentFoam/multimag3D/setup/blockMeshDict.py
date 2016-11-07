@@ -63,6 +63,8 @@ nz3 = nr2
 
 d = blockMeshDict(par.dir_polyMesh + '/' + 'blockMeshDict')
 
+# Vertices
+
 d.vertices.set(  0, [            0.0,              0,     par.geo_z0])
 d.vertices.set(  1, [     par.geo_r0,              0,     par.geo_z0])
 d.vertices.set(  2, [ f*a*par.geo_r0, f*a*par.geo_r0,     par.geo_z0])
