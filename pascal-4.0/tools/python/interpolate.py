@@ -340,7 +340,7 @@ if P:
 
     # Built up the search tree
     if (verb > 1 and mpi_rank == 0):
-        print 'Building up k-d-tree for interpolation...'
+        print('Building up k-d-tree for interpolation...')
     sourceDataNodesTree = cKDTree(sourceDataNodes)
 
     # Get local target node range from MPI index partitioning
@@ -348,7 +348,7 @@ if P:
 
     # Get ready and init average proximity distribution matrix on verbose
     if (mpi_rank == 0 and verb > 1):
-        print 'Interpolating now...'
+        print('Interpolating now...')
 
     # Init progress bar
     timeStart = time.time()
@@ -389,7 +389,7 @@ if S:
 
     # Built up the search tree for smoothing
     if (verb > 1 and mpi_rank == 0):
-        print 'Building up k-d-tree for smoothing...'
+        print('Building up k-d-tree for smoothing...')
     smoothDataNodesTree = cKDTree(targetDataNodes)
 
     # Get local target node range from MPI index partitioning
@@ -397,7 +397,7 @@ if S:
 
     # Get ready and init average proximity distribution matrix on verbose
     if (mpi_rank == 0 and verb > 1):
-        print 'Smoothing now...'
+        print('Smoothing now...')
 
     # Init progress bar
     timeStart = time.time()

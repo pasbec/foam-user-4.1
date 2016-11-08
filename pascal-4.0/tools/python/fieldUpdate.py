@@ -318,10 +318,10 @@ foamToolsFieldUpdateDictPath = foamToolsPath + '/fieldUpdateDict'
 # --------------------------------------------------------------------------- #
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
-# +++ print basic info ++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# +++ print(basic info ++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-print
-if (verb > 0): print 'time = ' + time
+print()
+if (verb > 0): print('time = ' + time)
 
 
 
@@ -335,11 +335,11 @@ else:
     boundaryDictPath = foamConstantBoundaryDictPath
 
 # Parse boundary dictionary
-if (verb > 0): print 'read boundary dictionary'
+if (verb > 0): print('read boundary dictionary')
 boundaryDict = ParsedParameterFile(boundaryDictPath, boundaryDict=True)
 
 # Extract patch-types mapping as list
-if (verb > 0): print 'create patch list'
+if (verb > 0): print('create patch list')
 patchList, patchTypeList = foamGetPatchListFromBoudaryDict(boundaryDict)
 
 
@@ -348,17 +348,17 @@ patchList, patchTypeList = foamGetPatchListFromBoudaryDict(boundaryDict)
 # +++ parse field update dictionary +++++++++++++++++++++++++++++++++++++++++ #
 
 # Parse field update dictionary
-if (verb > 0): print 'read field update dictionary'
+if (verb > 0): print('read field update dictionary')
 fieldUpdateDict = ParsedParameterFile(foamToolsFieldUpdateDictPath)
 # FIXME: Why is macro expansion not working correctly?
 fieldUpdateDict = ParsedParameterFile(foamToolsFieldUpdateDictPath, doMacroExpansion=True)
 
 # Extract field update method
-if (verb > 0): print 'set update method'
+if (verb > 0): print('set update method')
 updateMethod = foamGetUpdateMethodFromFieldUpdateDict(fieldUpdateDict, method)
 
 # Extract all field names and parse their sub-dictionaries
-if (verb > 0): print 'create field list and extract their dictionaries'
+if (verb > 0): print('create field list and extract their dictionaries')
 fieldList, fieldDictList = foamGetFieldListFromFieldUpdateDict(fieldUpdateDict)
 
 
@@ -371,15 +371,15 @@ if not (os.path.isdir(time)):
     raise IOError('time directory "' + time + '" does not exist')
 
 # Create foam time directory structure
-if (verb > 1): print 'create time directory structure'
+if (verb > 1): print('create time directory structure')
 for dirPath in foamTimeSubPathList:
     if not (os.path.isdir(dirPath)):
-        if (verb > 1): print 'create ' + dirPath
+        if (verb > 1): print('create ' + dirPath)
         os.mkdir(dirPath)
 
 if clear:
     # Raw/Int data and log files
-    if (verb > 0): print 'delete old files in time sub-directories ' + str(foamTimeSubPathList)
+    if (verb > 0): print('delete old files in time sub-directories ' + str(foamTimeSubPathList))
     for dirPath in foamTimeSubPathList:
         for path in glob.glob(dirPath + '/' + '*'):
             if not os.path.isdir(path):
@@ -387,7 +387,7 @@ if clear:
 
 # Stop if we would like to clean only
 if clean:
-    print
+    print()
     sys.exit(0)
 
 
@@ -415,10 +415,10 @@ else:
     updateMethodInternal = updateMethod
 
     # Print info
-    if (verb > 0): print 'select update method ' +  updateMethod
+    if (verb > 0): print('select update method ' +  updateMethod)
 
     # Extract field update method dictionary
-    if (verb > 0): print 'get update method dictionary'
+    if (verb > 0): print('get update method dictionary')
     updateMethodDict = foamGetUpdateMethodDictFromFieldUpdateDict(fieldUpdateDict, updateMethod)
 
     # Parse method's settings dictionary
@@ -444,7 +444,7 @@ if methodResultType=='rawdata' or methodResultType=='intdata': methodCreateFromR
 if methodInterpolate:
 
     # Extract cell centers of volume mesh
-    if (verb > 0): print 'extract cell centers'
+    if (verb > 0): print('extract cell centers')
     exe = 'extractCellCenters'
     arg = '-time ' + time
     log = foamTimeLogFilePath('extractCellCenters')
@@ -461,14 +461,14 @@ if methodInterpolate:
         if patchValued:
 
             # Extract patch face center data
-            if (verb > 0): print 'extract face centers of patch ' + patch
+            if (verb > 0): print('extract face centers of patch ' + patch)
             exe = 'extractPatchFaceCenters'
             arg = patch + ' -time ' + time
             log = foamTimeLogFilePath('extractPatchFaceCenters', p=patch)
             subProc.run(exe, arg, log, verb)
 
             # Extract patch point data
-            if (verb > 0): print 'extract points of patch ' + patch
+            if (verb > 0): print('extract points of patch ' + patch)
             exe = 'extractPatchPoints'
             arg = patch + ' -time ' + time
             log = foamTimeLogFilePath('extractPatchPoints', p=patch)
@@ -551,26 +551,26 @@ elif (updateMethodInternal == 'comsolLorentzForceSurface'):
     # --- prepare comsol directory ------------------------------------------ #
 
     # Print info
-    if (verb > 0): print 'prepare comsol directory structure'
+    if (verb > 0): print('prepare comsol directory structure')
 
     # Create comsol time directory structure if necessary
     for dirPath in comsolSubPathList:
         if not os.path.isdir(dirPath):
-            if (verb > 0): print 'create ' + dirPath + ' in ' + time
+            if (verb > 0): print('create ' + dirPath + ' in ' + time)
             os.mkdir(dirPath)
 
 
     # --- prepare surface data ---------------------------------------------- #
 
     # Print info
-    if (verb > 0): print 'prepare surface data'
+    if (verb > 0): print('prepare surface data')
 
     # Check if surface file is present
     if not os.path.exists(comsolSurfaceSourcePath):
         raise IOError('surface file "' + comsolSurfaceSourcePath + '" does not exist')
 
     # Copy raw surface file for comsol
-    if (verb > 0): print 'copy and prepare point data file of free surface'
+    if (verb > 0): print('copy and prepare point data file of free surface')
     shutil.copy(comsolSurfaceSourcePath, comsolSurfaceDatPath)
     if not os.path.exists(comsolSurfaceDatPath):
         raise IOError('comsol surface data file "' + comsolSurfaceDatPath + '" is no file')
@@ -587,7 +587,7 @@ elif (updateMethodInternal == 'comsolLorentzForceSurface'):
 
     # Recompile comsol java setup file to get a class file if necessary
     if comsolRecompile or not os.path.exists(comsolClassPath):
-        if (verb > 0): print 'recompile comsol setup'
+        if (verb > 0): print('recompile comsol setup')
         exe = comsolBin
         arg = 'compile' + ' ' + comsolJavaPathFull
         log = comsolLogPath + '/compile'
@@ -597,7 +597,7 @@ elif (updateMethodInternal == 'comsolLorentzForceSurface'):
     # HINT: Comsol needs to get started in the directory
     #       where the class file is stored: so we have to
     #       change our working directory, temporarily
-    if (verb > 0): print 'start comsol simulation'
+    if (verb > 0): print('start comsol simulation')
     os.chdir(comsolWorkPath)
     if True:
         # Run simulation of the setup
@@ -615,7 +615,7 @@ elif (updateMethodInternal == 'comsolLorentzForceSurface'):
     # --- process results --------------------------------------------------- #
 
     # Copy epxported data file depending on its type raw/int to time subdir
-    if (verb > 0): print 'copy comsol results'
+    if (verb > 0): print('copy comsol results')
     shutil.copy(comsolExportDatPath, comsolResultPath)
 
 
@@ -646,7 +646,7 @@ for f, field in enumerate(fieldList):
     if fieldInterpolate:
 
         # Print info
-        if (verb > 0): print 'interpolate data for field ' + field + ' on cell centers'
+        if (verb > 0): print('interpolate data for field ' + field + ' on cell centers')
 
         # Parse interpolation data dictionary for internal field
         intDataDict = foamDict.readSubDict(foamDict.tryMandatory(fieldDictList[f], "intdata"))
@@ -722,7 +722,7 @@ for f, field in enumerate(fieldList):
             if patchValued:
 
                 # Print info
-                if (verb > 0): print 'interpolate data for field ' + field + ' on face centers of patch ' + patch
+                if (verb > 0): print('interpolate data for field ' + field + ' on face centers of patch ' + patch)
 
                 # Read interpolation source information
                 source = foamDict.readStr(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("source",sub="intdata"))
@@ -790,7 +790,7 @@ for f, field in enumerate(fieldList):
     if methodCreateFromRaw:
 
         # Print info
-        if (verb > 0): print 'create foam object from raw data of field ' + field
+        if (verb > 0): print('create foam object from raw data of field ' + field)
 
         # Assemble field info tuple
         fInfo = (field, fieldClass, fieldDimension)
@@ -837,7 +837,7 @@ for f, field in enumerate(fieldList):
             pInfoList.append(pInfo)
 
         # Delete existing foam field files in time dir
-        if (verb > 0): print 'delete old files for field ' + field
+        if (verb > 0): print('delete old files for field ' + field)
         for path in [foamTimePath + '/' + field, foamTimePath + '/' + field + '.gz']:
             if not os.path.isdir(path):
                 if os.path.exists(path): os.remove(path)

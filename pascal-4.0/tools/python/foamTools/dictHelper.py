@@ -153,7 +153,6 @@ def readDim(v):
     if type(v) == str:
         dim = readStr(v).strip('[]')
         dims = dim.split()
-        print dims
         return Dimension(*dims)
 
     else:

@@ -19,7 +19,7 @@ import math as m
 if len(sys.argv) > 1:
     t=float(sys.argv[1])
 else:
-    print "usage: python GaInSn.py <Temperature/Celcius>"
+    print("usage: python GaInSn.py <Temperature/Celcius>")
     sys.exit(1)
 
 # melt point
@@ -38,16 +38,16 @@ cp=368.01-0.11*t+6.67e-6*t*t
 pr=eta*cp/l
 s=3.33e6-3890.0*(t-tm)-48.5*(t-tm)**2.0
 
-print "T       = %g C" % (t)
-print "rho     = %g Kg/m^3" % (rho)
-print "beta    = %g 1/K" % (beta)
-print "eta     = %g Pa s" % (eta)
-print "nu      = %g m^2/s" % (nu)
-print "sigma   = %g S/m" % (s)
-print "lambda  = %g W/(m K) " % (l)
-print "alpha   = %g m^2/s" % (l/rho/cp)
-print "Pr      = %g" % (pr)
-print "cp      = %g J/kg/K" % (cp)
+print("T       = %g C" % (t))
+print("rho     = %g Kg/m^3" % (rho))
+print("beta    = %g 1/K" % (beta))
+print("eta     = %g Pa s" % (eta))
+print("nu      = %g m^2/s" % (nu))
+print("sigma   = %g S/m" % (s))
+print("lambda  = %g W/(m K) " % (l))
+print("alpha   = %g m^2/s" % (l/rho/cp))
+print("Pr      = %g" % (pr))
+print("cp      = %g J/kg/K" % (cp))
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

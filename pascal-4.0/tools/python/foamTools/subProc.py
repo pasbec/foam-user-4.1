@@ -73,7 +73,8 @@ def run(exe, arg='', log='', vrb=0):
 
     # Check return code and exit if failed
     if not (sp.returncode == 0):
-        print os.path.basename(sys.argv[0]) + ': error: ' + 'subprocess: "' + cmd + '" returned error code ' + str(sp.returncode)
+        print(os.path.basename(sys.argv[0]) + ': error: ' + 'subprocess: "'
+              + cmd + '" returned error code ' + str(sp.returncode))
         sys.exit(1)
 
 # --------------------------------------------------------------------------- #
