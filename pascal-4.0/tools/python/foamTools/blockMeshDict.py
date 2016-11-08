@@ -11,6 +11,10 @@
 
 import os, sys
 
+import warnings
+
+import math as m
+
 from foamTools.ioInfo import fileGetScriptPath, fileGetPath, objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
@@ -144,35 +148,112 @@ class vertices(object):
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, ioRef):
+    def __init__(self, blockMeshDictRef, nmaxverts=100):
 
-        self.io = ioRef
+        self.debug = blockMeshDictRef.debug
+        self.mesh = blockMeshDictRef.mesh
+        self.io = blockMeshDictRef.io
+
+        self.nmaxverts = nmaxverts
+
+    # ----------------------------------------------------------------------- #
+
+    def _meshPoint(self, point, dir=0):
+
+        if len(point) == 3 and self.mesh['dim'] == 3:
+
+            return point
+
+        if len(point) == 2 and self.mesh['dim'] == 2:
+
+            if dir not in [0, 1]: raise ValueError()
+
+            p = [0.0, 0.0, 0.0]
+
+            n = self.mesh['normal']
+
+            t = [0, 1, 2]; t.pop(n)
+
+            # 2D mesh transformation
+            if not self.mesh['wedge']:
+
+                delta = self.mesh['thickness'] / 2.0
+
+                p[n] = -delta if dir == 0 else delta
+
+                if n == 1: p[n] *= -1.0
+
+                for i in [0, 1]: p[t[i]] = point[i]
+
+                return p
+
+            # 2D axial mesh transformation
+            else:
+
+                angle = m.pi/180.0 * self.mesh['angle'] / 2.0
+
+                def rc(r): return r * m.cos(angle)
+                def rs(r): return r * m.sin(angle)
+
+                p[n] = -rs(point[0]) if dir == 0 else rs(point[0])
+
+                if n == 1: p[n] *= -1.0
+
+                p[t[0]] = rc(point[0])
+                p[t[1]] = point[1]
+
+                return p
+
+        else:
+
+            raise ValueError()
 
     # ----------------------------------------------------------------------- #
 
     def set(self, label, point):
 
-        if not (type(label) == int \
-            and type(point) == list \
-            and len(point) == 3):
+        if not type(label) == int and type(point) == list:
 
             raise KeyError()
 
-        # Vertice already exists
-        try:
+        if not len(point) == self.mesh['dim']:
 
-            vertice = self.labels.index(label)
+            raise ValueError("Vertice (label "
+                + str(label) + ") point dimension ("
+                + str(len(point)) + ") mismatch (dim: "
+                + str(self.mesh['dim']) + ").")
 
-            self.points[vertice] = point
+        if label > self.nmaxverts:
 
-        # New vertice
-        except:
+            raise ValueError("Vertice label "
+                + str(label) + ") out of range (max: "
+                + str(self.nmaxverts) + ").")
 
-            vertice = len(self.labels)
-            self.labels.append(label)
-            self.labelIndex[label] = vertice
+        if self.mesh['dim'] == 3:
 
-            self.points.append(point)
+            label = [label]
+
+        else:
+
+            label = [label, self.nmaxverts + 1 + label]
+
+        for i, l in enumerate(label):
+
+            # Vertice already exists
+            try:
+
+                vertice = self.labels.index(l)
+
+                self.points[vertice] = self._meshPoint(point, i)
+
+            # New vertice
+            except:
+
+                vertice = len(self.labels)
+                self.labels.append(l)
+                self.labelIndex[l] = vertice
+
+                self.points.append(self._meshPoint(point, i))
 
     # ----------------------------------------------------------------------- #
 
@@ -185,7 +266,7 @@ class vertices(object):
             raise KeyError()
 
         if type(verticeLabels) == int:
-            verticeLabels = [ verticeLabels ]
+            verticeLabels = [verticeLabels]
 
         if not type(verticeLabels) == list: raise KeyError()
 
@@ -194,7 +275,7 @@ class vertices(object):
             originPoint = self.points[self.labelIndex[verticeLabel]]
 
             translatedPoint = \
-                [ originPoint[i] + direction[i] for i in range(3)]
+                [originPoint[i] + direction[i] for i in range(3)]
 
             if len(verticeLabels) == 1:
                 label = par1
@@ -329,7 +410,7 @@ class blocks(object):
 
             self.blocks = blocksRef
 
-            self.debug = False
+            self.debug = blocksRef.debug
 
         # ------------------------------------------------------------------- #
 
@@ -355,12 +436,6 @@ class blocks(object):
 
         # ------------------------------------------------------------------- #
 
-        def verbose(self):
-
-            self.debug = True;
-
-        # ------------------------------------------------------------------- #
-
         def sync(self, block, blockSyncData, blockSync, base):
 
             if self.debug:
@@ -374,12 +449,12 @@ class blocks(object):
 
             if self.debug:
 
-                print debugMsg, "block =", block
-                print debugMsg, "blockSyncData =", blockSyncData
-                print debugMsg, "base =", base
-                print debugMsg, "baseFaces =", baseFaces
-                print debugMsg, "crossBaseFaces =", crossBaseFaces
-                print
+                print(debugMsg, "block =", block)
+                print(debugMsg, "blockSyncData =", blockSyncData)
+                print(debugMsg, "base =", base)
+                print(debugMsg, "baseFaces =", baseFaces)
+                print(debugMsg, "crossBaseFaces =", crossBaseFaces)
+                print()
 
 
             # Write data for distribution and simpleGrading data
@@ -413,19 +488,18 @@ class blocks(object):
 
                 if self.debug:
 
-                    print debugMsg, "face =", face
-                    print debugMsg, "faceVertices =", faceVertices
-                    print debugMsg, "faceVerticesBaseBase =", \
-                        faceVerticesBaseBase
-                    print debugMsg, "faceVerticesBaseSign =", \
-                        faceVerticesBaseSign
-                    print debugMsg, "faceVerticeLabels =", \
-                        faceVerticeLabels
-                    print debugMsg, "nextBlock =", nextBlock
+                    print(debugMsg, "face =", face)
+                    print(debugMsg, "faceVertices =", faceVertices)
+                    print(debugMsg, "faceVerticesBaseBase =",
+                          faceVerticesBaseBase)
+                    print(debugMsg, "faceVerticesBaseSign =",
+                          faceVerticesBaseSign)
+                    print(debugMsg, "faceVerticeLabels =", faceVerticeLabels)
+                    print(debugMsg, "nextBlock =", nextBlock)
                     if not nextBlock == None:
-                        print debugMsg, "getProcessedBlock(nextBlock) =", \
-                            self._getProcessedBlock(nextBlock)
-                    print
+                        print(debugMsg, "getProcessedBlock(nextBlock) =",
+                              self._getProcessedBlock(nextBlock))
+                    print()
 
                 if nextBlock == None or \
                     self._getProcessedBlock(nextBlock) == True:
@@ -484,24 +558,23 @@ class blocks(object):
 
                 if self.debug:
 
-                    print debugMsg, "nextFace =", nextFace
-                    print debugMsg, "nextFaceVertices =", \
-                        nextFaceVertices
-                    print debugMsg, "nextFaceVerticesTransformed =", \
-                        nextFaceVerticesShifted
-                    print debugMsg, "nextFaceVerticeLabels =", \
-                        nextFaceVerticeLabels
-                    print debugMsg, "nextFaceVerticesBaseBase =", \
-                        nextFaceVerticesBaseBase
-                    print debugMsg, "nextFaceVerticesBaseSign =", \
-                        nextFaceVerticesBaseSign
-                    print debugMsg, "nextBaseOrientation =", \
-                        nextBaseOrientation
-                    print debugMsg, "nextbaseOrientationReverse =", \
-                        nextbaseOrientationReverse
-                    print debugMsg, "nextBlockSync =", nextBlockSync
-                    print debugMsg, "nextBase =", nextBase
-                    print
+                    print(debugMsg, "nextFace =", nextFace)
+                    print(debugMsg, "nextFaceVertices =", nextFaceVertices)
+                    print(debugMsg, "nextFaceVerticesTransformed =",
+                        nextFaceVerticesShifted)
+                    print(debugMsg, "nextFaceVerticeLabels =",
+                        nextFaceVerticeLabels)
+                    print(debugMsg, "nextFaceVerticesBaseBase =",
+                        nextFaceVerticesBaseBase)
+                    print(debugMsg, "nextFaceVerticesBaseSign =",
+                        nextFaceVerticesBaseSign)
+                    print(debugMsg, "nextBaseOrientation =",
+                        nextBaseOrientation)
+                    print(debugMsg, "nextbaseOrientationReverse =",
+                        nextbaseOrientationReverse)
+                    print(debugMsg, "nextBlockSync =", nextBlockSync)
+                    print(debugMsg, "nextBase =", nextBase)
+                    print()
 
                 # Recursion
                 self.sync(nextBlock, blockSyncData, nextBlockSync, nextBase)
@@ -695,16 +768,16 @@ class blocks(object):
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, ioRef, verticesRef):
+    def __init__(self, blockMeshDictRef):
 
-        self.io = ioRef
-        self.vertices = verticesRef
+        self.debug = blockMeshDictRef.debug
+        self.mesh = blockMeshDictRef.mesh
+        self.io = blockMeshDictRef.io
+        self.vertices = blockMeshDictRef.vertices
 
         self.topo = self.cTopo(self)
         self.distribution = self.cDistribution(self)
         self.grading = self.cGrading(self)
-
-        self.debug = False
 
     # ----------------------------------------------------------------------- #
 
@@ -762,9 +835,9 @@ class blocks(object):
         if self.debug:
 
             debugMsg = "[blocks::_getNeighbours]"
-            print debugMsg, "block =", block
-            print debugMsg, "otherBlock =", otherBlock
-            print
+            print(debugMsg, "block =", block)
+            print(debugMsg, "otherBlock =", otherBlock)
+            print()
 
         if not (type(block) == int \
             and type(otherBlock) == int):
@@ -781,7 +854,7 @@ class blocks(object):
 
         if self.debug:
 
-            print debugMsg, "neighbourVertices =", neighbourVertices
+            print(debugMsg, "neighbourVertices =", neighbourVertices)
 
         # Face neighbours
         if len(neighbourVertices) == 4:
@@ -879,8 +952,8 @@ class blocks(object):
 
             debugMsg = "[blocks::_setNeighbourData]"
 
-            print debugMsg, "block =", block
-            print
+            print(debugMsg, "block =", block)
+            print()
 
         for otherBlock, otherBlockLabel in enumerate(self.labels):
 
@@ -891,13 +964,13 @@ class blocks(object):
 
                 if self.debug:
 
-                    print debugMsg, "otherBlock =", otherBlock
-                    print
+                    print(debugMsg, "otherBlock =", otherBlock)
+                    print()
 
-                    print debugMsg, "neighbours =", neighbours
-                    print debugMsg, "neighbourType =", neighbourType
-                    print debugMsg, "neighbourVertices =", neighbourVertices
-                    print
+                    print(debugMsg, "neighbours =", neighbours)
+                    print(debugMsg, "neighbourType =", neighbourType)
+                    print(debugMsg, "neighbourVertices =", neighbourVertices)
+                    print()
 
                 if neighbourType == "face" \
                     or neighbourType == "axis":
@@ -928,12 +1001,6 @@ class blocks(object):
                         otherBlock,
                         neighbourVertices
                     )
-
-    # ----------------------------------------------------------------------- #
-
-    def verbose(self):
-
-        self.debug = True;
 
     # ----------------------------------------------------------------------- #
 
@@ -994,6 +1061,8 @@ class blocks(object):
 
         self._setNeighbourData(block)
 
+    # ----------------------------------------------------------------------- #
+
     def copyShiftVerticeLabels(self, shift, blockLabels, verticeLebelShift):
 
         if not (type(shift) == int \
@@ -1016,13 +1085,11 @@ class blocks(object):
             shiftedVerticeLables = \
                 [ originVerticeLables[l] + verticeLebelShift for l in range(8)]
 
+# TODO: How to COPY those values? The below are references...
             originDistribution = self.distributions[blockLabel]
-
             originGrading = self.gradings[blockLabel]
-
             originZone = self.zones[blockLabel]
-
-            # TODO: How to COPY those values? The above are references...
+# TODO: How to COPY those values? The above are references...
 
             self.set(label, shiftedVerticeLables)
 
@@ -1085,7 +1152,7 @@ class blocks(object):
 
     def printData(self, blockLabels=None):
 
-        # Only print data for given block
+        # Only print(data for given block
         if blockLabels:
 
             if type(blockLabels) == int: blockLabels = [ blockLabels ]
@@ -1103,17 +1170,17 @@ class blocks(object):
 
         for block in printBlocks:
 
-            print "index:", block
-            print "label:", self.labels[block]
-            print "vertices: ", self.blockVertices[block]
-            print "verticeLabels: ", self.blockVerticeLabels[block]
-            print "distributions: ", self.distributions[block]
-            print "gradings: ", self.gradings[block]
-            print "zone: ", self.zones[block]
-            print "neighbours: ", self.neighbours[block]
-            print "faceNeighbours: ", self.faceNeighbours[block]
-            print "edgeNeighbours: ", self.edgeNeighbours[block]
-            print
+            print("index:", block)
+            print("label:", self.labels[block])
+            print("vertices: ", self.blockVertices[block])
+            print("verticeLabels: ", self.blockVerticeLabels[block])
+            print("distributions: ", self.distributions[block])
+            print("gradings: ", self.gradings[block])
+            print("zone: ", self.zones[block])
+            print("neighbours: ", self.neighbours[block])
+            print("faceNeighbours: ", self.faceNeighbours[block])
+            print("edgeNeighbours: ", self.edgeNeighbours[block])
+            print()
 
 
 
@@ -1132,11 +1199,13 @@ class boundaryFaces(object):
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, ioRef, verticesRef, blocksRef):
+    def __init__(self, blockMeshDictRef):
 
-        self.io = ioRef
-        self.vertices = verticesRef
-        self.blocks = blocksRef
+        self.debug = blockMeshDictRef.debug
+        self.mesh = blockMeshDictRef.mesh
+        self.io = blockMeshDictRef.io
+        self.vertices = blockMeshDictRef.vertices
+        self.blocks = blockMeshDictRef.blocks
 
     # ----------------------------------------------------------------------- #
 
@@ -1248,11 +1317,11 @@ class boundaryFaces(object):
 
         for boundaryFace in printBoundaryFaces:
 
-            print "index:", boundaryFace
-            print "label:", self.labels[boundaryFace]
-            print "boundary: ", self.boundary[boundaryFace]
-            print "faces: ", self.faces[boundaryFace]
-            print
+            print("index:", boundaryFace)
+            print("label:", self.labels[boundaryFace])
+            print("boundary: ", self.boundary[boundaryFace])
+            print("faces: ", self.faces[boundaryFace])
+            print()
 
 
 
@@ -1351,13 +1420,42 @@ class blockMeshDict(object):
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, fileName=None):
+    def __init__(self, fileName=None, nmaxverts=100, mesh=None, debug=False):
 
+        self.debug = debug
+
+        if not mesh: mesh = dict()
+        if not 'dim' in mesh: mesh['dim'] = 3
+        if not 'wedge' in mesh: mesh['wedge'] = False
+        if not 'normal' in mesh: mesh['normal'] = -1
+        if not 'angle' in mesh: mesh['angle'] = 5.0
+        if not 'thickness' in mesh: mesh['thickness'] = 1.0
+
+        if not mesh['dim'] in [2, 3]:
+
+            raise ValueError("Mesh dimensions must be one of [2, 3].")
+
+        if not mesh['normal'] in [-1, 0, 1, 2]:
+
+            raise ValueError("Mesh normal must be one of [-1, 0, 1, 2].")
+
+        if mesh['angle'] < 2.0 or mesh['angle'] > 8.0:
+
+            warnings.warn("Wedge mesh angle should preferably be 5°")
+
+            if mesh['angle'] <= 0.0:
+
+                raise ValueError("Wedge mesh angle may not be zero or negative.")
+
+        if mesh['thickness'] <= 0.0:
+
+            raise ValueError("Mesh thickness may not be zero or negative.")
+
+        self.mesh = mesh
         self.io = self.cIo(self, fileName)
-        self.vertices = vertices(self.io)
-        self.blocks = blocks(self.io, self.vertices)
-        self.boundaryFaces = \
-            boundaryFaces(self.io, self.vertices, self.blocks)
+        self.vertices = vertices(self, nmaxverts)
+        self.blocks = blocks(self)
+        self.boundaryFaces = boundaryFaces(self)
 
     # ----------------------------------------------------------------------- #
 
