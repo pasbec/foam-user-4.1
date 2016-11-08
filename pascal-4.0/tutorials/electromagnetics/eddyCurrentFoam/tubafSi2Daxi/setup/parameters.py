@@ -57,7 +57,7 @@ mesh_Phi   = 5.0                                          # Wedge angle
 mesh_phi   = m.pi/180.0 * mesh_Phi                        # Wedge angle (rad)
 
 mesh_R         = dict()
-mesh_R['axis'] = 0.01                                     # Axis patch radius
+mesh_R['axis'] = 1.0                                      # Axis patch radius
 mesh_R['inf']  = 4.0 * mesh_space * geo_R[2]              # Infinity patch radius
 
 # TODO

@@ -148,13 +148,13 @@ class vertices(object):
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, blockMeshDictRef, nmaxverts=100):
+    def __init__(self, blockMeshDictRef, nmax=1000):
 
         self.debug = blockMeshDictRef.debug
         self.mesh = blockMeshDictRef.mesh
         self.io = blockMeshDictRef.io
 
-        self.nmaxverts = nmaxverts
+        self.nmax = nmax
 
     # ----------------------------------------------------------------------- #
 
@@ -216,18 +216,18 @@ class vertices(object):
 
             raise KeyError()
 
-        if not len(point) == self.mesh['dim']:
-
-            raise ValueError("Vertice (label "
-                + str(label) + ") point dimension ("
-                + str(len(point)) + ") mismatch (dim: "
-                + str(self.mesh['dim']) + ").")
-
-        if label > self.nmaxverts:
+        if label > self.nmax:
 
             raise ValueError("Vertice label "
                 + str(label) + ") out of range (max: "
-                + str(self.nmaxverts) + ").")
+                + str(self.nmax) + ").")
+
+        if not len(point) == self.mesh['dim']:
+
+            raise ValueError("Vertice (label "
+                + str(label) + "), point dimension ("
+                + str(len(point)) + ") mismatch (dim: "
+                + str(self.mesh['dim']) + ").")
 
         if self.mesh['dim'] == 3:
 
@@ -235,7 +235,7 @@ class vertices(object):
 
         else:
 
-            label = [label, self.nmaxverts + 1 + label]
+            label = [label, self.nmax + 1 + label]
 
         for i, l in enumerate(label):
 
@@ -768,12 +768,14 @@ class blocks(object):
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, blockMeshDictRef):
+    def __init__(self, blockMeshDictRef, nmax=1000):
 
         self.debug = blockMeshDictRef.debug
         self.mesh = blockMeshDictRef.mesh
         self.io = blockMeshDictRef.io
         self.vertices = blockMeshDictRef.vertices
+
+        self.nmax = nmax
 
         self.topo = self.cTopo(self)
         self.distribution = self.cDistribution(self)
@@ -1011,21 +1013,76 @@ class blocks(object):
 
         if not (type(label) == int \
             and type(verticeLabels) == list \
-            and len(verticeLabels) == 8
-            and (distribution == None or \
-                (type(distribution) == list and len(distribution) == 3)) \
-            and (grading == None or \
-                (type(grading) == list \
+            and (distribution == None or type(distribution) == list) \
+            and (grading == None or (type(grading) == list \
                 and (len(grading) == 3 or len(grading) == 12))) \
             and (zone == None or type(zone) == str)):
 
             raise KeyError()
 
-        blockVertices = [ self.vertices.labelIndex[l] for l in verticeLabels ]
+        if label > self.nmax:
 
-        if not distribution: distribution = [1,1,1]
+            raise ValueError("Block label "
+                + str(label) + ") out of range (max: "
+                + str(self.nmax) + ").")
 
-        if not grading: grading = [1.0,1.0,1.0]
+        if not len(verticeLabels) == 2**self.mesh['dim']:
+
+            raise ValueError("Block (label "
+                + str(label) + "), vertice label dimension ("
+                + str(len(verticeLabels)) + ") mismatch (2^dim: "
+                + str(2**self.mesh['dim']) + ").")
+
+        # Add 2D vertices
+        if self.mesh['dim'] == 2:
+
+            verticeLabels += [self.vertices.nmax + 1 + l for l in verticeLabels]
+
+        blockVertices = [self.vertices.labelIndex[l] for l in verticeLabels]
+
+        if distribution:
+
+## TODO
+            #if not len(distribution) == self.mesh['dim']:
+
+                #raise ValueError()
+
+            pass
+
+        else:
+
+            distribution = [1,1,1]
+
+        if grading:
+
+## TODO
+            #if not len(grading) == self.mesh['dim']:
+
+                #if self.mesh['dim'] == 2:
+
+                    #if len(grading) == self.mesh['dim']:
+
+                        #grading += [1.0]
+
+                    #elif len(grading) == 4:
+
+                        #pass
+
+                    #else:
+
+                    #raise ValueError()
+
+                #else:
+
+                #elif not len(grading) == 12:
+
+                    #raise ValueError()
+
+            pass
+
+        else:
+
+            grading = [1.0,1.0,1.0]
 
         # ------------------------------------------------------------------- #
 
@@ -1069,6 +1126,12 @@ class blocks(object):
             and type(verticeLebelShift) == int):
 
             raise KeyError()
+
+        if verticeLebelShift < 2*self.nmax:
+
+            raise ValueError("Vertice label shift "
+                + str(verticeLebelShift) + ") is too small (min: "
+                + str(2*self.nmax) + ").")
 
         if type(blockLabels) == int:
             blockLabels = [ blockLabels ]
@@ -1420,7 +1483,9 @@ class blockMeshDict(object):
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, fileName=None, nmaxverts=100, mesh=None, debug=False):
+    def __init__(self, fileName=None,
+                 nmaxverts=1000, nmaxblocks=1000,
+                 mesh=None, debug=False):
 
         self.debug = debug
 
@@ -1454,7 +1519,7 @@ class blockMeshDict(object):
         self.mesh = mesh
         self.io = self.cIo(self, fileName)
         self.vertices = vertices(self, nmaxverts)
-        self.blocks = blocks(self)
+        self.blocks = blocks(self, nmaxblocks)
         self.boundaryFaces = boundaryFaces(self)
 
     # ----------------------------------------------------------------------- #
