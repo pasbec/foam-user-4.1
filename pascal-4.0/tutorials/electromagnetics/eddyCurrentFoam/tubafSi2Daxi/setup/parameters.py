@@ -17,40 +17,47 @@ csn = os.path.splitext(csb)[0]
 sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 
 import math as m
+import numpy as np
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-geo_scale  = 1e-3
+geo_scale = 1e-3
 
-geo_R0 =  53.0
-geo_R1 =  62.0
-geo_R2 =  70.0
+geo_R     = dict()
+geo_R[0]  =  53.0
+geo_R[1]  =  62.0
+geo_R[2]  =  70.0
 
-geo_Z0 = -34.0
-geo_Z1 =  -8.0
-geo_Z2 =   0.0
-geo_Z3 =  22.0
-geo_Z4 =  27.095
-geo_Z5 =  30.0
-geo_Z6 =  70.0
-geo_Z7 = 142.0
+geo_Z     = dict()
+geo_Z[0]  = -34.0
+geo_Z[1]  =  -8.0
+geo_Z[2]  =   0.0
+geo_Z[3]  =  22.0
+geo_Z[4]  =  27.095
+geo_Z[5]  =  30.0
+geo_Z[6]  =  70.0
+geo_Z[7]  = 142.0
 
-geo_alpha = m.atan(geo_Z5/geo_R0)      # Cone angle
+geo_alpha = m.atan(geo_Z[5]/geo_R[0])                # Cone angle (rad)
 
-geo_Zs = geo_Z3                        # Solid height
-geo_Rs = geo_Z3/m.tan(geo_alpha)       # Solid wall contact radius
-geo_Ss = m.sqrt(geo_Zs**2 + geo_Rs**2) # Solid wall length
+geo_magG  = (geo_Z[2] - geo_Z[1]) * m.cos(geo_alpha) # Non-conducting gap size
+geo_G     = geo_magG * np.array([m.sin(geo_alpha), -m.cos(geo_alpha)])
+
+geo_Z['solid'] =  geo_Z[3]                           # Solid height
+geo_R['solid'] =  geo_Z[3] / m.tan(geo_alpha)        # Solid wall contact radius
 
 # --------------------------------------------------------------------------- #
 
 mesh_scale = 1.0
 mesh_space = 1.0
 
-mesh_Ra    = 0.01 # Axis patch radius
+mesh_Phi   = 5.0                   # Wedge angle
+mesh_phi   = m.pi/180.0 * mesh_Phi # Wedge angle (rad)
 
-mesh_phi   = 5.0  # Wedge angle
+mesh_R         = dict()
+mesh_R['axis'] = 0.01              # Axis patch radius
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #
