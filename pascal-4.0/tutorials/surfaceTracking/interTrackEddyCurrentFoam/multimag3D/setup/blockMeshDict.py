@@ -39,14 +39,14 @@ lz1 = par.geo_z2-par.geo_z1
 lz2 = par.geo_z3-par.geo_z2
 lz3 = par.geo_z4-par.geo_z3
 
-nr0 = int(par.mesh_scale*m.ceil(lr0*4))
-nr1 = int(par.mesh_scale*m.ceil(lr1*5))
-#nr2 = int(par.mesh_scale*m.ceil(lr2*2))
+nr0 = int(m.ceil(par.mesh_scale*lr0*4))
+nr1 = int(m.ceil(par.mesh_scale*lr1*5))
+#nr2 = int(m.ceil(par.mesh_scale*lr2*2))
 
-#nz0 = int(par.mesh_scale*m.ceil(lz0*2))
-nz1 = int(par.mesh_scale*m.ceil(lz1*5))
-nz2 = int(par.mesh_scale*m.ceil(lz2*5))
-#nz3 = int(par.mesh_scale*m.ceil(lz3*2))
+#nz0 = int(m.ceil(par.mesh_scale*lz0*2))
+nz1 = int(m.ceil(par.mesh_scale*lz1*5))
+nz2 = int(m.ceil(par.mesh_scale*lz2*5))
+#nz3 = int(m.ceil(par.mesh_scale*lz3*2))
 
 e1 = 0.5
 e2ds = expansion_de_e(nr1, e1, lr1)
