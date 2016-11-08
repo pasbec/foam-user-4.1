@@ -96,9 +96,10 @@ bset(  2, n, [  3,  2,  5,  6], zone="solid")
 bset(  3, n, [  4,  7,  8,  9], zone="fluid")
 bset(  4, n, [  5,  4,  9, 10], zone="fluid")
 bset(  5, n, [  6,  5, 10, 11], zone="fluid")
-bset(  6, n, [ 12, 13,  1,  0], zone="container")
-bset(  7, n, [ 13, 14,  4,  1], zone="container")
-bset(  8, n, [ 14, 15,  7,  4], zone="container")
+bset(  6, n, [ 12, 13,  1,  0], zone="vessel")
+bset(  7, n, [ 13, 14,  4,  1], zone="vessel")
+bset(  8, n, [ 14, 15,  7,  4], zone="vessel")
+bset(  9, n, [  7, 15, 16,  8], zone="vessel")
 
 # --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
