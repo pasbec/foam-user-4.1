@@ -43,14 +43,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("overwrite", "");
     argList::validOptions.insert("angle", "scalar [deg]");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    bool overwrite = args.optionFound("overwrite");
     word pointsInstance = mesh.pointsInstance();
 
     scalar angle = 5.0;
@@ -123,87 +121,16 @@ int main(int argc, char *argv[])
 
         if (mesh2D)
         {
-            if (!overwrite)
-            {
-                runTime++;
+            Info << "Write new mesh" << endl;
 
-                mesh.setInstance(mesh.time().timeName());
-            }
+            // Write mesh (points)
+            mesh.movePoints(newPoints);
+            mesh.setInstance(pointsInstance);
+            mesh.write();
 
             // This is a cruel hack in order to avoid juggling with
             // the boundaryMesh or the boundary dictionary itself
             mesh.boundaryMesh().write();
-
-
-            Info << "Write new mesh" << endl;
-
-            // Write mesh (points)
-            mesh.write();
-
-//             polyMesh wedgeMesh
-//             (
-//                 IOobject
-//                 (
-//                     mesh.name(),
-//                     mesh.pointsInstance(),
-//                     runTime,
-//                     IOobject::NO_READ,
-//                     IOobject::NO_WRITE
-//                 ),
-//                 xferCopy(mesh.allPoints()),
-//                 xferCopy(mesh.allFaces()),
-//                 xferCopy(mesh.faceOwner()),
-//                 xferCopy(mesh.faceNeighbour()),
-//                 false
-//             );
-//
-//             Info << "Create new patches" << endl;
-//
-//             // Create new patches
-//             List<polyPatch*> newPatches(boundaryMesh.size(), NULL);
-//
-//             forAll (boundaryMesh, patchI)
-//             {
-//                 const polyPatch& patch = boundaryMesh[patchI];
-//
-//                 word curPatchType = patch.type();
-//
-//                 // Replace empty patches with wedge
-//                 if (curPatchType == emptyPolyPatch::typeName)
-//                 {
-//                     curPatchType = wedgePolyPatch::typeName;
-//                 }
-//
-//     Info << "patch.name() = " << patch.name() << endl;
-//     Info << "patch.type() = " << patch.type() << endl;
-//     Info << "patch.start() = " << patch.start() << endl;
-//     Info << "patch.size() = " << patch.size() << endl;
-//     Info << "curPatchType = " << curPatchType << endl;
-//
-//                 newPatches[patchI] = polyPatch::New
-//                 (
-//                     curPatchType,
-//                     patch.name(),
-//                     patch.size(),
-//                     patch.start(),
-//                     patchI,
-//                     wedgeMesh.boundaryMesh()
-//                 ).ptr();
-//             }
-//
-//             // Add new patches
-//             wedgeMesh.addPatches(newPatches);
-//
-//             if (!overwrite)
-//             {
-//                 runTime++;
-//
-//                 wedgeMesh.setInstance(mesh.time().timeName());
-//             }
-//
-//             Info << "Write new mesh" << endl;
-//
-//             wedgeMesh.write();
         }
         else
         {
