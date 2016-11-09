@@ -49,21 +49,26 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
+    // Store initial instance of mesh
     word pointsInstance = mesh.pointsInstance();
 
+    // Read optional angle
     scalar angle = 5.0;
     args.optionReadIfPresent("angle", angle);
 
     scalar phi = mathematicalConstant::pi/180.0 * angle/2.0;
 
+    // Analyse mesh geometry and extract
     label nGeometricD = mesh.nGeometricD();
     Vector<label> geometricD = mesh.geometricD();
 
     labelHashSet nSet;
     labelHashSet tSet;
 
+    // Only proceed if this mesh is 2D
     if (nGeometricD == 2)
     {
+        // Extract normal and tangential directions
         for (direction cmpt = 0; cmpt < Vector<label>::nComponents; cmpt++)
         {
             if (geometricD[cmpt] < 0)
@@ -80,14 +85,28 @@ int main(int argc, char *argv[])
         labelList t = tSet.sortedToc();
 
         // Create the new points
-        pointField newPoints = mesh.allPoints();
+        pointIOField newPoints
+        (
+            IOobject
+            (
+                "points",
+                pointsInstance,
+                mesh.meshSubDir,
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh.allPoints()
+        );
 
         Info << "Transform points" << endl;
 
-        const polyBoundaryMesh& boundaryMesh = mesh.boundaryMesh();
-
         bool mesh2D = false;
 
+        const polyBoundaryMesh& boundaryMesh = mesh.boundaryMesh();
+
+        // Search for empty patches
         forAll (boundaryMesh, patchI)
         {
             const polyPatch& patch = boundaryMesh[patchI];
@@ -96,6 +115,7 @@ int main(int argc, char *argv[])
             {
                 const labelList& meshPoints = patch.meshPoints();
 
+                // Transform mesh points
                 forAll (meshPoints, patchPointI)
                 {
                     label pointI = meshPoints[patchPointI];
@@ -112,10 +132,6 @@ int main(int argc, char *argv[])
                 }
 
                 mesh2D = true;
-
-                // This is a cruel hack in order to avoid juggling with
-                // the boundaryMesh or the boundary dictionary itself
-                const_cast<word&>(patch.type()) = "wedge";
             }
         }
 
@@ -123,18 +139,36 @@ int main(int argc, char *argv[])
         {
             Info << "Write new mesh" << endl;
 
-            // Write mesh (points)
-            mesh.movePoints(newPoints);
-            mesh.setInstance(pointsInstance);
-            mesh.write();
+            // Write new points
+            newPoints.write();
 
-            // This is a cruel hack in order to avoid juggling with
-            // the boundaryMesh or the boundary dictionary itself
-            mesh.boundaryMesh().write();
+            // Update mesh according to new points
+            mesh.readUpdate();
+
+            // Turn empty patches into wedge ones. This is currently
+            // a cruel hack in order to avoid juggling with the all
+            // details of boundaryMesh and/or the boundary dictionary itself
+            forAll (boundaryMesh, patchI)
+            {
+                const polyPatch& patch = boundaryMesh[patchI];
+
+                if (isA<emptyPolyPatch>(patch))
+                {
+                    const_cast<word&>(patch.type()) = "wedge";
+                }
+            }
+
+            // WARNING: Now the mash became actually invalid, as we have just
+            // brutaly RENAMED the empty patches instead of replacing them
+            // with real wedgePatches. Due to our laziness, any further usage
+            // (after writing the new boundaryMesh) is stronlgy discouraged!
+
+            // Write new patch types
+            boundaryMesh.write();
         }
         else
         {
-            Info << "Mesh is 2D, but does not have empty patches!" << endl;
+            Info << "Mesh is 2D without empty patches! Already wedge?" << endl;
         }
     }
     else
