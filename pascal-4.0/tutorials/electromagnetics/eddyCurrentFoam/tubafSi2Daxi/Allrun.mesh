@@ -7,7 +7,7 @@ rm -rf 'constant/polyMesh'
 # Create blockMeshDict
 ./setup/blockMeshDict.py || exit 1
 
-# Run blockMesh
+# Run blockMesh to get 2D mesh
 blockMesh || exit 1
 
 # Run snappyHexMesh to do refinement
@@ -25,6 +25,15 @@ rm -rf 'constant/cellLevel' \
 
 # Remove empty patches
 createPatch -overwrite || exit 1
+
+# Create a 2D mesh again
+extrudeMesh || exit 1
+
+cp 'system/changeDictionaryDict.extrudeMesh' 'system/changeDictionaryDict'
+changeDictionary || exit 1
+
+# Convert 2D mesh into wedge
+makeWedgeMesh || exit 1
 
 # Move new polyMesh files to storage folder
 mesh0Folder='0/polyMesh'

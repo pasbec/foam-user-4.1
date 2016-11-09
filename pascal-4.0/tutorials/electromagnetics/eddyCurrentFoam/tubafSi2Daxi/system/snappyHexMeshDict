@@ -14,7 +14,12 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-geo_rc      1e-3;
+inside      (1e-2 0.0 0.0);
+
+finer       4;
+fine        3;
+coarse      2;
+coarser     1;
 
 // ************************************************************************* //
 
@@ -59,6 +64,20 @@ geometry
         type    triSurfaceMesh;
         name    region_heater;
     }
+
+    space_refine_coarse
+    {
+        type    searchableBox;
+        min     ( 0.00000 -1.00000 -0.09000);
+        max     ( 0.11000  1.00000  0.19800);
+    }
+
+    space_refine_coarser
+    {
+        type    searchableBox;
+        min     ( 0.00000 -1.00000 -0.13000);
+        max     ( 0.15000  1.00000  0.23800);
+    }
 };
 
 castellatedMeshControls
@@ -91,29 +110,41 @@ castellatedMeshControls
         region_fluid
         {
             mode inside;
-            levels ((1e-15 4));
+            levels ((1e-15 $finer));
         }
 
         region_solid
         {
             mode inside;
-            levels ((1e-15 3));
+            levels ((1e-15 $fine));
         }
 
         region_vessel
         {
             mode inside;
-            levels ((1e-15 2));
+            levels ((1e-15 $fine));
         }
 
         region_heater
         {
             mode inside;
-            levels ((1e-15 3));
+            levels ((1e-15 $fine));
+        }
+
+        space_refine_coarse
+        {
+            mode inside;
+            levels ((1e-15 $coarse));
+        }
+
+        space_refine_coarser
+        {
+            mode inside;
+            levels ((1e-15 $coarser));
         }
     }
 
-    locationInMesh ($geo_rc 0.0 0.0);
+    locationInMesh $inside;
     allowFreeStandingZoneFaces no;
 }
 
