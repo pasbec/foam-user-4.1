@@ -113,6 +113,14 @@ for k in V.keys():
     r[k].Angle = 360.00
     r[k].Solid = True
 
+r['conductor'] = d.addObject("Part::MultiFuse","RegionConductor")
+r['conductor'].Label = 'region_conductor'
+r['conductor'].Shapes = [r['solid'], r['fluid'], r['heater']]
+
+r['space'] = d.addObject("Part::MultiFuse","RegionSpace")
+r['space'].Label = 'region_space'
+r['space'].Shapes = [r['vessel'], r['free']]
+
 # --------------------------------------------------------------------------- #
 
 d.recompute()
@@ -131,7 +139,7 @@ d.recompute()
 # --- Export ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-exportObj = []
+exportObj = r.values()
 
 for e in exportObj:
 
