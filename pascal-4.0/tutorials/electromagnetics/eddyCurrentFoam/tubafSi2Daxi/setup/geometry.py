@@ -168,6 +168,7 @@ exportObj = r.values() + r2D.values()
 for e in exportObj:
 
     mesh = Mesh.Mesh(e.Shape.tessellate(0.1))
+    #mesh = MeshPart.meshFromShape(Shape=e.Shape, MaxLength=10)
 
     mesh.transform(scale)
 
