@@ -52,29 +52,18 @@ d = App.activeDocument()
 # --- Sketches -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def V0z(i): return Vector(0.0, blockMeshDict.v[i][1], 0.0)
-def Vz0(i): return Vector(blockMeshDict.v[i][0], 0.0, 0.0)
-def Vrz(i): return Vector(blockMeshDict.v[i][0], blockMeshDict.v[i][1], 0.0)
+v = dict()
 
-V = dict()
-
-V['solid'] = [V0z(0), V0z(3), V0z(6), Vrz(5), Vrz(4), Vrz(1), V0z(0)]
-V['fluid'] = [V0z(6), V0z(11), Vrz(10), Vrz(9), Vrz(8), Vrz(7), Vrz(4),
-              Vrz(5), V0z(6)]
-V['vessel'] = [V0z(12), V0z(0), Vrz(1), Vrz(4), Vrz(7), Vrz(8), Vrz(16),
-               Vrz(15), Vrz(14), Vrz(13), V0z(12)]
-V['heater'] = [V0z(17), V0z(12), Vrz(13), Vrz(14), Vrz(15), Vrz(16), Vrz(25),
-               Vrz(24), Vrz(23), Vrz(22), Vrz(21), Vrz(20), Vrz(19), Vrz(18),
-               V0z(17)]
-V['free'] = [V0z(11), V0z(29), V0z(46), Vrz(45), Vrz(44), Vrz(43), Vrz(42),
-             Vrz(41), Vrz(40), Vrz(39), Vrz(38), Vrz(37), Vrz(36), Vrz(35),
-             Vrz(34), Vrz(33), Vrz(32), Vrz(31), V0z(30), V0z(17), Vrz(18),
-             Vrz(19), Vrz(20), Vrz(21), Vrz(22), Vrz(23), Vrz(24), Vrz(25),
-             Vrz(16), Vrz(8), Vrz(9), Vrz(10), V0z(11)]
+v['solid']  = [0, 3, 6, 5, 4, 1, 0]
+v['fluid']  = [6, 11, 10, 9, 8, 7, 4, 5, 6]
+v['vessel'] = [12, 0, 1, 4, 7, 8, 16, 15, 14, 13, 12]
+v['heater'] = [17, 12, 13, 14, 15, 16, 25, 24, 23, 22, 21, 20, 19, 18, 17]
+v['free']   = [11, 29, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33,
+               32, 31, 30, 17, 18, 19, 20, 21, 22, 23, 24, 25, 16, 8, 9, 10, 11]
 
 s = dict()
 
-for k in V.keys():
+for k in v.keys():
 
     name = 'Sketch' + k.capitalize()
     label = 'sketch_' + k
@@ -84,15 +73,17 @@ for k in V.keys():
     s[k].Placement = Placement(Vector(0.0, 0.0, 0.0),
                                Rotation(Vector(1.0, 0.0, 0.0), 90))
 
-    def addPolyLine(sketch, vectors):
+    def addPolyLine(s, v, bmdv2D):
 
-        l = len(vectors) - 1
+        l = len(v) - 1
+
+        def V(i): return Vector(bmdv2D[i][0], bmdv2D[i][1], 0.0)
 
         for i in range(l):
 
-            sketch.addGeometry(Line(vectors[i], vectors[i+1]))
+            s.addGeometry(Line(V(v[i]), V(v[i+1])))
 
-    addPolyLine(s[k], V[k])
+    addPolyLine(s[k], v[k], blockMeshDict.v)
 
 # --------------------------------------------------------------------------- #
 # --- Regions --------------------------------------------------------------- #
@@ -100,7 +91,7 @@ for k in V.keys():
 
 r = dict()
 
-for k in V.keys():
+for k in v.keys():
 
     name = 'Region' + k.capitalize()
     label = 'region_' + k
@@ -123,7 +114,7 @@ r['space'].Shapes = [r['vessel'], r['free']]
 
 r2D = dict()
 
-for k in V.keys():
+for k in v.keys():
 
     name = 'Region' + k.capitalize() + '2D'
     label = 'region_' + k + '_2D'
@@ -131,14 +122,14 @@ for k in V.keys():
     back = d.addObject('Part::Extrusion', name + 'Back')
     back.Label = label + '_back'
     back.Base = s[k]
-    back.Dir = (0.0, par.mesh_Y/2.0, 0.0)
+    back.Dir = (0.0, par.mesh_thickness/2.0, 0.0)
     back.Solid = True
     back.TaperAngle = 0.0
 
     front = d.addObject('Part::Extrusion', name + 'Front')
     front.Label = label + '_front'
     front.Base = s[k]
-    front.Dir = (0.0,-par.mesh_Y/2.0, 0.0)
+    front.Dir = (0.0,-par.mesh_thickness/2.0, 0.0)
     front.Solid = True
     front.TaperAngle = 0.0
 

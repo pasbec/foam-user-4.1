@@ -32,7 +32,7 @@ import parameters as par
 # --- Document -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-mesh = {'normal': par.mesh_normal, 'wedge': False, 'extent': par.mesh_Y}
+mesh = {'normal': par.mesh_normal, 'wedge': False, 'extent': par.mesh_thickness}
 
 d = blockMeshDict(fileName=par.dir_polyMesh + '/' + 'blockMeshDict', mesh=mesh)
 
@@ -42,7 +42,7 @@ d = blockMeshDict(fileName=par.dir_polyMesh + '/' + 'blockMeshDict', mesh=mesh)
 
 def vmg(v): return np.linalg.norm(v)
 def vr0(r): return np.array([r, 0.0])
-def v0z(z): return np.array([par.mesh_R['axis'], z])
+def v0z(z): return np.array([0.0, z])
 def vrz(r, z): return np.array([r, z])
 def vsa(s, a): return s * np.array([m.cos(a), m.sin(a)])
 def vwg(al, wl=None):
@@ -105,7 +105,29 @@ v[ 44] = vrz(v[27][0], v[40][1])
 v[ 45] = vrz(v[28][0], v[40][1])
 v[ 46] = vrz(v[29][0], v[40][1])
 
-for i in range(len(v)): d.vertices.set(i, v[i])
+# --------------------------------------------------------------------------- #
+
+# Copy vertice dict its containing vertices
+V = v.copy()
+for i in range(len(V)): V[i] = v[i].copy()
+
+# Axis point shift based on inner point p
+def dv0z(v, p): r = par.mesh_R['axis']; return np.array([r, r*(p[1]-v[1])/p[0]])
+
+# Shift axis points
+V[ 0] += dv0z(V[ 0], V[ 1])
+V[ 3] += dv0z(V[ 3], V[ 2])
+V[ 6] += dv0z(V[ 6], V[ 5])
+V[11] += dv0z(V[11], V[10])
+V[12] += dv0z(V[12], V[13])
+V[17] += dv0z(V[17], V[18])
+V[29] += dv0z(V[29], V[28])
+V[30] += dv0z(V[30], V[31])
+V[46] += dv0z(V[46], V[45])
+
+# --------------------------------------------------------------------------- #
+
+for i in range(len(V)): d.vertices.set(i, V[i])
 
 # --------------------------------------------------------------------------- #
 # --- Blocks ---------------------------------------------------------------- #

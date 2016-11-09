@@ -51,7 +51,8 @@ geo_R['solid'] =  geo_Z[3] / m.tan(geo_alpha)        # Solid wall contact radius
 # --------------------------------------------------------------------------- #
 
 mesh_normal    = 1
-mesh_tangent   = [0, 2]
+
+mesh_thickness = 10.0
 
 mesh_scale     = 1.0
 mesh_space     = 1.0
@@ -69,8 +70,6 @@ mesh_Z['inf']  = 4.0 * mesh_space * (geo_Z[6] - geo_Z[3]) # Infinity patch radiu
 
 mesh_R['inf']  = max(mesh_R['inf'], mesh_Z['inf'])
 mesh_Z['inf']  = max(mesh_Z['inf'], mesh_R['inf'])
-
-mesh_Y         = 10.0
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #
