@@ -32,7 +32,7 @@ import parameters as par
 # --- Document -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-mesh = {'dim': 2, 'normal': 1, 'wedge': False, 'thickness': 10.0}
+mesh = {'normal': par.mesh_normal, 'wedge': False, 'extent': par.mesh_Y}
 
 d = blockMeshDict(fileName=par.dir_polyMesh + '/' + 'blockMeshDict', mesh=mesh)
 

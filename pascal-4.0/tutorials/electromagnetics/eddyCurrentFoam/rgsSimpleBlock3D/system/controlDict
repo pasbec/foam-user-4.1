@@ -24,7 +24,7 @@ startTime           0;
 
 stopAt              endTime;
 
-endTime             2;
+endTime             1;
 
 // *************************** TIME STEPPING ******************************* //
 

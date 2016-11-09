@@ -10,16 +10,21 @@ rm -rf 'constant/polyMesh'
 # Run blockMesh
 blockMesh || exit 1
 
-# Mirror mesh in x- and y- direction
-directions="x y"
-for d in $directions; do
+# Run snappyHexMesh to do refinement
+snappyHexMesh -overwrite || exit 1
 
-    cp "system/mirrorMeshDict.$d" \
-        'system/mirrorMeshDict'
+# Remove leftovers from snappyHexMesh
+rm -rf 'constant/cellLevel' \
+        'constant/polyMesh/cellLevel'* \
+        'constant/pointLevel' \
+        'constant/polyMesh/pointLevel'* \
+        'constant/polyMesh/refinementHistory'* \
+        'constant/polyMesh/surfaceIndex'* \
+        'constant/polyMesh/level0Edge' \
+        > /dev/null 2>&1
 
-    mirrorMesh || exit 1
-
-done
+# Remove empty patches
+createPatch -overwrite || exit 1
 
 # Move new polyMesh files to storage folder
 mesh0Folder='0/polyMesh'

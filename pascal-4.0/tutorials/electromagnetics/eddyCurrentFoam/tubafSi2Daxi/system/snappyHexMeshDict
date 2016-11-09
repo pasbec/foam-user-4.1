@@ -1,0 +1,124 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      snappyHexMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+geo_rc      1e-3;
+
+// ************************************************************************* //
+
+// Flags for optional output
+// 0 : only write final meshes
+// 1 : write intermediate meshes
+// 2 : write volScalarField with cellLevel for postprocessing
+// 4 : write current intersections as .obj files
+debug 0;
+
+// Merge tolerance. Is fraction of overall bounding box of initial mesh.
+// Note: the write tolerance needs to be higher than this.
+mergeTolerance 1e-6;
+
+// Meshing steps
+castellatedMesh true;
+snap            false;
+addLayers       false;
+
+geometry
+{
+    geometry_region_fluid_2D.stl
+    {
+        type    triSurfaceMesh;
+        name    region_fluid;
+    }
+
+    geometry_region_solid_2D.stl
+    {
+        type    triSurfaceMesh;
+        name    region_solid;
+    }
+
+    geometry_region_vessel_2D.stl
+    {
+        type    triSurfaceMesh;
+        name    region_vessel;
+    }
+
+    geometry_region_heater_2D.stl
+    {
+        type    triSurfaceMesh;
+        name    region_heater;
+    }
+};
+
+castellatedMeshControls
+{
+
+    maxLocalCells 100000;
+    maxGlobalCells 2000000;
+    minRefinementCells 0;
+    nCellsBetweenLevels 1;
+
+    features
+    (
+    );
+
+    refinementSurfaces
+    {
+//         region_fluid
+//         {
+//             level (2 2);
+//             faceZone fluid;
+//             cellZone fluid;
+//             zoneInside yes;
+//         }
+    }
+
+    resolveFeatureAngle 30;
+
+    refinementRegions
+    {
+        region_fluid
+        {
+            mode inside;
+            levels ((1e-15 4));
+        }
+
+        region_solid
+        {
+            mode inside;
+            levels ((1e-15 3));
+        }
+
+        region_vessel
+        {
+            mode inside;
+            levels ((1e-15 2));
+        }
+
+        region_heater
+        {
+            mode inside;
+            levels ((1e-15 3));
+        }
+    }
+
+    locationInMesh ($geo_rc 0.0 0.0);
+    allowFreeStandingZoneFaces no;
+}
+
+#include "snappyHexMeshDict.include.meshQualityControls"
+#include "snappyHexMeshDict.include.snapControls"
+#include "snappyHexMeshDict.include.addLayersControls"
+
+// ************************************************************************* //

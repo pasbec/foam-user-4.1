@@ -50,23 +50,27 @@ geo_R['solid'] =  geo_Z[3] / m.tan(geo_alpha)        # Solid wall contact radius
 
 # --------------------------------------------------------------------------- #
 
-mesh_scale = 1.0
-mesh_space = 1.0
+mesh_normal    = 1
+mesh_tangent   = [0, 2]
 
-mesh_Phi   = 5.0                                          # Wedge angle
-mesh_phi   = m.pi/180.0 * mesh_Phi                        # Wedge angle (rad)
+mesh_scale     = 1.0
+mesh_space     = 1.0
+
+mesh_Phi       = 5.0                                      # Wedge angle
+mesh_phi       = m.pi/180.0 * mesh_Phi                    # Wedge angle (rad)
 
 mesh_R         = dict()
 mesh_R['axis'] = 1.0                                      # Axis patch radius
 mesh_R['inf']  = 4.0 * mesh_space * geo_R[2]              # Infinity patch radius
 
-# TODO
 mesh_Z         = dict()
 mesh_Z['C']    = geo_Z[0] + 0.5*(geo_Z[7] - geo_Z[0])
 mesh_Z['inf']  = 4.0 * mesh_space * (geo_Z[6] - geo_Z[3]) # Infinity patch radius
 
-mesh_R['inf'] = max(mesh_R['inf'], mesh_Z['inf'])
-mesh_Z['inf'] = max(mesh_Z['inf'], mesh_R['inf'])
+mesh_R['inf']  = max(mesh_R['inf'], mesh_Z['inf'])
+mesh_Z['inf']  = max(mesh_Z['inf'], mesh_R['inf'])
+
+mesh_Y         = 10.0
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #

@@ -12,7 +12,7 @@ cp -r 'constant/polyMesh.org/blockMeshDict.py' 'constant/polyMesh/'
 ./constant/polyMesh/blockMeshDict.py
 
 # Run blockMesh
-blockMesh
+blockMesh || exit 1
 
 # Mirror mesh in all directions
 directions="x y z"
@@ -21,7 +21,7 @@ for d in $directions; do
     cp "system/mirrorMeshDict.$d" \
         'system/mirrorMeshDict'
 
-    mirrorMesh
+    mirrorMesh || exit 1
 
 done
 

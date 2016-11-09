@@ -113,13 +113,46 @@ for k in V.keys():
     r[k].Angle = 360.00
     r[k].Solid = True
 
-r['conductor'] = d.addObject("Part::MultiFuse","RegionConductor")
+r['conductor'] = d.addObject("Part::MultiFuse", "RegionConductor")
 r['conductor'].Label = 'region_conductor'
 r['conductor'].Shapes = [r['solid'], r['fluid'], r['heater']]
 
-r['space'] = d.addObject("Part::MultiFuse","RegionSpace")
+r['space'] = d.addObject("Part::MultiFuse", "RegionSpace")
 r['space'].Label = 'region_space'
 r['space'].Shapes = [r['vessel'], r['free']]
+
+r2D = dict()
+
+for k in V.keys():
+
+    name = 'Region' + k.capitalize() + '2D'
+    label = 'region_' + k + '_2D'
+
+    back = d.addObject('Part::Extrusion', name + 'Back')
+    back.Label = label + '_back'
+    back.Base = s[k]
+    back.Dir = (0.0, par.mesh_Y/2.0, 0.0)
+    back.Solid = True
+    back.TaperAngle = 0.0
+
+    front = d.addObject('Part::Extrusion', name + 'Front')
+    front.Label = label + '_front'
+    front.Base = s[k]
+    front.Dir = (0.0,-par.mesh_Y/2.0, 0.0)
+    front.Solid = True
+    front.TaperAngle = 0.0
+
+    r2D[k] = d.addObject("Part::MultiFuse", name)
+    r2D[k].Label = label
+    r2D[k].Shapes = [front, back]
+
+r2D['conductor'] = d.addObject("Part::MultiFuse", "RegionConductor2D")
+r2D['conductor'].Label = 'region_conductor_2D'
+r2D['conductor'].Shapes = [r2D['solid'], r2D['fluid'], r2D['heater']]
+
+r2D['space'] = d.addObject("Part::MultiFuse", "RegionSpace2D")
+r2D['space'].Label = 'region_space_2D'
+r2D['space'].Shapes = [r2D['vessel'], r2D['free']]
 
 # --------------------------------------------------------------------------- #
 
@@ -139,7 +172,7 @@ d.recompute()
 # --- Export ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-exportObj = r.values()
+exportObj = r.values() + r2D.values()
 
 for e in exportObj:
 

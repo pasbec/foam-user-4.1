@@ -22,13 +22,13 @@ cp -r 'constant/polyMesh.org/blockMeshDict.py' 'constant/polyMesh/'
 ./constant/polyMesh/blockMeshDict.py
 
 # Run blockMesh
-blockMesh
+blockMesh || exit 1
 
 # Extract surface features
-surfaceFeatureExtract
+surfaceFeatureExtract || exit 1
 
 # Run snappyHexMesh (needs OpenFOAM 2.2.0 + for featureSnapping)
-snappyHexMesh -overwrite
+snappyHexMesh -overwrite || exit 1
 
 # Remove leftovers from snappyHexMesh
 rm -rf 'constant/cellLevel' \
@@ -41,7 +41,7 @@ rm -rf 'constant/cellLevel' \
         > /dev/null 2>&1
 
 # Remove empty patches
-createPatch -overwrite
+createPatch -overwrite || exit 1
 
 # Move new polyMesh files to storage folder
 mv 'constant/polyMesh/boundary' \

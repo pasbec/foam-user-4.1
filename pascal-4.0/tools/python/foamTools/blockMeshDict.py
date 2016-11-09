@@ -1127,11 +1127,12 @@ class blocks(object):
 
             raise KeyError()
 
-        if verticeLebelShift < 2*self.nmax:
+# TODO: Is this really necessary?
+        #if verticeLebelShift < 2*self.nmax:
 
-            raise ValueError("Vertice label shift "
-                + str(verticeLebelShift) + ") is too small (min: "
-                + str(2*self.nmax) + ").")
+            #raise ValueError("Vertice label shift ("
+                #+ str(verticeLebelShift) + ") is too small (min: "
+                #+ str(2*self.nmax) + ").")
 
         if type(blockLabels) == int:
             blockLabels = [ blockLabels ]
@@ -1483,40 +1484,88 @@ class blockMeshDict(object):
 
     # ----------------------------------------------------------------------- #
 
+    def _initMesh(self, mesh):
+
+        if not mesh: mesh = dict()
+
+        if not 'normal' in mesh: mesh['normal'] = -1
+
+        if not mesh['normal'] in [-1, 0, 1, 2]:
+
+            raise ValueError("Mesh normal must be one of [-1, 0, 1, 2].")
+
+        else:
+
+            if mesh['normal'] == -1:
+
+                if not 'dim' in mesh: mesh['dim'] = 3
+
+            else:
+
+                if not 'dim' in mesh: mesh['dim'] = 2
+
+        if not mesh['dim'] in [2, 3]:
+
+            raise ValueError("Mesh dimensions must be one of [2, 3].")
+
+        if mesh['dim'] == 3:
+
+            mesh.pop('wedge', None)
+            mesh.pop('extent', None)
+            mesh.pop('angle', None)
+            mesh.pop('thickness', None)
+
+        else:
+
+            if not 'wedge' in mesh: mesh['wedge'] = False
+
+            if mesh['wedge']:
+
+                mesh.pop('thickness', None)
+
+                if 'extent' in mesh:
+
+                    mesh['angle'] = mesh['extent']
+
+                else:
+
+                    if not 'angle' in mesh: mesh['angle'] = 5.0
+
+                if mesh['angle'] < 2.0 or mesh['angle'] > 8.0:
+
+                    warnings.warn("Wedge mesh angle should preferably be 5°")
+
+                    if mesh['angle'] <= 0.0:
+
+                        raise ValueError("Wedge mesh angle may not be zero or negative.")
+
+            else:
+
+                mesh.pop('angle', None)
+
+                if 'extent' in mesh:
+
+                    mesh['thickness'] = mesh['extent']
+
+                else:
+
+                    if not 'thickness' in mesh: mesh['thickness'] = 1.0
+
+                if mesh['thickness'] <= 0.0:
+
+                    raise ValueError("Mesh thickness may not be zero or negative.")
+
+        self.mesh = mesh
+
+    # ----------------------------------------------------------------------- #
+
     def __init__(self, fileName=None,
                  nmaxverts=1000, nmaxblocks=1000,
                  mesh=None, debug=False):
 
         self.debug = debug
 
-        if not mesh: mesh = dict()
-        if not 'dim' in mesh: mesh['dim'] = 3
-        if not 'wedge' in mesh: mesh['wedge'] = False
-        if not 'normal' in mesh: mesh['normal'] = -1
-        if not 'angle' in mesh: mesh['angle'] = 5.0
-        if not 'thickness' in mesh: mesh['thickness'] = 1.0
-
-        if not mesh['dim'] in [2, 3]:
-
-            raise ValueError("Mesh dimensions must be one of [2, 3].")
-
-        if not mesh['normal'] in [-1, 0, 1, 2]:
-
-            raise ValueError("Mesh normal must be one of [-1, 0, 1, 2].")
-
-        if mesh['angle'] < 2.0 or mesh['angle'] > 8.0:
-
-            warnings.warn("Wedge mesh angle should preferably be 5°")
-
-            if mesh['angle'] <= 0.0:
-
-                raise ValueError("Wedge mesh angle may not be zero or negative.")
-
-        if mesh['thickness'] <= 0.0:
-
-            raise ValueError("Mesh thickness may not be zero or negative.")
-
-        self.mesh = mesh
+        self._initMesh(mesh)
         self.io = self.cIo(self, fileName)
         self.vertices = vertices(self, nmaxverts)
         self.blocks = blocks(self, nmaxblocks)

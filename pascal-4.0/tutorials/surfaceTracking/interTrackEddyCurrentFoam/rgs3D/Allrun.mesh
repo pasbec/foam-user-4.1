@@ -23,29 +23,29 @@ cp -r 'constant/polyMesh.org/blockMeshDict.py' 'constant/polyMesh/'
 ./constant/polyMesh/blockMeshDict.py
 
 # Run blockMesh
-blockMesh
+blockMesh || exit 1
 rm -f 'constant/polyMesh/cellZones'
 rm -f 'constant/polyMesh/faceZones'
 rm -f 'constant/polyMesh/pointZones'
 
 # Mirror mesh
 cp 'system/mirrorMeshDict.x' 'system/mirrorMeshDict'
-mirrorMesh
+mirrorMesh || exit 1
 cp 'system/mirrorMeshDict.y' 'system/mirrorMeshDict'
-mirrorMesh
+mirrorMesh || exit 1
 
 # Extract surface features
-surfaceFeatureExtract
+surfaceFeatureExtract || exit 1
 
 # Run snappyHexMesh (needs OpenFOAM 2.2.0 + for featureSnapping)
 cp 'system/snappyHexMeshDict.stage1' 'system/snappyHexMeshDict'
-snappyHexMesh -overwrite
+snappyHexMesh -overwrite || exit 1
 cp 'system/snappyHexMeshDict.stage2' 'system/snappyHexMeshDict'
-snappyHexMesh -overwrite
+snappyHexMesh -overwrite || exit 1
 cp 'system/snappyHexMeshDict.stage3' 'system/snappyHexMeshDict'
-snappyHexMesh -overwrite
+snappyHexMesh -overwrite || exit 1
 cp 'system/snappyHexMeshDict.stage4' 'system/snappyHexMeshDict'
-snappyHexMesh -overwrite
+snappyHexMesh -overwrite || exit 1
 
 # Remove leftovers from snappyHexMesh
 rm -rf 'constant/cellLevel' \
@@ -58,7 +58,7 @@ rm -rf 'constant/cellLevel' \
         > /dev/null 2>&1
 
 # Remove empty patches
-createPatch -overwrite
+createPatch -overwrite || exit 1
 
 # Move new polyMesh files to storage folder
 mv 'constant/polyMesh/boundary' \

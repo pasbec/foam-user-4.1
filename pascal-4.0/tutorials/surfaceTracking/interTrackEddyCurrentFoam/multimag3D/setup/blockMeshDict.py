@@ -62,7 +62,7 @@ nz3 = nr2
 # --- Document -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-mesh = {'dim': 3}
+mesh = {'normal': par.mesh_normal}
 
 d = blockMeshDict(fileName=par.dir_polyMesh + '/' + 'blockMeshDict', mesh=mesh)
 
