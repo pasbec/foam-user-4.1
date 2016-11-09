@@ -32,7 +32,7 @@ import parameters as par
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-mesh = {'dim': 2, 'normal': 1, 'wedge': True, 'angle': 5.0, 'thickness': 10.0}
+mesh = {'dim': 2, 'normal': 1, 'wedge': False, 'angle': 5.0, 'thickness': 10.0}
 
 d = blockMeshDict(fileName=par.dir_polyMesh + '/' + 'blockMeshDict', mesh=mesh)
 
@@ -211,11 +211,11 @@ if d.subDict("boundary"):
 
         d.boundaryFaces.write()
 
-    if d.boundarySubDict("front", "wedge"):
+    if d.boundarySubDict("front", "empty"):
 
         d.boundaryFaces.write()
 
-    if d.boundarySubDict("back", "wedge"):
+    if d.boundarySubDict("back", "empty"):
 
         d.boundaryFaces.write()
 
