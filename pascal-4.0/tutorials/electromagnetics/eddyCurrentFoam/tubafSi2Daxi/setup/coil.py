@@ -17,6 +17,7 @@ csn = os.path.splitext(csb)[0]
 sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 
 import math as m
+import numpy as np
 
 from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
 

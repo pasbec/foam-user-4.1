@@ -17,6 +17,9 @@ csn = os.path.splitext(csb)[0]
 sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 sys.path.append('/usr/lib/freecad/lib')
 
+import math as m
+import numpy as np
+
 import FreeCAD, Sketcher, Part, Mesh, MeshPart
 from FreeCAD import Units, Placement, Matrix, Vector, Rotation
 from Part import Line, Circle, Shell
@@ -36,109 +39,109 @@ scale = Matrix()
 scale.scale(par.geo_scale, par.geo_scale, par.geo_scale)
 
 # --------------------------------------------------------------------------- #
-# --- Geometry -------------------------------------------------------------- #
+# --- Document -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-# Create new document
 App.newDocument(csn)
 App.setActiveDocument(csn)
 d = App.activeDocument()
 
-# Inner cylinder sketch
-s1 = d.addObject('Sketcher::SketchObject', 'Sketch1')
+# --------------------------------------------------------------------------- #
+# --- Sketches -------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
-s1.Label = 'inner'
-s1.Placement = Placement(Vector(0.0, 0.0, par.geo_z1), Rotation(0.0, 0.0, 0, 1.0))
-s1.addGeometry(Circle(Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0), par.geo_r1)) # Element 0
-s1.addConstraint(Constraint('Coincident', -1, 1, 0, 3)) # Contstraint 0
-s1.addConstraint(Constraint('Radius', 0, par.geo_r1)) # Constraint 1
+s = dict()
 
-# Outer cylinder sketch
-s2 = d.addObject('Sketcher::SketchObject', 'Sketch2')
+s['inner'] = d.addObject('Sketcher::SketchObject', 'Sketch1')
+s['inner'].Label = 'sketch_inner'
+s['inner'].Placement = Placement(Vector(0.0, 0.0, par.geo_z1), Rotation(0.0, 0.0, 0, 1.0))
+s['inner'].addGeometry(Circle(Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0), par.geo_r1)) # Element 0
+s['inner'].addConstraint(Constraint('Coincident', -1, 1, 0, 3)) # Contstraint 0
+s['inner'].addConstraint(Constraint('Radius', 0, par.geo_r1)) # Constraint 1
 
-s2.Label = 'outer'
-s2.Placement = Placement(Vector(0.0, 0.0, par.geo_z1), Rotation(0.0, 0.0, 0, 1.0))
-s2.addGeometry(Circle(Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0), par.geo_r2)) # Element 0
-s2.addConstraint(Constraint('Coincident', -1, 1, 0, 3)) # Contstraint 0
-s2.addConstraint(Constraint('Radius', 0, par.geo_r2)) # Constraint 1
+s['outer'] = d.addObject('Sketcher::SketchObject', 'Sketch2')
+s['outer'].Label = 'sketch_outer'
+s['outer'].Placement = Placement(Vector(0.0, 0.0, par.geo_z1), Rotation(0.0, 0.0, 0, 1.0))
+s['outer'].addGeometry(Circle(Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0), par.geo_r2)) # Element 0
+s['outer'].addConstraint(Constraint('Coincident', -1, 1, 0, 3)) # Contstraint 0
+s['outer'].addConstraint(Constraint('Radius', 0, par.geo_r2)) # Constraint 1
+
+# --------------------------------------------------------------------------- #
+# --- Regions --------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+r = dict()
+
+r['fluid'] = d.addObject('Part::Extrusion', 'RegionFluid')
+r['fluid'].Label = 'region_fluid'
+r['fluid'].Base = s['inner']
+r['fluid'].Dir = (0.0, 0.0, par.geo_z3)
+r['fluid'].Solid = True
+r['fluid'].TaperAngle = 0.0
+
+r['above'] = d.addObject('Part::Extrusion', 'RegionAbove')
+r['above'].Label = 'region_above'
+r['above'].Base = s['outer']
+r['above'].Dir = (0.0, 0.0, par.geo_z4)
+r['above'].Solid = True
+r['above'].TaperAngle = 0.0
+
+r['below'] = d.addObject('Part::Extrusion', 'RegionBelow')
+r['below'].Label = 'region_below'
+r['below'].Base = s['outer']
+r['below'].Dir = (0.0, 0.0, par.geo_z0)
+r['below'].Solid = True
+r['below'].TaperAngle = 0.0
+
+r['buffer'] = d.addObject("Part::Cut", "RegionBuffer")
+r['buffer'].Label = 'region_buffer'
+r['buffer'].Base = r['above']
+r['buffer'].Tool = r['fluid']
 
 # --------------------------------------------------------------------------- #
 
-# Region: region_fluid
-region_fluid = d.addObject('Part::Extrusion', 'Fluid')
-region_fluid.Label = 'region_fluid'
-region_fluid.Base = s1
-region_fluid.Dir = (0.0, 0.0, par.geo_z3)
-region_fluid.Solid = True
-region_fluid.TaperAngle = 0.0
-
-# Region: region_above
-region_above = d.addObject('Part::Extrusion', 'Above')
-region_above.Label = 'region_above'
-region_above.Base = s2
-region_above.Dir = (0.0, 0.0, par.geo_z4)
-region_above.Solid = True
-region_above.TaperAngle = 0.0
-
-# Region: region_below
-region_below = d.addObject('Part::Extrusion', 'Below')
-region_below.Label = 'region_below'
-region_below.Base = s2
-region_below.Dir = (0.0, 0.0, par.geo_z0)
-region_below.Solid = True
-region_below.TaperAngle = 0.0
-
-# Region: buffer
-region_buffer = d.addObject("Part::Cut", "Buffer")
-region_buffer.Label = 'region_buffer'
-region_buffer.Base = region_above
-region_buffer.Tool = region_fluid
-
-# Recompute to get solids and their faces
 d.recompute()
 
-# Patch: fixedMesh
-patch_fixedMesh = d.addObject('Part::Feature', 'FixedMesh')
-patch_fixedMesh.Label = 'patch_fixedMesh'
-patch_fixedMesh.Shape = Shell([region_buffer.Shape.Face1,
-                               region_buffer.Shape.Face2,
-                               region_buffer.Shape.Face3])
+# --------------------------------------------------------------------------- #
+# --- Patches --------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
-# Patch: sideWall
-patch_sideWall = d.addObject('Part::Feature', 'SideWall')
-patch_sideWall.Label = 'patch_sideWall'
-patch_sideWall.Shape = Shell([region_fluid.Shape.Face1])
+p = dict()
 
-# Patch: bottomWall
-patch_bottomWall = d.addObject('Part::Feature', 'BottomWall')
-patch_bottomWall.Label = 'patch_bottomWall'
-patch_bottomWall.Shape = Shell([region_fluid.Shape.Face2])
+p['fixedMesh'] = d.addObject('Part::Feature', 'PatchFixedMesh')
+p['fixedMesh'].Label = 'patch_fixedMesh'
+p['fixedMesh'].Shape = Shell([r['buffer'].Shape.Face1, r['buffer'].Shape.Face2, r['buffer'].Shape.Face3])
 
-# Patch: trackedSurface
-patch_trackedSurface = d.addObject('Part::Feature', 'TrackedSurface')
-patch_trackedSurface.Label = 'patch_trackedSurface'
-patch_trackedSurface.Shape = Shell([region_fluid.Shape.Face3])
+p['sideWall'] = d.addObject('Part::Feature', 'PatchSideWall')
+p['sideWall'].Label = 'patch_sideWall'
+p['sideWall'].Shape = Shell([r['fluid'].Shape.Face1])
+
+p['bottomWall'] = d.addObject('Part::Feature', 'PatchBottomWall')
+p['bottomWall'].Label = 'patch_bottomWall'
+p['bottomWall'].Shape = Shell([r['fluid'].Shape.Face2])
+
+p['trackedSurface'] = d.addObject('Part::Feature', 'PatchTrackedSurface')
+p['trackedSurface'].Label = 'patch_trackedSurface'
+p['trackedSurface'].Shape = Shell([r['fluid'].Shape.Face3])
 
 # --------------------------------------------------------------------------- #
 
-# Recompute
 d.recompute()
 
 # --------------------------------------------------------------------------- #
 # --- Export ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-exportObj = [region_fluid, region_buffer,
-             patch_fixedMesh, patch_sideWall,
-             patch_bottomWall, patch_trackedSurface]
+exportObj = [r['fluid'], r['buffer'],
+             p['fixedMesh'], p['sideWall'], p['bottomWall'], p['trackedSurface']]
 
 for e in exportObj:
 
-    m = Mesh.Mesh(e.Shape.tessellate(0.1))
+    mesh = Mesh.Mesh(e.Shape.tessellate(0.1))
 
-    m.transform(scale)
+    mesh.transform(scale)
 
-    m.write(par.dir_triSurface + '/' + csn + '_' + e.Label + '.stl')
+    mesh.write(par.dir_triSurface + '/' + csn + '_' + e.Label + '.stl')
 
 # --------------------------------------------------------------------------- #
 # --- Save ------------------------------------------------------------------ #

@@ -17,6 +17,7 @@ csn = os.path.splitext(csb)[0]
 sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 
 import math as m
+import numpy as np
 
 from foamTools.expansion import expansion_de_e, expansion_n_ds
 from foamTools.blockMeshDict import blockMeshDict
@@ -58,12 +59,16 @@ nz0 = nr2
 nz3 = nr2
 
 # --------------------------------------------------------------------------- #
-# --- Data ------------------------------------------------------------------ #
+# --- Document -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-d = blockMeshDict(par.dir_polyMesh + '/' + 'blockMeshDict')
+mesh = {'dim': 3}
 
-# Vertices
+d = blockMeshDict(fileName=par.dir_polyMesh + '/' + 'blockMeshDict', mesh=mesh)
+
+# --------------------------------------------------------------------------- #
+# --- Vertices -------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
 d.vertices.set(  0, [            0.0,              0,     par.geo_z0])
 d.vertices.set(  1, [     par.geo_r0,              0,     par.geo_z0])
@@ -83,7 +88,9 @@ d.vertices.copyTranslate( 20, baseVertices, [0.0, 0.0, par.geo_z2-par.geo_z0])
 d.vertices.copyTranslate( 30, baseVertices, [0.0, 0.0, par.geo_z3-par.geo_z0])
 d.vertices.copyTranslate( 40, baseVertices, [0.0, 0.0, par.geo_z4-par.geo_z0])
 
-# Blocks
+# --------------------------------------------------------------------------- #
+# --- Blocks ---------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
 d.blocks.set(  0, [  0,  1,  2,  3, 10, 11, 12, 13], zone="core")
 d.blocks.set(  1, [  1,  4,  5,  2, 11, 14, 15, 12], zone="core")
@@ -98,7 +105,9 @@ d.blocks.copyShiftVerticeLabels(  10, baseBlocks,  10)
 d.blocks.copyShiftVerticeLabels(  20, baseBlocks,  20)
 d.blocks.copyShiftVerticeLabels(  30, baseBlocks,  30)
 
-# Distributions
+# --------------------------------------------------------------------------- #
+# --- Distribution ---------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
 d.blocks.distribution.set(  0, "x", nr0)
 d.blocks.distribution.set(  0, "y", nr0)
@@ -110,7 +119,9 @@ d.blocks.distribution.set( 10, "z", nz1)
 d.blocks.distribution.set( 20, "z", nz2)
 d.blocks.distribution.set( 30, "z", nz3)
 
-# Gradings
+# --------------------------------------------------------------------------- #
+# --- Grading --------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
 d.blocks.grading.set( 1, [ e1, 1.0,    1.0])
 d.blocks.grading.set( 3, [ e2, 1.0,    1.0])
@@ -120,7 +131,9 @@ d.blocks.grading.set(10, [1.0, 1.0, 1.0/e1])
 d.blocks.grading.set(20, [1.0, 1.0,     e1])
 d.blocks.grading.set(30, [1.0, 1.0,     e2])
 
-# Boundary faces
+# --------------------------------------------------------------------------- #
+# --- Boundary -------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
 d.boundaryFaces.set(  0, "mirror_x",  0, "x-")
 d.boundaryFaces.set(  1, "mirror_x",  2, "x-")
