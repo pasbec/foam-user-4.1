@@ -69,26 +69,35 @@ mesh_Z['inf']  = max(mesh_Z['inf'], mesh_R['inf'])
 
 # --------------------------------------------------------------------------- #
 
-coil_scale     = 1e-3
+coil_scale      = 1e-3
 
-coil_dr        =  10.0
-coil_dz        =   8.0
+coil_r          = 105.0
+coil_z          =   7.0
 
-coil_r         = 105.0
-coil_z         =   7.0
+coil_n          = 10
+coil_dn         =  14.9
 
-coil_n         = 10
-coil_dn        =  14.9
+coil_arc_n      = 36
 
-coil_arc_n     = 36
-coil_bun_n     = 10
+#coil_path       = {'shape': 'loop',
+                   #'r': coil_scale * 105.0,
+                   #'n': 36}
 
-coil_nNonOrth  = 10
-coil_reverse   = False
-coil_current   = m.sqrt(2.0) * 260
-coil_phase     = 0.0
+#coil_bundle     = {'shape': 'point'}
+#coil_bundle     = {'shape': 'circle',
+                   #'r':     5.0,
+                   #'n':     10}
+coil_bundle     = {'shape': 'rectangle',
+                   'x':     10.0,
+                   'y':     8.0,
+                   'n':     10}
 
-coil_frequency = 6300.0
+coil_biotSavart = {'nNonOrth': 10,
+                   'reverse':  coil_n * [False],
+                   'current':  coil_n * [m.sqrt(2.0) * 260.0],
+                   'phase':    coil_n * [0.0]}
+
+coil_frequency  = 6300.0
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #

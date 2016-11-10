@@ -95,11 +95,16 @@ cs = par.coil_scale/par.geo_scale
 
 c0v    = dict()
 
-c0v[0] = cs*np.array([par.coil_r, par.coil_z])
-c0v[1] = cs*np.array([par.coil_r + par.coil_dr, par.coil_z])
-c0v[2] = cs*np.array([par.coil_r + par.coil_dr, par.coil_z + par.coil_dz])
-c0v[3] = cs*np.array([par.coil_r, par.coil_z + par.coil_dz])
-c0v[4] = cs*np.array([par.coil_r, par.coil_z])
+c0v[0] = cs*np.array([par.coil_r - par.coil_bundle['x']/2.0,
+                      par.coil_z - par.coil_bundle['y']/2.0])
+c0v[1] = cs*np.array([par.coil_r + par.coil_bundle['x']/2.0,
+                      par.coil_z - par.coil_bundle['y']/2.0])
+c0v[2] = cs*np.array([par.coil_r + par.coil_bundle['x']/2.0,
+                      par.coil_z + par.coil_bundle['y']/2.0])
+c0v[3] = cs*np.array([par.coil_r - par.coil_bundle['x']/2.0,
+                      par.coil_z + par.coil_bundle['y']/2.0])
+c0v[4] = cs*np.array([par.coil_r - par.coil_bundle['x']/2.0,
+                      par.coil_z - par.coil_bundle['y']/2.0])
 
 c0s = d.addObject('Sketcher::SketchObject', 'SketchCoil0')
 c0s.Label = 'sketch_coil0'

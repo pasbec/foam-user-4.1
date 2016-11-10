@@ -29,14 +29,6 @@ from foamTools.coil import writeEdgeBiotSavartProperties, writeFrequency
 
 import parameters as par
 
-coil_r      = par.coil_scale*par.coil_r
-coil_z      = par.coil_scale*par.coil_z
-
-coil_dr     = par.coil_scale*par.coil_dr
-coil_dz     = par.coil_scale*par.coil_dz
-
-coil_dn     = par.coil_scale*par.coil_dn
-
 # --------------------------------------------------------------------------- #
 # --- Coil creation --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -51,14 +43,17 @@ for n in range(par.coil_n):
     points[n] = list()
     edges[n]  = list()
 
-    r0 = coil_r
-    z0 = coil_z + n*coil_dn
+    r0 = par.coil_r
+    z0 = par.coil_z + n*par.coil_dn
 
-    for bun_i in range(bundleN['circle'](par.coil_bun_n)):
+    b       = par.coil_bundle
+    b_shape = b['shape']
+
+    for bun_i in range(bundleN[b_shape](b)):
 
         p = list()
 
-        rb, zb = bundle['rectangle'](bun_i, par.coil_bun_n, coil_dr, coil_dz, r0, z0)
+        rb, zb = bundle[b_shape](b, bun_i, r0, z0, par.coil_scale)
 
         for arc_i in range(par.coil_arc_n):
 
@@ -74,8 +69,8 @@ for n in range(par.coil_n):
     writeCoilFeatureEdgeMesh(par.dir_featureEdgeMesh,
                              names[n], points[n], edges[n])
 
-writeEdgeBiotSavartProperties(par.dir_constant, par.coil_nNonOrth, names,
-                              par.coil_reverse, par.coil_current, par.coil_phase)
+writeEdgeBiotSavartProperties(par.dir_constant, names,
+                              par.coil_bundle, par.coil_biotSavart)
 
 writeFrequency(par.dir_constant, par.coil_frequency)
 

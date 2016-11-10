@@ -22,7 +22,7 @@ inductors
     {
         file       "coil0.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
     
@@ -30,7 +30,7 @@ inductors
     {
         file       "coil1.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
     
@@ -38,7 +38,7 @@ inductors
     {
         file       "coil2.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
     
@@ -46,7 +46,7 @@ inductors
     {
         file       "coil3.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
     
@@ -54,7 +54,7 @@ inductors
     {
         file       "coil4.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
     
@@ -62,7 +62,7 @@ inductors
     {
         file       "coil5.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
     
@@ -70,7 +70,7 @@ inductors
     {
         file       "coil6.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
     
@@ -78,7 +78,7 @@ inductors
     {
         file       "coil7.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
     
@@ -86,7 +86,7 @@ inductors
     {
         file       "coil8.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
     
@@ -94,7 +94,7 @@ inductors
     {
         file       "coil9.eMesh";
         reverse    false;
-        current    367.695526217;
+        current    10.2137646171;
         phase      0.0;
     }
 }
