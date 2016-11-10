@@ -34,6 +34,10 @@ Author
 
 #include "eddyCurrentApp.H"
 
+// TODO: Stop loop if conductivity not given
+
+// TODO: Stop loop if no current present
+
 // TODO: Only do Biot-Savart if mesh is moving or has been changed recently
 
 // TODO: Derived gradient boundary condition for VRe/VIm in conductor region
