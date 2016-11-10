@@ -179,11 +179,21 @@ bundle = {'point': bundlePoint, 'circle': bundleCircle, 'rectangle': bundleRecta
 
 # --------------------------------------------------------------------------- #
 
-def writeCoilFeatureEdgeMesh(folder, name, points, edges):
+def writeCoilFeatureEdgeMeshes(case, names, points, edges):
 
-    path = folder + '/' + name + '.eMesh'
+    for n in names.keys():
 
-    with open(path, 'w') as f:
+        writeCoilFeatureEdgeMesh(case, names[n], points[n], edges[n])
+
+
+
+def writeCoilFeatureEdgeMesh(case, name, points, edges):
+
+    path = case + '/' + 'constant' + '/' + 'featureEdgeMesh'
+    if not os.path.exists(path): os.makedirs(path)
+    fullpath = path + '/' + name + '.eMesh'
+
+    with open(fullpath, 'w') as f:
 
         # Define short indented line with line break
         def ind(iL, cS, eS='\n'): return objectIndent(cS + eS, iLevel=iL)
@@ -214,11 +224,7 @@ def writeCoilFeatureEdgeMesh(folder, name, points, edges):
 
 
 
-def writeEdgeBiotSavartProperties(folder, names, b, bs):
-
-    name = 'edgeBiotSavartProperties'
-
-    path = folder + '/' + name
+def writeEdgeBiotSavartProperties(case, names, b, bs):
 
     n = len(names)
 
@@ -254,7 +260,12 @@ def writeEdgeBiotSavartProperties(folder, names, b, bs):
 
         raise KeyError("Number of phase settings is wrong.")
 
-    with open(path, 'w') as f:
+    path = case + '/' + 'constant'
+    if not os.path.exists(path): os.makedirs(path)
+    name = 'edgeBiotSavartProperties'
+    fullpath = path + '/' + name
+
+    with open(fullpath, 'w') as f:
 
         # Define short indented line with line break
         def ind(iL, cS, eS='\n'): return objectIndent(cS + eS, iLevel=iL)
@@ -292,13 +303,14 @@ def writeEdgeBiotSavartProperties(folder, names, b, bs):
 
 
 
-def writeFrequency(folder, value):
+def writeFrequency(case, value):
 
+    path = case + '/' + 'constant'
+    if not os.path.exists(path): os.makedirs(path)
     name = 'f0'
+    fullpath = path + '/' + name
 
-    path = folder + '/' + name
-
-    with open(path, 'w') as f:
+    with open(fullpath, 'w') as f:
 
         # Define short indented line with line break
         def ind(iL, cS, eS='\n'): return objectIndent(cS + eS, iLevel=iL)

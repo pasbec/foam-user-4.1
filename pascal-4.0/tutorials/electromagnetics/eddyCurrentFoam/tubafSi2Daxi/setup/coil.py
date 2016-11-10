@@ -20,7 +20,7 @@ import math as m
 import numpy as np
 
 from foamTools.coil import bundleN, bundle, edgeLoopFromPoints
-from foamTools.coil import writeCoilFeatureEdgeMesh
+from foamTools.coil import writeCoilFeatureEdgeMeshes
 from foamTools.coil import writeEdgeBiotSavartProperties, writeFrequency
 
 # --------------------------------------------------------------------------- #
@@ -66,13 +66,11 @@ for n in range(par.coil_n):
         edges[n] += edgeLoopFromPoints(p, len(points[n]))
         points[n] += p
 
-    writeCoilFeatureEdgeMesh(par.dir_featureEdgeMesh,
-                             names[n], points[n], edges[n])
+writeCoilFeatureEdgeMeshes(par.dir_case, names, points, edges)
 
-writeEdgeBiotSavartProperties(par.dir_constant, names,
-                              par.coil_bundle, par.coil_biotSavart)
+writeEdgeBiotSavartProperties(par.dir_case, names, par.coil_bundle, par.coil_biotSavart)
 
-writeFrequency(par.dir_constant, par.coil_frequency)
+writeFrequency(par.dir_case, par.coil_frequency)
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

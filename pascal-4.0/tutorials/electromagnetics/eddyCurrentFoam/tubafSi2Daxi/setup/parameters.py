@@ -105,11 +105,11 @@ coil_frequency  = 6300.0
 
 dir_case = os.path.realpath(csd + '/' + '..')
 dir_constant = os.path.realpath(dir_case + '/' + 'constant')
-dir_system = os.path.realpath(dir_case+'/' + 'system')
+dir_system = os.path.realpath(dir_case + '/' + 'system')
 
-dir_polyMesh = os.path.realpath(dir_constant+'/' + 'polyMesh')
-dir_featureEdgeMesh = os.path.realpath(dir_constant+'/' + 'featureEdgeMesh')
-dir_triSurface = os.path.realpath(dir_constant+'/' + 'triSurface')
+dir_polyMesh = os.path.realpath(dir_constant + '/' + 'polyMesh')
+dir_featureEdgeMesh = os.path.realpath(dir_constant + '/' + 'featureEdgeMesh')
+dir_triSurface = os.path.realpath(dir_constant + '/' + 'triSurface')
 
 for d in [dir_polyMesh, dir_triSurface, dir_featureEdgeMesh]:
     if not os.path.exists(d): os.makedirs(d)
