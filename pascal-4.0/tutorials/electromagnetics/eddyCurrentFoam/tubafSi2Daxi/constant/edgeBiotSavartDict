@@ -10,18 +10,18 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      edgeBiotSavartProperties;
+    object      edgeBiotSavartDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-nNonOrthogonalCorrectors    10;
+nNonOrthogonalCorrectors    10
 
 inductors
 {
     coil0
     {
         file       "coil0.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }
@@ -29,7 +29,7 @@ inductors
     coil1
     {
         file       "coil1.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }
@@ -37,7 +37,7 @@ inductors
     coil2
     {
         file       "coil2.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }
@@ -45,7 +45,7 @@ inductors
     coil3
     {
         file       "coil3.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }
@@ -53,7 +53,7 @@ inductors
     coil4
     {
         file       "coil4.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }
@@ -61,7 +61,7 @@ inductors
     coil5
     {
         file       "coil5.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }
@@ -69,7 +69,7 @@ inductors
     coil6
     {
         file       "coil6.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }
@@ -77,7 +77,7 @@ inductors
     coil7
     {
         file       "coil7.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }
@@ -85,7 +85,7 @@ inductors
     coil8
     {
         file       "coil8.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }
@@ -93,7 +93,7 @@ inductors
     coil9
     {
         file       "coil9.eMesh";
-        reverse    false;
+        reverse    False;
         current    367.695526217;
         phase      0.0;
     }

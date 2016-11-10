@@ -20,7 +20,7 @@ sys.path.append('/usr/lib/freecad/lib')
 import math as m
 import numpy as np
 
-import FreeCAD, Sketcher, Part, Mesh, MeshPart
+import FreeCAD, Sketcher, Draft, Part, PartDesign, Mesh, MeshPart
 from FreeCAD import Units, Placement, Matrix, Vector, Rotation
 from Part import Line, Circle, Shell
 from Sketcher import Constraint
@@ -61,6 +61,20 @@ v['heater'] = [17, 12, 13, 14, 15, 16, 25, 24, 23, 22, 21, 20, 19, 18, 17]
 v['free']   = [11, 29, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33,
                32, 31, 30, 17, 18, 19, 20, 21, 22, 23, 24, 25, 16, 8, 9, 10, 11]
 
+# --------------------------------------------------------------------------- #
+
+def addPolyLine(s, v, v2D):
+
+    l = len(v) - 1
+
+    def V(i): return Vector(v2D[i][0], v2D[i][1], 0.0)
+
+    for i in range(l):
+
+        s.addGeometry(Line(V(v[i]), V(v[i+1])))
+
+# --------------------------------------------------------------------------- #
+
 s = dict()
 
 for k in v.keys():
@@ -73,17 +87,25 @@ for k in v.keys():
     s[k].Placement = Placement(Vector(0.0, 0.0, 0.0),
                                Rotation(Vector(1.0, 0.0, 0.0), 90))
 
-    def addPolyLine(s, v, bmdv2D):
-
-        l = len(v) - 1
-
-        def V(i): return Vector(bmdv2D[i][0], bmdv2D[i][1], 0.0)
-
-        for i in range(l):
-
-            s.addGeometry(Line(V(v[i]), V(v[i+1])))
-
     addPolyLine(s[k], v[k], blockMeshDict.v)
+
+# --------------------------------------------------------------------------- #
+
+cs = par.coil_scale/par.geo_scale
+
+c0v    = dict()
+
+c0v[0] = cs*np.array([par.coil_r, par.coil_z])
+c0v[1] = cs*np.array([par.coil_r + par.coil_dr, par.coil_z])
+c0v[2] = cs*np.array([par.coil_r + par.coil_dr, par.coil_z + par.coil_dz])
+c0v[3] = cs*np.array([par.coil_r, par.coil_z + par.coil_dz])
+c0v[4] = cs*np.array([par.coil_r, par.coil_z])
+
+c0s = d.addObject('Sketcher::SketchObject', 'SketchCoil0')
+c0s.Label = 'sketch_coil0'
+c0s.Placement = Placement(Vector(0.0, 0.0, 0.0),
+                                Rotation(Vector(1.0, 0.0, 0.0), 90))
+addPolyLine(c0s, c0v.keys(), c0v)
 
 # --------------------------------------------------------------------------- #
 # --- Regions --------------------------------------------------------------- #
@@ -111,6 +133,8 @@ r['conductor'].Shapes = [r['solid'], r['fluid'], r['heater']]
 r['space'] = d.addObject("Part::MultiFuse", "RegionSpace")
 r['space'].Label = 'region_space'
 r['space'].Shapes = [r['vessel'], r['free']]
+
+# --------------------------------------------------------------------------- #
 
 r2D = dict()
 
@@ -147,6 +171,21 @@ r2D['space'].Shapes = [r2D['vessel'], r2D['free']]
 
 # --------------------------------------------------------------------------- #
 
+c0 = d.addObject('Part::Revolution', 'Coil0')
+c0.Label = 'coil0'
+c0.Source = c0s
+c0.Axis = (0.00,0.00,1.00)
+c0.Base = (0.00,0.00,0.00)
+c0.Angle = 360.00
+c0.Solid = True
+
+c = Draft.makeArray(c0, Vector(0.0, 0.0, cs*par.coil_dn),
+                    Vector(0.0, 0.0, 0.0), par.coil_n, 1, name="Coil")
+d.recompute()
+c.Label = 'coil'
+
+# --------------------------------------------------------------------------- #
+
 d.recompute()
 
 # --------------------------------------------------------------------------- #
@@ -174,7 +213,7 @@ d.recompute()
 # --- Export ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-exportObj = r.values() + r2D.values() + p.values()
+exportObj = r.values() + r2D.values() + [c] + p.values()
 
 for e in exportObj:
 

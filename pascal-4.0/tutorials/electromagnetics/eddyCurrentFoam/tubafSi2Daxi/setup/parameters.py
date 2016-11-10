@@ -23,42 +23,38 @@ import numpy as np
 # --- Parameters ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-geo_scale = 1e-3
+geo_scale      = 1e-3
 
-geo_R     = dict()
-geo_R[0]  =  53.0
-geo_R[1]  =  62.0
-geo_R[2]  =  70.0
+geo_R          = dict()
+geo_R[0]       =  53.0
+geo_R[1]       =  62.0
+geo_R[2]       =  70.0
 
-geo_Z     = dict()
-geo_Z[0]  = -34.0
-geo_Z[1]  =  -8.0
-geo_Z[2]  =   0.0
-geo_Z[3]  =  22.0
-geo_Z[4]  =  27.095
-geo_Z[5]  =  30.0
-geo_Z[6]  =  70.0
-geo_Z[7]  = 142.0
+geo_Z          = dict()
+geo_Z[0]       = -34.0
+geo_Z[1]       =  -8.0
+geo_Z[2]       =   0.0
+geo_Z[3]       =  22.0
+geo_Z[4]       =  27.095
+geo_Z[5]       =  30.0
+geo_Z[6]       =  70.0
+geo_Z[7]       = 142.0
 
-geo_alpha = m.atan(geo_Z[5]/geo_R[0])                # Cone angle (rad)
+geo_alpha      = m.atan(geo_Z[5]/geo_R[0])                # Cone angle (rad)
 
-geo_magG  = (geo_Z[2] - geo_Z[1]) * m.cos(geo_alpha) # Non-conducting gap size
-geo_G     = geo_magG * np.array([m.sin(geo_alpha), -m.cos(geo_alpha)])
+geo_magG       = (geo_Z[2] - geo_Z[1]) * m.cos(geo_alpha) # Non-conducting gap size
+geo_G          = geo_magG * np.array([m.sin(geo_alpha), -m.cos(geo_alpha)])
 
-geo_Z['solid'] =  geo_Z[3]                           # Solid height
-geo_R['solid'] =  geo_Z[3] / m.tan(geo_alpha)        # Solid wall contact radius
+geo_Z['solid'] =  geo_Z[3]                                # Solid height
+geo_R['solid'] =  geo_Z[3] / m.tan(geo_alpha)             # Solid wall contact radius
 
 # --------------------------------------------------------------------------- #
-
-mesh_normal    = 1
-
-mesh_thickness = 10.0
 
 mesh_scale     = 1.0
 mesh_space     = 1.0
 
-mesh_Phi       = 5.0                                      # Wedge angle
-mesh_phi       = m.pi/180.0 * mesh_Phi                    # Wedge angle (rad)
+mesh_normal    = 1
+mesh_thickness = 10.0
 
 mesh_R         = dict()
 mesh_R['axis'] = 1.0                                      # Axis patch radius
@@ -70,6 +66,29 @@ mesh_Z['inf']  = 4.0 * mesh_space * (geo_Z[6] - geo_Z[3]) # Infinity patch radiu
 
 mesh_R['inf']  = max(mesh_R['inf'], mesh_Z['inf'])
 mesh_Z['inf']  = max(mesh_Z['inf'], mesh_R['inf'])
+
+# --------------------------------------------------------------------------- #
+
+coil_scale     = 1e-3
+
+coil_dr        =  10.0
+coil_dz        =   8.0
+
+coil_r         = 105.0
+coil_z         =   7.0
+
+coil_n         = 10
+coil_dn        =  14.9
+
+coil_arc_n     = 36
+coil_bun_n     = 10
+
+coil_nNonOrth  = 10
+coil_reverse   = False
+coil_current   = m.sqrt(2.0) * 260
+coil_phase     = 0.0
+
+coil_frequency = 6300.0
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #
