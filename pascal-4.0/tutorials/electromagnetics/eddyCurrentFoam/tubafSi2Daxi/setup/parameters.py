@@ -79,18 +79,18 @@ coil_dn         =  14.9
 
 coil_arc_n      = 36
 
-#coil_path       = {'shape': 'loop',
-                   #'r': coil_scale * 105.0,
-                   #'n': 36}
+coil_path       = {'shape': 'loop',
+                   'n': 36,
+                   'r': 105.0}
 
 #coil_bundle     = {'shape': 'point'}
 #coil_bundle     = {'shape': 'circle',
                    #'r':     5.0,
                    #'n':     10}
 coil_bundle     = {'shape': 'rectangle',
+                   'n':     10,
                    'x':     10.0,
-                   'y':     8.0,
-                   'n':     10}
+                   'y':     8.0}
 
 coil_biotSavart = {'nNonOrth': 10,
                    'reverse':  coil_n * [False],

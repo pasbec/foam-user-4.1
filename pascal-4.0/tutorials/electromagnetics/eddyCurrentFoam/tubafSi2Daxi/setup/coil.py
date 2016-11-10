@@ -19,6 +19,7 @@ sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 import math as m
 import numpy as np
 
+from foamTools.coil import path
 from foamTools.coil import bundleN, bundle, edgeLoopFromPoints
 from foamTools.coil import writeCoilFeatureEdgeMeshes
 from foamTools.coil import writeEdgeBiotSavartProperties, writeFrequency
@@ -32,6 +33,9 @@ import parameters as par
 # --------------------------------------------------------------------------- #
 # --- Coil creation --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
+
+#print(path['loop'](par.coil_path, scale=par.coil_scale))
+#exit()
 
 names  = dict()
 points = dict()
@@ -49,16 +53,14 @@ for n in range(par.coil_n):
     b       = par.coil_bundle
     b_shape = b['shape']
 
-    for bun_i in range(bundleN[b_shape](b)):
+    for bundle_i in range(bundleN[b_shape](b)):
 
-        p = list()
+        rb, zb = bundle[b_shape](b, bundle_i, r0, z0, par.coil_scale)
 
-        rb, zb = bundle[b_shape](b, bun_i, r0, z0, par.coil_scale)
+        for path_i in range(par.coil_arc_n):
 
-        for arc_i in range(par.coil_arc_n):
-
-            x =  rb * m.cos(arc_i*2*m.pi/par.coil_arc_n)
-            y =  rb * m.sin(arc_i*2*m.pi/par.coil_arc_n)
+            x =  rb * m.cos(path_i*1.0/par.coil_arc_n * 2.0*m.pi)
+            y =  rb * m.sin(path_i*1.0/par.coil_arc_n * 2.0*m.pi)
             z =  zb
 
             p.append([x, y, z])

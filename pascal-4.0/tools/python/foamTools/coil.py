@@ -36,116 +36,191 @@ def edgeLoopFromPoints(points, off=0):
     return edges
 
 # --------------------------------------------------------------------------- #
+# --- Paths ----------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
-def bundlePointN(b):
+def pathLoop(data, p0=None, scale=1.0):
+    """
+
+    data-Keys
+    ----------
+    n : int, Number of bundles
+    r : float, Coil radius
+    """
+
+    if not 'n' in data:
+
+        raise KeyError("Number of edges (n) is missing.")
+
+    if not type(data['n']) ==  int:
+
+        raise KeyError("Number of edges (n) needs to be of type int.")
+
+    if not data['n'] > 0:
+
+        raise ValueError("Number of edges (n) needs to be larger than 0.")
+
+    if not 'r' in data:
+
+        raise KeyError("Coil loop radius (r) is missing.")
+
+    if data['r'] <= 0.0:
+
+        raise ValueError("Coil loop radius (r) must be positive.")
+
+    if not p0: p0 = np.zeros(3)
+
+    points = []
+
+    for i in range(data['n']):
+
+        p = np.zeros(3)
+
+        p[0] = p0[0] + data['r'] * m.cos(i*1.0/data['n'] * 2.0*m.pi)
+        p[1] = p0[1] + data['r'] * m.sin(i*1.0/data['n'] * 2.0*m.pi)
+        p[2] = p0[2]
+
+        points.append(p)
+
+    return points
+
+# --------------------------------------------------------------------------- #
+
+path = {'loop': pathLoop}
+
+# --------------------------------------------------------------------------- #
+# --- Bundles --------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+def bundlePointN(data):
 
     return 1
 
-def bundlePointI(b, I):
+def bundlePointI(data, I):
 
     return I
 
-def bundlePoint(b, i, x0=0.0, y0=0.0, scale=1.0):
+def bundlePoint(data, i, x0=0.0, y0=0.0, scale=1.0):
+    """
+
+    data-Keys
+    ----------
+    """
 
     return scale*x0, scale*y0
 
+# --------------------------------------------------------------------------- #
 
+def bundleCircleN(data):
 
-def bundleCircleN(b):
-
-    if not 'n' in b:
-
-        raise KeyError("Number of bundles (n) is missing.")
-
-    return b['n']
-
-def bundleCircleI(b, I):
-
-    return I/bundleCircleN(b)
-
-def bundleCircle(b, i, x0=0.0, y0=0.0, scale=1.0):
-
-    if not 'n' in b:
+    if not 'n' in data:
 
         raise KeyError("Number of bundles (n) is missing.")
 
-    if not type(b['n']) ==  int:
+    return data['n']
+
+def bundleCircleI(data, I):
+
+    return I/bundleCircleN(data)
+
+def bundleCircle(data, i, x0=0.0, y0=0.0, scale=1.0):
+    """
+
+    data-Keys
+    ----------
+    n : int, Number of bundles
+    r : float, Coil radius
+    """
+
+    if not 'n' in data:
+
+        raise KeyError("Number of bundles (n) is missing.")
+
+    if not type(data['n']) ==  int:
 
         raise KeyError("Number of bundles (n) needs to be of type int.")
 
-    if not b['n'] > 0:
+    if not data['n'] > 0:
 
         raise ValueError("Number of bundles (n) needs to be larger than 0.")
 
-    if not 'r' in b:
+    if not 'r' in data:
 
-        raise KeyError("Coil radius (r) is missing.")
+        raise KeyError("Coil bundle radius (r) is missing.")
 
-    if b['r'] <= 0.0:
+    if data['r'] <= 0.0:
 
-        raise ValueError("Coil radius (r) must be positive.")
+        raise ValueError("Coil bundle radius (r) must be positive.")
 
-    if not i < b['n']:
+    if not i < data['n']:
 
         raise ValueError("Bundle index (i) out of range (max: n).")
 
-    x = x0 + b['r']*m.cos(i*1.0/b['n'] * 2.0*m.pi)
-    y = y0 + b['r']*m.sin(i*1.0/b['n'] * 2.0*m.pi)
+    x = x0 + data['r']*m.cos(i*1.0/data['n'] * 2.0*m.pi)
+    y = y0 + data['r']*m.sin(i*1.0/data['n'] * 2.0*m.pi)
 
     return scale*x, scale*y
 
+# --------------------------------------------------------------------------- #
 
+def bundleRectangleN(data, s=4):
 
-def bundleRectangleN(b, s=4):
-
-    if not 'n' in b:
-
-        raise KeyError("Number of bundles per side (n) is missing.")
-
-    return s*(b['n']-1)
-
-def bundleRectangleI(b, I):
-
-    return I/bundleRectangleN(b)
-
-def bundleRectangle(b, i, x0=0.0, y0=0.0, scale=1.0):
-
-    if not 'n' in b:
+    if not 'n' in data:
 
         raise KeyError("Number of bundles per side (n) is missing.")
 
-    if not type(b['n']) ==  int:
+    return s*(data['n']-1)
+
+def bundleRectangleI(data, I):
+
+    return I/bundleRectangleN(data)
+
+def bundleRectangle(data, i, x0=0.0, y0=0.0, scale=1.0):
+    """
+
+    data-Keys
+    ----------
+    n : int, Number of bundles per side
+    x : float,  Coil size in radial direction
+    y : float,  Coil size in axial direction
+    """
+
+    if not 'n' in data:
+
+        raise KeyError("Number of bundles per side (n) is missing.")
+
+    if not type(data['n']) ==  int:
 
         raise KeyError("Number of bundles per side (n) needs to be of type int.")
 
-    if not b['n'] > 1:
+    if not data['n'] > 1:
 
         raise ValueError("Number of bundles per side (n) needs to be larger than 1.")
 
-    if not 'x' in b:
+    if not 'x' in data:
 
-        raise KeyError("Coil size (x) is missing.")
+        raise KeyError("Coil bundle size (x) is missing.")
 
-    if not 'y' in b:
+    if not 'y' in data:
 
-        raise KeyError("Coil size (y) is missing.")
+        raise KeyError("Coil bundle size (y) is missing.")
 
-    if b['x'] <= 0.0 or b['y'] <= 0.0:
+    if data['x'] <= 0.0 or data['y'] <= 0.0:
 
         raise ValueError("Coil size (x/y) must be positive.")
 
-    def N(s): return bundleRectangleN(b, s)
-    def N0(s): return bundleRectangleN(b, s) + 1
+    def N(s): return bundleRectangleN(data, s)
+    def N0(s): return bundleRectangleN(data, s) + 1
 
     if not i < N(4):
 
         raise ValueError("Bundle index (i) out of range (max: 4*(n-1)).")
 
-    x = x0 - b['x']/2.0
-    y = y0 - b['y']/2.0
+    x = x0 - data['x']/2.0
+    y = y0 - data['y']/2.0
 
-    xi = b['x'] / (b['n']-1)
-    yi = b['y'] / (b['n']-1)
+    xi = data['x'] / (data['n']-1)
+    yi = data['y'] / (data['n']-1)
 
     if (i < N0(1)):
 
@@ -169,7 +244,7 @@ def bundleRectangle(b, i, x0=0.0, y0=0.0, scale=1.0):
 
     return scale*x, scale*y
 
-
+# --------------------------------------------------------------------------- #
 
 bundleN = {'point': bundlePointN, 'circle': bundleCircleN, 'rectangle': bundleRectangleN}
 
@@ -177,6 +252,8 @@ bundleI = {'point': bundlePointI, 'circle': bundleCircleI, 'rectangle': bundleRe
 
 bundle = {'point': bundlePoint, 'circle': bundleCircle, 'rectangle': bundleRectangle}
 
+# --------------------------------------------------------------------------- #
+# --- Writing --------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 def writeCoilFeatureEdgeMeshes(case, names, points, edges):
@@ -222,7 +299,7 @@ def writeCoilFeatureEdgeMesh(case, name, points, edges):
 
         f.write(objectFooter())
 
-
+# --------------------------------------------------------------------------- #
 
 def writeEdgeBiotSavartProperties(case, names, b, bs):
 
@@ -301,7 +378,7 @@ def writeEdgeBiotSavartProperties(case, names, b, bs):
 
         f.write(objectFooter())
 
-
+# --------------------------------------------------------------------------- #
 
 def writeFrequency(case, value):
 
