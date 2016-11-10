@@ -47,23 +47,17 @@ for n in range(par.coil_n):
     points[n] = list()
     edges[n]  = list()
 
-    r0 = par.coil_r
     z0 = par.coil_z + n*par.coil_dn
 
-    b       = par.coil_bundle
-    b_shape = b['shape']
+    bundle_data  = par.coil_bundle
+    bundle_shape = bundle_data['shape']
 
-    for bundle_i in range(bundleN[b_shape](b)):
+    path_data   = par.coil_path
+    path_shape = path_data['shape']
 
-        rb, zb = bundle[b_shape](b, bundle_i, r0, z0, par.coil_scale)
+    for bundle_i in range(bundleN[bundle_shape](bundle_data)):
 
-        for path_i in range(par.coil_arc_n):
-
-            x =  rb * m.cos(path_i*1.0/par.coil_arc_n * 2.0*m.pi)
-            y =  rb * m.sin(path_i*1.0/par.coil_arc_n * 2.0*m.pi)
-            z =  zb
-
-            p.append([x, y, z])
+        p = path[path_shape](path_data, bundle_data, bundle_i, p0=[0.0, 0.0, z0], scale=par.coil_scale)
 
         edges[n] += edgeLoopFromPoints(p, len(points[n]))
         points[n] += p

@@ -39,7 +39,7 @@ def edgeLoopFromPoints(points, off=0):
 # --- Paths ----------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def pathLoop(data, p0=None, scale=1.0):
+def pathLoop(data, bdata, bi, p0=None, scale=1.0):
     """
 
     data-Keys
@@ -47,6 +47,10 @@ def pathLoop(data, p0=None, scale=1.0):
     n : int, Number of bundles
     r : float, Coil radius
     """
+
+    if not 'shape' in bdata:
+
+        raise KeyError("Bundle shape (shape) is missing.")
 
     if not 'n' in data:
 
@@ -70,17 +74,19 @@ def pathLoop(data, p0=None, scale=1.0):
 
     if not p0: p0 = np.zeros(3)
 
+    rb, zb = bundle[bdata['shape']](bdata, bi)
+
     points = []
 
     for i in range(data['n']):
 
         p = np.zeros(3)
 
-        p[0] = p0[0] + data['r'] * m.cos(i*1.0/data['n'] * 2.0*m.pi)
-        p[1] = p0[1] + data['r'] * m.sin(i*1.0/data['n'] * 2.0*m.pi)
-        p[2] = p0[2]
+        p[0] = p0[0] + (data['r'] + rb) * m.cos(i*1.0/data['n'] * 2.0*m.pi)
+        p[1] = p0[1] + (data['r'] + rb) * m.sin(i*1.0/data['n'] * 2.0*m.pi)
+        p[2] = p0[2] + zb
 
-        points.append(p)
+        points.append(scale*p)
 
     return points
 
