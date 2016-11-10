@@ -165,6 +165,8 @@ int main(int argc, char *argv[])
 
             // Write new patch types
             boundaryMesh.write();
+
+            Info << "Use 'collapseEdges' to remove axis patch!" << endl;
         }
         else
         {

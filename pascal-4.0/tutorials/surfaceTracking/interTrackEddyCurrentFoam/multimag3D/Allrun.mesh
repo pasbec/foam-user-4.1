@@ -51,5 +51,5 @@ mv "$meshFolder/boundary" \
 rm -rf "$meshFolder"
 rm -rf "$mesh0Folder"
 if [[ -e '0' ]]; then
-    [[ -z "$(ls -A '0' > /dev/null 2>&1)" ]] && rmdir '0'
+    [[ -z "$(ls -A '0' 2> /dev/null)" ]] && rmdir '0'
 fi
