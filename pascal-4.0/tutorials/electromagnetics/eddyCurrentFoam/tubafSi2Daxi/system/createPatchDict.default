@@ -10,23 +10,60 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      changeDictionaryDict;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dictionaryReplacement
-{
-    boundary
+matchTolerance 1e-12;
+
+pointSync true;
+
+patchInfo
+(
     {
-        originalPatch
+        name             axis;
+        constructFrom    patches;
+        patches          (sides);
+
+        dictionary
         {
-            type            empty;
-        }
-        otherSide
-        {
-            type            empty;
+            type         patch;
         }
     }
-}
+
+    {
+        name             front;
+        constructFrom    patches;
+        patches          (originalPatch);
+
+        dictionary
+        {
+            type         wedge;
+        }
+    }
+
+    {
+        name             back;
+        constructFrom    patches;
+        patches          (otherSide);
+
+        dictionary
+        {
+            type         wedge;
+        }
+    }
+
+    // WARNING: This needs to be after axis creation
+    {
+        name             infinity;
+        constructFrom    set;
+        set              faceSet_patch_infinity;
+
+        dictionary
+        {
+            type         patch;
+        }
+    }
+);
 
 // ************************************************************************* //

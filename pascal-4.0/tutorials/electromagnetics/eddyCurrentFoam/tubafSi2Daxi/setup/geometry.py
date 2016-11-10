@@ -155,6 +155,17 @@ d.recompute()
 
 p = dict()
 
+p['infinity'] = d.addObject('Part::Feature', 'PatchInifnity')
+p['infinity'].Label = 'patch_infinity'
+p['infinity'].Shape = Shell([r['space'].Shape.Face1, r['space'].Shape.Face2,
+                             r['space'].Shape.Face3, r['space'].Shape.Face4,
+                             r['space'].Shape.Face5, r['space'].Shape.Face6,
+                             r['space'].Shape.Face7, r['space'].Shape.Face8,
+                             r['space'].Shape.Face9, r['space'].Shape.Face10,
+                             r['space'].Shape.Face11, r['space'].Shape.Face12,
+                             r['space'].Shape.Face13, r['space'].Shape.Face14,
+                             r['space'].Shape.Face15, r['space'].Shape.Face16 ])
+
 # --------------------------------------------------------------------------- #
 
 d.recompute()
@@ -163,7 +174,7 @@ d.recompute()
 # --- Export ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-exportObj = r.values() + r2D.values()
+exportObj = r.values() + r2D.values() + p.values()
 
 for e in exportObj:
 
