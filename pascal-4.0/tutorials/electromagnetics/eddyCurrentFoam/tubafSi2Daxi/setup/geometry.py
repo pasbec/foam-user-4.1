@@ -93,24 +93,25 @@ for k in v.keys():
 
 cs = par.coil_scale/par.geo_scale
 
-c0v    = dict()
+cv    = dict()
 
-c0v[0] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
+cv[0] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
                       par.coil_z - par.coil_bundle['y']/2.0])
-c0v[1] = cs*np.array([par.coil_path['r'] + par.coil_bundle['x']/2.0,
+cv[1] = cs*np.array([par.coil_path['r'] + par.coil_bundle['x']/2.0,
                       par.coil_z - par.coil_bundle['y']/2.0])
-c0v[2] = cs*np.array([par.coil_path['r'] + par.coil_bundle['x']/2.0,
+cv[2] = cs*np.array([par.coil_path['r'] + par.coil_bundle['x']/2.0,
                       par.coil_z + par.coil_bundle['y']/2.0])
-c0v[3] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
+cv[3] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
                       par.coil_z + par.coil_bundle['y']/2.0])
-c0v[4] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
+cv[4] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
                       par.coil_z - par.coil_bundle['y']/2.0])
 
-c0s = d.addObject('Sketcher::SketchObject', 'SketchCoil0')
-c0s.Label = 'sketch_coil0'
-c0s.Placement = Placement(Vector(0.0, 0.0, 0.0),
+s['coil'] = d.addObject('Sketcher::SketchObject', 'SketchCoil')
+s['coil'].Label = 'sketch_coil'
+s['coil'].Placement = Placement(Vector(0.0, 0.0, 0.0),
                                 Rotation(Vector(1.0, 0.0, 0.0), 90))
-addPolyLine(c0s, c0v.keys(), c0v)
+
+addPolyLine(s['coil'] , cv.keys(), cv)
 
 # --------------------------------------------------------------------------- #
 # --- Regions --------------------------------------------------------------- #
@@ -118,18 +119,38 @@ addPolyLine(c0s, c0v.keys(), c0v)
 
 r = dict()
 
-for k in v.keys():
+for k in s.keys():
 
     name = 'Region' + k.capitalize()
     label = 'region_' + k
 
-    r[k] = d.addObject('Part::Revolution', name)
+    back = d.addObject('Part::Revolution', name + 'Back')
+    back.Label = label + '_back'
+    back.Source = s[k]
+    back.Axis = (0.00,0.00,1.00)
+    back.Base = (0.00,0.00,0.00)
+    back.Angle = par.mesh_angle/2.0
+    back.Solid = True
+
+    front = d.addObject('Part::Revolution', name + 'Front')
+    front.Label = label + '_front'
+    front.Source = s[k]
+    front.Axis = (0.00,0.00,1.00)
+    front.Base = (0.00,0.00,0.00)
+    front.Angle = -par.mesh_angle/2.0
+    front.Solid = True
+
+    r[k] = d.addObject("Part::MultiFuse", name)
     r[k].Label = label
-    r[k].Source = s[k]
-    r[k].Axis = (0.00,0.00,1.00)
-    r[k].Base = (0.00,0.00,0.00)
-    r[k].Angle = 360.00
-    r[k].Solid = True
+    r[k].Shapes = [front, back]
+
+# --------------------------------------------------------------------------- #
+
+r['coils'] = Draft.makeArray(r['coil'], Vector(0.0, 0.0, cs*par.coil_dz),
+                             Vector(0.0, 0.0, 0.0), par.coil_n, 1,
+                             name="RegionCoils")
+d.recompute()
+r['coils'].Label = 'region_coils'
 
 r['conductor'] = d.addObject("Part::MultiFuse", "RegionConductor")
 r['conductor'].Label = 'region_conductor'
@@ -143,7 +164,7 @@ r['space'].Shapes = [r['vessel'], r['free']]
 
 r2D = dict()
 
-for k in v.keys():
+for k in s.keys():
 
     name = 'Region' + k.capitalize() + '2D'
     label = 'region_' + k + '_2D'
@@ -176,18 +197,44 @@ r2D['space'].Shapes = [r2D['vessel'], r2D['free']]
 
 # --------------------------------------------------------------------------- #
 
-c0 = d.addObject('Part::Revolution', 'Coil0')
-c0.Label = 'coil0'
-c0.Source = c0s
-c0.Axis = (0.00,0.00,1.00)
-c0.Base = (0.00,0.00,0.00)
-c0.Angle = 360.00
-c0.Solid = True
-
-c = Draft.makeArray(c0, Vector(0.0, 0.0, cs*par.coil_dz),
-                    Vector(0.0, 0.0, 0.0), par.coil_n, 1, name="Coil")
+r2D['coils'] = Draft.makeArray(r2D['coil'], Vector(0.0, 0.0, cs*par.coil_dz),
+                               Vector(0.0, 0.0, 0.0), par.coil_n, 1,
+                               name="Coils2D")
 d.recompute()
-c.Label = 'coil'
+r2D['coils'].Label = 'region_coils_2D'
+
+# --------------------------------------------------------------------------- #
+
+r3D = dict()
+
+for k in s.keys():
+
+    name = 'Region' + k.capitalize() + '3D'
+    label = 'region_' + k + '_3D'
+
+    r3D[k] = d.addObject('Part::Revolution', name)
+    r3D[k].Label = label
+    r3D[k].Source = s[k]
+    r3D[k].Axis = (0.00,0.00,1.00)
+    r3D[k].Base = (0.00,0.00,0.00)
+    r3D[k].Angle = 360.00
+    r3D[k].Solid = True
+
+r3D['conductor'] = d.addObject("Part::MultiFuse", "RegionConductor3D")
+r3D['conductor'].Label = 'region_conductor_3D'
+r3D['conductor'].Shapes = [r3D['solid'], r3D['fluid'], r3D['heater']]
+
+r3D['space'] = d.addObject("Part::MultiFuse", "RegionSpace3D")
+r3D['space'].Label = 'region_space_3D'
+r3D['space'].Shapes = [r3D['vessel'], r3D['free']]
+
+# --------------------------------------------------------------------------- #
+
+r3D['coils'] = Draft.makeArray(r3D['coil'], Vector(0.0, 0.0, cs*par.coil_dz),
+                               Vector(0.0, 0.0, 0.0), par.coil_n, 1,
+                               name="Coils3D")
+d.recompute()
+r3D['coils'].Label = 'region_coils_3D'
 
 # --------------------------------------------------------------------------- #
 
@@ -198,17 +245,20 @@ d.recompute()
 # --------------------------------------------------------------------------- #
 
 p = dict()
+pff = dict()
+pfl = dict()
+
+pff['infinity'] = list()
+pfl['infinity'] = [25, 26, 27, 28, 30, 32, 34, 36, 38, 40, 42, 44, 45, 46, 47, 48,
+                   53, 54, 55, 56, 58, 60, 62, 64, 66, 68, 70, 72, 73, 74, 75, 76]
+
+for i in pfl['infinity']:
+
+    exec("pff['infinity'].append(r['space'].Shape.Face" + str(i) + ")")
 
 p['infinity'] = d.addObject('Part::Feature', 'PatchInifnity')
 p['infinity'].Label = 'patch_infinity'
-p['infinity'].Shape = Shell([r['space'].Shape.Face1, r['space'].Shape.Face2,
-                             r['space'].Shape.Face3, r['space'].Shape.Face4,
-                             r['space'].Shape.Face5, r['space'].Shape.Face6,
-                             r['space'].Shape.Face7, r['space'].Shape.Face8,
-                             r['space'].Shape.Face9, r['space'].Shape.Face10,
-                             r['space'].Shape.Face11, r['space'].Shape.Face12,
-                             r['space'].Shape.Face13, r['space'].Shape.Face14,
-                             r['space'].Shape.Face15, r['space'].Shape.Face16 ])
+p['infinity'].Shape = Shell(pff['infinity'])
 
 # --------------------------------------------------------------------------- #
 
@@ -218,7 +268,7 @@ d.recompute()
 # --- Export ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-exportObj = r.values() + r2D.values() + [c] + p.values()
+exportObj = r.values() + r2D.values() + r3D.values() + p.values()
 
 for e in exportObj:
 

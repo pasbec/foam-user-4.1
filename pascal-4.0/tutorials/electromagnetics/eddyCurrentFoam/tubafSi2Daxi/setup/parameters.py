@@ -55,6 +55,7 @@ mesh_space     = 1.0
 
 mesh_normal    = 1
 mesh_thickness = 10.0
+mesh_angle     =  5.0
 
 mesh_R         = dict()
 mesh_R['axis'] = 1.0                                      # Axis patch radius

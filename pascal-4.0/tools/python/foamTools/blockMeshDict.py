@@ -51,14 +51,12 @@ class resizeList(list):
 
 class ioBase(object):
 
-    fileName = None
-    indentLevel = 0
-
     # ----------------------------------------------------------------------- #
 
     def __init__(self, fileName):
 
         self.fileName = fileName
+        self.indentLevel = 0
 
         if not fileName == None:
 
@@ -143,11 +141,6 @@ class ioBase(object):
 
 class vertices(object):
 
-    labels = list()
-    labelIndex  = resizeList()
-
-    points = list()
-
     # ----------------------------------------------------------------------- #
 
     def __init__(self, blockMeshDictRef, nmax=1000):
@@ -157,6 +150,11 @@ class vertices(object):
         self.io = blockMeshDictRef.io
 
         self.nmax = nmax
+
+        self.labels = list()
+        self.labelIndex  = resizeList()
+
+        self.points = list()
 
     # ----------------------------------------------------------------------- #
 
@@ -755,19 +753,6 @@ class blocks(object):
 
     # ----------------------------------------------------------------------- #
 
-    labels = list()
-    labelIndex = resizeList()
-
-    blockVertices = list()
-    blockVerticeLabels = list()
-    distributions = list()
-    gradings = list()
-    zones = list()
-
-    neighbours = list()
-    faceNeighbours = list()
-    edgeNeighbours = list()
-
     # ----------------------------------------------------------------------- #
 
     def __init__(self, blockMeshDictRef, nmax=1000):
@@ -782,6 +767,19 @@ class blocks(object):
         self.topo = self.cTopo(self)
         self.distribution = self.cDistribution(self)
         self.grading = self.cGrading(self)
+
+        self.labels = list()
+        self.labelIndex = resizeList()
+
+        self.blockVertices = list()
+        self.blockVerticeLabels = list()
+        self.distributions = list()
+        self.gradings = list()
+        self.zones = list()
+
+        self.neighbours = list()
+        self.faceNeighbours = list()
+        self.edgeNeighbours = list()
 
     # ----------------------------------------------------------------------- #
 
@@ -1256,15 +1254,6 @@ class blocks(object):
 
 class boundaryFaces(object):
 
-
-    labels = list()
-    labelIndex = resizeList()
-
-    faces = list()
-    boundary = list()
-
-    # ----------------------------------------------------------------------- #
-
     def __init__(self, blockMeshDictRef):
 
         self.debug = blockMeshDictRef.debug
@@ -1272,6 +1261,12 @@ class boundaryFaces(object):
         self.io = blockMeshDictRef.io
         self.vertices = blockMeshDictRef.vertices
         self.blocks = blockMeshDictRef.blocks
+
+        self.labels = list()
+        self.labelIndex = resizeList()
+
+        self.faces = list()
+        self.boundary = list()
 
     # ----------------------------------------------------------------------- #
 
