@@ -78,21 +78,24 @@ coil_dz         = 14.9
 coil_n          = 10
 
 coil_path       = {'shape': 'loop',
-                   'n': 36,
-                   'r': 105.0}
+                   'n':     36,
+                   'r':     105.0}
+#coil_path       = {'shape': 'racetrack',
+                   #'n':     36,
+                   #'r':     100.0,
+                   #'x':     100.0,
+                   #'y':     100.0}
 
 #coil_bundle     = {'shape': 'point'}
 #coil_bundle     = {'shape': 'circle',
-                   #'r':     5.0,
-                   #'n':     10}
+                   #'n':     36,
+                   #'r':     5.0}
 coil_bundle     = {'shape': 'rectangle',
                    'n':     10,
-                   'x':     10.0,
-                   'y':     8.0}
+                   'r':     10.0,
+                   'z':     8.0}
 
-coil_reverse    = False
 coil_current    = m.sqrt(2.0) * 260.0
-coil_phase      = 0.0
 coil_nNonOrto   = 10
 coil_frequency  = 6300.0
 

@@ -16,10 +16,10 @@ import numpy as np
 from ioInfo import objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
-# --- Function definitions -------------------------------------------------- #
+# --- Paths ----------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def edgeLoopFromPoints(points, start=0):
+def edgeLoopFromPoints(points, edgeStart=0):
 
     edges = list()
 
@@ -27,19 +27,17 @@ def edgeLoopFromPoints(points, start=0):
 
     for i in range(l):
 
-        I = start + i
+        I = edgeStart + i
 
         edges.append([I, I + 1])
 
-    edges.append([start + l, start])
+    edges.append([edgeStart + l, edgeStart])
 
     return edges
 
 # --------------------------------------------------------------------------- #
-# --- Paths ----------------------------------------------------------------- #
-# --------------------------------------------------------------------------- #
 
-def pathLoop(pathDict, f, start):
+def pathLoop(pathDict, bundleDict, filamentI, edgeStart=0):
     """
 
     pathDict-Keys
@@ -68,6 +66,8 @@ def pathLoop(pathDict, f, start):
 
         raise ValueError("Coil loop radius (r) must be positive.")
 
+    f = bundle[bundleDict['shape']](bundleDict, filamentI)
+
     points = list()
 
     r = f[0] + pathDict['r']
@@ -84,13 +84,87 @@ def pathLoop(pathDict, f, start):
 
         points.append(p)
 
-    edges = edgeLoopFromPoints(points, start)
+    edges = edgeLoopFromPoints(points, edgeStart)
 
     return points, edges
 
 # --------------------------------------------------------------------------- #
 
-path = {'loop': pathLoop}
+def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
+    """
+
+    pathDict-Keys
+    ----------
+    n : int, Number of edges for each corner arc
+    r : float, Inner coil corner radius
+    x : float, Coil size in x-direction
+    y : float, Coil size in y-direction
+    """
+
+    if not 'n' in pathDict:
+
+        raise KeyError("Number of edges (n) is missing.")
+
+    if not type(pathDict['n']) ==  int:
+
+        raise KeyError("Number of edges (n) needs to be of type int.")
+
+    if not pathDict['n'] > 0:
+
+        raise ValueError("Number of edges (n) needs to be larger than 0.")
+
+    if not 'r' in pathDict:
+
+        raise KeyError("Inner coil corner radius (r) is missing.")
+
+    if pathDict['r'] <= 0.0:
+
+        raise ValueError("Inner coil corner radius (r) must be positive.")
+
+    if not 'x' in pathDict:
+
+        raise KeyError("Coil size (x) is missing.")
+
+    if not 'y' in pathDict:
+
+        raise KeyError("Coil size (y) is missing.")
+
+    if pathDict['x'] <= 0.0 or pathDict['y'] <= 0.0:
+
+        raise ValueError("Coil sizes (x/y) must be positive.")
+
+    f = bundle[bundleDict['shape']](bundleDict, filamentI)
+    rb = bundleR[bundleDict['shape']](bundleDict)/2.0
+
+    points = list()
+
+    x = pathDict['x'] - pathDict['r']
+    y = pathDict['y'] - pathDict['r']
+    r = f[0] +  pathDict['r'] + rb
+    z = f[1]
+    phii = 1.0/pathDict['n'] * m.pi/2.0
+    phi0 = m.pi * np.array([0.0, 0.5, 1.0, 1.5])
+    s = [[1, 1], [-1, 1], [-1, -1], [1, -1]]
+
+    for c in range(len(s)):
+
+        for i in range(pathDict['n'] + 1):
+
+            p = np.zeros(3)
+
+            p[0] = s[c][0]*x + r * m.cos(phi0[c] + i*phii)
+            p[1] = s[c][1]*y + r * m.sin(phi0[c] + i*phii)
+            p[2] = z
+
+            points.append(p)
+
+    edges = edgeLoopFromPoints(points, edgeStart)
+
+    return points, edges
+
+# --------------------------------------------------------------------------- #
+
+path = {'loop': pathLoop, 'racetrack': pathRaceTrack}
 
 # --------------------------------------------------------------------------- #
 # --- Bundles --------------------------------------------------------------- #
@@ -99,6 +173,14 @@ path = {'loop': pathLoop}
 def bundlePointN(bundleDict):
 
     return 1
+
+def bundlePointR(bundleDict):
+
+    return 0.0
+
+def bundlePointZ(bundleDict):
+
+    return 0.0
 
 def bundlePointI(bundleDict, I):
 
@@ -125,9 +207,24 @@ def bundleCircleN(bundleDict):
 
     return bundleDict['n']
 
+def bundleCircleR(bundleDict):
+
+    if not 'r' in bundleDict:
+
+        raise KeyError("Coil bundle radius (r) is missing.")
+
+    return 2.0*bundleDict['r']
+
+def bundleCircleZ(bundleDict):
+
+    if not 'r' in bundleDict:
+
+        raise KeyError("Coil bundle radius (r) is missing.")
+
 def bundleCircleI(bundleDict, I):
 
     return I/bundleCircleN(bundleDict)
+    return 2.0*bundleDict['r']
 
 def bundleCircle(bundleDict, i):
     """
@@ -179,6 +276,22 @@ def bundleRectangleN(bundleDict, s=4):
 
     return s*(bundleDict['n']-1)
 
+def bundleRectangleR(bundleDict):
+
+    if not 'r' in bundleDict:
+
+        raise KeyError("Coil bundle radius (r) is missing.")
+
+    return bundleDict['r']
+
+def bundleRectangleZ(bundleDict):
+
+    if not 'z' in bundleDict:
+
+        raise KeyError("Coil bundle height (z) is missing.")
+
+    return bundleDict['z']
+
 def bundleRectangleI(bundleDict, I):
 
     return I/bundleRectangleN(bundleDict)
@@ -189,8 +302,8 @@ def bundleRectangle(bundleDict, i):
     bundleDict-Keys
     ----------
     n : int, Number of filaments per side
-    x : float,  Coil size in radial direction
-    y : float,  Coil size in axial direction
+    r : float,  Coil size in radial direction
+    z : float,  Coil size in axial direction
     """
 
     if not 'n' in bundleDict:
@@ -205,17 +318,17 @@ def bundleRectangle(bundleDict, i):
 
         raise ValueError("Number of filaments per side (n) needs to be larger than 1.")
 
-    if not 'x' in bundleDict:
+    if not 'r' in bundleDict:
 
-        raise KeyError("Coil bundle size (x) is missing.")
+        raise KeyError("Coil bundle radius (r) is missing.")
 
-    if not 'y' in bundleDict:
+    if not 'z' in bundleDict:
 
-        raise KeyError("Coil bundle size (y) is missing.")
+        raise KeyError("Coil bundle height (z) is missing.")
 
-    if bundleDict['x'] <= 0.0 or bundleDict['y'] <= 0.0:
+    if bundleDict['r'] <= 0.0 or bundleDict['z'] <= 0.0:
 
-        raise ValueError("Coil bundle size (x/y) must be positive.")
+        raise ValueError("Coil bundle sizes (r/z) must be positive.")
 
     def N(s): return bundleRectangleN(bundleDict, s)
     def N0(s): return bundleRectangleN(bundleDict, s) + 1
@@ -224,7 +337,7 @@ def bundleRectangle(bundleDict, i):
 
         raise ValueError("Coil filament index (i) out of range (max: 4*(n-1)).")
 
-    b = -0.5 * np.array([bundleDict['x'], bundleDict['y']])
+    b = -0.5 * np.array([bundleDict['r'], bundleDict['z']])
 
     bi = -2.0 * b / (bundleDict['n'] - 1)
 
@@ -255,6 +368,10 @@ def bundleRectangle(bundleDict, i):
 bundleN = {'point': bundlePointN, 'circle': bundleCircleN, 'rectangle': bundleRectangleN}
 
 bundleI = {'point': bundlePointI, 'circle': bundleCircleI, 'rectangle': bundleRectangleI}
+
+bundleR = {'point': bundlePointR, 'circle': bundleCircleR, 'rectangle': bundleRectangleR}
+
+bundleZ = {'point': bundlePointZ, 'circle': bundleCircleZ, 'rectangle': bundleRectangleZ}
 
 bundle = {'point': bundlePoint, 'circle': bundleCircle, 'rectangle': bundleRectangle}
 
@@ -376,20 +493,20 @@ def writeFrequency(case, value):
         f.write(objectFooter())
 
 # --------------------------------------------------------------------------- #
-# --- Class definitions ----------------------------------------------------- #
+# --- Inductor coil --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-class coil(object):
+class inductorCoil(object):
 
-    def __init__(self, name, reverse, current, phase,
-                 bundleDict, pathDict, **kwargs):
+    def __init__(self, name, bundleDict, pathDict,
+                 reverse, current, phase, *args, **kwargs):
 
         if not type(name) == str:
 
             raise KeyError("Name must be of type string")
 
         if not type(reverse) == bool:
-            
+
             raise KeyError("Reverse switch must be of type bool.")
 
         if not type(current) in [int, float]:
@@ -401,23 +518,24 @@ class coil(object):
             raise KeyError("Phase must be of type int or float.")
 
         self.name = name
+
+        self.bundleDict = bundleDict
+        self.pathDict = pathDict
+
         self.reverse = reverse
         self.current = current
         self.filaments = None
         self.filamentCurrent = None
         self.phase = phase
-        
-        self.bundleDict = bundleDict
-        self.pathDict = pathDict
 
         self.points = list()
         self.edges = list()
 
-        self.compute(**kwargs)
+        self.compute(*args, **kwargs)
 
     # ----------------------------------------------------------------------- #
 
-    def compute(self, **kwargs):
+    def compute(self, *args, **kwargs):
 
         bundleShape = self.bundleDict['shape']
         pathShape   = self.pathDict['shape']
@@ -427,24 +545,30 @@ class coil(object):
 
         for i in range(self.filaments):
 
-            f = bundle[bundleShape](self.bundleDict, i)
-
             start = len(self.points)
 
-            p, e = path[pathShape](self.pathDict, f, start)
+            p, e = path[pathShape](self.pathDict, self.bundleDict, i, start)
 
             self.points += p
             self.edges += e
 
-        self.transform(**kwargs)
+        self.transform(*args, **kwargs)
 
     # ----------------------------------------------------------------------- #
 
-    def transform(self, translate=None, rotate=None, scale=None):
+    def transform(self, **kwargs):
 
-        if translate:
+        if 'function' in kwargs:
 
-            if not type(translate) in [list, np.array]:
+            function = kwargs['function']
+
+            p = function(p)
+
+        if 'translate' in kwargs:
+
+            translate = kwargs['translate']
+
+            if not type(translate) in [list, np.ndarray]:
 
                 raise KeyError("Translation vector must be a list or an array.")
 
@@ -457,7 +581,9 @@ class coil(object):
             p = self.points
             for i in range(len(p)): p[i] += translate
 
-        if rotate:
+        if 'rotate' in kwargs:
+
+            rotate = kwargs['rotate']
 
             if not type(rotate) == list and len(rotate) == 2:
 
@@ -466,7 +592,7 @@ class coil(object):
             rotAxis  = rotate[0]
             rotAngle = rotate[1]
 
-            if not type(rotAxis) in [list, np.array]:
+            if not type(rotAxis) in [list, np.ndarray]:
 
                 raise KeyError("Rotation vector must be a list or an array.")
 
@@ -488,9 +614,11 @@ class coil(object):
             p = self.points
             for i in range(len(p)): p[i] = np.dot(rotM, p[i])
 
-        if scale:
+        if 'scale' in kwargs:
 
-            if not type(scale) in [int, float, list, np.array]:
+            scale = kwargs['scale']
+
+            if not type(scale) in [int, float, list, np.ndarray]:
 
                 raise KeyError("Scalae factor must be of type int, float, list or array.")
 
@@ -521,6 +649,128 @@ class coil(object):
 
         print("points:", self.points)
         print("edges:", self.edges)
+
+# --------------------------------------------------------------------------- #
+# --- Inductor coils -------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+class inductorCoils(dict):
+
+    def __setitem__(self, key, item):
+
+        self.__dict__[key] = item
+
+    def __getitem__(self, key):
+
+        return self.__dict__[key]
+
+    def __repr__(self):
+
+        return repr(self.__dict__)
+
+    def __len__(self):
+
+        return len(self.__dict__)
+
+    def __delitem__(self, key):
+
+        del self.__dict__[key]
+
+    def clear(self):
+
+        return self.__dict__.clear()
+
+    def copy(self):
+
+        return self.__dict__.copy()
+
+    def has_key(self, k):
+
+        return self.__dict__.has_key(k)
+
+    def pop(self, k, d=None):
+
+        return self.__dict__.pop(k, d)
+
+    def update(self, *args, **kwargs):
+
+        return self.__dict__.update(*args, **kwargs)
+
+    def keys(self):
+
+        return self.__dict__.keys()
+
+    def values(self):
+
+        return self.__dict__.values()
+
+    def items(self):
+
+        return self.__dict__.items()
+
+    def pop(self, *args):
+
+        return self.__dict__.pop(*args)
+
+    def __cmp__(self, dict):
+
+        return cmp(self.__dict__, dict)
+
+    def __contains__(self, item):
+
+        return item in self.__dict__
+
+    def __iter__(self):
+
+        return iter(self.__dict__)
+
+    # ----------------------------------------------------------------------- #
+
+    def __init__(self, shape, *args, **kwargs):
+
+        super(inductorCoils, self).__init__()
+
+        self._makeCoils[shape](self, *args, **kwargs)
+
+    # ----------------------------------------------------------------------- #
+
+    def _makeCoilsArray(self, name, bundleDict, pathDict,
+                        current, n, step,
+                        origin=0.0, axis=2, scale=1.0, **kwargs):
+
+        for i in range(n):
+
+            nameI = name + str(i)
+            reverseI = False
+            currentI = current
+            phaseI = 0.0
+
+            translation = np.zeros(3)
+            translation[axis] = origin + i*step
+
+            self[i] = inductorCoil(nameI, bundleDict, pathDict,
+                                   reverseI, currentI, phaseI,
+                                   translate=translation, scale=scale)
+
+    # ----------------------------------------------------------------------- #
+
+    _makeCoils = {'array': _makeCoilsArray }
+
+    # ----------------------------------------------------------------------- #
+
+    def compute(self, *args, **kwargs):
+
+        for k in self.keys():
+
+            self[k].compute(*args, **kwargs)
+
+    # ----------------------------------------------------------------------- #
+
+    def transform(self, *args, **kwargs):
+
+        for k in self.keys():
+
+            self[k].transform(*args, **kwargs)
 
 # --------------------------------------------------------------------------- #
 # --- End of module --------------------------------------------------------- #

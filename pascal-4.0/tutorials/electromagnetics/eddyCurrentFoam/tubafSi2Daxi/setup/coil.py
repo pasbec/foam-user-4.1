@@ -19,7 +19,7 @@ sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 import math as m
 import numpy as np
 
-from foamTools.coil import coil
+from foamTools.coil import inductorCoils
 from foamTools.coil import writeCoilFeatureEdgeMeshes
 from foamTools.coil import writeEdgeBiotSavartProperties, writeFrequency
 
@@ -33,15 +33,9 @@ import parameters as par
 # --- Coil creation --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-coils = dict()
-
-for n in range(par.coil_n):
-
-    coils[n] = coil(csn + str(n),
-                    par.coil_reverse, par.coil_current, par.coil_phase,
-                    par.coil_bundle, par.coil_path,
-                    translate=[0.0, 0.0, par.coil_z + n*par.coil_dz],
-                    scale=par.coil_scale)
+coils = inductorCoils("array", csn, par.coil_bundle, par.coil_path,
+                      par.coil_current, par.coil_n, par.coil_dz,
+                      origin=par.coil_z, axis=2, scale=par.coil_scale)
 
 writeCoilFeatureEdgeMeshes(par.dir_case, coils)
 writeEdgeBiotSavartProperties(par.dir_case, coils, par.coil_nNonOrto)
