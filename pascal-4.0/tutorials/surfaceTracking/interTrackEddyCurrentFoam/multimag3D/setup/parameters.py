@@ -23,24 +23,6 @@ import numpy as np
 # --- Parameters ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-coil_scale = 1.0
-
-coil_xi    = 0.050 # half inner width:  100/2.0
-coil_yi    = 0.175 # half inner height: 350/2.0
-#coil_y     = 500.0 # half inner height: 1000000/2.0
-coil_ri    = 0.010 # inner radius
-coil_dxy   = 0.045 # thickness
-coil_dz    = 0.060 # height
-
-coil_r     = 0.285 - coil_dz/2.0
-coil_z     = 0.030
-
-coil_n     = 6
-coil_arc_n = 9
-coil_bun_n = 10 # 4*10 - 2 = 38
-
-# --------------------------------------------------------------------------- #
-
 mesh_normal    = -1
 
 geo_scale  = 1e-3
@@ -62,10 +44,50 @@ mesh_f     =    1.2
 mesh_scale =    1.0 * 2e-1
 
 # --------------------------------------------------------------------------- #
+
+coil_scale      = 1e-3
+
+coil_bundle     = {'shape': 'rectangle',
+                   'n':     10,
+                   'r':     45.0,
+                   'z':     60.0}
+
+coil_path       = {'shape': 'racetrack',
+                   'n':     9,
+                   'r':     10.0 + coil_bundle['r']/2.0,
+                   'x':     (100.0 + coil_bundle['r'])/2.0,
+                   'y':     (350.0 + coil_bundle['r'])/2.0}
+
+coils_n         = 6
+coils_step      = 285.0
+coils_origin    = [0.0, 0.0, geo_z2]
+
+coils_current   = 450.0
+coils_nNonOrto  = 10
+coils_frequency = 50.0
+
+# We need a current amplitude of
+#
+# I = 450 A
+#
+# for achieving
+#
+# B = sqrt(Bx^2 + By^2 + Bz^2) = 0.4216 mT
+#
+# at centroid of cylinder for
+#
+# Ta = 10^5
+#
+# with Ta = sigma * omega * B^2 * (H/2)^4 / (2 * rho * nu^2)
+#
+
+# --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 dir_case = os.path.realpath(csd + '/' + '..')
+
+dir_0 = os.path.realpath(dir_case + '/' + '0')
 dir_constant = os.path.realpath(dir_case + '/' + 'constant')
 dir_system = os.path.realpath(dir_case + '/' + 'system')
 

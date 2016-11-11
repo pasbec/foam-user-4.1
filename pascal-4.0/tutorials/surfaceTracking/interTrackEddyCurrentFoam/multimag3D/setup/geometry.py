@@ -52,19 +52,19 @@ d = App.activeDocument()
 
 s = dict()
 
-s['inner'] = d.addObject('Sketcher::SketchObject', 'Sketch1')
+s['inner'] = d.addObject('Sketcher::SketchObject', 'SketchInner')
 s['inner'].Label = 'sketch_inner'
-s['inner'].Placement = Placement(Vector(0.0, 0.0, par.geo_z1), Rotation(0.0, 0.0, 0, 1.0))
-s['inner'].addGeometry(Circle(Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0), par.geo_r1)) # Element 0
-s['inner'].addConstraint(Constraint('Coincident', -1, 1, 0, 3)) # Contstraint 0
-s['inner'].addConstraint(Constraint('Radius', 0, par.geo_r1)) # Constraint 1
+s['inner'].Placement = Placement(Vector(0.0, 0.0, par.geo_z1),
+                                 Rotation(0.0, 0.0, 0, 1.0))
+s['inner'].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
+                              Vector(0.0, 0.0, 1.0), par.geo_r1))
 
-s['outer'] = d.addObject('Sketcher::SketchObject', 'Sketch2')
+s['outer'] = d.addObject('Sketcher::SketchObject', 'SketchOuter')
 s['outer'].Label = 'sketch_outer'
-s['outer'].Placement = Placement(Vector(0.0, 0.0, par.geo_z1), Rotation(0.0, 0.0, 0, 1.0))
-s['outer'].addGeometry(Circle(Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0), par.geo_r2)) # Element 0
-s['outer'].addConstraint(Constraint('Coincident', -1, 1, 0, 3)) # Contstraint 0
-s['outer'].addConstraint(Constraint('Radius', 0, par.geo_r2)) # Constraint 1
+s['outer'].Placement = Placement(Vector(0.0, 0.0, par.geo_z1),
+                                 Rotation(0.0, 0.0, 0, 1.0))
+s['outer'].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
+                              Vector(0.0, 0.0, 1.0), par.geo_r2))
 
 # --------------------------------------------------------------------------- #
 # --- Regions --------------------------------------------------------------- #
@@ -110,7 +110,9 @@ p = dict()
 
 p['fixedMesh'] = d.addObject('Part::Feature', 'PatchFixedMesh')
 p['fixedMesh'].Label = 'patch_fixedMesh'
-p['fixedMesh'].Shape = Shell([r['buffer'].Shape.Face1, r['buffer'].Shape.Face2, r['buffer'].Shape.Face3])
+p['fixedMesh'].Shape = Shell([r['buffer'].Shape.Face1,
+                              r['buffer'].Shape.Face2,
+                              r['buffer'].Shape.Face3])
 
 p['sideWall'] = d.addObject('Part::Feature', 'PatchSideWall')
 p['sideWall'].Label = 'patch_sideWall'

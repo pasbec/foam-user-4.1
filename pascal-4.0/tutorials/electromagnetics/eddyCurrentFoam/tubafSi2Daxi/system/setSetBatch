@@ -58,9 +58,9 @@ faceSet  faceSet_patch_infinity           new    pointToFace    pointSet_patch_i
 
 ### Materials
 
-cellSet cellSet_material_silicon_liquid   new    setToCell      cellSet_geometry_fluid
+cellSet cellSet_material_siliconLiquid    new    setToCell      cellSet_geometry_fluid
 
-cellSet cellSet_material_silicon_solid    new    setToCell      cellSet_geometry_solid
+cellSet cellSet_material_siliconSolid     new    setToCell      cellSet_geometry_solid
 
 cellSet cellSet_material_graphite         new    setToCell      cellSet_geometry_heater
 

@@ -17,7 +17,7 @@
 #                     'n':     36,
 #                     'r':     105.0}
 #  coil_path       = {'shape': 'racetrack',
-#                     'n':     36,
+#                     'n':     9,
 #                     'r':     10.0,
 #                     'x':     50.0,
 #                     'y':     100.0}
@@ -162,11 +162,11 @@ def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
 
     if not 'x' in pathDict:
 
-        raise KeyError("Coil size (x) is missing.")
+        raise KeyError("Coil width (x) is missing.")
 
     if not 'y' in pathDict:
 
-        raise KeyError("Coil size (y) is missing.")
+        raise KeyError("Coil height (y) is missing.")
 
     if pathDict['x'] <= 0.0 or pathDict['y'] <= 0.0:
 
@@ -699,65 +699,97 @@ class inductorCoils(dict):
 
         self.__dict__[key] = item
 
+    # ----------------------------------------------------------------------- #
+
     def __getitem__(self, key):
 
         return self.__dict__[key]
+
+    # ----------------------------------------------------------------------- #
 
     def __repr__(self):
 
         return repr(self.__dict__)
 
+    # ----------------------------------------------------------------------- #
+
     def __len__(self):
 
         return len(self.__dict__)
+
+    # ----------------------------------------------------------------------- #
 
     def __delitem__(self, key):
 
         del self.__dict__[key]
 
+    # ----------------------------------------------------------------------- #
+
     def clear(self):
 
         return self.__dict__.clear()
+
+    # ----------------------------------------------------------------------- #
 
     def copy(self):
 
         return self.__dict__.copy()
 
+    # ----------------------------------------------------------------------- #
+
     def has_key(self, k):
 
         return self.__dict__.has_key(k)
+
+    # ----------------------------------------------------------------------- #
 
     def pop(self, k, d=None):
 
         return self.__dict__.pop(k, d)
 
+    # ----------------------------------------------------------------------- #
+
     def update(self, *args, **kwargs):
 
         return self.__dict__.update(*args, **kwargs)
+
+    # ----------------------------------------------------------------------- #
 
     def keys(self):
 
         return self.__dict__.keys()
 
+    # ----------------------------------------------------------------------- #
+
     def values(self):
 
         return self.__dict__.values()
+
+    # ----------------------------------------------------------------------- #
 
     def items(self):
 
         return self.__dict__.items()
 
+    # ----------------------------------------------------------------------- #
+
     def pop(self, *args):
 
         return self.__dict__.pop(*args)
+
+    # ----------------------------------------------------------------------- #
 
     def __cmp__(self, dict):
 
         return cmp(self.__dict__, dict)
 
+    # ----------------------------------------------------------------------- #
+
     def __contains__(self, item):
 
         return item in self.__dict__
+
+    # ----------------------------------------------------------------------- #
 
     def __iter__(self):
 
@@ -784,7 +816,7 @@ class inductorCoils(dict):
             currenti = current
             phasei = 0.0
 
-            translation = origin
+            translation = np.array(origin).copy()
             translation[axis] += i*step
 
             self[i] = inductorCoil(namei, bundleDict, pathDict,
@@ -802,7 +834,7 @@ class inductorCoils(dict):
             currenti = current
             phasei = i*1.0/n * 360.0
 
-            translation = origin
+            translation = np.array(origin).copy()
             translation[axis] += i*step
 
             self[i] = inductorCoil(namei, bundleDict, pathDict,
@@ -837,7 +869,7 @@ class inductorCoils(dict):
             rotation[0][axis] = 1.0
             self[i].transform(rotate=rotation)
 
-            translation = origin.copy()
+            translation = np.array(origin).copy()
             translation[plane[0]] += step * m.cos(phasei/180.0 * m.pi)
             translation[plane[1]] += step * m.sin(phasei/180.0 * m.pi)
             self[i].transform(translate=translation)

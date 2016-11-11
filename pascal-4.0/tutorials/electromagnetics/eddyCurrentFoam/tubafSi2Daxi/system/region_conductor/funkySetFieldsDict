@@ -17,8 +17,8 @@ FoamFile
 materialProperties
 (
     // Data from Vladi
-    "sigma_silicon_liquid=1.2e+6;"    // Conductivity of liquid silicon in [S/m]
-    "sigma_silicon_solid=5.0e+4;"     // Conductivity of solid silicon in [S/m]
+    "sigma_liquidSilicon=1.2e+6;"    // Conductivity of liquid silicon in [S/m]
+    "sigma_siliconSolid=5.0e+4;"     // Conductivity of solid silicon in [S/m]
     "sigma_graphite=8.47e+4;"         // Conductivity of graphite in [S/m]
 );
 
@@ -34,8 +34,8 @@ expressions
     {
         field         sigma;
         variables     $materialProperties;
-        expression    "sigma_silicon_liquid";
-        condition     "set(cellSet_material_silicon_liquid)";
+        expression    "sigma_liquidSilicon";
+        condition     "set(cellSet_material_siliconLiquid)";
     }
 
     sigma_graphite
@@ -50,8 +50,8 @@ expressions
     {
         field         sigma;
         variables     $materialProperties;
-        expression    "sigma_silicon_solid";
-        condition     "set(cellSet_material_silicon_solid)";
+        expression    "sigma_siliconSolid";
+        condition     "set(cellSet_material_siliconSolid)";
     }
 );
 

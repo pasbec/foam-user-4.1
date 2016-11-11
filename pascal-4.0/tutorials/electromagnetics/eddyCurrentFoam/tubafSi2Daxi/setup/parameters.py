@@ -72,28 +72,30 @@ mesh_Z['inf']  = max(mesh_Z['inf'], mesh_R['inf'])
 
 coil_scale      = 1e-3
 
-coil_n          = 10
-coil_step       = 14.9
-coil_origin     = [0.0, 0.0, 7.0]
-
-coil_path       = {'shape': 'loop',
-                   'n':     36,
-                   'r':     105.0}
-
 coil_bundle     = {'shape': 'rectangle',
                    'n':     10,
                    'r':     10.0,
                    'z':     8.0}
 
-coil_current    = m.sqrt(2.0) * 260.0
-coil_nNonOrto   = 10
-coil_frequency  = 6300.0
+coil_path       = {'shape': 'loop',
+                   'n':     36,
+                   'r':     100.0 + coil_bundle['r']/2.0}
+
+coils_n         = 10
+coils_step      = 14.9
+coils_origin    = [0.0, 0.0, 3.0 + coil_bundle['z']/2.0]
+
+coils_current   = m.sqrt(2.0) * 260.0
+coils_nNonOrto  = 10
+coils_frequency = 6300.0
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 dir_case = os.path.realpath(csd + '/' + '..')
+
+dir_0 = os.path.realpath(dir_case + '/' + '0')
 dir_constant = os.path.realpath(dir_case + '/' + 'constant')
 dir_system = os.path.realpath(dir_case + '/' + 'system')
 
