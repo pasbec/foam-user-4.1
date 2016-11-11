@@ -22,11 +22,11 @@ pointSet pointSet_geometry_solid          remove
 
 # Heater
 
-pointSet pointSet_geometry_heater          new    surfaceToPoint "constant/triSurface/geometry_region_heater.stl" 2e-4 true false
+pointSet pointSet_geometry_heater         new    surfaceToPoint "constant/triSurface/geometry_region_heater.stl" 2e-4 true false
 
-cellSet  cellSet_geometry_heater           new    pointToCell    pointSet_geometry_heater all
+cellSet  cellSet_geometry_heater          new    pointToCell    pointSet_geometry_heater all
 
-pointSet pointSet_geometry_heater          remove
+pointSet pointSet_geometry_heater         remove
 
 # Conductor
 

@@ -4,6 +4,45 @@
 # October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 #
+#  Example usage
+#  ~~~~~~~~~~~~~
+#
+#  coil_scale      = 1e-3
+#
+#  coil_n          = 10
+#  coil_step       = 14.9
+#  coil_origin     = [0.0, 0.0, 7.0]
+#
+#  coil_path       = {'shape': 'loop',
+#                     'n':     36,
+#                     'r':     105.0}
+#  coil_path       = {'shape': 'racetrack',
+#                     'n':     36,
+#                     'r':     10.0,
+#                     'x':     50.0,
+#                     'y':     100.0}
+#
+#  coil_bundle     = {'shape': 'point'}
+#  coil_bundle     = {'shape': 'circle',
+#                     'n':     36,
+#                     'r':     5.0}
+#  coil_bundle     = {'shape': 'rectangle',
+#                     'n':     10,
+#                     'r':     10.0,
+#                     'z':     8.0}
+#
+#  coil_current    = m.sqrt(2.0) * 260.0
+#  coil_nNonOrto   = 10
+#  coil_frequency  = 6300.0
+#
+#  coils = inductorCoils("ARRAY", csn, par.coil_bundle, par.coil_path,
+#                        par.coil_current, par.coil_n, par.coil_step,
+#                        origin=par.coil_origin, axis=2, scale=par.coil_scale)
+#
+#  writeCoilFeatureEdgeMeshes(par.dir_case, coils)
+#  writeEdgeBiotSavartProperties(par.dir_case, coils, par.coil_nNonOrto)
+#  writeFrequency(par.dir_case, par.coil_frequency)
+#
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -96,7 +135,7 @@ def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
     pathDict-Keys
     ----------
     n : int, Number of edges for each corner arc
-    r : float, Inner coil corner radius
+    r : float, Coil corner radius
     x : float, Coil size in x-direction
     y : float, Coil size in y-direction
     """
@@ -134,13 +173,12 @@ def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
         raise ValueError("Coil sizes (x/y) must be positive.")
 
     f = bundle[bundleDict['shape']](bundleDict, filamentI)
-    rb = bundleR[bundleDict['shape']](bundleDict)/2.0
 
     points = list()
 
     x = pathDict['x'] - pathDict['r']
     y = pathDict['y'] - pathDict['r']
-    r = f[0] +  pathDict['r'] + rb
+    r = f[0] +  pathDict['r']
     z = f[1]
     phii = 1.0/pathDict['n'] * m.pi/2.0
     phi0 = m.pi * np.array([0.0, 0.5, 1.0, 1.5])
@@ -737,25 +775,80 @@ class inductorCoils(dict):
 
     def _makeCoilsArray(self, name, bundleDict, pathDict,
                         current, n, step,
-                        origin=0.0, axis=2, scale=1.0, **kwargs):
+                        origin=np.zeros(3), axis=2, scale=1.0, **kwargs):
 
         for i in range(n):
 
-            nameI = name + str(i)
-            reverseI = False
-            currentI = current
-            phaseI = 0.0
+            namei = name + str(i)
+            reversei = False
+            currenti = current
+            phasei = 0.0
 
-            translation = np.zeros(3)
-            translation[axis] = origin + i*step
+            translation = origin
+            translation[axis] += i*step
 
-            self[i] = inductorCoil(nameI, bundleDict, pathDict,
-                                   reverseI, currentI, phaseI,
+            self[i] = inductorCoil(namei, bundleDict, pathDict,
+                                   reversei, currenti, phasei,
                                    translate=translation, scale=scale)
+
+    def _makeCoilsTMF(self, name, bundleDict, pathDict,
+                      current, n, step,
+                      origin=np.zeros(3), axis=2, scale=1.0, **kwargs):
+
+        for i in range(n):
+
+            namei = name + str(i)
+            reversei = False
+            currenti = current
+            phasei = i*1.0/n * 360.0
+
+            translation = origin
+            translation[axis] += i*step
+
+            self[i] = inductorCoil(namei, bundleDict, pathDict,
+                                   reversei, currenti, phasei,
+                                   translate=translation, scale=scale)
+
+    def _makeCoilsRMF(self, name, bundleDict, pathDict,
+                      current, n, step,
+                      origin=np.zeros(3), axis=2, scale=1.0, **kwargs):
+
+        for i in range(n):
+
+            namei = name + str(i)
+            reversei = False
+            currenti = current
+            phasei = i*1.0/n * 360.0
+
+            self[i] = inductorCoil(namei, bundleDict, pathDict,
+                                   reversei, currenti, phasei)
+
+            plane = [0, 1, 2]; plane.pop(axis)
+
+            rotation = [np.zeros(3), 90.0]
+            rotation[0][plane[1]] = 1.0
+            self[i].transform(rotate=rotation)
+
+            rotation = [np.zeros(3), 90.0]
+            rotation[0][plane[0]] = 1.0
+            self[i].transform(rotate=rotation)
+
+            rotation = [np.zeros(3), phasei]
+            rotation[0][axis] = 1.0
+            self[i].transform(rotate=rotation)
+
+            translation = origin.copy()
+            translation[plane[0]] += step * m.cos(phasei/180.0 * m.pi)
+            translation[plane[1]] += step * m.sin(phasei/180.0 * m.pi)
+            self[i].transform(translate=translation)
+
+            self[i].transform(scale=scale)
 
     # ----------------------------------------------------------------------- #
 
-    _makeCoils = {'array': _makeCoilsArray }
+    _makeCoils = {'ARRAY': _makeCoilsArray,
+                  'TMF': _makeCoilsTMF,
+                  'RMF': _makeCoilsRMF}
 
     # ----------------------------------------------------------------------- #
 

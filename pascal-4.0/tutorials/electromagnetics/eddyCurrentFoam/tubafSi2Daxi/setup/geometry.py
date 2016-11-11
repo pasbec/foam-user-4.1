@@ -95,16 +95,16 @@ cs = par.coil_scale/par.geo_scale
 
 cv    = dict()
 
-cv[0] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
-                      par.coil_z - par.coil_bundle['y']/2.0])
-cv[1] = cs*np.array([par.coil_path['r'] + par.coil_bundle['x']/2.0,
-                      par.coil_z - par.coil_bundle['y']/2.0])
-cv[2] = cs*np.array([par.coil_path['r'] + par.coil_bundle['x']/2.0,
-                      par.coil_z + par.coil_bundle['y']/2.0])
-cv[3] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
-                      par.coil_z + par.coil_bundle['y']/2.0])
-cv[4] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
-                      par.coil_z - par.coil_bundle['y']/2.0])
+cv[0] = cs*np.array([par.coil_path['r'] - par.coil_bundle['r']/2.0,
+                      par.coil_origin[2] - par.coil_bundle['z']/2.0])
+cv[1] = cs*np.array([par.coil_path['r'] + par.coil_bundle['r']/2.0,
+                      par.coil_origin[2] - par.coil_bundle['z']/2.0])
+cv[2] = cs*np.array([par.coil_path['r'] + par.coil_bundle['r']/2.0,
+                      par.coil_origin[2] + par.coil_bundle['z']/2.0])
+cv[3] = cs*np.array([par.coil_path['r'] - par.coil_bundle['r']/2.0,
+                      par.coil_origin[2] + par.coil_bundle['z']/2.0])
+cv[4] = cs*np.array([par.coil_path['r'] - par.coil_bundle['r']/2.0,
+                      par.coil_origin[2] - par.coil_bundle['z']/2.0])
 
 s['coil'] = d.addObject('Sketcher::SketchObject', 'SketchCoil')
 s['coil'].Label = 'sketch_coil'
@@ -146,7 +146,7 @@ for k in s.keys():
 
 # --------------------------------------------------------------------------- #
 
-r['coils'] = Draft.makeArray(r['coil'], Vector(0.0, 0.0, cs*par.coil_dz),
+r['coils'] = Draft.makeArray(r['coil'], Vector(0.0, 0.0, cs*par.coil_step),
                              Vector(0.0, 0.0, 0.0), par.coil_n, 1,
                              name="RegionCoils")
 d.recompute()
@@ -197,7 +197,7 @@ r2D['space'].Shapes = [r2D['vessel'], r2D['free']]
 
 # --------------------------------------------------------------------------- #
 
-r2D['coils'] = Draft.makeArray(r2D['coil'], Vector(0.0, 0.0, cs*par.coil_dz),
+r2D['coils'] = Draft.makeArray(r2D['coil'], Vector(0.0, 0.0, cs*par.coil_step),
                                Vector(0.0, 0.0, 0.0), par.coil_n, 1,
                                name="Coils2D")
 d.recompute()
@@ -230,7 +230,7 @@ r3D['space'].Shapes = [r3D['vessel'], r3D['free']]
 
 # --------------------------------------------------------------------------- #
 
-r3D['coils'] = Draft.makeArray(r3D['coil'], Vector(0.0, 0.0, cs*par.coil_dz),
+r3D['coils'] = Draft.makeArray(r3D['coil'], Vector(0.0, 0.0, cs*par.coil_step),
                                Vector(0.0, 0.0, 0.0), par.coil_n, 1,
                                name="Coils3D")
 d.recompute()

@@ -72,24 +72,14 @@ mesh_Z['inf']  = max(mesh_Z['inf'], mesh_R['inf'])
 
 coil_scale      = 1e-3
 
-coil_z          =  7.0
-coil_dz         = 14.9
-
 coil_n          = 10
+coil_step       = 14.9
+coil_origin     = [0.0, 0.0, 7.0]
 
 coil_path       = {'shape': 'loop',
                    'n':     36,
                    'r':     105.0}
-#coil_path       = {'shape': 'racetrack',
-                   #'n':     36,
-                   #'r':     100.0,
-                   #'x':     100.0,
-                   #'y':     100.0}
 
-#coil_bundle     = {'shape': 'point'}
-#coil_bundle     = {'shape': 'circle',
-                   #'n':     36,
-                   #'r':     5.0}
 coil_bundle     = {'shape': 'rectangle',
                    'n':     10,
                    'r':     10.0,

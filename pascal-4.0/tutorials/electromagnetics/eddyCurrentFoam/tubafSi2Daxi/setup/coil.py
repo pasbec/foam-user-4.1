@@ -33,9 +33,9 @@ import parameters as par
 # --- Coil creation --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-coils = inductorCoils("array", csn, par.coil_bundle, par.coil_path,
-                      par.coil_current, par.coil_n, par.coil_dz,
-                      origin=par.coil_z, axis=2, scale=par.coil_scale)
+coils = inductorCoils("ARRAY", csn, par.coil_bundle, par.coil_path,
+                      par.coil_current, par.coil_n, par.coil_step,
+                      origin=par.coil_origin, axis=2, scale=par.coil_scale)
 
 writeCoilFeatureEdgeMeshes(par.dir_case, coils)
 writeEdgeBiotSavartProperties(par.dir_case, coils, par.coil_nNonOrto)
