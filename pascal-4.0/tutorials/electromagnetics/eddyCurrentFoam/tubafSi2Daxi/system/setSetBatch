@@ -2,7 +2,32 @@
 
 # All
 
-cellSet  cellSet_geometry_all             new    sphereToCell      (0.0 0.0 0.0) 1
+cellSet  cellSet_geometry_all             new    boxToCell      (-10 -10 -10) ( 10  10  10)
+
+# Fluid
+
+pointSet pointSet_geometry_fluid          new    surfaceToPoint "constant/triSurface/geometry_region_fluid.stl" 2e-4 true false
+
+cellSet  cellSet_geometry_fluid           new    pointToCell    pointSet_geometry_fluid all
+
+pointSet pointSet_geometry_fluid          remove
+
+# Solid
+
+pointSet pointSet_geometry_solid          new    surfaceToPoint "constant/triSurface/geometry_region_solid.stl" 2e-4 true false
+
+cellSet  cellSet_geometry_solid           new    pointToCell    pointSet_geometry_solid all
+
+pointSet pointSet_geometry_solid          remove
+
+# Heater
+
+# TODO: Why is non-2D version constant/triSurface/geometry_region_heater.stl not working
+pointSet pointSet_geometry_heater          new    surfaceToPoint "constant/triSurface/geometry_region_heater_2D.stl" 2e-4 true false
+
+cellSet  cellSet_geometry_heater           new    pointToCell    pointSet_geometry_heater all
+
+pointSet pointSet_geometry_heater          remove
 
 # Conductor
 
@@ -35,7 +60,11 @@ faceSet  faceSet_patch_infinity           new    pointToFace    pointSet_patch_i
 
 ### Materials
 
-cellSet cellSet_material_conductor        new    setToCell      cellSet_geometry_conductor
+cellSet cellSet_material_silicon_liquid   new    setToCell      cellSet_geometry_fluid
+
+cellSet cellSet_material_silicon_solid    new    setToCell      cellSet_geometry_solid
+
+cellSet cellSet_material_graphite         new    setToCell      cellSet_geometry_heater
 
 cellSet cellSet_material_air              new    setToCell      cellSet_geometry_background
 
