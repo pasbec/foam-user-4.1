@@ -24,6 +24,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
     
     coil1
@@ -32,6 +33,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
     
     coil2
@@ -40,6 +42,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
     
     coil3
@@ -48,6 +51,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
     
     coil4
@@ -56,6 +60,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
     
     coil5
@@ -64,6 +69,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
     
     coil6
@@ -72,6 +78,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
     
     coil7
@@ -80,6 +87,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
     
     coil8
@@ -88,6 +96,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
     
     coil9
@@ -96,6 +105,7 @@ inductors
         reverse    false;
         current    10.2137646171;
         phase      0.0;
+        bundles    36;
     }
 }
 

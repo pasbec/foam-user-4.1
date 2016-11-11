@@ -95,15 +95,15 @@ cs = par.coil_scale/par.geo_scale
 
 c0v    = dict()
 
-c0v[0] = cs*np.array([par.coil_r - par.coil_bundle['x']/2.0,
+c0v[0] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
                       par.coil_z - par.coil_bundle['y']/2.0])
-c0v[1] = cs*np.array([par.coil_r + par.coil_bundle['x']/2.0,
+c0v[1] = cs*np.array([par.coil_path['r'] + par.coil_bundle['x']/2.0,
                       par.coil_z - par.coil_bundle['y']/2.0])
-c0v[2] = cs*np.array([par.coil_r + par.coil_bundle['x']/2.0,
+c0v[2] = cs*np.array([par.coil_path['r'] + par.coil_bundle['x']/2.0,
                       par.coil_z + par.coil_bundle['y']/2.0])
-c0v[3] = cs*np.array([par.coil_r - par.coil_bundle['x']/2.0,
+c0v[3] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
                       par.coil_z + par.coil_bundle['y']/2.0])
-c0v[4] = cs*np.array([par.coil_r - par.coil_bundle['x']/2.0,
+c0v[4] = cs*np.array([par.coil_path['r'] - par.coil_bundle['x']/2.0,
                       par.coil_z - par.coil_bundle['y']/2.0])
 
 c0s = d.addObject('Sketcher::SketchObject', 'SketchCoil0')
@@ -184,7 +184,7 @@ c0.Base = (0.00,0.00,0.00)
 c0.Angle = 360.00
 c0.Solid = True
 
-c = Draft.makeArray(c0, Vector(0.0, 0.0, cs*par.coil_dn),
+c = Draft.makeArray(c0, Vector(0.0, 0.0, cs*par.coil_dz),
                     Vector(0.0, 0.0, 0.0), par.coil_n, 1, name="Coil")
 d.recompute()
 c.Label = 'coil'

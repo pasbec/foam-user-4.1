@@ -334,6 +334,7 @@ def writeEdgeBiotSavartProperties(case, coils, nNonOrth=10):
             reverse = coils[i].reverse
             current = coils[i].bundleCurrent
             phase   = coils[i].phase
+            bundles =coils[i].bundles
 
             f.write(ind(1, name))
             f.write(ind(1, '{'))
@@ -342,6 +343,7 @@ def writeEdgeBiotSavartProperties(case, coils, nNonOrth=10):
             f.write(ind(2, 'reverse    ' + bstr(reverse) + ';'))
             f.write(ind(2, 'current    ' + str(current) + ';'))
             f.write(ind(2, 'phase      ' + str(phase) + ';'))
+            f.write(ind(2, 'bundles    ' + str(bundles) + ';'))
 
             f.write(ind(1, '}'))
 
@@ -419,9 +421,10 @@ class coil(object):
         bundleShape = self.bundleDict['shape']
         pathShape   = self.pathDict['shape']
 
+        self.bundles = bundleN[bundleShape](self.bundleDict)
         self.bundleCurrent = bundleI[bundleShape](self.bundleDict, self.current)
 
-        for i in range(bundleN[bundleShape](self.bundleDict)):
+        for i in range(self.bundles):
 
             b = bundle[bundleShape](self.bundleDict, i)
 
