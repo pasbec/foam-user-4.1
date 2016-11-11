@@ -23,8 +23,8 @@ inductors
         file       "coil0.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
     
     coil1
@@ -32,8 +32,8 @@ inductors
         file       "coil1.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
     
     coil2
@@ -41,8 +41,8 @@ inductors
         file       "coil2.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
     
     coil3
@@ -50,8 +50,8 @@ inductors
         file       "coil3.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
     
     coil4
@@ -59,8 +59,8 @@ inductors
         file       "coil4.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
     
     coil5
@@ -68,8 +68,8 @@ inductors
         file       "coil5.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
     
     coil6
@@ -77,8 +77,8 @@ inductors
         file       "coil6.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
     
     coil7
@@ -86,8 +86,8 @@ inductors
         file       "coil7.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
     
     coil8
@@ -95,8 +95,8 @@ inductors
         file       "coil8.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
     
     coil9
@@ -104,8 +104,8 @@ inductors
         file       "coil9.eMesh";
         reverse    false;
         current    10.2137646171;
+        filaments  36;
         phase      0.0;
-        bundles    36;
     }
 }
 

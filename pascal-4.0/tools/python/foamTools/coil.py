@@ -39,7 +39,7 @@ def edgeLoopFromPoints(points, start=0):
 # --- Paths ----------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def pathLoop(pathDict, b, start):
+def pathLoop(pathDict, f, start):
     """
 
     pathDict-Keys
@@ -70,8 +70,8 @@ def pathLoop(pathDict, b, start):
 
     points = list()
 
-    r = b[0] + pathDict['r']
-    z = b[1]
+    r = f[0] + pathDict['r']
+    z = f[1]
     phii = 1.0/pathDict['n'] * 2.0*m.pi
 
     for i in range(pathDict['n']):
@@ -121,7 +121,7 @@ def bundleCircleN(bundleDict):
 
     if not 'n' in bundleDict:
 
-        raise KeyError("Number of bundles (n) is missing.")
+        raise KeyError("Number of filaments (n) is missing.")
 
     return bundleDict['n']
 
@@ -134,21 +134,21 @@ def bundleCircle(bundleDict, i):
 
     bundleDict-Keys
     ----------
-    n : int, Number of bundles
+    n : int, Number of filaments
     r : float, Coil bundle radius
     """
 
     if not 'n' in bundleDict:
 
-        raise KeyError("Number of bundles (n) is missing.")
+        raise KeyError("Number of filaments (n) is missing.")
 
     if not type(bundleDict['n']) ==  int:
 
-        raise KeyError("Number of bundles (n) needs to be of type int.")
+        raise KeyError("Number of filaments (n) needs to be of type int.")
 
     if not bundleDict['n'] > 0:
 
-        raise ValueError("Number of bundles (n) needs to be larger than 0.")
+        raise ValueError("Number of filaments (n) needs to be larger than 0.")
 
     if not 'r' in bundleDict:
 
@@ -160,7 +160,7 @@ def bundleCircle(bundleDict, i):
 
     if not i < bundleDict['n']:
 
-        raise ValueError("Coil bundle index (i) out of range (max: n).")
+        raise ValueError("Coil filament index (i) out of range (max: n).")
 
     r = bundleDict['r']
     phii = 1.0/bundleDict['n'] * 2.0*m.pi
@@ -175,7 +175,7 @@ def bundleRectangleN(bundleDict, s=4):
 
     if not 'n' in bundleDict:
 
-        raise KeyError("Number of bundles per side (n) is missing.")
+        raise KeyError("Number of filaments per side (n) is missing.")
 
     return s*(bundleDict['n']-1)
 
@@ -188,22 +188,22 @@ def bundleRectangle(bundleDict, i):
 
     bundleDict-Keys
     ----------
-    n : int, Number of bundles per side
+    n : int, Number of filaments per side
     x : float,  Coil size in radial direction
     y : float,  Coil size in axial direction
     """
 
     if not 'n' in bundleDict:
 
-        raise KeyError("Number of bundles per side (n) is missing.")
+        raise KeyError("Number of filaments per side (n) is missing.")
 
     if not type(bundleDict['n']) ==  int:
 
-        raise KeyError("Number of bundles per side (n) needs to be of type int.")
+        raise KeyError("Number of filaments per side (n) needs to be of type int.")
 
     if not bundleDict['n'] > 1:
 
-        raise ValueError("Number of bundles per side (n) needs to be larger than 1.")
+        raise ValueError("Number of filaments per side (n) needs to be larger than 1.")
 
     if not 'x' in bundleDict:
 
@@ -222,7 +222,7 @@ def bundleRectangle(bundleDict, i):
 
     if not i < N(4):
 
-        raise ValueError("Coil bundle index (i) out of range (max: 4*(n-1)).")
+        raise ValueError("Coil filament index (i) out of range (max: 4*(n-1)).")
 
     b = -0.5 * np.array([bundleDict['x'], bundleDict['y']])
 
@@ -330,11 +330,11 @@ def writeEdgeBiotSavartProperties(case, coils, nNonOrth=10):
 
         for i in range(len(coils)):
 
-            name    = coils[i].name
-            reverse = coils[i].reverse
-            current = coils[i].bundleCurrent
-            phase   = coils[i].phase
-            bundles =coils[i].bundles
+            name      = coils[i].name
+            reverse   = coils[i].reverse
+            current   = coils[i].filamentCurrent
+            filaments = coils[i].filaments
+            phase     = coils[i].phase
 
             f.write(ind(1, name))
             f.write(ind(1, '{'))
@@ -342,8 +342,8 @@ def writeEdgeBiotSavartProperties(case, coils, nNonOrth=10):
             f.write(ind(2, 'file       ' + '"' + name + '.eMesh"' + ';'))
             f.write(ind(2, 'reverse    ' + bstr(reverse) + ';'))
             f.write(ind(2, 'current    ' + str(current) + ';'))
+            f.write(ind(2, 'filaments  ' + str(filaments) + ';'))
             f.write(ind(2, 'phase      ' + str(phase) + ';'))
-            f.write(ind(2, 'bundles    ' + str(bundles) + ';'))
 
             f.write(ind(1, '}'))
 
@@ -403,7 +403,8 @@ class coil(object):
         self.name = name
         self.reverse = reverse
         self.current = current
-        self.bundleCurrent = None
+        self.filaments = None
+        self.filamentCurrent = None
         self.phase = phase
         
         self.bundleDict = bundleDict
@@ -421,16 +422,16 @@ class coil(object):
         bundleShape = self.bundleDict['shape']
         pathShape   = self.pathDict['shape']
 
-        self.bundles = bundleN[bundleShape](self.bundleDict)
-        self.bundleCurrent = bundleI[bundleShape](self.bundleDict, self.current)
+        self.filaments = bundleN[bundleShape](self.bundleDict)
+        self.filamentCurrent = bundleI[bundleShape](self.bundleDict, self.current)
 
-        for i in range(self.bundles):
+        for i in range(self.filaments):
 
-            b = bundle[bundleShape](self.bundleDict, i)
+            f = bundle[bundleShape](self.bundleDict, i)
 
             start = len(self.points)
 
-            p, e = path[pathShape](self.pathDict, b, start)
+            p, e = path[pathShape](self.pathDict, f, start)
 
             self.points += p
             self.edges += e
@@ -511,6 +512,8 @@ class coil(object):
         print("name:", self.name)
         print("reverse:", reverse)
         print("current:", current)
+        print("filaments", filaments)
+        print("filamentCurrent", filamentCurrent)
         print("phase:", phase)
 
         print("pathDict:", self.pathDict)
