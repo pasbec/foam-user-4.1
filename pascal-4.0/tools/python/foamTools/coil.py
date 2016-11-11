@@ -562,7 +562,8 @@ class inductorCoil(object):
 
             function = kwargs['function']
 
-            p = function(p)
+            p = self.points
+            for i in range(len(p)): p[i] = function(p[i])
 
         if 'translate' in kwargs:
 
