@@ -54,6 +54,7 @@ d = App.activeDocument()
 
 v = dict()
 
+v['all']  = [30, 35, 40, 46, 30]
 v['solid']  = [0, 3, 6, 5, 4, 1, 0]
 v['fluid']  = [6, 11, 10, 9, 8, 7, 4, 5, 6]
 v['vessel'] = [12, 0, 1, 4, 7, 8, 16, 15, 14, 13, 12]
@@ -245,20 +246,32 @@ d.recompute()
 # --------------------------------------------------------------------------- #
 
 p = dict()
-pff = dict()
-pfl = dict()
 
-pff['infinity'] = list()
-pfl['infinity'] = [25, 26, 27, 28, 30, 32, 34, 36, 38, 40, 42, 44, 45, 46, 47, 48,
-                   53, 54, 55, 56, 58, 60, 62, 64, 66, 68, 70, 72, 73, 74, 75, 76]
+p['front'] = d.addObject('Part::Feature', 'PatchFront')
+p['front'].Label = 'patch_front'
+p['front'].Shape = Shell([r['all'].Shape.Face4])
 
-for i in pfl['infinity']:
-
-    exec("pff['infinity'].append(r['space'].Shape.Face" + str(i) + ")")
+p['back'] = d.addObject('Part::Feature', 'PatchBack')
+p['back'].Label = 'patch_back'
+p['back'].Shape = Shell([r['all'].Shape.Face7])
 
 p['infinity'] = d.addObject('Part::Feature', 'PatchInifnity')
 p['infinity'].Label = 'patch_infinity'
-p['infinity'].Shape = Shell(pff['infinity'])
+p['infinity'].Shape = Shell([r['all'].Shape.Face1, r['all'].Shape.Face2,
+                             r['all'].Shape.Face3, r['all'].Shape.Face5,
+                             r['all'].Shape.Face6, r['all'].Shape.Face8])
+
+#pff['infinity'] = list()
+#pfl['infinity'] = [25, 26, 27, 28, 30, 32, 34, 36, 38, 40, 42, 44, 45, 46, 47, 48,
+                   #53, 54, 55, 56, 58, 60, 62, 64, 66, 68, 70, 72, 73, 74, 75, 76]
+
+#for i in pfl['infinity']:
+
+    #exec("pff['infinity'].append(r['space'].Shape.Face" + str(i) + ")")
+
+#p['infinity'] = d.addObject('Part::Feature', 'PatchInifnity')
+#p['infinity'].Label = 'patch_infinity'
+#p['infinity'].Shape = Shell(pff['infinity'])
 
 # --------------------------------------------------------------------------- #
 
