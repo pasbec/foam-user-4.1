@@ -86,7 +86,7 @@ class setSetBatch(object):
 
     # ----------------------------------------------------------------------- #
 
-    def _doSurface(self, topo, name, stl, tol=2e-4, i=False, o=False):
+    def _doSurface(self, topo, name, stl, tol=1e-4, i=False, o=False):
 
         # Define write for boolean-strings for OpenFOAM
         def bstr(b): return "true" if b else "false"

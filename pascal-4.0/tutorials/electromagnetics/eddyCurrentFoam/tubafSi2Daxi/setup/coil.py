@@ -28,7 +28,7 @@ from foamTools.coil import (inductorCoils, writeCoilFeatureEdgeMeshes,
 import parameters as par
 
 # --------------------------------------------------------------------------- #
-# --- Coil creation --------------------------------------------------------- #
+# --- Main ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
 coils = inductorCoils("ARRAY", __name__, par.coil_bundle, par.coil_path,
