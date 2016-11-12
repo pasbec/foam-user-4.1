@@ -14,7 +14,7 @@ csb = os.path.basename(os.path.realpath(sys.argv[0]))
 csd = os.path.dirname(os.path.realpath(sys.argv[0]))
 csn = os.path.splitext(csb)[0]
 
-sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
+sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
 import math as m
 import numpy as np
@@ -31,9 +31,9 @@ import parameters as par
 # --- Document -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-mesh = {'normal': par.mesh_normal, 'wedge': False, 'extent': par.mesh_thickness}
+mesh = {"normal": par.mesh_normal, "wedge": False, "extent": par.mesh_thickness}
 
-d = blockMeshDict(fileName=par.dir_polyMesh + '/' + 'blockMeshDict', mesh=mesh)
+d = blockMeshDict(fileName=par.dir_polyMesh + "/" + "blockMeshDict", mesh=mesh)
 
 # --------------------------------------------------------------------------- #
 # --- Vertices -------------------------------------------------------------- #
@@ -53,9 +53,9 @@ def vwg(al, wl=None):
 v      = dict()
 
 v[  0] = v0z(0.0)
-v[  6] = v0z(par.geo_Z['solid'])
+v[  6] = v0z(par.geo_Z["solid"])
 v[  3] = vwg([v[0], v[6]])                    # Centroid of solid axis height
-v[  4] = vrz(par.geo_R['solid'], v[6][1])
+v[  4] = vrz(par.geo_R["solid"], v[6][1])
 v[  1] = vwg([v[0], v[4]])                    # Centroid of solid wall contact
 v[  2] = vwg([v[0], v[4], v[6]], [1, 1.3, 1]) # Centroid of solid (weighted)
 v[  5] = vwg([v[4], v[6]])                    # Centroid of solid radius width
@@ -86,17 +86,17 @@ v[ 27] = vrz(v[9][0], v[24][1])
 v[ 28] = vrz(v[5][0], v[24][1])
 v[ 29] = v0z(v[28][1])
 
-v[ 30] = v0z(par.mesh_Z['C'] - par.mesh_Z['inf'])
+v[ 30] = v0z(par.mesh_Z["C"] - par.mesh_Z["inf"])
 v[ 31] = vrz(v[18][0], v[30][1])
 v[ 32] = vrz(v[19][0], v[30][1])
 v[ 33] = vrz(v[20][0], v[30][1])
 v[ 34] = vrz(v[21][0], v[30][1])
-v[ 35] = vrz(par.mesh_R['inf'], v[30][1])
+v[ 35] = vrz(par.mesh_R["inf"], v[30][1])
 v[ 36] = vrz(v[35][0], v[21][1])
 v[ 37] = vrz(v[36][0], v[22][1])
 v[ 38] = vrz(v[36][0], v[23][1])
 v[ 39] = vrz(v[36][0], v[24][1])
-v[ 40] = vrz(v[36][0], par.mesh_Z['C'] + par.mesh_Z['inf'])
+v[ 40] = vrz(v[36][0], par.mesh_Z["C"] + par.mesh_Z["inf"])
 v[ 41] = vrz(v[24][0], v[40][1])
 v[ 42] = vrz(v[25][0], v[40][1])
 v[ 43] = vrz(v[26][0], v[40][1])
@@ -111,7 +111,7 @@ V = v.copy()
 for i in range(len(V)): V[i] = v[i].copy()
 
 # Axis point shift based on inner point p
-def dv0z(v, p): r = par.mesh_R['axis']; return np.array([r, r*(p[1]-v[1])/p[0]])
+def dv0z(v, p): r = par.mesh_R["axis"]; return np.array([r, r*(p[1]-v[1])/p[0]])
 
 # Shift axis points
 V[ 0] += dv0z(V[ 0], V[ 1])
@@ -174,34 +174,34 @@ d.blocks.set( 33, [ 29, 28, 45, 46], zone="free_external")
 def n(l): s = 0.1; return int(m.ceil(abs(s*par.mesh_scale*l)))
 
 nr                 = dict()
-nr['free_side']   = n(v[35][0] - v[34][0])
-nr['vessel']       = n(v[42][0] - v[43][0])
-nr['heater_side']  = n(v[41][0] - v[42][0])
-nr['heater_width'] = n(v[19][0] - v[18][0])
-nr['fluid_width0'] = n(v[10][0] - v[11][0])
-nr['fluid_width1'] = n(v[9][0] - v[10][0])
-nr['fluid_width2'] = n(v[8][0] - v[9][0])
+nr["free_side"]   = n(v[35][0] - v[34][0])
+nr["vessel"]       = n(v[42][0] - v[43][0])
+nr["heater_side"]  = n(v[41][0] - v[42][0])
+nr["heater_width"] = n(v[19][0] - v[18][0])
+nr["fluid_width0"] = n(v[10][0] - v[11][0])
+nr["fluid_width1"] = n(v[9][0] - v[10][0])
+nr["fluid_width2"] = n(v[8][0] - v[9][0])
 
 nz                   = dict()
-nz['free_top']      = n(v[40][1] - v[39][1])
-nz['free_bottom']   = n(v[36][1] - v[35][1])
-nz['free_internal'] = n(v[29][1] - v[11][1])
-nz['heater_bottom']  = n(v[37][1] - v[36][1])
-nz['fluid_height']   = n(v[11][1] - v[6][1])
+nz["free_top"]      = n(v[40][1] - v[39][1])
+nz["free_bottom"]   = n(v[36][1] - v[35][1])
+nz["free_internal"] = n(v[29][1] - v[11][1])
+nz["heater_bottom"]  = n(v[37][1] - v[36][1])
+nz["fluid_height"]   = n(v[11][1] - v[6][1])
 
-d.blocks.distribution.set( 24, "x", nr['free_side'])
-d.blocks.distribution.set( 30, "x", nr['vessel'])
-d.blocks.distribution.set( 29, "x", nr['heater_side'])
-d.blocks.distribution.set( 11, "x", nr['heater_width'])
-d.blocks.distribution.set(  5, "x", nr['fluid_width0'])
-d.blocks.distribution.set(  4, "x", nr['fluid_width1'])
-d.blocks.distribution.set(  3, "x", nr['fluid_width2'])
+d.blocks.distribution.set( 24, "x", nr["free_side"])
+d.blocks.distribution.set( 30, "x", nr["vessel"])
+d.blocks.distribution.set( 29, "x", nr["heater_side"])
+d.blocks.distribution.set( 11, "x", nr["heater_width"])
+d.blocks.distribution.set(  5, "x", nr["fluid_width0"])
+d.blocks.distribution.set(  4, "x", nr["fluid_width1"])
+d.blocks.distribution.set(  3, "x", nr["fluid_width2"])
 
-d.blocks.distribution.set( 33, "y", nz['free_top'])
-d.blocks.distribution.set( 20, "y", nz['free_bottom'])
-d.blocks.distribution.set( 19, "y", nz['free_internal'])
-d.blocks.distribution.set( 10, "y", nz['heater_bottom'])
-d.blocks.distribution.set(  5, "y", nz['fluid_height'])
+d.blocks.distribution.set( 33, "y", nz["free_top"])
+d.blocks.distribution.set( 20, "y", nz["free_bottom"])
+d.blocks.distribution.set( 19, "y", nz["free_internal"])
+d.blocks.distribution.set( 10, "y", nz["heater_bottom"])
+d.blocks.distribution.set(  5, "y", nz["fluid_height"])
 
 # --------------------------------------------------------------------------- #
 # --- Grading --------------------------------------------------------------- #

@@ -17,7 +17,7 @@ import subprocess
 # --- Function definitions -------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def run(exe, arg='', log='', vrb=0):
+def run(exe, arg="", log="", vrb=0):
 
     # exe : executable string which needs to be hashed
     # arg : arguments string
@@ -25,8 +25,8 @@ def run(exe, arg='', log='', vrb=0):
     # vrb : verbose level
 
     # Start sub process and wait till finished
-    cmd = exe + ' ' + arg
-    # TODO: Check if ''.split() is good enough or not -> shlex.split() ?
+    cmd = exe + " " + arg
+    # TODO: Check if "".split() is good enough or not -> shlex.split() ?
     sp = subprocess.Popen(cmd.split())
     #sp = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -35,7 +35,7 @@ def run(exe, arg='', log='', vrb=0):
     #if (vrb > 1):
 
         ## FIXME: Bug if both stdout and stderr are read simultaneously
-        #stderr = ''
+        #stderr = ""
 
         ## Reset lists
         #stdoutL = []
@@ -55,8 +55,8 @@ def run(exe, arg='', log='', vrb=0):
             ##sys.stderr.write(le)
 
         ## Save stdout and stderr from list
-        #stdout = ''.join(stdoutL)
-        ##stderr = ''.join(stderrL)
+        #stdout = "".join(stdoutL)
+        ##stderr = "".join(stderrL)
 
     #else:
     if True:
@@ -65,16 +65,16 @@ def run(exe, arg='', log='', vrb=0):
         stdout, stderr = sp.communicate()
 
     ## Write log files
-    #if not log=='':
-        #with open(log + '.out', 'w') as logOut:
+    #if not log=="":
+        #with open(log + ".out", "w") as logOut:
             #logOut.write(stdout)
-        #with open(log + '.err', 'w') as logErr:
+        #with open(log + ".err", "w") as logErr:
             #logErr.write(stderr)
 
     # Check return code and exit if failed
     if not (sp.returncode == 0):
-        print(os.path.basename(sys.argv[0]) + ': error: ' + 'subprocess: "'
-              + cmd + '" returned error code ' + str(sp.returncode))
+        print(os.path.basename(sys.argv[0]) + ": error: " + "subprocess: \""
+              + cmd + "\" returned error code " + str(sp.returncode))
         sys.exit(1)
 
 # --------------------------------------------------------------------------- #

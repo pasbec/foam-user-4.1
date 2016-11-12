@@ -14,13 +14,13 @@ csb = os.path.basename(os.path.realpath(sys.argv[0]))
 csd = os.path.dirname(os.path.realpath(sys.argv[0]))
 csn = os.path.splitext(csb)[0]
 
-sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
+sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
 import math as m
 import numpy as np
 
 # --------------------------------------------------------------------------- #
-# --- Parameters ------------------------------------------------------------ #
+# --- Geometry -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 geo_scale      = 1e-3
@@ -45,9 +45,11 @@ geo_alpha      = m.atan(geo_Z[5]/geo_R[0])                # Cone angle (rad)
 geo_magG       = (geo_Z[2] - geo_Z[1]) * m.cos(geo_alpha) # Non-conducting gap size
 geo_G          = geo_magG * np.array([m.sin(geo_alpha), -m.cos(geo_alpha)])
 
-geo_Z['solid'] =  geo_Z[3]                                # Solid height
-geo_R['solid'] =  geo_Z[3] / m.tan(geo_alpha)             # Solid wall contact radius
+geo_Z["solid"] =  geo_Z[3]                                # Solid height
+geo_R["solid"] =  geo_Z[3] / m.tan(geo_alpha)             # Solid wall contact radius
 
+# --------------------------------------------------------------------------- #
+# --- Mesh ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
 mesh_scale     = 1.0
@@ -58,32 +60,34 @@ mesh_thickness = 10.0
 mesh_angle     =  5.0
 
 mesh_R         = dict()
-mesh_R['axis'] = 1.0                                      # Axis patch radius
-mesh_R['inf']  = 4.0 * mesh_space * geo_R[2]              # Infinity patch radius
+mesh_R["axis"] = 1.0                                      # Axis patch radius
+mesh_R["inf"]  = 4.0 * mesh_space * geo_R[2]              # Infinity patch radius
 
 mesh_Z         = dict()
-mesh_Z['C']    = geo_Z[0] + 0.5*(geo_Z[7] - geo_Z[0])
-mesh_Z['inf']  = 4.0 * mesh_space * (geo_Z[6] - geo_Z[3]) # Infinity patch radius
+mesh_Z["C"]    = geo_Z[0] + 0.5*(geo_Z[7] - geo_Z[0])
+mesh_Z["inf"]  = 4.0 * mesh_space * (geo_Z[6] - geo_Z[3]) # Infinity patch radius
 
-mesh_R['inf']  = max(mesh_R['inf'], mesh_Z['inf'])
-mesh_Z['inf']  = max(mesh_Z['inf'], mesh_R['inf'])
+mesh_R["inf"]  = max(mesh_R["inf"], mesh_Z["inf"])
+mesh_Z["inf"]  = max(mesh_Z["inf"], mesh_R["inf"])
 
+# --------------------------------------------------------------------------- #
+# --- Coils ----------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 coil_scale      = 1e-3
 
-coil_bundle     = {'shape': 'rectangle',
-                   'n':     10,
-                   'r':     10.0,
-                   'z':     8.0}
+coil_bundle     = {"shape": "rectangle",
+                   "n":     10,
+                   "r":     10.0,
+                   "z":     8.0}
 
-coil_path       = {'shape': 'loop',
-                   'n':     36,
-                   'r':     100.0 + coil_bundle['r']/2.0}
+coil_path       = {"shape": "loop",
+                   "n":     36,
+                   "r":     100.0 + coil_bundle["r"]/2.0}
 
 coils_n         = 10
 coils_step      = 14.9
-coils_origin    = [0.0, 0.0, 3.0 + coil_bundle['z']/2.0]
+coils_origin    = [0.0, 0.0, 3.0 + coil_bundle["z"]/2.0]
 
 coils_current   = m.sqrt(2.0) * 260.0
 coils_nNonOrto  = 10
@@ -93,15 +97,15 @@ coils_frequency = 6300.0
 # --- Directories ----------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-dir_case = os.path.realpath(csd + '/' + '..')
+dir_case = os.path.realpath(csd + "/" + "..")
 
-dir_0 = os.path.realpath(dir_case + '/' + '0')
-dir_constant = os.path.realpath(dir_case + '/' + 'constant')
-dir_system = os.path.realpath(dir_case + '/' + 'system')
+dir_0 = os.path.realpath(dir_case + "/" + "0")
+dir_constant = os.path.realpath(dir_case + "/" + "constant")
+dir_system = os.path.realpath(dir_case + "/" + "system")
 
-dir_polyMesh = os.path.realpath(dir_constant + '/' + 'polyMesh')
-dir_featureEdgeMesh = os.path.realpath(dir_constant + '/' + 'featureEdgeMesh')
-dir_triSurface = os.path.realpath(dir_constant + '/' + 'triSurface')
+dir_polyMesh = os.path.realpath(dir_constant + "/" + "polyMesh")
+dir_featureEdgeMesh = os.path.realpath(dir_constant + "/" + "featureEdgeMesh")
+dir_triSurface = os.path.realpath(dir_constant + "/" + "triSurface")
 
 for d in [dir_polyMesh, dir_triSurface, dir_featureEdgeMesh]:
     if not os.path.exists(d): os.makedirs(d)

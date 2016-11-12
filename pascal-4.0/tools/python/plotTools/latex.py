@@ -16,9 +16,9 @@ import matplotlib.pyplot as plt
 
 def latexify(
         fig_width=None, fig_height=None, columns=1,
-        fontsize=8, fontfamily='serif'
+        fontsize=8, fontfamily="serif"
     ):
-    """Set up matplotlib's RC params for LaTeX plotting.
+    """Set up matplotlib"s RC params for LaTeX plotting.
     Call this before plotting a figure.
 
     Parameters
@@ -60,26 +60,26 @@ def latexify(
 
     ## Adjust size
 
-    #mpl.rcParams['figure.figsize'] = [fig_width,fig_height]
+    #mpl.rcParams["figure.figsize"] = [fig_width,fig_height]
 
     # Adjust settings
 
-    mpl.rcParams['backend'] = 'ps'
+    mpl.rcParams["backend"] = "ps"
 
-    mpl.rcParams['text.usetex'] = True
-    mpl.rcParams['text.latex.unicode'] = True
-    #mpl.rcParams['text.latex.preamble'] = ['\usepackage{gensymb}']
+    mpl.rcParams["text.usetex"] = True
+    mpl.rcParams["text.latex.unicode"] = True
+    #mpl.rcParams["text.latex.preamble"] = ["\usepackage{gensymb}"]
 
-    mpl.rcParams['font.size'] = fontsize
-    mpl.rcParams['font.family'] = fontfamily
+    mpl.rcParams["font.size"] = fontsize
+    mpl.rcParams["font.family"] = fontfamily
 
-    mpl.rcParams['axes.labelsize'] = fontsize
-    mpl.rcParams['axes.titlesize'] = fontsize
+    mpl.rcParams["axes.labelsize"] = fontsize
+    mpl.rcParams["axes.titlesize"] = fontsize
 
-    mpl.rcParams['legend.fontsize'] = fontsize
+    mpl.rcParams["legend.fontsize"] = fontsize
 
-    mpl.rcParams['xtick.labelsize'] = fontsize
-    mpl.rcParams['ytick.labelsize'] = fontsize
+    mpl.rcParams["xtick.labelsize"] = fontsize
+    mpl.rcParams["ytick.labelsize"] = fontsize
 
 # --------------------------------------------------------------------------- #
 # --- End of module --------------------------------------------------------- #

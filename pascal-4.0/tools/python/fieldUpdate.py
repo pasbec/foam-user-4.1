@@ -65,18 +65,18 @@ def verbStr(vl):
 
     if not vl == None:
         if (vl > 0):
-            return '-' + 'v'*vl + ' '
+            return "-" + "v"*vl + " "
 
         if (vl < 0):
-            raise ValueError('verbose level must not be negative')
+            raise ValueError("verbose level must not be negative")
         else:
-            return ' '
+            return " "
     else:
-        return ' '
+        return " "
 
 
 
-def foamTimeSubDirFilePath(sub, pre, t='', p='', f=''):
+def foamTimeSubDirFilePath(sub, pre, t="", p="", f=""):
 
     # return : path to raw file
     #
@@ -88,55 +88,55 @@ def foamTimeSubDirFilePath(sub, pre, t='', p='', f=''):
 
     # TODO [Low]: Improve descriptions
 
-    path = foamTimePath + '/' + sub + '/' + pre
+    path = foamTimePath + "/" + sub + "/" + pre
 
     if sub==foamTimeRawSubDir:
-        if not t=='internalField':
-            if t=='boundary':
-                path += '.' + p
+        if not t=="internalField":
+            if t=="boundary":
+                path += "." + p
 
             else:
-                raise ValueError('the type ' + t + 'has to be either "interalField" or "boundary"')
+                raise ValueError("the type " + t + "has to be either \"interalField\" or \"boundary\"")
 
-    if not f=='':
-        path += '.' + f
+    if not f=="":
+        path += "." + f
 
     if any(sub in s for s in [foamTimeRawSubDir, foamTimeIntSubDir]):
-        path += '.dat'
+        path += ".dat"
 
     elif sub==foamTimeLogSubDir:
-        path += '.log'
+        path += ".log"
 
     else:
-        raise ValueError('the time sub dir ' + sub + 'has to be one of ' + str([foamTimeRawSubDir, foamTimeIntSubDir, foamTimeLogSubDir]))
+        raise ValueError("the time sub dir " + sub + "has to be one of " + str([foamTimeRawSubDir, foamTimeIntSubDir, foamTimeLogSubDir]))
 
     return path
 
-def  foamTimeRawFilePath(pre, t='', p='', f=''):
+def  foamTimeRawFilePath(pre, t="", p="", f=""):
     return foamTimeSubDirFilePath(foamTimeRawSubDir, pre, t, p, f)
 
-def  foamTimeIntFilePath(pre, t='', p='', f=''):
+def  foamTimeIntFilePath(pre, t="", p="", f=""):
     return foamTimeSubDirFilePath(foamTimeIntSubDir, pre, t, p, f)
 
-def  foamTimeLogFilePath(pre, t='', p='', f=''):
+def  foamTimeLogFilePath(pre, t="", p="", f=""):
     return foamTimeSubDirFilePath(foamTimeLogSubDir, pre, t, p, f)
 
 
 
 def foamGetPatchListFromBoudaryDict(boundaryDict):
 
-    '''
+    """
     Read all patches and their base types directly from the boundary
     dictionary of the current polyMesh.
     @return: (patch list, "patch name <-> type mapping" as list in
              same order as the patch list)
     @param boundaryDict: Currently valid boundary dictionary
-    '''
+    """
 
     # TODO [Low]: Intercept error exceptions with useful descriptions
 
     if not type(boundaryDict)== ParsedParameterFile:
-        raise TypeError(str(boundaryDict) + ' is no valid dictionary (ParsedParameterFile)')
+        raise TypeError(str(boundaryDict) + " is no valid dictionary (ParsedParameterFile)")
 
     # Read and store patch types
     pl = []
@@ -153,17 +153,17 @@ def foamGetPatchListFromBoudaryDict(boundaryDict):
 
 def foamGetUpdateMethodFromFieldUpdateDict(dictionary, argMethod=None):
 
-    '''
+    """
     Function to determine the update method.
     Depending on the exsitance of argMethod, the method from the fieldUpdateDict
     may be overwritten.
     @return: update method
     @param dictionary : field update dictionary
     @param argMethod: method name read from command line
-    '''
+    """
 
     if not type(dictionary)== ParsedParameterFile:
-        raise TypeError(str(dictionary) + ' is no valid dictionary (ParsedParameterFile)')
+        raise TypeError(str(dictionary) + " is no valid dictionary (ParsedParameterFile)")
 
     # update method from dictionary if no optional argument was given
     if argMethod==None:
@@ -179,34 +179,34 @@ def foamGetUpdateMethodFromFieldUpdateDict(dictionary, argMethod=None):
 
 def foamGetUpdateMethodDictFromFieldUpdateDict(dictionary, updateMethod):
 
-    '''
-    Function to determine the update method's dictionary.
-    @return: update method's dictionary
+    """
+    Function to determine the update method"s dictionary.
+    @return: update method"s dictionary
     @param dictionary : field update dictionary
     @param updateMethod: method name
-    '''
+    """
 
     if foamDict.tryKey(dictionary, updateMethod):
         return foamDict.readSubDict(dictionary[updateMethod])
     else:
-        raise KeyError('the dictionary for selected update method "' + updateMethod + '" is missing')
+        raise KeyError("the dictionary for selected update method "" + updateMethod + "" is missing")
 
 
 
 def foamGetFieldListFromFieldUpdateDict(dictionary):
 
-    '''
+    """
     Function to return a list of all fields and their own sub-dictionaries
     from the main field update dictionary.
     @return: (field list, field dictionary list in same order)
     @param dictionary: field update dictionary
-    '''
+    """
 
     if not type(dictionary)== ParsedParameterFile:
-        raise TypeError(str(dictionary) + ' is no valid dictionary (ParsedParameterFile)')
+        raise TypeError(str(dictionary) + " is no valid dictionary (ParsedParameterFile)")
 
     if not foamDict.tryKey(dictionary, "fields"):
-        raise KeyError('the "fields" dictionary is missing')
+        raise KeyError("the \"fields\" dictionary is missing")
 
     fl = []
     fdl = []
@@ -218,20 +218,20 @@ def foamGetFieldListFromFieldUpdateDict(dictionary):
 
 
 
-def foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict(key, sub=''):
+def foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict(key, sub=""):
 
-    '''
+    """
     Small helper function to get key values from the parent field as default
     if specific keys or sub-dictionaries are not given in each single patch.
     @param key: Key to search in patch dict of fieldUpdateDict
     @param sub: Sub-dictionary of patch/field to search the key in
-    '''
+    """
 
     # TODO [Low]: Intercept error exceptions with useful descriptions
 
     if foamDict.tryKey(fieldDictList[f], "patches"):
         if foamDict.tryKey(fieldDictList[f]["patches"], patch):
-            if sub=='':
+            if sub=="":
                 if foamDict.tryKey(fieldDictList[f]["patches"][patch], key):
                     return fieldDictList[f]["patches"][patch][key]
             else:
@@ -240,7 +240,7 @@ def foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict(key, sub=''):
                         return fieldDictList[f]["patches"][patch][sub][key]
 
     else:
-        if sub=='':
+        if sub=="":
             return fieldDictList[f][key]
         else:
             return fieldDictList[f][sub][key]
@@ -250,23 +250,23 @@ def foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict(key, sub=''):
 # --------------------------------------------------------------------------- #
 
 # Description
-parser = argparse.ArgumentParser(description='')
+parser = argparse.ArgumentParser(description="")
 
 # Optional arguments
 parser.add_argument("-c", "--clear",
-                    help="(create and) clear subdirectories (rawdata, intdata, log) of the time folder given with TIME before applying the field update method", action='store_true')
+                    help="(create and) clear subdirectories (rawdata, intdata, log) of the time folder given with TIME before applying the field update method", action="store_true")
 parser.add_argument("-C", "--clean",
-                    help="(create and) clear subdirectories (rawdata, intdata, log) of the time folder and exit", action='store_true')
-parser.add_argument("-m", "--method", metavar='METHOD',
-                    help="overwrite name of update method in", action='store',
+                    help="(create and) clear subdirectories (rawdata, intdata, log) of the time folder and exit", action="store_true")
+parser.add_argument("-m", "--method", metavar="METHOD",
+                    help="overwrite name of update method in", action="store",
                     type=str)
 parser.add_argument("-v", "--verbose",
                     help="increase output verbosity", action="count")
 
 # Positional arguments
-parser.add_argument("time", metavar='TIME',
-                    help="name of time directory to update (default: 0)", action='store',
-                    type=str, default='0')
+parser.add_argument("time", metavar="TIME",
+                    help="name of time directory to update (default: 0)", action="store",
+                    type=str, default="0")
 
 # Commence parsing
 cargs = parser.parse_args()
@@ -285,33 +285,33 @@ if verb == None: verb = 0
 time = cargs.time
 
 # methods
-methodValidResultTypes = ['foamdata', 'rawdata', 'intdata']
+methodValidResultTypes = ["foamdata", "rawdata", "intdata"]
 
 # foam
 foamCasePath = os.getcwd()
 
 foamTimePath = time
-foamTimeFaMeshPath = foamTimePath + '/faMesh'
-foamTimePolyMeshPath = foamTimePath + '/polyMesh'
-foamTimeBoundaryDictPath = foamTimePolyMeshPath + '/boundary'
+foamTimeFaMeshPath = foamTimePath + "/faMesh"
+foamTimePolyMeshPath = foamTimePath + "/polyMesh"
+foamTimeBoundaryDictPath = foamTimePolyMeshPath + "/boundary"
 
-foamTimeRawSubDir = 'rawdata'
-foamTimeRawPath = foamTimePath + '/' + foamTimeRawSubDir
-foamTimeIntSubDir = 'intdata'
-foamTimeIntPath = foamTimePath + '/' + foamTimeIntSubDir
-foamTimeLogSubDir = 'log'
-foamTimeLogPath = foamTimePath + '/' + foamTimeLogSubDir
+foamTimeRawSubDir = "rawdata"
+foamTimeRawPath = foamTimePath + "/" + foamTimeRawSubDir
+foamTimeIntSubDir = "intdata"
+foamTimeIntPath = foamTimePath + "/" + foamTimeIntSubDir
+foamTimeLogSubDir = "log"
+foamTimeLogPath = foamTimePath + "/" + foamTimeLogSubDir
 foamTimeSubPathList = [foamTimeRawPath, foamTimeIntPath, foamTimeLogPath]
 
-foamConstantPath = 'constant'
-foamConstantFaMeshPath = foamConstantPath + '/faMesh'
-foamConstantPolyMeshPath = foamConstantPath + '/polyMesh'
-foamConstantBoundaryDictPath = foamConstantPolyMeshPath + '/boundary'
+foamConstantPath = "constant"
+foamConstantFaMeshPath = foamConstantPath + "/faMesh"
+foamConstantPolyMeshPath = foamConstantPath + "/polyMesh"
+foamConstantBoundaryDictPath = foamConstantPolyMeshPath + "/boundary"
 
-foamSystemPath = 'system'
+foamSystemPath = "system"
 
-foamToolsPath = 'tools'
-foamToolsFieldUpdateDictPath = foamToolsPath + '/fieldUpdateDict'
+foamToolsPath = "tools"
+foamToolsFieldUpdateDictPath = foamToolsPath + "/fieldUpdateDict"
 
 # --------------------------------------------------------------------------- #
 # --- Main program sequence ------------------------------------------------- #
@@ -321,7 +321,7 @@ foamToolsFieldUpdateDictPath = foamToolsPath + '/fieldUpdateDict'
 # +++ print(basic info ++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 print()
-if (verb > 0): print('time = ' + time)
+if (verb > 0): print("time = " + time)
 
 
 
@@ -335,11 +335,11 @@ else:
     boundaryDictPath = foamConstantBoundaryDictPath
 
 # Parse boundary dictionary
-if (verb > 0): print('read boundary dictionary')
+if (verb > 0): print("read boundary dictionary")
 boundaryDict = ParsedParameterFile(boundaryDictPath, boundaryDict=True)
 
 # Extract patch-types mapping as list
-if (verb > 0): print('create patch list')
+if (verb > 0): print("create patch list")
 patchList, patchTypeList = foamGetPatchListFromBoudaryDict(boundaryDict)
 
 
@@ -348,17 +348,17 @@ patchList, patchTypeList = foamGetPatchListFromBoudaryDict(boundaryDict)
 # +++ parse field update dictionary +++++++++++++++++++++++++++++++++++++++++ #
 
 # Parse field update dictionary
-if (verb > 0): print('read field update dictionary')
+if (verb > 0): print("read field update dictionary")
 fieldUpdateDict = ParsedParameterFile(foamToolsFieldUpdateDictPath)
 # FIXME: Why is macro expansion not working correctly?
 fieldUpdateDict = ParsedParameterFile(foamToolsFieldUpdateDictPath, doMacroExpansion=True)
 
 # Extract field update method
-if (verb > 0): print('set update method')
+if (verb > 0): print("set update method")
 updateMethod = foamGetUpdateMethodFromFieldUpdateDict(fieldUpdateDict, method)
 
 # Extract all field names and parse their sub-dictionaries
-if (verb > 0): print('create field list and extract their dictionaries')
+if (verb > 0): print("create field list and extract their dictionaries")
 fieldList, fieldDictList = foamGetFieldListFromFieldUpdateDict(fieldUpdateDict)
 
 
@@ -368,20 +368,20 @@ fieldList, fieldDictList = foamGetFieldListFromFieldUpdateDict(fieldUpdateDict)
 
 # Check if foam time directory exists
 if not (os.path.isdir(time)):
-    raise IOError('time directory "' + time + '" does not exist')
+    raise IOError("time directory "" + time + "" does not exist")
 
 # Create foam time directory structure
-if (verb > 1): print('create time directory structure')
+if (verb > 1): print("create time directory structure")
 for dirPath in foamTimeSubPathList:
     if not (os.path.isdir(dirPath)):
-        if (verb > 1): print('create ' + dirPath)
+        if (verb > 1): print("create " + dirPath)
         os.mkdir(dirPath)
 
 if clear:
     # Raw/Int data and log files
-    if (verb > 0): print('delete old files in time sub-directories ' + str(foamTimeSubPathList))
+    if (verb > 0): print("delete old files in time sub-directories " + str(foamTimeSubPathList))
     for dirPath in foamTimeSubPathList:
-        for path in glob.glob(dirPath + '/' + '*'):
+        for path in glob.glob(dirPath + "/" + "*"):
             if not os.path.isdir(path):
                 if os.path.exists(path): os.remove(path)
 
@@ -396,45 +396,45 @@ if clean:
 # +++ Pre-processing depending on selected update method ++++++++++++++++++++ #
 
 # Process dummy process aliases
-if updateMethod=='foam':
+if updateMethod=="foam":
 
-    updateMethodInternal = 'dummy'
+    updateMethodInternal = "dummy"
     methodResultType = "foamdata"
 
-elif updateMethod=='raw':
+elif updateMethod=="raw":
 
-    updateMethodInternal = 'dummy'
+    updateMethodInternal = "dummy"
     methodResultType = "rawdata"
 
-elif updateMethod=='int':
+elif updateMethod=="int":
 
-    updateMethodInternal = 'dummy'
+    updateMethodInternal = "dummy"
     methodResultType = "intdata"
 
 else:
     updateMethodInternal = updateMethod
 
     # Print info
-    if (verb > 0): print('select update method ' +  updateMethod)
+    if (verb > 0): print("select update method " +  updateMethod)
 
     # Extract field update method dictionary
-    if (verb > 0): print('get update method dictionary')
+    if (verb > 0): print("get update method dictionary")
     updateMethodDict = foamGetUpdateMethodDictFromFieldUpdateDict(fieldUpdateDict, updateMethod)
 
-    # Parse method's settings dictionary
+    # Parse method"s settings dictionary
     updateMethodSettingsDict = foamDict.readSubDict(foamDict.tryMandatory(updateMethodDict, "settings"))
 
-    # Read method's result type
+    # Read method"s result type
     methodResultType = foamDict.readStr(foamDict.tryMandatory(updateMethodDict, "type"))
     if not any(methodResultType in t for t in methodValidResultTypes):
-        raise ValueError('result type of selected update method is "' + methodResultType + '", but must be one of "' + str(methodValidResultTypes))
+        raise ValueError("result type of selected update method is \"" + methodResultType + "\", but must be one of \"" + str(methodValidResultTypes))
 
 # Set interpolation switch to on if we are dealing with data which needs interpoltion
 methodInterpolate = False
-if methodResultType=='intdata': methodInterpolate = True
+if methodResultType=="intdata": methodInterpolate = True
 
 methodCreateFromRaw = False
-if methodResultType=='rawdata' or methodResultType=='intdata': methodCreateFromRaw = True
+if methodResultType=="rawdata" or methodResultType=="intdata": methodCreateFromRaw = True
 
 
 
@@ -444,10 +444,10 @@ if methodResultType=='rawdata' or methodResultType=='intdata': methodCreateFromR
 if methodInterpolate:
 
     # Extract cell centers of volume mesh
-    if (verb > 0): print('extract cell centers')
-    exe = 'extractCellCenters'
-    arg = '-time ' + time
-    log = foamTimeLogFilePath('extractCellCenters')
+    if (verb > 0): print("extract cell centers")
+    exe = "extractCellCenters"
+    arg = "-time " + time
+    log = foamTimeLogFilePath("extractCellCenters")
     subProc.run(exe, arg, log, verb)
 
     ## Loop over all data patches
@@ -461,17 +461,17 @@ if methodInterpolate:
         if patchValued:
 
             # Extract patch face center data
-            if (verb > 0): print('extract face centers of patch ' + patch)
-            exe = 'extractPatchFaceCenters'
-            arg = patch + ' -time ' + time
-            log = foamTimeLogFilePath('extractPatchFaceCenters', p=patch)
+            if (verb > 0): print("extract face centers of patch " + patch)
+            exe = "extractPatchFaceCenters"
+            arg = patch + " -time " + time
+            log = foamTimeLogFilePath("extractPatchFaceCenters", p=patch)
             subProc.run(exe, arg, log, verb)
 
             # Extract patch point data
-            if (verb > 0): print('extract points of patch ' + patch)
-            exe = 'extractPatchPoints'
-            arg = patch + ' -time ' + time
-            log = foamTimeLogFilePath('extractPatchPoints', p=patch)
+            if (verb > 0): print("extract points of patch " + patch)
+            exe = "extractPatchPoints"
+            arg = patch + " -time " + time
+            log = foamTimeLogFilePath("extractPatchPoints", p=patch)
             subProc.run(exe, arg, log, verb)
 
 
@@ -479,67 +479,67 @@ if methodInterpolate:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # +++ Process update method +++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-if (updateMethodInternal == 'dummy'):
+if (updateMethodInternal == "dummy"):
     pass
 
-elif (updateMethodInternal == 'copyFoam'):
+elif (updateMethodInternal == "copyFoam"):
 
     # Read basic settings from update method dictionary
     copyFoamDataPath = foamDict.readStr(foamDict.tryMandatory(updateMethodSettingsDict, "path"))
 
     # Copy foam file
     for field in fieldList:
-        shutil.copy(copyFoamDataPath + '/' + field, foamTimePath)
+        shutil.copy(copyFoamDataPath + "/" + field, foamTimePath)
 
-elif (updateMethodInternal == 'copyRaw'):
+elif (updateMethodInternal == "copyRaw"):
 
     # Read basic settings from update method dictionary
     copyRawDataPath = foamDict.readStr(foamDict.tryMandatory(updateMethodSettingsDict, "path"))
 
     # Copy all data of given path
     for field in fieldList:
-        for path in glob.glob(copyRawDataPath + '/' + field + '*'):
+        for path in glob.glob(copyRawDataPath + "/" + field + "*"):
             shutil.copy(path, foamTimeRawPath)
 
-elif (updateMethodInternal == 'comsolLorentzForceSurface'):
+elif (updateMethodInternal == "comsolLorentzForceSurface"):
 
     # Name of comsol binary
-    comsolBin = 'comsol'
+    comsolBin = "comsol"
 
     # Read basic settings from update method dictionary
     comsolWorkPath = foamDict.readStr(foamDict.tryMandatory(updateMethodSettingsDict, "root"))
     comsolRecompile = foamDict.readBool(foamDict.tryOrDefault(updateMethodSettingsDict, "recompile",True))
 
     # Settings for temporary files and logging
-    comsolTmpPath = comsolWorkPath + '/tmp'
-    comsolLogPath = comsolWorkPath + '/log'
+    comsolTmpPath = comsolWorkPath + "/tmp"
+    comsolLogPath = comsolWorkPath + "/log"
     comsolSubPathList = [comsolTmpPath, comsolLogPath]
 
-    comsolSurfaceDatFile = 'surface.dat'
-    comsolSurfaceDatPath = comsolTmpPath + '/' + comsolSurfaceDatFile
-    comsolExportDatFile = 'export.dat'
-    comsolExportDatPath = comsolTmpPath + '/' + comsolExportDatFile
+    comsolSurfaceDatFile = "surface.dat"
+    comsolSurfaceDatPath = comsolTmpPath + "/" + comsolSurfaceDatFile
+    comsolExportDatFile = "export.dat"
+    comsolExportDatPath = comsolTmpPath + "/" + comsolExportDatFile
 
     # Read model name to derive file names
     comsolModelName = foamDict.readStr(foamDict.tryMandatory(updateMethodSettingsDict, "name"))
-    comsolModelName = re.sub('\.[^.]*$','',comsolModelName)
+    comsolModelName = re.sub("\.[^.]*$","",comsolModelName)
 
     # Read java file path
-    comsolJavaFile = comsolModelName + '.java'
-    comsolJavaPath = comsolWorkPath + '/' + comsolJavaFile
-    comsolJavaPathFull = foamCasePath + '/' + comsolJavaPath
+    comsolJavaFile = comsolModelName + ".java"
+    comsolJavaPath = comsolWorkPath + "/" + comsolJavaFile
+    comsolJavaPathFull = foamCasePath + "/" + comsolJavaPath
 
     # Relate class file to java file
-    comsolClassFile = comsolModelName + '.class'
-    comsolClassPath = comsolWorkPath + '/' + comsolClassFile
-    comsolClassPathFull = foamCasePath + '/' + comsolClassPath
+    comsolClassFile = comsolModelName + ".class"
+    comsolClassPath = comsolWorkPath + "/" + comsolClassFile
+    comsolClassPathFull = foamCasePath + "/" + comsolClassPath
 
     # Parse surface dictionary
     comsolSurfaceDict = foamDict.readSubDict(updateMethodSettingsDict["surface"])
 
     comsolSurfacePatch = foamDict.readStr(foamDict.tryMandatory(comsolSurfaceDict, "patch"))
     comsolSurfaceSource = foamDict.readStr(foamDict.tryMandatory(comsolSurfaceDict, "source"))
-    comsolSurfaceSourcePath = foamTimeRawFilePath(comsolSurfaceSource, t='boundary', p=comsolSurfacePatch)
+    comsolSurfaceSourcePath = foamTimeRawFilePath(comsolSurfaceSource, t="boundary", p=comsolSurfacePatch)
     comsolSurfaceComments = foamDict.readStr(foamDict.tryMandatory(comsolSurfaceDict, "comments"))
 
     # Copy result settings from method
@@ -551,76 +551,76 @@ elif (updateMethodInternal == 'comsolLorentzForceSurface'):
     # --- prepare comsol directory ------------------------------------------ #
 
     # Print info
-    if (verb > 0): print('prepare comsol directory structure')
+    if (verb > 0): print("prepare comsol directory structure")
 
     # Create comsol time directory structure if necessary
     for dirPath in comsolSubPathList:
         if not os.path.isdir(dirPath):
-            if (verb > 0): print('create ' + dirPath + ' in ' + time)
+            if (verb > 0): print("create " + dirPath + " in " + time)
             os.mkdir(dirPath)
 
 
     # --- prepare surface data ---------------------------------------------- #
 
     # Print info
-    if (verb > 0): print('prepare surface data')
+    if (verb > 0): print("prepare surface data")
 
     # Check if surface file is present
     if not os.path.exists(comsolSurfaceSourcePath):
-        raise IOError('surface file "' + comsolSurfaceSourcePath + '" does not exist')
+        raise IOError("surface file \"" + comsolSurfaceSourcePath + "\" does not exist")
 
     # Copy raw surface file for comsol
-    if (verb > 0): print('copy and prepare point data file of free surface')
+    if (verb > 0): print("copy and prepare point data file of free surface")
     shutil.copy(comsolSurfaceSourcePath, comsolSurfaceDatPath)
     if not os.path.exists(comsolSurfaceDatPath):
-        raise IOError('comsol surface data file "' + comsolSurfaceDatPath + '" is no file')
+        raise IOError("comsol surface data file \"" + comsolSurfaceDatPath + "\" is no file")
 
     # Replace comments prefix in surface file
-    replacePatternByMatch(comsolSurfaceDatPath, comsolSurfaceComments,'%')
+    replacePatternByMatch(comsolSurfaceDatPath, comsolSurfaceComments,"%")
 
 
     # --- comsol simulation and field data export --------------------------- #
 
     # Check if comsol java setup file exists and exit if not
     if not os.path.exists(comsolJavaPath):
-        raise IOError('comsol java file "' + comsolJavaPath + '" is missing')
+        raise IOError("comsol java file \"" + comsolJavaPath + "\" is missing")
 
     # Recompile comsol java setup file to get a class file if necessary
     if comsolRecompile or not os.path.exists(comsolClassPath):
-        if (verb > 0): print('recompile comsol setup')
+        if (verb > 0): print("recompile comsol setup")
         exe = comsolBin
-        arg = 'compile' + ' ' + comsolJavaPathFull
-        log = comsolLogPath + '/compile'
+        arg = "compile" + " " + comsolJavaPathFull
+        log = comsolLogPath + "/compile"
         subProc.run(exe,arg,log,verb)
 
     # Start comsol
     # HINT: Comsol needs to get started in the directory
     #       where the class file is stored: so we have to
     #       change our working directory, temporarily
-    if (verb > 0): print('start comsol simulation')
+    if (verb > 0): print("start comsol simulation")
     os.chdir(comsolWorkPath)
     if True:
         # Run simulation of the setup
         exe = comsolBin
-        arg = 'batch -inputfile' + ' ' + comsolClassFile
-        log = comsolLogPath + '/batch'
+        arg = "batch -inputfile" + " " + comsolClassFile
+        log = comsolLogPath + "/batch"
         subProc.run(exe,arg,vrb=verb)
     os.chdir(foamCasePath)
 
     # Check if comsol export data file exists and exit if not
     if not os.path.exists(comsolExportDatPath):
-        raise IOError('comsol export data file "' + comsolExportDatPath + '" is missing')
+        raise IOError("comsol export data file \"" + comsolExportDatPath + "\" is missing")
 
 
     # --- process results --------------------------------------------------- #
 
     # Copy epxported data file depending on its type raw/int to time subdir
-    if (verb > 0): print('copy comsol results')
+    if (verb > 0): print("copy comsol results")
     shutil.copy(comsolExportDatPath, comsolResultPath)
 
 
 
-else: raise ValueError('update method ' + updateMethod + ' is not supported')
+else: raise ValueError("update method " + updateMethod + " is not supported")
 
 
 
@@ -636,7 +636,7 @@ for f, field in enumerate(fieldList):
     fieldAtomicType, fieldAtomicSize = foamClassInfo.fieldClassToAtomicTypeSize(fieldClass)
     fieldDimension = foamDict.readDim(foamDict.tryMandatory(fieldDictList[f], "dimension"))
 
-    # Read interpolation switch from method's settings
+    # Read interpolation switch from method"s settings
     fieldInterpolate = methodInterpolate
 
 
@@ -646,7 +646,7 @@ for f, field in enumerate(fieldList):
     if fieldInterpolate:
 
         # Print info
-        if (verb > 0): print('interpolate data for field ' + field + ' on cell centers')
+        if (verb > 0): print("interpolate data for field " + field + " on cell centers")
 
         # Parse interpolation data dictionary for internal field
         intDataDict = foamDict.readSubDict(foamDict.tryMandatory(fieldDictList[f], "intdata"))
@@ -656,25 +656,25 @@ for f, field in enumerate(fieldList):
         sourceColumns = fieldAtomicSize
         sourceOffset = foamDict.readInt(foamDict.tryMandatory(intDataDict, "sourceOffset"))
         sourceComments = foamDict.readStr(foamDict.tryMandatory(intDataDict, "sourceComments"))
-        sourcePath = foamTimeIntPath + '/' + source + '.dat'
+        sourcePath = foamTimeIntPath + "/" + source + ".dat"
 
         # Check interpolation source data of internalField
         if not os.path.exists(sourcePath):
-            raise IOError('interpolation source data file "' + sourcePath + '" for field ' + field + ' is missing')
+            raise IOError("interpolation source data file \"" + sourcePath + "\" for field " + field + " is missing")
 
         # Read interpolation target node information
         tnodes = foamDict.readStr(foamDict.tryMandatory(intDataDict, "tnodes"))
         tnodesOffset = foamDict.readInt(foamDict.tryMandatory(intDataDict, "tnodesOffset"))
         tnodesComments = foamDict.readStr(foamDict.tryMandatory(intDataDict, "tnodesComments"))
-        tnodesPath = foamTimeRawPath + '/' + tnodes + '.internal' + '.dat'
+        tnodesPath = foamTimeRawPath + "/" + tnodes + ".internal" + ".dat"
 
         # Check interpolation target node data of internalField
         if not os.path.exists(tnodesPath):
-            raise IOError('interpolation target node data file "' + tnodesPath + '" for field ' + field + ' is missing')
+            raise IOError("interpolation target node data file \"" + tnodesPath + "\" for field " + field + " is missing")
 
         # Assemble target information
         target = foamDict.readStr(foamDict.tryOrDefault(intDataDict, "target",field))
-        targetPath = foamTimeRawPath + '/' + target + '.' + 'internal' + '.dat'
+        targetPath = foamTimeRawPath + "/" + target + "." + "internal" + ".dat"
 
         # Parse interpolation data settings sub-dictionary for internal field
         intDataSettingsDict = foamDict.readSubDict(foamDict.tryMandatory(intDataDict, "settings"))
@@ -684,8 +684,8 @@ for f, field in enumerate(fieldList):
         settingsInterpolatePoints = foamDict.readInt(foamDict.tryOrDefault(intDataSettingsDict, "Pn",8))
         settingsInterpolateRadius = foamDict.readFloat(foamDict.tryOrDefault(intDataSettingsDict, "Pr",numpy.inf))
         settingsSmooth = foamDict.readBool(foamDict.tryOrDefault(intDataSettingsDict, "S",False))
-        settingsSmoothStr = ''
-        if settingsSmooth: settingsSmoothStr = '-S'
+        settingsSmoothStr = ""
+        if settingsSmooth: settingsSmoothStr = "-S"
         settingsSmoothExponent = foamDict.readInt(foamDict.tryOrDefault(intDataSettingsDict, "Sp",1))
         settingsSmoothPoints = foamDict.readInt(foamDict.tryOrDefault(intDataSettingsDict, "Sn",3))
         settingsSmoothRadius = foamDict.readFloat(foamDict.tryOrDefault(intDataSettingsDict, "Sr",numpy.inf))
@@ -693,22 +693,22 @@ for f, field in enumerate(fieldList):
 
         # Interpolate data on cell centers
         # TODO [Low]: Do not use subprocess here, use python directly
-        exe = 'foamUserToolInterpolate'
-        arg = verbStr(verb) + ' ' \
-            + '-Pp ' + str(settingsInterpolateExponent) + ' ' \
-            + '-Pn ' + str(settingsInterpolatePoints) + ' ' \
-            + '-Pr ' + str(settingsInterpolateRadius) + ' ' \
-            + settingsSmoothStr + ' ' \
-            + '-Sp ' + str(settingsSmoothExponent) + ' ' \
-            + '-Sn ' + str(settingsSmoothPoints) + ' ' \
-            + '-Sr ' + str(settingsSmoothRadius) + ' ' \
-            + '-Sf ' + str(settingsSmoothFactor) + ' ' \
-            + '-i ' + sourceComments + ' ' + tnodesComments + ' ' \
-            + '-csd ' + str(sourceColumns) + ' ' \
-            + '-cso ' + str(sourceOffset) + ' ' \
-            + '-cno ' + str(tnodesOffset) + ' ' \
-            + sourcePath + ' ' + tnodesPath + ' ' + targetPath
-        log = foamTimeLogPath + '/' + 'foamUserToolInterpolate'
+        exe = "foamUserToolInterpolate"
+        arg = verbStr(verb) + " " \
+            + "-Pp " + str(settingsInterpolateExponent) + " " \
+            + "-Pn " + str(settingsInterpolatePoints) + " " \
+            + "-Pr " + str(settingsInterpolateRadius) + " " \
+            + settingsSmoothStr + " " \
+            + "-Sp " + str(settingsSmoothExponent) + " " \
+            + "-Sn " + str(settingsSmoothPoints) + " " \
+            + "-Sr " + str(settingsSmoothRadius) + " " \
+            + "-Sf " + str(settingsSmoothFactor) + " " \
+            + "-i " + sourceComments + " " + tnodesComments + " " \
+            + "-csd " + str(sourceColumns) + " " \
+            + "-cso " + str(sourceOffset) + " " \
+            + "-cno " + str(tnodesOffset) + " " \
+            + sourcePath + " " + tnodesPath + " " + targetPath
+        log = foamTimeLogPath + "/" + "foamUserToolInterpolate"
         subProc.run(exe, arg, log, verb)
 
         ## Loop over all data patches
@@ -722,31 +722,31 @@ for f, field in enumerate(fieldList):
             if patchValued:
 
                 # Print info
-                if (verb > 0): print('interpolate data for field ' + field + ' on face centers of patch ' + patch)
+                if (verb > 0): print("interpolate data for field " + field + " on face centers of patch " + patch)
 
                 # Read interpolation source information
                 source = foamDict.readStr(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("source",sub="intdata"))
                 sourceOffset = foamDict.readInt(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("sourceOffset",sub="intdata"))
                 sourceComments = foamDict.readStr(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("sourceComments",sub="intdata"))
-                sourcePath = foamTimeIntPath + '/' + source + '.dat'
+                sourcePath = foamTimeIntPath + "/" + source + ".dat"
 
                 # Check interpolation source data for patch
                 if not os.path.exists(sourcePath):
-                   raise IOError('interpolation source data file "' + sourcePath + '" for patch ' + patch + ' of field ' + field + ' is missing')
+                   raise IOError("interpolation source data file \"" + sourcePath + "\" for patch " + patch + " of field " + field + " is missing")
 
                 # Read interpolation target node information
                 tnodes = foamDict.readStr(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("tnodes",sub="intdata"))
                 tnodesOffset = foamDict.readInt(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("tnodesOffset",sub="intdata"))
                 tnodesComments = foamDict.readStr(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("tnodesComments",sub="intdata"))
-                tnodesPath = foamTimeRawPath + '/' + tnodes + '.' + patch + '.dat'
+                tnodesPath = foamTimeRawPath + "/" + tnodes + "." + patch + ".dat"
 
                 # Check interpolation target node data for patch
                 if not os.path.exists(tnodesPath):
-                   raise IOError('interpolation target node data file "' + tnodesPath + '" for patch ' + patch + ' of field ' + field + ' is missing')
+                   raise IOError("interpolation target node data file \"" + tnodesPath + "\" for patch " + patch + " of field " + field + " is missing")
 
                 # Assemble target information
                 target = foamDict.readStr(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("target",sub="intdata"))
-                targetPath = foamTimeRawPath + '/' + target + '.' + patch + '.dat'
+                targetPath = foamTimeRawPath + "/" + target + "." + patch + ".dat"
 
                 # Parse interpolation data settings sub-dictionary for internal field
                 intDataSettingsDict = foamDict.readSubDict(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("settings",sub="intdata"))
@@ -756,8 +756,8 @@ for f, field in enumerate(fieldList):
                 settingsInterpolatePoints = foamDict.readInt(foamDict.tryOrDefault(intDataSettingsDict, "Pn",8))
                 settingsInterpolateRadius = foamDict.readFloat(foamDict.tryOrDefault(intDataSettingsDict, "Pr",numpy.inf))
                 settingsSmooth = foamDict.readBool(foamDict.tryOrDefault(intDataSettingsDict, "S",False))
-                settingsSmoothStr = ''
-                if settingsSmooth: settingsSmoothStr = '-S'
+                settingsSmoothStr = ""
+                if settingsSmooth: settingsSmoothStr = "-S"
                 settingsSmoothExponent = foamDict.readInt(foamDict.tryOrDefault(intDataSettingsDict, "Sp",1))
                 settingsSmoothPoints = foamDict.readInt(foamDict.tryOrDefault(intDataSettingsDict, "Sn",3))
                 settingsSmoothRadius = foamDict.readFloat(foamDict.tryOrDefault(intDataSettingsDict, "Sr",numpy.inf))
@@ -765,22 +765,22 @@ for f, field in enumerate(fieldList):
 
                 # Interpolate data on cell centers
                 # TODO [Low]: Do not use subprocess here, use python directly
-                exe = 'foamUserToolInterpolate'
-                arg = verbStr(verb) + ' ' \
-                    + '-Pp ' + str(settingsInterpolateExponent) + ' ' \
-                    + '-Pn ' + str(settingsInterpolatePoints) + ' ' \
-                    + '-Pr ' + str(settingsInterpolateRadius) + ' ' \
-                    + settingsSmoothStr + ' ' \
-                    + '-Sp ' + str(settingsSmoothExponent) + ' ' \
-                    + '-Sn ' + str(settingsSmoothPoints) + ' ' \
-                    + '-Sr ' + str(settingsSmoothRadius) + ' ' \
-                    + '-Sf ' + str(settingsSmoothFactor) + ' ' \
-                    + '-i ' + sourceComments + ' ' + tnodesComments + ' ' \
-                    + '-csd ' + str(sourceColumns) + ' ' \
-                    + '-cso ' + str(sourceOffset) + ' ' \
-                    + '-cno ' + str(tnodesOffset) + ' ' \
-                    + sourcePath + ' ' + tnodesPath + ' ' + targetPath
-                log = foamTimeLogPath + '/' + 'foamUserToolInterpolate'
+                exe = "foamUserToolInterpolate"
+                arg = verbStr(verb) + " " \
+                    + "-Pp " + str(settingsInterpolateExponent) + " " \
+                    + "-Pn " + str(settingsInterpolatePoints) + " " \
+                    + "-Pr " + str(settingsInterpolateRadius) + " " \
+                    + settingsSmoothStr + " " \
+                    + "-Sp " + str(settingsSmoothExponent) + " " \
+                    + "-Sn " + str(settingsSmoothPoints) + " " \
+                    + "-Sr " + str(settingsSmoothRadius) + " " \
+                    + "-Sf " + str(settingsSmoothFactor) + " " \
+                    + "-i " + sourceComments + " " + tnodesComments + " " \
+                    + "-csd " + str(sourceColumns) + " " \
+                    + "-cso " + str(sourceOffset) + " " \
+                    + "-cno " + str(tnodesOffset) + " " \
+                    + sourcePath + " " + tnodesPath + " " + targetPath
+                log = foamTimeLogPath + "/" + "foamUserToolInterpolate"
                 subProc.run(exe, arg, log, verb)
 
 
@@ -790,7 +790,7 @@ for f, field in enumerate(fieldList):
     if methodCreateFromRaw:
 
         # Print info
-        if (verb > 0): print('create foam object from raw data of field ' + field)
+        if (verb > 0): print("create foam object from raw data of field " + field)
 
         # Assemble field info tuple
         fInfo = (field, fieldClass, fieldDimension)
@@ -802,11 +802,11 @@ for f, field in enumerate(fieldList):
         raw = foamDict.readStr(foamDict.tryOrDefault(rawDataDict, "data",field))
         rawOffset = foamDict.readInt(foamDict.tryMandatory(rawDataDict, "offset"))
         rawComments = foamDict.readStr(foamDict.tryMandatory(rawDataDict, "comments"))
-        rawPath = foamTimeRawPath + '/' + raw + '.' + 'internal' + '.dat'
+        rawPath = foamTimeRawPath + "/" + raw + "." + "internal" + ".dat"
 
         # Check raw data for internalField
         if not os.path.exists(rawPath):
-            raise IOError('raw data file "' + rawPath + '" for field ' + field + ' is missing')
+            raise IOError("raw data file \"" + rawPath + "\" for field " + field + " is missing")
 
         # Assemble information for field conversion
         rInfo = (rawPath, rawOffset, rawComments)
@@ -825,11 +825,11 @@ for f, field in enumerate(fieldList):
             raw = foamDict.readStr(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("data",sub="rawdata"))
             rawOffset = foamDict.readInt(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("offset",sub="rawdata"))
             rawComments = foamDict.readStr(foamFieldDictValIfPatchKeyNotPresentFromFieldUpdateDict("comments",sub="rawdata"))
-            rawPath = foamTimeRawPath + '/' + raw + '.' + patch + '.dat'
+            rawPath = foamTimeRawPath + "/" + raw + "." + patch + ".dat"
 
             # Check raw data for patch
             if patchValued and not os.path.exists(rawPath):
-                raise IOError('raw data file "' + rawPath + '" for patch ' + patch + ' of field ' + field + ' is missing')
+                raise IOError("raw data file \"" + rawPath + "\" for patch " + patch + " of field " + field + " is missing")
 
             # Assemble information for field conversion
             pData = (rawPath, rawOffset, rawComments)
@@ -837,8 +837,8 @@ for f, field in enumerate(fieldList):
             pInfoList.append(pInfo)
 
         # Delete existing foam field files in time dir
-        if (verb > 0): print('delete old files for field ' + field)
-        for path in [foamTimePath + '/' + field, foamTimePath + '/' + field + '.gz']:
+        if (verb > 0): print("delete old files for field " + field)
+        for path in [foamTimePath + "/" + field, foamTimePath + "/" + field + ".gz"]:
             if not os.path.isdir(path):
                 if os.path.exists(path): os.remove(path)
 

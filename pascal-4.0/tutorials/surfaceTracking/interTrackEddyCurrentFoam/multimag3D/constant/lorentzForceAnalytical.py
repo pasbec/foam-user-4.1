@@ -76,23 +76,23 @@ def fl(r,z):
 rl = np.linspace(0.0,R0,nr)
 zl = np.linspace(0.0,H0,nz)
 
-R,Z = np.meshgrid(rl,zl,indexing='ij')
+R,Z = np.meshgrid(rl,zl,indexing="ij")
 F   = np.zeros(R.shape)
 
 
 # Calculate and write data
-with open(fileGetPath('lorentzForceAnalytical.dat'),'w') as lff:
+with open(fileGetPath("lorentzForceAnalytical.dat"),"w") as lff:
 
-    lff.write('# Variables: ' + 'r' + ' ' + 'z' + ' ' + 'F' + '\n')
+    lff.write("# Variables: " + "r" + " " + "z" + " " + "F" + "\n")
 
-    lff.write('# Resolution: ' + 'nr=' + str(nr) + ', ' + 'nz=' + str(nz) + '\n')
+    lff.write("# Resolution: " + "nr=" + str(nr) + ", " + "nz=" + str(nz) + "\n")
 
     for ri in range(nr):
         for zi in range(nz):
 
             F[ri,zi] = fl(rl[ri],zl[zi])
 
-            lff.write(str(rl[ri]) + ' ' + str(zl[zi]) + ' ' + str(F[ri,zi]) + '\n')
+            lff.write(str(rl[ri]) + " " + str(zl[zi]) + " " + str(F[ri,zi]) + "\n")
 
 print "Fmin, Fmax :", str(np.min(F)) + ",", str(np.max(F))
 

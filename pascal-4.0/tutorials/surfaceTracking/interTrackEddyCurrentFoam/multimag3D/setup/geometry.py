@@ -14,8 +14,8 @@ csb = os.path.basename(os.path.realpath(sys.argv[0]))
 csd = os.path.dirname(os.path.realpath(sys.argv[0]))
 csn = os.path.splitext(csb)[0]
 
-sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
-sys.path.append('/usr/lib/freecad/lib')
+sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
+sys.path.append("/usr/lib/freecad/lib")
 
 import math as m
 import numpy as np
@@ -52,18 +52,18 @@ d = App.activeDocument()
 
 s = dict()
 
-s['inner'] = d.addObject('Sketcher::SketchObject', 'SketchInner')
-s['inner'].Label = 'sketch_inner'
-s['inner'].Placement = Placement(Vector(0.0, 0.0, par.geo_z1),
+s["inner"] = d.addObject("Sketcher::SketchObject", "SketchInner")
+s["inner"].Label = "sketch_inner"
+s["inner"].Placement = Placement(Vector(0.0, 0.0, par.geo_z1),
                                  Rotation(0.0, 0.0, 0, 1.0))
-s['inner'].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
+s["inner"].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
                               Vector(0.0, 0.0, 1.0), par.geo_r1))
 
-s['outer'] = d.addObject('Sketcher::SketchObject', 'SketchOuter')
-s['outer'].Label = 'sketch_outer'
-s['outer'].Placement = Placement(Vector(0.0, 0.0, par.geo_z1),
+s["outer"] = d.addObject("Sketcher::SketchObject", "SketchOuter")
+s["outer"].Label = "sketch_outer"
+s["outer"].Placement = Placement(Vector(0.0, 0.0, par.geo_z1),
                                  Rotation(0.0, 0.0, 0, 1.0))
-s['outer'].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
+s["outer"].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
                               Vector(0.0, 0.0, 1.0), par.geo_r2))
 
 # --------------------------------------------------------------------------- #
@@ -72,31 +72,31 @@ s['outer'].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
 
 r = dict()
 
-r['fluid'] = d.addObject('Part::Extrusion', 'RegionFluid')
-r['fluid'].Label = 'region_fluid'
-r['fluid'].Base = s['inner']
-r['fluid'].Dir = (0.0, 0.0, par.geo_z3)
-r['fluid'].Solid = True
-r['fluid'].TaperAngle = 0.0
+r["fluid"] = d.addObject("Part::Extrusion", "RegionFluid")
+r["fluid"].Label = "region_fluid"
+r["fluid"].Base = s["inner"]
+r["fluid"].Dir = (0.0, 0.0, par.geo_z3)
+r["fluid"].Solid = True
+r["fluid"].TaperAngle = 0.0
 
-r['above'] = d.addObject('Part::Extrusion', 'RegionAbove')
-r['above'].Label = 'region_above'
-r['above'].Base = s['outer']
-r['above'].Dir = (0.0, 0.0, par.geo_z4)
-r['above'].Solid = True
-r['above'].TaperAngle = 0.0
+r["above"] = d.addObject("Part::Extrusion", "RegionAbove")
+r["above"].Label = "region_above"
+r["above"].Base = s["outer"]
+r["above"].Dir = (0.0, 0.0, par.geo_z4)
+r["above"].Solid = True
+r["above"].TaperAngle = 0.0
 
-r['below'] = d.addObject('Part::Extrusion', 'RegionBelow')
-r['below'].Label = 'region_below'
-r['below'].Base = s['outer']
-r['below'].Dir = (0.0, 0.0, par.geo_z0)
-r['below'].Solid = True
-r['below'].TaperAngle = 0.0
+r["below"] = d.addObject("Part::Extrusion", "RegionBelow")
+r["below"].Label = "region_below"
+r["below"].Base = s["outer"]
+r["below"].Dir = (0.0, 0.0, par.geo_z0)
+r["below"].Solid = True
+r["below"].TaperAngle = 0.0
 
-r['buffer'] = d.addObject("Part::Cut", "RegionBuffer")
-r['buffer'].Label = 'region_buffer'
-r['buffer'].Base = r['above']
-r['buffer'].Tool = r['fluid']
+r["buffer"] = d.addObject("Part::Cut", "RegionBuffer")
+r["buffer"].Label = "region_buffer"
+r["buffer"].Base = r["above"]
+r["buffer"].Tool = r["fluid"]
 
 # --------------------------------------------------------------------------- #
 
@@ -108,23 +108,23 @@ d.recompute()
 
 p = dict()
 
-p['fixedMesh'] = d.addObject('Part::Feature', 'PatchFixedMesh')
-p['fixedMesh'].Label = 'patch_fixedMesh'
-p['fixedMesh'].Shape = Shell([r['buffer'].Shape.Face1,
-                              r['buffer'].Shape.Face2,
-                              r['buffer'].Shape.Face3])
+p["fixedMesh"] = d.addObject("Part::Feature", "PatchFixedMesh")
+p["fixedMesh"].Label = "patch_fixedMesh"
+p["fixedMesh"].Shape = Shell([r["buffer"].Shape.Face1,
+                              r["buffer"].Shape.Face2,
+                              r["buffer"].Shape.Face3])
 
-p['sideWall'] = d.addObject('Part::Feature', 'PatchSideWall')
-p['sideWall'].Label = 'patch_sideWall'
-p['sideWall'].Shape = Shell([r['fluid'].Shape.Face1])
+p["sideWall"] = d.addObject("Part::Feature", "PatchSideWall")
+p["sideWall"].Label = "patch_sideWall"
+p["sideWall"].Shape = Shell([r["fluid"].Shape.Face1])
 
-p['bottomWall'] = d.addObject('Part::Feature', 'PatchBottomWall')
-p['bottomWall'].Label = 'patch_bottomWall'
-p['bottomWall'].Shape = Shell([r['fluid'].Shape.Face2])
+p["bottomWall"] = d.addObject("Part::Feature", "PatchBottomWall")
+p["bottomWall"].Label = "patch_bottomWall"
+p["bottomWall"].Shape = Shell([r["fluid"].Shape.Face2])
 
-p['trackedSurface'] = d.addObject('Part::Feature', 'PatchTrackedSurface')
-p['trackedSurface'].Label = 'patch_trackedSurface'
-p['trackedSurface'].Shape = Shell([r['fluid'].Shape.Face3])
+p["trackedSurface"] = d.addObject("Part::Feature", "PatchTrackedSurface")
+p["trackedSurface"].Label = "patch_trackedSurface"
+p["trackedSurface"].Shape = Shell([r["fluid"].Shape.Face3])
 
 # --------------------------------------------------------------------------- #
 
@@ -134,8 +134,8 @@ d.recompute()
 # --- Export ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-exportObj = [r['fluid'], r['buffer'],
-             p['fixedMesh'], p['sideWall'], p['bottomWall'], p['trackedSurface']]
+exportObj = [r["fluid"], r["buffer"],
+             p["fixedMesh"], p["sideWall"], p["bottomWall"], p["trackedSurface"]]
 
 for e in exportObj:
 
@@ -144,14 +144,14 @@ for e in exportObj:
 
     mesh.transform(scale)
 
-    mesh.write(par.dir_triSurface + '/' + csn + '_' + e.Label + '.stl')
+    mesh.write(par.dir_triSurface + "/" + csn + "_" + e.Label + ".stl")
 
 # --------------------------------------------------------------------------- #
 # --- Save ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
 # Save document
-d.saveAs(par.dir_triSurface + '/' + csn + '.fcstd')
+d.saveAs(par.dir_triSurface + "/" + csn + ".fcstd")
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

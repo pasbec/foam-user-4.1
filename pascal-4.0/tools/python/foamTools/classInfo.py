@@ -4,7 +4,7 @@
 # March 2015
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
-# TODO [High]: Allow other primitive patch types than 'fixedValue'
+# TODO [High]: Allow other primitive patch types than "fixedValue"
 
 # TODO [Low]: Rework function descriptions
 
@@ -29,11 +29,11 @@ def fieldClassToAtomicTypeSize(cl):
     # cl     : class of foam object (e.g. volScalarField)
 
     # Predefined mappings
-    scalarTypes = ['scalarField', 'volScalarField', 'surfaceScalarField', 'pointScalarField', 'tetPointScalarField']
-    vectorTypes = ['vectorField', 'volVectorField', 'surfaceVectorField', 'pointVectorField', 'tetPointVectorField']
+    scalarTypes = ["scalarField", "volScalarField", "surfaceScalarField", "pointScalarField", "tetPointScalarField"]
+    vectorTypes = ["vectorField", "volVectorField", "surfaceVectorField", "pointVectorField", "tetPointVectorField"]
 
-    if any(cl in t for t in scalarTypes): return 'scalar', 1
-    elif any(cl in t for t in vectorTypes): return 'vector', 3
+    if any(cl in t for t in scalarTypes): return "scalar", 1
+    elif any(cl in t for t in vectorTypes): return "vector", 3
 
 
 
@@ -45,8 +45,8 @@ def patchBaseTypeToPrimitiveValued(bT):
     # bT     : base type of patch
 
     # Predefined mappings
-    valueTypes = [('patch', 'fixedValue'), ('wall', 'fixedValue'), ('processor', 'fixedValue')]
-    passTypes  = ['empty', 'cyclic', 'symmetryPlane', 'wedge']
+    valueTypes = [("patch", "fixedValue"), ("wall", "fixedValue"), ("processor", "fixedValue")]
+    passTypes  = ["empty", "cyclic", "symmetryPlane", "wedge"]
 
     for t in valueTypes:
         if bT == t[0]: return t[1], True

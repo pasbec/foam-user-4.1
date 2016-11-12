@@ -4,7 +4,7 @@
 # March 2015
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
-# TODO [High]: Allow other primitive patch types than 'fixedValue'
+# TODO [High]: Allow other primitive patch types than "fixedValue"
 
 # TODO [Low]: Rework function descriptions
 
@@ -40,7 +40,7 @@ def fileGetPath(fileName):
 
 
 
-def objectIndent(cString, iLevel=0, iChar=' ', iCount=4):
+def objectIndent(cString, iLevel=0, iChar=" ", iCount=4):
 
     # return  : indented content string
     #
@@ -62,27 +62,27 @@ def objectHeader(name, cl, time=""):
     # cl     : class of foam object (e.g. volScalarField)
 
     # Define short indented line with line break
-    def i(iL,cS,eS='\n'): return objectIndent(cS + eS,iLevel=iL)
+    def i(iL,cS,eS="\n"): return objectIndent(cS + eS,iLevel=iL)
 
     # Assemble header string
-    r  = ''
-    r += i(0, '/*--------------------------------*- C++ -*----------------------------------*\\')
-    r += i(0, '| =========                 |                                                 |')
-    r += i(0, '| \\\\      /  F ield         | foam-extend: Open Source CFD                    |')
-    r += i(0, '|  \\\\    /   O peration     | Version:     4.0                                |')
-    r += i(0, '|   \\\\  /    A nd           | Web:         http://www.extend-project.de       |')
-    r += i(0, '|    \\\\/     M anipulation  | For copyright notice see file Copyright         |')
-    r += i(0, '\*---------------------------------------------------------------------------*/')
-    r += i(0, 'FoamFile')
-    r += i(0, '{')
-    r += i(1, 'version     2.0;')
-    r += i(1, 'format      ascii;')
-    r += i(1, 'class       ' + cl + ';')
-    if time: r += i(1, 'location    "' + time + '"' + ';')
-    r += i(1, 'object      ' + name + ';')
-    r += i(0, '}')
-    r += i(0, '// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //')
-    r += i(0, '')
+    r  = ""
+    r += i(0, "/*--------------------------------*- C++ -*----------------------------------*\\")
+    r += i(0, "| =========                 |                                                 |")
+    r += i(0, "| \\\\      /  F ield         | foam-extend: Open Source CFD                    |")
+    r += i(0, "|  \\\\    /   O peration     | Version:     4.0                                |")
+    r += i(0, "|   \\\\  /    A nd           | Web:         http://www.extend-project.de       |")
+    r += i(0, "|    \\\\/     M anipulation  | For copyright notice see file Copyright         |")
+    r += i(0, "\*---------------------------------------------------------------------------*/")
+    r += i(0, "FoamFile")
+    r += i(0, "{")
+    r += i(1, "version     2.0;")
+    r += i(1, "format      ascii;")
+    r += i(1, "class       " + cl + ";")
+    if time: r += i(1, "location    "" + time + """ + ";")
+    r += i(1, "object      " + name + ";")
+    r += i(0, "}")
+    r += i(0, "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //")
+    r += i(0, "")
 
     return r
 
@@ -93,12 +93,12 @@ def objectFooter():
     # return : footer string
 
     # Define short indented line with line break
-    def i(iL,cS,eS='\n'): return objectIndent(cS + eS,iLevel=iL)
+    def i(iL,cS,eS="\n"): return objectIndent(cS + eS,iLevel=iL)
 
     # Assemble footer string
-    r  = ''
-    r += i(0, '// ************************************************************************* //')
-    r += i(0, '')
+    r  = ""
+    r += i(0, "// ************************************************************************* //")
+    r += i(0, "")
 
     return r
 
@@ -117,7 +117,7 @@ class ioBase(object):
 
         if not fileName == None:
 
-            with open(self._getFilePath(),'w') as f: f.write("")
+            with open(self._getFilePath(),"w") as f: f.write("")
 
     # ----------------------------------------------------------------------- #
 
@@ -165,7 +165,7 @@ class ioBase(object):
 
             fileName = self._getFilePath()
 
-            with open(fileName,'a') as f:
+            with open(fileName,"a") as f:
 
                 f.write(string)
 
@@ -176,7 +176,7 @@ class ioBase(object):
 
     # ----------------------------------------------------------------------- #
 
-    def write(self, string, ind=True, end="\n"):
+    def write(self, string="", ind=True, end="\n"):
 
         if not (type(string) == str \
             and type(ind) == bool \

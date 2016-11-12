@@ -14,16 +14,14 @@ csb = os.path.basename(os.path.realpath(sys.argv[0]))
 csd = os.path.dirname(os.path.realpath(sys.argv[0]))
 csn = os.path.splitext(csb)[0]
 
-sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
+sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
 import math as m
 import numpy as np
 
 # --------------------------------------------------------------------------- #
-# --- Parameters ------------------------------------------------------------ #
+# --- Geometry -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
-
-mesh_normal    = -1
 
 geo_scale  = 1e-3
 geo_space  = 1.0
@@ -39,24 +37,30 @@ geo_z3     =   60.0
 geo_z4     =   30.0 * 4.0 * geo_space + 30.0
 
 # --------------------------------------------------------------------------- #
+# --- Mesh ------------------------------------------------------------------ #
+# --------------------------------------------------------------------------- #
+
+mesh_normal    = -1
 
 mesh_f     =    1.2
 mesh_scale =    1.0 * 2e-1
 
 # --------------------------------------------------------------------------- #
+# --- Coils ----------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
 coil_scale      = 1e-3
 
-coil_bundle     = {'shape': 'rectangle',
-                   'n':     10,
-                   'r':     45.0,
-                   'z':     60.0}
+coil_bundle     = {"shape": "rectangle",
+                   "n":     10,
+                   "r":     45.0,
+                   "z":     60.0}
 
-coil_path       = {'shape': 'racetrack',
-                   'n':     9,
-                   'r':     10.0 + coil_bundle['r']/2.0,
-                   'x':     (100.0 + coil_bundle['r'])/2.0,
-                   'y':     (350.0 + coil_bundle['r'])/2.0}
+coil_path       = {"shape": "racetrack",
+                   "n":     9,
+                   "r":     10.0 + coil_bundle["r"]/2.0,
+                   "x":     (100.0 + coil_bundle["r"])/2.0,
+                   "y":     (350.0 + coil_bundle["r"])/2.0}
 
 coils_n         = 6
 coils_step      = 285.0
@@ -85,15 +89,15 @@ coils_frequency = 50.0
 # --- Directories ----------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-dir_case = os.path.realpath(csd + '/' + '..')
+dir_case = os.path.realpath(csd + "/" + "..")
 
-dir_0 = os.path.realpath(dir_case + '/' + '0')
-dir_constant = os.path.realpath(dir_case + '/' + 'constant')
-dir_system = os.path.realpath(dir_case + '/' + 'system')
+dir_0 = os.path.realpath(dir_case + "/" + "0")
+dir_constant = os.path.realpath(dir_case + "/" + "constant")
+dir_system = os.path.realpath(dir_case + "/" + "system")
 
-dir_polyMesh = os.path.realpath(dir_constant + '/' + 'polyMesh')
-dir_featureEdgeMesh = os.path.realpath(dir_constant + '/' + 'featureEdgeMesh')
-dir_triSurface = os.path.realpath(dir_constant + '/' + 'triSurface')
+dir_polyMesh = os.path.realpath(dir_constant + "/" + "polyMesh")
+dir_featureEdgeMesh = os.path.realpath(dir_constant + "/" + "featureEdgeMesh")
+dir_triSurface = os.path.realpath(dir_constant + "/" + "triSurface")
 
 for d in [dir_polyMesh, dir_triSurface, dir_featureEdgeMesh]:
     if not os.path.exists(d): os.makedirs(d)

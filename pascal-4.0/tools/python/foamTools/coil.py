@@ -13,23 +13,23 @@
 #  coil_step       = 14.9
 #  coil_origin     = [0.0, 0.0, 7.0]
 #
-#  coil_path       = {'shape': 'loop',
-#                     'n':     36,
-#                     'r':     105.0}
-#  coil_path       = {'shape': 'racetrack',
-#                     'n':     9,
-#                     'r':     10.0,
-#                     'x':     50.0,
-#                     'y':     100.0}
+#  coil_path       = {"shape": "loop",
+#                     "n":     36,
+#                     "r":     105.0}
+#  coil_path       = {"shape": "racetrack",
+#                     "n":     9,
+#                     "r":     10.0,
+#                     "x":     50.0,
+#                     "y":     100.0}
 #
-#  coil_bundle     = {'shape': 'point'}
-#  coil_bundle     = {'shape': 'circle',
-#                     'n':     36,
-#                     'r':     5.0}
-#  coil_bundle     = {'shape': 'rectangle',
-#                     'n':     10,
-#                     'r':     10.0,
-#                     'z':     8.0}
+#  coil_bundle     = {"shape": "point"}
+#  coil_bundle     = {"shape": "circle",
+#                     "n":     36,
+#                     "r":     5.0}
+#  coil_bundle     = {"shape": "rectangle",
+#                     "n":     10,
+#                     "r":     10.0,
+#                     "z":     8.0}
 #
 #  coil_current    = m.sqrt(2.0) * 260.0
 #  coil_nNonOrto   = 10
@@ -85,35 +85,35 @@ def pathLoop(pathDict, bundleDict, filamentI, edgeStart=0):
     r : float, Coil loop radius
     """
 
-    if not 'n' in pathDict:
+    if not "n" in pathDict:
 
         raise KeyError("Number of edges (n) is missing.")
 
-    if not type(pathDict['n']) ==  int:
+    if not type(pathDict["n"]) ==  int:
 
         raise KeyError("Number of edges (n) needs to be of type int.")
 
-    if not pathDict['n'] > 0:
+    if not pathDict["n"] > 0:
 
         raise ValueError("Number of edges (n) needs to be larger than 0.")
 
-    if not 'r' in pathDict:
+    if not "r" in pathDict:
 
         raise KeyError("Coil loop radius (r) is missing.")
 
-    if pathDict['r'] <= 0.0:
+    if pathDict["r"] <= 0.0:
 
         raise ValueError("Coil loop radius (r) must be positive.")
 
-    f = bundle[bundleDict['shape']](bundleDict, filamentI)
+    f = bundle[bundleDict["shape"]](bundleDict, filamentI)
 
     points = list()
 
-    r = f[0] + pathDict['r']
+    r = f[0] + pathDict["r"]
     z = f[1]
-    phii = 1.0/pathDict['n'] * 2.0*m.pi
+    phii = 1.0/pathDict["n"] * 2.0*m.pi
 
-    for i in range(pathDict['n']):
+    for i in range(pathDict["n"]):
 
         p = np.zeros(3)
 
@@ -140,53 +140,53 @@ def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
     y : float, Coil size in y-direction
     """
 
-    if not 'n' in pathDict:
+    if not "n" in pathDict:
 
         raise KeyError("Number of edges (n) is missing.")
 
-    if not type(pathDict['n']) ==  int:
+    if not type(pathDict["n"]) ==  int:
 
         raise KeyError("Number of edges (n) needs to be of type int.")
 
-    if not pathDict['n'] > 0:
+    if not pathDict["n"] > 0:
 
         raise ValueError("Number of edges (n) needs to be larger than 0.")
 
-    if not 'r' in pathDict:
+    if not "r" in pathDict:
 
         raise KeyError("Inner coil corner radius (r) is missing.")
 
-    if pathDict['r'] <= 0.0:
+    if pathDict["r"] <= 0.0:
 
         raise ValueError("Inner coil corner radius (r) must be positive.")
 
-    if not 'x' in pathDict:
+    if not "x" in pathDict:
 
         raise KeyError("Coil width (x) is missing.")
 
-    if not 'y' in pathDict:
+    if not "y" in pathDict:
 
         raise KeyError("Coil height (y) is missing.")
 
-    if pathDict['x'] <= 0.0 or pathDict['y'] <= 0.0:
+    if pathDict["x"] <= 0.0 or pathDict["y"] <= 0.0:
 
         raise ValueError("Coil sizes (x/y) must be positive.")
 
-    f = bundle[bundleDict['shape']](bundleDict, filamentI)
+    f = bundle[bundleDict["shape"]](bundleDict, filamentI)
 
     points = list()
 
-    x = pathDict['x'] - pathDict['r']
-    y = pathDict['y'] - pathDict['r']
-    r = f[0] +  pathDict['r']
+    x = pathDict["x"] - pathDict["r"]
+    y = pathDict["y"] - pathDict["r"]
+    r = f[0] +  pathDict["r"]
     z = f[1]
-    phii = 1.0/pathDict['n'] * m.pi/2.0
+    phii = 1.0/pathDict["n"] * m.pi/2.0
     phi0 = m.pi * np.array([0.0, 0.5, 1.0, 1.5])
     s = [[1, 1], [-1, 1], [-1, -1], [1, -1]]
 
     for c in range(len(s)):
 
-        for i in range(pathDict['n'] + 1):
+        for i in range(pathDict["n"] + 1):
 
             p = np.zeros(3)
 
@@ -202,7 +202,7 @@ def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
 
 # --------------------------------------------------------------------------- #
 
-path = {'loop': pathLoop, 'racetrack': pathRaceTrack}
+path = {"loop": pathLoop, "racetrack": pathRaceTrack}
 
 # --------------------------------------------------------------------------- #
 # --- Bundles --------------------------------------------------------------- #
@@ -239,30 +239,30 @@ def bundlePoint(bundleDict, i):
 
 def bundleCircleN(bundleDict):
 
-    if not 'n' in bundleDict:
+    if not "n" in bundleDict:
 
         raise KeyError("Number of filaments (n) is missing.")
 
-    return bundleDict['n']
+    return bundleDict["n"]
 
 def bundleCircleR(bundleDict):
 
-    if not 'r' in bundleDict:
+    if not "r" in bundleDict:
 
         raise KeyError("Coil bundle radius (r) is missing.")
 
-    return 2.0*bundleDict['r']
+    return 2.0*bundleDict["r"]
 
 def bundleCircleZ(bundleDict):
 
-    if not 'r' in bundleDict:
+    if not "r" in bundleDict:
 
         raise KeyError("Coil bundle radius (r) is missing.")
 
 def bundleCircleI(bundleDict, I):
 
     return I/bundleCircleN(bundleDict)
-    return 2.0*bundleDict['r']
+    return 2.0*bundleDict["r"]
 
 def bundleCircle(bundleDict, i):
     """
@@ -273,32 +273,32 @@ def bundleCircle(bundleDict, i):
     r : float, Coil bundle radius
     """
 
-    if not 'n' in bundleDict:
+    if not "n" in bundleDict:
 
         raise KeyError("Number of filaments (n) is missing.")
 
-    if not type(bundleDict['n']) ==  int:
+    if not type(bundleDict["n"]) ==  int:
 
         raise KeyError("Number of filaments (n) needs to be of type int.")
 
-    if not bundleDict['n'] > 0:
+    if not bundleDict["n"] > 0:
 
         raise ValueError("Number of filaments (n) needs to be larger than 0.")
 
-    if not 'r' in bundleDict:
+    if not "r" in bundleDict:
 
         raise KeyError("Coil bundle radius (r) is missing.")
 
-    if bundleDict['r'] <= 0.0:
+    if bundleDict["r"] <= 0.0:
 
         raise ValueError("Coil bundle radius (r) must be positive.")
 
-    if not i < bundleDict['n']:
+    if not i < bundleDict["n"]:
 
         raise ValueError("Coil filament index (i) out of range (max: n).")
 
-    r = bundleDict['r']
-    phii = 1.0/bundleDict['n'] * 2.0*m.pi
+    r = bundleDict["r"]
+    phii = 1.0/bundleDict["n"] * 2.0*m.pi
 
     b = r * np.array([m.cos(i * phii), m.sin(i * phii)])
 
@@ -308,27 +308,27 @@ def bundleCircle(bundleDict, i):
 
 def bundleRectangleN(bundleDict, s=4):
 
-    if not 'n' in bundleDict:
+    if not "n" in bundleDict:
 
         raise KeyError("Number of filaments per side (n) is missing.")
 
-    return s*(bundleDict['n']-1)
+    return s*(bundleDict["n"]-1)
 
 def bundleRectangleR(bundleDict):
 
-    if not 'r' in bundleDict:
+    if not "r" in bundleDict:
 
         raise KeyError("Coil bundle radius (r) is missing.")
 
-    return bundleDict['r']
+    return bundleDict["r"]
 
 def bundleRectangleZ(bundleDict):
 
-    if not 'z' in bundleDict:
+    if not "z" in bundleDict:
 
         raise KeyError("Coil bundle height (z) is missing.")
 
-    return bundleDict['z']
+    return bundleDict["z"]
 
 def bundleRectangleI(bundleDict, I):
 
@@ -344,27 +344,27 @@ def bundleRectangle(bundleDict, i):
     z : float,  Coil size in axial direction
     """
 
-    if not 'n' in bundleDict:
+    if not "n" in bundleDict:
 
         raise KeyError("Number of filaments per side (n) is missing.")
 
-    if not type(bundleDict['n']) ==  int:
+    if not type(bundleDict["n"]) ==  int:
 
         raise KeyError("Number of filaments per side (n) needs to be of type int.")
 
-    if not bundleDict['n'] > 1:
+    if not bundleDict["n"] > 1:
 
         raise ValueError("Number of filaments per side (n) needs to be larger than 1.")
 
-    if not 'r' in bundleDict:
+    if not "r" in bundleDict:
 
         raise KeyError("Coil bundle radius (r) is missing.")
 
-    if not 'z' in bundleDict:
+    if not "z" in bundleDict:
 
         raise KeyError("Coil bundle height (z) is missing.")
 
-    if bundleDict['r'] <= 0.0 or bundleDict['z'] <= 0.0:
+    if bundleDict["r"] <= 0.0 or bundleDict["z"] <= 0.0:
 
         raise ValueError("Coil bundle sizes (r/z) must be positive.")
 
@@ -375,9 +375,9 @@ def bundleRectangle(bundleDict, i):
 
         raise ValueError("Coil filament index (i) out of range (max: 4*(n-1)).")
 
-    b = -0.5 * np.array([bundleDict['r'], bundleDict['z']])
+    b = -0.5 * np.array([bundleDict["r"], bundleDict["z"]])
 
-    bi = -2.0 * b / (bundleDict['n'] - 1)
+    bi = -2.0 * b / (bundleDict["n"] - 1)
 
     if (i < N0(1)):
 
@@ -403,15 +403,15 @@ def bundleRectangle(bundleDict, i):
 
 # --------------------------------------------------------------------------- #
 
-bundleN = {'point': bundlePointN, 'circle': bundleCircleN, 'rectangle': bundleRectangleN}
+bundleN = {"point": bundlePointN, "circle": bundleCircleN, "rectangle": bundleRectangleN}
 
-bundleI = {'point': bundlePointI, 'circle': bundleCircleI, 'rectangle': bundleRectangleI}
+bundleI = {"point": bundlePointI, "circle": bundleCircleI, "rectangle": bundleRectangleI}
 
-bundleR = {'point': bundlePointR, 'circle': bundleCircleR, 'rectangle': bundleRectangleR}
+bundleR = {"point": bundlePointR, "circle": bundleCircleR, "rectangle": bundleRectangleR}
 
-bundleZ = {'point': bundlePointZ, 'circle': bundleCircleZ, 'rectangle': bundleRectangleZ}
+bundleZ = {"point": bundlePointZ, "circle": bundleCircleZ, "rectangle": bundleRectangleZ}
 
-bundle = {'point': bundlePoint, 'circle': bundleCircle, 'rectangle': bundleRectangle}
+bundle = {"point": bundlePoint, "circle": bundleCircle, "rectangle": bundleRectangle}
 
 # --------------------------------------------------------------------------- #
 # --- Writing --------------------------------------------------------------- #
@@ -426,36 +426,36 @@ def writeCoilFeatureEdgeMeshes(case, coils):
 
 def writeCoilFeatureEdgeMesh(case, name, points, edges):
 
-    path = case + '/' + 'constant' + '/' + 'featureEdgeMesh'
+    path = case + "/" + "constant" + "/" + "featureEdgeMesh"
     if not os.path.exists(path): os.makedirs(path)
-    fullpath = path + '/' + name + '.eMesh'
+    fullpath = path + "/" + name + ".eMesh"
 
-    with open(fullpath, 'w') as f:
+    with open(fullpath, "w") as f:
 
         # Define short indented line with line break
-        def ind(iL, cS, eS='\n'): return objectIndent(cS + eS, iLevel=iL)
+        def ind(iL, cS, eS="\n"): return objectIndent(cS + eS, iLevel=iL)
 
-        f.write(objectHeader(name, 'featureEdgeMesh'))
+        f.write(objectHeader(name, "featureEdgeMesh"))
 
-        f.write(ind(0, '// points:\n'))
+        f.write(ind(0, "// points:\n"))
         f.write(ind(0, str(len(points))))
-        f.write(ind(0, '('))
+        f.write(ind(0, "("))
 
         for p in points:
 
-            f.write(ind(1, '(' + str(p[0]) + ' ' + str(p[1]) + ' ' + str(p[2])+')'))
+            f.write(ind(1, "(" + str(p[0]) + " " + str(p[1]) + " " + str(p[2])+")"))
 
-        f.write(ind(0, ')\n'))
+        f.write(ind(0, ")\n"))
 
-        f.write(ind(0, '// edges:\n'))
+        f.write(ind(0, "// edges:\n"))
         f.write(ind(0, str(len(edges))))
-        f.write(ind(0, '('))
+        f.write(ind(0, "("))
 
         for e in edges:
 
-            f.write(ind(1, '(' + str(e[0]) + ' '+str(e[1]) + ')'))
+            f.write(ind(1, "(" + str(e[0]) + " "+str(e[1]) + ")"))
 
-        f.write(ind(0, ')\n'))
+        f.write(ind(0, ")\n"))
 
         f.write(objectFooter())
 
@@ -463,25 +463,25 @@ def writeCoilFeatureEdgeMesh(case, name, points, edges):
 
 def writeEdgeBiotSavartProperties(case, coils, nNonOrth=10):
 
-    path = case + '/' + 'constant'
+    path = case + "/" + "constant"
     if not os.path.exists(path): os.makedirs(path)
-    name = 'edgeBiotSavartProperties'
-    fullpath = path + '/' + name
+    name = "edgeBiotSavartProperties"
+    fullpath = path + "/" + name
 
-    with open(fullpath, 'w') as f:
+    with open(fullpath, "w") as f:
 
         # Define short indented line with line break
-        def ind(iL, cS, eS='\n'): return objectIndent(cS + eS, iLevel=iL)
+        def ind(iL, cS, eS="\n"): return objectIndent(cS + eS, iLevel=iL)
 
         # Define write for boolean-strings for OpenFOAM
-        def bstr(b): return 'true' if b else 'false'
+        def bstr(b): return "true" if b else "false"
 
-        f.write(objectHeader(name, 'dictionary'))
+        f.write(objectHeader(name, "dictionary"))
 
-        f.write(ind(0, 'nNonOrthogonalCorrectors    ' + str(nNonOrth) + ';\n'))
+        f.write(ind(0, "nNonOrthogonalCorrectors    " + str(nNonOrth) + ";\n"))
 
-        f.write(ind(0, 'inductors'))
-        f.write(ind(0, '{'))
+        f.write(ind(0, "inductors"))
+        f.write(ind(0, "{"))
 
         for i in range(len(coils)):
 
@@ -492,20 +492,20 @@ def writeEdgeBiotSavartProperties(case, coils, nNonOrth=10):
             phase     = coils[i].phase
 
             f.write(ind(1, name))
-            f.write(ind(1, '{'))
+            f.write(ind(1, "{"))
 
-            f.write(ind(2, 'file       ' + '"' + name + '.eMesh"' + ';'))
-            f.write(ind(2, 'reverse    ' + bstr(reverse) + ';'))
-            f.write(ind(2, 'current    ' + str(current) + ';'))
-            f.write(ind(2, 'filaments  ' + str(filaments) + ';'))
-            f.write(ind(2, 'phase      ' + str(phase) + ';'))
+            f.write(ind(2, "file       " + "\"" + name + ".eMesh\"" + ";"))
+            f.write(ind(2, "reverse    " + bstr(reverse) + ";"))
+            f.write(ind(2, "current    " + str(current) + ";"))
+            f.write(ind(2, "filaments  " + str(filaments) + ";"))
+            f.write(ind(2, "phase      " + str(phase) + ";"))
 
-            f.write(ind(1, '}'))
+            f.write(ind(1, "}"))
 
-            if not i == len(coils) - 1: f.write(ind(1, ''))
+            if not i == len(coils) - 1: f.write(ind(1, ""))
 
 
-        f.write(ind(0, '}\n'))
+        f.write(ind(0, "}\n"))
 
         f.write(objectFooter())
 
@@ -513,20 +513,20 @@ def writeEdgeBiotSavartProperties(case, coils, nNonOrth=10):
 
 def writeFrequency(case, value):
 
-    path = case + '/' + 'constant'
+    path = case + "/" + "constant"
     if not os.path.exists(path): os.makedirs(path)
-    name = 'f0'
-    fullpath = path + '/' + name
+    name = "f0"
+    fullpath = path + "/" + name
 
-    with open(fullpath, 'w') as f:
+    with open(fullpath, "w") as f:
 
         # Define short indented line with line break
-        def ind(iL, cS, eS='\n'): return objectIndent(cS + eS, iLevel=iL)
+        def ind(iL, cS, eS="\n"): return objectIndent(cS + eS, iLevel=iL)
 
-        f.write(objectHeader(name, 'uniformDimensionedScalarField'))
+        f.write(objectHeader(name, "uniformDimensionedScalarField"))
 
-        f.write(ind(0, 'dimensions    [0 0 -1 0 0 0 0];\n'))
-        f.write(ind(0, 'value         ' + str(value) + ';\n'))
+        f.write(ind(0, "dimensions    [0 0 -1 0 0 0 0];\n"))
+        f.write(ind(0, "value         " + str(value) + ";\n"))
 
         f.write(objectFooter())
 
@@ -575,8 +575,8 @@ class inductorCoil(object):
 
     def compute(self, *args, **kwargs):
 
-        bundleShape = self.bundleDict['shape']
-        pathShape   = self.pathDict['shape']
+        bundleShape = self.bundleDict["shape"]
+        pathShape   = self.pathDict["shape"]
 
         self.filaments = bundleN[bundleShape](self.bundleDict)
         self.filamentCurrent = bundleI[bundleShape](self.bundleDict, self.current)
@@ -596,16 +596,16 @@ class inductorCoil(object):
 
     def transform(self, **kwargs):
 
-        if 'function' in kwargs:
+        if "function" in kwargs:
 
-            function = kwargs['function']
+            function = kwargs["function"]
 
             p = self.points
             for i in range(len(p)): p[i] = function(p[i])
 
-        if 'translate' in kwargs:
+        if "translate" in kwargs:
 
-            translate = kwargs['translate']
+            translate = kwargs["translate"]
 
             if not type(translate) in [list, np.ndarray]:
 
@@ -620,9 +620,9 @@ class inductorCoil(object):
             p = self.points
             for i in range(len(p)): p[i] += translate
 
-        if 'rotate' in kwargs:
+        if "rotate" in kwargs:
 
-            rotate = kwargs['rotate']
+            rotate = kwargs["rotate"]
 
             if not type(rotate) == list and len(rotate) == 2:
 
@@ -653,9 +653,9 @@ class inductorCoil(object):
             p = self.points
             for i in range(len(p)): p[i] = np.dot(rotM, p[i])
 
-        if 'scale' in kwargs:
+        if "scale" in kwargs:
 
-            scale = kwargs['scale']
+            scale = kwargs["scale"]
 
             if not type(scale) in [int, float, list, np.ndarray]:
 
@@ -878,9 +878,9 @@ class inductorCoils(dict):
 
     # ----------------------------------------------------------------------- #
 
-    _makeCoils = {'ARRAY': _makeCoilsArray,
-                  'TMF': _makeCoilsTMF,
-                  'RMF': _makeCoilsRMF}
+    _makeCoils = {"ARRAY": _makeCoilsArray,
+                  "TMF": _makeCoilsTMF,
+                  "RMF": _makeCoilsRMF}
 
     # ----------------------------------------------------------------------- #
 

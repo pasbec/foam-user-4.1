@@ -14,7 +14,7 @@ csb = os.path.basename(os.path.realpath(sys.argv[0]))
 csd = os.path.dirname(os.path.realpath(sys.argv[0]))
 csn = os.path.splitext(csb)[0]
 
-sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
+sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
 import math as m
 import numpy as np
@@ -61,9 +61,9 @@ nz3 = nr2
 # --- Document -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-mesh = {'normal': par.mesh_normal}
+mesh = {"normal": par.mesh_normal}
 
-d = blockMeshDict(fileName=par.dir_polyMesh + '/' + 'blockMeshDict', mesh=mesh)
+d = blockMeshDict(fileName=par.dir_polyMesh + "/" + "blockMeshDict", mesh=mesh)
 
 # --------------------------------------------------------------------------- #
 # --- Vertices -------------------------------------------------------------- #

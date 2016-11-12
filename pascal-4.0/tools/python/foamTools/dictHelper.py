@@ -4,7 +4,7 @@
 # March 2015
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
-# TODO [High]: Allow other primitive patch types than 'fixedValue'
+# TODO [High]: Allow other primitive patch types than "fixedValue"
 
 # TODO [Low]: Rework function descriptions
 
@@ -62,7 +62,7 @@ def tryMandatory(d, k):
         return d[k]
 
     else:
-        raise KeyError('mandatory key "' + k + '" is missing')
+        raise KeyError("mandatory key " + k + " is missing")
 
 
 
@@ -86,19 +86,19 @@ def tryOrDefault(d, k, vDef):
 
 def readStr(v):
 
-    # return : stripped dictionary value (without '"')
+    # return : stripped dictionary value (without "\"")
     #
     # v      : dictionary key value of type str
 
     # TODO [Low]: Improve descriptions
 
     if type(v) == str:
-        return v.strip('"')
+        return v.strip("\"")
     else:
         try:
             return str(v)
         except:
-            raise TypeError('key value ' + str(v) + ' is no string')
+            raise TypeError("key value " + str(v) + " is no string")
 
 
 
@@ -117,7 +117,7 @@ def readInt(v):
         return int(readStr(v))
 
     else:
-      raise TypeError('key value ' + str(v) + ' is not an integer')
+      raise TypeError("key value " + str(v) + " is not an integer")
 
 
 
@@ -139,7 +139,7 @@ def readFloat(v):
         return float(readStr(v))
 
     else:
-      raise TypeError('key value ' + str(v) + ' is not an float')
+      raise TypeError("key value " + str(v) + " is not an float")
 
 
 
@@ -155,12 +155,12 @@ def readDim(v):
         return v
 
     if type(v) == str:
-        dim = readStr(v).strip('[]')
+        dim = readStr(v).strip("[]")
         dims = dim.split()
         return Dimension(*dims)
 
     else:
-      raise TypeError('key value ' + str(v) + ' has no dimensional type')
+      raise TypeError("key value " + str(v) + " has no dimensional type")
 
 
 
@@ -176,20 +176,20 @@ def readBool(v):
         return v
 
     elif type(v) == str:
-        trueKeys = ['On', 'on', 'True', 'true', 'Yes', 'yes']
-        falseKeys  = ['Off', 'off', 'False', 'false', 'No', 'no']
+        trueKeys = ["On", "on", "True", "true", "Yes", "yes"]
+        falseKeys  = ["Off", "off", "False", "false", "No", "no"]
         for k in trueKeys:
             if readStr(v) == k: return BoolProxy(val=True)
         for k in falseKeys:
             if readStr(v) == k: return BoolProxy(val=False)
-        raise TypeError('keyValue ' + str(v) + ' is no boolean')
+        raise TypeError("keyValue " + str(v) + " is no boolean")
 
     elif type(v) == int:
         if v == 1: return BoolProxy(val=True)
         elif v == 0: return BoolProxy(val=False)
 
     else:
-      raise TypeError('key value ' + str(v) + ' is no boolean')
+      raise TypeError("key value " + str(v) + " is no boolean")
 
 
 
@@ -205,7 +205,7 @@ def readSubDict(v):
         return v
 
     else:
-      raise TypeError('key value ' + str(v) + ' is no (sub-)dictionary')
+      raise TypeError("key value " + str(v) + " is no (sub-)dictionary")
 
 # --------------------------------------------------------------------------- #
 # --- End of module --------------------------------------------------------- #

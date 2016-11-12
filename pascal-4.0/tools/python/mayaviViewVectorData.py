@@ -30,15 +30,15 @@ import argparse
 # --------------------------------------------------------------------------- #
 
 # Description
-parser = argparse.ArgumentParser(description='This python script simply plots a vector data file with mayavi! The file must have the following structure: x,y,z,f_x,f_y,f_z,|f|')
+parser = argparse.ArgumentParser(description="This python script simply plots a vector data file with mayavi! The file must have the following structure: x,y,z,f_x,f_y,f_z,|f|")
 
 # Optional arguments
-parser.add_argument("-c", "--scale", metavar='SCALE', type=float, default=0.01, help="vector length scale factor (default: '0.05')")
-parser.add_argument("-f", "--filter", metavar='FILTER', type=int, default=1, help="filter every s points while plotting (default: 2)")
-parser.add_argument("-s", "--skip", metavar='SKIP', type=int, default=0, help="skip line count for plot file (default: 9)")
+parser.add_argument("-c", "--scale", metavar="SCALE", type=float, default=0.01, help="vector length scale factor (default: 0.05)")
+parser.add_argument("-f", "--filter", metavar="FILTER", type=int, default=1, help="filter every s points while plotting (default: 2)")
+parser.add_argument("-s", "--skip", metavar="SKIP", type=int, default=0, help="skip line count for plot file (default: 9)")
 
 # Positional arguments
-parser.add_argument("dataFile", metavar='DATA-FILE', nargs='?', default='plot.dat', help="Source data file for plot (default: 'plot.dat').")
+parser.add_argument("dataFile", metavar="DATA-FILE", nargs="?", default="plot.dat", help="Source data file for plot (default: \"plot.dat\").")
 
 # Commence parsing
 cargs = parser.parse_args()
@@ -90,14 +90,14 @@ def te():
   mayavi.add_module(g)
 
   # Glyph module settings
-  g.glyph.scale_mode = 'scale_by_vector'
+  g.glyph.scale_mode = "scale_by_vector"
 
   g.glyph.glyph.scale_factor = 0.04
-  g.glyph.glyph.color_mode = 'color_by_scalar'
+  g.glyph.glyph.color_mode = "color_by_scalar"
 
   gs = g.glyph.glyph_source
-  gs.glyph_position = 'tail'
-  gs.glyph_source = gs.glyph_dict['arrow_source']
+  gs.glyph_position = "tail"
+  gs.glyph_source = gs.glyph_dict["arrow_source"]
 
   # Readjust mask filter for mask points
   m.filter.set(random_mode=False)

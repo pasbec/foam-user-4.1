@@ -56,7 +56,7 @@ def getQueryInfo(sourceDataNodesProximityIDs, sourceDataNodesProximityDists):
         maxValIDs = 1
     else:
         if (mpi_rank == 0):
-            raise TypeError('\nERROR: Variable sourceDataNodesProximityIDs has wrong type!')
+            raise TypeError("\nERROR: Variable sourceDataNodesProximityIDs has wrong type!")
         sys.exit(1)
 
     if type(sourceDataNodesProximityDists) == numpy.ndarray:
@@ -67,7 +67,7 @@ def getQueryInfo(sourceDataNodesProximityIDs, sourceDataNodesProximityDists):
         minValDists = sourceDataNodesProximityDists
     else:
         if (mpi_rank == 0):
-            raise TypeError('\nERROR: Variable sourceDataNodesProximityDists has wrong type!')
+            raise TypeError("\nERROR: Variable sourceDataNodesProximityDists has wrong type!")
         sys.exit(1)
 
     return minValDists, maxValIDs
@@ -172,39 +172,39 @@ def checkIfEmptyFile(fpath):
 # --------------------------------------------------------------------------- #
 
 # Description
-parser = argparse.ArgumentParser(description='This python script realizes a inverse distance interpolation from data given on nodes (source data) to a different set of arbitrary nodes (target nodes). If necessary the script can be run in parallel with MPI. The result (target data) will include both, target nodes and the interpolated data!')
+parser = argparse.ArgumentParser(description="This python script realizes a inverse distance interpolation from data given on nodes (source data) to a different set of arbitrary nodes (target nodes). If necessary the script can be run in parallel with MPI. The result (target data) will include both, target nodes and the interpolated data!")
 
 # Basic optional arguments
 parser.add_argument("-v", "--verbose", help="increase output verbosity", action="count")
 
 # Basic interpolation parameters
-parser.add_argument("-d", "--dimension", metavar='DIMENSION', type=int, default=3, choices=[2,3], help="Interpolation dimension (default: 3)")
-parser.add_argument("-z", "--zero", metavar='ZERO', type=float, default=1e-20, help="Interpolation zero replacement (default: 1e-20)")
+parser.add_argument("-d", "--dimension", metavar="DIMENSION", type=int, default=3, choices=[2,3], help="Interpolation dimension (default: 3)")
+parser.add_argument("-z", "--zero", metavar="ZERO", type=float, default=1e-20, help="Interpolation zero replacement (default: 1e-20)")
 
 # Interpolation optional arguments
-parser.add_argument("-Pp", "-p", "--InterpolateExpontent", metavar='P_EXPONENT', type=int, default=3, help="Interpolation: Weighting exponent (default: 3)")
-parser.add_argument("-Pn", "-n", "--InterpolatePoints", metavar='P_POINTS', type=int, default=8, help="Interpolation: Number of interpolation points (default: 8)")
-parser.add_argument("-Pr", "-r", "--InterpolateRadius", metavar='P_RADIUS', type=float, default=numpy.inf, help="Interpolation: Search radius for interpolation points (default: 'inf')")
+parser.add_argument("-Pp", "-p", "--InterpolateExpontent", metavar="P_EXPONENT", type=int, default=3, help="Interpolation: Weighting exponent (default: 3)")
+parser.add_argument("-Pn", "-n", "--InterpolatePoints", metavar="P_POINTS", type=int, default=8, help="Interpolation: Number of interpolation points (default: 8)")
+parser.add_argument("-Pr", "-r", "--InterpolateRadius", metavar="P_RADIUS", type=float, default=numpy.inf, help="Interpolation: Search radius for interpolation points (default: "inf")")
 
 # Smoothing optional arguments
-parser.add_argument("-S", "--Smooth", action='store_true', help="Smoothing: Switch (default: false)")
-parser.add_argument("-Sp", "--SmoothExpontent", metavar='S_EXPONENT', type=int, default=1, help="Smoothing: Weighting exponent (default: 1)")
-parser.add_argument("-Sn", "--SmoothPoints", metavar='S_POINTS', type=int, default=3, help="Smoothing: Number of interpolation points (default: 3)")
-parser.add_argument("-Sr", "--SmoothRadius", metavar='S_RADIUS', type=float, default=numpy.inf, help="Smoothing: Search radius for interpolation points (default: 'inf')")
-parser.add_argument("-Sf", "--SmoothFactor", metavar='S_FACTOR', type=float, default=0.5, help="Smoothing: Intensity factor (default: '0.5')")
+parser.add_argument("-S", "--Smooth", action="store_true", help="Smoothing: Switch (default: false)")
+parser.add_argument("-Sp", "--SmoothExpontent", metavar="S_EXPONENT", type=int, default=1, help="Smoothing: Weighting exponent (default: 1)")
+parser.add_argument("-Sn", "--SmoothPoints", metavar="S_POINTS", type=int, default=3, help="Smoothing: Number of interpolation points (default: 3)")
+parser.add_argument("-Sr", "--SmoothRadius", metavar="S_RADIUS", type=float, default=numpy.inf, help="Smoothing: Search radius for interpolation points (default: \"inf\")")
+parser.add_argument("-Sf", "--SmoothFactor", metavar="S_FACTOR", type=float, default=0.5, help="Smoothing: Intensity factor (default: 0.5)")
 
 # File optional parameters
-parser.add_argument("-c", "--columns", metavar='COLS', nargs=2, type=int, default=[3,0], help="number of columns containing field data and relative offset (default: 3 0)")
-parser.add_argument("-i", "--ignore", metavar='IGNORE', nargs=2, type=str, default=['#','#'], help="ignore line prefix for source and tnodes file (default: # #)")
-parser.add_argument("-s", "--skip", metavar='SKIP', nargs=2, type=int, default=[0,0], help="skip line count for source and tnodes file (default: 0 0)")
-parser.add_argument("-csd", "--columns-source-data", metavar='COLS-SOURCE-DATA', type=int, default=3, help="Number of columns containing field data (default: 3) [replaces -c]")
-parser.add_argument("-cso", "--columns-source-offset", metavar='COLS-SOURCE-OFFSET', type=int, help="Absolute columns offset for field data counted from (default: DIM) [replaces -c]")
-parser.add_argument("-cno", "--columns-tnodes-offset", metavar='COLS-TNODES-OFFSET', type=int, default=0, help="Absolute columns offset for node data counted from (default: 0)")
+parser.add_argument("-c", "--columns", metavar="COLS", nargs=2, type=int, default=[3,0], help="number of columns containing field data and relative offset (default: 3 0)")
+parser.add_argument("-i", "--ignore", metavar="IGNORE", nargs=2, type=str, default=["#","#"], help="ignore line prefix for source and tnodes file (default: # #)")
+parser.add_argument("-s", "--skip", metavar="SKIP", nargs=2, type=int, default=[0,0], help="skip line count for source and tnodes file (default: 0 0)")
+parser.add_argument("-csd", "--columns-source-data", metavar="COLS-SOURCE-DATA", type=int, default=3, help="Number of columns containing field data (default: 3) [replaces -c]")
+parser.add_argument("-cso", "--columns-source-offset", metavar="COLS-SOURCE-OFFSET", type=int, help="Absolute columns offset for field data counted from (default: DIM) [replaces -c]")
+parser.add_argument("-cno", "--columns-tnodes-offset", metavar="COLS-TNODES-OFFSET", type=int, default=0, help="Absolute columns offset for node data counted from (default: 0)")
 
 # Positional arguments
-parser.add_argument("source", metavar='SOURCE-FILE', nargs='?', default='source.dat', help="source data file (default: 'source.dat')")
-parser.add_argument("tnodes", metavar='TNODES-FILE', nargs='?', default='tnodes.dat', help="target nodes file (default: 'tnodes.dat')")
-parser.add_argument("target", metavar='TARGET-FILE', nargs='?', default='target.dat', help="target data file (default: 'target.dat')")
+parser.add_argument("source", metavar="SOURCE-FILE", nargs="?", default="source.dat", help="source data file (default: \"source.dat\")")
+parser.add_argument("tnodes", metavar="TNODES-FILE", nargs="?", default="tnodes.dat", help="target nodes file (default: \"tnodes.dat\")")
+parser.add_argument("target", metavar="TARGET-FILE", nargs="?", default="target.dat", help="target data file (default: \"target.dat\")")
 
 # Commence parsing
 cargs = parser.parse_args()
@@ -298,7 +298,7 @@ colsFields = cols[cso:cso+csd]
 if (checkIfEmptyFile(sourceFile)):
     sourceData  = scipy.loadtxt(sourceFile, skiprows=sourceFileSkip, comments=sourceFileIgnore)
 else:
-    if (mpi_rank == 0): raise IOError('ERROR: Empty source file!')
+    if (mpi_rank == 0): raise IOError("ERROR: Empty source file!")
 sourceDataNodes = sourceData[:, colsNodes]
 sourceDataNodesCount = sourceDataNodes.shape[0]
 sourceDataFieldValues = sourceData[:, colsFields]
@@ -307,7 +307,7 @@ sourceDataFieldValues = sourceData[:, colsFields]
 if (checkIfEmptyFile(tnodesFile)):
     targetDataNodes = scipy.loadtxt(tnodesFile, skiprows=tnodesFileSkip, comments=tnodesFileIgnore)
 else:
-    if (mpi_rank == 0): raise IOError('ERROR: Empty target node file!')
+    if (mpi_rank == 0): raise IOError("ERROR: Empty target node file!")
 targetDataNodesCount = targetDataNodes.shape[0]
 targetDataFieldValues = scipy.zeros((targetDataNodesCount, sourceDataFieldValues.shape[1]))
 
@@ -325,11 +325,11 @@ targetDataFieldValues = scipy.zeros((targetDataNodesCount, sourceDataFieldValues
 
 # Check source node count
 if (sourceDataNodes.shape[0] == 0):
-    if (mpi_rank == 0): raise ValueError('ERROR: Source node count is zero!')
+    if (mpi_rank == 0): raise ValueError("ERROR: Source node count is zero!")
 
 # Check target node count
 if (targetDataNodes.shape[0] == 0):
-    if (mpi_rank == 0): raise ValueError('ERROR: Target node count is zero!')
+    if (mpi_rank == 0): raise ValueError("ERROR: Target node count is zero!")
 
 
 
@@ -340,7 +340,7 @@ if P:
 
     # Built up the search tree
     if (verb > 1 and mpi_rank == 0):
-        print('Building up k-d-tree for interpolation...')
+        print("Building up k-d-tree for interpolation...")
     sourceDataNodesTree = cKDTree(sourceDataNodes)
 
     # Get local target node range from MPI index partitioning
@@ -348,7 +348,7 @@ if P:
 
     # Get ready and init average proximity distribution matrix on verbose
     if (mpi_rank == 0 and verb > 1):
-        print('Interpolating now...')
+        print("Interpolating now...")
 
     # Init progress bar
     timeStart = time.time()
@@ -375,7 +375,7 @@ if P:
         if not (sourceMaxValIDs > 0 or sourceMinValDists < numpy.inf):
             if (mpi_rank == 0):
                 if (verb > 0): update_progress("Interpolate",-1,timeElapsed)
-                raise ValueError('\nERROR: Tree query failure! Try to increase search radius or decrease \nnumber of interpolation points!')
+                raise ValueError("\nERROR: Tree query failure! Try to increase search radius or decrease \nnumber of interpolation points!")
 
         # Inverse distance calculation
         targetDataFieldValues[i,:] = inverseDistance(sourceDataFieldValues[sourceDataNodesProximityIDs,:], sourceDataNodesProximityDists, sourceMaxValIDs, csd, Pp, z)
@@ -389,7 +389,7 @@ if S:
 
     # Built up the search tree for smoothing
     if (verb > 1 and mpi_rank == 0):
-        print('Building up k-d-tree for smoothing...')
+        print("Building up k-d-tree for smoothing...")
     smoothDataNodesTree = cKDTree(targetDataNodes)
 
     # Get local target node range from MPI index partitioning
@@ -397,7 +397,7 @@ if S:
 
     # Get ready and init average proximity distribution matrix on verbose
     if (mpi_rank == 0 and verb > 1):
-        print('Smoothing now...')
+        print("Smoothing now...")
 
     # Init progress bar
     timeStart = time.time()
@@ -435,7 +435,7 @@ if S:
         if not (smoothMaxValIDs > 0 or smoothMinValDists < numpy.inf):
             if (mpi_rank == 0):
                 if (verb > 0): update_progress("Smooth",-1,timeElapsed)
-                raise ValueError('\nERROR: Tree query failure! Try to increase search radius or decrease \nnumber of interpolation points!')
+                raise ValueError("\nERROR: Tree query failure! Try to increase search radius or decrease \nnumber of interpolation points!")
 
         # Inverse distance calculation
         targetDataFieldValues[i,:] *= (1.-Sf)
@@ -472,7 +472,7 @@ if (mpi_rank == 0 and mpi_size != 0):
     targetFileParts=list(targetFile + str(rank) for rank in range(mpi_size))
 
     # Read and concatenate local parts
-    targetData = ''.join([open(targetFilePart).read() for targetFilePart in targetFileParts])
+    targetData = "".join([open(targetFilePart).read() for targetFilePart in targetFileParts])
 
     # Save/Export global target data file
     open(targetFile, "w").write(targetData)
