@@ -10,9 +10,8 @@
 
 import os, sys
 
-csb = os.path.basename(os.path.realpath(sys.argv[0]))
-csd = os.path.dirname(os.path.realpath(sys.argv[0]))
-csn = os.path.splitext(csb)[0]
+__path__ = os.path.realpath(__file__)
+__dir__ = os.path.dirname(__path__)
 
 sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
@@ -97,7 +96,7 @@ coils_frequency = 6300.0
 # --- Directories ----------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-dir_case = os.path.realpath(csd + "/" + "..")
+dir_case = os.path.realpath(__dir__ + "/" + "..")
 
 dir_0 = os.path.realpath(dir_case + "/" + "0")
 dir_constant = os.path.realpath(dir_case + "/" + "constant")

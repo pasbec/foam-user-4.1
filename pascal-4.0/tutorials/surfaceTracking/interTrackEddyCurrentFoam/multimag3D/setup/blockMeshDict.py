@@ -10,9 +10,8 @@
 
 import os, sys
 
-csb = os.path.basename(os.path.realpath(sys.argv[0]))
-csd = os.path.dirname(os.path.realpath(sys.argv[0]))
-csn = os.path.splitext(csb)[0]
+__path__ = os.path.realpath(__file__)
+__dir__ = os.path.dirname(__path__)
 
 sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 

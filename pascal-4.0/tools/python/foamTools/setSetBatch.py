@@ -11,6 +11,9 @@
 
 import os, sys
 
+__path__ = os.path.realpath(__file__)
+__dir__ = os.path.dirname(__path__)
+
 from .ioInfo import ioBase
 
 # --------------------------------------------------------------------------- #
@@ -28,6 +31,8 @@ class setSetBatch(object):
         self.nameStringMaxLenth = 60
 
         self.io = ioBase(fileName)
+
+        self.io.write()
 
     # ----------------------------------------------------------------------- #
 
@@ -77,9 +82,11 @@ class setSetBatch(object):
         self._writeActionString(action)
         self.io.write(source)
 
+        self.io.write()
+
     # ----------------------------------------------------------------------- #
 
-    def _doFromStl(self, topo, name, stl, tol=2e-4, i=False, o=False):
+    def _doSurface(self, topo, name, stl, tol=2e-4, i=False, o=False):
 
         # Define write for boolean-strings for OpenFOAM
         def bstr(b): return "true" if b else "false"
@@ -89,28 +96,48 @@ class setSetBatch(object):
         self._writeTopoSetString("pointSet")
         self._writeNameString("pointSet" + "_" + name)
         self._writeActionString("new")
-        self.io.write("surfaceToPoint" + " ", end=" ")
-        self.io.write("\"" + stl + "\"" + str(tol) + " " + bstr(i) + " " + bstr(o))
+        self.io.write("surfaceToPoint", end=" ")
+        self.io.write("\"" + stl + "\" " + str(tol) + " " + bstr(i) + " " + bstr(o))
 
-        self._writeTopoSetString(topo + "Set")
-        self._writeNameString(topo + "Set" + "_" + name)
-        self._writeActionString("new")
-        self.io.write("pointTo" + topo.capitalize() + " ", end=" ")
-        self.io.write("pointSet" + "_" + name + "all")
+        if not topo == "point":
 
-        self._writeTopoSetString("pointSet")
-        self._writeNameString("pointSet" + "_" + name)
-        self._writeActionString("remove")
+            self._writeTopoSetString(topo + "Set")
+            self._writeNameString(topo + "Set" + "_" + name)
+            self._writeActionString("new")
+            self.io.write("pointTo" + topo.capitalize(), end=" ")
+            self.io.write("pointSet" + "_" + name + " " + "all")
+
+            self._writeTopoSetString("pointSet")
+            self._writeNameString("pointSet" + "_" + name)
+            self._writeActionString("remove")
+            self.io.write()
+
         self.io.write()
 
     # ----------------------------------------------------------------------- #
 
     _do = {"manual": _doManual,
-           "fromStl": _doFromStl}
+           "surface": _doSurface}
 
     # ----------------------------------------------------------------------- #
 
-    def cellSet(self, do, name, *args, **kwargs):
+    def pointSet(self, name, do, *args, **kwargs):
+
+# TODO: Check name for NO spaces
+
+        self._do[do](self, "point", name, *args, **kwargs)
+
+    # ----------------------------------------------------------------------- #
+
+    def faceSet(self, name, do, *args, **kwargs):
+
+# TODO: Check name for NO spaces
+
+        self._do[do](self, "face", name, *args, **kwargs)
+
+    # ----------------------------------------------------------------------- #
+
+    def cellSet(self, name, do, *args, **kwargs):
 
 # TODO: Check name for NO spaces
 

@@ -10,9 +10,8 @@
 
 import os, sys
 
-csb = os.path.basename(os.path.realpath(sys.argv[0]))
-csd = os.path.dirname(os.path.realpath(sys.argv[0]))
-csn = os.path.splitext(csb)[0]
+__path__ = os.path.realpath(__file__)
+__dir__ = os.path.dirname(__path__)
 
 sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
@@ -32,7 +31,7 @@ import parameters as par
 # --- Coil creation --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-coils = inductorCoils("ARRAY", csn, par.coil_bundle, par.coil_path,
+coils = inductorCoils("ARRAY", __name__, par.coil_bundle, par.coil_path,
                       par.coils_current, par.coils_n, par.coils_step,
                       origin=par.coils_origin, axis=2, scale=par.coil_scale)
 

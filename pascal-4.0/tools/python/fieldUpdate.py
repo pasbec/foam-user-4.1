@@ -29,8 +29,10 @@
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-# Base modules
 import os, sys
+
+__path__ = os.path.realpath(__file__)
+__dir__ = os.path.dirname(__path__)
 
 # pyFoam modules
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile

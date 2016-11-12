@@ -10,8 +10,10 @@
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-# Base modules
 import os, sys
+
+__path__ = os.path.realpath(__file__)
+__dir__ = os.path.dirname(__path__)
 
 # Additional modules
 import time

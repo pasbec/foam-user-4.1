@@ -10,9 +10,8 @@
 
 import os, sys
 
-csb = os.path.basename(os.path.realpath(sys.argv[0]))
-csd = os.path.dirname(os.path.realpath(sys.argv[0]))
-csn = os.path.splitext(csb)[0]
+__path__ = os.path.realpath(__file__)
+__dir__ = os.path.dirname(__path__)
 
 sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 sys.path.append("/usr/lib/freecad/lib")
@@ -42,8 +41,8 @@ scale.scale(par.geo_scale, par.geo_scale, par.geo_scale)
 # --- Document -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-App.newDocument(csn)
-App.setActiveDocument(csn)
+App.newDocument(__name__)
+App.setActiveDocument(__name__)
 d = App.activeDocument()
 
 # --------------------------------------------------------------------------- #
@@ -144,14 +143,14 @@ for e in exportObj:
 
     mesh.transform(scale)
 
-    mesh.write(par.dir_triSurface + "/" + csn + "_" + e.Label + ".stl")
+    mesh.write(par.dir_triSurface + "/" + __name__ + "_" + e.Label + ".stl")
 
 # --------------------------------------------------------------------------- #
 # --- Save ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
 # Save document
-d.saveAs(par.dir_triSurface + "/" + csn + ".fcstd")
+d.saveAs(par.dir_triSurface + "/" + __name__ + ".fcstd")
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

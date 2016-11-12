@@ -9,6 +9,13 @@
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
+import os, sys
+
+__path__ = os.path.realpath(__file__)
+__dir__ = os.path.dirname(__path__)
+
+sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
+
 import math as m
 import numpy as np
 from scipy import special as spsp
