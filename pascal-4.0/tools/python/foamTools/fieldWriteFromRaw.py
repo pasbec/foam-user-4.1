@@ -19,8 +19,8 @@ import os, sys
 
 import re
 
-from classInfo import fieldClassToAtomicTypeSize, patchBaseTypeToPrimitiveValued
-from ioInfo import objectIndent, objectHeader, objectFooter
+from .classInfo import fieldClassToAtomicTypeSize, patchBaseTypeToPrimitiveValued
+from .ioInfo import objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Function definitions -------------------------------------------------- #

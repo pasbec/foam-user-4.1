@@ -11,14 +11,13 @@
 
 # pyFoam module paths
 
-from foamTools import fileEdit
-from foamTools import subProc
-from foamTools import ioInfo
-from foamTools import classInfo
-from foamTools import dictHelper
-from foamTools import fieldWriteFromRaw
-from foamTools import expansion
-from foamTools import blockMeshDict
+from . import fileEdit
+from . import subProc
+from . import ioInfo
+from . import classInfo
+from . import dictHelper
+from . import fieldWriteFromRaw
+from . import blockMeshDict
 
 # --------------------------------------------------------------------------- #
 # --- End of init ----------------------------------------------------------- #

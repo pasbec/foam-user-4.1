@@ -52,7 +52,7 @@ import os, sys
 import math as m
 import numpy as np
 
-from ioInfo import objectIndent, objectHeader, objectFooter
+from .ioInfo import objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Paths ----------------------------------------------------------------- #

@@ -11,8 +11,8 @@
 
 # pyFoam module paths
 
-from plotTools import latex
-from plotTools import hzdr
+from . import latex
+from . import hzdr
 
 # --------------------------------------------------------------------------- #
 # --- End of init ----------------------------------------------------------- #

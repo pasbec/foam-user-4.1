@@ -20,7 +20,11 @@ import re
 
 # pyFoam modules
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.Basics.DataStructures import Vector,Field,Dimension,DictProxy,TupleProxy,Tensor,SymmTensor,Unparsed,UnparsedList,Codestream,DictRedirection,BinaryBlob,BinaryList,BoolProxy
+from PyFoam.Basics.DataStructures import (Vector, Field, Dimension, DictProxy,
+                                          TupleProxy, Tensor, SymmTensor,
+                                          Unparsed, UnparsedList, Codestream,
+                                          DictRedirection, BinaryBlob,
+                                          BinaryList, BoolProxy)
 
 # --------------------------------------------------------------------------- #
 # --- Function definitions -------------------------------------------------- #

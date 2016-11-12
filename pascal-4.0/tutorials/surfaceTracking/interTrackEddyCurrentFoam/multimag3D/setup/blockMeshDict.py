@@ -19,8 +19,7 @@ sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 import math as m
 import numpy as np
 
-from foamTools.expansion import expansion_de_e, expansion_n_ds
-from foamTools.blockMeshDict import blockMeshDict
+from foamTools.blockMeshDict import expansion_de_e, expansion_n_ds, blockMeshDict
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #

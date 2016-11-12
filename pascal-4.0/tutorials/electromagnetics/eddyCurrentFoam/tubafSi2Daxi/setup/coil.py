@@ -19,9 +19,8 @@ sys.path.append(os.environ['FOAM_USER_TOOLS'] + '/' + 'python')
 import math as m
 import numpy as np
 
-from foamTools.coil import inductorCoils
-from foamTools.coil import writeCoilFeatureEdgeMeshes
-from foamTools.coil import writeEdgeBiotSavartProperties, writeFrequency
+from foamTools.coil import (inductorCoils, writeCoilFeatureEdgeMeshes,
+                            writeEdgeBiotSavartProperties, writeFrequency)
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #

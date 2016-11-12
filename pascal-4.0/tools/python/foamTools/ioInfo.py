@@ -103,6 +103,94 @@ def objectFooter():
     return r
 
 # --------------------------------------------------------------------------- #
+# --- Class definitions ----------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+class ioBase(object):
+
+    # ----------------------------------------------------------------------- #
+
+    def __init__(self, fileName):
+
+        self.fileName = fileName
+        self.indentLevel = 0
+
+        if not fileName == None:
+
+            with open(self._getFilePath(),'w') as f: f.write("")
+
+    # ----------------------------------------------------------------------- #
+
+    def _getScriptPath(self):
+
+        return fileGetScriptPath()
+
+    # ----------------------------------------------------------------------- #
+
+    def _getFilePath(self):
+
+        if not self.fileName == None:
+
+            return fileGetPath(self.fileName)
+
+        else:
+
+            return None
+
+    # ----------------------------------------------------------------------- #
+
+    def _indent(self, level, string, end):
+
+        if not (type(level) == int \
+            and type(string) == str \
+            and type(end) == str):
+
+            raise KeyError()
+
+        return objectIndent(string + end, iLevel=level)
+
+    # ----------------------------------------------------------------------- #
+
+    def _write(self, string):
+
+        if not type(string) == str:
+
+            raise KeyError()
+
+        if self.fileName == None:
+
+            sys.stdout.write(string)
+
+        else:
+
+            fileName = self._getFilePath()
+
+            with open(fileName,'a') as f:
+
+                f.write(string)
+
+    # ----------------------------------------------------------------------- #
+
+    def line(self):
+        self._write("\n")
+
+    # ----------------------------------------------------------------------- #
+
+    def write(self, string, ind=True, end="\n"):
+
+        if not (type(string) == str \
+            and type(ind) == bool \
+            and type(end) == str):
+
+            raise KeyError()
+
+        level = self.indentLevel
+        if not ind: level = 0
+
+        wstr = self._indent(level,str(string), end)
+        self._write(wstr)
+
+# --------------------------------------------------------------------------- #
 # --- End of module --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
