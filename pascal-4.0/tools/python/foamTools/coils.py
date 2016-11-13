@@ -270,10 +270,11 @@ def bundleCircleZ(bundleDict):
 
         raise KeyError("Coil bundle radius (r) is missing.")
 
+    return 2.0*bundleDict["r"]
+
 def bundleCircleI(bundleDict, I):
 
     return I/bundleCircleN(bundleDict)
-    return 2.0*bundleDict["r"]
 
 def bundleCircle(bundleDict, i):
     """
