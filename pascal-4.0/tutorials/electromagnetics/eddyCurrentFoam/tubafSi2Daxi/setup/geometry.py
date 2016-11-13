@@ -52,6 +52,8 @@ def addPolyLine(s, v, v2D):
 
         s.addGeometry(Line(V(v[i]), V(v[i+1])))
 
+    s.addGeometry(Line(V(v[l]), V(v[0])))
+
 
 
 def exportMeshes(obj, dir, prefix, tol=0.1, scale=1.0):
@@ -76,13 +78,13 @@ def exportMeshes(obj, dir, prefix, tol=0.1, scale=1.0):
 
 v = dict()
 
-v["all"]  = [30, 35, 40, 46, 30]
-v["solid"]  = [0, 3, 6, 5, 4, 1, 0]
-v["fluid"]  = [6, 11, 10, 9, 8, 7, 4, 5, 6]
-v["vessel"] = [12, 0, 1, 4, 7, 8, 16, 15, 14, 13, 12]
-v["heater"] = [17, 12, 13, 14, 15, 16, 25, 24, 23, 22, 21, 20, 19, 18, 17]
+v["all"]  = [30, 35, 40, 46]
+v["solid"]  = [0, 3, 6, 5, 4, 1]
+v["fluid"]  = [6, 11, 10, 9, 8, 7, 4, 5]
+v["vessel"] = [12, 0, 1, 4, 7, 8, 16, 15, 14, 13]
+v["heater"] = [17, 12, 13, 14, 15, 16, 25, 24, 23, 22, 21, 20, 19, 18]
 v["free"]   = [11, 29, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33,
-               32, 31, 30, 17, 18, 19, 20, 21, 22, 23, 24, 25, 16, 8, 9, 10, 11]
+               32, 31, 30, 17, 18, 19, 20, 21, 22, 23, 24, 25, 16, 8, 9, 10]
 
 s = dict()
 
@@ -112,8 +114,6 @@ cv[2] = cs*np.array([par.coil_path["r"] + par.coil_bundle["r"]/2.0,
                       par.coils_origin[2] + par.coil_bundle["z"]/2.0])
 cv[3] = cs*np.array([par.coil_path["r"] - par.coil_bundle["r"]/2.0,
                       par.coils_origin[2] + par.coil_bundle["z"]/2.0])
-cv[4] = cs*np.array([par.coil_path["r"] - par.coil_bundle["r"]/2.0,
-                      par.coils_origin[2] - par.coil_bundle["z"]/2.0])
 
 s["coil"] = d.addObject("Sketcher::SketchObject", "SketchCoil")
 s["coil"].Label = "sketch_coil"

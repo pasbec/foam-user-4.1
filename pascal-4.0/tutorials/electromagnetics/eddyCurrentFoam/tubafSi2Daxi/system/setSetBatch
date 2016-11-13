@@ -117,6 +117,12 @@ faceSet  faceSet_regions_old                                          remove
 
 # Patches
 
+faceSet  faceSet_patch_front                                          new    
+faceSet  faceSet_patch_front                                          add    setToFace faceSet_shell_front
+
+faceSet  faceSet_patch_back                                           new    
+faceSet  faceSet_patch_back                                           add    setToFace faceSet_shell_back
+
 faceSet  faceSet_patch_infinity                                       new    
 faceSet  faceSet_patch_infinity                                       add    setToFace faceSet_shell_infinity
 

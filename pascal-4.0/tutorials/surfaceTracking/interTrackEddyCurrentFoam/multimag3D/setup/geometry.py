@@ -52,6 +52,7 @@ def addPolyLine(s, v, v2D):
 
         s.addGeometry(Line(V(v[i]), V(v[i+1])))
 
+    s.addGeometry(Line(V(v[l]), V(v[0])))
 
 
 def exportMeshes(obj, dir, prefix, tol=0.1, scale=1.0):
