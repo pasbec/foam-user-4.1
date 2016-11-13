@@ -43,14 +43,18 @@
 #  writeEdgeBiotSavartProperties(par.dir_case, coils, par.coil_nNonOrto)
 #  writeFrequency(par.dir_case, par.coil_frequency)
 #
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 import math as m
 import numpy as np
@@ -58,8 +62,10 @@ import numpy as np
 from .ioInfo import objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
-# --- Paths ----------------------------------------------------------------- #
+# --- Functions ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
+
+# +++ Paths +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 def edgeLoopFromPoints(points, edgeStart=0):
 
@@ -77,7 +83,7 @@ def edgeLoopFromPoints(points, edgeStart=0):
 
     return edges
 
-# --------------------------------------------------------------------------- #
+
 
 def pathLoop(pathDict, bundleDict, filamentI, edgeStart=0):
     """
@@ -130,7 +136,7 @@ def pathLoop(pathDict, bundleDict, filamentI, edgeStart=0):
 
     return points, edges
 
-# --------------------------------------------------------------------------- #
+
 
 def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
     """
@@ -203,13 +209,15 @@ def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
 
     return points, edges
 
-# --------------------------------------------------------------------------- #
+
 
 path = {"loop": pathLoop, "racetrack": pathRaceTrack}
 
-# --------------------------------------------------------------------------- #
-# --- Bundles --------------------------------------------------------------- #
-# --------------------------------------------------------------------------- #
+
+
+# +++ Bundles  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+
 
 def bundlePointN(bundleDict):
 
@@ -238,7 +246,7 @@ def bundlePoint(bundleDict, i):
 
     return b
 
-# --------------------------------------------------------------------------- #
+
 
 def bundleCircleN(bundleDict):
 
@@ -307,7 +315,7 @@ def bundleCircle(bundleDict, i):
 
     return b
 
-# --------------------------------------------------------------------------- #
+
 
 def bundleRectangleN(bundleDict, s=4):
 
@@ -404,7 +412,7 @@ def bundleRectangle(bundleDict, i):
 
     return b
 
-# --------------------------------------------------------------------------- #
+
 
 bundleN = {"point": bundlePointN, "circle": bundleCircleN, "rectangle": bundleRectangleN}
 
@@ -416,9 +424,9 @@ bundleZ = {"point": bundlePointZ, "circle": bundleCircleZ, "rectangle": bundleRe
 
 bundle = {"point": bundlePoint, "circle": bundleCircle, "rectangle": bundleRectangle}
 
-# --------------------------------------------------------------------------- #
-# --- Writing --------------------------------------------------------------- #
-# --------------------------------------------------------------------------- #
+
+
+# +++ Writing  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 def writeCoilFeatureEdgeMeshes(case, coils):
 
@@ -462,7 +470,7 @@ def writeCoilFeatureEdgeMesh(case, name, points, edges):
 
         f.write(objectFooter())
 
-# --------------------------------------------------------------------------- #
+
 
 def writeEdgeBiotSavartProperties(case, coils, nNonOrth=10):
 
@@ -512,7 +520,7 @@ def writeEdgeBiotSavartProperties(case, coils, nNonOrth=10):
 
         f.write(objectFooter())
 
-# --------------------------------------------------------------------------- #
+
 
 def writeFrequency(case, value):
 
@@ -534,7 +542,7 @@ def writeFrequency(case, value):
         f.write(objectFooter())
 
 # --------------------------------------------------------------------------- #
-# --- Inductor coil --------------------------------------------------------- #
+# --- Classes --------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 class inductorCoil(object):
@@ -692,9 +700,7 @@ class inductorCoil(object):
         print("points:", self.points)
         print("edges:", self.edges)
 
-# --------------------------------------------------------------------------- #
-# --- Inductor coils -------------------------------------------------------- #
-# --------------------------------------------------------------------------- #
+
 
 class inductorCoils(dict):
 
@@ -902,6 +908,6 @@ class inductorCoils(dict):
             self[k].transform(*args, **kwargs)
 
 # --------------------------------------------------------------------------- #
-# --- End of module --------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 

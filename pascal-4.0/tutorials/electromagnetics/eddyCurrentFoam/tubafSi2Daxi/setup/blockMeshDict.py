@@ -10,21 +10,30 @@
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
 import math as m
 import numpy as np
 
-from foamTools.blockMeshDict import expansion_de_e, expansion_n_ds, blockMeshDict
+from foamTools.blockMeshDict import blockMeshDict
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
 import parameters as par
+
+d = blockMeshDict(mesh=par.mesh)
+
+# --------------------------------------------------------------------------- #
+# --- Vertices -------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 
 def vmg(v): return np.linalg.norm(v)
 def vr0(r): return np.array([r, 0.0])
@@ -111,16 +120,6 @@ V[29] += dv0z(V[29], V[28])
 V[30] += dv0z(V[30], V[31])
 V[46] += dv0z(V[46], V[45])
 
-# --------------------------------------------------------------------------- #
-# --- Main ------------------------------------------------------------------ #
-# --------------------------------------------------------------------------- #
-
-mesh = {"normal": par.mesh_normal, "wedge": False, "extent": par.mesh_thickness}
-
-d = blockMeshDict(fileName=par.dir_polyMesh + "/" + "blockMeshDict", mesh=mesh)
-
-# --------------------------------------------------------------------------- #
-# --- Vertices -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 for i in range(len(V)): d.vertices.set(i, V[i])
@@ -216,52 +215,56 @@ d.boundaryFaces.set(  4, "infinity", [ 28, 29, 30, 31, 32, 33], "y+")
 d.boundaryFaces.set(  5, "infinity", [ 20, 21, 22, 23, 24], "y-")
 
 # --------------------------------------------------------------------------- #
-# --- blockMeshDict --------------------------------------------------------- #
+# --- Main ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-d.header(par.geo_scale)
+def main():
+
+    d.rename(par.dir_polyMesh + "/" + "blockMeshDict")
+
+    d.header(par.geo_scale)
+
+    if d.subDict("vertices"):
+
+        d.vertices.write()
+
+    if d.subDict("blocks"):
+
+        d.blocks.write()
+
+    if d.subDict("edges"):
+
+        pass
+
+    if d.subDict("boundary"):
+
+        if d.boundarySubDict("axis", "patch"):
+
+            d.boundaryFaces.write()
+
+        if d.boundarySubDict("front", "empty"):
+
+            d.boundaryFaces.write()
+
+        if d.boundarySubDict("back", "empty"):
+
+            d.boundaryFaces.write()
+
+        if d.boundarySubDict("infinity", "patch"):
+
+            d.boundaryFaces.write()
+
+        pass
+
+    if d.subDict("mergePatchPairs"):
+
+        pass
+
+    d.footer()
 
 # --------------------------------------------------------------------------- #
 
-if d.subDict("vertices"):
-
-    d.vertices.write()
-
-if d.subDict("blocks"):
-
-    d.blocks.write()
-
-if d.subDict("edges"):
-
-    pass
-
-if d.subDict("boundary"):
-
-    if d.boundarySubDict("axis", "patch"):
-
-        d.boundaryFaces.write()
-
-    if d.boundarySubDict("front", "empty"):
-
-        d.boundaryFaces.write()
-
-    if d.boundarySubDict("back", "empty"):
-
-        d.boundaryFaces.write()
-
-    if d.boundarySubDict("infinity", "patch"):
-
-        d.boundaryFaces.write()
-
-    pass
-
-if d.subDict("mergePatchPairs"):
-
-    pass
-
-# --------------------------------------------------------------------------- #
-
-d.footer()
+if __name__ == "__main__": main()
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

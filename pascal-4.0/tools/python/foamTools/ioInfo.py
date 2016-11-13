@@ -1,14 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# March 2015
+# October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
 # TODO [High]: Allow other primitive patch types than "fixedValue"
 
 # TODO [Low]: Rework function descriptions
-
-# TODO [Low]: Reorganize some functions in modules
 
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
@@ -16,32 +14,17 @@
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 import re
 
 # --------------------------------------------------------------------------- #
-# --- Function definitions -------------------------------------------------- #
+# --- Functions ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
-
-def fileGetScriptPath():
-
-    return os.path.dirname(os.path.realpath(sys.argv[0]))
-
-
-
-def fileGetPath(fileName):
-
-    if os.path.isabs(fileName):
-
-        return fileName
-
-    else:
-
-        return fileGetScriptPath() + "/" + fileName
-
-
 
 def objectIndent(cString, iLevel=0, iChar=" ", iCount=4):
 
@@ -106,49 +89,27 @@ def objectFooter():
     return r
 
 # --------------------------------------------------------------------------- #
-# --- Class definitions ----------------------------------------------------- #
+# --- Classes --------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 class ioBase(object):
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, fileName):
+    def __init__(self, filePath=None):
 
-        self.fileName = fileName
+        self.filePath = filePath
+        self.fileObject = None
+
         self.indentLevel = 0
-
-        if not fileName == None:
-
-            with open(self._getFilePath(),"w") as f: f.write("")
-
-    # ----------------------------------------------------------------------- #
-
-    def _getScriptPath(self):
-
-        return fileGetScriptPath()
-
-    # ----------------------------------------------------------------------- #
-
-    def _getFilePath(self):
-
-        if not self.fileName == None:
-
-            return fileGetPath(self.fileName)
-
-        else:
-
-            return None
 
     # ----------------------------------------------------------------------- #
 
     def _indent(self, level, string, end):
 
-        if not (type(level) == int \
-            and type(string) == str \
-            and type(end) == str):
+        if type(level) != int or type(string) != str or type(end) != str:
 
-            raise KeyError()
+            raise KeyError("Argument types are wrong.")
 
         return objectIndent(string + end, iLevel=level)
 
@@ -156,36 +117,92 @@ class ioBase(object):
 
     def _write(self, string):
 
-        if not type(string) == str:
+        if type(string) != str:
 
-            raise KeyError()
+            raise KeyError("Argument types are wrong.")
 
-        if self.fileName == None:
+        if not self.filePath:
 
             sys.stdout.write(string)
 
+        elif self.fileObject:
+
+            self.fileObject.write(string)
+
         else:
 
-            fileName = self._getFilePath()
+            raise IOError("File" + " \"" + self.filePath + "\" "+
+                          "is not open.")
 
-            with open(fileName,"a") as f:
+    # ----------------------------------------------------------------------- #
 
-                f.write(string)
+    def open(self):
+
+        if self.filePath:
+
+            if not self.fileObject:
+
+                self.fileObject = open(os.path.realpath(self.filePath),"w")
+
+                self.fileObject.write("")
+
+            else:
+
+                raise IOError("File" + " \"" + self.filePath + "\" "+
+                            "is already open.")
+
+    # ----------------------------------------------------------------------- #
+
+    def close(self):
+
+        if self.filePath:
+
+            if self.fileObject:
+
+                self.fileObject.close()
+
+                self.fileObject = None
+
+            else:
+
+                raise IOError("File" + " \"" + self.filePath + "\" "+
+                            "is not open.")
+
+    # ----------------------------------------------------------------------- #
+
+    def rename(self, filePath=None):
+
+        if self.fileObject:
+
+            self.fileObject.close()
+
+            self.fileObject = None
+
+        self.filePath = filePath
+
+    # ----------------------------------------------------------------------- #
+
+    def indent(self, level=0):
+
+        if type(level) != int:
+
+            raise KeyError("Indent level must be an integer larger or equal 0.")
+
+        self.indentLevel = level
 
     # ----------------------------------------------------------------------- #
 
     def line(self):
+
         self._write("\n")
 
     # ----------------------------------------------------------------------- #
 
     def write(self, string="", ind=True, end="\n"):
 
-        if not (type(string) == str \
-            and type(ind) == bool \
-            and type(end) == str):
+        if type(string) != str or type(ind) != bool or type(end) != str:
 
-            raise KeyError()
+            raise KeyError("Argument types are wrong.")
 
         level = self.indentLevel
         if not ind: level = 0
@@ -194,6 +211,6 @@ class ioBase(object):
         self._write(wstr)
 
 # --------------------------------------------------------------------------- #
-# --- End of module --------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 

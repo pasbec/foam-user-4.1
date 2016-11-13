@@ -10,8 +10,11 @@
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 sys.path.append("/usr/lib/freecad/lib")
@@ -29,17 +32,43 @@ from Sketcher import Constraint
 # --------------------------------------------------------------------------- #
 
 import parameters as par
+import blockMeshDict
 
-scale = Matrix()
-scale.scale(par.geo_scale, par.geo_scale, par.geo_scale)
+FreeCAD.newDocument(__head__)
+FreeCAD.setActiveDocument(__head__)
+d = FreeCAD.activeDocument()
 
 # --------------------------------------------------------------------------- #
-# --- Main ------------------------------------------------------------------ #
+# --- Functions ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-App.newDocument(__name__)
-App.setActiveDocument(__name__)
-d = App.activeDocument()
+def addPolyLine(s, v, v2D):
+
+    l = len(v) - 1
+
+    def V(i): return Vector(v2D[i][0], v2D[i][1], 0.0)
+
+    for i in range(l):
+
+        s.addGeometry(Line(V(v[i]), V(v[i+1])))
+
+
+
+def exportMeshes(obj, dir, prefix, tol=0.1, scale=1.0):
+
+    S = Matrix()
+    S.scale(scale, scale, scale)
+
+    for o in obj:
+
+        mesh = Mesh.Mesh(o.Shape.tessellate(tol))
+        #mesh = MeshPart.meshFromShape(Shape=o.Shape, MaxLength=10)
+
+        mesh.transform(S)
+
+        name = prefix + "_" + o.Label + ".stl"
+
+        mesh.write(dir + "/" + name)
 
 # --------------------------------------------------------------------------- #
 # --- Sketches -------------------------------------------------------------- #
@@ -126,27 +155,25 @@ p["trackedSurface"].Shape = Shell([r["fluid"].Shape.Face3])
 d.recompute()
 
 # --------------------------------------------------------------------------- #
-# --- Export ---------------------------------------------------------------- #
+# --- Main ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-exportObj = [r["fluid"], r["buffer"],
-             p["fixedMesh"], p["sideWall"], p["bottomWall"], p["trackedSurface"]]
+bodyObj = [r["fluid"], r["buffer"]]
+shellObj = [p["fixedMesh"], p["sideWall"], p["bottomWall"], p["trackedSurface"]]
 
-for e in exportObj:
+def main():
 
-    mesh = Mesh.Mesh(e.Shape.tessellate(0.1))
-    #mesh = MeshPart.meshFromShape(Shape=e.Shape, MaxLength=10)
+    exportObj = bodyObj + shellObj
 
-    mesh.transform(scale)
+    #Export body abnd shell meshes
+    exportMeshes(exportObj, par.dir_triSurface, __head__, scale=par.geo_scale)
 
-    mesh.write(par.dir_triSurface + "/" + __name__ + "_" + e.Label + ".stl")
+    # Save document
+    d.saveAs(par.dir_triSurface + "/" + __head__ + ".fcstd")
 
 # --------------------------------------------------------------------------- #
-# --- Save ------------------------------------------------------------------ #
-# --------------------------------------------------------------------------- #
 
-# Save document
-d.saveAs(par.dir_triSurface + "/" + __name__ + ".fcstd")
+if __name__ == "__main__": main()
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

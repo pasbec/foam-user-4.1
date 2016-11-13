@@ -32,7 +32,7 @@ debug 0;
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.
 // Note: the write tolerance needs to be higher than this.
-mergeTolerance 1e-6;
+mergeTolerance 1e-8;
 
 // Meshing steps
 castellatedMesh true;
@@ -41,28 +41,32 @@ addLayers       false;
 
 geometry
 {
-    geometry_region_fluid_2D.stl
+    // WARNING: We do refinement in the 2D grid!
+    geometry_body_fluid_2D.stl
     {
         type    triSurfaceMesh;
-        name    region_fluid;
+        name    body_fluid;
     }
 
-    geometry_region_solid_2D.stl
+    // WARNING: We do refinement in the 2D grid!
+    geometry_body_solid_2D.stl
     {
         type    triSurfaceMesh;
-        name    region_solid;
+        name    body_solid;
     }
 
-    geometry_region_vessel_2D.stl
+    // WARNING: We do refinement in the 2D grid!
+    geometry_body_vessel_2D.stl
     {
         type    triSurfaceMesh;
-        name    region_vessel;
+        name    body_vessel;
     }
 
-    geometry_region_heater_2D.stl
+    // WARNING: We do refinement in the 2D grid!
+    geometry_body_heater_2D.stl
     {
         type    triSurfaceMesh;
-        name    region_heater;
+        name    body_heater;
     }
 
     space_refine_coarse
@@ -94,7 +98,7 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-//         region_fluid
+//         body_fluid
 //         {
 //             level (2 2);
 //             faceZone fluid;
@@ -107,25 +111,25 @@ castellatedMeshControls
 
     refinementRegions
     {
-        region_fluid
+        body_fluid
         {
             mode inside;
             levels ((1e-15 $finer));
         }
 
-        region_solid
+        body_solid
         {
             mode inside;
             levels ((1e-15 $fine));
         }
 
-        region_vessel
+        body_vessel
         {
             mode inside;
             levels ((1e-15 $fine));
         }
 
-        region_heater
+        body_heater
         {
             mode inside;
             levels ((1e-15 $fine));

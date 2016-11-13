@@ -10,8 +10,11 @@
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
@@ -56,13 +59,7 @@ nr2 = expansion_n_ds(e2, e2ds, lr2)
 nz0 = nr2
 nz3 = nr2
 
-# --------------------------------------------------------------------------- #
-# --- Main ------------------------------------------------------------------ #
-# --------------------------------------------------------------------------- #
-
-mesh = {"normal": par.mesh_normal}
-
-d = blockMeshDict(fileName=par.dir_polyMesh + "/" + "blockMeshDict", mesh=mesh)
+d = blockMeshDict(mesh=par.mesh)
 
 # --------------------------------------------------------------------------- #
 # --- Vertices -------------------------------------------------------------- #
@@ -181,76 +178,82 @@ d.boundaryFaces.set( 230, "infinity", 33, "x+")
 d.boundaryFaces.set( 231, "infinity", 34, "y+")
 
 # --------------------------------------------------------------------------- #
-# --- blockMeshDict --------------------------------------------------------- #
+# --- Main ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-d.header(par.geo_scale)
+def main():
+
+    d.rename(par.dir_polyMesh + "/" + "blockMeshDict")
+
+    d.header(par.geo_scale)
+
+    if d.subDict("vertices"):
+
+        d.vertices.write()
+
+    if d.subDict("blocks"):
+
+        d.blocks.write()
+
+    if d.subDict("edges"):
+
+        d.arc(  4,  5,  6)
+        d.arc(  6,  5,  4)
+
+        d.arc( 14, 15, 16)
+        d.arc( 16, 15, 14)
+
+        d.arc( 24, 25, 26)
+        d.arc( 26, 25, 24)
+
+        d.arc( 34, 35, 36)
+        d.arc( 36, 35, 34)
+
+        d.arc( 44, 45, 46)
+        d.arc( 46, 45, 44)
+
+        d.arc(  7,  8,  9)
+        d.arc(  9,  8,  7)
+
+        d.arc( 17, 18, 19)
+        d.arc( 19, 18, 17)
+
+        d.arc( 27, 28, 29)
+        d.arc( 29, 28, 27)
+
+        d.arc( 37, 38, 39)
+        d.arc( 39, 38, 37)
+
+        d.arc( 47, 48, 49)
+        d.arc( 49, 48, 47)
+
+        pass
+
+    if d.subDict("boundary"):
+
+        if d.boundarySubDict("mirror_x", "patch"):
+
+            d.boundaryFaces.write()
+
+        if d.boundarySubDict("mirror_y", "patch"):
+
+            d.boundaryFaces.write()
+
+        if d.boundarySubDict("infinity", "patch"):
+
+            d.boundaryFaces.write()
+
+        pass
+
+    if d.subDict("mergePatchPairs"):
+
+        pass
+
+    d.footer()
 
 # --------------------------------------------------------------------------- #
 
-if d.subDict("vertices"):
-
-    d.vertices.write()
-
-if d.subDict("blocks"):
-
-    d.blocks.write()
-
-if d.subDict("edges"):
-
-    d.arc(  4,  5,  6)
-    d.arc(  6,  5,  4)
-
-    d.arc( 14, 15, 16)
-    d.arc( 16, 15, 14)
-
-    d.arc( 24, 25, 26)
-    d.arc( 26, 25, 24)
-
-    d.arc( 34, 35, 36)
-    d.arc( 36, 35, 34)
-
-    d.arc( 44, 45, 46)
-    d.arc( 46, 45, 44)
-
-    d.arc(  7,  8,  9)
-    d.arc(  9,  8,  7)
-
-    d.arc( 17, 18, 19)
-    d.arc( 19, 18, 17)
-
-    d.arc( 27, 28, 29)
-    d.arc( 29, 28, 27)
-
-    d.arc( 37, 38, 39)
-    d.arc( 39, 38, 37)
-
-    d.arc( 47, 48, 49)
-    d.arc( 49, 48, 47)
-
-if d.subDict("boundary"):
-
-    if d.boundarySubDict("mirror_x", "patch"):
-
-        d.boundaryFaces.write()
-
-    if d.boundarySubDict("mirror_y", "patch"):
-
-        d.boundaryFaces.write()
-
-    if d.boundarySubDict("infinity", "patch"):
-
-        d.boundaryFaces.write()
-
-    pass
-
-if d.subDict("mergePatchPairs"):
-
-    pass
-
-# --------------------------------------------------------------------------- #
-
-d.footer()
+if __name__ == "__main__": main()
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

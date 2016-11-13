@@ -27,7 +27,8 @@ meshFolder='constant/polyMesh'
 [[ ! -e "$meshFolder" ]] && mkdir "$meshFolder"
 if [[ -e "$mesh0Folder" ]]; then
 
-    mv "$mesh0Folder/boundary" \
+    mv "$mesh0Folder/blockMeshDict" \
+       "$mesh0Folder/boundary" \
        "$mesh0Folder/faces" \
        "$mesh0Folder/neighbour" \
        "$mesh0Folder/owner" \
@@ -39,7 +40,8 @@ fi
 
 meshBakFolder='constant/polyMesh.org'
 [[ ! -e "$meshBakFolder" ]] && mkdir "$meshBakFolder"
-mv "$meshFolder/boundary" \
+mv "$meshFolder/blockMeshDict" \
+   "$meshFolder/boundary" \
    "$meshFolder/faces" \
    "$meshFolder/neighbour" \
    "$meshFolder/owner" \

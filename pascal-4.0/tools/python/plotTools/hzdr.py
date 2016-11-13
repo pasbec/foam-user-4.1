@@ -10,8 +10,11 @@
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -20,7 +23,7 @@ from matplotlib.cm import _reverse_cmap_spec as rcms
 from cycler import cycler as ccycler
 
 # --------------------------------------------------------------------------- #
-# --- Function definitions -------------------------------------------------- #
+# --- Functions ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 def colors():
@@ -167,6 +170,6 @@ def colors():
     mpl.rcParams["image.cmap"] = "hzdr-rainbow"
 
 # --------------------------------------------------------------------------- #
-# --- End of module --------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 

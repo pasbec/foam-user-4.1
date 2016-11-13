@@ -11,14 +11,17 @@
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
 import numpy as np
 
-from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFooter
+from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -30,68 +33,70 @@ R0 = 0.029999
 nr = 61
 nz = 61
 
-print "H0, R0 :", str(H0) + ",", str(R0)
-print "nr, nz : ", nr, ",", nz
-
-# --------------------------------------------------------------------------- #
-# --- Function definitions -------------------------------------------------- #
-# --------------------------------------------------------------------------- #
-
-# Define short indented line with line break
-def i(iL,cS,eS="\n"): return objectIndent(cS + eS,iLevel=iL)
-
-# --------------------------------------------------------------------------- #
-# --- Main program sequence ------------------------------------------------- #
-# --------------------------------------------------------------------------- #
+print ("H0, R0 :", str(H0) + ",", str(R0))
+print ("nr, nz : ", str(nr) + "," + str(nz))
 
 # Mesh and discretisation
 rl = np.linspace(0.0,R0,nr)
 zl = np.linspace(0.0,H0,nz)
 
-with open(fileGetPath("lorentzForce.samleDict"),"w") as cf:
+# --------------------------------------------------------------------------- #
+# --- Main ------------------------------------------------------------------ #
+# --------------------------------------------------------------------------- #
 
-    cf.write(objectHeader("sampleDict", "dictionary"))
+def main():
 
-    cf.write(i(0, "interpolationScheme cellPointFace;"))
-    cf.write(i(0, "setFormat           raw;"))
-    cf.write(i(0, "surfaceFormat       null;"))
+    with open(os.path.realpath("lorentzForce.samleDict"),"w") as f:
 
-    cf.write(i(0, "sets "))
-    cf.write(i(0, "("))
-    cf.write(i(1, "planexz"))
-    cf.write(i(1, "{"))
-    cf.write(i(2, "type cloud;"))
-    cf.write(i(2, "axis    xyz;"))
-    cf.write(i(2, "points"))
-    cf.write(i(2, "("))
+        # Define short indented line with line break
+        def i(iL,cS,eS="\n"): return objectIndent(cS + eS,iLevel=iL)
 
-    z0 = 0.03
+        f.write(objectHeader("sampleDict", "dictionary"))
 
-    for ri in range(len(rl)):
-        for zi in range(len(zl)):
+        f.write(i(0, "interpolationScheme cellPointFace;"))
+        f.write(i(0, "setFormat           raw;"))
+        f.write(i(0, "surfaceFormat       null;"))
 
-            cf.write(i(3,"(" + str(rl[ri]) + " 0.0 " + str(z0 + zl[zi]) + ")"))
+        f.write(i(0, "sets "))
+        f.write(i(0, "("))
+        f.write(i(1, "planexz"))
+        f.write(i(1, "{"))
+        f.write(i(2, "type cloud;"))
+        f.write(i(2, "axis    xyz;"))
+        f.write(i(2, "points"))
+        f.write(i(2, "("))
 
-    cf.write(i(2, ");"))
-    cf.write(i(1, "}"))
-    cf.write(i(0, ");"))
+        z0 = 0.03
 
-    cf.write("\n")
+        for ri in range(len(rl)):
+            for zi in range(len(zl)):
 
-    cf.write(i(0, "surfaces "))
-    cf.write(i(0, "("))
-    cf.write(i(0, ");"))
+                f.write(i(3,"(" + str(rl[ri]) + " 0.0 " + str(z0 + zl[zi]) + ")"))
 
-    cf.write("\n")
+        f.write(i(2, ");"))
+        f.write(i(1, "}"))
+        f.write(i(0, ");"))
 
-    cf.write(i(0, "fields "))
-    cf.write(i(0, "("))
-    cf.write(i(1, "F"))
-    cf.write(i(0, ");"))
+        f.write("\n")
 
-    cf.write("\n")
+        f.write(i(0, "surfaces "))
+        f.write(i(0, "("))
+        f.write(i(0, ");"))
 
-    cf.write(objectFooter())
+        f.write("\n")
+
+        f.write(i(0, "fields "))
+        f.write(i(0, "("))
+        f.write(i(1, "F"))
+        f.write(i(0, ");"))
+
+        f.write("\n")
+
+        f.write(objectFooter())
+
+# --------------------------------------------------------------------------- #
+
+if __name__ == "__main__": main()
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Module template
-# March 2015
+# October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
 # --------------------------------------------------------------------------- #
@@ -11,26 +10,25 @@
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 from .ioInfo import ioBase
 
 # --------------------------------------------------------------------------- #
-# --- Function definitions -------------------------------------------------- #
-# --------------------------------------------------------------------------- #
-
-# --------------------------------------------------------------------------- #
-# --- Class definitions ----------------------------------------------------- #
+# --- Classes --------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 class setSetBatch(object):
 
-    def __init__(self, fileName=None):
+    def __init__(self, filePath=None, maxLength=60):
 
-        self.nameStringMaxLenth = 60
+        self.nameStringMaxLenth = maxLength
 
-        self.io = ioBase(fileName)
+        self.io = ioBase(filePath)
 
         self.io.write()
 
@@ -38,7 +36,7 @@ class setSetBatch(object):
 
     def _topoSetString(self, string):
 
-        return string.ljust(10, " ")
+        return string.ljust(8, " ")
 
     # ----------------------------------------------------------------------- #
 
@@ -50,7 +48,7 @@ class setSetBatch(object):
 
     def _actionString(self, string):
 
-        return string.ljust(7, " ")
+        return string.ljust(6, " ")
 
     # ----------------------------------------------------------------------- #
 
@@ -72,84 +70,408 @@ class setSetBatch(object):
 
     # ----------------------------------------------------------------------- #
 
-    def _doManual(self, topo, name, action, source):
-
-# TODO: Check for valid actions?
-# TODO: Check for valid sources?
+    def _doAction(self, topo, name, action, source=False, skip=False):
 
         self._writeTopoSetString(topo + "Set")
         self._writeNameString(topo + "Set" + "_" + name)
         self._writeActionString(action)
-        self.io.write(source)
 
-        self.io.write()
+        if source:
+
+            self.io.write(source)
+
+        else:
+
+            self.io.write()
+
+        if skip: self.io.write()
 
     # ----------------------------------------------------------------------- #
 
-    def _doSurface(self, topo, name, stl, tol=1e-4, i=False, o=False):
+    def _doRemove(self, topo, name, skip=False):
+
+        self._doAction(topo, name, "remove", source=False, skip=skip)
+
+    # ----------------------------------------------------------------------- #
+
+    def _doClear(self, topo, name, rmOld=False, skip=True):
+
+        self._doAction(topo, name, "clear", source=False, skip=False)
+
+        if rmOld:
+
+            self._doRemove(topo, name + "_" + "old", skip=skip)
+
+        else:
+
+            if skip: self.io.write()
+
+    # ----------------------------------------------------------------------- #
+
+    def _doInvert(self, topo, name, rmOld=False, skip=True):
+
+        self._doAction(topo, name, "invert", source=False, skip=False)
+
+        if rmOld:
+
+            self._doRemove(topo, name + "_" + "old", skip=skip)
+
+        else:
+
+            if skip: self.io.write()
+
+    # ----------------------------------------------------------------------- #
+
+    def _doNew(self, topo, name, source=False, skip=True):
+
+        self._doAction(topo, name, "new", source=source, skip=skip)
+
+    # ----------------------------------------------------------------------- #
+
+    def _doAdd(self, topo, name, source, rmOld=False, skip=True):
+
+        self._doAction(topo, name, "add", source=source, skip=False)
+
+        if rmOld:
+
+            self._doRemove(topo, name + "_" + "old", skip=skip)
+
+        else:
+
+            if skip: self.io.write()
+
+    # ----------------------------------------------------------------------- #
+
+    def _doDelete(self, topo, name, source, rmOld=False, skip=True):
+
+        self._doAction(topo, name, "delete", source=source, skip=False)
+
+        if rmOld:
+
+            self._doRemove(topo, name + "_" + "old", skip=skip)
+
+        else:
+
+            if skip: self.io.write()
+
+    # ----------------------------------------------------------------------- #
+
+    def _doAll(self, topo, name, skip=True):
+
+        self._doNew(topo, name, source=False, skip=False)
+        self._doInvert(topo, name, rmOld=False, skip=skip)
+
+    # ----------------------------------------------------------------------- #
+
+    def _doInvSetToTopo(self, topo, name, add, rmOld=True, skip=True):
+
+        aList = list(add) if type(add) == list else list([add])
+
+        count = len(aList)
+
+        for a in aList:
+
+            source  = "setTo" + topo.capitalize() + " "
+            source += topo + "Set" + "_" + a
+
+            self._doAdd(topo, name, source=source, rmOld=False, skip=False)
+
+        self._doInvert(topo, name, rmOld=False, skip=False)
+
+        if count > 1 and rmOld:
+
+            self._doRemove(topo, name + "_" + "old", skip=skip)
+
+        else:
+
+            if skip: self.io.write()
+
+    # ----------------------------------------------------------------------- #
+
+    def _doAddSetToTopo(self, topo, name, add, new=True, rmOld=True, skip=True):
+
+        aList = list(add) if type(add) == list else list([add])
+
+        count = len(aList)
+
+        if new:
+
+            self._doNew(topo, name, source=False, skip=False)
+
+        for a in aList:
+
+            source  = "setTo" + topo.capitalize() + " "
+            source += topo + "Set" + "_" + a
+
+            self._doAdd(topo, name, source=source, rmOld=False, skip=False)
+
+        if count > 1 and rmOld:
+
+            self._doRemove(topo, name + "_" + "old", skip=skip)
+
+        else:
+
+            if skip: self.io.write()
+
+    # ----------------------------------------------------------------------- #
+
+    def _doDeleteSetToTopo(self, topo, name, delete, rmOld=True, skip=True):
+
+        dList = list(delete) if type(delete) == list else list([delete])
+
+        count = len(dList)
+
+        for d in dList:
+
+            source  = "setTo" + topo.capitalize() + " "
+            source += topo + "Set" + "_" + d
+
+            self._doDelete(topo, name, source=source, rmOld=False, skip=False)
+
+        if count > 1 and rmOld:
+
+            self._doRemove(topo, name + "_" + "old", skip=skip)
+
+        else:
+
+            if skip: self.io.write()
+
+    # ----------------------------------------------------------------------- #
+
+    def _doSetToTopo(self, topo, name, add, delete=None, new=True, invert=False,
+                        rmOld=True, skip=True):
+
+        count = len(add) if type(add) == list else 1
+
+        self._doAddSetToTopo(topo, name, add=add, new=new,
+                             rmOld=False, skip=False)
+
+        if delete:
+
+            count += len(delete) if type(delete) == list else 1
+
+            self._doDeleteSetToTopo(topo, name, delete=delete,
+                                    rmOld=False, skip=False)
+
+        if invert:
+
+            count += 1
+
+            self._doInvert(topo, name, rmOld=False, skip=False)
+
+        if count > 1 and rmOld:
+
+            self._doRemove(topo, name + "_" + "old", skip=skip)
+
+        else:
+
+            if skip: self.io.write()
+
+
+    # ----------------------------------------------------------------------- #
+
+    def _doSurfaceToTopo(self, topo, name, stl,
+                         tol=1e-4, inside=False, outside=False, skip=True):
 
         # Define write for boolean-strings for OpenFOAM
         def bstr(b): return "true" if b else "false"
 
-# TODO: Check name for NO spaces
+        source  = "surfaceToPoint" + " " + "\"" + stl + "\"" + " "
+        source += str(tol) + " " + bstr(inside) + " " + bstr(outside)
 
-        self._writeTopoSetString("pointSet")
-        self._writeNameString("pointSet" + "_" + name)
-        self._writeActionString("new")
-        self.io.write("surfaceToPoint", end=" ")
-        self.io.write("\"" + stl + "\" " + str(tol) + " " + bstr(i) + " " + bstr(o))
+        self._doNew("point", name, source=source, skip=False)
 
         if not topo == "point":
 
-            self._writeTopoSetString(topo + "Set")
-            self._writeNameString(topo + "Set" + "_" + name)
-            self._writeActionString("new")
-            self.io.write("pointTo" + topo.capitalize(), end=" ")
-            self.io.write("pointSet" + "_" + name + " " + "all")
+            source  = "pointTo" + topo.capitalize() + " "
+            source += "pointSet" + "_" + name + " " + "all"
 
-            self._writeTopoSetString("pointSet")
-            self._writeNameString("pointSet" + "_" + name)
-            self._writeActionString("remove")
-            self.io.write()
+            self._doNew(topo, name, source=source, skip=False)
 
-        self.io.write()
+            self._doRemove("point", name, skip=False)
+
+        if skip: self.io.write()
 
     # ----------------------------------------------------------------------- #
 
-    _do = {"manual": _doManual,
-           "surface": _doSurface}
+    def __doCellBoundaryToTopo(self, topo, name, add, delete=None, new=True,
+                               rmOld=True, skip=True):
+
+        aList = list(add) if type(add) == list else list([add])
+
+        count = len(aList)
+
+        if topo != "face":
+
+            raise NotImplementedError("Only available for faces.")
+
+        else:
+
+            dList = []
+
+            if delete:
+
+                dList = list(delete) if type(delete) == list else list([delete])
+
+            adList = aList + dList
+
+            for i, ad in enumerate(adList):
+
+                namei = name + str(i)
+
+                self._doNew(topo, namei, source=False, skip=False)
+
+                source  = "cellTo" + topo.capitalize() + " "
+                source += "cellSet" + "_" + ad + " " + "all"
+
+                self._doAdd(topo, namei, source=source,
+                            rmOld=False, skip=False)
+
+                source  = "cellTo" + topo.capitalize() + " "
+                source += "cellSet" + "_" + ad + " " + "both"
+
+                self._doDelete(topo, namei, source=source,
+                               rmOld=True, skip=False)
+
+            if skip: self.io.write()
+
+            if new:
+
+                self._doNew(topo, name, source=False, skip=False)
+
+            for i, a in enumerate(aList):
+
+                namei = name + str(i)
+
+                self._doAddSetToTopo(topo, name, add=[namei], new=False,
+                                     rmOld=False, skip=False)
+
+            for i, d in enumerate(dList):
+
+                namei = name + str(len(aList) + i)
+
+                self._doDeleteSetToTopo(topo, name, delete=[namei],
+                                     rmOld=False, skip=False)
+
+            if skip: self.io.write()
+
+            for i, a in enumerate(adList):
+
+                namei = name + str(i)
+
+                self._doRemove(topo, namei, skip=False)
+
+            if count > 1 and rmOld:
+
+                self._doRemove(topo, name + "_" + "old", skip=skip)
+
+            else:
+
+                if skip: self.io.write()
+
+    # ----------------------------------------------------------------------- #
+
+    _doPoint = {"remove": _doRemove, "clear": _doClear, "invert": _doInvert,
+               "new": _doNew, "add": _doAdd, "delete": _doDelete,
+               "all": _doAll,
+               "invSetToTopo": _doInvSetToTopo,
+               "addSetToTopo": _doAddSetToTopo,
+               "deleteSetToTopo": _doDeleteSetToTopo,
+               "setToTopo": _doSetToTopo,
+               "surfaceToTopo": _doSurfaceToTopo,
+               "manual": _doAction}
+
+    _doFace = {"remove": _doRemove, "clear": _doClear, "invert": _doInvert,
+               "new": _doNew, "add": _doAdd, "delete": _doDelete,
+               "all": _doAll,
+               "invSetToTopo": _doInvSetToTopo,
+               "addSetToTopo": _doAddSetToTopo,
+               "deleteSetToTopo": _doDeleteSetToTopo,
+               "setToTopo": _doSetToTopo,
+               "surfaceToTopo": _doSurfaceToTopo,
+               "cellBoundaryToTopo" : __doCellBoundaryToTopo,
+               "manual": _doAction}
+
+    _doCell = {"remove": _doRemove, "clear": _doClear, "invert": _doInvert,
+               "new": _doNew, "add": _doAdd, "delete": _doDelete,
+               "all": _doAll,
+               "invSetToTopo": _doInvSetToTopo,
+               "addSetToTopo": _doAddSetToTopo,
+               "deleteSetToTopo": _doDeleteSetToTopo,
+               "setToTopo": _doSetToTopo,
+               "surfaceToTopo": _doSurfaceToTopo,
+               "manual": _doAction}
+
+    # ----------------------------------------------------------------------- #
+
+    def rename(self, filePath):
+
+        self.io.rename(filePath)
+
+    # ----------------------------------------------------------------------- #
+
+    def open(self):
+
+        self.io.open()
+
+    # ----------------------------------------------------------------------- #
+
+    def close(self):
+
+        self.io.close()
+
+    # ----------------------------------------------------------------------- #
+
+    def quit(self):
+
+        self.group("End")
+
+        self.io.write("quit")
+
+        self.io.close()
+
+    # ----------------------------------------------------------------------- #
+
+    def write(self, string, end="\n"):
+
+        self.io.write(string, end=end)
+
+    # ----------------------------------------------------------------------- #
+
+    def group(self, string):
+
+        if self.io.filePath and not self.io.fileObject:
+
+            self.io.open()
+
+        self.write("# " + string + "\n")
+        return True
 
     # ----------------------------------------------------------------------- #
 
     def pointSet(self, name, do, *args, **kwargs):
 
-# TODO: Check name for NO spaces
+# TODO: Prevent name from containing spaces
 
-        self._do[do](self, "point", name, *args, **kwargs)
+        self._doPoint[do](self, "point", name, *args, **kwargs)
 
     # ----------------------------------------------------------------------- #
 
     def faceSet(self, name, do, *args, **kwargs):
 
-# TODO: Check name for NO spaces
+# TODO: Prevent name from containing spaces
 
-        self._do[do](self, "face", name, *args, **kwargs)
+        self._doFace[do](self, "face", name, *args, **kwargs)
 
     # ----------------------------------------------------------------------- #
 
     def cellSet(self, name, do, *args, **kwargs):
 
-# TODO: Check name for NO spaces
+# TODO: Prevent name from containing spaces
 
-        self._do[do](self, "cell", name, *args, **kwargs)
-
-    # ----------------------------------------------------------------------- #
-
-    def manual(self, string, end="\n"):
-
-        self.io.write(string, end=end)
+        self._doCell[do](self, "cell", name, *args, **kwargs)
 
 # --------------------------------------------------------------------------- #
-# --- End of module --------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 

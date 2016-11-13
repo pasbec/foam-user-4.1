@@ -1,11 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Module with helper functions to write a blockdict with python
-# July 2015
+# Module with helper functions to write a blockMeshDict with python
+# October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
-
-# TODO TODO WARNING TODO TODO Do not use static variables!!!
 
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
@@ -13,8 +11,11 @@
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 import warnings
 
@@ -26,7 +27,7 @@ import scipy.optimize as spo
 from .ioInfo import ioBase, objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
-# --- Function definitions -------------------------------------------------- #
+# --- Functions ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 def expansion_n_ds_root(e, ds, n, l=None):
@@ -217,7 +218,7 @@ def expansion(n, e, l=None):
         raise ValueError("n must be an integer, which is larger than 0")
 
 # --------------------------------------------------------------------------- #
-# --- Class definitions ----------------------------------------------------- #
+# --- Classes --------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 class resizeList(list):
@@ -235,10 +236,6 @@ class resizeList(list):
             self += [self.default] * (key - len(self) + 1)
 
         super(resizeList, self).__setitem__(key, value)
-
-
-
-# --------------------------------------------------------------------------- #
 
 
 
@@ -406,10 +403,6 @@ class vertices(object):
         # ------------------------------------------------------------------- #
 
             self.io.write(wstr)
-
-
-
-# --------------------------------------------------------------------------- #
 
 
 
@@ -1351,10 +1344,6 @@ class blocks(object):
 
 
 
-# --------------------------------------------------------------------------- #
-
-
-
 class boundaryFaces(object):
 
     def __init__(self, blockMeshDictRef):
@@ -1500,9 +1489,9 @@ class blockMeshDict(object):
 
         # ------------------------------------------------------------------- #
 
-        def __init__(self, blockMeshDictRef, fileName=None):
+        def __init__(self, blockMeshDictRef, filePath=None):
 
-            super(blockMeshDictRef.cIo, self).__init__(fileName)
+            super(blockMeshDictRef.cIo, self).__init__(filePath)
 
             self.blockMeshDict = blockMeshDictRef
 
@@ -1582,6 +1571,20 @@ class blockMeshDict(object):
 
     # ----------------------------------------------------------------------- #
 
+    def __init__(self, filePath=None,
+                 nmaxverts=1000, nmaxblocks=1000,
+                 mesh=None, debug=False):
+
+        self.debug = debug
+
+        self._initMesh(mesh)
+        self.io = self.cIo(self, filePath)
+        self.vertices = vertices(self, nmaxverts)
+        self.blocks = blocks(self, nmaxblocks)
+        self.boundaryFaces = boundaryFaces(self)
+
+    # ----------------------------------------------------------------------- #
+
     def _initMesh(self, mesh):
 
         if not mesh: mesh = dict()
@@ -1657,24 +1660,43 @@ class blockMeshDict(object):
 
     # ----------------------------------------------------------------------- #
 
-    def __init__(self, fileName=None,
-                 nmaxverts=1000, nmaxblocks=1000,
-                 mesh=None, debug=False):
+    def rename(self, filePath):
 
-        self.debug = debug
-
-        self._initMesh(mesh)
-        self.io = self.cIo(self, fileName)
-        self.vertices = vertices(self, nmaxverts)
-        self.blocks = blocks(self, nmaxblocks)
-        self.boundaryFaces = boundaryFaces(self)
+        self.io.rename(filePath)
 
     # ----------------------------------------------------------------------- #
 
-    def boundarySubDict(self, name, typename):
+    def open(self):
 
-        self.io.boundarySubDict(name, typename)
-        return True
+        self.io.open()
+
+    # ----------------------------------------------------------------------- #
+
+    def close(self):
+
+        self.io.close()
+
+    # ----------------------------------------------------------------------- #
+
+    def write(self, string, end="\n"):
+
+        self.io.write(string, end=end)
+
+    # ----------------------------------------------------------------------- #
+
+    def header(self, scale):
+
+        self.io.open()
+
+        self.io.header(scale)
+
+    # ----------------------------------------------------------------------- #
+
+    def footer(self):
+
+        self.io.footer()
+
+        self.io.close()
 
     # ----------------------------------------------------------------------- #
 
@@ -1685,15 +1707,10 @@ class blockMeshDict(object):
 
     # ----------------------------------------------------------------------- #
 
-    def header(self, scale):
+    def boundarySubDict(self, name, typename):
 
-        self.io.header(scale)
-
-    # ----------------------------------------------------------------------- #
-
-    def footer(self):
-
-        self.io.footer()
+        self.io.boundarySubDict(name, typename)
+        return True
 
     # ----------------------------------------------------------------------- #
 
@@ -1712,13 +1729,7 @@ class blockMeshDict(object):
 
         self.io.write(wstr, end=end)
 
-    # ----------------------------------------------------------------------- #
-
-    def manual(self, string, end="\n"):
-
-        self.io.write(string, end=end)
-
 # --------------------------------------------------------------------------- #
-# --- End of module --------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 

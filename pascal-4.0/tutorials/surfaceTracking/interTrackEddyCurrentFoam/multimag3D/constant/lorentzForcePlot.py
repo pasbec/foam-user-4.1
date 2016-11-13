@@ -10,8 +10,11 @@
 
 import os, sys
 
+__name__
 __path__ = os.path.realpath(__file__)
+__base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
+__head__ = os.path.splitext(__base__)[0]
 
 sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 
@@ -33,9 +36,9 @@ nz = 61
 fontsize   = 14
 fontfamily = "serif"
 
-print "nr, nz     : ", nr, ",", nz
-print "fontsize   : ", fontsize
-print "fontfamily : ", fontfamily
+print ("nr, nz     : ", str(nr) + "," + str(nz))
+print ("fontsize   : ", fontsize)
+print ("fontfamily : ", fontfamily)
 
 baseName = "lorentzForce"
 
