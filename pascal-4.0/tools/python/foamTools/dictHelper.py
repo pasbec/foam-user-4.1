@@ -10,6 +10,9 @@
 
 # TODO [Low]: Reorganize some functions in modules
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -98,7 +101,7 @@ def readStr(v):
 
     # TODO [Low]: Improve descriptions
 
-    if type(v) == str:
+    if isinstance(v, (str, unicode)):
         return v.strip("\"")
     else:
         try:
@@ -116,10 +119,10 @@ def readInt(v):
 
     # TODO [Low]: Improve descriptions
 
-    if type(v) == int:
+    if isinstance(v, int):
         return v
 
-    if type(v) == str:
+    if isinstance(v, (str, unicode)):
         return int(readStr(v))
 
     else:
@@ -135,13 +138,13 @@ def readFloat(v):
 
     # TODO [Low]: Improve descriptions
 
-    if type(v) == float:
+    if isinstance(v, float):
         return v
 
-    if type(v) == int:
+    if isinstance(v, int):
         return float(v)
 
-    if type(v) == str:
+    if isinstance(v, (str, unicode)):
         return float(readStr(v))
 
     else:
@@ -157,10 +160,10 @@ def readDim(v):
 
     # TODO [Low]: Improve descriptions
 
-    if type(v) == Dimension:
+    if isinstance(v, Dimension):
         return v
 
-    if type(v) == str:
+    if isinstance(v, (str, unicode)):
         dim = readStr(v).strip("[]")
         dims = dim.split()
         return Dimension(*dims)
@@ -178,10 +181,10 @@ def readBool(v):
 
     # TODO [Low]: Improve descriptions
 
-    if type(v) == BoolProxy:
+    if isinstance(v, BoolProxy):
         return v
 
-    elif type(v) == str:
+    elif isinstance(v, (str, unicode)):
         trueKeys = ["On", "on", "True", "true", "Yes", "yes"]
         falseKeys  = ["Off", "off", "False", "false", "No", "no"]
         for k in trueKeys:
@@ -190,7 +193,7 @@ def readBool(v):
             if readStr(v) == k: return BoolProxy(val=False)
         raise TypeError("keyValue " + str(v) + " is no boolean")
 
-    elif type(v) == int:
+    elif isinstance(v, int):
         if v == 1: return BoolProxy(val=True)
         elif v == 0: return BoolProxy(val=False)
 
@@ -207,7 +210,7 @@ def readSubDict(v):
 
     # TODO [Low]: Improve descriptions
 
-    if type(v) == DictProxy:
+    if isinstance(v, DictProxy):
         return v
 
     else:

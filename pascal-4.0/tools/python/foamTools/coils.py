@@ -44,6 +44,9 @@
 #  writeFrequency(par.dir_case, par.coil_frequency)
 #
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -59,7 +62,7 @@ __head__ = os.path.splitext(__base__)[0]
 import math as m
 import numpy as np
 
-from .ioInfo import objectIndent, objectHeader, objectFooter
+from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Functions ------------------------------------------------------------- #
@@ -98,7 +101,7 @@ def pathLoop(pathDict, bundleDict, filamentI, edgeStart=0):
 
         raise KeyError("Number of edges (n) is missing.")
 
-    if not type(pathDict["n"]) ==  int:
+    if not isinstance(pathDict["n"], int):
 
         raise KeyError("Number of edges (n) needs to be of type int.")
 
@@ -153,7 +156,7 @@ def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
 
         raise KeyError("Number of edges (n) is missing.")
 
-    if not type(pathDict["n"]) ==  int:
+    if not isinstance(pathDict["n"], int):
 
         raise KeyError("Number of edges (n) needs to be of type int.")
 
@@ -289,7 +292,7 @@ def bundleCircle(bundleDict, i):
 
         raise KeyError("Number of filaments (n) is missing.")
 
-    if not type(bundleDict["n"]) ==  int:
+    if not isinstance(bundleDict["n"], int):
 
         raise KeyError("Number of filaments (n) needs to be of type int.")
 
@@ -360,7 +363,7 @@ def bundleRectangle(bundleDict, i):
 
         raise KeyError("Number of filaments per side (n) is missing.")
 
-    if not type(bundleDict["n"]) ==  int:
+    if not isinstance(bundleDict["n"], int):
 
         raise KeyError("Number of filaments per side (n) needs to be of type int.")
 
@@ -551,19 +554,19 @@ class inductorCoil(object):
     def __init__(self, name, bundleDict, pathDict,
                  reverse, current, phase, *args, **kwargs):
 
-        if not type(name) == str:
+        if not isinstance(name, (str, unicode)):
 
             raise KeyError("Name must be of type string")
 
-        if not type(reverse) == bool:
+        if not isinstance(reverse, bool):
 
             raise KeyError("Reverse switch must be of type bool.")
 
-        if not type(current) in [int, float]:
+        if not isinstance(current, (int, float)):
 
             raise KeyError("Current must be of type int or float.")
 
-        if not type(phase) in [int, float]:
+        if not isinstance(phase, (int, float)):
 
             raise KeyError("Phase must be of type int or float.")
 
@@ -619,11 +622,11 @@ class inductorCoil(object):
 
             translate = kwargs["translate"]
 
-            if not type(translate) in [list, np.ndarray]:
+            if not isinstance(translate, (list, np.ndarray)):
 
                 raise KeyError("Translation vector must be a list or an array.")
 
-            if type(translate) is list: translate = np.array(translate)
+            if isinstance(translate, list): translate = np.array(translate)
 
             if not len(translate) == 3:
 
@@ -636,18 +639,18 @@ class inductorCoil(object):
 
             rotate = kwargs["rotate"]
 
-            if not type(rotate) == list and len(rotate) == 2:
+            if not isinstance(rotate, list) and len(rotate) == 2:
 
                 raise KeyError("Rotation data must be a list containing axis and angle.")
 
             rotAxis  = rotate[0]
             rotAngle = rotate[1]
 
-            if not type(rotAxis) in [list, np.ndarray]:
+            if not isinstance(rotAxis, (list, np.ndarray)):
 
                 raise KeyError("Rotation vector must be a list or an array.")
 
-            if type(rotAxis) is list: rotAxis = np.array(rotAxis)
+            if isinstance(rotAxis,list): rotAxis = np.array(rotAxis)
 
             if not len(rotAxis) == 3:
 
@@ -669,13 +672,13 @@ class inductorCoil(object):
 
             scale = kwargs["scale"]
 
-            if not type(scale) in [int, float, list, np.ndarray]:
+            if not isinstance(scale, (int, float, list, np.ndarray)):
 
                 raise KeyError("Scalae factor must be of type int, float, list or array.")
 
-            if type(scale) in [int, float]: scale = np.array(3 * [scale])
+            if isinstance(scale, (int, float)): scale = np.array(3 * [scale])
 
-            if type(scale) is list: scale = np.array(scale)
+            if isinstance(scale, list): scale = np.array(scale)
 
             if not len(scale) == 3:
 

@@ -5,6 +5,9 @@
 # Vladimir Galindo (v.galindo@hzdr.de)
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -33,8 +36,8 @@ R0 = 0.029999
 nr = 61
 nz = 61
 
-print ("H0, R0 :", str(H0) + ",", str(R0))
-print ("nr, nz : ", str(nr) + "," + str(nz))
+print("H0, R0     : {}, {} m".format(H0, R0))
+print("nr, nz     : {},{}".format(nr, nz))
 
 # Mesh and discretisation
 rl = np.linspace(0.0,R0,nr)
@@ -46,7 +49,7 @@ zl = np.linspace(0.0,H0,nz)
 
 def main():
 
-    with open(os.path.realpath("lorentzForce.samleDict"),"w") as f:
+    with open(__dir__+"/lorentzForce.samleDict", "w") as f:
 
         # Define short indented line with line break
         def i(iL,cS,eS="\n"): return objectIndent(cS + eS,iLevel=iL)

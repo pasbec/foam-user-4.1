@@ -8,6 +8,9 @@
 
 # TODO [Low]: Rework function descriptions
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -107,7 +110,8 @@ class ioBase(object):
 
     def _indent(self, level, string, end):
 
-        if type(level) != int or type(string) != str or type(end) != str:
+        if not (isinstance(level, int) and isinstance(string, (str, unicode))
+                and isinstance(end, (str, unicode))):
 
             raise KeyError("Argument types are wrong.")
 
@@ -117,7 +121,7 @@ class ioBase(object):
 
     def _write(self, string):
 
-        if type(string) != str:
+        if not isinstance(string, (str, unicode)):
 
             raise KeyError("Argument types are wrong.")
 
@@ -184,7 +188,7 @@ class ioBase(object):
 
     def indent(self, level=0):
 
-        if type(level) != int:
+        if isinstance(level, int):
 
             raise KeyError("Indent level must be an integer larger or equal 0.")
 
@@ -200,7 +204,8 @@ class ioBase(object):
 
     def write(self, string="", ind=True, end="\n"):
 
-        if type(string) != str or type(ind) != bool or type(end) != str:
+        if not (isinstance(string, (str, unicode)) and isinstance(ind, bool)
+                and isinstance(end, (str, unicode))):
 
             raise KeyError("Argument types are wrong.")
 

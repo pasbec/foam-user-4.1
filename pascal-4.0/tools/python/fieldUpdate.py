@@ -25,6 +25,9 @@
 
 # TODO [Low]: Reorganize some functions in modules
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

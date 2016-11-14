@@ -4,6 +4,9 @@
 # October 2016
 # Pascal Beckstein (par.beckstein@hzdr.de)
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

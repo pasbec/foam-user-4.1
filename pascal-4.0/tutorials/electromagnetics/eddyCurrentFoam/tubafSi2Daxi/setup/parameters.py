@@ -4,6 +4,9 @@
 # October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -104,6 +107,9 @@ coils_frequency = 6300.0
 # --------------------------------------------------------------------------- #
 
 dir_case = os.path.realpath(__dir__ + "/" + "..")
+
+dir_setup = os.path.realpath(dir_case + "/" + "setup")
+dir_results = os.path.realpath(dir_case + "/" + "results")
 
 dir_0 = os.path.realpath(dir_case + "/" + "0")
 dir_constant = os.path.realpath(dir_case + "/" + "constant")

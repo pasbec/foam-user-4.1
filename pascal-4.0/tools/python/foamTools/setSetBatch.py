@@ -4,6 +4,9 @@
 # October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -16,7 +19,7 @@ __base__ = os.path.basename(__path__)
 __dir__ = os.path.dirname(__path__)
 __head__ = os.path.splitext(__base__)[0]
 
-from .ioInfo import ioBase
+from foamTools.ioInfo import ioBase
 
 # --------------------------------------------------------------------------- #
 # --- Classes --------------------------------------------------------------- #
@@ -165,7 +168,7 @@ class setSetBatch(object):
 
     def _doInvSetToTopo(self, topo, name, add, rmOld=False, skip=True):
 
-        aList = list(add) if type(add) == list else list([add])
+        aList = list(add) if isinstance(add, list) else list([add])
 
         count = len(aList)
 
@@ -190,7 +193,7 @@ class setSetBatch(object):
 
     def _doAddSetToTopo(self, topo, name, add, new=True, rmOld=False, skip=True):
 
-        aList = list(add) if type(add) == list else list([add])
+        aList = list(add) if isinstance(add, list) else list([add])
 
         count = len(aList)
 
@@ -217,7 +220,7 @@ class setSetBatch(object):
 
     def _doDeleteSetToTopo(self, topo, name, delete, rmOld=False, skip=True):
 
-        dList = list(delete) if type(delete) == list else list([delete])
+        dList = list(delete) if isinstance(delete, list) else list([delete])
 
         count = len(dList)
 
@@ -241,14 +244,14 @@ class setSetBatch(object):
     def _doSetToTopo(self, topo, name, add, delete=None, new=True, invert=False,
                         rmOld=False, skip=True):
 
-        count = len(add) if type(add) == list else 1
+        count = len(add) if isinstance(add, list) else 1
 
         self._doAddSetToTopo(topo, name, add=add, new=new,
                              rmOld=False, skip=False)
 
         if delete:
 
-            count += len(delete) if type(delete) == list else 1
+            count += len(delete) if isinstance(delete, list) else 1
 
             self._doDeleteSetToTopo(topo, name, delete=delete,
                                     rmOld=False, skip=False)
@@ -297,7 +300,7 @@ class setSetBatch(object):
     def __doCellBoundaryToTopo(self, topo, name, add, delete=None, new=True,
                                rmOld=False, skip=True):
 
-        aList = list(add) if type(add) == list else list([add])
+        aList = list(add) if isinstance(add, list) else list([add])
 
         count = len(aList)
 
@@ -311,7 +314,7 @@ class setSetBatch(object):
 
             if delete:
 
-                dList = list(delete) if type(delete) == list else list([delete])
+                dList = list(delete) if isinstance(delete, list) else list([delete])
 
             adList = aList + dList
 

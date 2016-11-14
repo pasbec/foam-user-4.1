@@ -7,9 +7,8 @@
 
 # TODO [High]: Allow other primitive patch types than 'fixedValue'
 
-# TODO [Low]: Rework function descriptions
-
-# TODO [Low]: Reorganize some functions in modules
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
 
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
@@ -25,8 +24,9 @@ __head__ = os.path.splitext(__base__)[0]
 
 import re
 
-from .classInfo import fieldClassToAtomicTypeSize, patchBaseTypeToPrimitiveValued
-from .ioInfo import objectIndent, objectHeader, objectFooter
+from foamTools.classInfo import (fieldClassToAtomicTypeSize,
+                                 patchBaseTypeToPrimitiveValued)
+from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Functions ------------------------------------------------------------- #

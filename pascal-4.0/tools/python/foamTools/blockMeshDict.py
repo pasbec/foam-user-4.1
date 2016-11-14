@@ -5,6 +5,9 @@
 # October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -24,7 +27,7 @@ import numpy as np
 import scipy as sp
 import scipy.optimize as spo
 
-from .ioInfo import ioBase, objectIndent, objectHeader, objectFooter
+from foamTools.ioInfo import ioBase, objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Functions ------------------------------------------------------------- #
@@ -68,7 +71,7 @@ def expansion_f_ds_root(n, ds, f, l=None):
 
 def expansion_f_ds(n, ds, l=None, tol=1e-16, maxiter=100):
 
-    if (type(n) == int) and (n > 1):
+    if isinstance(n, int) and n > 1:
 
         ls = ds
 
@@ -81,7 +84,7 @@ def expansion_f_ds(n, ds, l=None, tol=1e-16, maxiter=100):
 
         return spo.newton(func=F, x0=f0, tol=tol, maxiter=maxiter)
 
-    elif (type(n) == int) and (n == 1):
+    elif isinstance(n, int) and (n == 1):
 
         return 1.0
 
@@ -93,11 +96,11 @@ def expansion_f_ds(n, ds, l=None, tol=1e-16, maxiter=100):
 
 def expansion_f_e(n, e):
 
-    if (type(n) == int) and (n > 1):
+    if isinstance(n, int) and n > 1:
 
         return pow(e, 1.0/(n - 1))
 
-    elif (type(n) == int) and (n == 1):
+    elif isinstance(n, int) and (n == 1):
 
         return 1.0
 
@@ -109,7 +112,7 @@ def expansion_f_e(n, e):
 
 def expansion_e_ds(n, ds, l=None):
 
-    if (type(n) == int) and (n > 1):
+    if isinstance(n, int) and n > 1:
 
         ls = ds
 
@@ -119,7 +122,7 @@ def expansion_e_ds(n, ds, l=None):
 
         return pow(f, n - 1)
 
-    elif (type(n) == int) and (n == 1):
+    elif isinstance(n, int) and (n == 1):
 
         return 1.0
 
@@ -131,11 +134,11 @@ def expansion_e_ds(n, ds, l=None):
 
 def expansion_e_f(n, f):
 
-    if (type(n) == int) and (n > 1):
+    if isinstance(n, int) and n > 1:
 
         return pow(f, n - 1)
 
-    elif (type(n) == int) and (n == 1):
+    elif isinstance(n, int) and (n == 1):
 
         return 1.0
 
@@ -147,7 +150,7 @@ def expansion_e_f(n, f):
 
 def expansion_ds_e(n, e, l=None):
 
-    if (type(n) == int) and (n > 1):
+    if isinstance(n, int) and n > 1:
 
         f = expansion_f_e(n, e)
 
@@ -171,7 +174,7 @@ def expansion_ds_e(n, e, l=None):
 
 def expansion_de_e(n, e, l=None):
 
-    if (type(n) == int) and (n > 1):
+    if isinstance(n, int) and n > 1:
 
         f = expansion_f_e(n, e)
 
@@ -195,7 +198,7 @@ def expansion_de_e(n, e, l=None):
 
 def expansion(n, e, l=None):
 
-    if (type(n) == int) and (n > 0):
+    if isinstance(n, int) and n > 0:
 
         f = expansion_f_e(n, e)
 
@@ -312,7 +315,7 @@ class vertices(object):
 
     def set(self, label, point):
 
-        if not type(label) == int and type(point) == list:
+        if not (isinstance(label, int) and isinstance(point, (list, np.ndarray))):
 
             raise KeyError()
 
@@ -359,16 +362,15 @@ class vertices(object):
 
     def copyTranslate(self, par1, verticeLabels, direction):
 
-        if not (type(par1) == int \
-            and type(direction) == list \
-            and len(direction) == 3):
+        if not (isinstance(par1, int) and isinstance(direction, list)
+                and len(direction) == 3):
 
             raise KeyError()
 
-        if type(verticeLabels) == int:
+        if isinstance(verticeLabels, int) == int:
             verticeLabels = [verticeLabels]
 
-        if not type(verticeLabels) == list: raise KeyError()
+        if not isinstance(verticeLabels, list): raise KeyError()
 
         for verticeLabel in verticeLabels:
 
@@ -687,9 +689,9 @@ class blocks(object):
 
         def set(self, blockLabels, par1, par2=None):
 
-            if type(blockLabels) == int: blockLabels = [ blockLabels ]
+            if isinstance(blockLabels, int): blockLabels = [ blockLabels ]
 
-            if not type(blockLabels) == list: raise KeyError()
+            if not isinstance(blockLabels, list): raise KeyError()
 
             blocks = [ self.blocks.labelIndex[l] for l in blockLabels ]
 
@@ -698,7 +700,7 @@ class blocks(object):
                 # Distribution for all components
                 if not par2:
 
-                    if type(par1) == list and len(par1) == 3:
+                    if isinstance(par1, list) and len(par1) == 3:
 
                         blockDistribution = par1
 
@@ -722,12 +724,12 @@ class blocks(object):
                 else:
 
                     # Direction as base
-                    if type(par1) == int:
+                    if isinstance(par1, int):
 
                         base = par1
 
                     # Direction as baseTag
-                    elif type(par1) == str:
+                    elif isinstance(par1, (str, unicode)):
 
                         baseTag = par1
 
@@ -736,7 +738,7 @@ class blocks(object):
                     else: raise KeyError()
 
                     # Distribution component
-                    if type(par2) == int:
+                    if isinstance(par2, int):
 
                         blockDistributionComponent = par2
 
@@ -767,9 +769,9 @@ class blocks(object):
 
         def set(self, blockLabels, par1, par2=None):
 
-            if type(blockLabels) == int: blockLabels = [ blockLabels ]
+            if isinstance(blockLabels, int): blockLabels = [ blockLabels ]
 
-            if not type(blockLabels) == list: raise KeyError()
+            if not isinstance(blockLabels, list): raise KeyError()
 
             blocks = [ self.blocks.labelIndex[l] for l in blockLabels ]
 
@@ -779,7 +781,7 @@ class blocks(object):
                 if not par2:
 
                     # simpleGrading
-                    if type(par1) == list and len(par1) == 3:
+                    if isinstance(par1, list) and len(par1) == 3:
 
                         blockSimpleGrading = par1
 
@@ -807,12 +809,12 @@ class blocks(object):
                 else:
 
                     # Direction as base
-                    if type(par1) == int:
+                    if isinstance(par1, int):
 
                         base = par1
 
                     # Direction as baseTag
-                    elif type(par1) == str:
+                    elif isinstance(par1, (str, unicode)):
 
                         baseTag = par1
 
@@ -824,7 +826,7 @@ class blocks(object):
                     if True:
 
                         # simpleGrading
-                        if type(par2) == float:
+                        if isinstance(par2, float):
 
                             blockSimpleGradingComponent = par2
 
@@ -919,8 +921,7 @@ class blocks(object):
 
     def _getSharedVertices(self, vertices, otherVertices):
 
-        if not (type(vertices) == list \
-            and type(otherVertices) == list):
+        if not (isinstance(vertices, list) and isinstance(otherVertices, list)):
 
             raise KeyError()
 
@@ -937,8 +938,7 @@ class blocks(object):
             print(debugMsg, "otherBlock =", otherBlock)
             print()
 
-        if not (type(block) == int \
-            and type(otherBlock) == int):
+        if not (isinstance(block, int) and isinstance(otherBlock, int)):
 
             raise KeyError()
 
@@ -1107,12 +1107,12 @@ class blocks(object):
         distribution=None, grading=None, zone=None
     ):
 
-        if not (type(label) == int \
-            and type(verticeLabels) == list \
-            and (distribution == None or type(distribution) == list) \
-            and (grading == None or (type(grading) == list \
-                and (len(grading) == 3 or len(grading) == 12))) \
-            and (zone == None or type(zone) == str)):
+        if not (isinstance(label, int) and isinstance(verticeLabels, list)
+                and (distribution == None or isinstance(distribution, list))
+                and (grading == None or (isinstance(grading, list)
+                                         and (len(grading) == 3
+                                           or len(grading) == 12)))
+                and (zone == None or isinstance(zone, (str, unicode)))):
 
             raise KeyError()
 
@@ -1138,11 +1138,7 @@ class blocks(object):
 
         if distribution:
 
-## TODO
-            #if not len(distribution) == self.mesh["dim"]:
-
-                #raise ValueError()
-
+## TODO: Check and processdistribution  for 2D-meshes
             pass
 
         else:
@@ -1151,29 +1147,7 @@ class blocks(object):
 
         if grading:
 
-## TODO
-            #if not len(grading) == self.mesh["dim"]:
-
-                #if self.mesh["dim"] == 2:
-
-                    #if len(grading) == self.mesh["dim"]:
-
-                        #grading += [1.0]
-
-                    #elif len(grading) == 4:
-
-                        #pass
-
-                    #else:
-
-                    #raise ValueError()
-
-                #else:
-
-                #elif not len(grading) == 12:
-
-                    #raise ValueError()
-
+## TODO: Check and processdistribution  for 2D-meshes
             pass
 
         else:
@@ -1218,8 +1192,7 @@ class blocks(object):
 
     def copyShiftVerticeLabels(self, shift, blockLabels, verticeLebelShift):
 
-        if not (type(shift) == int \
-            and type(verticeLebelShift) == int):
+        if not (isinstance(shift, int) and isinstance(verticeLebelShift, int)):
 
             raise KeyError()
 
@@ -1230,10 +1203,10 @@ class blocks(object):
                 #+ str(verticeLebelShift) + ") is too small (min: "
                 #+ str(2*self.nmax) + ").")
 
-        if type(blockLabels) == int:
+        if isinstance(blockLabels, int):
             blockLabels = [ blockLabels ]
 
-        if not type(blockLabels) == list: raise KeyError()
+        if not isinstance(blockLabels, list): raise KeyError()
 
         for blockLabel in blockLabels:
 
@@ -1315,9 +1288,10 @@ class blocks(object):
         # Only print(data for given block
         if blockLabels:
 
-            if type(blockLabels) == int: blockLabels = [ blockLabels ]
+            if isinstance(blockLabels, int):
+                blockLabels = [ blockLabels ]
 
-            if not type(blockLabels) == list: raise KeyError()
+            if not isinstance(blockLabels, list): raise KeyError()
 
             printBlocks = [ self.labelIndex[l] for l in blockLabels ]
 
@@ -1364,13 +1338,14 @@ class boundaryFaces(object):
 
     def set(self, label, boundary, par1, par2=None):
 
-        if not type(boundary) == str: raise KeyError()
+        if not isinstance(boundary, (str, unicode)): raise KeyError()
 
         blockLabels = par1
 
-        if type(blockLabels) == int: blockLabels = [ blockLabels ]
+        if isinstance(blockLabels, int):
+            blockLabels = [ blockLabels ]
 
-        if not type(blockLabels) == list: raise KeyError()
+        if not isinstance(blockLabels, list): raise KeyError()
 
         # Single
         if not par2 == None:
@@ -1453,10 +1428,10 @@ class boundaryFaces(object):
         # Only print data for given boundary face
         if boundaryFaceLabels:
 
-            if type(boundaryFaceLabels) == int:
+            if isinstance(boundaryFaceLabels, int):
                 boundaryFaceLabels = [ boundaryFaceLabels ]
 
-            if not type(boundaryFaceLabels) == list: raise KeyError()
+            if not isinstance(boundaryFaceLabels, list): raise KeyError()
 
             printBoundaryFaces = \
                 [ self.labelIndex[l] for l in boundaryFaceLabels ]

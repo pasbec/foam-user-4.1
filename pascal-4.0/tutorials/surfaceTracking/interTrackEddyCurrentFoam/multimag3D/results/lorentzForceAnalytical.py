@@ -5,6 +5,9 @@
 # Vladimir Galindo (v.galindo@hzdr.de)
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -23,7 +26,7 @@ import math as m
 import numpy as np
 from scipy import special as spsp
 
-from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFooter
+from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -39,13 +42,12 @@ B0 = 0.421599e-3
 nr = 61
 nz = 61
 
-print "N          : %g" % (N)
-print "H0, R0     :", str(H0) + ",", str(R0)
-print "sigma      : %g S/m" % (sigma)
-print "omega      : %g" % (omega)
-print "B0         : %g T" % (B0)
-
-print "nr, nz     :", str(nr) + ",", str(nz)
+print("N          : {}".format(N))
+print("H0, R0     : {}, {} m".format(H0, R0))
+print("sigma      : {} S/m".format(sigma))
+print("omega      : {} 1/s".format(omega))
+print("B0         : {} T".format(B0))
+print("nr, nz     : {},{}".format(nr, nz))
 
 # --------------------------------------------------------------------------- #
 # --- Function definitions -------------------------------------------------- #
@@ -91,7 +93,7 @@ F   = np.zeros(R.shape)
 
 
 # Calculate and write data
-with open(fileGetPath("lorentzForceAnalytical.dat"),"w") as lff:
+with open(__dir__+"/lorentzForceAnalytical.dat","w") as lff:
 
     lff.write("# Variables: " + "r" + " " + "z" + " " + "F" + "\n")
 
@@ -104,7 +106,7 @@ with open(fileGetPath("lorentzForceAnalytical.dat"),"w") as lff:
 
             lff.write(str(rl[ri]) + " " + str(zl[zi]) + " " + str(F[ri,zi]) + "\n")
 
-print("Fmin, Fmax :", str(np.min(F)) + "," + str(np.max(F)))
+print("Fmin, Fmax : {},{}".format(np.min(F), np.max(F)))
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

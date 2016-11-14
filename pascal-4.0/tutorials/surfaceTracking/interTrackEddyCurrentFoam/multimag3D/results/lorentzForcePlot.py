@@ -4,6 +4,9 @@
 # October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
+from __future__ import nested_scopes, generators, division, absolute_import
+from __future__ import with_statement, print_function, unicode_literals
+
 # --------------------------------------------------------------------------- #
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -36,9 +39,9 @@ nz = 61
 fontsize   = 14
 fontfamily = "serif"
 
-print ("nr, nz     : ", str(nr) + "," + str(nz))
-print ("fontsize   : ", fontsize)
-print ("fontfamily : ", fontfamily)
+print("nr, nz     : {},{}".format(nr, nz))
+print("fontsize   : {}".format(fontsize))
+print("fontfamily : {}".format(fontfamily))
 
 baseName = "lorentzForce"
 
@@ -74,7 +77,7 @@ set = "Analytical"
 # Read data
 if True:
 
-    data[set] = np.genfromtxt(csd+"/"+baseName+set+".dat", comments="#")
+    data[set] = np.genfromtxt(__dir__+"/"+baseName+set+".dat", comments="#")
 
     R[set]    = data[set][:,0].reshape(nr,nz)
     Z[set]    = data[set][:,1].reshape(nr,nz)
@@ -107,7 +110,7 @@ meshes = ["coarse", "fine"]
 # Read data
 for mesh in meshes:
 
-    data[set][mesh] = np.genfromtxt(csd+"/"+baseName+set+"_"+mesh+".dat", comments="#")
+    data[set][mesh] = np.genfromtxt(__dir__+"/"+baseName+set+"_"+mesh+".dat", comments="#")
 
     R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
     Z[set][mesh]    = data[set][mesh][:,1].reshape(nr,nz)
@@ -138,7 +141,7 @@ meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000", "1.500", "2.000"
 # Read data
 for mesh in meshes:
 
-    data[set][mesh] = np.genfromtxt(csd+"/"+baseName+set+"_"+mesh+".dat", comments="#")
+    data[set][mesh] = np.genfromtxt(__dir__+"/"+baseName+set+"_"+mesh+".dat", comments="#")
 
     R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
     Z[set][mesh]    = data[set][mesh][:,2].reshape(nr,nz)
@@ -220,7 +223,7 @@ meshes = ["00.300", "00.375", "00.500", "00.750", "01.000", "02.000", "04.000", 
 # Read data
 for mesh in meshes:
 
-    data[set][mesh] = np.genfromtxt(csd+"/"+baseName+set+"_"+mesh+".dat", comments="#")
+    data[set][mesh] = np.genfromtxt(__dir__+"/"+baseName+set+"_"+mesh+".dat", comments="#")
 
     R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
     Z[set][mesh]    = data[set][mesh][:,2].reshape(nr,nz)
@@ -366,7 +369,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fr")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ErrorFr")
 
@@ -411,7 +414,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fa")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ErrorFa")
 
@@ -456,7 +459,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fz")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ErrorFz")
 
@@ -511,7 +514,7 @@ def fig(p, name):
 
     ax(fig, axs, "F")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ErrorF")
 
@@ -576,7 +579,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fr")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "SpaceErrorFr")
 
@@ -639,7 +642,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fa")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "SpaceErrorFa")
 
@@ -702,7 +705,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fz")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "SpaceErrorFz")
 
@@ -775,7 +778,7 @@ def fig(p, name):
 
     ax(fig, axs, "F")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "SpaceErrorF")
 
@@ -812,7 +815,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fa")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "Analytical")
 
@@ -855,7 +858,7 @@ def fig(p, name):
 
     ax(fig, axs,"Fr")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ComparisonFr")
 
@@ -902,7 +905,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fa")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ComparisonFa")
 
@@ -945,7 +948,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fz")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ComparisonFz")
 
@@ -990,7 +993,7 @@ def fig(p, name):
 
     ax(fig, axs, "F")
 
-    fig.savefig(csd+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ComparisonF")
 
