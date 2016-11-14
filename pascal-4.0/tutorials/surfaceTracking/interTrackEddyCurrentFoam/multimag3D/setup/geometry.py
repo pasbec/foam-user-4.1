@@ -25,6 +25,8 @@ sys.path.append("/usr/lib/freecad/lib")
 import math as m
 import numpy as np
 
+from foamTools.freecad import addPolyLine, faceShell, exportMeshes
+
 import FreeCAD, Sketcher, Part, Mesh, MeshPart
 from FreeCAD import Units, Placement, Matrix, Vector, Rotation
 from Part import Line, Circle, Shell
@@ -40,39 +42,6 @@ import blockMeshDict
 FreeCAD.newDocument(__head__)
 FreeCAD.setActiveDocument(__head__)
 d = FreeCAD.activeDocument()
-
-# --------------------------------------------------------------------------- #
-# --- Functions ------------------------------------------------------------- #
-# --------------------------------------------------------------------------- #
-
-def addPolyLine(s, v, v2D):
-
-    l = len(v) - 1
-
-    def V(i): return Vector(v2D[i][0], v2D[i][1], 0.0)
-
-    for i in range(l):
-
-        s.addGeometry(Line(V(v[i]), V(v[i+1])))
-
-    s.addGeometry(Line(V(v[l]), V(v[0])))
-
-
-def exportMeshes(obj, dir, prefix, tol=0.1, scale=1.0):
-
-    S = Matrix()
-    S.scale(scale, scale, scale)
-
-    for o in obj:
-
-        mesh = Mesh.Mesh(o.Shape.tessellate(tol))
-        #mesh = MeshPart.meshFromShape(Shape=o.Shape, MaxLength=10)
-
-        mesh.transform(S)
-
-        name = prefix + "_" + o.Label + ".stl"
-
-        mesh.write(dir + "/" + name)
 
 # --------------------------------------------------------------------------- #
 # --- Sketches -------------------------------------------------------------- #
@@ -146,30 +115,24 @@ d.recompute()
 # --- Shells ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
+shd = dict()
+
+shd["infinity"] = [bo["all"], [1, 2, 3, 4]]
+shd["fixedMesh"] = [bo["buffer"], [1, 2, 3]]
+shd["sideWall"] = [bo["fluid"], [1]]
+shd["bottomWall"] = [bo["fluid"], [2]]
+shd["trackedSurface"] = [bo["fluid"], [3]]
+
 sh = dict()
 
-sh["infinity"] = d.addObject("Part::Feature", "ShellInfinity")
-sh["infinity"].Label = "shell_infinity"
-sh["infinity"].Shape = Shell([bo['all'].Shape.Face1, bo['all'].Shape.Face2,
-                              bo['all'].Shape.Face3, bo['all'].Shape.Face4])
+for k in shd.keys():
 
-sh["fixedMesh"] = d.addObject("Part::Feature", "ShellFixedMesh")
-sh["fixedMesh"].Label = "shell_fixedMesh"
-sh["fixedMesh"].Shape = Shell([bo["buffer"].Shape.Face1,
-                               bo["buffer"].Shape.Face2,
-                               bo["buffer"].Shape.Face3])
+    name = "Shell" + k.capitalize()
+    label = "shell_" + k
 
-sh["sideWall"] = d.addObject("Part::Feature", "ShellSideWall")
-sh["sideWall"].Label = "shell_sideWall"
-sh["sideWall"].Shape = Shell([bo["fluid"].Shape.Face1])
-
-sh["bottomWall"] = d.addObject("Part::Feature", "ShellBottomWall")
-sh["bottomWall"].Label = "shell_bottomWall"
-sh["bottomWall"].Shape = Shell([bo["fluid"].Shape.Face2])
-
-sh["trackedSurface"] = d.addObject("Part::Feature", "ShellTrackedSurface")
-sh["trackedSurface"].Label = "shell_trackedSurface"
-sh["trackedSurface"].Shape = Shell([bo["fluid"].Shape.Face3])
+    sh[k] = d.addObject("Part::Feature", name)
+    sh[k].Label = label
+    sh[k].Shape = faceShell(shd[k])
 
 # --------------------------------------------------------------------------- #
 
