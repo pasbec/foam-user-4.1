@@ -23,7 +23,7 @@ patchInfo
     {
         name             trackedSurface;
         constructFrom    set;
-        set              faceSet_geometry_trackedSurface;
+        set              faceSet_patch_trackedSurface;
 
         dictionary
         {
@@ -34,7 +34,7 @@ patchInfo
     {
         name             sideWall;
         constructFrom    set;
-        set              faceSet_geometry_sideWall;
+        set              faceSet_patch_sideWall;
 
         dictionary
         {
@@ -45,7 +45,7 @@ patchInfo
     {
         name             fixedMesh;
         constructFrom    set;
-        set              faceSet_geometry_fixedMesh;
+        set              faceSet_patch_fixedMesh;
 
         dictionary
         {

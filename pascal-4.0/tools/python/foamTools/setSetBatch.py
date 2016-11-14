@@ -163,7 +163,7 @@ class setSetBatch(object):
 
     # ----------------------------------------------------------------------- #
 
-    def _doInvSetToTopo(self, topo, name, add, rmOld=True, skip=True):
+    def _doInvSetToTopo(self, topo, name, add, rmOld=False, skip=True):
 
         aList = list(add) if type(add) == list else list([add])
 
@@ -188,7 +188,7 @@ class setSetBatch(object):
 
     # ----------------------------------------------------------------------- #
 
-    def _doAddSetToTopo(self, topo, name, add, new=True, rmOld=True, skip=True):
+    def _doAddSetToTopo(self, topo, name, add, new=True, rmOld=False, skip=True):
 
         aList = list(add) if type(add) == list else list([add])
 
@@ -215,7 +215,7 @@ class setSetBatch(object):
 
     # ----------------------------------------------------------------------- #
 
-    def _doDeleteSetToTopo(self, topo, name, delete, rmOld=True, skip=True):
+    def _doDeleteSetToTopo(self, topo, name, delete, rmOld=False, skip=True):
 
         dList = list(delete) if type(delete) == list else list([delete])
 
@@ -239,7 +239,7 @@ class setSetBatch(object):
     # ----------------------------------------------------------------------- #
 
     def _doSetToTopo(self, topo, name, add, delete=None, new=True, invert=False,
-                        rmOld=True, skip=True):
+                        rmOld=False, skip=True):
 
         count = len(add) if type(add) == list else 1
 
@@ -295,7 +295,7 @@ class setSetBatch(object):
     # ----------------------------------------------------------------------- #
 
     def __doCellBoundaryToTopo(self, topo, name, add, delete=None, new=True,
-                               rmOld=True, skip=True):
+                               rmOld=False, skip=True):
 
         aList = list(add) if type(add) == list else list([add])
 
@@ -331,7 +331,7 @@ class setSetBatch(object):
                 source += "cellSet" + "_" + ad + " " + "both"
 
                 self._doDelete(topo, namei, source=source,
-                               rmOld=True, skip=False)
+                               rmOld=rmOld, skip=False)
 
             if skip: self.io.write()
 

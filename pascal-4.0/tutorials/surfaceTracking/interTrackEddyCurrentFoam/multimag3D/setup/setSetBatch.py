@@ -77,15 +77,15 @@ def main():
         ssb.cellSet("region_fluid", "setToTopo",
                     add=["body_fluid"])
         ssb.cellSet("region_buffer", "setToTopo",
-                    add=[])
+                    add=["body_buffer"])
         ssb.cellSet("region_static", "setToTopo",
                     add=["region_fluid", "region_buffer"],
                     invert=True)
 
         ssb.cellSet("region_conductor", "setToTopo",
-                    add=["body_fluid", "body_solid", "body_heater"])
+                    add=["body_fluid"])
         ssb.cellSet("region_space", "setToTopo",
-                    add=['region_conductor'],
+                    add=["region_conductor"],
                     invert=True)
 
         ssb.faceSet("regions", "cellBoundaryToTopo",
@@ -96,13 +96,14 @@ def main():
     if ssb.group("Patches"):
 
         ssb.faceSet("patch_infinity", "setToTopo", add=["shell_infinity"])
+        ssb.faceSet("patch_fixedMesh", "setToTopo", add=["shell_fixedMesh"])
+        ssb.faceSet("patch_bottomWall", "setToTopo", add=["shell_bottomWall"])
+        ssb.faceSet("patch_sideWall", "setToTopo", add=["shell_sideWall"])
+        ssb.faceSet("patch_trackedSurface", "setToTopo", add=["shell_trackedSurface"])
 
     if ssb.group("Materials"):
 
-        ssb.cellSet("material_siliconLiquid", "setToTopo", add=["body_fluid"])
-        ssb.cellSet("material_siliconSolid", "setToTopo", add=["body_solid"])
-        ssb.cellSet("material_graphite", "setToTopo", add=["body_heater"])
-        ssb.cellSet("material_air", "setToTopo", add=["body_space"])
+        ssb.cellSet("material_liquidMetal", "setToTopo", add=["body_fluid"])
 
     ssb.quit()
 

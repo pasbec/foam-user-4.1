@@ -92,64 +92,81 @@ s["outer"].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
                               Vector(0.0, 0.0, 1.0), par.geo_r2))
 
 # --------------------------------------------------------------------------- #
-# --- Regions --------------------------------------------------------------- #
+# --- Bodies ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-r = dict()
+bo = dict()
 
-r["fluid"] = d.addObject("Part::Extrusion", "RegionFluid")
-r["fluid"].Label = "region_fluid"
-r["fluid"].Base = s["inner"]
-r["fluid"].Dir = (0.0, 0.0, par.geo_z3)
-r["fluid"].Solid = True
-r["fluid"].TaperAngle = 0.0
+bo["fluid"] = d.addObject("Part::Extrusion", "BodyFluid")
+bo["fluid"].Label = "body_fluid"
+bo["fluid"].Base = s["inner"]
+bo["fluid"].Dir = (0.0, 0.0, par.geo_z3)
+bo["fluid"].Solid = True
+bo["fluid"].TaperAngle = 0.0
 
-r["above"] = d.addObject("Part::Extrusion", "RegionAbove")
-r["above"].Label = "region_above"
-r["above"].Base = s["outer"]
-r["above"].Dir = (0.0, 0.0, par.geo_z4)
-r["above"].Solid = True
-r["above"].TaperAngle = 0.0
+bo["above"] = d.addObject("Part::Extrusion", "BodyAbove")
+bo["above"].Label = "body_above"
+bo["above"].Base = s["outer"]
+bo["above"].Dir = (0.0, 0.0, par.geo_z4)
+bo["above"].Solid = True
+bo["above"].TaperAngle = 0.0
 
-r["below"] = d.addObject("Part::Extrusion", "RegionBelow")
-r["below"].Label = "region_below"
-r["below"].Base = s["outer"]
-r["below"].Dir = (0.0, 0.0, par.geo_z0)
-r["below"].Solid = True
-r["below"].TaperAngle = 0.0
+bo["below"] = d.addObject("Part::Extrusion", "BodyBelow")
+bo["below"].Label = "body_below"
+bo["below"].Base = s["outer"]
+bo["below"].Dir = (0.0, 0.0, par.geo_z0)
+bo["below"].Solid = True
+bo["below"].TaperAngle = 0.0
 
-r["buffer"] = d.addObject("Part::Cut", "RegionBuffer")
-r["buffer"].Label = "region_buffer"
-r["buffer"].Base = r["above"]
-r["buffer"].Tool = r["fluid"]
+bo["buffer"] = d.addObject("Part::Cut", "BodyBuffer")
+bo["buffer"].Label = "body_buffer"
+bo["buffer"].Base = bo["above"]
+bo["buffer"].Tool = bo["fluid"]
+
+bo["all"] = d.addObject("Part::MultiFuse", "BodyAll")
+bo["all"].Label = "body_all"
+bo["all"].Shapes = [bo["above"], bo["below"]]
+
+bo["conductor"] = d.addObject("Part::MultiFuse", "BodyConductor")
+bo["conductor"].Label = "body_conductor"
+bo["conductor"].Shapes = [bo["fluid"], bo["fluid"]]
+
+bo["space"] = d.addObject("Part::MultiFuse", "BodySpace")
+bo["space"].Label = "body_space"
+bo["space"].Shapes = [bo["buffer"], bo["below"]]
 
 # --------------------------------------------------------------------------- #
 
 d.recompute()
 
 # --------------------------------------------------------------------------- #
-# --- Patches --------------------------------------------------------------- #
+# --- Shells ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-p = dict()
+sh = dict()
 
-p["fixedMesh"] = d.addObject("Part::Feature", "PatchFixedMesh")
-p["fixedMesh"].Label = "patch_fixedMesh"
-p["fixedMesh"].Shape = Shell([r["buffer"].Shape.Face1,
-                              r["buffer"].Shape.Face2,
-                              r["buffer"].Shape.Face3])
+sh["infinity"] = d.addObject("Part::Feature", "ShellInfinity")
+sh["infinity"].Label = "shell_infinity"
+sh["infinity"].Shape = Shell([bo['all'].Shape.Face1, bo['all'].Shape.Face2,
+                              bo['all'].Shape.Face3, bo['all'].Shape.Face4])
 
-p["sideWall"] = d.addObject("Part::Feature", "PatchSideWall")
-p["sideWall"].Label = "patch_sideWall"
-p["sideWall"].Shape = Shell([r["fluid"].Shape.Face1])
+sh["fixedMesh"] = d.addObject("Part::Feature", "ShellFixedMesh")
+sh["fixedMesh"].Label = "shell_fixedMesh"
+sh["fixedMesh"].Shape = Shell([bo["buffer"].Shape.Face1,
+                               bo["buffer"].Shape.Face2,
+                               bo["buffer"].Shape.Face3])
 
-p["bottomWall"] = d.addObject("Part::Feature", "PatchBottomWall")
-p["bottomWall"].Label = "patch_bottomWall"
-p["bottomWall"].Shape = Shell([r["fluid"].Shape.Face2])
+sh["sideWall"] = d.addObject("Part::Feature", "ShellSideWall")
+sh["sideWall"].Label = "shell_sideWall"
+sh["sideWall"].Shape = Shell([bo["fluid"].Shape.Face1])
 
-p["trackedSurface"] = d.addObject("Part::Feature", "PatchTrackedSurface")
-p["trackedSurface"].Label = "patch_trackedSurface"
-p["trackedSurface"].Shape = Shell([r["fluid"].Shape.Face3])
+sh["bottomWall"] = d.addObject("Part::Feature", "ShellBottomWall")
+sh["bottomWall"].Label = "shell_bottomWall"
+sh["bottomWall"].Shape = Shell([bo["fluid"].Shape.Face2])
+
+sh["trackedSurface"] = d.addObject("Part::Feature", "ShellTrackedSurface")
+sh["trackedSurface"].Label = "shell_trackedSurface"
+sh["trackedSurface"].Shape = Shell([bo["fluid"].Shape.Face3])
 
 # --------------------------------------------------------------------------- #
 
@@ -159,8 +176,8 @@ d.recompute()
 # --- Main ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-bodyObj = [r["fluid"], r["buffer"]]
-shellObj = [p["fixedMesh"], p["sideWall"], p["bottomWall"], p["trackedSurface"]]
+bodyObj = bo.values()
+shellObj = sh.values()
 
 def main():
 

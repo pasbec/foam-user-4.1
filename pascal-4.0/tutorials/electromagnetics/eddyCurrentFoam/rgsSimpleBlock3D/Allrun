@@ -68,6 +68,9 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     runApplication \
         changeDictionary || exit 1
 
+    # Remove old topoSets
+    rm "constant/polyMesh/sets/"*"_old" > /dev/null 2>&1
+
     # Create subset meshes
     # for regions
     for region in $regionlist; do

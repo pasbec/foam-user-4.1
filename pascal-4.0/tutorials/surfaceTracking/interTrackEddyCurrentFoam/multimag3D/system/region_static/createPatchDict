@@ -23,7 +23,7 @@ patchInfo
     {
         name             bottomWall;
         constructFrom    set;
-        set              faceSet_geometry_bottomWall;
+        set              faceSet_patch_bottomWall;
 
         dictionary
         {
@@ -34,7 +34,7 @@ patchInfo
     {
         name             fixedMesh;
         constructFrom    set;
-        set              faceSet_geometry_fixedMesh;
+        set              faceSet_patch_fixedMesh;
 
         dictionary
         {

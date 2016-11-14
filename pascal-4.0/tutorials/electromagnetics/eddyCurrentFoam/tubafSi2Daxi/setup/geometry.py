@@ -100,8 +100,6 @@ for k in v.keys():
 
     addPolyLine(s[k], v[k], blockMeshDict.v)
 
-# --------------------------------------------------------------------------- #
-
 cs = par.coil_scale/par.geo_scale
 
 cv    = dict()
@@ -153,14 +151,6 @@ for k in s.keys():
     bo[k].Label = label
     bo[k].Shapes = [front, back]
 
-# --------------------------------------------------------------------------- #
-
-bo["coils"] = Draft.makeArray(bo["coil"], Vector(0.0, 0.0, cs*par.coils_step),
-                              Vector(0.0, 0.0, 0.0), par.coils_n, 1,
-                              name="BodyCoils")
-d.recompute()
-bo["coils"].Label = "body_coils"
-
 bo["conductor"] = d.addObject("Part::MultiFuse", "BodyConductor")
 bo["conductor"].Label = "body_conductor"
 bo["conductor"].Shapes = [bo["solid"], bo["fluid"], bo["heater"]]
@@ -168,6 +158,12 @@ bo["conductor"].Shapes = [bo["solid"], bo["fluid"], bo["heater"]]
 bo["space"] = d.addObject("Part::MultiFuse", "BodySpace")
 bo["space"].Label = "body_space"
 bo["space"].Shapes = [bo["vessel"], bo["free"]]
+
+bo["coils"] = Draft.makeArray(bo["coil"], Vector(0.0, 0.0, cs*par.coils_step),
+                              Vector(0.0, 0.0, 0.0), par.coils_n, 1,
+                              name="BodyCoils")
+d.recompute()
+bo["coils"].Label = "body_coils"
 
 # --------------------------------------------------------------------------- #
 
@@ -204,8 +200,6 @@ bo2D["space"] = d.addObject("Part::MultiFuse", "BodySpace2D")
 bo2D["space"].Label = "body_space_2D"
 bo2D["space"].Shapes = [bo2D["vessel"], bo2D["free"]]
 
-# --------------------------------------------------------------------------- #
-
 bo2D["coils"] = Draft.makeArray(bo2D["coil"],
                                 Vector(0.0, 0.0, cs*par.coils_step),
                                 Vector(0.0, 0.0, 0.0), par.coils_n, 1,
@@ -238,11 +232,9 @@ bo3D["space"] = d.addObject("Part::MultiFuse", "BodySpace3D")
 bo3D["space"].Label = "body_space_3D"
 bo3D["space"].Shapes = [bo3D["vessel"], bo3D["free"]]
 
-# --------------------------------------------------------------------------- #
-
 bo3D["coils"] = Draft.makeArray(bo3D["coil"], Vector(0.0, 0.0, cs*par.coils_step),
-                               Vector(0.0, 0.0, 0.0), par.coils_n, 1,
-                               name="Coils3D")
+                                Vector(0.0, 0.0, 0.0), par.coils_n, 1,
+                                name="Coils3D")
 d.recompute()
 bo3D["coils"].Label = "body_coils_3D"
 
@@ -267,8 +259,8 @@ sh["back"].Shape = Shell([bo["all"].Shape.Face7])
 sh["infinity"] = d.addObject("Part::Feature", "ShellInifnity")
 sh["infinity"].Label = "shell_infinity"
 sh["infinity"].Shape = Shell([bo["all"].Shape.Face1, bo["all"].Shape.Face2,
-                             bo["all"].Shape.Face3, bo["all"].Shape.Face5,
-                             bo["all"].Shape.Face6, bo["all"].Shape.Face8])
+                              bo["all"].Shape.Face3, bo["all"].Shape.Face5,
+                              bo["all"].Shape.Face6, bo["all"].Shape.Face8])
 
 # --------------------------------------------------------------------------- #
 
