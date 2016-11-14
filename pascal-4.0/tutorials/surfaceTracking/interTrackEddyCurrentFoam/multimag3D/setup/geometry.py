@@ -25,7 +25,8 @@ sys.path.append("/usr/lib/freecad/lib")
 import math as m
 import numpy as np
 
-from foamTools.freecad import addPolyLine, faceShell, exportMeshes
+from foamTools.freecad import (addPolyLine, makeFuseBody, makeFaceShell,
+                               exportMeshes)
 
 import FreeCAD, Sketcher, Part, Mesh, MeshPart
 from FreeCAD import Units, Placement, Matrix, Vector, Rotation
@@ -95,17 +96,9 @@ bo["buffer"].Label = "body_buffer"
 bo["buffer"].Base = bo["above"]
 bo["buffer"].Tool = bo["fluid"]
 
-bo["all"] = d.addObject("Part::MultiFuse", "BodyAll")
-bo["all"].Label = "body_all"
-bo["all"].Shapes = [bo["above"], bo["below"]]
-
-bo["conductor"] = d.addObject("Part::MultiFuse", "BodyConductor")
-bo["conductor"].Label = "body_conductor"
-bo["conductor"].Shapes = [bo["fluid"], bo["fluid"]]
-
-bo["space"] = d.addObject("Part::MultiFuse", "BodySpace")
-bo["space"].Label = "body_space"
-bo["space"].Shapes = [bo["buffer"], bo["below"]]
+bo["all"] = makeFuseBody(d, "all", [bo["above"], bo["below"]])
+bo["conductor"] = makeFuseBody(d, "conductor", [bo["fluid"]])
+bo["space"] = makeFuseBody(d, "space", [bo["buffer"], bo["below"]])
 
 # --------------------------------------------------------------------------- #
 
@@ -117,22 +110,17 @@ d.recompute()
 
 shd = dict()
 
-shd["infinity"] = [bo["all"], [1, 2, 3, 4]]
-shd["fixedMesh"] = [bo["buffer"], [1, 2, 3]]
-shd["sideWall"] = [bo["fluid"], [1]]
-shd["bottomWall"] = [bo["fluid"], [2]]
-shd["trackedSurface"] = [bo["fluid"], [3]]
+shd["infinity"] = (bo["all"], [1, 2, 3, 4])
+shd["fixedMesh"] = (bo["buffer"], [1, 2, 3])
+shd["sideWall"] = (bo["fluid"], [1])
+shd["bottomWall"] = (bo["fluid"], [2])
+shd["trackedSurface"] = (bo["fluid"], [3])
 
 sh = dict()
 
 for k in shd.keys():
 
-    name = "Shell" + k.capitalize()
-    label = "shell_" + k
-
-    sh[k] = d.addObject("Part::Feature", name)
-    sh[k].Label = label
-    sh[k].Shape = faceShell(shd[k])
+    sh[k] = makeFaceShell(d, k, shd[k])
 
 # --------------------------------------------------------------------------- #
 

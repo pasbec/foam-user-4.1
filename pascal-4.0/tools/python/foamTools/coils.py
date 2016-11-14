@@ -639,9 +639,9 @@ class inductorCoil(object):
 
             rotate = kwargs["rotate"]
 
-            if not isinstance(rotate, list) and len(rotate) == 2:
+            if not isinstance(rotate, tuple) and len(rotate) == 2:
 
-                raise KeyError("Rotation data must be a list containing axis and angle.")
+                raise KeyError("Rotation data must be a tuple containing axis and angle.")
 
             rotAxis  = rotate[0]
             rotAngle = rotate[1]
@@ -870,15 +870,15 @@ class inductorCoils(dict):
 
             plane = [0, 1, 2]; plane.pop(axis)
 
-            rotation = [np.zeros(3), 90.0]
+            rotation = (np.zeros(3), 90.0)
             rotation[0][plane[1]] = 1.0
             self[i].transform(rotate=rotation)
 
-            rotation = [np.zeros(3), 90.0]
+            rotation = (np.zeros(3), 90.0)
             rotation[0][plane[0]] = 1.0
             self[i].transform(rotate=rotation)
 
-            rotation = [np.zeros(3), phasei]
+            rotation = (np.zeros(3), phasei)
             rotation[0][axis] = 1.0
             self[i].transform(rotate=rotation)
 

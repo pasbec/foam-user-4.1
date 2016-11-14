@@ -49,16 +49,30 @@ def addPolyLine(s, v, v2D):
 
 
 
-def faceShell(*args):
+def faceShell(shd):
+
+    dList = list([shd]) if isinstance(shd, tuple) else shd
+
+    if not isinstance(dList, list):
+
+        raise ValueError("Shell data must be list of tuples.")
 
     fList = list()
 
-    for arg in args:
+    for data in dList:
 
-        body = arg[0]
-        labels = arg[1]
+        if not isinstance(data, tuple):
 
-        lList = list(labels) if isinstance(labels, list) else list([labels])
+            raise ValueError("Shell dictionary data must be tuple(2).")
+
+        body = data[0]
+        labels = data[1]
+
+        lList = [labels] if isinstance(labels, int) else labels
+
+        if not isinstance(lList, list):
+
+            raise ValueError("Face labels must be list.")
 
         for l in lList:
 
@@ -69,6 +83,39 @@ def faceShell(*args):
             eval("fList.append(body.Shape.Face" + str(l) + ")")
 
     return Part.Shell(fList)
+
+
+
+def makeFaceShell(document, key, shd):
+
+    name = "Shell" + key.capitalize().replace("_", "")
+    label = "shell_" + key
+
+    document.recompute()
+
+    shell = document.addObject("Part::Feature", name)
+    shell.Label = label
+    shell.Shape = faceShell(shd)
+
+    return shell
+
+
+
+def makeFuseBody(document, key, bodies):
+
+    name = "Body" + key.capitalize().replace("_", "")
+    label = "body_" + key
+
+    # If only one body is given, fuse with itself
+    if len(bodies) == 1: bodies.append(bodies[0])
+
+    document.recompute()
+
+    body = document.addObject("Part::MultiFuse", name)
+    body.Label = label
+    body.Shapes = bodies
+
+    return body
 
 
 

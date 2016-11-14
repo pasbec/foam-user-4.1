@@ -25,7 +25,8 @@ sys.path.append("/usr/lib/freecad/lib")
 import math as m
 import numpy as np
 
-from foamTools.freecad import addPolyLine, faceShell, exportMeshes
+from foamTools.freecad import (addPolyLine, makeFuseBody, makeFaceShell,
+                               exportMeshes)
 
 import FreeCAD, Sketcher, Draft, Part, PartDesign, Mesh, MeshPart
 from FreeCAD import Units, Placement, Matrix, Vector, Rotation
@@ -118,17 +119,13 @@ for k in s.keys():
     front.Angle = -par.mesh_angle/2.0
     front.Solid = True
 
-    bo[k] = d.addObject("Part::MultiFuse", name)
-    bo[k].Label = label
-    bo[k].Shapes = [front, back]
+    bo[k] = makeFuseBody(d, k, [front, back])
 
-bo["conductor"] = d.addObject("Part::MultiFuse", "BodyConductor")
-bo["conductor"].Label = "body_conductor"
-bo["conductor"].Shapes = [bo["solid"], bo["fluid"], bo["heater"]]
+bo["conductor"] = makeFuseBody(d, "conductor", [bo["solid"],
+                                                bo["fluid"],
+                                                bo["heater"]])
 
-bo["space"] = d.addObject("Part::MultiFuse", "BodySpace")
-bo["space"].Label = "body_space"
-bo["space"].Shapes = [bo["vessel"], bo["free"]]
+bo["space"] = makeFuseBody(d, "space", [bo["vessel"], bo["free"]])
 
 bo["coils"] = Draft.makeArray(bo["coil"], Vector(0.0, 0.0, cs*par.coils_step),
                               Vector(0.0, 0.0, 0.0), par.coils_n, 1,
@@ -159,17 +156,13 @@ for k in s.keys():
     front.Solid = True
     front.TaperAngle = 0.0
 
-    bo2D[k] = d.addObject("Part::MultiFuse", name)
-    bo2D[k].Label = label
-    bo2D[k].Shapes = [front, back]
+    bo2D[k] = makeFuseBody(d, k + "_2D", [front, back])
 
-bo2D["conductor"] = d.addObject("Part::MultiFuse", "BodyConductor2D")
-bo2D["conductor"].Label = "body_conductor_2D"
-bo2D["conductor"].Shapes = [bo2D["solid"], bo2D["fluid"], bo2D["heater"]]
+bo2D["conductor"] = makeFuseBody(d, "conductor_2D", [bo2D["solid"],
+                                                     bo2D["fluid"],
+                                                     bo2D["heater"]])
 
-bo2D["space"] = d.addObject("Part::MultiFuse", "BodySpace2D")
-bo2D["space"].Label = "body_space_2D"
-bo2D["space"].Shapes = [bo2D["vessel"], bo2D["free"]]
+bo2D["space"] = makeFuseBody(d, "space_2D", [bo2D["vessel"], bo2D["free"]])
 
 bo2D["coils"] = Draft.makeArray(bo2D["coil"],
                                 Vector(0.0, 0.0, cs*par.coils_step),
@@ -195,15 +188,14 @@ for k in s.keys():
     bo3D[k].Angle = 360.00
     bo3D[k].Solid = True
 
-bo3D["conductor"] = d.addObject("Part::MultiFuse", "BodyConductor3D")
-bo3D["conductor"].Label = "body_conductor_3D"
-bo3D["conductor"].Shapes = [bo3D["solid"], bo3D["fluid"], bo3D["heater"]]
+bo3D["conductor"] = makeFuseBody(d, "conductor_3D", [bo3D["solid"],
+                                                     bo3D["fluid"],
+                                                     bo3D["heater"]])
 
-bo3D["space"] = d.addObject("Part::MultiFuse", "BodySpace3D")
-bo3D["space"].Label = "body_space_3D"
-bo3D["space"].Shapes = [bo3D["vessel"], bo3D["free"]]
+bo3D["space"] = makeFuseBody(d, "space_3D", [bo3D["vessel"], bo3D["free"]])
 
-bo3D["coils"] = Draft.makeArray(bo3D["coil"], Vector(0.0, 0.0, cs*par.coils_step),
+bo3D["coils"] = Draft.makeArray(bo3D["coil"],
+                                Vector(0.0, 0.0, cs*par.coils_step),
                                 Vector(0.0, 0.0, 0.0), par.coils_n, 1,
                                 name="Coils3D")
 d.recompute()
@@ -219,24 +211,19 @@ d.recompute()
 
 shd = dict()
 
-shd["front"] = [bo["all"], [4]]
-shd["back"] = [bo["all"], [7]]
-shd["infinity"] = [bo["all"], [1, 2, 3, 5, 6, 8]]
-shd["topWall"] = [bo["fluid"], [1, 2, 3, 5, 6, 12]]
-shd["sideWall"] = [bo["fluid"], [11, 16]]
-shd["cornerWall"] = [bo["fluid"], [10, 15]]
-shd["bottomWall"] = [bo["fluid"], [8, 9, 13, 14]]
+shd["front"] = (bo["all"], [4])
+shd["back"] = (bo["all"], [7])
+shd["infinity"] = (bo["all"], [1, 2, 3, 5, 6, 8])
+shd["topWall"] = (bo["fluid"], [1, 2, 3, 5, 6, 12])
+shd["sideWall"] = (bo["fluid"], [11, 16])
+shd["cornerWall"] = (bo["fluid"], [10, 15])
+shd["bottomWall"] = (bo["fluid"], [8, 9, 13, 14])
 
 sh = dict()
 
 for k in shd.keys():
 
-    name = "Shell" + k.capitalize()
-    label = "shell_" + k
-
-    sh[k] = d.addObject("Part::Feature", name)
-    sh[k].Label = label
-    sh[k].Shape = faceShell(shd[k])
+    sh[k] = makeFaceShell(d, k, shd[k])
 
 # --------------------------------------------------------------------------- #
 
