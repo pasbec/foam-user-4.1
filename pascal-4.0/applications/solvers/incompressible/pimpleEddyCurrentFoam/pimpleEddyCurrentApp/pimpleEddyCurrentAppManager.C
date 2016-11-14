@@ -114,12 +114,6 @@ Foam::pimpleEddyCurrentApp::Manager::Manager
                 Region::FLUID
             );
 
-            regionNameHashTable.insert
-            (
-                word(this->regionsDict().lookup("buffer")),
-                Region::BUFFER
-            );
-
             mesh.init(regionNameHashTable);
 
             this->messages().newLine();

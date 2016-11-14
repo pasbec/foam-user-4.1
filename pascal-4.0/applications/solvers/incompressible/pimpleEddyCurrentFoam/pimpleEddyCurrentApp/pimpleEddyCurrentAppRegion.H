@@ -53,8 +53,7 @@ namespace Region
     {
         DEFAULT,
         CONDUCTOR,
-        FLUID,
-        BUFFER
+        FLUID
     };
 }
 
