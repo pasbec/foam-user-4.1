@@ -223,8 +223,8 @@ shd["front"] = [bo["all"], [4]]
 shd["back"] = [bo["all"], [7]]
 shd["infinity"] = [bo["all"], [1, 2, 3, 5, 6, 8]]
 shd["topWall"] = [bo["fluid"], [1, 2, 3, 5, 6, 12]]
-shd["cornerWall"] = [bo["fluid"], [11, 16]]
-shd["sideWall"] = [bo["fluid"], [10, 15]]
+shd["sideWall"] = [bo["fluid"], [11, 16]]
+shd["cornerWall"] = [bo["fluid"], [10, 15]]
 shd["bottomWall"] = [bo["fluid"], [8, 9, 13, 14]]
 
 sh = dict()
