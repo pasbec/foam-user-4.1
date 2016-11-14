@@ -25,13 +25,14 @@ sys.path.append("/usr/lib/freecad/lib")
 import math as m
 import numpy as np
 
-from foamTools.freecad import (addPolyLine, makeFuseBody, makeFaceShell,
-                               exportMeshes)
+from foamTools.freecad import (addPolyLine, makeFuseBody, makeCutBody,
+                               makeExtrudeBody, makeRevolveBody,
+                               makeOrthoArrayBody, makePolarArrayBody,
+                               makeFaceShell, exportMeshes)
 
-import FreeCAD, Sketcher, Draft, Part, PartDesign, Mesh, MeshPart
+import FreeCAD, Sketcher
 from FreeCAD import Units, Placement, Matrix, Vector, Rotation
-from Part import Line, Circle, Shell
-from Sketcher import Constraint
+from Part import Line, Circle
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -100,24 +101,9 @@ bo = dict()
 
 for k in s.keys():
 
-    name = "Body" + k.capitalize()
-    label = "body_" + k
+    back = makeRevolveBody(d, k + "_back", s[k], angle=par.mesh_angle/2.0)
 
-    back = d.addObject("Part::Revolution", name + "Back")
-    back.Label = label + "_back"
-    back.Source = s[k]
-    back.Axis = (0.00,0.00,1.00)
-    back.Base = (0.00,0.00,0.00)
-    back.Angle = par.mesh_angle/2.0
-    back.Solid = True
-
-    front = d.addObject("Part::Revolution", name + "Front")
-    front.Label = label + "_front"
-    front.Source = s[k]
-    front.Axis = (0.00,0.00,1.00)
-    front.Base = (0.00,0.00,0.00)
-    front.Angle = -par.mesh_angle/2.0
-    front.Solid = True
+    front = makeRevolveBody(d, k + "_front", s[k], angle=-par.mesh_angle/2.0)
 
     bo[k] = makeFuseBody(d, k, [front, back])
 
@@ -127,11 +113,8 @@ bo["conductor"] = makeFuseBody(d, "conductor", [bo["solid"],
 
 bo["space"] = makeFuseBody(d, "space", [bo["vessel"], bo["free"]])
 
-bo["coils"] = Draft.makeArray(bo["coil"], Vector(0.0, 0.0, cs*par.coils_step),
-                              Vector(0.0, 0.0, 0.0), par.coils_n, 1,
-                              name="BodyCoils")
-d.recompute()
-bo["coils"].Label = "body_coils"
+bo["coils"] = makeOrthoArrayBody(d, "coils", bo["coil"],
+                                 (0.0, 0.0, cs*par.coils_step), par.coils_n)
 
 # --------------------------------------------------------------------------- #
 
@@ -139,22 +122,11 @@ bo2D = dict()
 
 for k in s.keys():
 
-    name = "Body" + k.capitalize() + "2D"
-    label = "body_" + k + "_2D"
+    back = makeExtrudeBody(d, k + "_2D_back", s[k],
+                           (0.0, par.mesh_thickness/2.0, 0.0))
 
-    back = d.addObject("Part::Extrusion", name + "Back")
-    back.Label = label + "_back"
-    back.Base = s[k]
-    back.Dir = (0.0, par.mesh_thickness/2.0, 0.0)
-    back.Solid = True
-    back.TaperAngle = 0.0
-
-    front = d.addObject("Part::Extrusion", name + "Front")
-    front.Label = label + "_front"
-    front.Base = s[k]
-    front.Dir = (0.0,-par.mesh_thickness/2.0, 0.0)
-    front.Solid = True
-    front.TaperAngle = 0.0
+    front = makeExtrudeBody(d, k + "_2D_front", s[k],
+                            (0.0, -par.mesh_thickness/2.0, 0.0))
 
     bo2D[k] = makeFuseBody(d, k + "_2D", [front, back])
 
@@ -164,12 +136,8 @@ bo2D["conductor"] = makeFuseBody(d, "conductor_2D", [bo2D["solid"],
 
 bo2D["space"] = makeFuseBody(d, "space_2D", [bo2D["vessel"], bo2D["free"]])
 
-bo2D["coils"] = Draft.makeArray(bo2D["coil"],
-                                Vector(0.0, 0.0, cs*par.coils_step),
-                                Vector(0.0, 0.0, 0.0), par.coils_n, 1,
-                                name="Coils2D")
-d.recompute()
-bo2D["coils"].Label = "body_coils_2D"
+bo2D["coils"] = makeOrthoArrayBody(d, "coils_2D", bo2D["coil"],
+                                 (0.0, 0.0, cs*par.coils_step), par.coils_n)
 
 # --------------------------------------------------------------------------- #
 
@@ -177,16 +145,7 @@ bo3D = dict()
 
 for k in s.keys():
 
-    name = "Body" + k.capitalize() + "3D"
-    label = "body_" + k + "_3D"
-
-    bo3D[k] = d.addObject("Part::Revolution", name)
-    bo3D[k].Label = label
-    bo3D[k].Source = s[k]
-    bo3D[k].Axis = (0.00,0.00,1.00)
-    bo3D[k].Base = (0.00,0.00,0.00)
-    bo3D[k].Angle = 360.00
-    bo3D[k].Solid = True
+    bo3D[k] = makeRevolveBody(d, k + "_3D", s[k])
 
 bo3D["conductor"] = makeFuseBody(d, "conductor_3D", [bo3D["solid"],
                                                      bo3D["fluid"],
@@ -194,12 +153,8 @@ bo3D["conductor"] = makeFuseBody(d, "conductor_3D", [bo3D["solid"],
 
 bo3D["space"] = makeFuseBody(d, "space_3D", [bo3D["vessel"], bo3D["free"]])
 
-bo3D["coils"] = Draft.makeArray(bo3D["coil"],
-                                Vector(0.0, 0.0, cs*par.coils_step),
-                                Vector(0.0, 0.0, 0.0), par.coils_n, 1,
-                                name="Coils3D")
-d.recompute()
-bo3D["coils"].Label = "body_coils_3D"
+bo2D["coils"] = makeOrthoArrayBody(d, "coils_3D", bo3D["coil"],
+                                 (0.0, 0.0, cs*par.coils_step), par.coils_n)
 
 # --------------------------------------------------------------------------- #
 

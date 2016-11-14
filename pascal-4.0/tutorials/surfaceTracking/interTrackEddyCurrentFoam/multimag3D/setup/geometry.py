@@ -25,13 +25,14 @@ sys.path.append("/usr/lib/freecad/lib")
 import math as m
 import numpy as np
 
-from foamTools.freecad import (addPolyLine, makeFuseBody, makeFaceShell,
-                               exportMeshes)
+from foamTools.freecad import (addPolyLine, makeFuseBody, makeCutBody,
+                               makeExtrudeBody, makeRevolveBody,
+                               makeOrthoArrayBody, makePolarArrayBody,
+                               makeFaceShell, exportMeshes)
 
-import FreeCAD, Sketcher, Part, Mesh, MeshPart
+import FreeCAD, Sketcher
 from FreeCAD import Units, Placement, Matrix, Vector, Rotation
-from Part import Line, Circle, Shell
-from Sketcher import Constraint
+from Part import Line, Circle
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -70,31 +71,11 @@ s["outer"].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
 
 bo = dict()
 
-bo["fluid"] = d.addObject("Part::Extrusion", "BodyFluid")
-bo["fluid"].Label = "body_fluid"
-bo["fluid"].Base = s["inner"]
-bo["fluid"].Dir = (0.0, 0.0, par.geo_z3)
-bo["fluid"].Solid = True
-bo["fluid"].TaperAngle = 0.0
+bo["fluid"] = makeExtrudeBody(d, "fluid", s["inner"], (0.0, 0.0, par.geo_z3))
+bo["above"] = makeExtrudeBody(d, "above", s["outer"], (0.0, 0.0, par.geo_z4))
+bo["below"] = makeExtrudeBody(d, "below", s["outer"], (0.0, 0.0, par.geo_z0))
 
-bo["above"] = d.addObject("Part::Extrusion", "BodyAbove")
-bo["above"].Label = "body_above"
-bo["above"].Base = s["outer"]
-bo["above"].Dir = (0.0, 0.0, par.geo_z4)
-bo["above"].Solid = True
-bo["above"].TaperAngle = 0.0
-
-bo["below"] = d.addObject("Part::Extrusion", "BodyBelow")
-bo["below"].Label = "body_below"
-bo["below"].Base = s["outer"]
-bo["below"].Dir = (0.0, 0.0, par.geo_z0)
-bo["below"].Solid = True
-bo["below"].TaperAngle = 0.0
-
-bo["buffer"] = d.addObject("Part::Cut", "BodyBuffer")
-bo["buffer"].Label = "body_buffer"
-bo["buffer"].Base = bo["above"]
-bo["buffer"].Tool = bo["fluid"]
+bo["buffer"] = makeCutBody(d, "buffer", bo["above"], bo["fluid"])
 
 bo["all"] = makeFuseBody(d, "all", [bo["above"], bo["below"]])
 bo["conductor"] = makeFuseBody(d, "conductor", [bo["fluid"]])
