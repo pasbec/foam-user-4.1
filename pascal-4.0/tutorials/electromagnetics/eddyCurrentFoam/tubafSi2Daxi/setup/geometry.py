@@ -25,14 +25,14 @@ sys.path.append("/usr/lib/freecad/lib")
 import math as m
 import numpy as np
 
-from foamTools.freecad import (addPolyLine, makeFuseBody, makeCutBody,
-                               makeExtrudeBody, makeRevolveBody,
+from foamTools.freecad import (makeSketch, sketchCircle, sketchPolyLine,
+                               makeFuseBody, makeCutBody,
+                               makeMirrorBody, makeExtrudeBody, makeRevolveBody,
+                               makeDoubleExtrudeBody, makeDoubleRevolveBody,
                                makeOrthoArrayBody, makePolarArrayBody,
                                makeFaceShell, exportMeshes)
 
-import FreeCAD, Sketcher
-from FreeCAD import Units, Placement, Matrix, Vector, Rotation
-from Part import Line, Circle
+import FreeCAD
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -63,35 +63,32 @@ s = dict()
 
 for k in v.keys():
 
-    name = "Sketch" + k.capitalize()
-    label = "sketch_" + k
+    s[k] = makeSketch(d, "inner", orient="xz")
 
-    s[k] = d.addObject("Sketcher::SketchObject", name)
-    s[k].Label = label
-    s[k].Placement = Placement(Vector(0.0, 0.0, 0.0),
-                               Rotation(Vector(1.0, 0.0, 0.0), 90))
-
-    addPolyLine(s[k], v[k], blockMeshDict.v)
+    sketchPolyLine(s[k], v[k], blockMeshDict.v)
 
 cs = par.coil_scale/par.geo_scale
 
 cv    = dict()
 
 cv[0] = cs*np.array([par.coil_path["r"] - par.coil_bundle["r"]/2.0,
-                      par.coils_origin[2] - par.coil_bundle["z"]/2.0])
+                    -par.coil_bundle["z"]/2.0])
 cv[1] = cs*np.array([par.coil_path["r"] + par.coil_bundle["r"]/2.0,
-                      par.coils_origin[2] - par.coil_bundle["z"]/2.0])
+                    -par.coil_bundle["z"]/2.0])
 cv[2] = cs*np.array([par.coil_path["r"] + par.coil_bundle["r"]/2.0,
-                      par.coils_origin[2] + par.coil_bundle["z"]/2.0])
+                     par.coil_bundle["z"]/2.0])
 cv[3] = cs*np.array([par.coil_path["r"] - par.coil_bundle["r"]/2.0,
-                      par.coils_origin[2] + par.coil_bundle["z"]/2.0])
+                     par.coil_bundle["z"]/2.0])
 
-s["coil"] = d.addObject("Sketcher::SketchObject", "SketchCoil")
-s["coil"].Label = "sketch_coil"
-s["coil"].Placement = Placement(Vector(0.0, 0.0, 0.0),
-                                Rotation(Vector(1.0, 0.0, 0.0), 90))
+s["coil"] = makeSketch(d, "coil", orient="xz",
+                       base=(par.coils_origin[0], par.coils_origin[1],
+                             par.coils_origin[2]))
 
-addPolyLine(s["coil"] , cv.keys(), cv)
+sketchPolyLine(s["coil"], cv.keys(), cv)
+
+# --------------------------------------------------------------------------- #
+
+d.recompute()
 
 # --------------------------------------------------------------------------- #
 # --- Bodies ---------------------------------------------------------------- #
@@ -101,19 +98,15 @@ bo = dict()
 
 for k in s.keys():
 
-    back = makeRevolveBody(d, k + "_back", s[k], angle=par.mesh_angle/2.0)
+    bo[k] = makeDoubleRevolveBody(k, s[k], angle=par.mesh_angle)
 
-    front = makeRevolveBody(d, k + "_front", s[k], angle=-par.mesh_angle/2.0)
+bo["conductor"] = makeFuseBody("conductor", [bo["solid"],
+                                             bo["fluid"],
+                                             bo["heater"]])
 
-    bo[k] = makeFuseBody(d, k, [front, back])
+bo["space"] = makeFuseBody("space", [bo["vessel"], bo["free"]])
 
-bo["conductor"] = makeFuseBody(d, "conductor", [bo["solid"],
-                                                bo["fluid"],
-                                                bo["heater"]])
-
-bo["space"] = makeFuseBody(d, "space", [bo["vessel"], bo["free"]])
-
-bo["coils"] = makeOrthoArrayBody(d, "coils", bo["coil"],
+bo["coils"] = makeOrthoArrayBody("coils", bo["coil"],
                                  (0.0, 0.0, cs*par.coils_step), par.coils_n)
 
 # --------------------------------------------------------------------------- #
@@ -122,22 +115,16 @@ bo2D = dict()
 
 for k in s.keys():
 
-    back = makeExtrudeBody(d, k + "_2D_back", s[k],
-                           (0.0, par.mesh_thickness/2.0, 0.0))
+    bo2D[k] = makeDoubleExtrudeBody(k + "_2D", s[k], par.mesh_thickness/2.0)
 
-    front = makeExtrudeBody(d, k + "_2D_front", s[k],
-                            (0.0, -par.mesh_thickness/2.0, 0.0))
+bo2D["conductor"] = makeFuseBody("conductor_2D", [bo2D["solid"],
+                                                  bo2D["fluid"],
+                                                  bo2D["heater"]])
 
-    bo2D[k] = makeFuseBody(d, k + "_2D", [front, back])
+bo2D["space"] = makeFuseBody("space_2D", [bo2D["vessel"], bo2D["free"]])
 
-bo2D["conductor"] = makeFuseBody(d, "conductor_2D", [bo2D["solid"],
-                                                     bo2D["fluid"],
-                                                     bo2D["heater"]])
-
-bo2D["space"] = makeFuseBody(d, "space_2D", [bo2D["vessel"], bo2D["free"]])
-
-bo2D["coils"] = makeOrthoArrayBody(d, "coils_2D", bo2D["coil"],
-                                 (0.0, 0.0, cs*par.coils_step), par.coils_n)
+bo2D["coils"] = makeOrthoArrayBody("coils_2D", bo2D["coil"],
+                                   (0.0, 0.0, cs*par.coils_step), par.coils_n)
 
 # --------------------------------------------------------------------------- #
 
@@ -145,16 +132,16 @@ bo3D = dict()
 
 for k in s.keys():
 
-    bo3D[k] = makeRevolveBody(d, k + "_3D", s[k])
+    bo3D[k] = makeRevolveBody(k + "_3D", s[k])
 
-bo3D["conductor"] = makeFuseBody(d, "conductor_3D", [bo3D["solid"],
-                                                     bo3D["fluid"],
-                                                     bo3D["heater"]])
+bo3D["conductor"] = makeFuseBody("conductor_3D", [bo3D["solid"],
+                                                  bo3D["fluid"],
+                                                  bo3D["heater"]])
 
-bo3D["space"] = makeFuseBody(d, "space_3D", [bo3D["vessel"], bo3D["free"]])
+bo3D["space"] = makeFuseBody("space_3D", [bo3D["vessel"], bo3D["free"]])
 
-bo2D["coils"] = makeOrthoArrayBody(d, "coils_3D", bo3D["coil"],
-                                 (0.0, 0.0, cs*par.coils_step), par.coils_n)
+bo3D["coils"] = makeOrthoArrayBody("coils_3D", bo3D["coil"],
+                                   (0.0, 0.0, cs*par.coils_step), par.coils_n)
 
 # --------------------------------------------------------------------------- #
 

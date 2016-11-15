@@ -27,6 +27,9 @@ import numpy as np
 
 import FreeCAD, Sketcher, Draft, Part, PartDesign, Mesh, MeshPart
 from FreeCAD import Units, Placement, Matrix, Vector, Rotation
+from Part import Line, Circle
+
+from foamTools.math import rotation
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -36,87 +39,243 @@ from FreeCAD import Units, Placement, Matrix, Vector, Rotation
 # --- Functions ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def addPolyLine(s, v, v2D):
+def makeSketch(document, key, orient=None, axis=None, angle=None,
+               base=(0.0, 0.0, 0.0), reverse=False):
+
+    name = "Sketch" + key.capitalize()
+    label = "sketch_" + key
+
+    if orient:
+
+        if axis: raise KeyError("Axis may not be given if orient is used.")
+
+        if angle: raise KeyError("Angle may not be given if orient is used.")
+
+        if orient == "xy":
+
+            if not reverse: rotation = Rotation(Vector(0.0, 0.0, 1.0), 0)
+
+            else: rotation = Rotation(Vector(-1.0, 0.0, 0.0), 180)
+
+        elif orient == "xz":
+
+            if not reverse: rotation = Rotation(Vector(1.0, 0.0, 0.0), 90)
+
+            else: rotation = Rotation(Vector(0.0, 1.0, 1.0), 180)
+
+        elif orient == "yz":
+
+            if not reverse: rotation = Rotation(Vector(1.0, 1.0, 1.0), 120)
+
+            else: rotation = Rotation(Vector(-1.0, 1.0, 1.0), 240)
+
+        else:
+
+            raise ValueError("Postition " + orient + " is not supported.")
+
+    else:
+
+        rotation = Rotation(Vector(axis), angle)
+
+    sketch = document.addObject("Sketcher::SketchObject", name)
+    sketch.Label = label
+    sketch.Placement = Placement(Vector(base), rotation)
+
+    return sketch
+
+
+
+def sketchCircle(sketchObj, radius, center=(0.0, 0.0, 0.0)):
+
+    document = sketchObj.Document
+    document.recompute()
+
+    nConstraints = len(sketchObj.Constraints)
+    nGeometry = len(sketchObj.Geometry)
+
+    sketchObj.addGeometry(Circle(Vector(center),
+                                 Vector(0.0, 0.0, 1.0), radius))
+
+
+
+def sketchPolyLine(sketchObj, v, v2D, fillet=None):
+
+    document = sketchObj.Document
+    document.recompute()
+
+    nConstraints = len(sketchObj.Constraints)
+    nGeometry = len(sketchObj.Geometry)
 
     l = len(v) - 1
+    L = nGeometry + l
 
     def V(i): return Vector((v2D[i][0], v2D[i][1], 0.0))
 
+    # Draw lines
     for i in range(l):
 
-        s.addGeometry(Part.Line(V(v[i]), V(v[i+1])))
+        sketchObj.addGeometry(Line(V(v[i]), V(v[i+1])))
 
-    s.addGeometry(Part.Line(V(v[l]), V(v[0])))
+    sketchObj.addGeometry(Line(V(v[l]), V(v[0])))
+
+    # Add Constraints (lines need to be drawn first)
+    for i in range(l):
+
+        I = nGeometry + i
+
+        sketchObj.addConstraint(
+            Sketcher.Constraint('Coincident', I, 2, I+1, 1))
+
+    sketchObj.addConstraint(
+        Sketcher.Constraint('Coincident', L, 2, nGeometry, 1))
+
+    if fillet:
+
+        # Add fillets
+        for i in range(l+1):
+
+            I = nGeometry + i
+
+            sketchObj.fillet(I, 1, fillet)
 
 
 
-def makeFuseBody(document, key, bodies):
+def makeFuseBody(key, fuseObjects):
+
+    document = fuseObjects[0].Document
+    document.recompute()
 
     name = "Body" + key.capitalize()
     label = "body_" + key
 
-    # If only one body is given, fuse with itself
-    if len(bodies) == 1: bodies.append(bodies[0])
-
-    document.recompute()
+    # If only one object is given, fuse with itself
+    if len(fuseObjects) == 1: fuseObjects.append(fuseObjects[0])
 
     body = document.addObject("Part::MultiFuse", name)
 
     body.Label = label
-    body.Shapes = bodies
+    body.Shapes = fuseObjects
 
     return body
 
 
 
-def makeCutBody(document, key, base, tool):
+def makeCutBody(key, baseObj, toolObj):
+
+    document = baseObj.Document
+    document.recompute()
 
     name = "Body" + key.capitalize()
     label = "body_" + key
-
-    document.recompute()
 
     body = document.addObject("Part::Cut", name)
 
     body.Label = label
-    body.Base = base
-    body.Tool = tool
+    body.Base = baseObj
+    body.Tool = toolObj
 
     return body
 
 
 
-def makeExtrudeBody(document, key, sketch, dir, solid=True, tAngle=0.0):
+def makeMirrorBody(key, baseObj, normal, base=(0.0, 0.0, 0.0)):
+
+    document = baseObj.Document
+    document.recompute()
 
     name = "Body" + key.capitalize()
     label = "body_" + key
 
+    body = document.addObject("Part::Mirroring", name)
+
+    body.Label = label
+    body.Source = baseObj
+    body.Normal = normal
+    body.Base = base
+
+    return body
+
+
+
+def makeExtrudeBody(key, sketchObj, normal=None, solid=True, angle=0.0):
+
+    document = sketchObj.Document
     document.recompute()
+
+    name = "Body" + key.capitalize()
+    label = "body_" + key
+
+    if isinstance(normal, (int, float)):
+
+        rotAxis = np.array(sketchObj.Placement.Rotation.Axis)
+        rotTheta = sketchObj.Placement.Rotation.Angle
+
+        direction = tuple(rotation(rotAxis, rotTheta,
+                                   np.array([0.0, 0.0, normal])))
+
+    else:
+
+        direction = tuple(np.array(normal).copy())
 
     body = document.addObject("Part::Extrusion", name)
 
     body.Label = label
-    body.Base = sketch
-    body.Dir = Vector(dir)
+    body.Base = sketchObj
+    body.Dir = Vector(direction)
     body.Solid = solid
-    body.TaperAngle = tAngle
+    body.TaperAngle = angle
 
     return body
 
 
 
-def makeRevolveBody(document, key, sketch, angle=360.0, axis=(0.00,0.00,1.00),
-                    base=(0.00,0.00,0.00), solid=True):
+def makeDoubleExtrudeBody(key, sketchObj, normal, solid=True, angle=0.0):
+
+    document = sketchObj.Document
+    document.recompute()
 
     name = "Body" + key.capitalize()
     label = "body_" + key
 
+    if isinstance(normal, (int, float)):
+
+        rotAxis = np.array(sketchObj.Placement.Rotation.Axis)
+        rotTheta = sketchObj.Placement.Rotation.Angle
+
+        direction = tuple(rotation(rotAxis, rotTheta,
+                                   np.array([0.0, 0.0, normal/2.0])))
+
+    else:
+
+        direction = tuple(np.array(normal).copy()/2.0)
+
+    front = makeExtrudeBody(key + "_front", sketchObj,
+                              normal=direction, solid=solid, angle=angle)
+
+    direction = tuple(-np.array(direction))
+
+    back = makeExtrudeBody(key + "_back", sketchObj,
+                              normal=direction, solid=solid, angle=angle)
+
+    body = makeFuseBody(key, [front, back])
+
+    return body
+
+
+
+def makeRevolveBody(key, sketchObj, angle=360.0, axis=(0.0, 0.0, 1.0),
+                    base=(0.0, 0.0, 0.0), solid=True):
+
+    document = sketchObj.Document
     document.recompute()
+
+    name = "Body" + key.capitalize()
+    label = "body_" + key
 
     body = document.addObject("Part::Revolution", name)
 
     body.Label = label
-    body.Source = sketch
+    body.Source = sketchObj
     body.Axis = Vector(axis)
     body.Base = Vector(base)
     body.Angle = angle
@@ -125,21 +284,44 @@ def makeRevolveBody(document, key, sketch, angle=360.0, axis=(0.00,0.00,1.00),
     return body
 
 
-def makeOrthoArrayBody(document, key, base, xvector, xnum,
-                       yvector=(0.0, 0.0, 0.0), ynum=1,
-                       zvector=(0.0, 0.0, 0.0), znum=1, fuse=False):
+
+def makeDoubleRevolveBody(key, sketchObj, angle=360.0, axis=(0.0, 0.0, 1.0),
+                          base=(0.0, 0.0, 0.0), solid=True):
+
+    document = sketchObj.Document
+    document.recompute()
 
     name = "Body" + key.capitalize()
     label = "body_" + key
 
+    front = makeRevolveBody(key + "_front", sketchObj, angle=angle/2.0,
+                              axis=axis, base=base, solid=solid)
+
+    back = makeRevolveBody(key + "_back", sketchObj, angle=-angle/2.0,
+                              axis=axis, base=base, solid=solid)
+
+    body = makeFuseBody(key, [front, back])
+
+    return body
+
+
+
+def makeOrthoArrayBody(key, baseObj, xvector, xnum,
+                       yvector=(0.0, 0.0, 0.0), ynum=1,
+                       zvector=(0.0, 0.0, 0.0), znum=1, fuse=False):
+
+    document = baseObj.Document
     document.recompute()
 
-    body = Draft.makeArray(base, Vector(xvector), Vector(yvector),
+    name = "Body" + key.capitalize()
+    label = "body_" + key
+
+    body = Draft.makeArray(baseObj, Vector(xvector), Vector(yvector),
                            xnum, ynum, name=name)
 
     body.Label = label
     body.ArrayType = str("ortho")
-    body.Base = base
+    body.Base = baseObj
     body.IntervalX = Vector(xvector)
     body.IntervalY = Vector(yvector)
     body.IntervalZ = Vector(zvector)
@@ -155,20 +337,23 @@ def makeOrthoArrayBody(document, key, base, xvector, xnum,
 
 
 
-def makePolarArrayBody(document, key, base, totalnum, center=(0.0, 0.0, 0.0),
+def makePolarArrayBody(key, baseObj, totalnum, center=(0.0, 0.0, 0.0),
                        axis=(0.0, 0.0, 1.0), iaxis=(0.0, 0.0, 0.0),
                        totalangle=360.0, fuse=False):
+
+    document = baseObj.Document
+    document.recompute()
 
     name = "Body" + key.capitalize()
     label = "body_" + key
 
     document.recompute()
 
-    body = Draft.makeArray(base, center, totalangle, totalnum, name=name)
+    body = Draft.makeArray(baseObj, center, totalangle, totalnum, name=name)
 
     body.Label = label
     body.ArrayType = str("polar")
-    body.Base = base
+    body.Base = baseObj
     body.Center = center
     body.Axis = axis
     body.IntervalAxis = iaxis
@@ -180,6 +365,7 @@ def makePolarArrayBody(document, key, base, totalnum, center=(0.0, 0.0, 0.0),
 
 
 
+# TODO: Document and Iteration
 def faceShell(shd):
 
     dList = list([shd]) if isinstance(shd, tuple) else shd
@@ -217,6 +403,7 @@ def faceShell(shd):
 
 
 
+# TODO: Document and Iteration
 def makeFaceShell(document, key, shd):
 
     name = "Shell" + key.capitalize()
@@ -233,12 +420,17 @@ def makeFaceShell(document, key, shd):
 
 
 
-def exportMeshes(obj, dir, prefix, tol=0.1, scale=1.0):
+def exportMeshes(objects, dir, prefix, tol=0.1, scale=1.0):
+
+    document = objects[0].Document
+    document.recompute()
 
     S = Matrix()
     S.scale(scale, scale, scale)
 
-    for o in obj:
+    for i in range(len(objects)):
+
+        o = objects[i]
 
         mesh = Mesh.Mesh(o.Shape.tessellate(tol))
         #mesh = MeshPart.meshFromShape(Shape=o.Shape, MaxLength=10)

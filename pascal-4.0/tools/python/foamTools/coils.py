@@ -63,6 +63,7 @@ import math as m
 import numpy as np
 
 from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
+from foamTools.math import rotationMatrix
 
 # --------------------------------------------------------------------------- #
 # --- Functions ------------------------------------------------------------- #
@@ -644,7 +645,7 @@ class inductorCoil(object):
                 raise KeyError("Rotation data must be a tuple containing axis and angle.")
 
             rotAxis  = rotate[0]
-            rotAngle = rotate[1]
+            rotAngle = rotate[1]/180.0 * m.pi
 
             if not isinstance(rotAxis, (list, np.ndarray)):
 
@@ -656,14 +657,7 @@ class inductorCoil(object):
 
                 raise KeyError("Rotation vector must have exactly 3 components.")
 
-            from scipy.linalg import expm3, norm
-
-            def R(axis, theta):
-
-                return expm3(np.cross(np.eye(3), theta * axis/norm(axis)))
-
-            rotTheta = rotAngle/180.0 * m.pi
-            rotM = R(rotAxis, rotTheta)
+            rotM = rotationMatrix(rotAxis, rotAngle)
 
             p = self.points
             for i in range(len(p)): p[i] = np.dot(rotM, p[i])

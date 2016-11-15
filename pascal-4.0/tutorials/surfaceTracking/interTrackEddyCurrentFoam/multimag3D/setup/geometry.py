@@ -25,14 +25,14 @@ sys.path.append("/usr/lib/freecad/lib")
 import math as m
 import numpy as np
 
-from foamTools.freecad import (addPolyLine, makeFuseBody, makeCutBody,
-                               makeExtrudeBody, makeRevolveBody,
+from foamTools.freecad import (makeSketch, sketchCircle, sketchPolyLine,
+                               makeFuseBody, makeCutBody,
+                               makeMirrorBody, makeExtrudeBody, makeRevolveBody,
+                               makeDoubleExtrudeBody, makeDoubleRevolveBody,
                                makeOrthoArrayBody, makePolarArrayBody,
                                makeFaceShell, exportMeshes)
 
-import FreeCAD, Sketcher
-from FreeCAD import Units, Placement, Matrix, Vector, Rotation
-from Part import Line, Circle
+import FreeCAD
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -51,19 +51,50 @@ d = FreeCAD.activeDocument()
 
 s = dict()
 
-s["inner"] = d.addObject("Sketcher::SketchObject", "SketchInner")
-s["inner"].Label = "sketch_inner"
-s["inner"].Placement = Placement(Vector(0.0, 0.0, par.geo_z1),
-                                 Rotation(0.0, 0.0, 0, 1.0))
-s["inner"].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
-                              Vector(0.0, 0.0, 1.0), par.geo_r1))
+s["inner"] = makeSketch(d, "inner", orient="xy", base=(0.0, 0.0, par.geo_z1))
 
-s["outer"] = d.addObject("Sketcher::SketchObject", "SketchOuter")
-s["outer"].Label = "sketch_outer"
-s["outer"].Placement = Placement(Vector(0.0, 0.0, par.geo_z1),
-                                 Rotation(0.0, 0.0, 0, 1.0))
-s["outer"].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
-                              Vector(0.0, 0.0, 1.0), par.geo_r2))
+sketchCircle(s["inner"], par.geo_r1)
+
+s["outer"] = makeSketch(d, "outer", orient="xy", base=(0.0, 0.0, par.geo_z1))
+
+sketchCircle(s["outer"], par.geo_r2)
+
+cs = par.coil_scale/par.geo_scale
+
+cvi    = dict()
+cvo    = dict()
+
+cvi[0] = cs*np.array([-par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                      -par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+cvi[1] = cs*np.array([ par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                      -par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+cvi[2] = cs*np.array([ par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                       par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+cvi[3] = cs*np.array([-par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                       par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+
+cvo[0] = cs*np.array([-par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                      -par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+cvo[1] = cs*np.array([ par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                      -par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+cvo[2] = cs*np.array([ par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                       par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+cvo[3] = cs*np.array([-par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                       par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+
+s["coil"] = makeSketch(d, "coil", orient="yz",
+                       base=(par.coils_origin[0] + par.coils_step,
+                             par.coils_origin[1], par.coils_origin[2]))
+
+sketchPolyLine(s["coil"] , cvi.keys(), cvi,
+               fillet=(par.coil_path["r"] - par.coil_bundle["r"]/2.0))
+
+sketchPolyLine(s["coil"] , cvo.keys(), cvo,
+               fillet=(par.coil_path["r"] + par.coil_bundle["r"]/2.0))
+
+# --------------------------------------------------------------------------- #
+
+d.recompute()
 
 # --------------------------------------------------------------------------- #
 # --- Bodies ---------------------------------------------------------------- #
@@ -71,15 +102,20 @@ s["outer"].addGeometry(Circle(Vector(0.0, 0.0, 0.0),
 
 bo = dict()
 
-bo["fluid"] = makeExtrudeBody(d, "fluid", s["inner"], (0.0, 0.0, par.geo_z3))
-bo["above"] = makeExtrudeBody(d, "above", s["outer"], (0.0, 0.0, par.geo_z4))
-bo["below"] = makeExtrudeBody(d, "below", s["outer"], (0.0, 0.0, par.geo_z0))
+bo["fluid"] = makeExtrudeBody("fluid", s["inner"], par.geo_z3)
+bo["above"] = makeExtrudeBody("above", s["outer"], par.geo_z4)
+bo["below"] = makeExtrudeBody("below", s["outer"], par.geo_z0)
 
-bo["buffer"] = makeCutBody(d, "buffer", bo["above"], bo["fluid"])
+bo["buffer"] = makeCutBody("buffer", bo["above"], bo["fluid"])
 
-bo["all"] = makeFuseBody(d, "all", [bo["above"], bo["below"]])
-bo["conductor"] = makeFuseBody(d, "conductor", [bo["fluid"]])
-bo["space"] = makeFuseBody(d, "space", [bo["buffer"], bo["below"]])
+bo["all"] = makeFuseBody("all", [bo["above"], bo["below"]])
+bo["conductor"] = makeFuseBody("conductor", [bo["fluid"]])
+bo["space"] = makeFuseBody("space", [bo["buffer"], bo["below"]])
+
+bo["coil"] = makeDoubleExtrudeBody("coil", s["coil"], cs*par.coil_bundle["z"])
+
+bo["coils"] = makePolarArrayBody("coils", bo["coil"], par.coils_n)
+
 
 # --------------------------------------------------------------------------- #
 
