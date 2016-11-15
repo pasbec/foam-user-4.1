@@ -17,6 +17,7 @@
             const volScalarField& rho = storage.rho();
             const volScalarField& mu = storage.mu();
             trackedSurface& interface = storage.interface();
+            incompressible::turbulenceModel& turbulence = storage.turbulence();
 
             interface.updateBoundaryConditions(); // abs phi
 
@@ -33,7 +34,7 @@
 
             if (control.turbCorr())
             {
-                storage.turbulence().correct();
+                turbulence.correct();
             }
 
             // Make the fluxes absolute

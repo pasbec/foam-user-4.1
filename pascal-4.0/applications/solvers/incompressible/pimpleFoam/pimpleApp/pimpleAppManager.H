@@ -123,6 +123,9 @@ public:
                 //- Turbulence model
                 SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
 
+                //- Density
+                SM_REGIONITEM_ADD(volScalarField, rho);
+
             SM_REGIONSTORAGE_ADD();
 
         SM_REGION_END();

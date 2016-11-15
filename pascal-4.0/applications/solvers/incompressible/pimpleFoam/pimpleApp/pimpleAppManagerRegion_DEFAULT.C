@@ -125,6 +125,41 @@ void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_F::create() const
     );
 }
 
+void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
+{
+    IOdictionary transportProperties
+    (
+        IOobject
+        (
+            "transportProperties",
+            time().constant(),
+            mesh(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
+
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                transportProperties.lookup("rho")
+            )
+        )
+    );
+}
+
 
 void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_transport::create() const
 {
@@ -162,6 +197,7 @@ void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::create() const
     item_F().setState(settings().volumeForce);
     item_transport().enable();
     item_turbulence().enable();
+    item_rho().enable();
 }
 
 

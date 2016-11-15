@@ -1,7 +1,7 @@
 
     tmp<volScalarField> tmuEff(new volScalarField(mu));
 
-    tmuEff() += rho*storage.turbulence().nut();
+    tmuEff() += rho*turbulence.nut();
     tmuEff().rename("muEff");
     tmuEff().correctBoundaryConditions();
 
