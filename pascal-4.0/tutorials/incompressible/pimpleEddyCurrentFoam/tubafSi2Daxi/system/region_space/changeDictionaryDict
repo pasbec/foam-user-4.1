@@ -9,37 +9,27 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      sigma;
+    class       dictionary;
+    object      changeDictionaryDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [-1 -3 3 0 0 2 0];
-
-internalField   uniform 0;
-
-boundaryField
+dictionaryReplacement
 {
-    axis
+    boundary
     {
-        type            zeroGradient;
-    }
-    front
-    {
-        type            wedge;
-    }
-    back
-    {
-        type            wedge;
-    }
-    oldInternalFaces
-    {
-        type            zeroGradient;
-    }
-    "procBoundary.*"
-    {
-        type            processor;
-        value           $internalField;
+//         conductorSurface
+//         {
+//             type            directMappedPatch;
+//             sampleMode      nearestPatchFace;
+//             sampleRegion    region_conductor;
+//             samplePatch     conductorSurface;
+//             offset          (0 0 0);
+//         }
+        conductorSurface
+        {
+            type            patch;
+        }
     }
 }
 

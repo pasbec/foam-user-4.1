@@ -17,17 +17,17 @@ pointSet pointSet_body_conductor                                      new    sur
 cellSet  cellSet_body_conductor                                       new    pointToCell pointSet_body_conductor all
 pointSet pointSet_body_conductor                                      remove 
 
-pointSet pointSet_body_coils                                          new    surfaceToPoint "constant/triSurface/geometry_body_coils.stl" 0.0002 true false
-cellSet  cellSet_body_coils                                           new    pointToCell pointSet_body_coils all
-pointSet pointSet_body_coils                                          remove 
+pointSet pointSet_body_space                                          new    surfaceToPoint "constant/triSurface/geometry_body_space.stl" 0.0002 true false
+cellSet  cellSet_body_space                                           new    pointToCell pointSet_body_space all
+pointSet pointSet_body_space                                          remove 
 
 pointSet pointSet_body_solid                                          new    surfaceToPoint "constant/triSurface/geometry_body_solid.stl" 0.0002 true false
 cellSet  cellSet_body_solid                                           new    pointToCell pointSet_body_solid all
 pointSet pointSet_body_solid                                          remove 
 
-pointSet pointSet_body_space                                          new    surfaceToPoint "constant/triSurface/geometry_body_space.stl" 0.0002 true false
-cellSet  cellSet_body_space                                           new    pointToCell pointSet_body_space all
-pointSet pointSet_body_space                                          remove 
+pointSet pointSet_body_coils                                          new    surfaceToPoint "constant/triSurface/geometry_body_coils.stl" 0.0002 true false
+cellSet  cellSet_body_coils                                           new    pointToCell pointSet_body_coils all
+pointSet pointSet_body_coils                                          remove 
 
 pointSet pointSet_body_fluid                                          new    surfaceToPoint "constant/triSurface/geometry_body_fluid.stl" 0.0002 true false
 cellSet  cellSet_body_fluid                                           new    pointToCell pointSet_body_fluid all
@@ -47,9 +47,9 @@ pointSet pointSet_body_coil                                           remove
 
 # Shells
 
-pointSet pointSet_shell_front                                         new    surfaceToPoint "constant/triSurface/geometry_shell_front.stl" 0.0002 false false
-faceSet  faceSet_shell_front                                          new    pointToFace pointSet_shell_front all
-pointSet pointSet_shell_front                                         remove 
+pointSet pointSet_shell_topWall                                       new    surfaceToPoint "constant/triSurface/geometry_shell_topWall.stl" 0.0002 false false
+faceSet  faceSet_shell_topWall                                        new    pointToFace pointSet_shell_topWall all
+pointSet pointSet_shell_topWall                                       remove 
 
 pointSet pointSet_shell_infinity                                      new    surfaceToPoint "constant/triSurface/geometry_shell_infinity.stl" 0.0002 false false
 faceSet  faceSet_shell_infinity                                       new    pointToFace pointSet_shell_infinity all
@@ -58,6 +58,22 @@ pointSet pointSet_shell_infinity                                      remove
 pointSet pointSet_shell_back                                          new    surfaceToPoint "constant/triSurface/geometry_shell_back.stl" 0.0002 false false
 faceSet  faceSet_shell_back                                           new    pointToFace pointSet_shell_back all
 pointSet pointSet_shell_back                                          remove 
+
+pointSet pointSet_shell_cornerWall                                    new    surfaceToPoint "constant/triSurface/geometry_shell_cornerWall.stl" 0.0002 false false
+faceSet  faceSet_shell_cornerWall                                     new    pointToFace pointSet_shell_cornerWall all
+pointSet pointSet_shell_cornerWall                                    remove 
+
+pointSet pointSet_shell_bottomWall                                    new    surfaceToPoint "constant/triSurface/geometry_shell_bottomWall.stl" 0.0002 false false
+faceSet  faceSet_shell_bottomWall                                     new    pointToFace pointSet_shell_bottomWall all
+pointSet pointSet_shell_bottomWall                                    remove 
+
+pointSet pointSet_shell_front                                         new    surfaceToPoint "constant/triSurface/geometry_shell_front.stl" 0.0002 false false
+faceSet  faceSet_shell_front                                          new    pointToFace pointSet_shell_front all
+pointSet pointSet_shell_front                                         remove 
+
+pointSet pointSet_shell_sideWall                                      new    surfaceToPoint "constant/triSurface/geometry_shell_sideWall.stl" 0.0002 false false
+faceSet  faceSet_shell_sideWall                                       new    pointToFace pointSet_shell_sideWall all
+pointSet pointSet_shell_sideWall                                      remove 
 
 # Regions
 
@@ -116,8 +132,26 @@ faceSet  faceSet_regions5                                             remove
 
 # Patches
 
+faceSet  faceSet_patch_front                                          new    
+faceSet  faceSet_patch_front                                          add    setToFace faceSet_shell_front
+
+faceSet  faceSet_patch_back                                           new    
+faceSet  faceSet_patch_back                                           add    setToFace faceSet_shell_back
+
 faceSet  faceSet_patch_infinity                                       new    
 faceSet  faceSet_patch_infinity                                       add    setToFace faceSet_shell_infinity
+
+faceSet  faceSet_patch_topWall                                        new    
+faceSet  faceSet_patch_topWall                                        add    setToFace faceSet_shell_topWall
+
+faceSet  faceSet_patch_sideWall                                       new    
+faceSet  faceSet_patch_sideWall                                       add    setToFace faceSet_shell_sideWall
+
+faceSet  faceSet_patch_cornerWall                                     new    
+faceSet  faceSet_patch_cornerWall                                     add    setToFace faceSet_shell_cornerWall
+
+faceSet  faceSet_patch_bottomWall                                     new    
+faceSet  faceSet_patch_bottomWall                                     add    setToFace faceSet_shell_bottomWall
 
 # Materials
 

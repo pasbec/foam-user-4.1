@@ -98,7 +98,13 @@ def main():
 
     if ssb.group("Patches"):
 
+        ssb.faceSet("patch_front", "setToTopo", add=["shell_front"])
+        ssb.faceSet("patch_back", "setToTopo", add=["shell_back"])
         ssb.faceSet("patch_infinity", "setToTopo", add=["shell_infinity"])
+        ssb.faceSet("patch_topWall", "setToTopo", add=["shell_topWall"])
+        ssb.faceSet("patch_sideWall", "setToTopo", add=["shell_sideWall"])
+        ssb.faceSet("patch_cornerWall", "setToTopo", add=["shell_cornerWall"])
+        ssb.faceSet("patch_bottomWall", "setToTopo", add=["shell_bottomWall"])
 
     if ssb.group("Materials"):
 
