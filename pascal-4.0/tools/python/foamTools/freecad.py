@@ -365,7 +365,6 @@ def makePolarArrayBody(key, baseObj, totalnum, center=(0.0, 0.0, 0.0),
 
 
 
-# TODO: Document and Iteration
 def faceShell(shd):
 
     dList = list([shd]) if isinstance(shd, tuple) else shd
@@ -376,14 +375,21 @@ def faceShell(shd):
 
     fList = list()
 
-    for data in dList:
+    for i in range(len(dList)):
 
-        if not isinstance(data, tuple):
+        d = dList[i]
 
-            raise ValueError("Shell dictionary data must be tuple(2).")
+        if not isinstance(d, tuple):
 
-        body = data[0]
-        labels = data[1]
+            raise ValueError("Shell dictionary data must be tuple.")
+
+        body = d[0]
+        labels = d[1]
+
+        if i == 0:
+
+            document = body.Document
+            document.recompute()
 
         lList = [labels] if isinstance(labels, int) else labels
 
@@ -403,13 +409,10 @@ def faceShell(shd):
 
 
 
-# TODO: Document and Iteration
 def makeFaceShell(document, key, shd):
 
     name = "Shell" + key.capitalize()
     label = "shell_" + key
-
-    document.recompute()
 
     shell = document.addObject("Part::Feature", name)
 
