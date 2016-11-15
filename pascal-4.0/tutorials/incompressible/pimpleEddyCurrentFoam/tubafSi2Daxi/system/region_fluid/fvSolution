@@ -37,12 +37,12 @@ solvers
         relTol          0;
     }
 
-    p { $pFinal; relTol 1e-3; }
+    p { $pFinal; relTol 1e-2; }
 
     "(UFinal|epsilon|omega|k|nuTilda)"
     {
         solver                   PBiCG;
-        tolerance                1e-08;
+        tolerance                1e-07;
         relTol                   0;
         preconditioner           DILU;
     }
@@ -53,25 +53,25 @@ solvers
 
 PIMPLE
 {
-    nOuterCorrectors            15;
-    nCorrectors                 1;
-    nNonOrthogonalCorrectors    3;
-    pRefPoint (0.05 0.0 0.05);
+    nOuterCorrectors            3;
+    nCorrectors                 2;
+    nNonOrthogonalCorrectors    2;
+    pRefPoint (0.04 0.0 0.04);
     pRefValue 0;
 
     momentumPredictor yes;
 
     residualControl
     {
-//         U
-//         {
-//                 tolerance  1e-05;
-//                 relTol     1e-02;
-//         }
+        U
+        {
+                tolerance  1e-05;
+                relTol     1e-02;
+        }
         p
         {
                 tolerance  1e-05;
-                relTol     5e-02;
+                relTol     1e-02;
         }
      }
 }

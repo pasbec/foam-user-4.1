@@ -22,7 +22,7 @@ boundaryField
 {
     axis
     {
-        type            zeroGradient;
+        type            slip;
     }
     front
     {

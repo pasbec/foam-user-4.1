@@ -22,7 +22,7 @@ boundaryField
 {
     axis
     {
-        type            calculated;
+        type            slip;
     }
     front
     {

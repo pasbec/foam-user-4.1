@@ -43,15 +43,15 @@ divSchemes
 {
     default                               none;
 
-    div(phi,U)                            Gauss GammaVDC 0.5;
+    div(phi,U)                            Gauss linear;
     div((mu*dev(grad(U).T())))            Gauss linear;
     div((muEff*dev(grad(U).T())))         Gauss linear;
     div((nuEff*dev(T(grad(U)))))          Gauss linear;
 
-    div(phi,k)                            Gauss Gamma 0.5;
-    div(phi,epsilon)                      Gauss Gamma 0.5;
-    div(phi,omega)                        Gauss Gamma 0.5;
-    div(phi,nuTilda)                      Gauss Gamma 0.5;
+    div(phi,k)                            Gauss upwind phi;
+    div(phi,epsilon)                      Gauss upwind phi;
+    div(phi,omega)                        Gauss upwind phi;
+    div(phi,nuTilda)                      Gauss upwind phi;
 }
 
 laplacianSchemes
@@ -62,8 +62,6 @@ laplacianSchemes
     laplacian(muEff,U)                    Gauss linear corrected;
     laplacian(nuEff,U)                    Gauss linear corrected;
     laplacian(rAUf,p)                     Gauss linear corrected;
-//     laplacian(rAUf,p)                     Gauss linear limited 0.5;
-//     laplacian(rAUf,p)                     Gauss linear limited 0.3333;
 
     laplacian(DkEff,k)                    Gauss linear corrected;
     laplacian(DomegaEff,omega)            Gauss linear corrected;

@@ -115,7 +115,7 @@ bo2D = dict()
 
 for k in s.keys():
 
-    bo2D[k] = makeDoubleExtrudeBody(k + "_2D", s[k], par.mesh_thickness/2.0)
+    bo2D[k] = makeDoubleExtrudeBody(k + "_2D", s[k], par.mesh_thickness)
 
 bo2D["conductor"] = makeFuseBody("conductor_2D", [bo2D["solid"],
                                                   bo2D["fluid"],

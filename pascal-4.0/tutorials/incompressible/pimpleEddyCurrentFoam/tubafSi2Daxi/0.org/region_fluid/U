@@ -34,8 +34,8 @@ boundaryField
     }
     ".*Wall"
     {
-        type            fixedGradient;
-        gradient        uniform (0 0 0);
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
     "procBoundary.*"
     {
