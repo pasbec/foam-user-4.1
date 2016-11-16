@@ -10,42 +10,27 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      eddyCurrentProperties;
+    object      changeDictionaryDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-regions
+dictionaryReplacement
 {
-    conductor          region_conductor;
-}
-
-settings
-{
-    biotSavart         true;
-    lorentzForce       true;
-    magneticPressure   true;
-    jouleHeat          true;
-}
-
-storage
-{
-//     "(BRe|BIm)"
-//     {
-//         write          false;
-//     }
-//
-//     "F"
-//     {
-//         write          false;
-//     }
-//
-//     region_conductor
-//     {
-//         "(jRe|jIm)"
+    boundary
+    {
+//         conductorSurface
 //         {
-//             write      false;
+//             type            directMappedPatch;
+//             sampleMode      nearestPatchFace;
+//             sampleRegion    region_conductor;
+//             samplePatch     conductorSurface;
+//             offset          (0 0 0);
 //         }
-//     }
+        conductorSurface
+        {
+            type            patch;
+        }
+    }
 }
 
 // ************************************************************************* //

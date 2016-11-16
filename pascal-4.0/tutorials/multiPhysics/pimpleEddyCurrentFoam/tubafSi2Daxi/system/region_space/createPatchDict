@@ -10,22 +10,26 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      eddyCurrentProperties;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-regions
-{
-    conductor          region_conductor;
-}
+matchTolerance           1e-6;
 
-settings
-{
-    biotSavart         true;
-}
+pointSync                true;
 
-storage
-{
-}
+patchInfo
+(
+    {
+        name             conductorSurface;
+        constructFrom    patches;
+        patches          (region_space_to_region_conductor);
+
+        dictionary
+        {
+            type         patch;
+        }
+    }
+);
 
 // ************************************************************************* //
