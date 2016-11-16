@@ -98,13 +98,12 @@ Foam::buoyantBoussinesqPimpleApp::Manager::Manager
     const argList& args,
     Time& time,
     fvMesh& mesh,
-    bool master,
-    const word& name
+    bool master
 )
 :
     fvSolverManager
     (
-        args, time, mesh, master, name
+        args, time, mesh, master
     )
 {}
 

@@ -22,26 +22,26 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interTrackEddyCurrentApp::Manager
+    Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager
 
 Description
     ...
 
 SourceFiles
-    interTrackEddyCurrentAppManager.C
+    buoyantBoussinesqPimpleEddyCurrentAppManager.C
 
 Author
     Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackEddyCurrentAppManager_H
-#define interTrackEddyCurrentAppManager_H
+#ifndef buoyantBoussinesqPimpleEddyCurrentAppManager_H
+#define buoyantBoussinesqPimpleEddyCurrentAppManager_H
 
-#include "interTrackEddyCurrentAppInclude.H"
-#include "interTrackEddyCurrentAppControl.H"
+#include "buoyantBoussinesqPimpleEddyCurrentAppInclude.H"
+#include "buoyantBoussinesqPimpleEddyCurrentAppControl.H"
 
-#include "interTrackAppManager.H"
+#include "buoyantBoussinesqPimpleAppManager.H"
 #include "eddyCurrentAppManager.H"
 
 
@@ -50,22 +50,22 @@ Author
 namespace Foam
 {
 
-namespace interTrackEddyCurrentApp
+namespace buoyantBoussinesqPimpleEddyCurrentApp
 {
 
 /*---------------------------------------------------------------------------*\
-               Class interTrackEddyCurrentApp::Manager Declaration
+               Class buoyantBoussinesqPimpleEddyCurrentApp::Manager Declaration
 \*---------------------------------------------------------------------------*/
 
 class Manager
 :
-    public regionDynamicFvSolverManager
+    public regionFvSolverManager
 {
 public:
 
     // Public typedefs and forward declarations
 
-        typedef interTrackEddyCurrentApp::Control Control;
+        typedef buoyantBoussinesqPimpleEddyCurrentApp::Control Control;
         class Settings;
         class Storage;
 
@@ -93,8 +93,8 @@ private:
 
     // Private data
 
-        //- Pointer for manager of interTrackApp
-        mutable autoPtr<interTrackApp::Manager> interTrackAppManager_;
+        //- Pointer for manager of buoyantBoussinesqPimpleApp
+        mutable autoPtr<buoyantBoussinesqPimpleApp::Manager> buoyantBoussinesqPimpleAppManager_;
 
         //- Pointer for manager of eddyCurrentApp
         mutable autoPtr<eddyCurrentApp::Manager> eddyCurrentAppManager_;
@@ -111,7 +111,7 @@ private:
 public:
 
     // Runtime type information
-    TypeName("interTrackEddyCurrentApp::Manager");
+    TypeName("buoyantBoussinesqPimpleEddyCurrentApp::Manager");
 
     // Constructor
 
@@ -119,9 +119,8 @@ public:
         (
             const argList& args,
             Time& time,
-            regionDynamicFvMesh& mesh,
-            bool master = true,
-            const word& prefix = "interTrackEddyCurrent"
+            regionFvMesh& mesh,
+            bool master = true
         );
 
     // Destructor
@@ -132,8 +131,8 @@ public:
 
         // Managers
 
-            //- interTrackApp
-            interTrackApp::Manager& interTrackAppManager() const;
+            //- buoyantBoussinesqPimpleApp
+            buoyantBoussinesqPimpleApp::Manager& buoyantBoussinesqPimpleAppManager() const;
 
             //- eddyCurrentApp
             eddyCurrentApp::Manager& eddyCurrentAppManager() const;
@@ -162,7 +161,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace interTrackEddyCurrentApp
+} // End namespace buoyantBoussinesqPimpleEddyCurrentApp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -171,7 +170,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interTrackEddyCurrentAppManager.C"
+#   include "buoyantBoussinesqPimpleEddyCurrentAppManager.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -160,8 +160,7 @@ Foam::solverManager<MESH>::solverManager
     const argList& args,
     Time& time,
     ManagerMesh& mesh,
-    bool master,
-    const word& name
+    bool master
 )
 :
     solverManagerName(),
@@ -178,7 +177,7 @@ Foam::solverManager<MESH>::solverManager
         (
             IOobject
             (
-                name + "Properties",
+                "solverProperties",
                 time_.constant(),
                 time_.db(),
                 IOobject::MUST_READ,

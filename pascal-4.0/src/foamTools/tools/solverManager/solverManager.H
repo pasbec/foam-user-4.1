@@ -265,8 +265,7 @@ public:
             const argList& args,
             Time& time,
             ManagerMesh& mesh,
-            bool master = true,
-            const word& name = "solverManager"
+            bool master = true
         );
 
     // Destructor

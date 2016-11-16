@@ -223,8 +223,7 @@ public:
             const argList& args,
             Time& time,
             regionFvMesh& mesh,
-            bool master = true,
-            const word& prefix = "eddyCurrent"
+            bool master = true
         );
 
     // Destructor

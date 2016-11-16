@@ -144,13 +144,12 @@ Foam::interTrackApp::Manager::Manager
     const argList& args,
     Time& time,
     dynamicFvMesh& mesh,
-    bool master,
-    const word& name
+    bool master
 )
 :
     dynamicFvSolverManager
     (
-        args, time, mesh, master, name
+        args, time, mesh, master
     )
 {}
 

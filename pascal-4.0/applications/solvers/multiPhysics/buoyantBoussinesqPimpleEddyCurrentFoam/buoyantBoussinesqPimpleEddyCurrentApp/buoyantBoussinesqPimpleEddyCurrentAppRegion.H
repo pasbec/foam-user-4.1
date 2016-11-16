@@ -22,7 +22,7 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 InNamespace
-    Foam::pimpleEddyCurrentApp
+    Foam::buoyantBoussinesqPimpleEddyCurrentApp
 
 Description
     ...
@@ -32,19 +32,21 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pimpleEddyCurrentAppRegion_H
-#define pimpleEddyCurrentAppRegion_H
+#ifndef buoyantBoussinesqPimpleEddyCurrentAppRegion_H
+#define buoyantBoussinesqPimpleEddyCurrentAppRegion_H
+
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-namespace pimpleEddyCurrentApp
+namespace buoyantBoussinesqPimpleEddyCurrentApp
 {
 
 /*---------------------------------------------------------------------------*\
-             Namespace pimpleEddyCurrentApp::Region Declaration
+             Namespace buoyantBoussinesqPimpleEddyCurrentApp::Region Declaration
 \*---------------------------------------------------------------------------*/
 
 namespace Region
@@ -60,7 +62,7 @@ namespace Region
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pimpleEddyCurrentApp
+} // End namespace buoyantBoussinesqPimpleEddyCurrentApp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,8 +77,8 @@ namespace Region
 {
     enum Labels
     {
-        DEFAULT = pimpleEddyCurrentApp::Region::DEFAULT,
-        CONDUCTOR = pimpleEddyCurrentApp::Region::CONDUCTOR
+        DEFAULT = buoyantBoussinesqPimpleEddyCurrentApp::Region::DEFAULT,
+        CONDUCTOR = buoyantBoussinesqPimpleEddyCurrentApp::Region::CONDUCTOR
     };
 }
 
@@ -87,25 +89,25 @@ namespace Region
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace pimpleApp
+namespace buoyantBoussinesqPimpleApp
 {
 
 /*---------------------------------------------------------------------------*\
-                   Namespace pimpleApp::Region Declaration
+             Namespace buoyantBoussinesqPimpleApp::Region Declaration
 \*---------------------------------------------------------------------------*/
 
 namespace Region
 {
     enum Labels
     {
-        DEFAULT = pimpleEddyCurrentApp::Region::FLUID
+        DEFAULT = buoyantBoussinesqPimpleEddyCurrentApp::Region::FLUID
     };
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pimpleApp
+} // End namespace buoyantBoussinesqPimpleApp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

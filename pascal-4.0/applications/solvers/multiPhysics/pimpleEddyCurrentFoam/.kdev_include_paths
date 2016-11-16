@@ -14,11 +14,7 @@
 ../../electromagnetics/eddyCurrentFoam/include
 
 ../../incompressible/pimpleFoam/pimpleApp
+../../incompressible/pimpleFoam/include
 
-../trackedSurface/lnInclude
-../interTrackFoam/interTrackApp
-../interTrackFoam/include
-
-./interTrackEddyCurrentApp
-
+./pimpleEddyCurrentApp
 ./include

@@ -741,13 +741,12 @@ Foam::eddyCurrentApp::Manager::Manager
     const argList& args,
     Time& time,
     regionFvMesh& mesh,
-    bool master,
-    const word& name
+    bool master
 )
 :
     regionFvSolverManager
     (
-        args, time, mesh, master, name
+        args, time, mesh, master
     )
 {
     if (master)
@@ -776,7 +775,7 @@ Foam::eddyCurrentApp::Manager::Manager
 
             regionNameHashTable.insert
             (
-                word(this->regionsDict().lookup("conductor")),
+                word(this->regionsDict().lookup("CONDUCTOR")),
                 Region::CONDUCTOR
             );
 

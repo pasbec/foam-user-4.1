@@ -13,8 +13,13 @@
 ../../electromagnetics/eddyCurrentFoam/eddyCurrentApp
 ../../electromagnetics/eddyCurrentFoam/include
 
-../pimpleFoam/pimpleApp
-../pimpleFoam/include
+../../incompressible/pimpleFoam/pimpleApp
 
-./pimpleEddyCurrentApp
+../../surfaceTracking/trackedSurface/lnInclude
+
+../../surfaceTracking/interTrackFoam/interTrackApp
+../../surfaceTracking/interTrackFoam/include
+
+./interTrackEddyCurrentApp
+
 ./include

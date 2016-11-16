@@ -161,8 +161,7 @@ public:
             const argList& args,
             Time& time,
             fvMesh& mesh,
-            bool master = true,
-            const word& prefix = "pimple"
+            bool master = true
         );
 
     // Destructor

@@ -22,59 +22,62 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interTrackApp::Manager
+    Foam::interTrackEddyCurrentApp::Manager
 
 Description
     ...
 
 SourceFiles
-    interTrackAppManager.C
-    interTrackAppManagerRegion_DEFAULT.C
+    interTrackEddyCurrentAppManager.C
 
 Author
     Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackAppManager_H
-#define interTrackAppManager_H
+#ifndef interTrackEddyCurrentAppManager_H
+#define interTrackEddyCurrentAppManager_H
 
-#include "interTrackAppInclude.H"
-#include "pimpleAppControl.H"
+#include "interTrackEddyCurrentAppInclude.H"
+#include "interTrackEddyCurrentAppControl.H"
 
-#include "solverManagers.H"
+#include "interTrackAppManager.H"
+#include "eddyCurrentAppManager.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-namespace interTrackApp
+namespace interTrackEddyCurrentApp
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class interTrackApp::Manager Declaration
+               Class interTrackEddyCurrentApp::Manager Declaration
 \*---------------------------------------------------------------------------*/
 
 class Manager
 :
-    public dynamicFvSolverManager
+    public regionDynamicFvSolverManager
 {
 public:
 
     // Public typedefs and forward declarations
 
-        typedef pimpleApp::Control Control;
+        typedef interTrackEddyCurrentApp::Control Control;
         class Settings;
         class Storage;
 
     // Solver Manager Construction
 
-        SM_GLOBALCONTROL_ADD_P2(Control, mesh(), "INTERTRACK");
-
+        SM_GLOBALCONTROL_ADD_P1
+        (
+            Control,
+            mesh()
+        );
 
         SM_GLOBALSETTINGS_NEW();
-
         SM_GLOBALSETTINGS_ADD();
 
 
@@ -82,75 +85,19 @@ public:
         SM_GLOBALSTORAGE_ADD();
 
 
-        SM_REGION_NEW(DEFAULT);
-
-            SM_REGIONCONTROL_ADD_GLOBALCONTROL();
-
-            SM_REGIONSETTINGS_NEW();
-
-                //- Volume force switch
-                SM_SETTINGS_MEMBER_ADD(Switch, volumeForce);
-
-                //- Use fixed flux-pressure to correct pressure p at
-                //  fixedGradient patches
-                // TODO: Do not use fixedGradient
-                //
-                //  * enabled: dp/dn = ((phi -(U&Sf))/rAUf)/magSf
-                //
-                //  * disabled: dp/dn = F&n
-                //
-                SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
-
-            SM_REGIONSETTINGS_ADD();
-
-            SM_REGIONSTORAGE_NEW();
-
-                //- Gravitational acceleration
-                SM_REGIONITEM_ADD(uniformDimensionedVectorField, g);
-
-                //- Pressure
-                SM_REGIONITEM_ADD(volScalarField, p);
-
-                //- Velocity
-                SM_REGIONITEM_ADD(volVectorField, U);
-
-                //- Face flux
-                SM_REGIONITEM_ADD(surfaceScalarField, phi);
-
-                //- Volume force
-                SM_REGIONITEM_ADD(volVectorField, F);
-
-                //- Density
-                SM_REGIONITEM_ADD(volScalarField, rho);
-
-                //- Dynamic viscosity
-                SM_REGIONITEM_ADD(volScalarField, mu);
-
-                //- Fluid indicator
-                SM_REGIONITEM_ADD(volScalarField, fluidIndicator);
-
-                //- Transport model
-                SM_REGIONITEM_ADD(twoPhaseMixture, transport);
-
-                //- Turbulence model
-                SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
-
-                //- Tracked surface
-                SM_REGIONITEM_ADD(trackedSurface, interface);
-
-            SM_REGIONSTORAGE_ADD();
-
-        SM_REGION_END();
-
-
         SM_REGIONS_NEW();
-
-            SM_REGIONS_REGION_ADD(DEFAULT, mesh());
-
         SM_REGIONS_ADD();
 
 
 private:
+
+    // Private data
+
+        //- Pointer for manager of interTrackApp
+        mutable autoPtr<interTrackApp::Manager> interTrackAppManager_;
+
+        //- Pointer for manager of eddyCurrentApp
+        mutable autoPtr<eddyCurrentApp::Manager> eddyCurrentAppManager_;
 
     // Private Member Functions
 
@@ -164,7 +111,7 @@ private:
 public:
 
     // Runtime type information
-    TypeName("interTrackApp::Manager");
+    TypeName("interTrackEddyCurrentApp::Manager");
 
     // Constructor
 
@@ -172,7 +119,7 @@ public:
         (
             const argList& args,
             Time& time,
-            dynamicFvMesh& mesh,
+            regionDynamicFvMesh& mesh,
             bool master = true
         );
 
@@ -180,12 +127,26 @@ public:
 
         virtual ~Manager();
 
-    // Member Functions
+    // Public Member Functions
+
+        // Managers
+
+            //- interTrackApp
+            interTrackApp::Manager& interTrackAppManager() const;
+
+            //- eddyCurrentApp
+            eddyCurrentApp::Manager& eddyCurrentAppManager() const;
 
         // Evolution
 
             //- Set Courant Number
             virtual bool setCoNum(scalar& CoNum) const;
+
+            //- Read sequence
+            virtual void read() const;
+
+            //- Init sequence
+            virtual void init() const;
 
             //- Next sequence
             virtual void next() const;
@@ -200,7 +161,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace interTrackApp
+} // End namespace interTrackEddyCurrentApp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -209,8 +170,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interTrackAppManager.C"
-#   include "interTrackAppManagerRegion_DEFAULT.C"
+#   include "interTrackEddyCurrentAppManager.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

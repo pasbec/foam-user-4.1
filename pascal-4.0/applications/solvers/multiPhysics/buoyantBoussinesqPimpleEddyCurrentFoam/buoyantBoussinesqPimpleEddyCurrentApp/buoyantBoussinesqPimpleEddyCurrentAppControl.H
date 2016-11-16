@@ -25,18 +25,18 @@ Description
     ...
 
 SourceFiles
-    pimpleEddyCurrentAppControlI.H
-    pimpleEddyCurrentAppControl.C
+    buoyantBoussinesqPimpleEddyCurrentAppControlI.H
+    buoyantBoussinesqPimpleEddyCurrentAppControl.C
 
 Author
     Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pimpleEddyCurrentAppControl_H
-#define pimpleEddyCurrentAppControl_H
+#ifndef buoyantBoussinesqPimpleEddyCurrentAppControl_H
+#define buoyantBoussinesqPimpleEddyCurrentAppControl_H
 
-#include "pimpleEddyCurrentAppInclude.H"
+#include "buoyantBoussinesqPimpleEddyCurrentAppInclude.H"
 
 #include "solutionControl.H"
 #include "solverPerformanceData.H"
@@ -46,11 +46,11 @@ Author
 namespace Foam
 {
 
-namespace pimpleEddyCurrentApp
+namespace buoyantBoussinesqPimpleEddyCurrentApp
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class pimpleEddyCurrentApp::Control Declaration
+                   Class buoyantBoussinesqPimpleEddyCurrentApp::Control Declaration
 \*---------------------------------------------------------------------------*/
 
 class Control
@@ -84,7 +84,7 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("pimpleEddyCurrentApp::Control");
+    TypeName("buoyantBoussinesqPimpleEddyCurrentApp::Control");
 
 
     // Constructors
@@ -93,7 +93,7 @@ public:
         Control
         (
             regionFvMesh& mesh,
-            const word& dictName="INTERTRACKEDDYCURRENT"
+            const word& dictName="PIMPLEEDDYCURRENT"
         );
 
 
@@ -112,7 +112,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pimpleEddyCurrentApp
+} // End namespace buoyantBoussinesqPimpleEddyCurrentApp
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -122,7 +122,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "pimpleEddyCurrentAppControl.C"
+#   include "buoyantBoussinesqPimpleEddyCurrentAppControl.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -23,59 +23,58 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackEddyCurrentAppManager.H"
+#include "pimpleEddyCurrentAppManager.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::interTrackEddyCurrentApp::Manager, 0);
+defineTypeNameAndDebug(Foam::pimpleEddyCurrentApp::Manager, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::interTrackEddyCurrentApp::Manager::Settings::read() const
+void Foam::pimpleEddyCurrentApp::Manager::Settings::read() const
 {
-    interTrackEddyCurrentApp::Manager::debug =
+    pimpleEddyCurrentApp::Manager::debug =
         dict().lookupOrDefault
         (
             "debug",
-            interTrackEddyCurrentApp::Manager::debug()
+            pimpleEddyCurrentApp::Manager::debug()
         );
 
-    interTrackEddyCurrentApp::Control::debug =
+    pimpleEddyCurrentApp::Control::debug =
         dict().lookupOrDefault
         (
             "debug",
-            interTrackEddyCurrentApp::Control::debug()
+            pimpleEddyCurrentApp::Control::debug()
         );
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::interTrackEddyCurrentApp::Manager::Storage::create() const
+void Foam::pimpleEddyCurrentApp::Manager::Storage::create() const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::interTrackEddyCurrentApp::Manager::Regions::create() const
+void Foam::pimpleEddyCurrentApp::Manager::Regions::create() const
 {}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::interTrackEddyCurrentApp::Manager::Manager
+Foam::pimpleEddyCurrentApp::Manager::Manager
 (
     const argList& args,
     Time& time,
-    regionDynamicFvMesh& mesh,
-    bool master,
-    const word& name
+    regionFvMesh& mesh,
+    bool master
 )
 :
-    regionDynamicFvSolverManager
+    regionFvSolverManager
     (
-        args, time, mesh, master, name
+        args, time, mesh, master
     )
 {
     if (master)
@@ -104,20 +103,14 @@ Foam::interTrackEddyCurrentApp::Manager::Manager
 
             regionNameHashTable.insert
             (
-                word(this->regionsDict().lookup("conductor")),
+                word(this->regionsDict().lookup("CONDUCTOR")),
                 Region::CONDUCTOR
             );
 
             regionNameHashTable.insert
             (
-                word(this->regionsDict().lookup("fluid")),
+                word(this->regionsDict().lookup("FLUID")),
                 Region::FLUID
-            );
-
-            regionNameHashTable.insert
-            (
-                word(this->regionsDict().lookup("buffer")),
-                Region::BUFFER
             );
 
             mesh.init(regionNameHashTable);
@@ -130,20 +123,20 @@ Foam::interTrackEddyCurrentApp::Manager::Manager
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::interTrackEddyCurrentApp::Manager::~Manager()
+Foam::pimpleEddyCurrentApp::Manager::~Manager()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::interTrackApp::Manager&
-Foam::interTrackEddyCurrentApp::Manager::interTrackAppManager() const
+Foam::pimpleApp::Manager&
+Foam::pimpleEddyCurrentApp::Manager::pimpleAppManager() const
 {
-    if (interTrackAppManager_.empty())
+    if (pimpleAppManager_.empty())
     {
-        interTrackAppManager_.set
+        pimpleAppManager_.set
         (
-            new interTrackApp::Manager
+            new pimpleApp::Manager
             (
                 this->args(),
                 this->time(),
@@ -153,11 +146,11 @@ Foam::interTrackEddyCurrentApp::Manager::interTrackAppManager() const
         );
     }
 
-    return interTrackAppManager_();
+    return pimpleAppManager_();
 }
 
 Foam::eddyCurrentApp::Manager&
-Foam::interTrackEddyCurrentApp::Manager::eddyCurrentAppManager() const
+Foam::pimpleEddyCurrentApp::Manager::eddyCurrentAppManager() const
 {
     if (eddyCurrentAppManager_.empty())
     {
@@ -177,18 +170,18 @@ Foam::interTrackEddyCurrentApp::Manager::eddyCurrentAppManager() const
 }
 
 
-bool Foam::interTrackEddyCurrentApp::Manager::setCoNum
+bool Foam::pimpleEddyCurrentApp::Manager::setCoNum
 (
     scalar& CourantNumber
 ) const
 {
-    return interTrackAppManager().setCoNum(CourantNumber);
+    return pimpleAppManager().setCoNum(CourantNumber);
 }
 
 
-void Foam::interTrackEddyCurrentApp::Manager::read() const
+void Foam::pimpleEddyCurrentApp::Manager::read() const
 {
-    interTrackAppManager().read();
+    pimpleAppManager().read();
     eddyCurrentAppManager().read();
 
     settings().checkRead();
@@ -196,9 +189,9 @@ void Foam::interTrackEddyCurrentApp::Manager::read() const
 }
 
 
-void Foam::interTrackEddyCurrentApp::Manager::init() const
+void Foam::pimpleEddyCurrentApp::Manager::init() const
 {
-    interTrackAppManager().init();
+    pimpleAppManager().init();
     eddyCurrentAppManager().init();
 
     storage().checkInit();
@@ -206,23 +199,23 @@ void Foam::interTrackEddyCurrentApp::Manager::init() const
 }
 
 
-void Foam::interTrackEddyCurrentApp::Manager::next() const
+void Foam::pimpleEddyCurrentApp::Manager::next() const
 {
-    interTrackAppManager().next();
+    pimpleAppManager().next();
     eddyCurrentAppManager().next();
 }
 
 
-void Foam::interTrackEddyCurrentApp::Manager::write() const
+void Foam::pimpleEddyCurrentApp::Manager::write() const
 {
-    interTrackAppManager().write();
+    pimpleAppManager().write();
     eddyCurrentAppManager().write();
 }
 
 
-void Foam::interTrackEddyCurrentApp::Manager::finalize() const
+void Foam::pimpleEddyCurrentApp::Manager::finalize() const
 {
-    interTrackAppManager().finalize();
+    pimpleAppManager().finalize();
     eddyCurrentAppManager().finalize();
 }
 

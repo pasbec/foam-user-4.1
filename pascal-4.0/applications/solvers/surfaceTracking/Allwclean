@@ -12,5 +12,3 @@ wclean interFreeFoam.new || exit 1
 wclean all trackedSurface || exit 1
 
 wclean interTrackFoam || exit 1
-
-wclean interTrackEddyCurrentFoam || exit 1
