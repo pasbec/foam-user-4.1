@@ -197,7 +197,7 @@ def makeMirrorBody(key, baseObj, normal, base=(0.0, 0.0, 0.0)):
 
 
 
-def makeExtrudeBody(key, sketchObj, normal=None, solid=True, angle=0.0):
+def makeExtrudeBody(key, sketchObj, normal, solid=True, angle=0.0):
 
     document = sketchObj.Document
     document.recompute()
