@@ -13,13 +13,17 @@ sourcePSD () { local psd="$PSD"; source "$1"; PSD="$psd"; }
 # --- Script ---------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-alias usrc='cd $FOAM_USER_SRC'
-alias ulib='cd $FOAM_USER_LIB'
-alias urun='cd $FOAM_USER_RUN'
 alias uapp='cd $FOAM_USER_APP'
 alias usol='cd $FOAM_USER_SOLVERS'
-alias utut='cd $FOAM_USER_TUTORIALS'
 alias uutil='cd $FOAM_USER_UTILITIES'
+alias ulib='cd $FOAM_USER_LIB'
+alias urun='cd $FOAM_USER_RUN'
+alias usrc='cd $FOAM_USER_SRC'
+alias utools='cd $FOAM_USER_TOOLS'
+alias utut='cd $FOAM_USER_TUTORIALS'
+
+alias uruntut='cd ${FOAM_USER_TUTORIALS}${PWD#$FOAM_USER_RUN/tutorials}'
+alias ututrun='cd ${FOAM_USER_RUN}/tutorials${PWD#$FOAM_USER_TUTORIALS}'
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
