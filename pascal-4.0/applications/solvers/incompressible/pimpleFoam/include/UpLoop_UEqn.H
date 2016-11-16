@@ -16,6 +16,8 @@
             UEqn == fvc::reconstruct
             (
               - (fvc::snGrad(p)*mesh.magSf())
+              + (fvc::interpolate(storage.F())
+                /fvc::interpolate(storage.rho()) & mesh.Sf())
             )
         );
     }

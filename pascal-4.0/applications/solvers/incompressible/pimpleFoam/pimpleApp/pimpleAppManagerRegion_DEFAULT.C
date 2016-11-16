@@ -125,6 +125,7 @@ void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_F::create() const
     );
 }
 
+
 void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
 {
     IOdictionary transportProperties
@@ -194,10 +195,10 @@ void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::create() const
     item_p().enable();
     item_U().enable();
     item_phi().enable();
-    item_F().setState(settings().volumeForce);
     item_transport().enable();
     item_turbulence().enable();
-    item_rho().enable();
+    item_F().setState(settings().volumeForce);
+    item_rho().setState(settings().volumeForce);
 }
 
 

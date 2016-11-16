@@ -114,14 +114,14 @@ public:
                 //- Face flux
                 SM_REGIONITEM_ADD(surfaceScalarField, phi);
 
-                //- Volume force
-                SM_REGIONITEM_ADD(volVectorField, F);
-
                 //- Transport model
                 SM_REGIONITEM_ADD(singlePhaseTransportModel, transport);
 
                 //- Turbulence model
                 SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
+
+                //- Volume force
+                SM_REGIONITEM_ADD(volVectorField, F);
 
                 //- Density
                 SM_REGIONITEM_ADD(volScalarField, rho);

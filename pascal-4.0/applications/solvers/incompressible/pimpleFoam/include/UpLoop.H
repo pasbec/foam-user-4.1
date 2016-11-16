@@ -14,7 +14,6 @@
             volVectorField& U = storage.U();
             surfaceScalarField& phi = storage.phi();
             incompressible::turbulenceModel& turbulence = storage.turbulence();
-            volScalarField& rho = storage.rho();
 
             #include "UpLoop_UEqn.H"
 

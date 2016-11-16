@@ -22,7 +22,8 @@
                     << endl;
             }
 
-            phi += rAUf*(fvc::interpolate(storage.F())/fvc::interpolate(rho) & mesh.Sf());
+            phi += rAUf*(fvc::interpolate(storage.F())
+                        /fvc::interpolate(storage.rho()) & mesh.Sf());
         }
 
         // Manually correct the boundary conditions for the pressure at walls
