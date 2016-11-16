@@ -78,6 +78,9 @@ public:
 
         typedef GeometricField<Type, PatchField, GeoMesh> GeometricFieldType;
 
+        typedef regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>
+            RegionGeometricFieldType;
+
 
 private:
 
@@ -165,10 +168,49 @@ public:
         regionGeometricField
         (
             const IOobject& IOo,
-            const regionGeometricField
-            <
-                Type, PatchField, GeoMesh, RegionGeoMesh
-            >& rgf,
+            const RegionGeometricFieldType& rgf,
+            const HashTable<IOobject> IOoOverride = HashTable<IOobject>()
+        );
+
+
+    // Constructor link-wrapper
+
+        //- Constructor given IOobject, mesh, dimensioned<Type>
+        static regionGeometricField* LinkOrNew
+        (
+            const IOobject& IOo,
+            const RegionMesh& regionMesh,
+            const dimensioned<Type>& dim,
+            const HashTable<IOobject> IOoOverride = HashTable<IOobject>()
+        );
+
+        //- Constructor given IOobject, mesh, dimensioned<Type>
+        //  and patch type.
+        static regionGeometricField* LinkOrNew
+        (
+            const IOobject& IOo,
+            const RegionMesh& regionMesh,
+            const dimensioned<Type>& dim,
+            const word& patchFieldType,
+            const HashTable<IOobject> IOoOverride = HashTable<IOobject>()
+        );
+
+        //- Constructor given IOobject, mesh, dimensioned<Type>
+        //  and patch types.
+        static regionGeometricField* LinkOrNew
+        (
+            const IOobject& IOo,
+            const RegionMesh& regionMesh,
+            const dimensioned<Type>& dim,
+            const wordList& patchFieldTypes,
+            const HashTable<IOobject> IOoOverride = HashTable<IOobject>()
+        );
+
+        //- Construct as copy resetting IO parameters
+        static regionGeometricField* LinkOrNew
+        (
+            const IOobject& IOo,
+            const RegionGeometricFieldType& rgf,
             const HashTable<IOobject> IOoOverride = HashTable<IOobject>()
         );
 

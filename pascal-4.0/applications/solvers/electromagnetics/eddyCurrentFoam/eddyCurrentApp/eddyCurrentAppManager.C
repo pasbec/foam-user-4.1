@@ -125,7 +125,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create() const
 
     set
     (
-        new regionVolScalarField
+        regionVolScalarField::LinkOrNew
         (
             IOobject
             (
@@ -173,7 +173,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create() const
 
     set
     (
-        new regionVolVectorField
+        regionVolVectorField::LinkOrNew
         (
             IOobject
             (
@@ -221,7 +221,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create() const
 
     set
     (
-        new regionVolVectorField
+        regionVolVectorField::LinkOrNew
         (
             IOobject
             (
@@ -269,7 +269,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_ARe::create() const
 
     set
     (
-        new regionVolVectorField
+        regionVolVectorField::LinkOrNew
         (
             IOobject
             (
@@ -317,7 +317,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create() const
 
     set
     (
-        new regionVolVectorField
+        regionVolVectorField::LinkOrNew
         (
             IOobject
             (
@@ -393,7 +393,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create() const
 {
     set
     (
-        new regionVolVectorField
+        regionVolVectorField::LinkOrNew
         (
             IOobject
             (
@@ -420,7 +420,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create() const
 {
     set
     (
-        new regionVolVectorField
+        regionVolVectorField::LinkOrNew
         (
             IOobject
             (
@@ -475,7 +475,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BRe::create() const
 
     set
     (
-        new regionVolVectorField
+        regionVolVectorField::LinkOrNew
         (
             IOobject
             (
@@ -529,7 +529,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_BIm::create() const
 
     set
     (
-        new regionVolVectorField
+        regionVolVectorField::LinkOrNew
         (
             IOobject
             (
@@ -577,7 +577,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_F::create() const
 
     set
     (
-        new regionVolVectorField
+        regionVolVectorField::LinkOrNew
         (
             IOobject
             (
@@ -625,7 +625,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_pB::create() const
 
     set
     (
-        new regionVolScalarField
+        regionVolScalarField::LinkOrNew
         (
             IOobject
             (
@@ -673,7 +673,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create() const
 
     set
     (
-        new regionVolScalarField
+        regionVolScalarField::LinkOrNew
         (
             IOobject
             (

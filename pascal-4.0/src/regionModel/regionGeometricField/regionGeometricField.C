@@ -90,6 +90,7 @@ linkFieldPtr
         dbI.foundObject<GeometricFieldType>(IOo.name())
     )
     {
+// TODO: Add member function to objectRegistry to get write access!
         GeometricFieldType& fieldRefI =
             const_cast<GeometricFieldType&>
             (
@@ -158,6 +159,7 @@ regionGeometricField
             regionIOoI = IOoOverride[regions()[regionI]];
         }
 
+// TODO: Add member functions linkOrNew for GeometricField
         if (linkFieldPtr(regionI, regionIOoI))
         {
             if (debug)
@@ -250,6 +252,7 @@ regionGeometricField
             regionIOoI = IOoOverride[regions()[regionI]];
         }
 
+// TODO: Add member functions linkOrNew for GeometricField
         if (linkFieldPtr(regionI, regionIOoI))
         {
             if (debug)
@@ -343,6 +346,7 @@ regionGeometricField
             regionIOoI = IOoOverride[regions()[regionI]];
         }
 
+// TODO: Add member functions linkOrNew for GeometricField
         if (linkFieldPtr(regionI, regionIOoI))
         {
             if (debug)
@@ -397,10 +401,7 @@ Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 regionGeometricField
 (
     const IOobject& IOo,
-    const regionGeometricField
-    <
-        Type, PatchField, GeoMesh, RegionGeoMesh
-    >& rgf,
+    const RegionGeometricFieldType& rgf,
     const HashTable<IOobject> IOoOverride
 )
 :
@@ -437,6 +438,7 @@ regionGeometricField
             regionIOoI = IOoOverride[regions()[regionI]];
         }
 
+// TODO: Add member functions linkOrNew for GeometricField
         if (linkFieldPtr(regionI, regionIOoI))
         {
             if (debug)
@@ -479,6 +481,197 @@ regionGeometricField
     }
 }
 
+// * * * * * * * * * * * * * Constructor link-wrapper  * * * * * * * * * * * //
+
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>*
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::LinkOrNew
+(
+    const IOobject& IOo,
+    const RegionMesh& regionMesh,
+    const dimensioned<Type>& dim,
+    const HashTable<IOobject> IOoOverride
+)
+{
+    const objectRegistry& db = regionMesh.thisDb();
+
+    RegionGeometricFieldType* ptr = NULL;
+
+    if
+    (
+        db.foundObject<RegionGeometricFieldType>(IOo.name())
+    )
+    {
+// TODO: Add member function to objectRegistry to get write access!
+        RegionGeometricFieldType& ref =
+            const_cast<RegionGeometricFieldType&>
+            (
+                db.lookupObject<RegionGeometricFieldType>(IOo.name())
+            );
+
+        ptr = &ref;
+    }
+    else
+    {
+        ptr = new RegionGeometricFieldType
+            (
+                IOo,
+                regionMesh,
+                dim,
+                IOoOverride
+            );
+    }
+
+    return ptr;
+}
+
+
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>*
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::LinkOrNew
+(
+    const IOobject& IOo,
+    const RegionMesh& regionMesh,
+    const dimensioned<Type>& dim,
+    const word& patchFieldType,
+    const HashTable<IOobject> IOoOverride
+)
+{
+    const objectRegistry& db = regionMesh.thisDb();
+
+    RegionGeometricFieldType* ptr = NULL;
+
+    if
+    (
+        db.foundObject<RegionGeometricFieldType>(IOo.name())
+    )
+    {
+// TODO: Add member function to objectRegistry to get write access!
+        RegionGeometricFieldType& ref =
+            const_cast<RegionGeometricFieldType&>
+            (
+                db.lookupObject<RegionGeometricFieldType>(IOo.name())
+            );
+
+        ptr = &ref;
+    }
+    else
+    {
+        ptr = new RegionGeometricFieldType
+            (
+                IOo,
+                regionMesh,
+                dim,
+                patchFieldType,
+                IOoOverride
+            );
+    }
+
+    return ptr;
+}
+
+
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>*
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::LinkOrNew
+(
+    const IOobject& IOo,
+    const RegionMesh& regionMesh,
+    const dimensioned<Type>& dim,
+    const wordList& patchFieldTypes,
+    const HashTable<IOobject> IOoOverride
+)
+{
+    const objectRegistry& db = regionMesh.thisDb();
+
+    RegionGeometricFieldType* ptr = NULL;
+
+    if
+    (
+        db.foundObject<RegionGeometricFieldType>(IOo.name())
+    )
+    {
+// TODO: Add member function to objectRegistry to get write access!
+        RegionGeometricFieldType& ref =
+            const_cast<RegionGeometricFieldType&>
+            (
+                db.lookupObject<RegionGeometricFieldType>(IOo.name())
+            );
+
+        ptr = &ref;
+    }
+    else
+    {
+        ptr = new RegionGeometricFieldType
+            (
+                IOo,
+                regionMesh,
+                dim,
+                patchFieldTypes,
+                IOoOverride
+            );
+    }
+
+    return ptr;
+}
+
+
+template
+<
+    class Type, template<class> class PatchField, class GeoMesh,
+    class RegionGeoMesh
+>
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>*
+Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::LinkOrNew
+(
+    const IOobject& IOo,
+    const RegionGeometricFieldType& rgf,
+    const HashTable<IOobject> IOoOverride
+)
+{
+    const objectRegistry& db = rgf.mesh().thisDb();
+
+    RegionGeometricFieldType* ptr = NULL;
+
+    if
+    (
+        db.foundObject<RegionGeometricFieldType>(IOo.name())
+    )
+    {
+// TODO: Add member function to objectRegistry to get write access!
+        RegionGeometricFieldType& ref =
+            const_cast<RegionGeometricFieldType&>
+            (
+                db.lookupObject<RegionGeometricFieldType>(IOo.name())
+            );
+
+        ptr = &ref;
+    }
+    else
+    {
+        ptr = new RegionGeometricFieldType
+            (
+                IOo,
+                rgf,
+                IOoOverride
+            );
+    }
+
+    return ptr;
+}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -510,10 +703,7 @@ template
 void
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 (
-    const regionGeometricField
-        <
-            Type, PatchField, GeoMesh, RegionGeoMesh
-        >& rgf
+    const RegionGeometricFieldType& rgf
 )
 {
     if (this == &rgf)
@@ -550,13 +740,7 @@ template
 void
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
 (
-    const tmp
-    <
-        regionGeometricField
-        <
-            Type, PatchField, GeoMesh, RegionGeoMesh
-        >
-    >& trgf
+    const tmp <RegionGeometricFieldType>& trgf
 )
 {
     if (this == &(trgf()))
@@ -568,12 +752,7 @@ Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::operator=
             << abort(FatalError);
     }
 
-    const regionGeometricField
-    <
-        Type, PatchField, GeoMesh,
-        RegionGeoMesh
-    >&
-    rgf = trgf();
+    const RegionGeometricFieldType& rgf = trgf();
 
     checkField(*this, rgf, "=");
 

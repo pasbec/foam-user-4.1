@@ -221,6 +221,7 @@ bool Foam::eddyCurrentApp::Control::updateRelDeltaA(label movedRegionI)
 
     volVectorField& prevC
     (
+// TODO: Add member function to objectRegistry to get write access!
         const_cast<volVectorField&>
         (
             mesh_[Region::CONDUCTOR].lookupObject<volVectorField> ("emPrevC")
@@ -304,6 +305,7 @@ bool Foam::eddyCurrentApp::Control::updateRelDeltaA(label movedRegionI)
 
         volScalarField& relDeltaA
         (
+// TODO: Add member function to objectRegistry to get write access!
             const_cast<volScalarField&>
             (
                 mesh_[Region::CONDUCTOR].lookupObject<volScalarField> ("emRelDeltaA")
