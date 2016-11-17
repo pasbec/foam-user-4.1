@@ -82,10 +82,70 @@ public:
 
 
         SM_GLOBALSTORAGE_NEW();
+
+            //- Thermal conductivity
+            SM_GLOBALITEM_ADD(regionVolScalarField, kappa);
+
         SM_GLOBALSTORAGE_ADD();
 
 
+        SM_REGION_NEW(FLUID);
+
+            SM_REGIONCONTROL_ADD_GLOBALCONTROL();
+
+            SM_REGIONSETTINGS_NEW();
+            SM_REGIONSETTINGS_ADD();
+
+            SM_REGIONSTORAGE_NEW();
+
+                //- Gravitational acceleration
+                SM_REGIONITEM_ADD(uniformDimensionedVectorField, g);
+
+                //- Thermal expansion coefficient
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, beta);
+
+                //- Reference temperature
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, TRef);
+
+                //- Laminar Prandtl number
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, Pr);
+
+                //- Turbulent Prandtl number
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, Prt);
+
+                //- Kinematic turbulent thermal conductivity
+                SM_REGIONITEM_ADD(volScalarField, kappat);
+
+//                 //- Kinematic density
+//                 SM_REGIONITEM_ADD(volScalarField, rhok);
+
+            SM_REGIONSTORAGE_ADD();
+
+        SM_REGION_END();
+
+
+        SM_REGION_NEW(THERMAL);
+
+            SM_REGIONCONTROL_ADD_GLOBALCONTROL();
+
+            SM_REGIONSETTINGS_NEW();
+            SM_REGIONSETTINGS_ADD();
+
+            SM_REGIONSTORAGE_NEW();
+
+                //- Temperature
+                SM_REGIONITEM_ADD(volScalarField, T);
+
+            SM_REGIONSTORAGE_ADD();
+
+        SM_REGION_END();
+
+
         SM_REGIONS_NEW();
+
+            SM_REGIONS_REGION_ADD(FLUID, mesh()[Region::FLUID]);
+            SM_REGIONS_REGION_ADD(THERMAL, mesh()[Region::THERMAL]);
+
         SM_REGIONS_ADD();
 
 
@@ -171,6 +231,8 @@ public:
 
 #ifdef NoRepository
 #   include "buoyantBoussinesqPimpleEddyCurrentAppManager.C"
+#   include "buoyantBoussinesqPimpleEddyCurrentAppManagerRegion_FLUID.C"
+#   include "buoyantBoussinesqPimpleEddyCurrentAppManagerRegion_THERMAL.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

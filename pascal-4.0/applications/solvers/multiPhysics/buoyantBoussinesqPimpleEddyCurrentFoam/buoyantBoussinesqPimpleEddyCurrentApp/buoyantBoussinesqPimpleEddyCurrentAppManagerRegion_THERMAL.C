@@ -21,63 +21,45 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    buoyantBoussinesqPimpleFoam
-
-Description
-
-Author
-    Pascal Beckstein
-
 \*---------------------------------------------------------------------------*/
 
-#include "buoyantBoussinesqPimpleApp.H"
+#include "buoyantBoussinesqPimpleEddyCurrentAppManager.H"
 
-// TODO: Pressure naming p vs. p_rgh (gh, ghf, hRef, ...)
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// TODO: Relaxation of pressure?
+void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Region_THERMAL::Settings::read() const
+{}
 
-// TODO: Pressure boundary conditions (F, bouyantPressure vs. fixedFluxPressure)
-
-// TODO: Continuity errors
-
-// TODO: Wall functions for kappat?
-
-// TODO: Radiation (radiation.ST, rhoCpRef, ...)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Region_THERMAL::Storage::Item_T::create() const
 {
-    using namespace Foam;
-
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    using namespace buoyantBoussinesqPimpleApp;
-    using namespace buoyantBoussinesqPimpleApp::Region;
-
-    Manager manager(args, runTime, mesh);
-
-    SM_GLOBALREGIONSCOPE(DEFAULT);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// TODO: Continuity errors
-// #   include "initContinuityErrs.H"
-
-    while (manager.run())
-    {
-#       include "UTpLoop.H"
-
-// TODO: Continuity errors
-// #       include "volContinuity.H"
-    }
-
-    return(0);
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()
+        )
+    );
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Region_THERMAL::Storage::create() const
+{
+    item_T().enable();
+}
+
+
 // ************************************************************************* //
+

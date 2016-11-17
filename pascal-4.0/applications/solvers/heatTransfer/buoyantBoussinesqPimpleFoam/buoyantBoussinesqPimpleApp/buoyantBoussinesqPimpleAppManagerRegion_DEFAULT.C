@@ -245,6 +245,26 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_tu
 }
 
 
+void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_kappat::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()
+        )
+    );
+}
+
+
 void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rhok::create() const
 {
     set
@@ -261,26 +281,6 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rh
             ),
             1.0 - storage().beta()*(storage().T() - storage().TRef()),
             calculatedFvPatchScalarField::typeName
-        )
-    );
-}
-
-
-void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_alphat::create() const
-{
-    set
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh()
         )
     );
 }
@@ -363,6 +363,7 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::create(
     item_Pr().enable();
     item_Prt().enable();
     item_turbulence().enable();
+    item_kappat().enable();
     item_rhok().enable();
     item_F().setState(settings().volumeForce);
     item_rho().setState(settings().volumeForce);

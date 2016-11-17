@@ -123,10 +123,10 @@ public:
                 //- Transport model
                 SM_REGIONITEM_ADD(singlePhaseTransportModel, transport);
 
-                //- Thermal expansion coefficient [1/K]
+                //- Thermal expansion coefficient
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, beta);
 
-                //- Reference temperature [K]
+                //- Reference temperature
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, TRef);
 
                 //- Laminar Prandtl number
@@ -138,11 +138,11 @@ public:
                 //- Turbulence model
                 SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
 
+                //- Kinematic turbulent thermal conductivity
+                SM_REGIONITEM_ADD(volScalarField, kappat);
+
                 //- Kinematic density
                 SM_REGIONITEM_ADD(volScalarField, rhok);
-
-                //- Kinematic turbulent thermal conductivity [m^2/s]
-                SM_REGIONITEM_ADD(volScalarField, alphat);
 
                 //- Volume force
                 SM_REGIONITEM_ADD(volVectorField, F);

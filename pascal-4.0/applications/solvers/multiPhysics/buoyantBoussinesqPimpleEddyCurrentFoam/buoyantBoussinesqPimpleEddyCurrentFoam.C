@@ -41,7 +41,7 @@ Author
 
 // TODO: Continuity errors
 
-// TODO: Wall functions for alphat?
+// TODO: Wall functions for kappat?
 
 // TODO: Radiation (radiation.ST, rhoCpRef, ...)
 

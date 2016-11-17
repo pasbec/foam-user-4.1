@@ -9,23 +9,39 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      transportProperties;
+    class       volScalarField;
+    object      kappa;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-transportModel        Newtonian;
+dimensions      [0 2 -1 0 0 0 0];
 
-nu                    nu  [ 0 2 -1 0 0 0 0 ] 3.3333e-7; // SiLiquid
-rho                   rho [ 1 -3  0 0 0 0 0 ] 2580;     // SiLiquid
+internalField   uniform 0;
 
-beta                  beta [0 0 0 -1 0 0 0] 1e-04;
-
-TRef                  TRef [0 0 0 1 0 0 0] 0;
-
-Pr                    Pr [0 0 0 0 0 0 0] 0.0122;
-
-Prt                   Prt [0 0 0 0 0 0 0] 0.85;
+boundaryField
+{
+    axis
+    {
+        type            slip;
+    }
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
+    ".*Wall"
+    {
+        type            calculated;
+        value           $internalField;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
+    }
+}
 
 // ************************************************************************* //
-

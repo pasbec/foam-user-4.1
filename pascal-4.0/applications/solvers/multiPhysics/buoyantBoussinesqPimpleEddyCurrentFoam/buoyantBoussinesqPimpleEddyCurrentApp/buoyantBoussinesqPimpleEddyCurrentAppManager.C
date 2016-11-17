@@ -52,14 +52,69 @@ void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Settings::read() cons
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::Item_kappa::create() const
+{
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", true))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::THERMAL],
+        IOo
+    );
+
+    set
+    (
+        regionVolScalarField::LinkOrNew
+        (
+            IOobject
+            (
+                IOo.name(),
+                IOo.instance(),
+                IOo.db()
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                pow(dimLength, 2)/dimTime,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName,
+            IOoOverride
+        )
+    );
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::create() const
-{}
+{
+    item_kappa().enable();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Regions::create() const
-{}
+{
+    region_FLUID().enable();
+    region_THERMAL().enable();
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
