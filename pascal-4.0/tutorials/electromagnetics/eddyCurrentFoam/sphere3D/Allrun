@@ -1,30 +1,41 @@
 #!/bin/bash
 
-flagClean=0; flagPrepare=0; flagParallel=0; flagReset=0; flagRun=0
+flagClean=0; flagPrepare=0; flagDecompose=0; flagReset=0; flagReconstruct=0; flagRun=0; flagForce=0
 
 flagRenumberMesh=0
 
 while [[ $# -gt 0 ]]; do
-    if   [[ $1 == 'clean' ]];   then flagClean=1
-    elif [[ $1 == 'prepare' ]]; then flagPrepare=1
-    elif [[ $1 == 'parallel' ]]; then flagParallel=1
-    elif [[ $1 == 'reset' ]];   then flagReset=1
-    elif [[ $1 == 'start' ]];   then
-        flagPrepare=1
-        flagRun=1
+    if   [[ $1 == 'clean' ]];       then flagClean=1
+    elif [[ $1 == 'prepare' ]];     then flagPrepare=1
+    elif [[ $1 == 'decompose' ]];   then flagDecompose=1
+    elif [[ $1 == 'reset' ]];       then flagReset=1
+    elif [[ $1 == 'reconstruct' ]]; then flagReconstruct=1
+    elif [[ $1 == 'start' ]];       then flagRun=1
+    elif [[ $1 == 'force' ]];       then flagForce=1
     else
       echo "Unsupported flag: '$1'"
     fi
     shift
 done
 
-# Helper functions
-. $WM_PROJECT_USER_DIR/etc/helpFunctions.sh
-. $WM_PROJECT_USER_DIR/etc/cleanFunctions.sh
+# Check if we are running OpenFOAM
+if [[ -z $WM_PROJECT_USER_DIR || ! -d "$WM_PROJECT_USER_DIR/etc" ]]; then
+
+    echo "Directory '\$WM_PROJECT_USER_DIR/etc' was not found."
+    echo "Please make sure that the user environment is set correctly."
+    exit
+else
+    # Helper functions
+    . "$WM_PROJECT_USER_DIR/etc/helpFunctions.sh"
+    . "$WM_PROJECT_USER_DIR/etc/cleanFunctions.sh"
+fi
 
 setErrorTrap
 
-regionlist="region_conductor"
+regionlist_splitn=1
+regionlist_split1="region_conductor"
+regionlist="$regionlist_split1"
+regionlistExt="$regionlist"
 
 if [[ $flagClean -eq 1 ]]; then
 
@@ -46,9 +57,27 @@ if [[ $flagClean -eq 1 ]]; then
         wipePolyMesh "$region"
     done
 
+    rm 'state.'* >& /dev/null
 fi
 
-if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
+if [[ $flagPrepare -eq 1 ]]; then
+if [[ ! -e 'state.prepared' || $flagForce -eq 1 ]]; then
+
+    if [[ $flagForce -eq 1 ]]; then
+
+        rm 'log.setSet'* >& /dev/null
+        rm 'log.createPatch'* >& /dev/null
+        rm 'log.changeDictionary'* >& /dev/null
+        rm 'log.setsToZones'* >& /dev/null
+        rm 'log.subsetMesh'* >& /dev/null
+        rm 'log.splitMeshRegions'* >& /dev/null
+        rm 'log.makeRegionSets'* >& /dev/null
+        rm 'log.funkySetFields'* >& /dev/null
+        rm 'log.makeFaMesh'* >& /dev/null
+        rm 'log.makeFaSubMesh'* >& /dev/null
+        rm 'log.makeCellSetFromRegion'* >& /dev/null
+
+    fi
 
     # Restore polymesh folder from org backup
     restorePolyMeshOrg
@@ -68,30 +97,75 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     runApplication \
         changeDictionary || exit 1
 
-    # Remove old topoSets
+    # Create backup of topoSets
     rm "constant/polyMesh/sets/"*"_old" > /dev/null 2>&1
+    mkdir 'constant/polyMesh/sets/bak'
+    cp 'constant/polyMesh/sets/'* \
+        'constant/polyMesh/sets/bak/' \
+        > /dev/null 2>&1
 
-    # Create subset meshes
-    # for regions
-    for region in $regionlist; do
+    # Create meshes
+    for n in $(eval echo "{1..$regionlist_splitn}"); do
 
-        runApplication -r "$region" \
-            subsetMesh "cellSet_$region" -overwrite || exit 1
+        regionlist_split=$(eval echo \$regionlist_split$n)
 
-        mkdir 'constant/setSubset' > /dev/null 2>&1
-        mkdir 'constant/setSubset/polyMesh' > /dev/null 2>&1
-        mv "0/setSubset/polyMesh/"* "constant/setSubset/polyMesh/"
-        mkdir "constant/$region" > /dev/null 2>&1
-        mkdir "constant/$region/polyMesh" > /dev/null 2>&1
-        mv "constant/setSubset/polyMesh/"* "constant/$region/polyMesh"
-        rm -rf "0/setSubset"
-        rm -rf "constant/setSubset"
-        rm -rf "system/setSubset"
+        # Remove all topoSets
+        rm 'constant/polyMesh/sets/'* > /dev/null 2>&1
 
-        runApplication -r "$region" \
-            createPatch -region "$region" -overwrite || exit 1
+        # Restore cellSets for this step of splitMeshRegions
+        for region in $regionlist_split; do
+            cp "constant/polyMesh/sets/bak/cellSet_$region" \
+            'constant/polyMesh/sets/' || exit 1
+        done
+
+        # Remove all zones
+        cleanPolyMeshZones
+
+        # Create cellset for complementary region
+        runApplication -l "log.makeComplementaryCellSet.$n" \
+            makeComplementaryCellSet -name 'cellSet_region_complementary' || exit 1
+
+        # Create zones for restored topoSets
+        runApplication -l "log.setsToZones.$n" \
+            setsToZones || exit 1
+
+        # Remove cellSet prefixes from cellZones
+        sed -i 's/cellSet_//g' 'constant/polyMesh/cellZones' > /dev/null 2>&1
+
+        # Split regions
+        runApplication -l "log.splitMeshRegions.$n" \
+            splitMeshRegions -overwrite -cellZonesOnly || exit 1
+
+        # Remove all directMapped crap from splitMeshRegions to useless
+        # complementary region in order to silence directMapped::mapDistribute().
+        # This only works until someone uses curly brackets {} within the patch
+        # definition.
+        for region in $regionlist_split; do
+            boundary="constant/$region/polyMesh/boundary"
+            patch='/to_region_complementary/,/\}/'
+            sed -i "$patch{s/directMappedWall/wall/g}" "$boundary"
+            sed -i "$patch{s/directMappedPatch/patch/g}" "$boundary"
+            sed -i "$patch{/sampleMode/d}" "$boundary"
+            sed -i "$patch{/sampleRegion/d}" "$boundary"
+            sed -i "$patch{/samplePatch/d}" "$boundary"
+            sed -i "$patch{/offset/d}" "$boundary"
+        done
+
+        # Remove complementary region and cellSet
+        rm -rf 'constant/region_complementary'
+        rm -rf 'system/region_complementary'
+        rm 'constant/polyMesh/sets/cellSet_region_complementary'
+
+        # Remove cellToRegion and cellZones
+        find -name 'cellToRegion' -delete > /dev/null 2>&1
+        find -name 'cellZones' -delete > /dev/null 2>&1
 
     done
+
+    # Restore all topoSets
+    cp 'constant/polyMesh/sets/bak/'* \
+        'constant/polyMesh/sets/' \
+        > /dev/null 2>&1
 
     # Add fields to 0 from org backup
     addZeroOrg
@@ -107,6 +181,23 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     for region in $regionlist; do
         runApplication -r "$region" \
             makeRegionSets -region "$region" || exit 1
+    done
+
+    # Create new patches and cleanup
+    # for regions
+    for region in $regionlist; do
+        runApplication -r "$region" \
+            createPatch -overwrite -region "$region" || exit 1
+
+#         rm "constant/$region/polyMesh/boundaryRegionAddressing" > /dev/null 2>&1
+# TODO [Low]: Fix boundaryRegionAddressing for all regions
+    done
+
+    # Change dictionaries
+    # for regions
+    for region in $regionlist; do
+        runApplication -r "$region" \
+            changeDictionary -region "$region" || exit 1
     done
 
     # Add fields to 0 from org backup
@@ -132,61 +223,121 @@ if [[ $flagPrepare -eq 1 && $flagClean -eq 1 ]]; then
     # Touch paraFoam files
     paraviewTouchFoam
     paraviewTouchOpenFOAM
+    for region in $regionlistExt; do
+        paraviewTouchOpenFOAM "$region"
+    done
 
-    if [[ $flagParallel -eq 1 ]]; then
+    touch 'state.prepared'
+else
+    echo "Case already prepared. Not preparing!"
+fi
+fi
 
-        # Decompose mesh
-        runApplication \
-            decomposePar -cellDist || exit 1
+if [[ $flagDecompose -eq 1 ]]; then
+if [[ -e 'state.prepared' || $flagForce -eq 1 ]]; then
+if [[ ! -e 'state.decomposed' || $flagForce -eq 1 ]]; then
 
-        # Split cell decompositions
-        for region in $regionlist; do
-            runApplication -r "$region" \
-                makeRegionCellDecomposition -region $region || exit 1
-        done
+    if [[ $flagForce -eq 1 ]]; then
 
-        # Decompose mesh
-        # for regions
-        for region in $regionlist; do
-            cp 'system/decomposeParDict.region' \
-                "system/$region/decomposeParDict"
+        rm 'log.decomposePar'* >& /dev/null
+        rm 'log.makeRegionCellDecomposition'* >& /dev/null
+        rm 'log.decomposeSets'* >& /dev/null
+        rm 'log.decomposeRegionAddressing'* >& /dev/null
 
-            runApplication -r "$region" \
-                decomposePar -region $region || exit 1
-        done
+        [[ -d 'processor0' ]] && rm -rf 'processor'* >& /dev/null
 
-        # Decompose sets
-        # for regions
-        for region in $regionlist; do
-            runApplication -r "$region" \
-                decomposeSets -region $region || exit 1
-        done
-
-        # Decompose region addressings
-        # for regions
-        for region in $regionlist; do
-            runApplication -r "$region" \
-                decomposeRegionAddressing -region $region || exit 1
-        done
-
-        # Touch paraFoam files
-        paraviewTouchFoamParallel
-        paraviewTouchOpenFOAMParallel
     fi
+
+    # Decompose mesh
+    runApplication \
+        decomposePar -cellDist || exit 1
+
+    # Split cell decompositions
+    for region in $regionlistExt; do
+        runApplication -r "$region" \
+            makeRegionCellDecomposition -region $region || exit 1
+    done
+
+    # Decompose mesh
+    # for regions
+    for region in $regionlistExt; do
+        cp 'system/decomposeParDict.region' \
+            "system/$region/decomposeParDict"
+
+        runApplication -r "$region" \
+            decomposePar -region $region || exit 1
+    done
+
+    # Decompose sets
+    # for regions
+    for region in $regionlistExt; do
+        runApplication -r "$region" \
+            decomposeSets -region $region || exit 1
+    done
+
+    # Decompose region addressings
+    # for regions
+    for region in $regionlistExt; do
+        runApplication -r "$region" \
+            decomposeRegionAddressing -region $region || exit 1
+    done
+
+    # Touch paraFoam files
+    paraviewTouchFoamParallel
+    paraviewTouchOpenFOAMParallel
+    for region in $regionlistExt; do
+        paraviewTouchOpenFOAMParallel "$region"
+    done
+
+    touch 'state.decomposed'
+else
+    echo "Case already decomposed. Not decomposing!"
+fi
+else
+    echo "Case not prepared. Not decomposing!"
+fi
+fi
+
+if [[ $flagReconstruct -eq 1 ]]; then
+if [[ -e 'state.decomposed' || $flagForce -eq 1 ]]; then
+
+    if [[ $flagForce -eq 1 ]]; then
+
+        rm 'log.reconstructPar'* >& /dev/null
+
+    fi
+
+    # Reconstruct mesh
+    runApplication \
+        reconstructPar -latestTime || exit 1
+
+    # Reconstruct mesh
+    # for regions
+    for region in $regionlistExt; do
+        runApplication -r "$region" \
+            reconstructPar -latestTime -region $region || exit 1
+    done
+else
+    echo "Case not decomposed! Not reconstructing!"
+fi
 fi
 
 if [[ $flagReset -eq 1 ]]; then
+if [[ -e 'state.prepared' || $flagForce -eq 1 ]]; then
 
-    if [[ $flagParallel -eq 1 ]] || \
-       [[ $flagParallel2 -eq 1 ]]; then
+    if [[ -e 'state.decomposed' ]]; then
 
         # Clean time directories
         cleanTimeDirectoriesParallel
+
+        [[ $flagForce -eq 1 ]] && cleanTimeDirectories
 
     else
 
         # Clean time directories
         cleanTimeDirectories
+
+        [[ $flagForce -eq 1 ]] && cleanTimeDirectoriesParallel
 
     fi
 
@@ -194,12 +345,14 @@ if [[ $flagReset -eq 1 ]]; then
     rm "log.$(getApplication)" > /dev/null 2>&1
 
 fi
+fi
 
 if [[ $flagRun -eq 1 ]]; then
-    if [[ $flagParallel -eq 1 ]] || \
-       [[ $flagParallel2 -eq 1 ]]; then
+if [[ -e 'state.prepared' || $flagForce -eq 1 ]]; then
 
-        np=$(ls -1d processor* | wc -l)
+    if [[ -e 'state.decomposed' ]]; then
+
+        np=$(ls -1d 'processor'* | wc -l)
         runParallel $np \
             $(getApplication) || exit 1
 
@@ -209,4 +362,5 @@ if [[ $flagRun -eq 1 ]]; then
             $(getApplication) || exit 1
 
     fi
+fi
 fi

@@ -20,38 +20,22 @@ dictionaryReplacement
     {
         topWall
         {
-            type            directMappedWall;
-            sampleMode      nearestPatchFace;
-            sampleRegion    region_static;
-            samplePatch     topWall;
-            offset          (0 0 0);
+            type            wall;
         }
 
         sideWall
         {
-            type            directMappedWall;
-            sampleMode      nearestPatchFace;
-            sampleRegion    region_static;
-            samplePatch     sideWall;
-            offset          (0 0 0);
+            type            wall;
         }
 
         cornerWall
         {
-            type            directMappedWall;
-            sampleMode      nearestPatchFace;
-            sampleRegion    region_static;
-            samplePatch     cornerWall;
-            offset          (0 0 0);
+            type            wall;
         }
 
         bottomWall
         {
-            type            directMappedWall;
-            sampleMode      nearestPatchFace;
-            sampleRegion    region_static;
-            samplePatch     bottomWall;
-            offset          (0 0 0);
+            type            wall;
         }
     }
 }

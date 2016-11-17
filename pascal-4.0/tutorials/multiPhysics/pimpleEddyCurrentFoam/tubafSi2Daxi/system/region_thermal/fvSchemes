@@ -10,27 +10,38 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      changeDictionaryDict;
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dictionaryReplacement
+ddtSchemes
 {
-    boundary
-    {
-//         conductorSurface
-//         {
-//             type            directMappedPatch;
-//             sampleMode      nearestPatchFace;
-//             sampleRegion    region_conductor;
-//             samplePatch     conductorSurface;
-//             offset          (0 0 0);
-//         }
-        conductorSurface
-        {
-            type            patch;
-        }
-    }
+    default                               none;
+}
+
+gradSchemes
+{
+    default                               none;
+}
+
+divSchemes
+{
+    default                               none;
+}
+
+laplacianSchemes
+{
+    default                               none;
+}
+
+interpolationSchemes
+{
+    default                               none;
+}
+
+fluxRequired
+{
+    p;
 }
 
 // ************************************************************************* //

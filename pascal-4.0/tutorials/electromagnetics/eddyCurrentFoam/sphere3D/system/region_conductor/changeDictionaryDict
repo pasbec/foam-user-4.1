@@ -18,23 +18,10 @@ dictionaryReplacement
 {
     boundary
     {
-//         bottomWall
-//         {
-//             type            directMappedWall;
-//             sampleMode      nearestPatchFace;
-//             sampleRegion    region_fluid;
-//             samplePatch     bottomWall;
-//             offset          (0 0 0);
-//         }
-
-//         fixedMesh
-//         {
-//             type            directMappedPatch;
-//             sampleMode      nearestPatchFace;
-//             sampleRegion    region_buffer;
-//             samplePatch     fixedMesh;
-//             offset          (0 0 0);
-//         }
+        conductorSurface
+        {
+            type            patch;
+        }
     }
 }
 

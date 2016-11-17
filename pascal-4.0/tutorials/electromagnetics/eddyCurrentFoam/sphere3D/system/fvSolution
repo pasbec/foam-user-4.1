@@ -53,7 +53,7 @@ solvers
 
 EDDYCURRENT
 {
-    interface          "oldInternalFaces";
+    interface          "conductorSurface";
 
     nCorrectors        10;
     nSubCorrectors     100;

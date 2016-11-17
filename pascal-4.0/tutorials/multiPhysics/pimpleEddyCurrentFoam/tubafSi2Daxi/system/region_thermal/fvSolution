@@ -10,26 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      createPatchDict;
+    object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-matchTolerance           1e-6;
-
-pointSync                true;
-
-patchInfo
-(
-    {
-        name             conductorSurface;
-        constructFrom    patches;
-        patches          (region_space_to_region_conductor);
-
-        dictionary
-        {
-            type         patch;
-        }
-    }
-);
 
 // ************************************************************************* //

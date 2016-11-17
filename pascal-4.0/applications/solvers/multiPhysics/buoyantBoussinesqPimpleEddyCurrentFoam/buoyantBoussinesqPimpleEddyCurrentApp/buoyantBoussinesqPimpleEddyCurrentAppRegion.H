@@ -46,7 +46,7 @@ namespace buoyantBoussinesqPimpleEddyCurrentApp
 {
 
 /*---------------------------------------------------------------------------*\
-             Namespace buoyantBoussinesqPimpleEddyCurrentApp::Region Declaration
+      Namespace buoyantBoussinesqPimpleEddyCurrentApp::Region Declaration
 \*---------------------------------------------------------------------------*/
 
 namespace Region
@@ -55,7 +55,8 @@ namespace Region
     {
         DEFAULT,
         CONDUCTOR,
-        FLUID
+        FLUID,
+        THERMAL
     };
 }
 
@@ -89,11 +90,11 @@ namespace Region
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace buoyantBoussinesqPimpleApp
+namespace pimpleApp
 {
 
 /*---------------------------------------------------------------------------*\
-             Namespace buoyantBoussinesqPimpleApp::Region Declaration
+                   Namespace pimpleApp::Region Declaration
 \*---------------------------------------------------------------------------*/
 
 namespace Region
@@ -107,7 +108,7 @@ namespace Region
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace buoyantBoussinesqPimpleApp
+} // End namespace pimpleApp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

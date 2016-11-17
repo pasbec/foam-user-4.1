@@ -50,7 +50,7 @@ namespace buoyantBoussinesqPimpleEddyCurrentApp
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class buoyantBoussinesqPimpleEddyCurrentApp::Control Declaration
+        Class buoyantBoussinesqPimpleEddyCurrentApp::Control Declaration
 \*---------------------------------------------------------------------------*/
 
 class Control

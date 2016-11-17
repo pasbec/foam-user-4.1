@@ -23,7 +23,7 @@ patchInfo
     {
         name             conductorSurface;
         constructFrom    patches;
-        patches          (region_conductor_to_region_space);
+        patches          (region_conductor_to_region_complementary);
 
         dictionary
         {

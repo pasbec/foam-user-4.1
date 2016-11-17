@@ -18,17 +18,25 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-# Helper functions
-. $WM_PROJECT_USER_DIR/etc/helpFunctions.sh
-. $WM_PROJECT_USER_DIR/etc/cleanFunctions.sh
+# Check if we are running OpenFOAM
+if [[ -z $WM_PROJECT_USER_DIR || ! -d "$WM_PROJECT_USER_DIR/etc" ]]; then
+
+    echo "Directory '\$WM_PROJECT_USER_DIR/etc' was not found."
+    echo "Please make sure that the user environment is set correctly."
+    exit
+else
+    # Helper functions
+    . "$WM_PROJECT_USER_DIR/etc/helpFunctions.sh"
+    . "$WM_PROJECT_USER_DIR/etc/cleanFunctions.sh"
+fi
 
 setErrorTrap
 
 regionlist_splitn=2
-regionlist_split1="region_fluid region_buffer region_static"
-regionlist_split2="region_conductor region_space"
+regionlist_split1="region_fluid region_buffer"
+regionlist_split2="region_conductor"
 regionlist="$regionlist_split1 $regionlist_split2"
-regionlist2="$regionlist region_fluid_faSubMesh"
+regionlistExt="$regionlist region_fluid_faSubMesh"
 
 if [[ $flagClean -eq 1 ]]; then
 
@@ -114,6 +122,10 @@ if [[ ! -e 'state.prepared' || $flagForce -eq 1 ]]; then
         # Remove all zones
         cleanPolyMeshZones
 
+        # Create cellset for complementary region
+        runApplication -l "log.makeComplementaryCellSet.$n" \
+            makeComplementaryCellSet -name 'cellSet_region_complementary' || exit 1
+
         # Create zones for restored topoSets
         runApplication -l "log.setsToZones.$n" \
             setsToZones || exit 1
@@ -124,6 +136,26 @@ if [[ ! -e 'state.prepared' || $flagForce -eq 1 ]]; then
         # Split regions
         runApplication -l "log.splitMeshRegions.$n" \
             splitMeshRegions -overwrite -cellZonesOnly || exit 1
+
+        # Remove all directMapped crap from splitMeshRegions to useless
+        # complementary region in order to silence directMapped::mapDistribute().
+        # This only works until someone uses curly brackets {} within the patch
+        # definition.
+        for region in $regionlist_split; do
+            boundary="constant/$region/polyMesh/boundary"
+            patch='/to_region_complementary/,/\}/'
+            sed -i "$patch{s/directMappedWall/wall/g}" "$boundary"
+            sed -i "$patch{s/directMappedPatch/patch/g}" "$boundary"
+            sed -i "$patch{/sampleMode/d}" "$boundary"
+            sed -i "$patch{/sampleRegion/d}" "$boundary"
+            sed -i "$patch{/samplePatch/d}" "$boundary"
+            sed -i "$patch{/offset/d}" "$boundary"
+        done
+
+        # Remove complementary region and cellSet
+        rm -rf 'constant/region_complementary'
+        rm -rf 'system/region_complementary'
+        rm 'constant/polyMesh/sets/cellSet_region_complementary'
 
         # Remove cellToRegion and cellZones
         find -name 'cellToRegion' -delete > /dev/null 2>&1
@@ -213,7 +245,7 @@ if [[ ! -e 'state.prepared' || $flagForce -eq 1 ]]; then
     # Touch paraFoam files
     paraviewTouchFoam
     paraviewTouchOpenFOAM
-    for region in $regionlist2; do
+    for region in $regionlistExt; do
         paraviewTouchOpenFOAM "$region"
     done
 
@@ -243,14 +275,14 @@ if [[ ! -e 'state.decomposed' || $flagForce -eq 1 ]]; then
         decomposePar -cellDist || exit 1
 
     # Split cell decompositions
-    for region in $regionlist2; do
+    for region in $regionlistExt; do
         runApplication -r "$region" \
             makeRegionCellDecomposition -region $region || exit 1
     done
 
     # Decompose mesh
     # for regions
-    for region in $regionlist2; do
+    for region in $regionlistExt; do
         cp 'system/decomposeParDict.region' \
             "system/$region/decomposeParDict"
 
@@ -260,14 +292,14 @@ if [[ ! -e 'state.decomposed' || $flagForce -eq 1 ]]; then
 
     # Decompose sets
     # for regions
-    for region in $regionlist2; do
+    for region in $regionlistExt; do
         runApplication -r "$region" \
             decomposeSets -region $region || exit 1
     done
 
     # Decompose region addressings
     # for regions
-    for region in $regionlist2; do
+    for region in $regionlistExt; do
         runApplication -r "$region" \
             decomposeRegionAddressing -region $region || exit 1
     done
@@ -275,7 +307,7 @@ if [[ ! -e 'state.decomposed' || $flagForce -eq 1 ]]; then
     # Touch paraFoam files
     paraviewTouchFoamParallel
     paraviewTouchOpenFOAMParallel
-    for region in $regionlist2; do
+    for region in $regionlistExt; do
         paraviewTouchOpenFOAMParallel "$region"
     done
 
@@ -303,7 +335,7 @@ if [[ -e 'state.decomposed' || $flagForce -eq 1 ]]; then
 
     # Reconstruct mesh
     # for regions
-    for region in $regionlist2; do
+    for region in $regionlistExt; do
         runApplication -r "$region" \
             reconstructPar -latestTime -region $region || exit 1
     done

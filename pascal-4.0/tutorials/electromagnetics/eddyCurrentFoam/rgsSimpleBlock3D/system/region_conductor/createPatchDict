@@ -14,17 +14,22 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-matchTolerance 1e-12;
+matchTolerance           1e-6;
 
-pointSync true;
+pointSync                true;
 
 patchInfo
 (
-);
+    {
+        name             conductorSurface;
+        constructFrom    patches;
+        patches          (region_conductor_to_region_complementary);
 
-// OpenFOAM syntax
-patches
-(
+        dictionary
+        {
+            type         patch;
+        }
+    }
 );
 
 // ************************************************************************* //

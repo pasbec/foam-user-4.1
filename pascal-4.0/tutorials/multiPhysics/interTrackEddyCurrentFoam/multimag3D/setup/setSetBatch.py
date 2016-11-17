@@ -81,19 +81,12 @@ def main():
                     add=["body_fluid"])
         ssb.cellSet("region_buffer", "setToTopo",
                     add=["body_buffer"])
-        ssb.cellSet("region_static", "setToTopo",
-                    add=["region_fluid", "region_buffer"],
-                    invert=True)
 
         ssb.cellSet("region_conductor", "setToTopo",
                     add=["body_fluid"])
-        ssb.cellSet("region_space", "setToTopo",
-                    add=["region_conductor"],
-                    invert=True)
 
         ssb.faceSet("regions", "cellBoundaryToTopo",
-                    add=["region_fluid", "region_buffer", "region_static",
-                         "region_conductor", "region_space"],
+                    add=["region_fluid", "region_buffer", "region_conductor"],
                     delete=["all"])
 
     if ssb.group("Patches"):

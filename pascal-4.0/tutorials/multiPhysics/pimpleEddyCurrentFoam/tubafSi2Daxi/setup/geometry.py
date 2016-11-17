@@ -104,7 +104,7 @@ bo["conductor"] = makeFuseBody("conductor", [bo["solid"],
                                              bo["fluid"],
                                              bo["heater"]])
 
-bo["space"] = makeFuseBody("space", [bo["vessel"], bo["free"]])
+bo["thermal"] = makeFuseBody("thermal", [bo["solid"], bo["fluid"]])
 
 bo["coils"] = makeOrthoArrayBody("coils", bo["coil"],
                                  (0.0, 0.0, cs*par.coils_step), par.coils_n)
@@ -121,7 +121,7 @@ bo2D["conductor"] = makeFuseBody("conductor_2D", [bo2D["solid"],
                                                   bo2D["fluid"],
                                                   bo2D["heater"]])
 
-bo2D["space"] = makeFuseBody("space_2D", [bo2D["vessel"], bo2D["free"]])
+bo2D["thermal"] = makeFuseBody("thermal_2D", [bo2D["solid"], bo2D["fluid"]])
 
 bo2D["coils"] = makeOrthoArrayBody("coils_2D", bo2D["coil"],
                                    (0.0, 0.0, cs*par.coils_step), par.coils_n)
@@ -138,7 +138,7 @@ bo3D["conductor"] = makeFuseBody("conductor_3D", [bo3D["solid"],
                                                   bo3D["fluid"],
                                                   bo3D["heater"]])
 
-bo3D["space"] = makeFuseBody("space_3D", [bo3D["vessel"], bo3D["free"]])
+bo3D["thermal"] = makeFuseBody("thermal_3D", [bo3D["solid"], bo3D["fluid"]])
 
 bo3D["coils"] = makeOrthoArrayBody("coils_3D", bo3D["coil"],
                                    (0.0, 0.0, cs*par.coils_step), par.coils_n)
@@ -160,6 +160,7 @@ shd["topWall"] = (bo["fluid"], [1, 2, 3, 5, 6, 12])
 shd["sideWall"] = (bo["fluid"], [11, 16])
 shd["cornerWall"] = (bo["fluid"], [10, 15])
 shd["bottomWall"] = (bo["fluid"], [8, 9, 13, 14])
+shd["solidWall"] = (bo["solid"], [6, 8, 9, 10])
 
 sh = dict()
 

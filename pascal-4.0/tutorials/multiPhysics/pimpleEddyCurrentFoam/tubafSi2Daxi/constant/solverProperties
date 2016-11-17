@@ -18,6 +18,7 @@ regions
 {
     CONDUCTOR               region_conductor;
     FLUID                   region_fluid;
+    THERMAL                 region_thermal;
 }
 
 settings

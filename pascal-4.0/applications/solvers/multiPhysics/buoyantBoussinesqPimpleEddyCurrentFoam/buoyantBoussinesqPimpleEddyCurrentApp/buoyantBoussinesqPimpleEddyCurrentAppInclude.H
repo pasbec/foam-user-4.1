@@ -29,7 +29,7 @@ Description
 #ifndef buoyantBoussinesqPimpleEddyCurrentAppInclude_H
 #define buoyantBoussinesqPimpleEddyCurrentAppInclude_H
 
-#include "buoyantBoussinesqPimpleAppInclude.H"
+#include "pimpleAppInclude.H"
 #include "eddyCurrentAppLink.H"
 #include "eddyCurrentAppInclude.H"
 

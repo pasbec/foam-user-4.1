@@ -10,37 +10,19 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      createPatchDict;
+    object      changeDictionaryDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-matchTolerance           1e-6;
-
-pointSync                true;
-
-patchInfo
-(
+dictionaryReplacement
+{
+    boundary
     {
-        name             bottomWall;
-        constructFrom    set;
-        set              faceSet_patch_bottomWall;
-
-        dictionary
+        conductorSurface
         {
-            type         wall;
+            type            patch;
         }
     }
-
-    {
-        name             fixedMesh;
-        constructFrom    set;
-        set              faceSet_patch_fixedMesh;
-
-        dictionary
-        {
-            type         patch;
-        }
-    }
-);
+}
 
 // ************************************************************************* //

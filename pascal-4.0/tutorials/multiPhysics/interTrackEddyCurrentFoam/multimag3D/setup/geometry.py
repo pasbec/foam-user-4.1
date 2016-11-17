@@ -109,8 +109,8 @@ bo["below"] = makeExtrudeBody("below", s["outer"], par.geo_z0)
 bo["buffer"] = makeCutBody("buffer", bo["above"], bo["fluid"])
 
 bo["all"] = makeFuseBody("all", [bo["above"], bo["below"]])
+
 bo["conductor"] = makeFuseBody("conductor", [bo["fluid"]])
-bo["space"] = makeFuseBody("space", [bo["buffer"], bo["below"]])
 
 bo["coil"] = makeDoubleExtrudeBody("coil", s["coil"], cs*par.coil_bundle["z"])
 

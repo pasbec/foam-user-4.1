@@ -41,7 +41,7 @@ Author
 #include "buoyantBoussinesqPimpleEddyCurrentAppInclude.H"
 #include "buoyantBoussinesqPimpleEddyCurrentAppControl.H"
 
-#include "buoyantBoussinesqPimpleAppManager.H"
+#include "pimpleAppManager.H"
 #include "eddyCurrentAppManager.H"
 
 
@@ -54,7 +54,7 @@ namespace buoyantBoussinesqPimpleEddyCurrentApp
 {
 
 /*---------------------------------------------------------------------------*\
-               Class buoyantBoussinesqPimpleEddyCurrentApp::Manager Declaration
+        Class buoyantBoussinesqPimpleEddyCurrentApp::Manager Declaration
 \*---------------------------------------------------------------------------*/
 
 class Manager
@@ -93,8 +93,8 @@ private:
 
     // Private data
 
-        //- Pointer for manager of buoyantBoussinesqPimpleApp
-        mutable autoPtr<buoyantBoussinesqPimpleApp::Manager> buoyantBoussinesqPimpleAppManager_;
+        //- Pointer for manager of pimpleApp
+        mutable autoPtr<pimpleApp::Manager> pimpleAppManager_;
 
         //- Pointer for manager of eddyCurrentApp
         mutable autoPtr<eddyCurrentApp::Manager> eddyCurrentAppManager_;
@@ -131,8 +131,8 @@ public:
 
         // Managers
 
-            //- buoyantBoussinesqPimpleApp
-            buoyantBoussinesqPimpleApp::Manager& buoyantBoussinesqPimpleAppManager() const;
+            //- pimpleApp
+            pimpleApp::Manager& pimpleAppManager() const;
 
             //- eddyCurrentApp
             eddyCurrentApp::Manager& eddyCurrentAppManager() const;

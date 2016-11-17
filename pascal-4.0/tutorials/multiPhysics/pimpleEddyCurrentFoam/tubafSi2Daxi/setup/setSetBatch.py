@@ -79,21 +79,15 @@ def main():
 
         ssb.cellSet("region_fluid", "setToTopo",
                     add=["body_fluid"])
-        ssb.cellSet("region_buffer", "setToTopo",
-                    add=[])
-        ssb.cellSet("region_static", "setToTopo",
-                    add=["region_fluid", "region_buffer"],
-                    invert=True)
 
         ssb.cellSet("region_conductor", "setToTopo",
                     add=["body_fluid", "body_solid", "body_heater"])
-        ssb.cellSet("region_space", "setToTopo",
-                    add=['region_conductor'],
-                    invert=True)
+
+        ssb.cellSet("region_thermal", "setToTopo",
+                    add=["body_fluid", "body_solid"])
 
         ssb.faceSet("regions", "cellBoundaryToTopo",
-                    add=["region_fluid", "region_buffer", "region_static",
-                         "region_conductor", "region_space"],
+                    add=["region_fluid", "region_conductor", "region_thermal"],
                     delete=["all"])
 
     if ssb.group("Patches"):
@@ -101,17 +95,18 @@ def main():
         ssb.faceSet("patch_front", "setToTopo", add=["shell_front"])
         ssb.faceSet("patch_back", "setToTopo", add=["shell_back"])
         ssb.faceSet("patch_infinity", "setToTopo", add=["shell_infinity"])
+
         ssb.faceSet("patch_topWall", "setToTopo", add=["shell_topWall"])
         ssb.faceSet("patch_sideWall", "setToTopo", add=["shell_sideWall"])
         ssb.faceSet("patch_cornerWall", "setToTopo", add=["shell_cornerWall"])
         ssb.faceSet("patch_bottomWall", "setToTopo", add=["shell_bottomWall"])
+        ssb.faceSet("patch_solidWall", "setToTopo", add=["shell_solidWall"])
 
     if ssb.group("Materials"):
 
         ssb.cellSet("material_siliconLiquid", "setToTopo", add=["body_fluid"])
         ssb.cellSet("material_siliconSolid", "setToTopo", add=["body_solid"])
         ssb.cellSet("material_graphite", "setToTopo", add=["body_heater"])
-        ssb.cellSet("material_air", "setToTopo", add=["body_space"])
 
     ssb.quit()
 
