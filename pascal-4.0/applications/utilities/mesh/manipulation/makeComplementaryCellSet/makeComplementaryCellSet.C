@@ -50,12 +50,19 @@ int main(int argc, char *argv[])
     argList::noParallel();
 #   include "addRegionOption.H"
 
+    // Add optional argument to specify cellset name
+    argList::validOptions.insert("name", "word");
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 
     Info<< "Time = " << runTime.timeName() << endl;
 
 #   include "createNamedPolyMesh.H"
+
+    // Read cellSet name
+    Foam::word csName = "complementaryCells";
+    args.optionReadIfPresent("name", csName);
 
     // Search for list of objects for the time of the mesh
     IOobjectList objects
@@ -102,13 +109,13 @@ int main(int argc, char *argv[])
     if (!cellsNotInAnySet.empty())
     {
         Info<<"Found " << cellsNotInAnySet.toc().size()
-            << " complemetary cells. Writing them to cellSet"
-            << " 'cellSet_complementaryCells'." << endl;
+            << " complementary cells. Writing them to cellSet"
+            << " '" << csName << "'." << endl;
 
         cellSet cs
         (
             mesh,
-            "cellSet_complementaryCells",
+            csName,
             cellsNotInAnySet,
             IOobject::NO_WRITE
         );
