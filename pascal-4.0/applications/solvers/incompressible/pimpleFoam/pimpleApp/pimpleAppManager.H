@@ -91,14 +91,7 @@ public:
                 //- Volume force switch
                 SM_SETTINGS_MEMBER_ADD(Switch, volumeForce);
 
-                //- Use fixed flux-pressure to correct pressure p at
-                //  fixedGradient patches
-                // TODO: Do not use fixedGradient
-                //
-                //  * enabled: dp/dn = ((phi -(U&Sf))/rAUf)/magSf
-                //
-                //  * disabled: dp/dn = (rhokp*g + F)&n
-                //
+                //- Use fixed flux-pressure to correct pressure p
                 SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
 
             SM_REGIONSETTINGS_ADD();
@@ -124,7 +117,7 @@ public:
                 SM_REGIONITEM_ADD(volVectorField, F);
 
                 //- Density
-                SM_REGIONITEM_ADD(volScalarField, rho);
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, rho);
 
             SM_REGIONSTORAGE_ADD();
 

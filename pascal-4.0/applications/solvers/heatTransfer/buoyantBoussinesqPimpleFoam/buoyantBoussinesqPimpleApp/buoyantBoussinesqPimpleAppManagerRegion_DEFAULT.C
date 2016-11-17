@@ -313,7 +313,7 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_F:
 }
 
 
-void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
+void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rhoRef::create() const
 {
     IOdictionary transportProperties
     (
@@ -329,20 +329,19 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rh
 
     set
     (
-        new volScalarField
+        new uniformDimensionedScalarField
         (
             IOobject
             (
                 name(),
-                time().timeName(),
-                mesh(),
+                time().constant(),
+                time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            mesh(),
             dimensionedScalar
             (
-                transportProperties.lookup("rho")
+                transportProperties.lookup("rhoRef")
             )
         )
     );
@@ -366,7 +365,7 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::create(
     item_alphat().enable();
     item_rhok().enable();
     item_F().setState(settings().volumeForce);
-    item_rho().setState(settings().volumeForce);
+    item_rhoRef().setState(settings().volumeForce);
 }
 
 

@@ -17,8 +17,7 @@
             (
               - (fvc::snGrad(p)*mesh.magSf())
               + (fvc::interpolate(rhok)*(g & mesh.Sf()))
-              + (fvc::interpolate(storage.F())
-                /fvc::interpolate(storage.rho()) & mesh.Sf())
+              + (fvc::interpolate(storage.F())/storage.rhoRef() & mesh.Sf())
             )
         );
     }

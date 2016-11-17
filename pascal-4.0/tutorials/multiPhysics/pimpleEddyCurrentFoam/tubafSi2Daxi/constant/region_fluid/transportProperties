@@ -17,7 +17,8 @@ FoamFile
 transportModel        Newtonian;
 
 nu                    nu  [ 0 2 -1 0 0 0 0 ] 3.3333e-7; // SiLiquid
-rho                   rho [ 1 -3  0 0 0 0 0 ] 2580;     // SiLiquid
+
+rhoRef                rho [ 1 -3  0 0 0 0 0 ] 2580;     // SiLiquid
 
 beta                  beta [0 0 0 -1 0 0 0] 1e-04;
 

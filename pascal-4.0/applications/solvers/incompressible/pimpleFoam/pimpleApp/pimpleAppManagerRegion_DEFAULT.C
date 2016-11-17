@@ -99,6 +99,33 @@ void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_phi::create() const
 }
 
 
+void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_transport::create() const
+{
+    set
+    (
+        new singlePhaseTransportModel
+        (
+            storage().U(),
+            storage().phi()
+        )
+    );
+}
+
+
+void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_turbulence::create() const
+{
+    set
+    (
+        incompressible::turbulenceModel::New
+        (
+            storage().U(),
+            storage().phi(),
+            storage().transport()
+        )
+    );
+}
+
+
 void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_F::create() const
 {
     set
@@ -142,17 +169,16 @@ void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
 
     set
     (
-        new volScalarField
+        new uniformDimensionedScalarField
         (
             IOobject
             (
                 name(),
-                time().timeName(),
-                mesh(),
+                time().constant(),
+                time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            mesh(),
             dimensionedScalar
             (
                 transportProperties.lookup("rho")
@@ -161,32 +187,6 @@ void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
     );
 }
 
-
-void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_transport::create() const
-{
-    set
-    (
-        new singlePhaseTransportModel
-        (
-            storage().U(),
-            storage().phi()
-        )
-    );
-}
-
-
-void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_turbulence::create() const
-{
-    set
-    (
-        incompressible::turbulenceModel::New
-        (
-            storage().U(),
-            storage().phi(),
-            storage().transport()
-        )
-    );
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

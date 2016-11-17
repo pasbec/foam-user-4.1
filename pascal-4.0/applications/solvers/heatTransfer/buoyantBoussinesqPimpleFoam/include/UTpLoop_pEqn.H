@@ -22,8 +22,7 @@
                     << endl;
             }
 
-            phi += rAUf*(fvc::interpolate(storage.F())
-                        /fvc::interpolate(storage.rho()) & mesh.Sf());
+            phi += rAUf*(fvc::interpolate(storage.F())/storage.rhoRef() & mesh.Sf());
         }
 
         // Manually correct the boundary conditions for the pressure at walls
@@ -88,7 +87,7 @@
                             const vectorField& Fp =
                                 storage.F().boundaryField()[patchI];
 
-                            pp.gradient() = ((rhokp*g.value() + Fp) & Sfp)/magSfp;
+                            pp.gradient() = ((rhokp*g.value() + Fp/storage.rhoRef().value()) & Sfp)/magSfp;
                         }
                         else
                         {

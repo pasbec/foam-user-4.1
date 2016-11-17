@@ -148,7 +148,7 @@ public:
                 SM_REGIONITEM_ADD(volVectorField, F);
 
                 //- Density
-                SM_REGIONITEM_ADD(volScalarField, rho);
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, rhoRef);
 
             SM_REGIONSTORAGE_ADD();
 
