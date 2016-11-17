@@ -41,7 +41,7 @@ Author
 #include "buoyantBoussinesqPimpleEddyCurrentAppInclude.H"
 #include "buoyantBoussinesqPimpleEddyCurrentAppControl.H"
 
-#include "pimpleAppManager.H"
+#include "buoyantBoussinesqPimpleAppManager.H"
 #include "eddyCurrentAppManager.H"
 
 
@@ -83,69 +83,16 @@ public:
 
         SM_GLOBALSTORAGE_NEW();
 
+            //- Temperature
+            SM_GLOBALITEM_ADD(regionVolScalarField, T);
+
             //- Thermal conductivity
-            SM_GLOBALITEM_ADD(regionVolScalarField, kappa);
+            SM_GLOBALITEM_ADD(regionVolScalarField, lambda);
 
         SM_GLOBALSTORAGE_ADD();
 
 
-        SM_REGION_NEW(FLUID);
-
-            SM_REGIONCONTROL_ADD_GLOBALCONTROL();
-
-            SM_REGIONSETTINGS_NEW();
-            SM_REGIONSETTINGS_ADD();
-
-            SM_REGIONSTORAGE_NEW();
-
-                //- Gravitational acceleration
-                SM_REGIONITEM_ADD(uniformDimensionedVectorField, g);
-
-                //- Thermal expansion coefficient
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, beta);
-
-                //- Reference temperature
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, TRef);
-
-                //- Laminar Prandtl number
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, Pr);
-
-                //- Turbulent Prandtl number
-                SM_REGIONITEM_ADD(uniformDimensionedScalarField, Prt);
-
-                //- Kinematic turbulent thermal conductivity
-                SM_REGIONITEM_ADD(volScalarField, kappat);
-
-//                 //- Kinematic density
-//                 SM_REGIONITEM_ADD(volScalarField, rhok);
-
-            SM_REGIONSTORAGE_ADD();
-
-        SM_REGION_END();
-
-
-        SM_REGION_NEW(THERMAL);
-
-            SM_REGIONCONTROL_ADD_GLOBALCONTROL();
-
-            SM_REGIONSETTINGS_NEW();
-            SM_REGIONSETTINGS_ADD();
-
-            SM_REGIONSTORAGE_NEW();
-
-                //- Temperature
-                SM_REGIONITEM_ADD(volScalarField, T);
-
-            SM_REGIONSTORAGE_ADD();
-
-        SM_REGION_END();
-
-
         SM_REGIONS_NEW();
-
-            SM_REGIONS_REGION_ADD(FLUID, mesh()[Region::FLUID]);
-            SM_REGIONS_REGION_ADD(THERMAL, mesh()[Region::THERMAL]);
-
         SM_REGIONS_ADD();
 
 
@@ -153,8 +100,8 @@ private:
 
     // Private data
 
-        //- Pointer for manager of pimpleApp
-        mutable autoPtr<pimpleApp::Manager> pimpleAppManager_;
+        //- Pointer for manager of buoyantBoussinesqPimpleApp
+        mutable autoPtr<buoyantBoussinesqPimpleApp::Manager> buoyantBoussinesqPimpleAppManager_;
 
         //- Pointer for manager of eddyCurrentApp
         mutable autoPtr<eddyCurrentApp::Manager> eddyCurrentAppManager_;
@@ -191,8 +138,8 @@ public:
 
         // Managers
 
-            //- pimpleApp
-            pimpleApp::Manager& pimpleAppManager() const;
+            //- buoyantBoussinesqPimpleApp
+            buoyantBoussinesqPimpleApp::Manager& buoyantBoussinesqPimpleAppManager() const;
 
             //- eddyCurrentApp
             eddyCurrentApp::Manager& eddyCurrentAppManager() const;
@@ -231,8 +178,6 @@ public:
 
 #ifdef NoRepository
 #   include "buoyantBoussinesqPimpleEddyCurrentAppManager.C"
-#   include "buoyantBoussinesqPimpleEddyCurrentAppManagerRegion_FLUID.C"
-#   include "buoyantBoussinesqPimpleEddyCurrentAppManagerRegion_THERMAL.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

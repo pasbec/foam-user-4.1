@@ -52,7 +52,7 @@ void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Settings::read() cons
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::Item_kappa::create() const
+void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::Item_T::create() const
 {
     IOobject IOo
     (
@@ -100,21 +100,67 @@ void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::Item_kappa::
 }
 
 
+void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::Item_lambda::create() const
+{
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", true))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::THERMAL],
+        IOo
+    );
+
+    set
+    (
+        regionVolScalarField::LinkOrNew
+        (
+            IOobject
+            (
+                IOo.name(),
+                IOo.instance(),
+                IOo.db()
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimThermalConductivity,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName,
+            IOoOverride
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::create() const
 {
-    item_kappa().enable();
+    item_T().enable();
+    item_lambda().enable();
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Regions::create() const
-{
-    region_FLUID().enable();
-    region_THERMAL().enable();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -190,14 +236,14 @@ Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::~Manager()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::pimpleApp::Manager&
-Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::pimpleAppManager() const
+Foam::buoyantBoussinesqPimpleApp::Manager&
+Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::buoyantBoussinesqPimpleAppManager() const
 {
-    if (pimpleAppManager_.empty())
+    if (buoyantBoussinesqPimpleAppManager_.empty())
     {
-        pimpleAppManager_.set
+        buoyantBoussinesqPimpleAppManager_.set
         (
-            new pimpleApp::Manager
+            new buoyantBoussinesqPimpleApp::Manager
             (
                 this->args(),
                 this->time(),
@@ -207,7 +253,7 @@ Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::pimpleAppManager() const
         );
     }
 
-    return pimpleAppManager_();
+    return buoyantBoussinesqPimpleAppManager_();
 }
 
 Foam::eddyCurrentApp::Manager&
@@ -236,13 +282,13 @@ bool Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::setCoNum
     scalar& CourantNumber
 ) const
 {
-    return pimpleAppManager().setCoNum(CourantNumber);
+    return buoyantBoussinesqPimpleAppManager().setCoNum(CourantNumber);
 }
 
 
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::read() const
 {
-    pimpleAppManager().read();
+    buoyantBoussinesqPimpleAppManager().read();
     eddyCurrentAppManager().read();
 
     settings().checkRead();
@@ -252,7 +298,7 @@ void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::read() const
 
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::init() const
 {
-    pimpleAppManager().init();
+    buoyantBoussinesqPimpleAppManager().init();
     eddyCurrentAppManager().init();
 
     storage().checkInit();
@@ -262,21 +308,21 @@ void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::init() const
 
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::next() const
 {
-    pimpleAppManager().next();
+    buoyantBoussinesqPimpleAppManager().next();
     eddyCurrentAppManager().next();
 }
 
 
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::write() const
 {
-    pimpleAppManager().write();
+    buoyantBoussinesqPimpleAppManager().write();
     eddyCurrentAppManager().write();
 }
 
 
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::finalize() const
 {
-    pimpleAppManager().finalize();
+    buoyantBoussinesqPimpleAppManager().finalize();
     eddyCurrentAppManager().finalize();
 }
 

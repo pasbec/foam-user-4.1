@@ -19,6 +19,4 @@
         TEqn.solve();
 
     //     radiation.correct();
-
-        rhok = 1.0 - beta*(T - TRef);
     }

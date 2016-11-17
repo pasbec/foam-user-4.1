@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
             if (Control::debug)
             {
                 Info << "interTrackEddyCurrentApp::Control : "
-                    << "Map/Extrapolate Lorentz-force in fluid region."
+                    << "Map/Extrapolate Lorentz-force to fluid region."
                     << endl;
             }
 

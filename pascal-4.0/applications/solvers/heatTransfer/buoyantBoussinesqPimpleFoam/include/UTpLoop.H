@@ -2,7 +2,7 @@
     {
         if (Control::debug)
         {
-            Info<< Control::typeName << " | UpLoop.H : "
+            Info<< Control::typeName << " | UTpLoop.H : "
                 << "Commencing PIMPLE U-T-p loop."
                 << endl;
         }
@@ -23,13 +23,14 @@
             volScalarField& rhok = storage.rhok();
             volScalarField& kappat = storage.kappat();
 
-            #include "UTpLoop_UEqn.H"
-            #include "UTpLoop_TEqn.H"
+#           include "UTpLoop_UEqn.H"
+#           include "UTpLoop_TEqn.H"
+#           include "UTpLoop_rhokUpdate.H"
 
             // --- Pressure corrector loop
             while (control.correct())
             {
-                #include "UTpLoop_pEqn.H"
+#               include "UTpLoop_pEqn.H"
             }
 
             if (control.turbCorr())

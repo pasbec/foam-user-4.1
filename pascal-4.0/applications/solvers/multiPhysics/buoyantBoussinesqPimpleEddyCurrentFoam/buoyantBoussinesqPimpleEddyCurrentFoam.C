@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
     eddyCurrentApp::Manager& eddyCurrentAppManager =
         masterManager.eddyCurrentAppManager();
 
-    pimpleApp::Manager& pimpleAppManager =
-        masterManager.pimpleAppManager();
+    buoyantBoussinesqPimpleApp::Manager& buoyantBoussinesqPimpleAppManager =
+        masterManager.buoyantBoussinesqPimpleAppManager();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -159,7 +159,8 @@ int main(int argc, char *argv[])
             }
         }
 
-        // Map/Extrapolate and update volume force in fluid region
+        // Map/Extrapolate and update volume force in fluid region and
+        // Joule heat in conducting region
         if (emUpdate)
         {
             using namespace buoyantBoussinesqPimpleEddyCurrentApp;
@@ -172,28 +173,103 @@ int main(int argc, char *argv[])
             if (Control::debug)
             {
                 Info << "buoyantBoussinesqPimpleEddyCurrentApp::Control : "
-                    << "Map/Extrapolate Lorentz-force in fluid region."
+                    << "Map/Extrapolate Lorentz-force to fluid region."
                     << endl;
             }
 
             eddyCurrentAppManager.storage().F().rmap(Region::CONDUCTOR);
             eddyCurrentAppManager.storage().F().mapExtrapolate(Region::FLUID);
 
+            if (Control::debug)
+            {
+                Info << "buoyantBoussinesqPimpleEddyCurrentApp::Control : "
+                    << "Map/Extrapolate Joule-heat to thermal region."
+                    << endl;
+            }
+
             eddyCurrentAppManager.storage().Q().rmap(Region::CONDUCTOR);
             eddyCurrentAppManager.storage().Q().mapExtrapolate(Region::THERMAL);
         }
 
+        // Solve thermal problem
+        {
+            using namespace buoyantBoussinesqPimpleEddyCurrentApp;
+            using namespace buoyantBoussinesqPimpleEddyCurrentApp::Region;
+
+            Manager& manager = masterManager;
+
+            SM_MANAGERSCOPE();
+
+// TODO
+        }
+
+        // Map/Extrapolate and update temperature in fluid region
+        {
+            using namespace buoyantBoussinesqPimpleEddyCurrentApp;
+            using namespace buoyantBoussinesqPimpleEddyCurrentApp::Region;
+
+            Manager& manager = masterManager;
+
+            SM_MANAGERSCOPE();
+
+            if (Control::debug)
+            {
+                Info << "buoyantBoussinesqPimpleEddyCurrentApp::Control : "
+                    << "Map/Extrapolate temperature to fluid region."
+                    << endl;
+            }
+
+            masterManager.storage().T().rmap(Region::THERMAL);
+            masterManager.storage().T().mapExtrapolate(Region::THERMAL);
+        }
+
         // Solve fluid flow
         {
-            using namespace pimpleApp;
-            using namespace pimpleApp::Region;
+            using namespace buoyantBoussinesqPimpleApp;
+            using namespace buoyantBoussinesqPimpleApp::Region;
 
-            Manager& manager = pimpleAppManager;
+            Manager& manager = buoyantBoussinesqPimpleAppManager;
 
             SM_MANAGERSCOPE();
             SM_REGIONSCOPE(DEFAULT);
 
-#           include "UpLoop.H"
+            if (Control::debug)
+            {
+                Info<< Control::typeName << " | UTpLoop.H : "
+                    << "Commencing PIMPLE U-T-p loop."
+                    << endl;
+            }
+
+            // --- PIMPLE corrector loop
+            while (control.loop())
+            {
+                uniformDimensionedVectorField& g = storage.g();
+                volScalarField& T = storage.T();
+                volScalarField& p = storage.p();
+                volVectorField& U = storage.U();
+                surfaceScalarField& phi = storage.phi();
+                uniformDimensionedScalarField& beta = storage.beta();
+                uniformDimensionedScalarField& TRef = storage.TRef();
+                uniformDimensionedScalarField& Pr = storage.Pr();
+                uniformDimensionedScalarField& Prt = storage.Prt();
+                incompressible::turbulenceModel& turbulence = storage.turbulence();
+                volScalarField& rhok = storage.rhok();
+                volScalarField& kappat = storage.kappat();
+
+#               include "UTpLoop_UEqn.H"
+#               include "UTpLoop_rhokUpdate.H"
+
+                // --- Pressure corrector loop
+                while (control.correct())
+                {
+#                   include "UTpLoop_pEqn.H"
+                }
+
+                if (control.turbCorr())
+                {
+                    storage.turbulence().correct();
+                }
+            }
         }
     }
 

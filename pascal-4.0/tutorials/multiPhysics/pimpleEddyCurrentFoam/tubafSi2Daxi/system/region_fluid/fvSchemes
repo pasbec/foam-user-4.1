@@ -89,6 +89,8 @@ interpolationSchemes
     // ddtPhiCorr
     interpolate(U_0)                      linear;
     interpolate(((1|deltaT)*rAU))         linear;
+
+    interpolate(rhok)                     linear;
 }
 
 fluxRequired

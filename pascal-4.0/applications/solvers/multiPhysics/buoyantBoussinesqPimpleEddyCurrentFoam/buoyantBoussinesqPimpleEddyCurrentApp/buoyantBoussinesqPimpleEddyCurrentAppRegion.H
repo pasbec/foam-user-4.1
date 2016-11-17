@@ -90,11 +90,11 @@ namespace Region
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace pimpleApp
+namespace buoyantBoussinesqPimpleApp
 {
 
 /*---------------------------------------------------------------------------*\
-                   Namespace pimpleApp::Region Declaration
+           Namespace buoyantBoussinesqPimpleApp::Region Declaration
 \*---------------------------------------------------------------------------*/
 
 namespace Region
@@ -108,7 +108,7 @@ namespace Region
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pimpleApp
+} // End namespace buoyantBoussinesqPimpleApp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

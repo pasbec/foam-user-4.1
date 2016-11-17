@@ -9,32 +9,39 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      funkySetFieldsDict;
+    class       volScalarField;
+    object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-materialProperties
-(
-    // Data from Vladi (currently nu_siliconLiquid/Pr = 3.333e-7/0.0122 [m^2/s])
-    "lambda_siliconSolid=2.732e-5;"   // Conductivity of solid silicon in [m^2/s]
-);
+dimensions      [0 0 0 1 0 0 0];
 
-expressions
-(
-    lambda_reset
-    {
-        field         lambda;
-        expression    "0";
-    }
+internalField   uniform 0;
 
-    lambda_solidSilicon
+boundaryField
+{
+    axis
     {
-        field         lambda;
-        variables     $materialProperties;
-        expression    "lambda_siliconSolid";
-        condition     "set(cellSet_material_siliconSolid)";
+        type            slip;
     }
-);
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
+    ".*Wall"
+    {
+        type            calculated;
+        value           $internalField;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
+    }
+}
 
 // ************************************************************************* //
