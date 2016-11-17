@@ -33,6 +33,95 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_f0::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                time(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_omega0::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mathematicalConstant::twoPi*storage().f0()
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_Anormf::create() const
+{
+    set
+    (
+        new uniformDimensionedVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            dimensionedVector
+            (
+                word(),
+                dimless,
+                vector::one
+            )
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_Ascale::create() const
+{
+    set
+    (
+        new uniformDimensionedVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            dimensionedVector
+            (
+                word(),
+                dimless,
+                vector::one
+            )
+        )
+    );
+}
+
+
 void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create() const
 {
     set
@@ -91,6 +180,12 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create()
 
 void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create() const
 {
+    item_f0().enable();
+    item_omega0().enable();
+
+    item_Anormf().setState(globalSettings().tolScale);
+    item_Ascale().setState(globalSettings().tolScale);
+
     item_j0Re().setState(!globalSettings().biotSavart);
     item_j0Im().setState(!globalSettings().biotSavart);
 }

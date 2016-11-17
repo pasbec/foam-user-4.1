@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
     manager.init();
 
-    uniformDimensionedScalarField& omega0 = globalStorage.omega0();
+    uniformDimensionedScalarField& omega0 = storage.omega0();
 
     while(manager.once())
     {

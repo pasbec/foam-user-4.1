@@ -203,8 +203,8 @@
                             << endl;
                     }
 
-                    uniformDimensionedVectorField& Anormf = globalStorage.Anormf();
-                    uniformDimensionedVectorField& Ascale = globalStorage.Ascale();
+                    uniformDimensionedVectorField& Anormf = storage.Anormf();
+                    uniformDimensionedVectorField& Ascale = storage.Ascale();
 
                     const BlockLduMatrix<vector2>& matrix = AcmptEqn;
                     const vector2Field& x = ACmpt;

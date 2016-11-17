@@ -36,8 +36,6 @@
             // Time-averaged Lorentz-force
             globalStorage.F()[CONDUCTOR] = 0.5 * ( (storage.jRe() ^ BRe)
                                                  + (storage.jIm() ^ BIm) );
-
-            globalStorage.F().rmap(CONDUCTOR);
         }
 
         if (globalStorage.item_pB().enabled())
@@ -46,8 +44,6 @@
             globalStorage.pB()[CONDUCTOR] = 0.5 * physicalConstant::rMu0
                                           * 0.5 * ( (BRe & BRe)
                                                   + (BIm & BIm) );
-
-            globalStorage.pB().rmap(CONDUCTOR);
         }
 
         if (globalStorage.item_Q().enabled())
@@ -55,8 +51,6 @@
             // Time-averaged joule heating
             globalStorage.Q()[CONDUCTOR] = 0.5 / sigma * ( (storage.jRe() & storage.jRe())
                                                          + (storage.jIm() & storage.jIm()) );
-
-            globalStorage.Q().rmap(CONDUCTOR);
         }
     }
 

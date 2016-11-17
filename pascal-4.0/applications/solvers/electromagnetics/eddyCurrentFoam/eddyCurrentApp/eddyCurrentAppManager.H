@@ -96,12 +96,6 @@ public:
 
         SM_GLOBALSTORAGE_NEW();
 
-            //- Harmonic field frequency
-            SM_GLOBALITEM_ADD(uniformDimensionedScalarField, f0);
-
-            //- Angular harmonic field frequency
-            SM_GLOBALITEM_ADD(uniformDimensionedScalarField, omega0);
-
             //- Electrical conductivity
             SM_GLOBALITEM_ADD(regionVolScalarField, sigma);
 
@@ -112,10 +106,6 @@ public:
             //- Magnetic vector potential
             SM_GLOBALITEM_ADD(regionVolVectorField, ARe);
             SM_GLOBALITEM_ADD(regionVolVectorField, AIm);
-
-            //- TODO
-            SM_GLOBALITEM_ADD(uniformDimensionedVectorField, Anormf);
-            SM_GLOBALITEM_ADD(uniformDimensionedVectorField, Ascale);
 
             //- Gradient of electric scalar potential
             SM_GLOBALITEM_ADD(regionVolVectorField, VReGrad);
@@ -145,6 +135,16 @@ public:
             SM_REGIONSETTINGS_ADD();
 
             SM_REGIONSTORAGE_NEW();
+
+                //- Harmonic field frequency
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, f0);
+
+                //- Angular harmonic field frequency
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, omega0);
+
+                //- TODO
+                SM_REGIONITEM_ADD(uniformDimensionedVectorField, Anormf);
+                SM_REGIONITEM_ADD(uniformDimensionedVectorField, Ascale);
 
                 // Source current density
                 SM_REGIONITEM_ADD(volVectorField, j0Re);

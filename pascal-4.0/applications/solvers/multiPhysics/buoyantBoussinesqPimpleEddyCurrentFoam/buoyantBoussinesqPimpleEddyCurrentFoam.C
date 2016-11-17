@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
         SM_GLOBALREGIONSCOPE(DEFAULT);
 
-        uniformDimensionedScalarField& omega0 = globalStorage.omega0();
+        uniformDimensionedScalarField& omega0 = storage.omega0();
 
         {
 #           include "AVLoop_sigmaUpdate.H"
@@ -103,7 +103,11 @@ int main(int argc, char *argv[])
 
         SM_MANAGERSCOPE();
 
+        eddyCurrentAppManager.storage().F().rmap(Region::CONDUCTOR);
         eddyCurrentAppManager.storage().F().mapExtrapolate(Region::FLUID);
+
+        eddyCurrentAppManager.storage().Q().rmap(Region::CONDUCTOR);
+        eddyCurrentAppManager.storage().Q().mapExtrapolate(Region::THERMAL);
     }
 
     while (masterManager.run())
@@ -142,7 +146,7 @@ int main(int argc, char *argv[])
 
             SM_GLOBALREGIONSCOPE(DEFAULT);
 
-            uniformDimensionedScalarField& omega0 = globalStorage.omega0();
+            uniformDimensionedScalarField& omega0 = storage.omega0();
 
             {
 #               include "A0BiotSavart.H"
@@ -172,7 +176,11 @@ int main(int argc, char *argv[])
                     << endl;
             }
 
+            eddyCurrentAppManager.storage().F().rmap(Region::CONDUCTOR);
             eddyCurrentAppManager.storage().F().mapExtrapolate(Region::FLUID);
+
+            eddyCurrentAppManager.storage().Q().rmap(Region::CONDUCTOR);
+            eddyCurrentAppManager.storage().Q().mapExtrapolate(Region::THERMAL);
         }
 
         // Solve fluid flow

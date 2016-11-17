@@ -60,45 +60,6 @@ void Foam::eddyCurrentApp::Manager::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_f0::create() const
-{
-    set
-    (
-        new uniformDimensionedScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().constant(),
-                time(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            )
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Storage::Item_omega0::create() const
-{
-    set
-    (
-        new uniformDimensionedScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().constant(),
-                time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mathematicalConstant::twoPi*storage().f0()
-        )
-    );
-}
-
-
 void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create() const
 {
     IOobject IOo
@@ -334,56 +295,6 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create() const
             ),
             calculatedFvPatchVectorField::typeName,
             IOoOverride
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Storage::Item_Anormf::create() const
-{
-    set
-    (
-        new uniformDimensionedVectorField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            dimensionedVector
-            (
-                word(),
-                dimless,
-                vector::one
-            )
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Storage::Item_Ascale::create() const
-{
-    set
-    (
-        new uniformDimensionedVectorField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            dimensionedVector
-            (
-                word(),
-                dimless,
-                vector::one
-            )
         )
     );
 }
@@ -699,9 +610,6 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create() const
 
 void Foam::eddyCurrentApp::Manager::Storage::create() const
 {
-    item_f0().enable();
-    item_omega0().enable();
-
     item_sigma().enable();
 
     item_A0Re().setState(settings().biotSavart);
@@ -709,9 +617,6 @@ void Foam::eddyCurrentApp::Manager::Storage::create() const
 
     item_ARe().enable();
     item_AIm().enable();
-
-    item_Anormf().setState(settings().tolScale);
-    item_Ascale().setState(settings().tolScale);
 
     item_VReGrad().setState(control().meshIs3D());
     item_VImGrad().setState(control().meshIs3D());
