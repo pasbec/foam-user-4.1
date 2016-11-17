@@ -62,15 +62,14 @@ int main(int argc, char *argv[])
     eddyCurrentApp::Manager& eddyCurrentAppManager =
         masterManager.eddyCurrentAppManager();
 
-    buoyantBoussinesqPimpleApp::Manager& buoyantBoussinesqPimpleAppManager =
-        masterManager.buoyantBoussinesqPimpleAppManager();
+    pimpleApp::Manager& pimpleAppManager =
+        masterManager.pimpleAppManager();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     masterManager.read();
     masterManager.init();
 
-// TODO: IDEAS? Buffer region may be out of sync with fluid region on write
 // TODO: Make this nicer!
     // Init eddyCurrentApp
     {
@@ -94,7 +93,6 @@ int main(int argc, char *argv[])
         }
     }
 
-// TODO: IDEAS? Buffer region may be out of sync with fluid region on write
 // TODO: Make this nicer!
     // Init buoyantBoussinesqPimpleEddyCurrentApp
     {
@@ -179,16 +177,14 @@ int main(int argc, char *argv[])
 
         // Solve fluid flow
         {
-            using namespace buoyantBoussinesqPimpleApp;
-            using namespace buoyantBoussinesqPimpleApp::Region;
+            using namespace pimpleApp;
+            using namespace pimpleApp::Region;
 
-            Manager& manager = buoyantBoussinesqPimpleAppManager;
+            Manager& manager = pimpleAppManager;
 
             SM_MANAGERSCOPE();
             SM_REGIONSCOPE(DEFAULT);
 
-            // WARNING: This is the loop of pimpleFoam run in the scope
-            //          of the buoyantBoussinesqPimpleApp!
 #           include "UpLoop.H"
         }
     }

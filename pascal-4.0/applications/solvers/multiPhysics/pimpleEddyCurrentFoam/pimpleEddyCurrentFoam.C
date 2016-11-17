@@ -58,7 +58,6 @@ int main(int argc, char *argv[])
     masterManager.read();
     masterManager.init();
 
-// TODO: IDEAS? Buffer region may be out of sync with fluid region on write
 // TODO: Make this nicer!
     // Init eddyCurrentApp
     {
@@ -82,7 +81,6 @@ int main(int argc, char *argv[])
         }
     }
 
-// TODO: IDEAS? Buffer region may be out of sync with fluid region on write
 // TODO: Make this nicer!
     // Init pimpleEddyCurrentApp
     {
