@@ -16,8 +16,9 @@ FoamFile
 
 materialProperties
 (
-    // Data from Vladi (currently nu_siliconLiquid/Pr = 3.333e-7/0.0122 [m^2/s])
-    "lambda_siliconSolid=2.732e-5;"   // Conductivity of solid silicon in [m^2/s]
+    // Data from Vladi
+    "lambda_siliconLiquid=66.448;"   // 2580*942.727*3.333e-7/0.0122 (rho * cp * nu / pr)
+    "lambda_siliconSolid=128.8;"   // 2300*700*8e-5 (rho * cp * kappa)
 );
 
 expressions
@@ -28,7 +29,15 @@ expressions
         expression    "0";
     }
 
-    lambda_solidSilicon
+    lambda_siliconLiquid
+    {
+        field         lambda;
+        variables     $materialProperties;
+        expression    "lambda_siliconLiquid";
+        condition     "set(cellSet_material_siliconLiquid)";
+    }
+
+    lambda_siliconSolid
     {
         field         lambda;
         variables     $materialProperties;

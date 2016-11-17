@@ -200,7 +200,35 @@ int main(int argc, char *argv[])
 
             SM_MANAGERSCOPE();
 
+            volScalarField& T = masterManager.storage().T()[Region::THERMAL];
+            volScalarField& lambda = masterManager.storage().lambda()[Region::THERMAL];
+            volScalarField& Q = eddyCurrentAppManager.storage().Q()[Region::THERMAL];
+
+// TODO: rho
+// TODO: Cp
+
+// TODO: alphat & influence on lambda
+
 // TODO
+// //             alphat = turbulence.nut()/Prt;
+// //             alphat.correctBoundaryConditions();
+// //
+// //             volScalarField alphaEff("alphaEff", turbulence.nu()/Pr + alphat);
+//
+//             fvScalarMatrix TEqn
+//             (
+//                 fvm::ddt(T)
+//               + fvm::div(phi, T)
+//               - fvm::laplacian(alphaEff, T)
+// //              ==
+// //                 radiation.ST(rhoCpRef, T)
+//             );
+//
+//             TEqn.relax();
+//
+//             TEqn.solve();
+//
+// //             radiation.correct();
         }
 
         // Map/Extrapolate and update temperature in fluid region
@@ -250,11 +278,11 @@ int main(int argc, char *argv[])
                 surfaceScalarField& phi = storage.phi();
                 uniformDimensionedScalarField& beta = storage.beta();
                 uniformDimensionedScalarField& TRef = storage.TRef();
-                uniformDimensionedScalarField& Pr = storage.Pr();
-                uniformDimensionedScalarField& Prt = storage.Prt();
+// TODO: Pr, Prt, alphat
+//                 uniformDimensionedScalarField& Pr = storage.Pr();
+//                 uniformDimensionedScalarField& Prt = storage.Prt();
                 incompressible::turbulenceModel& turbulence = storage.turbulence();
                 volScalarField& rhok = storage.rhok();
-                volScalarField& kappat = storage.kappat();
 
 #               include "UTpLoop_UEqn.H"
 #               include "UTpLoop_rhokUpdate.H"
@@ -269,6 +297,9 @@ int main(int argc, char *argv[])
                 {
                     storage.turbulence().correct();
                 }
+
+// TODO: Pr, Prt, alphat
+// TODO: alphat & influence on lambda
             }
         }
     }

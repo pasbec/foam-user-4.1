@@ -1,9 +1,9 @@
 
     {
-        kappat = turbulence.nut()/Prt;
-        kappat.correctBoundaryConditions();
+        alphat = turbulence.nut()/Prt;
+        alphat.correctBoundaryConditions();
 
-        volScalarField kappaEff("kappaEff", turbulence.nu()/Pr + kappat);
+        volScalarField kappaEff("kappaEff", turbulence.nu()/Pr + alphat);
 
         fvScalarMatrix TEqn
         (

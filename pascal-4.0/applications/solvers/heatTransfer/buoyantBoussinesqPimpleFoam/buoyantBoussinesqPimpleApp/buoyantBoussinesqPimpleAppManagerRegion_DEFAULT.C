@@ -245,7 +245,7 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_tu
 }
 
 
-void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_kappat::create() const
+void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_alphat::create() const
 {
     set
     (
@@ -363,7 +363,7 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::create(
     item_Pr().enable();
     item_Prt().enable();
     item_turbulence().enable();
-    item_kappat().enable();
+    item_alphat().enable();
     item_rhok().enable();
     item_F().setState(settings().volumeForce);
     item_rho().setState(settings().volumeForce);

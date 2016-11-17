@@ -139,7 +139,7 @@ public:
                 SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
 
                 //- Kinematic turbulent thermal conductivity
-                SM_REGIONITEM_ADD(volScalarField, kappat);
+                SM_REGIONITEM_ADD(volScalarField, alphat);
 
                 //- Kinematic density
                 SM_REGIONITEM_ADD(volScalarField, rhok);

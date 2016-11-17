@@ -21,7 +21,7 @@
             uniformDimensionedScalarField& Prt = storage.Prt();
             incompressible::turbulenceModel& turbulence = storage.turbulence();
             volScalarField& rhok = storage.rhok();
-            volScalarField& kappat = storage.kappat();
+            volScalarField& alphat = storage.alphat();
 
 #           include "UTpLoop_UEqn.H"
 #           include "UTpLoop_TEqn.H"
