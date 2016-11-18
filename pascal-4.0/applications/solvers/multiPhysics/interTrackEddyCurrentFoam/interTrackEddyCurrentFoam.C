@@ -61,7 +61,6 @@ int main(int argc, char *argv[])
     masterManager.init();
 
 // TODO: IDEAS? Buffer region may be out of sync with fluid region on write
-// TODO: Make this nicer!
     // Init eddyCurrentApp
     {
         using namespace eddyCurrentApp;
@@ -85,7 +84,6 @@ int main(int argc, char *argv[])
     }
 
 // TODO: IDEAS? Buffer region may be out of sync with fluid region on write
-// TODO: Make this nicer!
     // Init interTrackEddyCurrentApp
     {
         using namespace interTrackEddyCurrentApp;
@@ -95,8 +93,11 @@ int main(int argc, char *argv[])
 
         SM_MANAGERSCOPE();
 
-        eddyCurrentAppManager.storage().F().rmap(Region::CONDUCTOR);
-        eddyCurrentAppManager.storage().F().mapExtrapolate(Region::FLUID);
+        eddyCurrentApp::Manager::Storage& ecs =
+            eddyCurrentAppManager.storage();
+
+        ecs.F().rmap(Region::CONDUCTOR);
+        ecs.F().mapExtrapolate(Region::FLUID);
     }
 
     while (masterManager.run())
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
 
             if (Control::debug)
             {
-                Info << "interTrackEddyCurrentApp::Control : "
+                Info<< Control::typeName << " : "
                     << "Update of electromagntic fields due."
                     << endl;
             }
@@ -154,7 +155,7 @@ int main(int argc, char *argv[])
 
             if (Control::debug)
             {
-                Info << "interTrackEddyCurrentApp::Control : "
+                Info<< Control::typeName << " : "
                     << "Update mesh of buffer region."
                     << endl;
             }
@@ -177,7 +178,7 @@ int main(int argc, char *argv[])
 
             if (Control::debug)
             {
-                Info << "interTrackEddyCurrentApp::Control : "
+                Info<< Control::typeName << " : "
                     << "Update mesh of default region."
                     << endl;
             }
@@ -201,7 +202,7 @@ int main(int argc, char *argv[])
 
             if (Control::debug)
             {
-                Info << "interTrackEddyCurrentApp::Control : "
+                Info<< Control::typeName << " : "
                     << "Update mesh of conducting region."
                     << endl;
             }
@@ -249,15 +250,18 @@ int main(int argc, char *argv[])
 
             SM_MANAGERSCOPE();
 
+            eddyCurrentApp::Manager::Storage& ecs =
+                eddyCurrentAppManager.storage();
+
             if (Control::debug)
             {
-                Info << "interTrackEddyCurrentApp::Control : "
+                Info<< Control::typeName << " : "
                     << "Map/Extrapolate Lorentz-force to fluid region."
                     << endl;
             }
 
-            eddyCurrentAppManager.storage().F().rmap(Region::CONDUCTOR);
-            eddyCurrentAppManager.storage().F().mapExtrapolate(Region::FLUID);
+            ecs.F().rmap(Region::CONDUCTOR);
+            ecs.F().mapExtrapolate(Region::FLUID);
         }
 
         // Solve fluid flow

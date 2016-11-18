@@ -28,6 +28,7 @@ expressions
     {
         field         sigma;
         expression    "0";
+        keepPatches   true;
     }
 
     sigma_liquidSilicon
@@ -36,6 +37,7 @@ expressions
         variables     $materialProperties;
         expression    "sigma_liquidSilicon";
         condition     "set(cellSet_material_siliconLiquid)";
+        keepPatches   true;
     }
 
     sigma_graphite
@@ -44,6 +46,7 @@ expressions
         variables     $materialProperties;
         expression    "sigma_graphite";
         condition     "set(cellSet_material_graphite)";
+        keepPatches   true;
     }
 
     sigma_solidSilicon
@@ -52,6 +55,7 @@ expressions
         variables     $materialProperties;
         expression    "sigma_siliconSolid";
         condition     "set(cellSet_material_siliconSolid)";
+        keepPatches   true;
     }
 );
 

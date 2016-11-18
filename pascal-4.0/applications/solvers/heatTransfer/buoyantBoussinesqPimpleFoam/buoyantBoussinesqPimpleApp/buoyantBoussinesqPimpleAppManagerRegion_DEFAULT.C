@@ -266,7 +266,6 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_al
 }
 
 
-// TODO: Do not write rhok
 void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rhok::create() const
 {
     set
@@ -279,7 +278,7 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rh
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::NO_WRITE
             ),
             1.0 - storage().beta()*(storage().T() - storage().TRef()),
             calculatedFvPatchScalarField::typeName

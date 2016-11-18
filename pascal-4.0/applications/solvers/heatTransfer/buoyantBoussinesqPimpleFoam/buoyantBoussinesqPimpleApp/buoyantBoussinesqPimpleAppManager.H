@@ -150,7 +150,6 @@ public:
                 //- Heat source
                 SM_REGIONITEM_ADD(volScalarField, Q);
 
-// TODO: Disable if not necessary!
                 //- Reference specific heat capacity
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, CpRef);
 

@@ -58,7 +58,6 @@ int main(int argc, char *argv[])
     masterManager.read();
     masterManager.init();
 
-// TODO: Make this nicer!
     // Init eddyCurrentApp
     {
         using namespace eddyCurrentApp;
@@ -81,7 +80,6 @@ int main(int argc, char *argv[])
         }
     }
 
-// TODO: Make this nicer!
     // Init pimpleEddyCurrentApp
     {
         using namespace pimpleEddyCurrentApp;
@@ -91,8 +89,11 @@ int main(int argc, char *argv[])
 
         SM_MANAGERSCOPE();
 
-        eddyCurrentAppManager.storage().F().rmap(Region::CONDUCTOR);
-        eddyCurrentAppManager.storage().F().mapExtrapolate(Region::FLUID);
+        eddyCurrentApp::Manager::Storage& ecs =
+            eddyCurrentAppManager.storage();
+
+        ecs.F().rmap(Region::CONDUCTOR);
+        ecs.F().mapExtrapolate(Region::FLUID);
     }
 
     while (masterManager.run())
@@ -115,7 +116,7 @@ int main(int argc, char *argv[])
 
             if (Control::debug)
             {
-                Info << "pimpleEddyCurrentApp::Control : "
+                Info<< Control::typeName << " : "
                     << "Update of electromagntic fields due."
                     << endl;
             }
@@ -156,13 +157,16 @@ int main(int argc, char *argv[])
 
             if (Control::debug)
             {
-                Info << "pimpleEddyCurrentApp::Control : "
+                Info<< Control::typeName << " : "
                     << "Map/Extrapolate Lorentz-force in fluid region."
                     << endl;
             }
 
-            eddyCurrentAppManager.storage().F().rmap(Region::CONDUCTOR);
-            eddyCurrentAppManager.storage().F().mapExtrapolate(Region::FLUID);
+            eddyCurrentApp::Manager::Storage& ecs =
+                eddyCurrentAppManager.storage();
+
+            ecs.F().rmap(Region::CONDUCTOR);
+            ecs.F().mapExtrapolate(Region::FLUID);
         }
 
         // Solve fluid flow

@@ -17,10 +17,10 @@ FoamFile
 materialProperties
 (
     // Data from Vladi
-    "rhoCp_siliconLiquid=2432235.66;" // = 2580*942.727 (rho * cp)
-    "rhoCp_siliconSolid=1610000;"     // = 2300*700 (rho * cp)
-    "lambda_siliconLiquid=66.448;"    // 2580*942.727*3.333e-7/0.0122 (rho * cp * nu / pr)
-    "lambda_siliconSolid=128.8;"      // 2300*700*8e-5 (rho * cp * kappa)
+    "rhoCp_siliconLiquid=2432236;" // = 2580*943 (rho * cp)
+    "rhoCp_siliconSolid=1905940;"     // = 2330*818 (rho * cp)
+    "lambda_siliconLiquid=66.5;"    // 2580*943*3.333e-7/0.0122 (rho * cp * nu / pr)
+    "lambda_siliconSolid=22.0;"      // 2330*818*1.1543e-05 (rho * cp * kappa)
 );
 
 expressions
@@ -29,6 +29,7 @@ expressions
     {
         field         lambda;
         expression    "0";
+        keepPatches   true;
     }
 
 //     lambda_siliconLiquid
@@ -37,6 +38,7 @@ expressions
 //         variables     $materialProperties;
 //         expression    "lambda_siliconLiquid";
 //         condition     "set(cellSet_material_siliconLiquid)";
+//         keepPatches   true;
 //     }
 
     lambda_siliconSolid
@@ -45,12 +47,14 @@ expressions
         variables     $materialProperties;
         expression    "lambda_siliconSolid";
         condition     "set(cellSet_material_siliconSolid)";
+        keepPatches   true;
     }
 
     rhoCp_reset
     {
         field         rhoCp;
         expression    "0";
+        keepPatches   true;
     }
 
 //     rhoCp_siliconLiquid
@@ -59,6 +63,7 @@ expressions
 //         variables     $materialProperties;
 //         expression    "rhoCp_siliconLiquid";
 //         condition     "set(cellSet_material_siliconLiquid)";
+//         keepPatches   true;
 //     }
 
     rhoCp_siliconSolid
@@ -67,6 +72,14 @@ expressions
         variables     $materialProperties;
         expression    "rhoCp_siliconSolid";
         condition     "set(cellSet_material_siliconSolid)";
+        keepPatches   true;
+    }
+
+    temperature_gradient
+    {
+        field         T;
+        expression    "50.0*(pos().z-0.022)";
+        keepPatches   true;
     }
 );
 

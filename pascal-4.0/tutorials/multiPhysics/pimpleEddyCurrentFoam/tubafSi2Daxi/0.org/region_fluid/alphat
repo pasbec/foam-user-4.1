@@ -34,7 +34,11 @@ boundaryField
     }
     ".*Wall"
     {
-        type            alphatWallFunction;
+// TODO: alphat wall functions?
+// TODO: alphatJayatillekeWallFunction?
+//         type            alphatWallFunction;
+//         value           uniform 0;
+        type            fixedValue;
         value           uniform 0;
     }
     "procBoundary.*"

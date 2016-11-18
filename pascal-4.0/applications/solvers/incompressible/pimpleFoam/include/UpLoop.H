@@ -25,7 +25,7 @@
 
             if (control.turbCorr())
             {
-                storage.turbulence().correct();
+                turbulence.correct();
             }
         }
     }

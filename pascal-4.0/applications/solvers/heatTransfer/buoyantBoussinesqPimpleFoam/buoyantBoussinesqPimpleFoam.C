@@ -33,8 +33,6 @@ Author
 
 #include "buoyantBoussinesqPimpleApp.H"
 
-// TODO: Do not write rhok
-
 // TODO: Rename to bbqPimpleFoam
 
 // TODO: Pressure naming p vs. p_rgh (gh, ghf, hRef, ...)
