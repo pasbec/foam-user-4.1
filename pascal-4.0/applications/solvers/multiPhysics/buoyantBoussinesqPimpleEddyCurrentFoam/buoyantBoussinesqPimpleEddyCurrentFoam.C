@@ -218,6 +218,7 @@ int main(int argc, char *argv[])
             ecs.Q().mapExtrapolate(Region::THERMAL);
         }
 
+        // Map/Extrapolate lambda
         {
             using namespace buoyantBoussinesqPimpleEddyCurrentApp;
             using namespace buoyantBoussinesqPimpleEddyCurrentApp::Region;
@@ -246,8 +247,7 @@ int main(int argc, char *argv[])
             mms.lambda().mapExtrapolate(Region::THERMAL);
         }
 
-// TODO: Loop over T -> U -> rhok -> p
-
+// TODO: Loop over U -> alphat -> T -> rhok -> p?
         // Solve thermal problem
         {
             using namespace buoyantBoussinesqPimpleEddyCurrentApp;
@@ -355,12 +355,10 @@ int main(int argc, char *argv[])
                 volScalarField& alphat = storage.alphat();
 
 #               include "UTpLoop_UEqn.H"
-
 // TODO: alphat wall functions?
 // TODO: alphat (Boundary conditions)
-                alphat = turbulence.nut()/Prt;
-                alphat.correctBoundaryConditions();
-
+#               include "UTpLoop_alphatUpdate.H"
+// TODO: Loop over U -> alphat -> T -> rhok -> p?
 #               include "UTpLoop_rhokUpdate.H"
 
                 // --- Pressure corrector loop

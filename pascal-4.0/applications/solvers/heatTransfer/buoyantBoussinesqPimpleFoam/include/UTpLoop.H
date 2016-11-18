@@ -24,6 +24,7 @@
             volScalarField& alphat = storage.alphat();
 
 #           include "UTpLoop_UEqn.H"
+#           include "UTpLoop_alphatUpdate.H"
 #           include "UTpLoop_TEqn.H"
 #           include "UTpLoop_rhokUpdate.H"
 
