@@ -11,13 +11,27 @@
 
     if (control.momentumPredictor())
     {
-        solve
-        (
-            UEqn == fvc::reconstruct
+        if (storage.item_F().enabled())
+        {
+            solve
             (
-              - (fvc::snGrad(p)*mesh.magSf())
-              + (fvc::interpolate(rhok)*(g & mesh.Sf()))
-              + (fvc::interpolate(storage.F())/storage.rhoRef() & mesh.Sf())
-            )
-        );
+                UEqn == fvc::reconstruct
+                (
+                  - (fvc::snGrad(p)*mesh.magSf())
+                  + (fvc::interpolate(rhok)*(g & mesh.Sf()))
+                  + (fvc::interpolate(storage.F())/storage.rhoRef() & mesh.Sf())
+                )
+            );
+        }
+        else
+        {
+            solve
+            (
+                UEqn == fvc::reconstruct
+                (
+                  - (fvc::snGrad(p)*mesh.magSf())
+                  + (fvc::interpolate(rhok)*(g & mesh.Sf()))
+                )
+            );
+        }
     }

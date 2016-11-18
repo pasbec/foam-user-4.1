@@ -17,8 +17,10 @@ FoamFile
 materialProperties
 (
     // Data from Vladi
-    "lambda_siliconLiquid=66.448;"   // 2580*942.727*3.333e-7/0.0122 (rho * cp * nu / pr)
-    "lambda_siliconSolid=128.8;"   // 2300*700*8e-5 (rho * cp * kappa)
+    "rhoCp_siliconLiquid=2432235.66;" // = 2580*942.727 (rho * cp)
+    "rhoCp_siliconSolid=1610000;"     // = 2300*700 (rho * cp)
+    "lambda_siliconLiquid=66.448;"    // 2580*942.727*3.333e-7/0.0122 (rho * cp * nu / pr)
+    "lambda_siliconSolid=128.8;"      // 2300*700*8e-5 (rho * cp * kappa)
 );
 
 expressions
@@ -29,19 +31,41 @@ expressions
         expression    "0";
     }
 
-    lambda_siliconLiquid
-    {
-        field         lambda;
-        variables     $materialProperties;
-        expression    "lambda_siliconLiquid";
-        condition     "set(cellSet_material_siliconLiquid)";
-    }
+//     lambda_siliconLiquid
+//     {
+//         field         lambda;
+//         variables     $materialProperties;
+//         expression    "lambda_siliconLiquid";
+//         condition     "set(cellSet_material_siliconLiquid)";
+//     }
 
     lambda_siliconSolid
     {
         field         lambda;
         variables     $materialProperties;
         expression    "lambda_siliconSolid";
+        condition     "set(cellSet_material_siliconSolid)";
+    }
+
+    rhoCp_reset
+    {
+        field         rhoCp;
+        expression    "0";
+    }
+
+//     rhoCp_siliconLiquid
+//     {
+//         field         rhoCp;
+//         variables     $materialProperties;
+//         expression    "rhoCp_siliconLiquid";
+//         condition     "set(cellSet_material_siliconLiquid)";
+//     }
+
+    rhoCp_siliconSolid
+    {
+        field         rhoCp;
+        variables     $materialProperties;
+        expression    "rhoCp_siliconSolid";
         condition     "set(cellSet_material_siliconSolid)";
     }
 );

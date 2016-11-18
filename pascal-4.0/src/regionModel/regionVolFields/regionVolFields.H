@@ -68,6 +68,17 @@ void regionGeometricField                                                     \
 >::rmapInteralField                                                           \
 (                                                                             \
     label regionI                                                             \
+) const;                                                                      \
+                                                                              \
+                                                                              \
+template<>                                                                    \
+void                                                                          \
+Foam::regionGeometricField                                                    \
+<                                                                             \
+    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
+>::extrapolateBoundaryField                                                   \
+(                                                                             \
+    label regionI                                                             \
 ) const;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

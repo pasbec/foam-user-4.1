@@ -14,6 +14,18 @@
 //             radiation.ST(rhoCpRef, T)
         );
 
+        if (storage.item_Q().enabled())
+        {
+            if (Control::debug)
+            {
+                Info<< Control::typeName << " | TEqn.H : "
+                    << "Adding heat source to TEqn."
+                    << endl;
+            }
+
+            TEqn -= storage.Q()/storage.rhoRef()/storage.CpRef();
+        }
+
         TEqn.relax();
 
         TEqn.solve();

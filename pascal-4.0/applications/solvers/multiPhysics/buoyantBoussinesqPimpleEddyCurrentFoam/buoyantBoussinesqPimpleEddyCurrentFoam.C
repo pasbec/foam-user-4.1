@@ -33,6 +33,10 @@ Author
 
 #include "buoyantBoussinesqPimpleEddyCurrentApp.H"
 
+// TODO: Do not write U/phi
+
+// TODO: Rename to bbqPimpleThermalEddyCurrentFoam
+
 // TODO: Pressure naming p vs. p_rgh (gh, ghf, hRef, ...)
 
 // TODO: Relaxation of pressure?
@@ -57,7 +61,8 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    buoyantBoussinesqPimpleEddyCurrentApp::Manager masterManager(args, runTime, regionMesh);
+    buoyantBoussinesqPimpleEddyCurrentApp::Manager
+        masterManager(args, runTime, regionMesh);
 
     eddyCurrentApp::Manager& eddyCurrentAppManager =
         masterManager.eddyCurrentAppManager();
@@ -108,6 +113,25 @@ int main(int argc, char *argv[])
 
         eddyCurrentAppManager.storage().Q().rmap(Region::CONDUCTOR);
         eddyCurrentAppManager.storage().Q().mapExtrapolate(Region::THERMAL);
+
+        masterManager.storage().rhoCp().rmap(Region::THERMAL);
+        masterManager.storage().rhoCp()[Region::FLUID] =
+            buoyantBoussinesqPimpleAppManager.regions().region_DEFAULT().
+            storage().rhoRef()
+          * buoyantBoussinesqPimpleAppManager.regions().region_DEFAULT().
+            storage().CpRef();
+        masterManager.storage().rhoCp().rmap(Region::FLUID);
+        masterManager.storage().rhoCp().mapExtrapolate(Region::THERMAL);
+
+        masterManager.storage().lambda().rmap(Region::THERMAL);
+        masterManager.storage().lambda()[Region::FLUID] =
+            masterManager.storage().rhoCp()[Region::FLUID]
+          * buoyantBoussinesqPimpleAppManager.regions().region_DEFAULT().
+            storage().transport().nu()
+          / buoyantBoussinesqPimpleAppManager.regions().region_DEFAULT().
+            storage().Pr();
+        masterManager.storage().lambda().rmap(Region::FLUID);
+        masterManager.storage().lambda().mapExtrapolate(Region::THERMAL);
     }
 
     while (masterManager.run())
@@ -191,6 +215,8 @@ int main(int argc, char *argv[])
             eddyCurrentAppManager.storage().Q().mapExtrapolate(Region::THERMAL);
         }
 
+// TODO: Loop over T -> U -> rhok -> p
+
         // Solve thermal problem
         {
             using namespace buoyantBoussinesqPimpleEddyCurrentApp;
@@ -200,35 +226,48 @@ int main(int argc, char *argv[])
 
             SM_MANAGERSCOPE();
 
-            volScalarField& T = masterManager.storage().T()[Region::THERMAL];
-            volScalarField& lambda = masterManager.storage().lambda()[Region::THERMAL];
             volScalarField& Q = eddyCurrentAppManager.storage().Q()[Region::THERMAL];
 
-// TODO: rho
-// TODO: Cp
+            volScalarField& T = masterManager.storage().T()[Region::THERMAL];
+            volScalarField& lambda = masterManager.storage().lambda()[Region::THERMAL];
+            volScalarField& rhoCp = masterManager.storage().rhoCp()[Region::THERMAL];
 
+// TODO: Substitute U with phi
+//             surfaceScalarField& phi = masterManager.storage().phi()[Region::THERMAL];
+            masterManager.storage().U().rmap(Region::FLUID);
+            masterManager.storage().U().mapInteralField(Region::THERMAL);
+            surfaceScalarField phi
+            (
+                "phi",
+                fvc::interpolate(masterManager.storage().U()[Region::THERMAL])
+              & globalMesh[Region::THERMAL].Sf()
+            );
+
+// TODO: Remove after debug
+//             Q.write();
+//             lambda.write();
+//             rhoCp.write();
+
+// TODO: phi
+// TODO: phi (Boundary conditions)
+// TODO: lambda (Boundary conditions)
+// TODO: rhoCp (Boundary conditions)
 // TODO: alphat & influence on lambda
+            fvScalarMatrix TEqn
+            (
+                rhoCp*fvm::ddt(T)
+              + rhoCp*fvm::div(phi, T)
+              - fvm::laplacian(lambda, T)
+              - Q
+//              ==
+//                 rhoCp*radiation.ST(rhoCp, T)
+            );
 
-// TODO
-// //             alphat = turbulence.nut()/Prt;
-// //             alphat.correctBoundaryConditions();
-// //
-// //             volScalarField alphaEff("alphaEff", turbulence.nu()/Pr + alphat);
-//
-//             fvScalarMatrix TEqn
-//             (
-//                 fvm::ddt(T)
-//               + fvm::div(phi, T)
-//               - fvm::laplacian(alphaEff, T)
-// //              ==
-// //                 radiation.ST(rhoCpRef, T)
-//             );
-//
-//             TEqn.relax();
-//
-//             TEqn.solve();
-//
-// //             radiation.correct();
+            TEqn.relax();
+
+            TEqn.solve();
+
+//             radiation.correct();
         }
 
         // Map/Extrapolate and update temperature in fluid region
@@ -248,7 +287,7 @@ int main(int argc, char *argv[])
             }
 
             masterManager.storage().T().rmap(Region::THERMAL);
-            masterManager.storage().T().mapExtrapolate(Region::THERMAL);
+            masterManager.storage().T().mapExtrapolate(Region::FLUID);
         }
 
         // Solve fluid flow
@@ -300,6 +339,10 @@ int main(int argc, char *argv[])
 
 // TODO: Pr, Prt, alphat
 // TODO: alphat & influence on lambda
+// //             alphat = turbulence.nut()/Prt;
+// //             alphat.correctBoundaryConditions();
+// //
+// //             volScalarField alphaEff("alphaEff", turbulence.nu()/Pr + alphat);
             }
         }
     }

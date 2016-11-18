@@ -969,22 +969,4 @@ interpolateBoundaryField
 };
 
 
-template
-<
-    class Type, template<class> class PatchField, class GeoMesh,
-    class RegionGeoMesh
->
-void
-Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
-extrapolateBoundaryField
-(
-    label regionI
-) const
-{
-    GeometricFieldType& vf = operator[](regionI);
-
-    fvc::extrapolate(vf);
-};
-
-
 // ************************************************************************* //

@@ -190,6 +190,10 @@ void Foam::interTrackEddyCurrentApp::Manager::read() const
     interTrackAppManager().read();
     eddyCurrentAppManager().read();
 
+    // Make sure volume force is enabled
+    interTrackAppManager().regions().region_DEFAULT().
+        settings().volumeForce = true;
+
     settings().checkRead();
     regions().checkRead();
 }

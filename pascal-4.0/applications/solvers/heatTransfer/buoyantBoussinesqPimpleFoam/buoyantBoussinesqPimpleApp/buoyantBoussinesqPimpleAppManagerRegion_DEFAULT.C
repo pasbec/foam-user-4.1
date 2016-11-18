@@ -30,6 +30,7 @@ License
 void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Settings::read() const
 {
     volumeForce = dict().lookupOrDefault("volumeForce", false);
+    heatSource = dict().lookupOrDefault("heatSource", false);
     snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
 }
 
@@ -265,6 +266,7 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_al
 }
 
 
+// TODO: Do not write rhok
 void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rhok::create() const
 {
     set
@@ -277,7 +279,7 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rh
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::AUTO_WRITE
             ),
             1.0 - storage().beta()*(storage().T() - storage().TRef()),
             calculatedFvPatchScalarField::typeName
@@ -315,18 +317,6 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_F:
 
 void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rhoRef::create() const
 {
-    IOdictionary transportProperties
-    (
-        IOobject
-        (
-            "transportProperties",
-            time().constant(),
-            mesh(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
-
     set
     (
         new uniformDimensionedScalarField
@@ -339,10 +329,54 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_rh
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
+            dimensionedScalar(storage().transport().lookup("rhoRef"))
+        )
+    );
+}
+
+
+void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_Q::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            mesh(),
             dimensionedScalar
             (
-                transportProperties.lookup("rhoRef")
-            )
+                word(),
+                dimEnergy/dimTime/dimVolume,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName
+        )
+    );
+}
+
+
+void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::Item_CpRef::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            dimensionedScalar(storage().transport().lookup("CpRef"))
         )
     );
 }
@@ -365,7 +399,9 @@ void Foam::buoyantBoussinesqPimpleApp::Manager::Region_DEFAULT::Storage::create(
     item_alphat().enable();
     item_rhok().enable();
     item_F().setState(settings().volumeForce);
-    item_rhoRef().setState(settings().volumeForce);
+    item_rhoRef().setState(settings().volumeForce || settings().heatSource);
+    item_Q().setState(settings().heatSource);
+    item_CpRef().setState(settings().heatSource);
 }
 
 

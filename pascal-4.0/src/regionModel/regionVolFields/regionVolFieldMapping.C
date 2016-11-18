@@ -76,6 +76,22 @@ void regionGeometricField                                                     \
     {                                                                         \
         vf0[map[celli]] = vf[celli];                                          \
     }                                                                         \
+}                                                                             \
+                                                                              \
+                                                                              \
+template<>                                                                    \
+void                                                                          \
+Foam::regionGeometricField                                                    \
+<                                                                             \
+    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
+>::extrapolateBoundaryField                                                   \
+(                                                                             \
+    label regionI                                                             \
+) const                                                                       \
+{                                                                             \
+    GeometricFieldType& vf = operator[](regionI);                             \
+                                                                              \
+    fvc::extrapolate(vf);                                                     \
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -90,7 +90,7 @@ void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::Item_T::crea
             dimensionedScalar
             (
                 word(),
-                pow(dimLength, 2)/dimTime,
+                dimTemperature,
                 0
             ),
             calculatedFvPatchScalarField::typeName,
@@ -148,12 +148,113 @@ void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::Item_lambda:
 }
 
 
+void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::Item_rhoCp::create() const
+{
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", true))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::THERMAL],
+        IOo
+    );
+
+    set
+    (
+        regionVolScalarField::LinkOrNew
+        (
+            IOobject
+            (
+                IOo.name(),
+                IOo.instance(),
+                IOo.db()
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimDensity*dimSpecificHeatCapacity,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName,
+            IOoOverride
+        )
+    );
+}
+
+
+// TODO: Do not write U/phi
+// TODO: Substitute U with phi
+void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::Item_U::create() const
+{
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", true))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::THERMAL],
+        IOo
+    );
+
+    set
+    (
+        regionVolVectorField::LinkOrNew
+        (
+            IOobject
+            (
+                IOo.name(),
+                IOo.instance(),
+                IOo.db()
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVelocity,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName,
+            IOoOverride
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Storage::create() const
 {
     item_T().enable();
     item_lambda().enable();
+    item_rhoCp().enable();
+// TODO: Substitute U with phi
+    item_U().enable();
 }
 
 
@@ -290,6 +391,14 @@ void Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::read() const
 {
     buoyantBoussinesqPimpleAppManager().read();
     eddyCurrentAppManager().read();
+
+    // Make sure volume force is enabled
+    buoyantBoussinesqPimpleAppManager().regions().region_DEFAULT().
+        settings().volumeForce = true;
+
+    // Make sure heat source is enabled
+    buoyantBoussinesqPimpleAppManager().regions().region_DEFAULT().
+        settings().heatSource = true;
 
     settings().checkRead();
     regions().checkRead();

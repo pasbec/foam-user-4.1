@@ -89,6 +89,14 @@ public:
             //- Thermal conductivity
             SM_GLOBALITEM_ADD(regionVolScalarField, lambda);
 
+            //- Density times specific heat capacity
+            SM_GLOBALITEM_ADD(regionVolScalarField, rhoCp);
+
+// TODO: Substitute U with phi
+            //- phi
+//             SM_GLOBALITEM_ADD(regionSurfaceScalarField, phi);
+            SM_GLOBALITEM_ADD(regionVolVectorField, U);
+
         SM_GLOBALSTORAGE_ADD();
 
 

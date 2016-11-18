@@ -184,6 +184,10 @@ void Foam::pimpleEddyCurrentApp::Manager::read() const
     pimpleAppManager().read();
     eddyCurrentAppManager().read();
 
+    // Make sure volume force is enabled
+    pimpleAppManager().regions().region_DEFAULT().
+        settings().volumeForce = true;
+
     settings().checkRead();
     regions().checkRead();
 }

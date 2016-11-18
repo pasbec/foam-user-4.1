@@ -91,14 +91,11 @@ public:
                 //- Volume force switch
                 SM_SETTINGS_MEMBER_ADD(Switch, volumeForce);
 
+                //- Heat source switch
+                SM_SETTINGS_MEMBER_ADD(Switch, heatSource);
+
                 //- Use fixed flux-pressure to correct pressure p at
                 //  fixedGradient patches
-                // TODO: Do not use fixedGradient
-                //
-                //  * enabled: dp/dn = ((phi -(U&Sf))/rAUf)/magSf
-                //
-                //  * disabled: dp/dn = (rhokp*g + F)&n
-                //
                 SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
 
             SM_REGIONSETTINGS_ADD();
@@ -147,8 +144,15 @@ public:
                 //- Volume force
                 SM_REGIONITEM_ADD(volVectorField, F);
 
-                //- Density
+                //- Reference density
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, rhoRef);
+
+                //- Heat source
+                SM_REGIONITEM_ADD(volScalarField, Q);
+
+// TODO: Disable if not necessary!
+                //- Reference specific heat capacity
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, CpRef);
 
             SM_REGIONSTORAGE_ADD();
 

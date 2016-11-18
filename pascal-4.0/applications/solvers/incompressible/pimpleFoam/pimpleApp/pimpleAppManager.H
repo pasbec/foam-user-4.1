@@ -91,7 +91,8 @@ public:
                 //- Volume force switch
                 SM_SETTINGS_MEMBER_ADD(Switch, volumeForce);
 
-                //- Use fixed flux-pressure to correct pressure p
+                //- Use fixed flux-pressure to correct pressure p at
+                //  fixedGradient patches
                 SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
 
             SM_REGIONSETTINGS_ADD();

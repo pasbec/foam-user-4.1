@@ -93,12 +93,6 @@ public:
 
                 //- Use fixed flux-pressure to correct pressure p at
                 //  fixedGradient patches
-                // TODO: Do not use fixedGradient
-                //
-                //  * enabled: dp/dn = ((phi -(U&Sf))/rAUf)/magSf
-                //
-                //  * disabled: dp/dn = F&n
-                //
                 SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
 
             SM_REGIONSETTINGS_ADD();

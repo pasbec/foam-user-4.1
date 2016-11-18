@@ -32,10 +32,24 @@ boundaryField
     {
         type            wedge;
     }
-    ".*Wall"
+    topWall
     {
         type            fixedValue;
         value           $internalField;
+    }
+    sideWall
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+    cornerWall
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+    solidWall
+    {
+        type            zeroGradient;
     }
     "procBoundary.*"
     {

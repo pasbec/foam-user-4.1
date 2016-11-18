@@ -295,13 +295,10 @@ public:
 //                 notImplemented(type() + "::interpolateBoundaryField()");
 //             };
 
-//- TODO: Boundary field extrapolation
-//- TODO: Parallel?
             void extrapolateBoundaryField(label regionI) const
-            ;
-//             {
-//                 notImplemented(type() + "::extrapolateBoundaryField()");
-//             };
+            {
+                notImplemented(type() + "::extrapolateBoundaryField()");
+            };
 
         // Mapping with patch mapping where possible
 

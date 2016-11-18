@@ -9,19 +9,38 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      fvSolution;
+    class       volScalarField;
+    object      rhoCp;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
+dimensions      [1 -1 -2 -1 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
 {
-    T
+    axis
     {
-        solver                   PBiCG;
-        tolerance                1e-07;
-        relTol                   0;
-        preconditioner           DILU;
+        type            slip;
+    }
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
+    ".*Wall"
+    {
+        type            calculated;
+        value           $internalField;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
     }
 }
 
