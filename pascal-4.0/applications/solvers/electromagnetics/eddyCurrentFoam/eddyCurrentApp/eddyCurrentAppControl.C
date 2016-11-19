@@ -43,6 +43,11 @@ void Foam::eddyCurrentApp::Control::read()
     nSubCorrEDDYCURRENT_ =
         eddyCurrentDict.lookupOrDefault<label>("nSubCorrectors", 2147483647);
 
+    // Manual override for solution direction. For experts only!
+    Vector<label>& solutionDir = const_cast<Vector<label>&>(solutionDir_);
+    solutionDir =
+        eddyCurrentDict.lookupOrDefault<Vector<label> >("solutionDir", solutionDir_);
+
 #ifdef eddyCurrentAppLink_H
 
     // Read update settings
