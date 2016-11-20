@@ -73,17 +73,17 @@ coils_n         = 6
 coils_step      = 285.0
 coils_origin    = [0.0, 0.0, geo_z2]
 
-coils_current   = 450.0
+coils_current   = 432.0
 coils_nNonOrto  = 10
 coils_frequency = 50.0
 
 # We need a current amplitude of
 #
-# I = 450 A
+# I = 431.6 A
 #
 # for achieving
 #
-# B = sqrt(Bx^2 + By^2 + Bz^2) = 0.4216 mT
+# B = sqrt(Bx^2 + By^2 + Bz^2) = sqrt(BRe^2 + BIm^2)/sqrt(2) = 0.4216 mT
 #
 # at centroid of cylinder for
 #
