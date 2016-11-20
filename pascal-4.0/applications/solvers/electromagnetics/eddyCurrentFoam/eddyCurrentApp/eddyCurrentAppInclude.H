@@ -47,6 +47,8 @@ Author
 #include "calculatedFvPatchFields.H"
 #include "extrapolatedFvPatchFields.H"
 
+#include "harmonic.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

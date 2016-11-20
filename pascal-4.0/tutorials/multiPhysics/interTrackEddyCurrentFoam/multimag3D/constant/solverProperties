@@ -37,23 +37,28 @@ settings
 
 storage
 {
-    "(BRe|BIm)"
+    "(VReGrad|VImGrad)"
     {
-        write               false;
+        write               true;
     }
 
-    "F"
-    {
-        write               false;
-    }
-
-    region_conductor
-    {
-        "(jRe|jIm)"
-        {
-            write           false;
-        }
-    }
+//     "(BRe|BIm)"
+//     {
+//         write               false;
+//     }
+//
+//     "F"
+//     {
+//         write               false;
+//     }
+//
+//     region_conductor
+//     {
+//         "(jRe|jIm)"
+//         {
+//             write           false;
+//         }
+//     }
 }
 
 // ************************************************************************* //

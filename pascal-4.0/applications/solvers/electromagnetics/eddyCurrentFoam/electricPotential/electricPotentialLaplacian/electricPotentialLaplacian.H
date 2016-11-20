@@ -89,6 +89,9 @@ private:
 
     // Private data
 
+        //- Name of the electrical conductivity field
+        word nameSigma_;
+
         //- Name of the field of rate of change of
         //  flux of magnetic vector potential
         word nameDdtAflux_;
@@ -152,10 +155,26 @@ public:
                     new uncorrectedSnGrad<Type>(mesh)
                 )
             ),
+            nameSigma_("sigma"),
             nameDdtAflux_("ddtAflux"),
             nameInterface_()
         {
             checkBaseScheme();
+
+            word schemeSigma = mesh.schemesDict().interpolationScheme
+            (
+                "interpolate(" + nameSigma_ + ")"
+            );
+
+            if (schemeSigma != "harmonic")
+            {
+                FatalErrorIn
+                (
+                    "electricPotentialLaplacian::electricPotentialLaplacian(...)"
+                )   << "For this Laplacian, gamma (sigma)"
+                    <<" needs to be interpolated harmonically!"
+                    << exit(FatalError);
+            }
         }
 
         //- Construct from Istream
@@ -179,15 +198,35 @@ public:
                     new uncorrectedSnGrad<Type>(mesh)
                 )
             ),
-            nameDdtAflux_(is),
+            nameSigma_(),
+            nameDdtAflux_(),
             nameInterface_()
         {
             checkBaseScheme();
+
+            nameSigma_ = word(is);
+            
+            nameDdtAflux_ = word(is);
 
             // TODO: Apply only for given faceSet?
             if (!is.eof())
             {
                 nameInterface_ = word(is);
+            }
+
+            word schemeSigma = mesh.schemesDict().interpolationScheme
+            (
+                "interpolate(" + nameSigma_ + ")"
+            );
+
+            if (schemeSigma != "harmonic")
+            {
+                FatalErrorIn
+                (
+                    "electricPotentialLaplacian::electricPotentialLaplacian(...)"
+                )   << "For this Laplacian, gamma (sigma)"
+                    <<" needs to be interpolated harmonically!"
+                    << exit(FatalError);
             }
         }
 
@@ -206,7 +245,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
-        // -NOTE: Deactivated!
+        // -Laplacian method with surfaceField of gamma
         virtual tmp<fvMatrix<Type> > fvmLaplacian
         (
             const GeometricField<GType, fvsPatchField, surfaceMesh>&,
@@ -234,7 +273,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
-        // -NOTE: Deactivated!
+        // -Laplacian calculation with surfaceField of gamma
         virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
         (
             const GeometricField<GType, fvsPatchField, surfaceMesh>&,

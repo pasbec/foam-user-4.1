@@ -55,9 +55,6 @@ divSchemes
     div(phi,epsilon)                      Gauss Gamma 0.5;
     div(phi,omega)                        Gauss Gamma 0.5;
     div(phi,nuTilda)                      Gauss Gamma 0.5;
-
-    // Up
-    div(U)                                Gauss linear;
 }
 
 laplacianSchemes

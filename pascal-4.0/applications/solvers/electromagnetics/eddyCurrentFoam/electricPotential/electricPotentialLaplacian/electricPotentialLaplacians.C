@@ -100,13 +100,7 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
     const GeometricField<Type, fvPatchField, volMesh>& vf                    \
 )                                                                            \
 {                                                                            \
-    FatalErrorIn                                                             \
-    (                                                                        \
-        "electricPotentialLaplacian::fvmLaplacian(...)"                      \
-    )   << "Laplacian method with gamma as surfaceField is not allowed."     \
-        << exit(FatalError);                                                 \
-                                                                             \
-    return fvmLaplacian(gamma, word(), vf);                                  \
+    return fvmLaplacian(gamma, gamma.name(), vf);                            \
 }                                                                            \
                                                                              \
                                                                              \
@@ -140,13 +134,7 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian \
     const GeometricField<Type, fvPatchField, volMesh>& vf                    \
 )                                                                            \
 {                                                                            \
-    FatalErrorIn                                                             \
-    (                                                                        \
-        "electricPotentialLaplacian::fvmLaplacian(...)"                      \
-    )   << "Laplacian calculus with gamma as surfaceField is not allowed."   \
-        << exit(FatalError);                                                 \
-                                                                             \
-    return fvcLaplacian(gamma, word(), vf);                                  \
+    return fvcLaplacian(gamma, gamma.name(), vf);                            \
 }
 
 

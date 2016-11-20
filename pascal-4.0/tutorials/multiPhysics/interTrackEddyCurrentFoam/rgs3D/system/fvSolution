@@ -55,7 +55,7 @@ EDDYCURRENT
 {
     interface                   "conductorSurface";
 
-    nCorrectors                 10;
+    nCorrectors                 1;
     nSubCorrectors              100;
 
     residualControl

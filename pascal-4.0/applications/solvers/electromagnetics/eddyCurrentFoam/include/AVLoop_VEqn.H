@@ -10,6 +10,7 @@
 
         label complexSign = 0;
         volScalarField* VPtr = NULL;
+        volVectorField* VGradPtr = NULL;
         volVectorField* APtr = NULL;
         volVectorField* A0Ptr = NULL;
         surfaceScalarField* ddtAPhiPtr = NULL;
@@ -18,6 +19,7 @@
         {
             complexSign = 1;
             VPtr = &storage.VRe();
+            VGradPtr = &globalStorage.VReGrad()[CONDUCTOR];
             APtr = &globalStorage.AIm()[CONDUCTOR];
             ddtAPhiPtr = &storage.ddtAImPhi();
 
@@ -30,6 +32,7 @@
         {
             complexSign = -1;
             VPtr = &storage.VIm();
+            VGradPtr = &globalStorage.VImGrad()[CONDUCTOR];
             APtr = &globalStorage.ARe()[CONDUCTOR];
             ddtAPhiPtr = &storage.ddtARePhi();
 
@@ -40,6 +43,7 @@
         }
 
         volScalarField& V = *VPtr;
+        volVectorField& VGrad = *VGradPtr;
         volVectorField& A = *APtr;
         surfaceScalarField& ddtAPhi = *ddtAPhiPtr;
 
@@ -63,8 +67,10 @@
             V.correctBoundaryConditions();
         }
 
+        surfaceScalarField sigmaf("sigmaf", fvc::interpolate(sigma));
+
         // Prepare V-equation
-        fvScalarMatrix VEqn(fvm::laplacian(sigma, V));
+        fvScalarMatrix VEqn(fvm::laplacian(sigmaf, V));
 
         // TODO: Apply electricPotentialLaplacian only for given faceSet?
         //       In this case we'd need a special electricConducivityGrad
@@ -76,11 +82,12 @@
             (
                 mesh.schemesDict().laplacianScheme
                 (
-                    "laplacian(" + sigma.name() + "," + V.name() + ")"
+                    "laplacian(" + sigmaf.name() + "," + V.name() + ")"
                 )
             ) != "electricPotentialLaplacian"
         )
         {
+            // NOTE: We do not use sigmaf here!
             volVectorField sigmaGrad = fvc::grad(sigma);
 
             // Explicit source term for V due to variable sigma
@@ -159,4 +166,15 @@
 
         // Correct boundary conditions
         V.correctBoundaryConditions();
+
+// TODO: Use relaxation?
+//         VReGrad.storePrevIter();
+//         VImGrad.storePrevIter();
+
+        // Reconstruct flux to get gradient and store it!
+        VGrad = fvc::reconstruct(VEqn.flux()/sigmaf);
+
+// TODO: Use relaxation?
+//         VReGrad.relax(0.5);
+//         VImGrad.relax(0.5);
     }

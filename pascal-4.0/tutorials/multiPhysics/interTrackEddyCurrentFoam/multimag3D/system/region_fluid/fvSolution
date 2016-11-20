@@ -16,17 +16,6 @@ FoamFile
 
 solvers
 {
-    Up
-    {
-        solver          BiCGStab;
-        preconditioner  Cholesky;
-        tolerance       1e-08;
-        relTol          1e-02;
-
-        minIter         0;
-        maxIter         500;
-    }
-
     pFinal
 //     {
 //         solver                GAMG;
@@ -94,12 +83,6 @@ INTERTRACK
 
     residualControl
     {
-        Up
-        {
-                tolerance  1e-05;
-                relTol     1e-02;
-        }
-
 //         U
 //         {
 //                 tolerance  1e-05;

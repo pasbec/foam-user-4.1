@@ -28,25 +28,25 @@ solvers
     }
 
     pFinal
-    {
-        solver                GAMG;
-        tolerance             1e-08;
-        relTol                0;
-
-        smoother              GaussSeidel;
-        nPreSweeps            0;
-        nPostSweeps           2;
-        cacheAgglomeration    on;
-        agglomerator          faceAreaPair;
-        nCellsInCoarsestLevel 80;
-        mergeLevels           1;
-    }
 //     {
-//         solver          PCG;
-//         preconditioner  DIC;
-//         tolerance       1e-08;
-//         relTol          0;
+//         solver                GAMG;
+//         tolerance             1e-08;
+//         relTol                0;
+//
+//         smoother              GaussSeidel;
+//         nPreSweeps            0;
+//         nPostSweeps           2;
+//         cacheAgglomeration    on;
+//         agglomerator          faceAreaPair;
+//         nCellsInCoarsestLevel 80;
+//         mergeLevels           1;
 //     }
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-08;
+        relTol          0;
+    }
 
     p { $pFinal; relTol 0.1; }
 
@@ -60,6 +60,26 @@ solvers
 
     U { $UFinal; }
 //     U { $UFinal; relTol 1e-02; }
+
+    cellMotionU
+//     {
+//         solver                   PCG;
+//         tolerance                1e-09;
+//         relTol                   1e-03;
+//         preconditioner           DIC;
+//     }
+    {
+        solver                   GAMG;
+        tolerance                1e-09;
+        relTol                   1e-03;
+        smoother                 DICGaussSeidel;
+        nPreSweeps               0;
+        nPostSweeps              2;
+        cacheAgglomeration       on;
+        agglomerator             faceAreaPair;
+        nCellsInCoarsestLevel    80;
+        mergeLevels              1;
+    }
 }
 
 INTERTRACK

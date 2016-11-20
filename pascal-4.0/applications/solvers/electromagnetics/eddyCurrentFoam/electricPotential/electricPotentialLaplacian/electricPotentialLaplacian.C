@@ -101,7 +101,7 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacianSource
 
     // Electrical conductivity as vol field
     const GeometricField<GType, fvPatchField, volMesh>& sigma =
-        mesh.lookupObject<GeometricField<GType, fvPatchField, volMesh> >(vfGammaName);
+        mesh.lookupObject<GeometricField<GType, fvPatchField, volMesh> >(nameSigma_);
     const Field<GType>& sigmaIn = sigma.internalField();
 
     // Rate of change of flux of magnetic vector potential
@@ -285,14 +285,7 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacian
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    FatalErrorIn
-    (
-        "electricPotentialLaplacian::fvmLaplacian(...)"
-    )   << "Laplacian method with gamma as surfaceField is not allowed."
-        << exit(FatalError);
-
-    // Dummy
-    return fvmLaplacian(gamma, word(), vf);
+    return fvmLaplacian(gamma, gamma.name(), vf);
 }
 
 
@@ -323,7 +316,7 @@ electricPotentialLaplacian<Type, GType>::fvcLaplacian
     FatalErrorIn
     (
         "electricPotentialLaplacian::fvcLaplacian(...)"
-    )   << "Laplacian calculus without gamma is not allowed."
+    )   << "For this Laplacian, calculus without gamma makes no sense."
         << exit(FatalError);
 
     const fvMesh& mesh = this->mesh();
@@ -383,14 +376,7 @@ electricPotentialLaplacian<Type, GType>::fvcLaplacian
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    FatalErrorIn
-    (
-        "electricPotentialLaplacian::fvmLaplacian(...)"
-    )   << "Laplacian calculus with gamma as surfaceField is not allowed."
-        << exit(FatalError);
-
-    // Dummy
-    return fvcLaplacian(gamma, word(), vf);
+    return fvcLaplacian(gamma, gamma.name(), vf);
 }
 
 
