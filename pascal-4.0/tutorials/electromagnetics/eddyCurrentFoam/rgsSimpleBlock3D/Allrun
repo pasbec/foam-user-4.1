@@ -153,9 +153,10 @@ if [[ ! -e 'state.prepared' || $flagForce -eq 1 ]]; then
         done
 
         # Remove complementary region and cellSet
-        rm -rf 'constant/region_complementary'
-        rm -rf 'system/region_complementary'
-        rm 'constant/polyMesh/sets/cellSet_region_complementary'
+        rm -rf '0/region_complementary' > /dev/null 2>&1
+        rm -rf 'constant/region_complementary' > /dev/null 2>&1
+        rm -rf 'system/region_complementary' > /dev/null 2>&1
+        rm 'constant/polyMesh/sets/cellSet_region_complementary' > /dev/null 2>&1
 
         # Remove cellToRegion and cellZones
         find -name 'cellToRegion' -delete > /dev/null 2>&1

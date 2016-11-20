@@ -3,7 +3,7 @@
     // from data in default region
     {
         SM_REGIONSCOPE(CONDUCTOR);
-        
+
         if (Control::debug)
         {
             Info<< Control::typeName << " | AUpdate.H : "
@@ -30,6 +30,7 @@
 //         AIm.relax(0.5);
 
         // Update rate of change of flux of A
+        if (control.meshIs3D())
         {
             storage.ddtARePhi() =  omega0*(fvc::interpolate(globalStorage.ARe()[CONDUCTOR]) & mesh.Sf());
             storage.ddtAImPhi() = -omega0*(fvc::interpolate(globalStorage.AIm()[CONDUCTOR]) & mesh.Sf());

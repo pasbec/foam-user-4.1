@@ -257,8 +257,8 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emRelDeltaA:
 
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create() const
 {
-    item_ddtARePhi().enable();
-    item_ddtAImPhi().enable();
+    item_ddtARePhi().setState(control().meshIs3D());
+    item_ddtAImPhi().setState(control().meshIs3D());
 
     item_VRe().setState(control().meshIs3D());
     item_VIm().setState(control().meshIs3D());

@@ -302,6 +302,28 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_AIm::create() const
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create() const
 {
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    );
+
+    if (dict().lookupOrDefault<bool>("write", false))
+    {
+        IOo.writeOpt() = IOobject::AUTO_WRITE;
+    }
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        IOo
+    );
+
     set
     (
         regionVolVectorField::LinkOrNew
@@ -310,9 +332,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create() const
             (
                 name(),
                 time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
+                mesh()
             ),
             mesh(),
             dimensionedVector
@@ -321,7 +341,8 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create() const
                 dimVoltage/dimLength,
                 vector::zero
             ),
-            calculatedFvPatchVectorField::typeName
+            calculatedFvPatchVectorField::typeName,
+            IOoOverride
         )
     );
 }
@@ -329,6 +350,28 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VReGrad::create() const
 
 void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create() const
 {
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    );
+
+    if (dict().lookupOrDefault<bool>("write", false))
+    {
+        IOo.writeOpt() = IOobject::AUTO_WRITE;
+    }
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        IOo
+    );
+
     set
     (
         regionVolVectorField::LinkOrNew
@@ -337,9 +380,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create() const
             (
                 name(),
                 time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
+                mesh()
             ),
             mesh(),
             dimensionedVector
@@ -348,7 +389,8 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_VImGrad::create() const
                 dimVoltage/dimLength,
                 vector::zero
             ),
-            calculatedFvPatchVectorField::typeName
+            calculatedFvPatchVectorField::typeName,
+            IOoOverride
         )
     );
 }

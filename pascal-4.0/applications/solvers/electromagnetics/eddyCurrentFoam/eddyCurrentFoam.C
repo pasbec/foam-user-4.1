@@ -34,6 +34,8 @@ Author
 
 #include "eddyCurrentApp.H"
 
+// TODO: Fix regions for settings in solverProeprties!
+
 // TODO: Stop loop if conductivity not given
 
 // TODO: Stop loop if no current present
