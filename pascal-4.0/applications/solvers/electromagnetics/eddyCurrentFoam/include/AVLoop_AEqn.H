@@ -1,5 +1,6 @@
 
     // Solve A component-wise in default region
+    if (!(globalSettings.biotSavart && globalSettings.lowFrequency))
     {
         SM_REGIONSCOPE(DEFAULT);
 
@@ -55,7 +56,7 @@
         }
 
         // Add explicit gradient terms of electric scalar potential V
-        if (control.meshIs3D())
+        if (control.meshIs3D() && !globalSettings.lowFrequency)
         {
             AReEqn -= sigma * globalStorage.VReGrad()[DEFAULT];
             AImEqn -= sigma * globalStorage.VImGrad()[DEFAULT];
@@ -185,8 +186,11 @@
 
             // Add coupling terms for real/imagninary ARe-AIm
             // dependence of magnetic vector potential
-            AcmptEqn.insertEquationCoupling(0, 1,  omega0 * sigma);
-            AcmptEqn.insertEquationCoupling(1, 0, -omega0 * sigma);
+            if (!globalSettings.lowFrequency)
+            {
+                AcmptEqn.insertEquationCoupling(0, 1,  omega0 * sigma);
+                AcmptEqn.insertEquationCoupling(1, 0, -omega0 * sigma);
+            }
 
             // Solve A but prevent segfault for homogenous solution
             scalar preResidual = mag(gSum(cmptMag(AcmptEqn.residual(ACmpt, AcmptEqn.source()))));

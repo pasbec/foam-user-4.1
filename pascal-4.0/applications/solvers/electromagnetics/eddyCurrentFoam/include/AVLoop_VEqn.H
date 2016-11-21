@@ -171,8 +171,24 @@
 //         VReGrad.storePrevIter();
 //         VImGrad.storePrevIter();
 
-        // Reconstruct flux to get gradient and store it!
-        VGrad = fvc::reconstruct(VEqn.flux()/sigmaf);
+// TODO: Create suitable interpolation scheme and snGradScheme!
+        if
+        (
+            word
+            (
+                mesh.schemesDict().laplacianScheme
+                (
+                    "laplacian(" + sigmaf.name() + "," + V.name() + ")"
+                )
+            ) != "electricPotentialLaplacian"
+        )
+        {
+            VGrad = fvc::reconstruct(VEqn.flux()/sigmaf);
+        }
+        else
+        {
+            VGrad = fvc::grad(V);
+        }
 
 // TODO: Use relaxation?
 //         VReGrad.relax(0.5);

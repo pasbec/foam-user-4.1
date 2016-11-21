@@ -79,6 +79,9 @@ public:
             //- Switch to set wether tolerance scaling is used
             SM_SETTINGS_MEMBER_ADD(Switch, tolScale);
 
+            //- Switch to set wether low-frequency is used
+            SM_SETTINGS_MEMBER_ADD(Switch, lowFrequency);
+
             //- Switch to set wether Biot-Savart is used
             SM_SETTINGS_MEMBER_ADD(Switch, biotSavart);
 
