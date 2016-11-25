@@ -72,20 +72,26 @@
         // Prepare V-equation
         fvScalarMatrix VEqn(fvm::laplacian(sigmaf, V));
 
+        // Read scheme for discretising the laplacian
+        word laplacianScheme
+        (
+            mesh.schemesDict().laplacianScheme
+            (
+                "laplacian(" + sigmaf.name() + "," + V.name() + ")"
+            )
+        );
+
+        // Read solver for V
+        word solver
+        (
+            mesh.solutionDict().solver(V.name()).lookup("solver")
+        );
+
         // TODO: Apply electricPotentialLaplacian only for given faceSet?
         //       In this case we'd need a special electricConducivityGrad
         //       which evaluates to zero in normal direction to corresponding
         //       faces
-        if
-        (
-            word
-            (
-                mesh.schemesDict().laplacianScheme
-                (
-                    "laplacian(" + sigmaf.name() + "," + V.name() + ")"
-                )
-            ) != "electricPotentialLaplacian"
-        )
+        if (laplacianScheme != "electricPotentialLaplacian")
         {
             // NOTE: We do not use sigmaf here!
             volVectorField sigmaGrad = fvc::grad(sigma);
@@ -157,12 +163,22 @@
 //             }
 //         }
 
-
         // Solve V-equation
-        // NOTE: Currently a deflated solver is necessary
-        //       as both matrices are kept singluar!
-// TODO: Warning if no deflated solver is used!
-        VEqn.solve(control.subDict(Region::CONDUCTOR, V.name()));
+        if(solver == "deflatedPCG")
+        {
+            // Currently a deflated solver is necessary.
+            // Therefor the matrix needs to be kept singluar!
+            VEqn.solve(control.subDict(Region::CONDUCTOR, V.name()));
+        }
+        else
+        {
+            FatalErrorIn
+            (
+                Control::typeName + " | VEqn.H :\n"
+            )   << "Only the 'deflatedPCG' solver is currently supported for"
+                << " the solution of VRe/VIm."
+                << abort(FatalError);
+        }
 
         // Correct boundary conditions
         V.correctBoundaryConditions();
@@ -172,16 +188,7 @@
 //         VImGrad.storePrevIter();
 
 // TODO: Create suitable interpolation scheme and snGradScheme!
-        if
-        (
-            word
-            (
-                mesh.schemesDict().laplacianScheme
-                (
-                    "laplacian(" + sigmaf.name() + "," + V.name() + ")"
-                )
-            ) != "electricPotentialLaplacian"
-        )
+        if (laplacianScheme != "electricPotentialLaplacian")
         {
             VGrad = fvc::reconstruct(VEqn.flux()/sigmaf);
         }

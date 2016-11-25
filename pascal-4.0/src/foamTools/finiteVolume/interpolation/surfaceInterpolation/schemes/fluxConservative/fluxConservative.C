@@ -21,48 +21,19 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    Central-differencing interpolation scheme class
+
 \*---------------------------------------------------------------------------*/
 
-#include "lookupFixedGradientFvPatchField.H"
-#include "dictionary.H"
-#include "volFields.H"
-#include "surfaceFields.H"
+#include "fvMesh.H"
+#include "fluxConservative.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<>
-void lookupFixedGradientFvPatchField<scalar>::updateCoeffs()
-{
-    if (this->updated())
-    {
-        return;
-    }
-
-    if (lookupType_ == "surface")
-    {
-        const vectorField& vf =
-            lookupPatchField<surfaceVectorField, vector>(lookupName_);
-
-        gradient_ = vf & this->patch().nf();
-    }
-    else if (lookupType_ == "volume")
-    {
-        const vectorField& vf =
-            lookupPatchField<volVectorField, vector>(lookupName_);
-
-        gradient_ = vf & this->patch().nf();
-    }
-
-    fvPatchField<scalar>::updateCoeffs();
+    makeSurfaceInterpolationScheme(fluxConservative)
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

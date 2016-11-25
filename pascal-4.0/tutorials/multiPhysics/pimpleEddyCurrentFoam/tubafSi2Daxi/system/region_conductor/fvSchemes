@@ -29,8 +29,8 @@ gradSchemes
     grad(A0Re)                        Gauss linear;
     grad(A0Im)                        Gauss linear;
 
-    grad(VRe)                         electricPotentialGrad Gauss sigma ddtAImPhi;
-    grad(VIm)                         electricPotentialGrad Gauss sigma ddtARePhi;
+    grad(VRe)                         Gauss fluxConservative sigma ddtAImPhi;
+    grad(VIm)                         Gauss fluxConservative sigma ddtARePhi;
 }
 
 divSchemes

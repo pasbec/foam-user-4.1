@@ -32,10 +32,6 @@ Author
 #ifndef eddyCurrentAppInclude_H
 #define eddyCurrentAppInclude_H
 
-#include "regionModelling.H"
-#include "physicalConstants.H"
-#include "edgeBiotSavart.H"
-
 #include "Switch.H"
 #include "HashTable.H"
 
@@ -47,7 +43,9 @@ Author
 #include "calculatedFvPatchFields.H"
 #include "extrapolatedFvPatchFields.H"
 
-#include "harmonic.H"
+#include "regionModelling.H"
+#include "physicalConstants.H"
+#include "edgeBiotSavart.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
