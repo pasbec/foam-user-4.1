@@ -31,7 +31,7 @@ License
 template<class Type>
 Foam::tmp<Foam::surfaceScalarField> Foam::fluxConservative<Type>::weights
 (
-    const volTypeField& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
 {
     const fvMesh& mesh = this->mesh();
@@ -54,7 +54,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fluxConservative<Type>::weights
     surfaceScalarField& w = tw();
     scalarField& wIn = w.internalField();
 
-    // Addressing
+    // Mesh addressing
     const unallocLabelList& owner = mesh.owner();
 
     // Mesh and basic surface interpolation data
@@ -94,9 +94,9 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fluxConservative<Type>::weights
         {
             const unallocLabelList& faceCells = patch.patch().faceCells();
 
-            const scalarField& weightsPatch = weights.boundaryField()[patchI];
-
             const scalarField& gammafPatch = gammaf.boundaryField()[patchI];
+
+            const scalarField& weightsPatch = weights.boundaryField()[patchI];
 
             forAll (patch, faceI)
             {
@@ -120,10 +120,10 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
 Foam::fluxConservative<Type>::correction
 (
-    const volTypeField& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
 {
-    if (!extFluxPtr_)
+    if (!jumpFluxPtr_)
     {
         FatalErrorIn
         (
@@ -132,19 +132,19 @@ Foam::fluxConservative<Type>::correction
             "(\n"
             "    GeometricField<Type, fvPatchField, volMesh>&"
             ")\n"
-        )   << "External flux pointer not assigned.\n"
+        )   << "Jump flux pointer not assigned.\n"
             << "Maybe this scheme was constructed from IStream without\n"
-            << " getting a name of external flux?"
-            << " If this is ture, ::correction(vf) may not be used"
-            << " ::corrected() should return 'false'!"
+            << " getting a name for the jump flux field?"
+            << " If this is ture, ::correction(vf) must not be used"
+            << " and ::corrected() should actually return 'false'!"
             << abort(FatalError);
     }
 
     const fvMesh& mesh = this->mesh();
 
-    tmp<surfaceTypeField> tcorr
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tcorr
     (
-        new surfaceTypeField
+        new GeometricField<Type, fvsPatchField, surfaceMesh>
         (
             IOobject
             (
@@ -157,10 +157,10 @@ Foam::fluxConservative<Type>::correction
         )
     );
 
-    surfaceTypeField& corr = tcorr();
+    GeometricField<Type, fvsPatchField, surfaceMesh>& corr = tcorr();
     Field<Type>& corrIn = corr.internalField();
 
-    // Addressing
+    // Mesh addressing
     const unallocLabelList& owner = mesh.owner();
     const unallocLabelList& neighbour = mesh.neighbour();
 
@@ -185,9 +185,10 @@ Foam::fluxConservative<Type>::correction
     const surfaceScalarField& gammaf = tgammaf();
     const scalarField& gammafIn = gammaf.internalField();
 
-    // External flux
-    const surfaceTypeField& extFlux = *extFluxPtr_;
-    const Field<Type>& extFluxIn = extFlux.internalField();
+    // Jump flux
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& jumpFlux =
+        *jumpFluxPtr_;
+    const Field<Type>& jumpFluxIn = jumpFlux.internalField();
 
     // Calculate internal correction
     forAll (owner, faceI)
@@ -201,11 +202,11 @@ Foam::fluxConservative<Type>::correction
 
         scalar dByMagSf = 1.0/deltaCoeffsIn[faceI]/magSfIn[faceI];
 
-        corrIn[faceI] = gammaRelDiff * wPwN * dByMagSf * extFluxIn[faceI];
+        corrIn[faceI] = gammaRelDiff * wPwN * dByMagSf * jumpFluxIn[faceI];
     }
 
     // Calculate boundary correction
-    // (Correction will be zero if grad(sigma)*n == 0)
+    // (Correction will be zero if grad(gamma)*n == 0)
     forAll (mesh.boundary(), patchI)
     {
         const fvPatch& patch = mesh.boundary()[patchI];
@@ -220,7 +221,7 @@ Foam::fluxConservative<Type>::correction
 
         const scalarField& gammaPatch = gamma.boundaryField()[patchI];
         const scalarField& gammafPatch = gammaf.boundaryField()[patchI];
-        const Field<Type>& extFluxPatch = extFlux.boundaryField()[patchI];
+        const Field<Type>& jumpFluxPatch = jumpFlux.boundaryField()[patchI];
 
         forAll (patch, faceI)
         {
@@ -234,7 +235,7 @@ Foam::fluxConservative<Type>::correction
             scalar dByMagSf = 1.0/deltaCoeffsPatch[faceI]/magSfPatch[faceI];
 
             corrPatch[faceI] =
-                gammaRelDiff * wPwN * dByMagSf * extFluxPatch[faceI];
+                gammaRelDiff * wPwN * dByMagSf * jumpFluxPatch[faceI];
         }
     }
 

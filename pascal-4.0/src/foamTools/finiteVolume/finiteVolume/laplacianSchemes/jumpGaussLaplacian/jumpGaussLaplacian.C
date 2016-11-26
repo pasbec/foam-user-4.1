@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "electricPotentialLaplacian.H"
+#include "jumpGaussLaplacian.H"
 #include "surfaceInterpolate.H"
 #include "fvcDiv.H"
 #include "fvcGrad.H"
@@ -43,7 +43,7 @@ namespace fv
 
 template<class Type, class GType>
 tmp<fvMatrix<Type> >
-electricPotentialLaplacian<Type, GType>::fvmLaplacianUncorrected
+jumpGaussLaplacian<Type, GType>::fvmLaplacianUncorrected
 (
     const surfaceScalarField& gammaMagSf,
     const word& vfGammaName,
@@ -79,120 +79,171 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacianUncorrected
         fvm.boundaryCoeffs()[patchI] = -patchGamma*psf.gradientBoundaryCoeffs();
     }
 
-    // Source contributions
-    fvm.source() = fvmLaplacianSource(gammaMagSf, vfGammaName);
+    // Add jump flux contributions
+    if (jumpFluxPtr_)
+    {
+        fvmLaplacianJumpFlux(fvm, gammaMagSf, vf);
+    }
 
     return tfvm;
 }
 
 
 template<class Type, class GType>
-tmp<Field<Type> >
-electricPotentialLaplacian<Type, GType>::fvmLaplacianSource
+void
+jumpGaussLaplacian<Type, GType>::fvmLaplacianJumpFlux
 (
+    fvMatrix<Type>& fvm,
     const surfaceScalarField& gammaMagSf,
-    const word& vfGammaName
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    // NOTE: gammaMagSf contains harmonically interpolated gamma!
-    const scalarField& gammaMagSfIn = gammaMagSf.internalField();
-
     const fvMesh& mesh = this->mesh();
 
-    // Electrical conductivity as vol field
-    const GeometricField<GType, fvPatchField, volMesh>& sigma =
-        mesh.lookupObject<GeometricField<GType, fvPatchField, volMesh> >(nameSigma_);
-    const Field<GType>& sigmaIn = sigma.internalField();
+    // NOTE: gammaMagSf should contain harmonically interpolated gamma!
+    const scalarField& gammaMagSfIn = gammaMagSf.internalField();
 
-    // Rate of change of flux of magnetic vector potential
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& ddtAflux =
-        mesh.lookupObject<GeometricField<Type, fvsPatchField, surfaceMesh> >(nameDdtAflux_);
-    const Field<Type>& ddtAfluxIn = ddtAflux.internalField();
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tjumpOwnFlux
+    (
+        new GeometricField<Type, fvsPatchField, surfaceMesh>
+        (
+            IOobject
+            (
+                "jumpOwnFlux("+vf.name()+')',
+                vf.instance(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            vf.dimensions()*mesh.deltaCoeffs().dimensions()
+        )
+    );
+    GeometricField<Type, fvsPatchField, surfaceMesh>& jumpOwnFlux =
+        tjumpOwnFlux();
+    Field<Type>& jumpOwnFluxIn = jumpOwnFlux.internalField();
 
-    // Mesh data
-    const unallocLabelList& own = mesh.owner();
-    const unallocLabelList& nei = mesh.neighbour();
-    const surfaceScalarField& w = mesh.weights();
-    const scalarField& wIn = w.internalField();
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tjumpNeiFlux
+    (
+        new GeometricField<Type, fvsPatchField, surfaceMesh>
+        (
+            IOobject
+            (
+                "jumpNeiFlux("+vf.name()+')',
+                vf.instance(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            vf.dimensions()*mesh.deltaCoeffs().dimensions()
+        )
+    );
+    GeometricField<Type, fvsPatchField, surfaceMesh>& jumpNeiFlux =
+        tjumpOwnFlux();
+    Field<Type>& jumpNeiFluxIn = jumpNeiFlux.internalField();
+
+    // Reference to matrix source
+    Field<Type>& source = fvm.source();
+    // Mesh addressing
+    const unallocLabelList& owner = mesh.owner();
+    const unallocLabelList& neighbour = mesh.neighbour();
+
+    // Mesh and basic surface interpolation data
+    const surfaceScalarField& weights = mesh.weights();
+    const scalarField& weightsIn = weights.internalField();
     const surfaceScalarField& magSf = mesh.magSf();
     const scalarField& magSfIn = magSf.internalField();
 
-    tmp<Field<Type> > tsource(new Field<Type>(sigma.size(), pTraits<Type>::zero));
-    Field<Type>& source = tsource();
+    // Gamma
+    const GeometricField<GType, fvPatchField, volMesh>& gamma = gamma_;
+    const Field<GType>& gammaIn = gamma.internalField();
 
+    // Jump flux
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& jumpFlux =
+        *jumpFluxPtr_;
+    const Field<Type>& jumpFluxIn = jumpFlux.internalField();
 
-    // Source contributions from jump conditions
-    forAll(own, faceI)
+    // Source contributions from jump flux
+    forAll(owner, faceI)
     {
         // Cell labels
-        label ownFaceI = own[faceI];
-        label neiFaceI = nei[faceI];
+        label own = owner[faceI];
+        label nei = neighbour[faceI];
 
         // Interpolation weights
-        scalar wP = wIn[faceI];
+        scalar wP = weightsIn[faceI];
         scalar wN = 1.0 - wP;
 
         // Cell sigma
 // TODO: The 'mag' is currently only a workaround to avoid
 //       template specializations for different types
-        scalar sigmaOwn = mag(sigmaIn[ownFaceI]);
-        scalar sigmaNei = mag(sigmaIn[neiFaceI]);
+        scalar sigmaOwn = mag(gammaIn[own]);
+        scalar sigmaNei = mag(gammaIn[nei]);
 
-        source[ownFaceI] -= gammaMagSfIn[faceI]
-          * (1.0 - sigmaOwn/sigmaNei) * wP
-          * ddtAfluxIn[faceI]/magSfIn[faceI];
+        jumpOwnFluxIn[faceI] = gammaMagSfIn[faceI]
+                             * (1.0 - sigmaOwn/sigmaNei) * wP
+                             * jumpFluxIn[faceI]/magSfIn[faceI];
 
-        source[neiFaceI] -= gammaMagSfIn[faceI]
-          * (sigmaNei/sigmaOwn - 1.0) * wN
-          * ddtAfluxIn[faceI]/magSfIn[faceI];
+        source[own] -= jumpOwnFluxIn[faceI];
+
+        jumpNeiFluxIn[faceI] = gammaMagSfIn[faceI]
+                             * (1.0 - sigmaNei/sigmaOwn) * wN
+                             * jumpFluxIn[faceI]/magSfIn[faceI];
+
+        source[nei] += jumpNeiFluxIn[faceI];
     }
 
-    // Boundary contributions from jump conditions
+    // Boundary contributions from jump flux
     forAll (mesh.boundary(), patchI)
     {
         const fvPatch& patch = mesh.boundary()[patchI];
 
-        // Coupled patches
-// TODO: Is this enough? What if there are symmetry, periodic
-//       empty or other special bc?
-        if (patch.coupled())
+        const scalarField& gammaMagSfPatch = gammaMagSf.boundaryField()[patchI];
+        Field<Type>& jumpOwnFluxPatch = jumpOwnFlux.boundaryField()[patchI];
+
+        const unallocLabelList& faceCells = patch.patch().faceCells();
+
+        const scalarField& weightsPatch = weights.boundaryField()[patchI];
+        const scalarField& magSfPatch = magSf.boundaryField()[patchI];
+
+        const Field<GType>& gammaPatch = gamma.boundaryField()[patchI];
+        const Field<Type>& jumpFluxPatch = jumpFlux.boundaryField()[patchI];
+
+        forAll (patch, faceI)
         {
-            const unallocLabelList& faceCells = patch.patch().faceCells();
+            // Cell label
+            const label own = faceCells[faceI];
 
-            const scalarField& gammaMagSfPatch = gammaMagSf.boundaryField()[patchI];
-            const scalarField& wPatch = w.boundaryField()[patchI];
-            const scalarField& magSfPatch = magSf.boundaryField()[patchI];
-            const Field<GType>& sigmaPatch = sigma.boundaryField()[patchI];
-            const Field<Type>& ddtAfluxPatch = ddtAflux.boundaryField()[patchI];
+            // Interpolation weights
+            scalar wP = weightsPatch[faceI];
 
-            forAll (patch, faceI)
-            {
-                // Cell label
-                const label ownFaceI = faceCells[faceI];
-
-                // Interpolation weights
-                scalar wP = wPatch[faceI];
-
-                // Cell sigma
+            // Cell sigma
 // TODO: The 'mag' is currently only a workaround to avoid
 //       template specializations for different types
-                scalar sigmaOwn = mag(sigmaIn[ownFaceI]);
-                scalar sigmaNei = mag(sigmaPatch[faceI]);
+            scalar sigmaOwn = mag(gammaIn[own]);
+            scalar sigmaNei = mag(gammaPatch[faceI]);
 
-                source[ownFaceI] -= gammaMagSfPatch[faceI]
-                  * (1.0 - sigmaOwn/sigmaNei) * wP
-                  * ddtAfluxPatch[faceI]/magSfPatch[faceI];
-            }
+            jumpOwnFluxPatch[faceI] = gammaMagSfPatch[faceI]
+                                    * (1.0 - sigmaOwn/sigmaNei) * wP
+                                    * jumpFluxPatch[faceI]/magSfPatch[faceI];
+
+            source[own] -= jumpOwnFluxPatch[faceI];
         }
     }
 
-    return tsource;
+    // Store jump face fluxes if required
+    if (mesh.schemesDict().fluxRequired(vf.name()))
+    {
+        fvm.faceFluxCorrectionPtr() = tjumpOwnFlux.ptr();
+        fvm.jumpFaceFluxCorrectionPtr() = tjumpNeiFlux.ptr();
+    }
 }
 
 
 template<class Type, class GType>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-electricPotentialLaplacian<Type, GType>::gammaSnGradCorr
+jumpGaussLaplacian<Type, GType>::gammaSnGradCorr
 (
     const surfaceVectorField& SfGammaCorr,
     const word& vfGammaName,
@@ -236,7 +287,7 @@ electricPotentialLaplacian<Type, GType>::gammaSnGradCorr
 
 template<class Type, class GType>
 tmp<fvMatrix<Type> >
-electricPotentialLaplacian<Type, GType>::fvmLaplacian
+jumpGaussLaplacian<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const word& vfGammaName,
@@ -279,7 +330,7 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacian
 
 template<class Type, class GType>
 tmp<fvMatrix<Type> >
-electricPotentialLaplacian<Type, GType>::fvmLaplacian
+jumpGaussLaplacian<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -291,7 +342,7 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacian
 
 template<class Type, class GType>
 tmp<fvMatrix<Type> >
-electricPotentialLaplacian<Type, GType>::fvmLaplacian
+jumpGaussLaplacian<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvPatchField, volMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -308,15 +359,15 @@ electricPotentialLaplacian<Type, GType>::fvmLaplacian
 
 template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-electricPotentialLaplacian<Type, GType>::fvcLaplacian
+jumpGaussLaplacian<Type, GType>::fvcLaplacian
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     FatalErrorIn
     (
-        "electricPotentialLaplacian::fvcLaplacian(...)"
-    )   << "For this Laplacian, calculus without gamma makes no sense."
+        "jumpGaussLaplacian::fvcLaplacian(...)"
+    )   << "For this Laplacian, calculus without gamma is disabled."
         << exit(FatalError);
 
     const fvMesh& mesh = this->mesh();
@@ -334,7 +385,7 @@ electricPotentialLaplacian<Type, GType>::fvcLaplacian
 
 template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-electricPotentialLaplacian<Type, GType>::fvcLaplacian
+jumpGaussLaplacian<Type, GType>::fvcLaplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const word& vfGammaName,
@@ -370,7 +421,7 @@ electricPotentialLaplacian<Type, GType>::fvcLaplacian
 
 template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-electricPotentialLaplacian<Type, GType>::fvcLaplacian
+jumpGaussLaplacian<Type, GType>::fvcLaplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -382,7 +433,7 @@ electricPotentialLaplacian<Type, GType>::fvcLaplacian
 
 template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-electricPotentialLaplacian<Type, GType>::fvcLaplacian
+jumpGaussLaplacian<Type, GType>::fvcLaplacian
 (
     const GeometricField<GType, fvPatchField, volMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf

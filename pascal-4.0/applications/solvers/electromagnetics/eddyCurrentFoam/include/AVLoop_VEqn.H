@@ -69,11 +69,8 @@
 
         surfaceScalarField sigmaf("sigmaf", fvc::interpolate(sigma));
 
-        // Prepare V-equation
-        fvScalarMatrix VEqn(fvm::laplacian(sigmaf, V));
-
-        // Read scheme for discretising the laplacian
-        word laplacianScheme
+        // Read Laplacian scheme for discretising laplacian(sigmaf,V)
+        word laplacianSchemeV
         (
             mesh.schemesDict().laplacianScheme
             (
@@ -81,19 +78,12 @@
             )
         );
 
-        // Read solver for V
-        word solver
-        (
-            mesh.solutionDict().solver(V.name()).lookup("solver")
-        );
+        // Prepare V-equation
+        fvScalarMatrix VEqn(fvm::laplacian(sigmaf, V));
 
-        // TODO: Apply electricPotentialLaplacian only for given faceSet?
-        //       In this case we'd need a special electricConducivityGrad
-        //       which evaluates to zero in normal direction to corresponding
-        //       faces
-        if (laplacianScheme != "electricPotentialLaplacian")
+        if (laplacianSchemeV != "jumpGauss")
         {
-            // NOTE: We do not use sigmaf here!
+            // NOTE: We do NOT use sigmaf here!
             volVectorField sigmaGrad = fvc::grad(sigma);
 
             // Explicit source term for V due to variable sigma
@@ -109,62 +99,14 @@
             }
         }
 
-
-// // TODO: Check for fixesValue
-//         // Compatibility check
-//         {
-//             bool singular = true;
-//
-//             forAll(mesh.boundary(), patchI)
-//             {
-//                 if
-//                 (
-//                     !V.boundaryField()[patchI].coupled()
-//                  && V.boundaryField()[patchI].fixesValue()
-//                 )
-//                 {
-//                     singular = false;
-//                 }
-//             }
-//
-//             if (singular)
-//             {
-//                 scalar sourceVolSum = sum(VEqn.source() * mesh.V());
-//                 scalar fluxAreaSum = 0;
-//                 forAll(mesh.boundary(), patchI)
-//                 {
-//                     if (isA<fixedGradientFvPatchScalarField>(V.boundaryField()[patchI]))
-//                     {
-//                         fixedGradientFvPatchScalarField& VP =
-//                             refCast<fixedGradientFvPatchScalarField>
-//                             (
-//                                 V.boundaryField()[patchI]
-//                             );
-// // TODO: Calc fluxAreaSum
-//                     }
-//                 }
-//
-//                 if (Control::debug)
-//                 {
-//                     Pout<< "eddyCurrentApp::Control | VEqn.H : "
-//                         << "Local compatibility check for " << V.name()
-//                         << "Eqn  (domain/boundary): " << sourceVolSum
-//                         << " / " << fluxAreaSum
-//                         << endl;
-//                 }
-//
-//                 scalar sourceVolSumGlobal = returnReduce(sourceVolSum, sumOp<scalar>());
-//                 scalar fluxAreaSumGlobal = returnReduce(fluxAreaSum, sumOp<scalar>());
-//
-//                 Info<< "Global compatibility check for " << V.name()
-//                     << "Eqn (domain/boundary): " << sourceVolSumGlobal
-//                     << " / " << fluxAreaSumGlobal
-//                     << endl;
-//             }
-//         }
+        // Read solver for V
+        word solverV
+        (
+            mesh.solutionDict().solver(V.name()).lookup("solver")
+        );
 
         // Solve V-equation
-        if(solver == "deflatedPCG")
+        if(solverV == "deflatedPCG")
         {
             // Currently a deflated solver is necessary.
             // Therefor the matrix needs to be kept singluar!
@@ -187,8 +129,7 @@
 //         VReGrad.storePrevIter();
 //         VImGrad.storePrevIter();
 
-// TODO: Create suitable interpolation scheme and snGradScheme!
-        if (laplacianScheme != "electricPotentialLaplacian")
+        if (laplacianSchemeV != "jumpGauss")
         {
             VGrad = fvc::reconstruct(VEqn.flux()/sigmaf);
         }

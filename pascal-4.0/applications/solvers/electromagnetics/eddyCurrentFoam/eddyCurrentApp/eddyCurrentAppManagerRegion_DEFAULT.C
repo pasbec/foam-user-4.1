@@ -72,56 +72,6 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_omega0::create
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_Anormf::create() const
-{
-    set
-    (
-        new uniformDimensionedVectorField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            dimensionedVector
-            (
-                word(),
-                dimless,
-                vector::one
-            )
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_Ascale::create() const
-{
-    set
-    (
-        new uniformDimensionedVectorField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            dimensionedVector
-            (
-                word(),
-                dimless,
-                vector::one
-            )
-        )
-    );
-}
-
-
 void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create() const
 {
     set
@@ -182,9 +132,6 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create() const
 {
     item_f0().enable();
     item_omega0().enable();
-
-    item_Anormf().setState(globalSettings().tolScale);
-    item_Ascale().setState(globalSettings().tolScale);
 
     item_j0Re().setState(!globalSettings().biotSavart);
     item_j0Im().setState(!globalSettings().biotSavart);

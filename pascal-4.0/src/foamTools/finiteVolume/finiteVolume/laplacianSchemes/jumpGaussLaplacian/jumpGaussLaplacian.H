@@ -22,47 +22,41 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::electricPotentialLaplacian
+    Foam::fv::jumpGaussLaplacian
 
 Description
     ...
 
-    NOTE: Currently it is NOT SUPPORTED or even tested to put the
-          conducting region on any type of boundary
-
 SourceFiles
-    electricPotentialLaplacian.C
+    jumpGaussLaplacian.C
 
 Author
     Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef electricPotentialLaplacian_H
-#define electricPotentialLaplacian_H
+#ifndef jumpGaussLaplacian_H
+#define jumpGaussLaplacian_H
 
 #include "laplacianScheme.H"
-#include "electricPotentialLaplacianBase.H"
 #include "harmonic.H"
 #include "snGradScheme.H"
 #include "uncorrectedSnGrad.H"
 
+// TODO: The diffusivity gamma is regarded as discontinous at every face!
+
+// TODO: Tensorial diffusivity?
+
 // TODO: Think about CORRECT implementation with snGrad correction. The
 //       corrected (explicit) gradient may not be interpolated from the cell
-//       values using linear interpolation!!! We MUST use the
-//       electricPotentialGrad or a corresponding interpolation scheme to
-//       calculate the gradient correction.
+//       values using linear interpolation!!! We MUST use fluxConservative
+//       or a corresponding interpolation scheme to calculate the gradient
+//       correction in normal direction.
 
-// TODO: Check consistency with electricPotentialGrad!
-
-// TODO: Proper template specialisation? The electrical conductivity may be
+// TODO: Proper template specialisation? The diffusivity may be
 //       any GType. Specialization is necessary for e.g. tensors. Currently
-//       we simply use the mag-function as workaraound and in order to avoid
+//       we simply use the mag-function as workaround and in order to avoid
 //       having to create these.
-
-// TODO: Check boundary contributions for boundaries with transformation!!
-//       Currently boundary contributions are simply realized to work with
-//       coupled processor patches
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,13 +69,12 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class electricPotentialLaplacian Declaration
+                       Class jumpGaussLaplacian Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type, class GType>
-class electricPotentialLaplacian
+class jumpGaussLaplacian
 :
-    public fv::electricPotentialLaplacianBase,
     public fv::laplacianScheme<Type, GType>
 {
 
@@ -89,102 +82,56 @@ private:
 
     // Private data
 
-        //- Name of the electrical conductivity field
-        word nameSigma_;
+        //- Name of the (scalar) diffusivity
+        const GeometricField<GType, fvPatchField, volMesh>& gamma_;
 
-        //- Name of the field of rate of change of
-        //  flux of magnetic vector potential
-        word nameDdtAflux_;
-
-        //- Name of the faceSet for jumps of conductivity
-        word nameInterface_;
+        //- Jump flux field
+        const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr_;
 
     // Private Member Functions
 
         tmp<fvMatrix<Type> > fvmLaplacianUncorrected
         (
             const surfaceScalarField& gammaMagSf,
-            const word&,
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const word& vfGammaName,
+            const GeometricField<Type, fvPatchField, volMesh>& vf
         );
 
-        tmp<Field<Type> > fvmLaplacianSource
+        void fvmLaplacianJumpFlux
         (
+            fvMatrix<Type>& fvm,
             const surfaceScalarField& gammaMagSf,
-            const word&
+            const GeometricField<Type, fvPatchField, volMesh>& vf
         );
 
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > gammaSnGradCorr
         (
             const surfaceVectorField& SfGammaCorr,
-            const word&,
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const word& vfGammaName,
+            const GeometricField<Type, fvPatchField, volMesh>& vf
         );
 
         //- Disallow default bitwise copy construct
-        electricPotentialLaplacian(const electricPotentialLaplacian&);
+        jumpGaussLaplacian(const jumpGaussLaplacian&);
 
         //- Disallow default bitwise assignment
-        void operator=(const electricPotentialLaplacian&);
+        void operator=(const jumpGaussLaplacian&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("electricPotentialLaplacian");
+    TypeName("jumpGauss");
 
     // Constructors
 
-        //- Construct null
-        electricPotentialLaplacian
-        (
-            const fvMesh& mesh
-        )
-        :
-            electricPotentialLaplacianBase(GAUSS),
-            laplacianScheme<Type, GType>
-            (
-                mesh,
-                tmp<surfaceInterpolationScheme<GType> >
-                (
-                    new harmonic<GType>(mesh)
-                ),
-// TODO FIXME: Special snGradSchemes are necessary?
-                tmp<snGradScheme<Type> >
-                (
-                    new uncorrectedSnGrad<Type>(mesh)
-                )
-            ),
-            nameSigma_("sigma"),
-            nameDdtAflux_("ddtAflux"),
-            nameInterface_()
-        {
-            checkBaseScheme();
-
-            word schemeSigma = mesh.schemesDict().interpolationScheme
-            (
-                "interpolate(" + nameSigma_ + ")"
-            );
-
-            if (schemeSigma != "harmonic")
-            {
-                FatalErrorIn
-                (
-                    "electricPotentialLaplacian::electricPotentialLaplacian(...)"
-                )   << "For this Laplacian, gamma (sigma)"
-                    <<" needs to be interpolated harmonically!"
-                    << exit(FatalError);
-            }
-        }
-
         //- Construct from Istream
-        electricPotentialLaplacian
+        jumpGaussLaplacian
         (
             const fvMesh& mesh,
             Istream& is
         )
         :
-            electricPotentialLaplacianBase(is),
             laplacianScheme<Type, GType>
             (
                 mesh,
@@ -198,41 +145,51 @@ public:
                     new uncorrectedSnGrad<Type>(mesh)
                 )
             ),
-            nameSigma_(),
-            nameDdtAflux_(),
-            nameInterface_()
+            gamma_
+            (
+                mesh.thisDb().lookupObject
+                <
+                    GeometricField<GType, fvPatchField, volMesh>
+                >
+                (
+                    word(is)
+                )
+            ),
+            jumpFluxPtr_(NULL)
         {
-            checkBaseScheme();
-
-            nameSigma_ = word(is);
-            
-            nameDdtAflux_ = word(is);
-
-            // TODO: Apply only for given faceSet?
             if (!is.eof())
             {
-                nameInterface_ = word(is);
+                const GeometricField<Type, fvsPatchField, surfaceMesh>& jumpFlux =
+                    mesh.thisDb().lookupObject
+                    <
+                        GeometricField<Type, fvsPatchField, surfaceMesh>
+                    >
+                    (
+                        word(is)
+                    );
+
+                jumpFluxPtr_ = &jumpFlux;
             }
 
             word schemeSigma = mesh.schemesDict().interpolationScheme
             (
-                "interpolate(" + nameSigma_ + ")"
+                "interpolate(" + gamma_.name() + ")"
             );
 
             if (schemeSigma != "harmonic")
             {
                 FatalErrorIn
                 (
-                    "electricPotentialLaplacian::electricPotentialLaplacian(...)"
-                )   << "For this Laplacian, gamma (sigma)"
-                    <<" needs to be interpolated harmonically!"
+                    "jumpGaussLaplacian::jumpGaussLaplacian(...)"
+                )   << "For this Laplacian, gamma needs to be"
+                    << " interpolated harmonically!"
                     << exit(FatalError);
             }
         }
 
     // Destructor
 
-        virtual ~electricPotentialLaplacian()
+        virtual ~jumpGaussLaplacian()
         {}
 
     // Member Functions
@@ -296,7 +253,7 @@ public:
                                                                             \
 template<>                                                                  \
 tmp<fvMatrix<Type> >                                                        \
-electricPotentialLaplacian<Type, scalar>::fvmLaplacian                      \
+jumpGaussLaplacian<Type, scalar>::fvmLaplacian                              \
 (                                                                           \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
     const word&,                                                            \
@@ -305,7 +262,7 @@ electricPotentialLaplacian<Type, scalar>::fvmLaplacian                      \
                                                                             \
 template<>                                                                  \
 tmp<fvMatrix<Type> >                                                        \
-electricPotentialLaplacian<Type, scalar>::fvmLaplacian                      \
+jumpGaussLaplacian<Type, scalar>::fvmLaplacian                              \
 (                                                                           \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
     const GeometricField<Type, fvPatchField, volMesh>&                      \
@@ -313,7 +270,7 @@ electricPotentialLaplacian<Type, scalar>::fvmLaplacian                      \
                                                                             \
 template<>                                                                  \
 tmp<GeometricField<Type, fvPatchField, volMesh> >                           \
-electricPotentialLaplacian<Type, scalar>::fvcLaplacian                      \
+jumpGaussLaplacian<Type, scalar>::fvcLaplacian                              \
 (                                                                           \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
     const word&,                                                            \
@@ -322,7 +279,7 @@ electricPotentialLaplacian<Type, scalar>::fvcLaplacian                      \
                                                                             \
 template<>                                                                  \
 tmp<GeometricField<Type, fvPatchField, volMesh> >                           \
-electricPotentialLaplacian<Type, scalar>::fvcLaplacian                      \
+jumpGaussLaplacian<Type, scalar>::fvcLaplacian                              \
 (                                                                           \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
     const GeometricField<Type, fvPatchField, volMesh>&                      \
@@ -347,7 +304,7 @@ defineLaplacianScalarGamma(tensor);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "electricPotentialLaplacian.C"
+#   include "jumpGaussLaplacian.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

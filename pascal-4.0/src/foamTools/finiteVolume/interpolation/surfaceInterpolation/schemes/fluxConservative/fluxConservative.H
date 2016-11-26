@@ -25,8 +25,13 @@ Class
     Foam::fluxConservative
 
 Description
-    Flux-conserving interpolation scheme class, which preserves
-    (gamma_f*grad(phi)_f) * n_f
+    Flux-conserving interpolation scheme class, which interpolates sigma
+    such that the face flux based on its gradient grad(phi), the corresponding
+    diffusivity gamma and optionally an additionally given jump flux F will
+    be preserved according to:
+
+    (gamma_f*grad(phi)_f) * n_f + F/|S_f| = const.
+
 
 SourceFiles
     fluxConservative.C
@@ -59,23 +64,14 @@ class fluxConservative
 :
     public surfaceInterpolationScheme<Type>
 {
-    // Private typedefs
-
-        //- Type of volume field
-        typedef GeometricField<Type, fvPatchField, volMesh>
-            volTypeField;
-
-        //- Type of surface field
-        typedef GeometricField<Type, fvsPatchField, surfaceMesh>
-            surfaceTypeField;
 
     // Private Member Functions
 
         //- Name of the (scalar) diffusivity
         const volScalarField& gamma_;
 
-        //- External flux field
-        const surfaceTypeField* extFluxPtr_;
+        //- Jump flux field
+        const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr_;
 
         //- Disallow default bitwise assignment
         void operator=(const fluxConservative&);
@@ -104,17 +100,20 @@ public:
                     word(is)
                 )
             ),
-            extFluxPtr_(NULL)
+            jumpFluxPtr_(NULL)
         {
             if (!is.eof())
             {
-                const surfaceTypeField& extFlux =
-                    mesh.thisDb().lookupObject<surfaceTypeField>
+                const GeometricField<Type, fvsPatchField, surfaceMesh>& jumpFlux =
+                    mesh.thisDb().lookupObject
+                    <
+                        GeometricField<Type, fvsPatchField, surfaceMesh>
+                    >
                     (
                         word(is)
                     );
 
-                extFluxPtr_ = &extFlux;
+                jumpFluxPtr_ = &jumpFlux;
             }
         }
 
@@ -135,17 +134,20 @@ public:
                     word(is)
                 )
             ),
-            extFluxPtr_(NULL)
+            jumpFluxPtr_(NULL)
         {
             if (!is.eof())
             {
-                const surfaceTypeField& extFlux =
-                    mesh.thisDb().lookupObject<surfaceTypeField>
+                const GeometricField<Type, fvsPatchField, surfaceMesh>& jumpFlux =
+                    mesh.thisDb().lookupObject
+                    <
+                        GeometricField<Type, fvsPatchField, surfaceMesh>
+                    >
                     (
                         word(is)
                     );
 
-                extFluxPtr_ = &extFlux;
+                jumpFluxPtr_ = &jumpFlux;
             }
         }
 
@@ -155,20 +157,20 @@ public:
         //- Return true if this scheme uses an explicit correction
         virtual bool corrected() const
         {
-            return extFluxPtr_;
+            return jumpFluxPtr_;
         }
 
         //- Return the interpolation weighting factors
         virtual tmp<surfaceScalarField> weights
         (
-            const volTypeField& vf
+            const GeometricField<Type, fvPatchField, volMesh>& vf
         ) const;
 
         //- Return the explicit correction to the face-interpolate
-        virtual tmp<surfaceTypeField>
+        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         correction
         (
-            const volTypeField& vf
+            const GeometricField<Type, fvPatchField, volMesh>& vf
         ) const;
 };
 

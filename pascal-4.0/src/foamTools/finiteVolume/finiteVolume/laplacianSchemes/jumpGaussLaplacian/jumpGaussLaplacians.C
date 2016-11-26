@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "electricPotentialLaplacian.H"
+#include "jumpGaussLaplacian.H"
 #include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -32,16 +32,16 @@ namespace Foam
 {
 namespace fv
 {
-    makeFvLaplacianScheme(electricPotentialLaplacian)
+    makeFvLaplacianScheme(jumpGaussLaplacian)
 }
 }
 
 
-#define declareElectricPotentialLaplacianScalarGamma(Type)                   \
+#define declareJumpGaussLaplacianScalarGamma(Type)                           \
                                                                              \
 template<>                                                                   \
 Foam::tmp<Foam::fvMatrix<Foam::Type> >                                       \
-Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
+Foam::fv::jumpGaussLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian         \
 (                                                                            \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
     const word& vfGammaName,                                                 \
@@ -94,7 +94,7 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
                                                                              \
 template<>                                                                   \
 Foam::tmp<Foam::fvMatrix<Foam::Type> >                                       \
-Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
+Foam::fv::jumpGaussLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian         \
 (                                                                            \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
     const GeometricField<Type, fvPatchField, volMesh>& vf                    \
@@ -106,7 +106,7 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvmLaplacian \
                                                                              \
 template<>                                                                   \
 Foam::tmp<Foam::GeometricField<Foam::Type, Foam::fvPatchField, Foam::volMesh> >\
-Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian \
+Foam::fv::jumpGaussLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian         \
 (                                                                            \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
     const word& vfGammaName,                                                 \
@@ -128,7 +128,7 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian \
                                                                              \
 template<>                                                                   \
 Foam::tmp<Foam::GeometricField<Foam::Type, Foam::fvPatchField, Foam::volMesh> >\
-Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian \
+Foam::fv::jumpGaussLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian         \
 (                                                                            \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& gamma,         \
     const GeometricField<Type, fvPatchField, volMesh>& vf                    \
@@ -138,11 +138,11 @@ Foam::fv::electricPotentialLaplacian<Foam::Type, Foam::scalar>::fvcLaplacian \
 }
 
 
-declareElectricPotentialLaplacianScalarGamma(scalar);
-declareElectricPotentialLaplacianScalarGamma(vector);
-declareElectricPotentialLaplacianScalarGamma(sphericalTensor);
-declareElectricPotentialLaplacianScalarGamma(symmTensor);
-declareElectricPotentialLaplacianScalarGamma(tensor);
+declareJumpGaussLaplacianScalarGamma(scalar);
+declareJumpGaussLaplacianScalarGamma(vector);
+declareJumpGaussLaplacianScalarGamma(sphericalTensor);
+declareJumpGaussLaplacianScalarGamma(symmTensor);
+declareJumpGaussLaplacianScalarGamma(tensor);
 
 
 // ************************************************************************* //

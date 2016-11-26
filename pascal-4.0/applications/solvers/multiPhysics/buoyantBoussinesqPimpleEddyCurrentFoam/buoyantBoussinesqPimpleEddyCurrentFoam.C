@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
         {
 #           include "AVLoop_sigmaUpdate.H"
 #           include "AVLoop_AUpdate.H"
+#           include "AVLoop_VGradInit.H"
 #           include "AVLoop_VGradUpdate.H"
 
 #           include "BUpdate.H"

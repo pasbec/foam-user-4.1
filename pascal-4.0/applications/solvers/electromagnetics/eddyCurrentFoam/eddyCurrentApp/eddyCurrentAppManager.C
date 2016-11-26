@@ -48,8 +48,6 @@ void Foam::eddyCurrentApp::Manager::Settings::read() const
             eddyCurrentApp::Control::debug()
         );
 
-    tolScale = dict().lookupOrDefault("tolScale", false);
-
     lowFrequency = dict().lookupOrDefault("lowFrequency", false);
 
     biotSavart = dict().lookupOrDefault("biotSavart", false);

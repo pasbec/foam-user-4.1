@@ -29,8 +29,8 @@ gradSchemes
     grad(A0Re)                        Gauss linear;
     grad(A0Im)                        Gauss linear;
 
-    grad(VRe)                         electricPotentialGrad Gauss sigma ddtAImPhi;
-    grad(VIm)                         electricPotentialGrad Gauss sigma ddtARePhi;
+    grad(VRe)                         Gauss fluxConservative sigma ddtAImPhi;
+    grad(VIm)                         Gauss fluxConservative sigma ddtARePhi;
 }
 
 divSchemes
@@ -45,8 +45,8 @@ laplacianSchemes
     laplacian(A0Re)                   Gauss linear corrected;
     laplacian(A0Im)                   Gauss linear corrected;
 
-    laplacian(sigmaf,VRe)             electricPotentialLaplacian Gauss sigma ddtAImPhi;
-    laplacian(sigmaf,VIm)             electricPotentialLaplacian Gauss sigma ddtARePhi;
+    laplacian(sigmaf,VRe)             jumpGauss sigma ddtAImPhi;
+    laplacian(sigmaf,VIm)             jumpGauss sigma ddtARePhi;
 
 }
 

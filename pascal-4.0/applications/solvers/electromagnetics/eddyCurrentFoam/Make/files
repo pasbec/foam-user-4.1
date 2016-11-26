@@ -1,10 +1,4 @@
 
-electricPotential/electricPotentialGrad/electricPotentialGradBase.C
-electricPotential/electricPotentialGrad/electricPotentialGrads.C
-electricPotential/electricPotentialGrad/scalarElectricPotentialGrad.C
-electricPotential/electricPotentialLaplacian/electricPotentialLaplacianBase.C
-electricPotential/electricPotentialLaplacian/electricPotentialLaplacians.C
-
 eddyCurrentFoam.C
 
 EXE = $(FOAM_USER_APPBIN)/eddyCurrentFoam

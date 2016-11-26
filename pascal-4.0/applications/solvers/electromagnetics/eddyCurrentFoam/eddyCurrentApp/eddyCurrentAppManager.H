@@ -76,9 +76,6 @@ public:
 
         SM_GLOBALSETTINGS_NEW();
 
-            //- Switch to set wether tolerance scaling is used
-            SM_SETTINGS_MEMBER_ADD(Switch, tolScale);
-
             //- Switch to set wether low-frequency is used
             SM_SETTINGS_MEMBER_ADD(Switch, lowFrequency);
 
@@ -144,10 +141,6 @@ public:
 
                 //- Angular harmonic field frequency
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, omega0);
-
-                //- TODO
-                SM_REGIONITEM_ADD(uniformDimensionedVectorField, Anormf);
-                SM_REGIONITEM_ADD(uniformDimensionedVectorField, Ascale);
 
                 // Source current density
                 SM_REGIONITEM_ADD(volVectorField, j0Re);

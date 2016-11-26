@@ -21,6 +21,8 @@ finiteVolume/fields/fvPatchFields/tangentialMagnetic/tangentialMagneticFvPatchFi
 
 finiteVolume/finiteVolume/snGradSchemes/patchCorrectedSnGrad/patchCorrectedSnGrads.C
 
+finiteVolume/finiteVolume/laplacianSchemes/jumpGaussLaplacian/jumpGaussLaplacians.C
+
 finiteVolume/interpolation/surfaceInterpolation/schemes/fluxConservative/fluxConservative.C
 
 foam/matrices/solverPerformanceData/solverPerformanceData.C
