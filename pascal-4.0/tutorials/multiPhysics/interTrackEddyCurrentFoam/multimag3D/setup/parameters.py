@@ -79,11 +79,11 @@ coils_frequency = 50.0
 
 # We need a current amplitude of
 #
-# I = 431.6 A
+# I = 431.6 A                      (with long coils path-x*10000, we have 415.2)
 #
 # for achieving
 #
-# B = sqrt(Bx^2 + By^2 + Bz^2) = sqrt(BRe^2 + BIm^2)/sqrt(2) = 0.4216 mT
+# B = sqrt(Bx^2 + By^2 + Bz^2) = sqrt(BRe^2 + BIm^2)/sqrt(2) = 0.4216e-3 T
 #
 # at centroid of cylinder for
 #

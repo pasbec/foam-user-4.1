@@ -23,6 +23,7 @@ regions
 
 settings
 {
+//     lowFrequency            true;
     biotSavart              true;
     lorentzForce            true;
     magneticPressure        false;
