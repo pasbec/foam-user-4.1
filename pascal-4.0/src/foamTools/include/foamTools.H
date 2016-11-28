@@ -24,28 +24,19 @@ License
 Description
     ...
 
-Author
-    Pascal Beckstein
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef eddyCurrentAppInclude_H
-#define eddyCurrentAppInclude_H
+#ifndef foamTools_H
+#define foamTools_H
 
-#include "Switch.H"
-#include "HashTable.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "fvCFD.H"
-#include "fvBlockMatrix.H"
-#include "uniformDimensionedFields.H"
-#include "fixedValueFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "calculatedFvPatchFields.H"
+#include "fvc_foamTools.H"
+#include "physicalConstants.H"
+
 #include "extrapolatedFvPatchFields.H"
-
-#include "foamTools.H"
-#include "regionModel.H"
-#include "edgeBiotSavart.H"
+#include "directionMixedMixedFvPatchFields.H"
+#include "patchDirectionMixedMixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

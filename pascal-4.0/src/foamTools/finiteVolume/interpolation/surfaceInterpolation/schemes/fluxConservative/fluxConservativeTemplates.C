@@ -66,11 +66,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fluxConservative<Type>::weights
     const scalarField& gammaIn = gamma.internalField();
 
     // Linear (!!!) interpolated gamma
-    tmp<surfaceScalarField> tgammaf
-    (
-        linearInterpolate(gamma)
-    );
-
+    tmp<surfaceScalarField> tgammaf(linearInterpolate(gamma));
     const surfaceScalarField& gammaf = tgammaf();
     const scalarField& gammafIn = gammaf.internalField();
 
@@ -94,9 +90,9 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fluxConservative<Type>::weights
         {
             const unallocLabelList& faceCells = patch.patch().faceCells();
 
-            const scalarField& gammafPatch = gammaf.boundaryField()[patchI];
-
             const scalarField& weightsPatch = weights.boundaryField()[patchI];
+
+            const scalarField& gammafPatch = gammaf.boundaryField()[patchI];
 
             forAll (patch, faceI)
             {
@@ -135,7 +131,7 @@ Foam::fluxConservative<Type>::correction
         )   << "Jump flux pointer not assigned.\n"
             << "Maybe this scheme was constructed from IStream without\n"
             << " getting a name for the jump flux field?"
-            << " If this is ture, ::correction(vf) must not be used"
+            << " If this is true, ::correction(vf) must not be used"
             << " and ::corrected() should actually return 'false'!"
             << abort(FatalError);
     }
@@ -153,7 +149,7 @@ Foam::fluxConservative<Type>::correction
                 mesh
             ),
             mesh,
-            vf.dimensions()
+            dimensioned<Type>(word(), vf.dimensions(), pTraits<Type>::zero)
         )
     );
 
@@ -172,16 +168,93 @@ Foam::fluxConservative<Type>::correction
     const surfaceScalarField& magSf = mesh.magSf();
     const scalarField& magSfIn = magSf.internalField();
 
+    // Non-orthogonal correction secant factors for one-sided gradient.
+    // NOTE: Not to be confused with non-orthogonal correction of a Laplacian!
+    surfaceScalarField secAlpha
+    (
+        IOobject
+        (
+            "secAlpha",
+            mesh.time().timeName(),
+            mesh
+        ),
+        mesh ,
+        dimensionedScalar(word(), dimless, 1.0)
+    );
+    scalarField& secAlphaIn = secAlpha.internalField();
+
+    if (!mesh.orthogonal())
+    {
+        const volVectorField& C = mesh.C();
+        const surfaceVectorField& Sf = mesh.Sf();
+        const vectorField& SfIn = Sf.internalField();
+        const surfaceVectorField& Kf = mesh.correctionVectors();
+        const surfaceVectorField Df = Sf/magSf - Kf;
+        const vectorField& DfIn = Df.internalField();
+
+        // Calculate internal secAlpha
+        forAll (owner, faceI)
+        {
+            vector NfInI = SfIn[faceI]/magSfIn[faceI];
+
+            secAlphaIn[faceI] = 1.0/(NfInI & DfIn[faceI]);
+        }
+
+        // Calculate boundary secAlpha
+        forAll (mesh.boundary(), patchI)
+        {
+            const fvPatch& patch = mesh.boundary()[patchI];
+
+            if (patch.coupled())
+            {
+                const scalarField& magSfPatch = magSf.boundaryField()[patchI];
+                const vectorField& SfPatch = Sf.boundaryField()[patchI];
+                const vectorField& DfPatch = Df.boundaryField()[patchI];
+
+                scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
+
+                forAll (patch, faceI)
+                {
+                    vector NfPatchI = SfPatch[faceI]/magSfPatch[faceI];
+
+                    secAlphaPatch[faceI] = 1.0/(NfPatchI & DfPatch[faceI]);
+                }
+            }
+            else
+            {
+                const unallocLabelList& faceCells = patch.patch().faceCells();
+
+                const scalarField& deltaCoeffsPatch =
+                    deltaCoeffs.boundaryField()[patchI];
+                const scalarField& magSfPatch = magSf.boundaryField()[patchI];
+                const vectorField& SfPatch = Sf.boundaryField()[patchI];
+                const vectorField& CfPatch = patch.Cf();
+
+                scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
+
+                forAll (patch, faceI)
+                {
+                    const label own = faceCells[faceI];
+
+                    vector NfPatchI = SfPatch[faceI]/magSfPatch[faceI];
+
+                    // Correction vectors for uncoupled boundaries are
+                    //  set to zero. We will avoid their usage here.
+                    vector DfPatchI = (CfPatch[faceI] - C[own])
+                                    * deltaCoeffsPatch[faceI];
+
+                    secAlphaPatch[faceI] = 1.0/(NfPatchI & DfPatchI);
+                }
+            }
+        }
+    }
+
     // Gamma
     const volScalarField& gamma = gamma_;
     const scalarField& gammaIn = gamma.internalField();
 
     // Linear (!!!) interpolated gamma
-    tmp<surfaceScalarField> tgammaf
-    (
-        linearInterpolate(gamma)
-    );
-
+    tmp<surfaceScalarField> tgammaf(linearInterpolate(gamma));
     const surfaceScalarField& gammaf = tgammaf();
     const scalarField& gammafIn = gammaf.internalField();
 
@@ -202,7 +275,9 @@ Foam::fluxConservative<Type>::correction
 
         scalar dByMagSf = 1.0/deltaCoeffsIn[faceI]/magSfIn[faceI];
 
-        corrIn[faceI] = gammaRelDiff * wPwN * dByMagSf * jumpFluxIn[faceI];
+        corrIn[faceI] = secAlphaIn[faceI]
+                      * gammaRelDiff * wPwN * dByMagSf
+                      * jumpFluxIn[faceI];
     }
 
     // Calculate boundary correction
@@ -219,6 +294,8 @@ Foam::fluxConservative<Type>::correction
         const scalarField& deltaCoeffsPatch = deltaCoeffs.boundaryField()[patchI];
         const scalarField& magSfPatch = magSf.boundaryField()[patchI];
 
+        const scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
+
         const scalarField& gammaPatch = gamma.boundaryField()[patchI];
         const scalarField& gammafPatch = gammaf.boundaryField()[patchI];
         const Field<Type>& jumpFluxPatch = jumpFlux.boundaryField()[patchI];
@@ -234,8 +311,9 @@ Foam::fluxConservative<Type>::correction
 
             scalar dByMagSf = 1.0/deltaCoeffsPatch[faceI]/magSfPatch[faceI];
 
-            corrPatch[faceI] =
-                gammaRelDiff * wPwN * dByMagSf * jumpFluxPatch[faceI];
+            corrPatch[faceI] = secAlphaPatch[faceI]
+                             * gammaRelDiff * wPwN * dByMagSf
+                             * jumpFluxPatch[faceI];
         }
     }
 

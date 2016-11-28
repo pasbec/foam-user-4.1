@@ -39,9 +39,12 @@ Author
 #define jumpGaussLaplacian_H
 
 #include "laplacianScheme.H"
+#include "fluxConservative.H"
 #include "harmonic.H"
 #include "snGradScheme.H"
 #include "uncorrectedSnGrad.H"
+
+// TODO: Only include headers which are really needed!
 
 // TODO: The diffusivity gamma is regarded as discontinous at every face!
 
@@ -97,17 +100,17 @@ private:
             const GeometricField<Type, fvPatchField, volMesh>& vf
         );
 
-        void fvmLaplacianJumpFlux
+        void addJumpFlux
         (
             fvMatrix<Type>& fvm,
             const surfaceScalarField& gammaMagSf,
             const GeometricField<Type, fvPatchField, volMesh>& vf
         );
 
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > gammaSnGradCorr
+        void addSnGradCorrection
         (
-            const surfaceVectorField& SfGammaCorr,
-            const word& vfGammaName,
+            fvMatrix<Type>& fvm,
+            const surfaceScalarField& gammaMagSf,
             const GeometricField<Type, fvPatchField, volMesh>& vf
         );
 
@@ -187,6 +190,48 @@ public:
             }
         }
 
+
+        //- Construct from mesh, gamma and jump flux pointer
+        jumpGaussLaplacian
+        (
+            const fvMesh& mesh,
+            const volScalarField& gamma,
+            const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr = NULL
+        )
+        :
+            laplacianScheme<Type, GType>
+            (
+                mesh,
+                tmp<surfaceInterpolationScheme<GType> >
+                (
+                    new harmonic<GType>(mesh)
+                ),
+// TODO FIXME: Special snGradSchemes are necessary?
+                tmp<snGradScheme<Type> >
+                (
+                    new uncorrectedSnGrad<Type>(mesh)
+                )
+            ),
+            gamma_(gamma),
+            jumpFluxPtr_(jumpFluxPtr)
+        {
+
+            word schemeSigma = mesh.schemesDict().interpolationScheme
+            (
+                "interpolate(" + gamma_.name() + ")"
+            );
+
+            if (schemeSigma != "harmonic")
+            {
+                FatalErrorIn
+                (
+                    "jumpGaussLaplacian::jumpGaussLaplacian(...)"
+                )   << "For this Laplacian, gamma needs to be"
+                    << " interpolated harmonically!"
+                    << exit(FatalError);
+            }
+        }
+
     // Destructor
 
         virtual ~jumpGaussLaplacian()
@@ -244,53 +289,6 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 };
-
-
-// Use macros to emulate partial-specialisation of the the Laplacian functions
-// for scalar diffusivity gamma
-
-#define defineLaplacianScalarGamma(Type)                                    \
-                                                                            \
-template<>                                                                  \
-tmp<fvMatrix<Type> >                                                        \
-jumpGaussLaplacian<Type, scalar>::fvmLaplacian                              \
-(                                                                           \
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
-    const word&,                                                            \
-    const GeometricField<Type, fvPatchField, volMesh>&                      \
-);                                                                          \
-                                                                            \
-template<>                                                                  \
-tmp<fvMatrix<Type> >                                                        \
-jumpGaussLaplacian<Type, scalar>::fvmLaplacian                              \
-(                                                                           \
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
-    const GeometricField<Type, fvPatchField, volMesh>&                      \
-);                                                                          \
-                                                                            \
-template<>                                                                  \
-tmp<GeometricField<Type, fvPatchField, volMesh> >                           \
-jumpGaussLaplacian<Type, scalar>::fvcLaplacian                              \
-(                                                                           \
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
-    const word&,                                                            \
-    const GeometricField<Type, fvPatchField, volMesh>&                      \
-);                                                                          \
-                                                                            \
-template<>                                                                  \
-tmp<GeometricField<Type, fvPatchField, volMesh> >                           \
-jumpGaussLaplacian<Type, scalar>::fvcLaplacian                              \
-(                                                                           \
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
-    const GeometricField<Type, fvPatchField, volMesh>&                      \
-);
-
-
-defineLaplacianScalarGamma(scalar);
-defineLaplacianScalarGamma(vector);
-defineLaplacianScalarGamma(sphericalTensor);
-defineLaplacianScalarGamma(symmTensor);
-defineLaplacianScalarGamma(tensor);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

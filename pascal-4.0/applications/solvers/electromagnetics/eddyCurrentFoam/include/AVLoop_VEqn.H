@@ -3,6 +3,8 @@
 
     // Solve V
     if (control.meshIs3D())
+    for (direction eqn = 0; eqn < 2; eqn++)
+    {
     {
         SM_REGIONSCOPE(CONDUCTOR);
 
@@ -122,9 +124,6 @@
                 << abort(FatalError);
         }
 
-        // Correct boundary conditions
-        V.correctBoundaryConditions();
-
 // TODO: Use relaxation?
 //         VReGrad.storePrevIter();
 //         VImGrad.storePrevIter();
@@ -135,10 +134,83 @@
         }
         else
         {
+//             volVectorField ownReconstructedFluxCorr
+//             (
+//                 V.name()+"EqnOwnReconstructedFluxCorr",
+//                 fvc::reconstruct
+//                 (
+//                     *VEqn.faceFluxCorrectionPtr()/sigmaf
+//                 )
+//             );
+//             ownReconstructedFluxCorr.write();
+//
+//             volVectorField neiReconstructedFluxCorr
+//             (
+//                 V.name()+"EqnNeiReconstructedFluxCorr",
+//                 fvc::reconstruct
+//                 (
+//                     *VEqn.jumpFaceFluxCorrectionPtr()/sigmaf
+//                 )
+//             );
+//             neiReconstructedFluxCorr.write();
+//
+//             volVectorField jumpReconstructedFluxCorr
+//             (
+//                 V.name()+"EqnJumpReconstructedFluxCorr",
+//                 fvc::jumpReconstruct
+//                 (
+//                     *VEqn.faceFluxCorrectionPtr()/sigmaf,
+//                     *VEqn.jumpFaceFluxCorrectionPtr()/sigmaf
+//                 )
+//             );
+//             jumpReconstructedFluxCorr.write();
+//
+//             volVectorField ownReconstructedFlux
+//             (
+//                 V.name()+"EqnOwnReconstructedFlux",
+//                 fvc::reconstruct
+//                 (
+//                     VEqn.flux()/sigmaf
+//                 )
+//             );
+//             ownReconstructedFlux.write();
+//
+//             volVectorField neiReconstructedFlux
+//             (
+//                 V.name()+"EqnNeiReconstructedFlux",
+//                 fvc::reconstruct
+//                 (
+//                     VEqn.jumpFlux()/sigmaf
+//                 )
+//             );
+//             neiReconstructedFlux.write();
+//
+//             volVectorField jumpReconstructedFlux
+//             (
+//                 V.name()+"EqnJumpReconstructedFlux",
+//                 fvc::jumpReconstruct
+//                 (
+//                     VEqn.flux()/sigmaf,
+//                     VEqn.jumpFlux()/sigmaf
+//                 )
+//             );
+//             jumpReconstructedFlux.write();
+//
+//             fluxConservative<scalar> wrongVinterpolScheme(mesh, sigma, NULL);
+//             surfaceScalarField wrongVf = wrongVinterpolScheme.interpolate(V);
+//             volVectorField wrongGrad = fvc::grad(wrongVf);
+//             wrongGrad.rename(V.name()+"GradWrong");
+//             wrongGrad.write();
+//
+//             volVectorField rightGrad = fvc::grad(V);
+//             rightGrad.rename(V.name()+"GradRight");
+//             rightGrad.write();
+
             VGrad = fvc::grad(V);
         }
 
 // TODO: Use relaxation?
 //         VReGrad.relax(0.5);
 //         VImGrad.relax(0.5);
+    }
     }

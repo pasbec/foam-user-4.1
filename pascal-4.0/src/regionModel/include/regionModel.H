@@ -26,8 +26,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionModelling_H
-#define regionModelling_H
+#ifndef regionModel_H
+#define regionModel_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,7 +39,7 @@ Description
 #include "regionVolFields.H"
 #include "regionPointFields.H"
 
-#include "regionFvc.H"
+#include "fvc_regionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

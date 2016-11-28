@@ -152,6 +152,20 @@ public:
         }
 
 
+        //- Construct from mesh, gamma and jump flux pointer
+        fluxConservative
+        (
+            const fvMesh& mesh,
+            const volScalarField& gamma,
+            const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr = NULL
+        )
+        :
+            surfaceInterpolationScheme<Type>(mesh),
+            gamma_(gamma),
+            jumpFluxPtr_(jumpFluxPtr)
+        {}
+
+
     // Member Functions
 
         //- Return true if this scheme uses an explicit correction

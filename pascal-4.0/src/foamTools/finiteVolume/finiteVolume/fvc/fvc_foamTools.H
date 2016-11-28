@@ -21,31 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    ...
+Namespace
+    Foam::fvc
 
-Author
-    Pascal Beckstein
+Description
+    Namespace of functions to calculate explicit derivatives for foamTools
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef eddyCurrentAppInclude_H
-#define eddyCurrentAppInclude_H
+#ifndef regionFvc_H
+#define regionFvc_H
 
-#include "Switch.H"
-#include "HashTable.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "fvCFD.H"
-#include "fvBlockMatrix.H"
-#include "uniformDimensionedFields.H"
-#include "fixedValueFvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "calculatedFvPatchFields.H"
-#include "extrapolatedFvPatchFields.H"
-
-#include "foamTools.H"
-#include "regionModel.H"
-#include "edgeBiotSavart.H"
+#include "fvcExtrapolate.H"
+#include "fvcJumpSurfaceIntegrate.H"
+#include "fvcJumpReconstruct.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

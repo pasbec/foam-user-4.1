@@ -21,22 +21,66 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
+InNamespace
     Foam::fvc
 
 Description
-    Namespace of functions to calculate explicit derivatives for region fields
+    Reconstruct volField from two face flux fields.
+
+SourceFiles
+    fvcJumpReconstruct.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionFvc_H
-#define regionFvc_H
+
+#ifndef fvcJumpReconstruct_H
+#define fvcJumpReconstruct_H
+
+#include "volFieldsFwd.H"
+#include "surfaceFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "fvcExtrapolate.H"
+namespace Foam
+{
 
-#include "regionFvcGrad.H"
+/*---------------------------------------------------------------------------*\
+                     Namespace fvc functions Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace fvc
+{
+    template<class Type>
+    tmp
+    <
+        GeometricField
+        <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
+    > jumpReconstruct
+    (
+        const GeometricField<Type, fvsPatchField, surfaceMesh>&
+    );
+
+    template<class Type>
+    tmp
+    <
+        GeometricField
+        <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
+    > jumpReconstruct
+    (
+        const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >&
+    );
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "fvcJumpReconstruct.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -10,6 +10,10 @@
                 << endl;
         }
 
+        // Correct boundary conditions of sigma
+        // NOTE: Important for parallel runs
+        globalStorage.sigma()[CONDUCTOR].correctBoundaryConditions();
+
         // Update sigma
         globalStorage.sigma().rmap(CONDUCTOR);
     }
