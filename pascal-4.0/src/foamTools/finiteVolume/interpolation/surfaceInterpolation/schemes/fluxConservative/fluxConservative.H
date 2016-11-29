@@ -65,13 +65,21 @@ class fluxConservative
     public surfaceInterpolationScheme<Type>
 {
 
-    // Private Member Functions
+private:
+
+    // Private data
 
         //- Name of the (scalar) diffusivity
         const volScalarField& gamma_;
 
         //- Jump flux field
         const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr_;
+
+    // Private Member Functions
+
+        //- Non-orthogonal correction secant factors for one-sided gradient.
+        //  NOTE: Not to be confused with non-orthogonal correction!
+        tmp<surfaceScalarField> secAlphaNonOrth() const;
 
         //- Disallow default bitwise assignment
         void operator=(const fluxConservative&);

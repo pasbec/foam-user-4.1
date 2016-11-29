@@ -85,6 +85,12 @@ private:
 
     // Private data
 
+        //- Is this scheme meant to be corrected?
+        bool corrected_;
+
+        //- Is this scheme's correction meant to be limited?
+        scalar limiter_;
+
         //- Name of the (scalar) diffusivity
         const GeometricField<GType, fvPatchField, volMesh>& gamma_;
 
@@ -93,13 +99,21 @@ private:
 
     // Private Member Functions
 
+        //- Check for valid schmeme settings
+        void checkSchemes() const;
+
+        //- Non-orthogonal correction secant factors for one-sided gradient.
+        //  NOTE: Not to be confused with non-orthogonal correction!
+        tmp<surfaceScalarField> secAlphaNonOrth() const;
+
+        //- Uncorrected Laplacian
         tmp<fvMatrix<Type> > fvmLaplacianUncorrected
         (
             const surfaceScalarField& gammaMagSf,
-            const word& vfGammaName,
             const GeometricField<Type, fvPatchField, volMesh>& vf
         );
 
+        //- Add jump flux to source of matrix
         void addJumpFlux
         (
             fvMatrix<Type>& fvm,
@@ -107,7 +121,8 @@ private:
             const GeometricField<Type, fvPatchField, volMesh>& vf
         );
 
-        void addSnGradCorrection
+        //- Add correction for both side of face to source of matrix
+        void addSnGradsCorrection
         (
             fvMatrix<Type>& fvm,
             const surfaceScalarField& gammaMagSf,
@@ -140,14 +155,16 @@ public:
                 mesh,
                 tmp<surfaceInterpolationScheme<GType> >
                 (
-                    new harmonic<GType>(mesh)
+                    surfaceInterpolationScheme<GType>::New(mesh, is)
                 ),
-// TODO FIXME: Special snGradSchemes are necessary?
+// TODO: Special snGradSchemes are necessary?
                 tmp<snGradScheme<Type> >
                 (
                     new uncorrectedSnGrad<Type>(mesh)
                 )
             ),
+            corrected_(true),
+            limiter_(1.0),
             gamma_
             (
                 mesh.thisDb().lookupObject
@@ -174,20 +191,7 @@ public:
                 jumpFluxPtr_ = &jumpFlux;
             }
 
-            word schemeSigma = mesh.schemesDict().interpolationScheme
-            (
-                "interpolate(" + gamma_.name() + ")"
-            );
-
-            if (schemeSigma != "harmonic")
-            {
-                FatalErrorIn
-                (
-                    "jumpGaussLaplacian::jumpGaussLaplacian(...)"
-                )   << "For this Laplacian, gamma needs to be"
-                    << " interpolated harmonically!"
-                    << exit(FatalError);
-            }
+            checkSchemes();
         }
 
 
@@ -206,30 +210,18 @@ public:
                 (
                     new harmonic<GType>(mesh)
                 ),
-// TODO FIXME: Special snGradSchemes are necessary?
+// TODO: Special snGradSchemes are necessary?
                 tmp<snGradScheme<Type> >
                 (
                     new uncorrectedSnGrad<Type>(mesh)
                 )
             ),
+            corrected_(true),
+            limiter_(1.0),
             gamma_(gamma),
             jumpFluxPtr_(jumpFluxPtr)
         {
-
-            word schemeSigma = mesh.schemesDict().interpolationScheme
-            (
-                "interpolate(" + gamma_.name() + ")"
-            );
-
-            if (schemeSigma != "harmonic")
-            {
-                FatalErrorIn
-                (
-                    "jumpGaussLaplacian::jumpGaussLaplacian(...)"
-                )   << "For this Laplacian, gamma needs to be"
-                    << " interpolated harmonically!"
-                    << exit(FatalError);
-            }
+            checkSchemes();
         }
 
     // Destructor
@@ -238,14 +230,6 @@ public:
         {}
 
     // Member Functions
-
-        // -Laplacian method with name of volField of gamma
-        tmp<fvMatrix<Type> > fvmLaplacian
-        (
-            const GeometricField<GType, fvsPatchField, surfaceMesh>&,
-            const word&,
-            const GeometricField<Type, fvPatchField, volMesh>&
-        );
 
         // -Laplacian method with surfaceField of gamma
         virtual tmp<fvMatrix<Type> > fvmLaplacian
@@ -264,14 +248,6 @@ public:
         // -NOTE: Deactivated!
         virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        );
-
-        // -Laplacian calculation with name of volField of gamma
-        tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
-        (
-            const GeometricField<GType, fvsPatchField, surfaceMesh>&,
-            const word&,
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 

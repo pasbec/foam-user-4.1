@@ -44,6 +44,9 @@ SourceFiles
 
 // TODO [Low]: This is a template class. Capitalize first letter!
 
+// TODO [High]: Correct boundary conditions after construction in order to get
+//              coupled patch values correct. This may be a problem!
+
 // TODO [High]: Implement template specializations for the currently
 //              hard coded membemer functions for boundary field mapping of volFields
 //              in regionVolFieldMapping.C

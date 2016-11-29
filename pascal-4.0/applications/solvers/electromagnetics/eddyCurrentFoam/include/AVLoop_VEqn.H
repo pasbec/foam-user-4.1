@@ -3,7 +3,7 @@
 
     // Solve V
     if (control.meshIs3D())
-    for (direction eqn = 0; eqn < 2; eqn++)
+    for (int VeqnI = 0; VeqnI < 2; VeqnI++)
     {
     {
         SM_REGIONSCOPE(CONDUCTOR);
@@ -125,8 +125,7 @@
         }
 
 // TODO: Use relaxation?
-//         VReGrad.storePrevIter();
-//         VImGrad.storePrevIter();
+//         VGrad.storePrevIter();
 
         if (laplacianSchemeV != "jumpGauss")
         {
@@ -210,7 +209,6 @@
         }
 
 // TODO: Use relaxation?
-//         VReGrad.relax(0.5);
-//         VImGrad.relax(0.5);
+//         VGrad.relax(0.5);
     }
     }
