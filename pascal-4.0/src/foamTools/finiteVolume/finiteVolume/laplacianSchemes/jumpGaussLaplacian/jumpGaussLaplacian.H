@@ -48,15 +48,8 @@ Author
 
 // TODO: Only include headers which are really needed!
 
-// TODO: The diffusivity gamma is regarded as discontinous at every face!
-
-// TODO: Tensorial diffusivity?
-
-// TODO: Think about CORRECT implementation with snGrad correction. The
-//       corrected (explicit) gradient may not be interpolated from the cell
-//       values using linear interpolation!!! We MUST use fluxConservative
-//       or a corresponding interpolation scheme to calculate the gradient
-//       correction in normal direction.
+// TODO: The diffusivity gamma is currently regarded as
+//       discontinous at every face!
 
 // TODO: Proper template specialisation? The diffusivity may be
 //       any GType. Specialization is necessary for e.g. tensors. Currently

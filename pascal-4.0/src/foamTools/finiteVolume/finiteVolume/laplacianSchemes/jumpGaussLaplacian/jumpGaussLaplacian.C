@@ -574,7 +574,7 @@ jumpGaussLaplacian<Type, GType>::fvcLaplacian
 
     tmp<GeometricField<Type, fvPatchField, volMesh> > tLaplacian
     (
-// TODO: This is totally wrong! snGrad does not exist!
+// TODO: Two-sided snGradSchemes necessary!
         fvc::div(this->tsnGradScheme_().snGrad(vf)*mesh.magSf())
     );
 
@@ -600,7 +600,7 @@ jumpGaussLaplacian<Type, GType>::fvcLaplacian
 
     tmp<GeometricField<Type, fvPatchField, volMesh> > tLaplacian
     (
-// TODO: This is totally wrong! snGrad does not exist!
+// TODO: Two-sided snGradSchemes necessary!
         fvc::div(gammaf*this->tsnGradScheme_().snGrad(vf)*mesh.magSf())
     );
 
