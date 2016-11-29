@@ -172,8 +172,8 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
         tjumpNeiFlux();
     Field<Type>& jumpNeiFluxIn = jumpNeiFlux.internalField();
 
-    // Reference to matrix source
-    Field<Type>& source = fvm.source();
+//     // Reference to matrix source
+//     Field<Type>& source = fvm.source();
 
     // Mesh addressing
     const unallocLabelList& owner = mesh.owner();
@@ -220,14 +220,14 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
                              * (1.0 - gammaOwn/gammaNei) * wP
                              * jumpFluxIn[faceI];
 
-        source[own] -= jumpOwnFluxIn[faceI];
+//         source[own] -= jumpOwnFluxIn[faceI];
 
         jumpNeiFluxIn[faceI] = secAlphaIn[faceI]
                              * gammaMagSfIn[faceI]/magSfIn[faceI]
                              * (1.0 - gammaNei/gammaOwn) * wN
                              * jumpFluxIn[faceI];
 
-        source[nei] += jumpNeiFluxIn[faceI];
+//         source[nei] -= jumpNeiFluxIn[faceI];
     }
 
     // Boundary contributions from jump flux
@@ -268,16 +268,24 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
                                     * (1.0 - gammaOwn/gammaNei) * wP
                                     * jumpFluxPatch[faceI];
 
-            source[own] -= jumpOwnFluxPatch[faceI];
+//             source[own] -= jumpOwnFluxPatch[faceI];
         }
     }
 
-//     // Store jump face fluxes if required
-//     if (mesh.schemesDict().fluxRequired(vf.name()))
-//     {
-//         fvm.faceFluxCorrectionPtr() = tjumpOwnFlux.ptr();
-//         fvm.jumpFaceFluxCorrectionPtr() = tjumpNeiFlux.ptr();
-//     }
+    // Add jump face flux to source
+    fvm.source() =
+        -mesh.V()*fvc::jumpSurfaceIntegrate<Type>
+        (
+            jumpOwnFlux,
+            jumpNeiFlux
+        )().internalField();
+
+    // Store jump face fluxes if required
+    if (mesh.schemesDict().fluxRequired(vf.name()))
+    {
+        fvm.faceFluxCorrectionPtr() = tjumpOwnFlux.ptr();
+        fvm.jumpFaceFluxCorrectionPtr() = tjumpNeiFlux.ptr();
+    }
 }
 
 
@@ -423,13 +431,13 @@ void jumpGaussLaplacian<Type, GType>::addSnGradsCorrection
                            / weightsIn[faceI]
                            * deltaCoeffsIn[faceI];
 
-            faceOwnFluxCorrIn[own] += gammaMagSf[faceI]
-                                    * (KfNfIn[faceI] & NfIn[faceI])
-                                    * snGradOwn;
+            faceOwnFluxCorrIn[faceI] += gammaMagSf[faceI]
+                                      * (KfNfIn[faceI] & NfIn[faceI])
+                                      * snGradOwn;
 
-            faceNeiFluxCorrIn[nei] += gammaMagSf[faceI]
-                                    * (KfNfIn[faceI] & NfIn[faceI])
-                                    * snGradNei;
+            faceNeiFluxCorrIn[faceI] += gammaMagSf[faceI]
+                                      * (KfNfIn[faceI] & NfIn[faceI])
+                                      * snGradNei;
         }
 
         forAll (mesh.boundary(), patchI)
@@ -482,29 +490,29 @@ void jumpGaussLaplacian<Type, GType>::addSnGradsCorrection
                 faceNeiFluxCorr
             )().internalField();
 
-//         // Store face flux corrections if required
-//         if (mesh.schemesDict().fluxRequired(vf.name()))
-//         {
-//             if (!fvm.faceFluxCorrectionPtr())
-//             {
-//                 fvm.faceFluxCorrectionPtr() = tfaceOwnFluxCorr.ptr();
-//             }
-//             else
-//             {
-//                 *fvm.faceFluxCorrectionPtr() += faceOwnFluxCorr;
-//                 tfaceOwnFluxCorr.clear();
-//             }
-//
-//             if (!fvm.jumpFaceFluxCorrectionPtr())
-//             {
-//                 fvm.jumpFaceFluxCorrectionPtr() = tfaceNeiFluxCorr.ptr();
-//             }
-//             else
-//             {
-//                 *fvm.jumpFaceFluxCorrectionPtr() += faceNeiFluxCorr;
-//                 tfaceNeiFluxCorr.clear();
-//             }
-//         }
+        // Store face flux corrections if required
+        if (mesh.schemesDict().fluxRequired(vf.name()))
+        {
+            if (!fvm.faceFluxCorrectionPtr())
+            {
+                fvm.faceFluxCorrectionPtr() = tfaceOwnFluxCorr.ptr();
+            }
+            else
+            {
+                *fvm.faceFluxCorrectionPtr() += faceOwnFluxCorr;
+                tfaceOwnFluxCorr.clear();
+            }
+
+            if (!fvm.jumpFaceFluxCorrectionPtr())
+            {
+                fvm.jumpFaceFluxCorrectionPtr() = tfaceNeiFluxCorr.ptr();
+            }
+            else
+            {
+                *fvm.jumpFaceFluxCorrectionPtr() += faceNeiFluxCorr;
+                tfaceNeiFluxCorr.clear();
+            }
+        }
     }
 }
 

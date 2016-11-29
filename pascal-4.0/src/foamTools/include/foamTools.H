@@ -31,8 +31,9 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "fvc_foamTools.H"
 #include "physicalConstants.H"
+#include "ownerNeighbour.H"
+#include "fvc_foamTools.H"
 
 #include "extrapolatedFvPatchFields.H"
 #include "directionMixedMixedFvPatchFields.H"
