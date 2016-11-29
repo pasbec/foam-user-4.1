@@ -345,14 +345,6 @@ void jumpGaussLaplacian<Type, GType>::addSnGradsCorrection
 
     if (!mesh.orthogonal())
     {
-Info << "DEBUG: Apply non-orthogonal correction!" << endl;
-
-// TODO: What if jumpFlux not present? We can use normal correction instead...
-
-// TODO: This is hard-coded corrected. How can we use existing snGradSchemes and limiters?
-
-// TODO: What about limiting?
-
         const Field<Type>& vfIn = vf.internalField();
 
         // Flux-conserving interpolation of vf
@@ -440,48 +432,47 @@ Info << "DEBUG: Apply non-orthogonal correction!" << endl;
                                     * snGradNei;
         }
 
-//         // Calculate boundary
-//         forAll (mesh.boundary(), patchI)
-//         {
-//             const fvPatch& patch = mesh.boundary()[patchI];
-//
-//             const scalarField& gammaMagSfPatch =
-//                 gammaMagSf.boundaryField()[patchI];
-//             const Field<Type>& sfPatch = sf.boundaryField()[patchI];
-//
-//             const unallocLabelList& faceCells = patch.patch().faceCells();
-//
-// //             const vectorField& CfPatch = Cf.boundaryField()[patchI];
-//             const scalarField& weightsPatch = weights.boundaryField()[patchI];
-//             const scalarField& deltaCoeffsPatch =
-//                 deltaCoeffs.boundaryField()[patchI];
-//             const vectorField& NfPatch = Nf.boundaryField()[patchI];
-//
-//             const vectorField& KfNfPatch = KfNf.boundaryField()[patchI];
-//
-//             const scalarField& cosAlphaPatch = cosAlpha.boundaryField()[patchI];
-//
-//             Field<Type>& faceOwnFluxCorrPatch =
-//                 faceOwnFluxCorr.boundaryField()[patchI];
-//
-//             forAll (patch, faceI)
-//             {
-//                 const label own = faceCells[faceI];
-//
-// //                 Type snGradOwn = cosAlphaPatch[faceI]
-// //                                * (sfPatch[faceI] - vfIn[own])
-// //                                / mag(CfPatch[faceI] - Cin[own]);
-//
-//                 Type snGradOwn = cosAlphaPatch[faceI]
-//                                * (sfPatch[faceI] - vfIn[own])
-//                                / (1.0 - weightsPatch[faceI])
-//                                * deltaCoeffsPatch[faceI];
-//
-//                 faceOwnFluxCorrPatch[own] += gammaMagSfPatch[faceI]
-//                                            * (KfNfPatch[faceI] & NfPatch[faceI])
-//                                            * snGradOwn;
-//             }
-//         }
+        forAll (mesh.boundary(), patchI)
+        {
+            const fvPatch& patch = mesh.boundary()[patchI];
+
+            if (patch.coupled())
+            {
+                const scalarField& gammaMagSfPatch =
+                    gammaMagSf.boundaryField()[patchI];
+                const Field<Type>& sfPatch = sf.boundaryField()[patchI];
+
+                const unallocLabelList& faceCells = patch.patch().faceCells();
+
+                const scalarField& weightsPatch =
+                    weights.boundaryField()[patchI];
+                const scalarField& deltaCoeffsPatch =
+                    deltaCoeffs.boundaryField()[patchI];
+                const vectorField& NfPatch = Nf.boundaryField()[patchI];
+
+                const vectorField& KfNfPatch = KfNf.boundaryField()[patchI];
+
+                const scalarField& cosAlphaPatch =
+                    cosAlpha.boundaryField()[patchI];
+
+                Field<Type>& faceOwnFluxCorrPatch =
+                    faceOwnFluxCorr.boundaryField()[patchI];
+
+                forAll (patch, faceI)
+                {
+                    const label own = faceCells[faceI];
+
+                    Type snGradOwn = cosAlphaPatch[faceI]
+                                   * (sfPatch[faceI] - vfIn[own])
+                                   / (1.0 - weightsPatch[faceI])
+                                   * deltaCoeffsPatch[faceI];
+
+                    faceOwnFluxCorrPatch[faceI] += gammaMagSfPatch[faceI]
+                                                 * (KfNfPatch[faceI] & NfPatch[faceI])
+                                                 * snGradOwn;
+                }
+            }
+        }
 
         // Add correction to source
         fvm.source() -=

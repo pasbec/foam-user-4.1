@@ -45,8 +45,8 @@ laplacianSchemes
     laplacian(A0Re)                   Gauss linear corrected;
     laplacian(A0Im)                   Gauss linear corrected;
 
-    laplacian(sigmaf,VRe)             jumpGauss sigma ddtAImPhi;
-    laplacian(sigmaf,VIm)             jumpGauss sigma ddtARePhi;
+    laplacian(sigmaf,VRe)             jumpGauss harmonic corrected sigma ddtAImPhi;
+    laplacian(sigmaf,VIm)             jumpGauss harmonic corrected sigma ddtARePhi;
 
 }
 

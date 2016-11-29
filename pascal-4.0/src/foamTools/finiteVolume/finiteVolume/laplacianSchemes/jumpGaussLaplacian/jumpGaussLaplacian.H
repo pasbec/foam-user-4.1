@@ -44,6 +44,8 @@ Author
 #include "snGradScheme.H"
 #include "uncorrectedSnGrad.H"
 
+// TODO: Two-sided snGradSchemes necessary!
+
 // TODO: Only include headers which are really needed!
 
 // TODO: The diffusivity gamma is regarded as discontinous at every face!
@@ -85,9 +87,16 @@ private:
 
     // Private data
 
+// TODO: Two-sided snGradSchemes necessary!
+        //- Which snGradScheme is meant to be used. Just a dummy to do
+        //  correction here
+        word snGradSchemeName_;
+
+// TODO: Two-sided snGradSchemes necessary!
         //- Is this scheme meant to be corrected?
         bool corrected_;
 
+// TODO: Two-sided snGradSchemes necessary!
         //- Is this scheme's correction meant to be limited?
         scalar limiter_;
 
@@ -120,6 +129,7 @@ private:
             const GeometricField<Type, fvPatchField, volMesh>& vf
         );
 
+// TODO: Two-sided snGradSchemes necessary!
         //- Add correction for both side of face to source of matrix
         void addSnGradsCorrection
         (
@@ -156,13 +166,15 @@ public:
                 (
                     surfaceInterpolationScheme<GType>::New(mesh, is)
                 ),
-// TODO: Special snGradSchemes are necessary?
+// TODO: Two-sided snGradSchemes necessary!
                 tmp<snGradScheme<Type> >
                 (
                     new uncorrectedSnGrad<Type>(mesh)
                 )
             ),
-            corrected_(true),
+// TODO: Two-sided snGradSchemes necessary!
+            snGradSchemeName_(is),
+            corrected_(true ? snGradSchemeName_ == "corrected" : false),
             limiter_(1.0),
             gamma_
             (
@@ -200,7 +212,8 @@ public:
         (
             const fvMesh& mesh,
             const volScalarField& gamma,
-            const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr = NULL
+            const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr = NULL,
+            const word& snGradSchemeName = "corrected"
         )
         :
             laplacianScheme<Type, GType>
@@ -210,13 +223,15 @@ public:
                 (
                     new harmonic<GType>(mesh)
                 ),
-// TODO: Special snGradSchemes are necessary?
+// TODO: Two-sided snGradSchemes necessary!
                 tmp<snGradScheme<Type> >
                 (
                     new uncorrectedSnGrad<Type>(mesh)
                 )
             ),
-            corrected_(true),
+// TODO: Two-sided snGradSchemes necessary!
+            snGradSchemeName_(snGradSchemeName),
+            corrected_(true ? snGradSchemeName_ == "corrected" : false),
             limiter_(1.0),
             gamma_(gamma),
             jumpFluxPtr_(jumpFluxPtr),
