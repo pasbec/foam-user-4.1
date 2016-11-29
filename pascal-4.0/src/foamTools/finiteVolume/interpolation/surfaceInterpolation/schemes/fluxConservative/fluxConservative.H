@@ -77,10 +77,6 @@ private:
 
     // Private Member Functions
 
-        //- Non-orthogonal correction secant factors for one-sided gradient.
-        //  NOTE: Not to be confused with non-orthogonal correction!
-        tmp<surfaceScalarField> secAlphaNonOrth() const;
-
         //- Disallow default bitwise assignment
         void operator=(const fluxConservative&);
 
@@ -181,6 +177,9 @@ public:
         {
             return jumpFluxPtr_;
         }
+
+        //- Secant factors for one-sided gradient.
+        tmp<surfaceScalarField> secAlphaOneSided() const;
 
         //- Return the interpolation weighting factors
         virtual tmp<surfaceScalarField> weights

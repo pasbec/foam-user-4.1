@@ -68,105 +68,6 @@ void jumpGaussLaplacian<Type, GType>::checkSchemes() const
 
 
 template<class Type, class GType>
-tmp<surfaceScalarField> jumpGaussLaplacian<Type, GType>::secAlphaNonOrth() const
-{
-    const fvMesh& mesh = this->mesh();
-
-    tmp<surfaceScalarField> tsecAlpha
-    (
-        new surfaceScalarField
-        (
-            IOobject
-            (
-                "secAlphaNonOrthAngle",
-                mesh.time().timeName(),
-                mesh
-            ),
-            mesh ,
-            dimensionedScalar(word(), dimless, 1.0)
-        )
-    );
-    surfaceScalarField& secAlpha = tsecAlpha();
-    scalarField& secAlphaIn = secAlpha.internalField();
-
-    if (!mesh.orthogonal())
-    {
-        // Mesh addressing
-        const unallocLabelList& owner = mesh.owner();
-
-        // Mesh and basic surface interpolation data
-        const volVectorField& C = mesh.C();
-        const surfaceScalarField& deltaCoeffs = mesh.deltaCoeffs();
-        const surfaceVectorField& Sf = mesh.Sf();
-        const vectorField& SfIn = Sf.internalField();
-        const surfaceScalarField& magSf = mesh.magSf();
-        const scalarField& magSfIn = magSf.internalField();
-        const surfaceVectorField& Kf = mesh.correctionVectors();
-        const surfaceVectorField Df = Sf/magSf - Kf;
-        const vectorField& DfIn = Df.internalField();
-
-        // Calculate internal secAlpha
-        forAll (owner, faceI)
-        {
-            vector NfInI = SfIn[faceI]/magSfIn[faceI];
-
-            secAlphaIn[faceI] = 1.0/(NfInI & DfIn[faceI]);
-        }
-
-        // Calculate boundary secAlpha
-        forAll (mesh.boundary(), patchI)
-        {
-            const fvPatch& patch = mesh.boundary()[patchI];
-
-            if (patch.coupled())
-            {
-                const scalarField& magSfPatch = magSf.boundaryField()[patchI];
-                const vectorField& SfPatch = Sf.boundaryField()[patchI];
-                const vectorField& DfPatch = Df.boundaryField()[patchI];
-
-                scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
-
-                forAll (patch, faceI)
-                {
-                    vector NfPatchI = SfPatch[faceI]/magSfPatch[faceI];
-
-                    secAlphaPatch[faceI] = 1.0/(NfPatchI & DfPatch[faceI]);
-                }
-            }
-            else
-            {
-                const unallocLabelList& faceCells = patch.patch().faceCells();
-
-                const scalarField& deltaCoeffsPatch =
-                    deltaCoeffs.boundaryField()[patchI];
-                const scalarField& magSfPatch = magSf.boundaryField()[patchI];
-                const vectorField& SfPatch = Sf.boundaryField()[patchI];
-                const vectorField& CfPatch = patch.Cf();
-
-                scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
-
-                forAll (patch, faceI)
-                {
-                    const label own = faceCells[faceI];
-
-                    vector NfPatchI = SfPatch[faceI]/magSfPatch[faceI];
-
-                    // Correction vectors for uncoupled boundaries are
-                    //  set to zero. We will avoid their usage here.
-                    vector DfPatchI = (CfPatch[faceI] - C[own])
-                                    * deltaCoeffsPatch[faceI];
-
-                    secAlphaPatch[faceI] = 1.0/(NfPatchI & DfPatchI);
-                }
-            }
-        }
-    }
-
-    return tsecAlpha;
-}
-
-
-template<class Type, class GType>
 tmp<fvMatrix<Type> >
 jumpGaussLaplacian<Type, GType>::fvmLaplacianUncorrected
 (
@@ -284,8 +185,8 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
     const surfaceScalarField& magSf = mesh.magSf();
     const scalarField& magSfIn = magSf.internalField();
 
-    // Non-orthogonal correction secant factors for one-sided gradient.
-    const surfaceScalarField secAlpha = secAlphaNonOrth()();
+    // Secant factors for one-sided gradient
+    const surfaceScalarField secAlpha = vfInterpolScheme_.secAlphaOneSided()();
     const scalarField& secAlphaIn = secAlpha.internalField();
 
     // Gamma
@@ -454,17 +355,10 @@ Info << "DEBUG: Apply non-orthogonal correction!" << endl;
 
         const Field<Type>& vfIn = vf.internalField();
 
-        tmp<fluxConservative<Type> > tvfFluxConsIntScheme
-        (
-            new fluxConservative<Type>(mesh, gamma_, jumpFluxPtr_)
-        );
-
         // Flux-conserving interpolation of vf
         const GeometricField<Type, fvsPatchField, surfaceMesh> sf =
-            tvfFluxConsIntScheme().interpolate(vf);
+            vfInterpolScheme_.interpolate(vf);
         const Field<Type>& sfIn = sf.internalField();
-
-        tvfFluxConsIntScheme.clear();
 
         // Cell-based gradient of vf
         typedef typename outerProduct<vector, Type>::type GradType;
@@ -484,8 +378,11 @@ Info << "DEBUG: Apply non-orthogonal correction!" << endl;
 
         tvfGrad.clear();
 
-        // Non-orthogonal correction cosinus factors for one-sided gradient.
-        const surfaceScalarField cosAlpha = 1.0/secAlphaNonOrth()();
+        // Secant factors for one-sided gradient
+        const surfaceScalarField cosAlpha
+        (
+            1.0/vfInterpolScheme_.secAlphaOneSided()
+        );
         const scalarField& cosAlphaIn = cosAlpha.internalField();
 
         // Mesh addressing
@@ -496,15 +393,18 @@ Info << "DEBUG: Apply non-orthogonal correction!" << endl;
         const surfaceScalarField& weights = mesh.weights();
         const scalarField& weightsIn = weights.internalField();
         const surfaceScalarField& deltaCoeffs = mesh.deltaCoeffs();
+        const scalarField& deltaCoeffsIn = deltaCoeffs.internalField();
         const surfaceVectorField& Sf = mesh.Sf();
         const surfaceScalarField& magSf = mesh.magSf();
         const surfaceVectorField& Kf = mesh.correctionVectors();
 
         // Face-normal vectors
         const surfaceVectorField Nf = Sf/magSf;
+        const vectorField NfIn = Nf.internalField();
 
         // Face-normal part of non-orthogonal correction vector
         const surfaceVectorField KfNf = Nf*(Nf & Kf);
+        const vectorField KfNfIn = KfNf.internalField();
 
         // Face-tangential part of the gradient shows no jump discontinuity
         // and may be corrected from interpolated gradient
@@ -523,20 +423,65 @@ Info << "DEBUG: Apply non-orthogonal correction!" << endl;
 
             Type snGradOwn = cosAlphaIn[faceI]
                            * (sfIn[faceI] - vfIn[own])
-                           / weightsIn[faceI]*deltaCoeffs[faceI];
+                           / (1.0 - weightsIn[faceI])
+                           * deltaCoeffsIn[faceI];
 
             Type snGradNei = cosAlphaIn[faceI]
                            * (vfIn[nei] - sfIn[faceI])
-                           / (1.0 - weightsIn[faceI])*deltaCoeffs[faceI];
+                           / weightsIn[faceI]
+                           * deltaCoeffsIn[faceI];
 
             faceOwnFluxCorrIn[own] += gammaMagSf[faceI]
-                                    * mag(KfNf[faceI]) * snGradOwn;
+                                    * (KfNfIn[faceI] & NfIn[faceI])
+                                    * snGradOwn;
 
             faceNeiFluxCorrIn[nei] += gammaMagSf[faceI]
-                                    * mag(KfNf[faceI]) * snGradNei;
+                                    * (KfNfIn[faceI] & NfIn[faceI])
+                                    * snGradNei;
         }
 
-// TODO: Boundary correction
+//         // Calculate boundary
+//         forAll (mesh.boundary(), patchI)
+//         {
+//             const fvPatch& patch = mesh.boundary()[patchI];
+//
+//             const scalarField& gammaMagSfPatch =
+//                 gammaMagSf.boundaryField()[patchI];
+//             const Field<Type>& sfPatch = sf.boundaryField()[patchI];
+//
+//             const unallocLabelList& faceCells = patch.patch().faceCells();
+//
+// //             const vectorField& CfPatch = Cf.boundaryField()[patchI];
+//             const scalarField& weightsPatch = weights.boundaryField()[patchI];
+//             const scalarField& deltaCoeffsPatch =
+//                 deltaCoeffs.boundaryField()[patchI];
+//             const vectorField& NfPatch = Nf.boundaryField()[patchI];
+//
+//             const vectorField& KfNfPatch = KfNf.boundaryField()[patchI];
+//
+//             const scalarField& cosAlphaPatch = cosAlpha.boundaryField()[patchI];
+//
+//             Field<Type>& faceOwnFluxCorrPatch =
+//                 faceOwnFluxCorr.boundaryField()[patchI];
+//
+//             forAll (patch, faceI)
+//             {
+//                 const label own = faceCells[faceI];
+//
+// //                 Type snGradOwn = cosAlphaPatch[faceI]
+// //                                * (sfPatch[faceI] - vfIn[own])
+// //                                / mag(CfPatch[faceI] - Cin[own]);
+//
+//                 Type snGradOwn = cosAlphaPatch[faceI]
+//                                * (sfPatch[faceI] - vfIn[own])
+//                                / (1.0 - weightsPatch[faceI])
+//                                * deltaCoeffsPatch[faceI];
+//
+//                 faceOwnFluxCorrPatch[own] += gammaMagSfPatch[faceI]
+//                                            * (KfNfPatch[faceI] & NfPatch[faceI])
+//                                            * snGradOwn;
+//             }
+//         }
 
         // Add correction to source
         fvm.source() -=

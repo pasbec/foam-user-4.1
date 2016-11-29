@@ -30,7 +30,7 @@ License
 
 template<class Type>
 Foam::tmp<Foam::surfaceScalarField>
-Foam::fluxConservative<Type>::secAlphaNonOrth() const
+Foam::fluxConservative<Type>::secAlphaOneSided() const
 {
     const fvMesh& mesh = this->mesh();
 
@@ -40,7 +40,7 @@ Foam::fluxConservative<Type>::secAlphaNonOrth() const
         (
             IOobject
             (
-                "secAlphaNonOrthAngle",
+                "secAlphaOneSided",
                 mesh.time().timeName(),
                 mesh
             ),
@@ -51,76 +51,60 @@ Foam::fluxConservative<Type>::secAlphaNonOrth() const
     surfaceScalarField& secAlpha = tsecAlpha();
     scalarField& secAlphaIn = secAlpha.internalField();
 
-    if (!mesh.orthogonal())
+    // Mesh addressing
+    const unallocLabelList& owner = mesh.owner();
+    const unallocLabelList& neighbour = mesh.neighbour();
+
+    // Mesh and basic surface interpolation data
+    const volVectorField& C = mesh.C();
+    const vectorField& CIn = C.internalField();
+    const surfaceScalarField& deltaCoeffs = mesh.deltaCoeffs();
+    const scalarField& deltaCoeffsIn = deltaCoeffs.internalField();
+    const surfaceVectorField& Sf = mesh.Sf();
+    const vectorField& SfIn = Sf.internalField();
+    const surfaceScalarField& magSf = mesh.magSf();
+    const scalarField& magSfIn = magSf.internalField();
+
+    // Calculate internal secAlpha
+    forAll (owner, faceI)
     {
-        // Mesh addressing
-        const unallocLabelList& owner = mesh.owner();
+        // Cell labels
+        label own = owner[faceI];
+        label nei = neighbour[faceI];
 
-        // Mesh and basic surface interpolation data
-        const volVectorField& C = mesh.C();
-        const surfaceScalarField& deltaCoeffs = mesh.deltaCoeffs();
-        const surfaceVectorField& Sf = mesh.Sf();
-        const vectorField& SfIn = Sf.internalField();
-        const surfaceScalarField& magSf = mesh.magSf();
-        const scalarField& magSfIn = magSf.internalField();
-        const surfaceVectorField& Kf = mesh.correctionVectors();
-        const surfaceVectorField Df = Sf/magSf - Kf;
-        const vectorField& DfIn = Df.internalField();
+        vector NfInI = SfIn[faceI]/magSfIn[faceI];
 
-        // Calculate internal secAlpha
-        forAll (owner, faceI)
+        vector DfInI = (CIn[nei] - CIn[own])
+                     * deltaCoeffsIn[faceI];
+
+        secAlphaIn[faceI] = 1.0/(NfInI & DfInI);
+    }
+
+    // Calculate boundary secAlpha
+    forAll (mesh.boundary(), patchI)
+    {
+        const fvPatch& patch = mesh.boundary()[patchI];
+
+        const unallocLabelList& faceCells = patch.patch().faceCells();
+
+        const scalarField& deltaCoeffsPatch =
+            deltaCoeffs.boundaryField()[patchI];
+        const scalarField& magSfPatch = magSf.boundaryField()[patchI];
+        const vectorField& SfPatch = Sf.boundaryField()[patchI];
+        const vectorField& CPatch = C.boundaryField()[patchI];
+
+        scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
+
+        forAll (patch, faceI)
         {
-            vector NfInI = SfIn[faceI]/magSfIn[faceI];
+            const label own = faceCells[faceI];
 
-            secAlphaIn[faceI] = 1.0/(NfInI & DfIn[faceI]);
-        }
+            vector NfPatchI = SfPatch[faceI]/magSfPatch[faceI];
 
-        // Calculate boundary secAlpha
-        forAll (mesh.boundary(), patchI)
-        {
-            const fvPatch& patch = mesh.boundary()[patchI];
+            vector DfPatchI = (CPatch[faceI] - CIn[own])
+                            * deltaCoeffsPatch[faceI];
 
-            if (patch.coupled())
-            {
-                const scalarField& magSfPatch = magSf.boundaryField()[patchI];
-                const vectorField& SfPatch = Sf.boundaryField()[patchI];
-                const vectorField& DfPatch = Df.boundaryField()[patchI];
-
-                scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
-
-                forAll (patch, faceI)
-                {
-                    vector NfPatchI = SfPatch[faceI]/magSfPatch[faceI];
-
-                    secAlphaPatch[faceI] = 1.0/(NfPatchI & DfPatch[faceI]);
-                }
-            }
-            else
-            {
-                const unallocLabelList& faceCells = patch.patch().faceCells();
-
-                const scalarField& deltaCoeffsPatch =
-                    deltaCoeffs.boundaryField()[patchI];
-                const scalarField& magSfPatch = magSf.boundaryField()[patchI];
-                const vectorField& SfPatch = Sf.boundaryField()[patchI];
-                const vectorField& CfPatch = patch.Cf();
-
-                scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
-
-                forAll (patch, faceI)
-                {
-                    const label own = faceCells[faceI];
-
-                    vector NfPatchI = SfPatch[faceI]/magSfPatch[faceI];
-
-                    // Correction vectors for uncoupled boundaries are
-                    //  set to zero. We will avoid their usage here.
-                    vector DfPatchI = (CfPatch[faceI] - C[own])
-                                    * deltaCoeffsPatch[faceI];
-
-                    secAlphaPatch[faceI] = 1.0/(NfPatchI & DfPatchI);
-                }
-            }
+            secAlphaPatch[faceI] = 1.0/(NfPatchI & DfPatchI);
         }
     }
 
@@ -269,8 +253,8 @@ Foam::fluxConservative<Type>::correction
     const surfaceScalarField& magSf = mesh.magSf();
     const scalarField& magSfIn = magSf.internalField();
 
-    // Non-orthogonal correction secant factors for one-sided gradient.
-    const surfaceScalarField secAlpha = secAlphaNonOrth()();
+    // Secant factors for one-sided gradient.
+    const surfaceScalarField secAlpha = secAlphaOneSided()();
     const scalarField& secAlphaIn = secAlpha.internalField();
 
     // Gamma

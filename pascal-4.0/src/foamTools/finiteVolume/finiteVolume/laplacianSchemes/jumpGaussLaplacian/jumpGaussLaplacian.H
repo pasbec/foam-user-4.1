@@ -97,14 +97,13 @@ private:
         //- Jump flux field
         const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr_;
 
+        //- Flux-conservative interpolation scheme
+        const fluxConservative<Type> vfInterpolScheme_;
+
     // Private Member Functions
 
         //- Check for valid schmeme settings
         void checkSchemes() const;
-
-        //- Non-orthogonal correction secant factors for one-sided gradient.
-        //  NOTE: Not to be confused with non-orthogonal correction!
-        tmp<surfaceScalarField> secAlphaNonOrth() const;
 
         //- Uncorrected Laplacian
         tmp<fvMatrix<Type> > fvmLaplacianUncorrected
@@ -175,7 +174,8 @@ public:
                     word(is)
                 )
             ),
-            jumpFluxPtr_(NULL)
+            jumpFluxPtr_(NULL),
+            vfInterpolScheme_(mesh, gamma_, jumpFluxPtr_)
         {
             if (!is.eof())
             {
@@ -219,7 +219,8 @@ public:
             corrected_(true),
             limiter_(1.0),
             gamma_(gamma),
-            jumpFluxPtr_(jumpFluxPtr)
+            jumpFluxPtr_(jumpFluxPtr),
+            vfInterpolScheme_(mesh, gamma_, jumpFluxPtr_)
         {
             checkSchemes();
         }
