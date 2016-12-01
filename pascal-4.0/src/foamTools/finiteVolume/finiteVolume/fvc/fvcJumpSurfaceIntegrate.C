@@ -40,7 +40,7 @@ namespace fvc
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void jumpSurfaceIntegrate
+void surfaceIntegrate
 (
     Field<Type>& vfIn,
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssfOwn,
@@ -81,7 +81,7 @@ void jumpSurfaceIntegrate
 
 template<class Type>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-jumpSurfaceIntegrate
+surfaceIntegrate
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssfOwn,
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssfNei
@@ -95,7 +95,7 @@ jumpSurfaceIntegrate
         (
             IOobject
             (
-                "jumpSurfaceIntegrate("+ssfOwn.name()+','+ssfNei.name()+')',
+                "surfaceIntegrate("+ssfOwn.name()+','+ssfNei.name()+')',
                 ssfOwn.instance(),
                 mesh,
                 IOobject::NO_READ,
@@ -113,7 +113,7 @@ jumpSurfaceIntegrate
     );
     GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
 
-    jumpSurfaceIntegrate(vf.internalField(), ssfOwn, ssfNei);
+    surfaceIntegrate(vf.internalField(), ssfOwn, ssfNei);
     vf.correctBoundaryConditions();
 
     return tvf;
@@ -122,7 +122,7 @@ jumpSurfaceIntegrate
 
 template<class Type>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-jumpSurfaceIntegrate
+surfaceIntegrate
 (
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssfOwn,
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssfNei
@@ -130,7 +130,7 @@ jumpSurfaceIntegrate
 {
     tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
     (
-        fvc::jumpSurfaceIntegrate(tssfOwn(), tssfNei())
+        fvc::surfaceIntegrate(tssfOwn(), tssfNei())
     );
     tssfOwn.clear();
     tssfNei.clear();
@@ -140,7 +140,7 @@ jumpSurfaceIntegrate
 
 template<class Type>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-jumpSurfaceSum
+surfaceSum
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssfOwn,
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssfNei
@@ -154,7 +154,7 @@ jumpSurfaceSum
         (
             IOobject
             (
-                "jumpSurfaceSum("+ssfOwn.name()+','+ssfNei.name()+')',
+                "surfaceSum("+ssfOwn.name()+','+ssfNei.name()+')',
                 ssfOwn.instance(),
                 mesh,
                 IOobject::NO_READ,
@@ -201,14 +201,14 @@ jumpSurfaceSum
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> > jumpSurfaceSum
+tmp<GeometricField<Type, fvPatchField, volMesh> > surfaceSum
 (
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssfOwn,
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssfNei
 )
 {
     tmp<GeometricField<Type, fvPatchField, volMesh> > tvf =
-        jumpSurfaceSum(tssfOwn(), tssfNei());
+        surfaceSum(tssfOwn(), tssfNei());
     tssfOwn.clear();
     tssfNei.clear();
     return tvf;

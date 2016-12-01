@@ -49,7 +49,7 @@ tmp
         typename outerProduct<vector,Type>::type, fvPatchField, volMesh
     >
 >
-jumpReconstruct
+reconstruct
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssfOwn,
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssfNei
@@ -65,7 +65,7 @@ jumpReconstruct
         (
             IOobject
             (
-                "volIntegrate(" + ssfOwn.name() + ',' + ssfNei.name() + ')',
+                "reconstruct(" + ssfOwn.name() + ',' + ssfNei.name() + ')',
                 ssfOwn.instance(),
                 mesh,
                 IOobject::NO_READ,
@@ -88,7 +88,7 @@ jumpReconstruct
     // HJ, 12/Aug/2011
 
     GeometricField<GradType, fvPatchField, volMesh> fluxTimesNormal =
-        jumpSurfaceSum
+        surfaceSum
         (
             (mesh.Sf()/mesh.magSf()) * ssfOwn,
             (mesh.Sf()/mesh.magSf()) * ssfNei
@@ -122,7 +122,7 @@ tmp
         typename outerProduct<vector, Type>::type, fvPatchField, volMesh
     >
 >
-jumpReconstruct
+reconstruct
 (
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssfOwn,
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssfNei
@@ -131,7 +131,7 @@ jumpReconstruct
     typedef typename outerProduct<vector, Type>::type GradType;
     tmp<GeometricField<GradType, fvPatchField, volMesh> > tvf
     (
-        fvc::jumpReconstruct(tssfOwn(), tssfNei())
+        fvc::reconstruct(tssfOwn(), tssfNei())
     );
     tssfOwn.clear();
     tssfNei.clear();

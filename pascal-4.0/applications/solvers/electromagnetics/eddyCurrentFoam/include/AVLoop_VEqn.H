@@ -129,13 +129,14 @@
 
         if (laplacianSchemeV != "jumpGauss")
         {
+            //VGrad = fvc::grad(V);
             VGrad = fvc::reconstruct(VEqn.flux()/sigmaf);
         }
         else
         {
             //VGrad = fvc::grad(V);
             VGrad =
-                fvc::jumpReconstruct
+                fvc::reconstruct
                 (
                     VEqn.flux()/ownerInterpolate(sigma),
                     VEqn.jumpFlux()/neighbourInterpolate(sigma)

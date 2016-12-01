@@ -52,7 +52,7 @@ namespace Foam
 namespace fvc
 {
     template<class Type>
-    void jumpSurfaceIntegrate
+    void surfaceIntegrate
     (
         Field<Type>&,
         const GeometricField<Type, fvsPatchField, surfaceMesh>&,
@@ -61,7 +61,7 @@ namespace fvc
 
     template<class Type>
     tmp<GeometricField<Type, fvPatchField, volMesh> >
-    jumpSurfaceIntegrate
+    surfaceIntegrate
     (
         const GeometricField<Type, fvsPatchField, surfaceMesh>&,
         const GeometricField<Type, fvsPatchField, surfaceMesh>&
@@ -69,21 +69,21 @@ namespace fvc
 
     template<class Type>
     tmp<GeometricField<Type, fvPatchField, volMesh> >
-    jumpSurfaceIntegrate
+    surfaceIntegrate
     (
         const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >&,
         const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, fvPatchField, volMesh> > jumpSurfaceSum
+    tmp<GeometricField<Type, fvPatchField, volMesh> > surfaceSum
     (
         const GeometricField<Type, fvsPatchField, surfaceMesh>&,
         const GeometricField<Type, fvsPatchField, surfaceMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, fvPatchField, volMesh> > jumpSurfaceSum
+    tmp<GeometricField<Type, fvPatchField, volMesh> > surfaceSum
     (
         const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >&,
         const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >&

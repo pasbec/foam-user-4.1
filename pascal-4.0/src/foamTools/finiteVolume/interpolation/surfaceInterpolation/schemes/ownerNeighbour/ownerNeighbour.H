@@ -44,17 +44,17 @@ ownerInterpolate(const GeometricField<Type, fvPatchField, volMesh>& vf)
     return surfaceInterpolationScheme<Type>::interpolate
     (
         vf,
-		surfaceScalarField
-		(
-			IOobject
-			(
-				"ownerWeightingFactors" + vf.name(),
-				vf.mesh().time().timeName(),
-				vf.mesh()
-			),
-			vf.mesh(),
-			dimensionedScalar(word(), dimless, 1.0)
-		)
+        surfaceScalarField
+        (
+            IOobject
+            (
+                "ownerWeightingFactors" + vf.name(),
+                vf.mesh().time().timeName(),
+                vf.mesh()
+            ),
+            vf.mesh(),
+            dimensionedScalar(word(), dimless, 1.0)
+        )
     );
 }
 
@@ -78,17 +78,17 @@ neighbourInterpolate(const GeometricField<Type, fvPatchField, volMesh>& vf)
     return surfaceInterpolationScheme<Type>::interpolate
     (
         vf,
-		surfaceScalarField
-		(
-			IOobject
-			(
-				"neighbourWeightingFactors" + vf.name(),
-				vf.mesh().time().timeName(),
-				vf.mesh()
-			),
-			vf.mesh(),
-			dimensionedScalar(word(), dimless, 0.0)
-		)
+        surfaceScalarField
+        (
+            IOobject
+            (
+                "neighbourWeightingFactors" + vf.name(),
+                vf.mesh().time().timeName(),
+                vf.mesh()
+            ),
+            vf.mesh(),
+            dimensionedScalar(word(), dimless, 0.0)
+        )
     );
 }
 

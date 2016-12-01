@@ -274,7 +274,7 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
 
     // Add jump face flux to source
     fvm.source() =
-        -mesh.V()*fvc::jumpSurfaceIntegrate<Type>
+        -mesh.V()*fvc::surfaceIntegrate<Type>
         (
             jumpOwnFlux,
             jumpNeiFlux
@@ -484,7 +484,7 @@ void jumpGaussLaplacian<Type, GType>::addSnGradsCorrection
 
         // Add correction to source
         fvm.source() -=
-            mesh.V()*fvc::jumpSurfaceIntegrate<Type>
+            mesh.V()*fvc::surfaceIntegrate<Type>
             (
                 faceOwnFluxCorr,
                 faceNeiFluxCorr
