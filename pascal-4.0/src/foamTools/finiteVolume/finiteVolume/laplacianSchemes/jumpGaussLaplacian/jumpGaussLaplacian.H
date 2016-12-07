@@ -78,29 +78,34 @@ class jumpGaussLaplacian
 
 private:
 
+    // Private typedefs
+
+        //- Surface gamma fields
+        typedef GeometricField<GType, fvsPatchField, surfaceMesh>
+        surfaceGTypeField;
+
+        //- Volume gamma fields
+        typedef GeometricField<GType, fvPatchField, volMesh>
+        volGTypeField;
+
+        //- Surface fields
+        typedef GeometricField<Type, fvsPatchField, surfaceMesh>
+        surfaceTypeField;
+
+        //- Volume fields
+        typedef GeometricField<Type, fvPatchField, volMesh>
+        volTypeField;
+
     // Private data
 
-// TODO: Two-sided snGradSchemes necessary!
-        //- Which snGradScheme is meant to be used. Just a dummy to do
-        //  correction here
-        word snGradSchemeName_;
-
-// TODO: Two-sided snGradSchemes necessary!
-        //- Is this scheme meant to be corrected?
-        bool corrected_;
-
-// TODO: Two-sided snGradSchemes necessary!
-        //- Is this scheme's correction meant to be limited?
-        scalar limiter_;
-
         //- Name of the (scalar) diffusivity
-        const GeometricField<GType, fvPatchField, volMesh>& gamma_;
+        const volGTypeField& gamma_;
 
         //- Jump flux field
-        const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr_;
+        const surfaceTypeField* jumpFluxPtr_;
 
-        //- Flux-conservative interpolation scheme
-        const fluxConservative<Type> vfInterpolScheme_;
+        //- Flux-conservative interpolation scheme for vf
+        const fluxConservative<Type> vfFluxConsScheme_;
 
     // Private Member Functions
 
@@ -111,7 +116,7 @@ private:
         tmp<fvMatrix<Type> > fvmLaplacianUncorrected
         (
             const surfaceScalarField& gammaMagSf,
-            const GeometricField<Type, fvPatchField, volMesh>& vf
+            const volTypeField& vf
         );
 
         //- Add jump flux to source of matrix
@@ -119,16 +124,15 @@ private:
         (
             fvMatrix<Type>& fvm,
             const surfaceScalarField& gammaMagSf,
-            const GeometricField<Type, fvPatchField, volMesh>& vf
+            const volTypeField& vf
         );
 
-// TODO: Two-sided snGradSchemes necessary!
         //- Add correction for both side of face to source of matrix
         void addSnGradsCorrection
         (
             fvMatrix<Type>& fvm,
             const surfaceScalarField& gammaMagSf,
-            const GeometricField<Type, fvPatchField, volMesh>& vf
+            const volTypeField& vf
         );
 
         //- Disallow default bitwise copy construct
@@ -152,43 +156,21 @@ public:
             Istream& is
         )
         :
-            laplacianScheme<Type, GType>
-            (
-                mesh,
-                tmp<surfaceInterpolationScheme<GType> >
-                (
-                    surfaceInterpolationScheme<GType>::New(mesh, is)
-                ),
-// TODO: Two-sided snGradSchemes necessary!
-                tmp<snGradScheme<Type> >
-                (
-                    new uncorrectedSnGrad<Type>(mesh)
-                )
-            ),
-// TODO: Two-sided snGradSchemes necessary!
-            snGradSchemeName_(is),
-            corrected_(true ? snGradSchemeName_ == "corrected" : false),
-            limiter_(1.0),
+            laplacianScheme<Type, GType>(mesh, is),
             gamma_
             (
-                mesh.thisDb().lookupObject
-                <
-                    GeometricField<GType, fvPatchField, volMesh>
-                >
+                mesh.thisDb().lookupObject<volGTypeField>
                 (
                     word(is)
                 )
             ),
             jumpFluxPtr_(NULL),
-            vfInterpolScheme_(mesh, gamma_, jumpFluxPtr_)
+            vfFluxConsScheme_(mesh, gamma_, jumpFluxPtr_)
         {
             if (!is.eof())
             {
-                const GeometricField<Type, fvsPatchField, surfaceMesh>& jumpFlux =
-                    mesh.thisDb().lookupObject
-                    <
-                        GeometricField<Type, fvsPatchField, surfaceMesh>
-                    >
+                const surfaceTypeField& jumpFlux =
+                    mesh.thisDb().lookupObject<surfaceTypeField>
                     (
                         word(is)
                     );
@@ -205,30 +187,13 @@ public:
         (
             const fvMesh& mesh,
             const volScalarField& gamma,
-            const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr = NULL,
-            const word& snGradSchemeName = "corrected"
+            const surfaceTypeField* jumpFluxPtr = NULL
         )
         :
-            laplacianScheme<Type, GType>
-            (
-                mesh,
-                tmp<surfaceInterpolationScheme<GType> >
-                (
-                    new harmonic<GType>(mesh)
-                ),
-// TODO: Two-sided snGradSchemes necessary!
-                tmp<snGradScheme<Type> >
-                (
-                    new uncorrectedSnGrad<Type>(mesh)
-                )
-            ),
-// TODO: Two-sided snGradSchemes necessary!
-            snGradSchemeName_(snGradSchemeName),
-            corrected_(true ? snGradSchemeName_ == "corrected" : false),
-            limiter_(1.0),
+            laplacianScheme<Type, GType>(mesh),
             gamma_(gamma),
             jumpFluxPtr_(jumpFluxPtr),
-            vfInterpolScheme_(mesh, gamma_, jumpFluxPtr_)
+            vfFluxConsScheme_(mesh, gamma_, jumpFluxPtr_)
         {
             checkSchemes();
         }
@@ -243,35 +208,35 @@ public:
         // -Laplacian method with surfaceField of gamma
         virtual tmp<fvMatrix<Type> > fvmLaplacian
         (
-            const GeometricField<GType, fvsPatchField, surfaceMesh>&,
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const surfaceGTypeField&,
+            const volTypeField&
         );
 
-        // -Laplacian method which interpolates gamma and passes its name
+        // -Laplacian method which interpolates gamma
         virtual tmp<fvMatrix<Type> > fvmLaplacian
         (
-            const GeometricField<GType, fvPatchField, volMesh>&,
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const volGTypeField&,
+            const volTypeField&
         );
 
         // -NOTE: Deactivated!
-        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        virtual tmp<volTypeField> fvcLaplacian
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const volTypeField&
         );
 
         // -Laplacian calculation with surfaceField of gamma
-        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        virtual tmp<volTypeField> fvcLaplacian
         (
-            const GeometricField<GType, fvsPatchField, surfaceMesh>&,
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const surfaceGTypeField&,
+            const volTypeField&
         );
 
-        // -Laplacian calculation which interpolates gamma and passes its name
-        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        // -Laplacian calculation which interpolates gamma
+        virtual tmp<volTypeField> fvcLaplacian
         (
-            const GeometricField<GType, fvPatchField, volMesh>&,
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const volGTypeField&,
+            const volTypeField&
         );
 };
 

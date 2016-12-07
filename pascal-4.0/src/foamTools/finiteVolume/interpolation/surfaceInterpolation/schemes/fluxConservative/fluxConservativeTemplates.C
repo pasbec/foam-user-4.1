@@ -201,7 +201,7 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
 Foam::fluxConservative<Type>::correction
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    const volTypeField& vf
 ) const
 {
     if (!jumpFluxPtr_)
@@ -223,9 +223,9 @@ Foam::fluxConservative<Type>::correction
 
     const fvMesh& mesh = this->mesh();
 
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tcorr
+    tmp<surfaceTypeField> tcorr
     (
-        new GeometricField<Type, fvsPatchField, surfaceMesh>
+        new surfaceTypeField
         (
             IOobject
             (
@@ -238,7 +238,7 @@ Foam::fluxConservative<Type>::correction
         )
     );
 
-    GeometricField<Type, fvsPatchField, surfaceMesh>& corr = tcorr();
+    surfaceTypeField& corr = tcorr();
     Field<Type>& corrIn = corr.internalField();
 
     // Mesh addressing
@@ -267,8 +267,7 @@ Foam::fluxConservative<Type>::correction
     const scalarField& gammafIn = gammaf.internalField();
 
     // Jump flux
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& jumpFlux =
-        *jumpFluxPtr_;
+    const surfaceTypeField& jumpFlux = *jumpFluxPtr_;
     const Field<Type>& jumpFluxIn = jumpFlux.internalField();
 
     // Calculate internal correction

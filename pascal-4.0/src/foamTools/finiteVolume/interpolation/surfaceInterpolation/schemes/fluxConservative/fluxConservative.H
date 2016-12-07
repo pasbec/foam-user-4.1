@@ -25,13 +25,36 @@ Class
     Foam::fluxConservative
 
 Description
-    Flux-conserving interpolation scheme class, which interpolates sigma
-    such that the face flux based on its gradient grad(phi), the corresponding
+    Flux-conserving interpolation scheme class, which interpolates a field psi
+    such that the face flux based on its gradient grad(psi), the corresponding
     diffusivity gamma and optionally an additionally given jump flux F will
-    be preserved according to:
+    be preserved for each face according to:
 
-    (gamma_f*grad(phi)_f) * n_f + F/|S_f| = const.
+        (gamma_f*grad(psi)_f) * n_f + F/|S_f| = const.
 
+    The corresponding interpolation weights read:
+
+        w = gamma_P / linearInterpolate(gamma) * f_x
+
+    where f_x = fN/PN is the default (linear) mesh weight. In case of F=0,
+    the face value is then simply:
+
+        psi_f = w*psi_P + (1 - w)*psi_N
+
+    If the jump flux F is present, a "correction" is necessary to get the
+    right face value according to
+
+        psi_f += (d_f & n_f) * (gamma_N - gamma_P)/linearInterpolate(gamma)
+               * f_x*(1 - f_x) * |d_f|/|S_f| * F
+
+    NOTE: The diffusivity gamma is regarded as scalar field which is constant
+          in each cell and which may be discontinous at every face of the mesh.
+          Mesh-skewness is currently not considered as this could not be
+          realised correctly based on weights (skewness is not necessarily
+          symmetric)!
+
+Author
+    Pascal Beckstein
 
 SourceFiles
     fluxConservative.C
@@ -45,10 +68,6 @@ SourceFiles
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "linear.H"
-
-// TODO: The diffusivity gamma is regarded as discontinous at every face!
-
-// TODO: Tensorial diffusivity?
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,13 +86,23 @@ class fluxConservative
 
 private:
 
+    // Private typedefs
+
+        //- Surface fields
+        typedef GeometricField<Type, fvsPatchField, surfaceMesh>
+        surfaceTypeField;
+
+        //- Volume fields
+        typedef GeometricField<Type, fvPatchField, volMesh>
+        volTypeField;
+
     // Private data
 
         //- Name of the (scalar) diffusivity
         const volScalarField& gamma_;
 
         //- Jump flux field
-        const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr_;
+        const surfaceTypeField* jumpFluxPtr_;
 
     // Private Member Functions
 
@@ -108,11 +137,8 @@ public:
         {
             if (!is.eof())
             {
-                const GeometricField<Type, fvsPatchField, surfaceMesh>& jumpFlux =
-                    mesh.thisDb().lookupObject
-                    <
-                        GeometricField<Type, fvsPatchField, surfaceMesh>
-                    >
+                const surfaceTypeField& jumpFlux =
+                    mesh.thisDb().lookupObject<surfaceTypeField>
                     (
                         word(is)
                     );
@@ -142,11 +168,8 @@ public:
         {
             if (!is.eof())
             {
-                const GeometricField<Type, fvsPatchField, surfaceMesh>& jumpFlux =
-                    mesh.thisDb().lookupObject
-                    <
-                        GeometricField<Type, fvsPatchField, surfaceMesh>
-                    >
+                const surfaceTypeField& jumpFlux =
+                    mesh.thisDb().lookupObject<surfaceTypeField>
                     (
                         word(is)
                     );
@@ -161,7 +184,7 @@ public:
         (
             const fvMesh& mesh,
             const volScalarField& gamma,
-            const GeometricField<Type, fvsPatchField, surfaceMesh>* jumpFluxPtr = NULL
+            const surfaceTypeField* jumpFluxPtr = NULL
         )
         :
             surfaceInterpolationScheme<Type>(mesh),
@@ -184,14 +207,14 @@ public:
         //- Return the interpolation weighting factors
         virtual tmp<surfaceScalarField> weights
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
+            const volTypeField& vf
         ) const;
 
         //- Return the explicit correction to the face-interpolate
-        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        virtual tmp<surfaceTypeField>
         correction
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
+            const volTypeField& vf
         ) const;
 };
 
