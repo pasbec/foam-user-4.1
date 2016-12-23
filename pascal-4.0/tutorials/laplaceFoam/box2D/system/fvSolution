@@ -22,7 +22,7 @@ solvers
         solver          PCG;
 //         solver          deflatedPCG;
         preconditioner  DIC;
-        tolerance       1e-6;
+        tolerance       1e-12;
         relTol          0;
         maxIter         1000;
     }

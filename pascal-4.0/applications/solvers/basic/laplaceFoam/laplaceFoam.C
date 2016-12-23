@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     {
         fvScalarMatrix psiEqn
         (
-            fvm::laplacian(psiGamma, psi)
+            fvm::laplacian(gamma, psi)
         );
 
         psiEqn.setReference(psiRefCell, psiRefValue);
@@ -68,13 +68,13 @@ int main(int argc, char *argv[])
 
         if (nonOrth == nNonOrthCorr)
         {
-            psiPhi -= psiEqn.flux();
+            phi = psiEqn.flux();
         }
     }
 
     psiGrad == fvc::grad(psi);
-    psiSnGradGrad == fvc::reconstruct(fvc::snGrad(psi) * mesh.magSf());
-    psiFlux == fvc::reconstruct(psiPhi);
+    psiGradFlux == fvc::reconstruct(phi/gamma);
+    psiGradSnGrad == fvc::reconstruct(fvc::snGrad(psi) * mesh.magSf());
 
     // Write
     runTime.writeNow();

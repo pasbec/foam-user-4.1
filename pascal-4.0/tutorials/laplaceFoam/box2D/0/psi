@@ -24,16 +24,7 @@ boundaryField
     {
         type            fixedGradient;
         gradient        uniform 0;
-
-//         type            fixedGradientCorrected;
-//         volFieldName    psi;
-//         gradient        uniform 0;
-
 //         type            fixedValue;
-//         value           uniform 0;
-
-//         type            fixedValueCorrected;
-//         volFieldName    psi;
 //         value           uniform 0;
     }
     top
@@ -46,12 +37,12 @@ boundaryField
     left
     {
         type            fixedGradient;
-        gradient        uniform 500;
+        gradient        uniform 1.0;
     }
     right
     {
         type            fixedGradient;
-        gradient        uniform -500;
+        gradient        uniform -1.0;
     }
     frontAndBack
     {

@@ -24,7 +24,7 @@ gradSchemes
 {
     default                 none;
 
-    grad(psi)               Gauss linear;
+    grad(psi)               Gauss leastSquaresSkewCorrected linear;
 }
 
 divSchemes
@@ -35,14 +35,14 @@ divSchemes
 laplacianSchemes
 {
     default                 none;
-//     laplacian(psiGamma,psi) Gauss linear uncorrected; // linear is not used
-//     laplacian(psiGamma,psi) Gauss linear corrected; // linear is not used
-//     laplacian(psiGamma,psi) Gauss linear limited 0.5; // linear is not used
-//     laplacian(psiGamma,psi) Gauss linear limited 0.3; // linear is not used
-//     laplacian(psiGamma,psi) Gauss linear fourth; // linear is not used
-//     laplacian(psiGamma,psi) Gauss linear skewCorrected 1.0; // linear is not used
-//     laplacian(psiGamma,psi) Gauss linear fourth; // linear is not used
-    laplacian(psiGamma,psi) Gauss linear corrected; // linear is not used
+//     laplacian(gamma,psi)    Gauss linear uncorrected; // linear is not used
+//     laplacian(gamma,psi)    Gauss linear corrected; // linear is not used
+//     laplacian(gamma,psi)    Gauss linear limited 0.5; // linear is not used
+//     laplacian(gamma,psi)    Gauss linear limited 0.3; // linear is not used
+//     laplacian(gamma,psi)    Gauss linear fourth; // linear is not used
+//     laplacian(gamma,psi)    Gauss linear skewCorrected 1.0; // linear is not used
+//     laplacian(gamma,psi)    Gauss linear fourth; // linear is not used
+    laplacian(gamma,psi)    Gauss linear corrected; // linear is not used
 }
 
 interpolationSchemes

@@ -14,45 +14,13 @@
     );
 
 
-    Info<< "Creating field psiGrad\n" << endl;
+    Info<< "Creating field phi\n" << endl;
 
-    volVectorField psiGrad
+    surfaceScalarField phi
     (
         IOobject
         (
-            "psiGrad",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        fvc::grad(psi)
-    );
-
-
-    Info<< "Creating field psiSnGradGrad\n" << endl;
-
-    volVectorField psiSnGradGrad
-    (
-        IOobject
-        (
-            "psiSnGradGrad",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        fvc::reconstruct(fvc::snGrad(psi) * mesh.magSf())
-    );
-
-
-    Info<< "Creating field psiPhi\n" << endl;
-
-    surfaceScalarField psiPhi
-    (
-        IOobject
-        (
-            "psiPhi",
+            "phi",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
@@ -69,26 +37,51 @@
     );
 
 
-    Info<< "Creating field psiFlux\n" << endl;
+    Info<< "Creating field psiGrad\n" << endl;
 
-    volVectorField psiFlux
+    volVectorField psiGrad
     (
         IOobject
         (
-            "psiFlux",
+            "psiGrad",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh,
-        dimensionedVector
+        fvc::grad(psi)
+    );
+
+
+    Info<< "Creating field psiGradFlux\n" << endl;
+
+    volVectorField psiGradFlux
+    (
+        IOobject
         (
-            word(),
-            psi.dimensions()/dimLength,
-            vector::zero
+            "psiGradFlux",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
-        calculatedFvPatchVectorField::typeName
+        fvc::grad(psi)
+    );
+
+
+    Info<< "Creating field psiGradSnGrad\n" << endl;
+
+    volVectorField psiGradSnGrad
+    (
+        IOobject
+        (
+            "psiGradSnGrad",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        fvc::grad(psi)
     );
 
 
@@ -107,11 +100,11 @@
     );
 
 
-    Info<< "Reading diffusivity psiGamma\n" << endl;
+    Info<< "Reading diffusivity gamma\n" << endl;
 
-    dimensionedScalar psiGamma
+    dimensionedScalar gamma
     (
-        transportProperties.lookup("psiGamma")
+        transportProperties.lookup("gamma")
     );
 
     label psiRefCell = 0;
