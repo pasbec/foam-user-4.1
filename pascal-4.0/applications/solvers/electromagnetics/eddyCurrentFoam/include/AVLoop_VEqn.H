@@ -108,21 +108,22 @@
         );
 
         // Solve V-equation
-        if(solverV == "deflatedPCG")
+        if(solverV != "deflatedPCG")
         {
-            // Currently a deflated solver is necessary.
-            // Therefor the matrix needs to be kept singluar!
-            VEqn.solve(control.subDict(Region::CONDUCTOR, V.name()));
+//             FatalErrorIn
+//             (
+//                 Control::typeName + " | VEqn.H :\n"
+//             )   << "Only the 'deflatedPCG' solver is currently supported for"
+//                 << " the solution of VRe/VIm."
+//                 << abort(FatalError);
+
+//             VEqn.setReference(VRefCell, VRefValue);
+            VEqn.setReference(0, 0.0);
         }
-        else
-        {
-            FatalErrorIn
-            (
-                Control::typeName + " | VEqn.H :\n"
-            )   << "Only the 'deflatedPCG' solver is currently supported for"
-                << " the solution of VRe/VIm."
-                << abort(FatalError);
-        }
+
+        // Currently a deflated solver is necessary.
+        // Therefor the matrix needs to be kept singluar!
+        VEqn.solve(control.subDict(Region::CONDUCTOR, V.name()));
 
 // TODO: Use relaxation?
 //         VGrad.storePrevIter();
