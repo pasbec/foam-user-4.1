@@ -60,10 +60,14 @@ int main(int argc, char *argv[])
     {
         fvScalarMatrix psiEqn
         (
-            fvm::laplacian(gamma, psi)
+            fvm::laplacian(gamma, psi) == cellsource
         );
 
-        psiEqn.setReference(psiRefCell, psiRefValue);
+        if (!deflated)
+        {
+            psiEqn.setReference(psiRefCell, psiRefValue);
+        }
+
         psiEqn.solve();
 
         if (nonOrth == nNonOrthCorr)

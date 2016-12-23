@@ -107,6 +107,28 @@
         transportProperties.lookup("gamma")
     );
 
+    dimensionedScalar source
+    (
+        transportProperties.lookup("source")
+    );
+
+    dimensionedScalar cellsource
+    (
+        source / sum(mesh.V()).value()
+    );
+
+    // Read solver for psi
+    word solver
+    (
+        mesh.solutionDict().solver(psi.name()).lookup("solver")
+    );
+
+    bool deflated = false;
+    if(solver == "deflatedPCG")
+    {
+        deflated = true;
+    }
+
     label psiRefCell = 0;
     scalar psiRefValue = 0.0;
     setRefCell(psi, mesh.solutionDict().subDict("SIMPLE"), psiRefCell, psiRefValue);
