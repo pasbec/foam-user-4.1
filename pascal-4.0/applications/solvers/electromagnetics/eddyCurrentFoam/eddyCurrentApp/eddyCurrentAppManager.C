@@ -108,6 +108,54 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create() const
 }
 
 
+void Foam::eddyCurrentApp::Manager::Storage::Item_mur::create() const
+{
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", true))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        IOo
+    );
+
+    set
+    (
+        regionVolScalarField::LinkOrNew
+        (
+            IOobject
+            (
+                IOo.name(),
+                IOo.instance(),
+                IOo.db()
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimless,
+                1
+            ),
+            calculatedFvPatchScalarField::typeName,
+            IOoOverride
+        )
+    );
+}
+
+
 void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create() const
 {
     IOobject IOo
@@ -653,6 +701,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_Q::create() const
 void Foam::eddyCurrentApp::Manager::Storage::create() const
 {
     item_sigma().enable();
+    item_mur().enable();
 
     item_A0Re().setState(settings().biotSavart);
     item_A0Im().setState(settings().biotSavart);

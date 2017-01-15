@@ -11,6 +11,7 @@
         SM_REGIONSCOPE(CONDUCTOR);
 
         volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];
+        volScalarField& mur = globalStorage.mur()[CONDUCTOR];
 
         volVectorField& BRe = globalStorage.BRe()[CONDUCTOR];
         volVectorField& BIm = globalStorage.BIm()[CONDUCTOR];
@@ -41,7 +42,7 @@
         if (globalStorage.item_pB().enabled())
         {
             // Time-averaged magnetic pressure
-            globalStorage.pB()[CONDUCTOR] = 0.5 * physicalConstant::rMu0
+            globalStorage.pB()[CONDUCTOR] = 0.5 * physicalConstant::rMu0/mur
                                           * 0.5 * ( (BRe & BRe)
                                                   + (BIm & BIm) );
         }

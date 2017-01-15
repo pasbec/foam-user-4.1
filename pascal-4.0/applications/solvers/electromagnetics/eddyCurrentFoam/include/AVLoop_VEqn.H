@@ -83,15 +83,16 @@
         // Prepare V-equation
         fvScalarMatrix VEqn(fvm::laplacian(sigmaf, V));
 
+        // Term from div(A)=0
+//         VEqn -= complexSign * omega0 * sigma * fvc::div(A);
+
         if (laplacianSchemeV != "jumpGauss")
         {
             // NOTE: We do NOT use sigmaf here!
             volVectorField sigmaGrad = fvc::grad(sigma);
 
             // Explicit source term for V due to variable sigma
-            // in conducting region with implied condition div(A)=0
             VEqn -= complexSign * omega0 * (sigmaGrad & A);
-//          VEqn -= complexSign * omega0 * sigma * fvc::div(A);
 
             if (globalSettings.biotSavart)
             {

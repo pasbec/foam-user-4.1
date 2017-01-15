@@ -5,35 +5,66 @@
         SM_REGIONSCOPE(DEFAULT);
 
         volScalarField& sigma = globalStorage.sigma()[DEFAULT];
+        volScalarField& mur = globalStorage.mur()[DEFAULT];
+        volScalarField mu = physicalConstant::mu0 * mur;
 
         volVectorField& ARe = globalStorage.ARe()[DEFAULT];
         volVectorField& AIm = globalStorage.AIm()[DEFAULT];
 
+// TEST
+        volScalarField rMu("rMu", 1.0/mu);
+        surfaceVectorField gradAReNPhi("gradAReNPhi", fvc::interpolate(fvc::grad(ARe)) & mesh.Sf());
+        surfaceVectorField gradAImNPhi("gradAImNPhi", fvc::interpolate(fvc::grad(AIm)) & mesh.Sf());
+
         // Assemble base-matrices for A
         fvVectorMatrix AReEqn
         (
-            physicalConstant::rMu0 * fvm::laplacian(ARe)
-//        - physicalConstant::rMu0 * fvc::grad(fvc::div(ARe))
+            fvm::laplacian(ARe)
+//             physicalConstant::rMu0/mur * fvm::laplacian(ARe)
+//        - physicalConstant::rMu0/mur * fvc::grad(fvc::div(ARe))
+//        + (fvc::curl(ARe) ^ fvc::grad(volScalarField("rMu", physicalConstant::rMu0/mur)))
 //        + sigma * omega0 * AIm
-//        - sigma * VReGrad()[DEFAULT].component(cmpt)
+//        - sigma * VReGrad()[DEFAULT]
 //        + j0Re
 //        + sigma * omega0 * A0Im
         );
         fvVectorMatrix AImEqn
         (
-            physicalConstant::rMu0 * fvm::laplacian(AIm)
-//        - physicalConstant::rMu0 * fvc::grad(fvc::div(AIm))
+            fvm::laplacian(AIm)
+//             physicalConstant::rMu0/mur * fvm::laplacian(AIm)
+//        - physicalConstant::rMu0/mur * fvc::grad(fvc::div(AIm))
+//        + (fvc::curl(AIm) ^ fvc::grad(volScalarField("rMu", physicalConstant::rMu0/mur)))
 //        - sigma * omega0 * ARe
-//        - sigma * VImGrad()[DEFAULT].component(cmpt)
+//        - sigma * VImGrad()[DEFAULT]
 //        + j0Im
 //        - sigma * omega0 * A0Re
         );
 
+// TEST
+//         {
+//             ARe.write();
+//             AIm.write();
+//
+//             volScalarField AReDiv = fvc::div(ARe);
+//             volScalarField AImDiv = fvc::div(AIm);
+//
+//             AReDiv.write();
+//             AImDiv.write();
+//
+// //             AReEqn -= (1.0-mur) * fvc::grad(AReDiv);
+// //             AImEqn -= (1.0-mur) * fvc::grad(AImDiv);
+//
+//             volVectorField muGradrMu = mu * fvc::grad(volScalarField("rMu", physicalConstant::rMu0/mur));
+//
+//             AReEqn += fvc::curl(ARe) ^ muGradrMu;
+//             AImEqn += fvc::curl(AIm) ^ muGradrMu;
+//         }
+
         // Add source current or source vector potential if Biot-Savart is used
         if (!globalSettings.biotSavart)
         {
-            AReEqn += storage.j0Re();
-            AImEqn += storage.j0Im();
+            AReEqn += mu * storage.j0Re();
+            AImEqn += mu * storage.j0Im();
 
             if (Control::debug)
             {
@@ -44,8 +75,8 @@
         }
         else
         {
-            AReEqn += sigma * omega0 * globalStorage.A0Im()[DEFAULT];
-            AImEqn -= sigma * omega0 * globalStorage.A0Re()[DEFAULT];
+            AReEqn += mu * sigma * omega0 * globalStorage.A0Im()[DEFAULT];
+            AImEqn -= mu * sigma * omega0 * globalStorage.A0Re()[DEFAULT];
 
             if (Control::debug)
             {
@@ -58,8 +89,8 @@
         // Add explicit gradient terms of electric scalar potential V
         if (control.meshIs3D() && !globalSettings.lowFrequency)
         {
-            AReEqn -= sigma * globalStorage.VReGrad()[DEFAULT];
-            AImEqn -= sigma * globalStorage.VImGrad()[DEFAULT];
+            AReEqn -= mu * sigma * globalStorage.VReGrad()[DEFAULT];
+            AImEqn -= mu * sigma * globalStorage.VImGrad()[DEFAULT];
 
             if (Control::debug)
             {
@@ -188,8 +219,8 @@
             // dependence of magnetic vector potential
             if (!globalSettings.lowFrequency)
             {
-                AcmptEqn.insertEquationCoupling(0, 1,  omega0 * sigma);
-                AcmptEqn.insertEquationCoupling(1, 0, -omega0 * sigma);
+                AcmptEqn.insertEquationCoupling(0, 1,  mu * sigma * omega0);
+                AcmptEqn.insertEquationCoupling(1, 0, -mu * sigma * omega0);
             }
 
             // Solve A but prevent segfault for homogenous solution

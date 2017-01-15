@@ -99,6 +99,9 @@ public:
             //- Electrical conductivity
             SM_GLOBALITEM_ADD(regionVolScalarField, sigma);
 
+            //- Magnetic permeability
+            SM_GLOBALITEM_ADD(regionVolScalarField, mur);
+
             //- Source vector potential
             SM_GLOBALITEM_ADD(regionVolVectorField, A0Re);
             SM_GLOBALITEM_ADD(regionVolVectorField, A0Im);
@@ -160,7 +163,7 @@ public:
 
             SM_REGIONSTORAGE_NEW();
 
-                //- Electric scalar potential
+                //- Flux of rate of change of A
                 SM_REGIONITEM_ADD(surfaceScalarField, ddtARePhi);
                 SM_REGIONITEM_ADD(surfaceScalarField, ddtAImPhi);
 
@@ -168,7 +171,7 @@ public:
                 SM_REGIONITEM_ADD(volScalarField, VRe);
                 SM_REGIONITEM_ADD(volScalarField, VIm);
 
-                // Current density
+                //- Current density
                 SM_REGIONITEM_ADD(volVectorField, jRe);
                 SM_REGIONITEM_ADD(volVectorField, jIm);
 
