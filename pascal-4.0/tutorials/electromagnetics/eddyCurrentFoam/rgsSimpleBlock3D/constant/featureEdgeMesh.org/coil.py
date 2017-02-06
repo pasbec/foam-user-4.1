@@ -8,9 +8,11 @@
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-from foamTools.ioInfo import fileGetPath, objectIndent, objectHeader, objectFooter
+import os, sys
 
 import math as m
+
+from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -101,7 +103,7 @@ for o in range(off_n):
 
     # Write
     fileName = fileNameBase + str(o) + '.eMesh'
-    with open(fileGetPath(fileName),'w') as f:
+    with open(os.path.dirname(os.path.realpath(__file__)) + "/" + fileName,'w') as f:
 
         f.write(objectHeader(fileName, 'featureEdgeMesh'))
 

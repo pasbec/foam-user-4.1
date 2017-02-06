@@ -8,8 +8,11 @@
 # --- Libraries ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-from foamTools.blockMeshDict import blockMeshDict
+import os, sys
+
 import math as m
+
+from foamTools.blockMeshDict import blockMeshDict
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -37,7 +40,7 @@ n_z = int(m.ceil(n_scale*(geo_z2-geo_z1)))
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-d = blockMeshDict("blockMeshDict")
+d = blockMeshDict()
 
 d.vertices.set(  0, [geo_x1, geo_y1, geo_z1])
 d.vertices.set(  1, [geo_x2, geo_y1, geo_z1])
@@ -60,6 +63,9 @@ d.boundaryFaces.set(6, "infinity", 0, "z+")
 # --------------------------------------------------------------------------- #
 # --- blockMeshDict --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
+
+#d.rename("constant/polyMesh/blockMeshDict")
+d.rename(os.path.dirname(os.path.realpath(__file__)) + "/" + "blockMeshDict")
 
 d.header(geo_scale)
 
