@@ -37,6 +37,7 @@ SourceFiles
 #define regionVolFields_H
 
 #include "fieldTypes.H"
+#include "volFields.H"
 #include "fvPatchFields.H"
 #include "volMesh.H"
 

@@ -140,6 +140,74 @@ public:
                 return rpMesh_.regions();
             };
 
+            //- Return const reference addressing of given type
+            //  and given region indices
+            inline const labelList& typeAddressing
+            (
+                addressingTypes::addressingType type,
+                label fromRegionI,
+                label toRegionI
+            ) const
+            {
+                return rpMesh_.typeAddressing
+                (
+                    type,
+                    fromRegionI,
+                    toRegionI
+                );
+            };
+
+            //- Return const reference addressing of given type
+            //  and given region names
+            inline const labelList& typeAddressing
+            (
+                addressingTypes::addressingType type,
+                const word& fromRegionName,
+                const word& toRegionName = polyMesh::defaultRegion
+            ) const
+            {
+                return rpMesh_.typeAddressing
+                (
+                    type,
+                    fromRegionName,
+                    toRegionName
+                );
+            };
+
+            //- Return const reference map of given type
+            //  and given region indices
+            inline const labelList& typeMap
+            (
+                addressingTypes::addressingType type,
+                label fromRegionI,
+                label toRegionI
+            ) const
+            {
+                return rpMesh_.typeMap
+                (
+                    type,
+                    fromRegionI,
+                    toRegionI
+                );
+            };
+
+            //- Return const reference map of given type
+            //  and given region names
+            inline const labelList& typeMap
+            (
+                addressingTypes::addressingType type,
+                const word& fromRegionName,
+                const word& toRegionName = polyMesh::defaultRegion
+            ) const
+            {
+                return rpMesh_.typeMap
+                (
+                    type,
+                    fromRegionName,
+                    toRegionName
+                );
+            };
+
     // Member Operators
 
         //- Mesh access operator by index (direct)

@@ -23,20 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "regionPointFields.H"
+#include "regionSurfaceFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(regionPointScalarField, 0);
-    defineTemplateTypeNameAndDebug(regionPointVectorField, 0);
-    defineTemplateTypeNameAndDebug(regionPointTensorField, 0);
+    defineTemplateTypeNameAndDebug(regionSurfaceScalarField, 0);
+    defineTemplateTypeNameAndDebug(regionSurfaceVectorField, 0);
+    defineTemplateTypeNameAndDebug(regionSurfaceTensorField, 0);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "regionPointFieldMapping.C"
-
+#   include "regionSurfaceFieldMapping.C"
 
 // ************************************************************************* //

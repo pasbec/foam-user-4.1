@@ -15,7 +15,7 @@ regionDynamicFvMesh/regionDynamicFvMesh.C
 regionDynamicFvMesh/regionDynamicFvMeshMapping.C
 
 regionVolFields/regionVolFields.C
-
+regionSurfaceFields/regionSurfaceFields.C
 regionPointFields/regionPointFields.C
 
 LIB = $(FOAM_USER_LIBBIN)/libregionModel

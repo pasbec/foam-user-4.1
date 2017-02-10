@@ -22,27 +22,27 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    regionPointFields
+    regionSurfaceFields
 
 Description
     ...
 
 SourceFiles
-    regionPointFields.C
+    regionSurfaceFields.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionPointFields_H
-#define regionPointFields_H
+#ifndef regionSurfaceFields_H
+#define regionSurfaceFields_H
 
 #include "fieldTypes.H"
-#include "pointFields.H"
-#include "pointPatchFields.H"
-#include "pointMesh.H"
+#include "surfaceFields.H"
+#include "fvsPatchFields.H"
+#include "surfaceMesh.H"
 
 #include "regionGeometricField.H"
 #include "regionGeoMesh.H"
-#include "regionPointMesh.H"
+#include "regionFvMesh.H"
 
 // TODO [Low]: Implement template specializations for the currently
 //             not-implemented membemer functions for boundary field mapping
@@ -54,7 +54,7 @@ SourceFiles
 template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
-    Type, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh>          \
+    Type, fvsPatchField, surfaceMesh, regionGeoMesh<regionFvMesh>             \
 >::mapInteralField                                                            \
 (                                                                             \
     label regionI                                                             \
@@ -64,7 +64,7 @@ void regionGeometricField                                                     \
 template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
-    Type, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh>          \
+    Type, fvsPatchField, surfaceMesh, regionGeoMesh<regionFvMesh>             \
 >::rmapInteralField                                                           \
 (                                                                             \
     label regionI                                                             \
@@ -78,14 +78,14 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 typedef regionGeometricField
-    <scalar, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh> >
-    regionPointScalarField;
+    <scalar, fvsPatchField, surfaceMesh, regionGeoMesh<regionFvMesh> >
+    regionSurfaceScalarField;
 typedef regionGeometricField
-    <vector, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh> >
-    regionPointVectorField;
+    <vector, fvsPatchField, surfaceMesh, regionGeoMesh<regionFvMesh> >
+    regionSurfaceVectorField;
 typedef regionGeometricField
-    <tensor, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh> >
-    regionPointTensorField;
+    <tensor, fvsPatchField, surfaceMesh, regionGeoMesh<regionFvMesh> >
+    regionSurfaceTensorField;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -27,6 +27,7 @@ License
 #include "fvcExtrapolate.H"
 #include "calculatedFvPatchFields.H"
 #include "demandDrivenData.H"
+#include "surfaceInterpolate.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -926,14 +927,13 @@ interpolateBoundaryField
             // Patch is only present in regionI but NOT in
             // default region. Thus, all faces of this patch
             // correspond to interal faces of default region.
-            // Linear interpolation is applied to get values
-            // for the corresponding patch field.
+            // Interpolation is applied to get values for the
+            // corresponding patch field.
             if (patchI0 == -1)
             {
-                const Field<Type>& vf0In = vf0.internalField();
-                const scalarField& w0 = vf0.mesh().weights().internalField();
-                const labelList& own0 = vf0.mesh().faceOwner();
-                const labelList& ngb0 = vf0.mesh().faceNeighbour();
+                const GeometricField<Type, fvsPatchField, surfaceMesh>
+                    sf0 = fvc::interpolate(vf0);
+                const Field<Type>& sf0In = sf0.internalField();
 
                 Field<Type>& patchField = vf.boundaryField()[patchI];
                 label patchStart = patch.start();
@@ -946,11 +946,7 @@ interpolateBoundaryField
                     label faceI = patchStart + facei;
                     label faceI0 = fmap[faceI];
 
-                    scalar w0I = w0[faceI0];
-
-                    patchField[facei] =
-                        w0I * vf0In[own0[faceI0]]
-                    + (1.0 - w0I) * vf0In[ngb0[faceI0]];
+                    patchField[facei] = sf0In[faceI0];
                 }
             }
             else
