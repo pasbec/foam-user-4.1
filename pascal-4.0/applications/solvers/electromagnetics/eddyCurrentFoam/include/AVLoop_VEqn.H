@@ -3,7 +3,7 @@
 
     // Solve V
     if (control.meshIs3D())
-    for (int VeqnI = 0; VeqnI < 2; VeqnI++)
+    for (int VEqnI = 0; VEqnI < 2; VEqnI++)
     {
     {
         SM_REGIONSCOPE(CONDUCTOR);
@@ -17,9 +17,9 @@
         volVectorField* A0Ptr = NULL;
         surfaceScalarField* ddtAPhiPtr = NULL;
 
-        if (control.switchV())
+        if (VEqnI == 0)
         {
-            complexSign = 1;
+            complexSign = -1;
             VPtr = &storage.VRe();
             VGradPtr = &globalStorage.VReGrad()[CONDUCTOR];
             APtr = &globalStorage.AIm()[CONDUCTOR];
@@ -32,7 +32,7 @@
         }
         else
         {
-            complexSign = -1;
+            complexSign = 1;
             VPtr = &storage.VIm();
             VGradPtr = &globalStorage.VImGrad()[CONDUCTOR];
             APtr = &globalStorage.ARe()[CONDUCTOR];
@@ -83,23 +83,28 @@
         // Prepare V-equation
         fvScalarMatrix VEqn(fvm::laplacian(sigmaf, V));
 
-        // Term from div(A)=0
-//         VEqn -= complexSign * omega0 * sigma * fvc::div(A);
-
         if (laplacianSchemeV != "jumpGauss")
         {
+            // Term from div(A)
+//             VEqn += complexSign * omega0 * sigma * fvc::div(A);
+
             // NOTE: We do NOT use sigmaf here!
             volVectorField sigmaGrad = fvc::grad(sigma);
 
             // Explicit source term for V due to variable sigma
-            VEqn -= complexSign * omega0 * (sigmaGrad & A);
+            VEqn += complexSign * omega0 * (sigmaGrad & A);
 
             if (globalSettings.biotSavart)
             {
                 volVectorField& A0 = *A0Ptr;
 
-                VEqn -= complexSign * omega0 * (sigmaGrad & A0);
+                VEqn += complexSign * omega0 * (sigmaGrad & A0);
             }
+        }
+        else
+        {
+//             // Term from div(A)
+//             VEqn += complexSign * omega0 * sigma * fvc::div(A);
         }
 
         // Read solver for V
@@ -126,9 +131,6 @@
         // Therefor the matrix needs to be kept singluar!
         VEqn.solve(control.subDict(Region::CONDUCTOR, V.name()));
 
-// TODO: Use relaxation?
-//         VGrad.storePrevIter();
-
         if (laplacianSchemeV != "jumpGauss")
         {
             //VGrad = fvc::grad(V);
@@ -144,8 +146,5 @@
                     VEqn.jumpFlux()/neighbourInterpolate(sigma)
                 );
         }
-
-// TODO: Use relaxation?
-//         VGrad.relax(0.5);
     }
     }

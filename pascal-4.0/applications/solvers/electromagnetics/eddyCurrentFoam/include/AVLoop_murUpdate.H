@@ -16,4 +16,8 @@
 
         // Update mur
         globalStorage.mur().rmap(CONDUCTOR);
+
+        // Update rMur
+        globalStorage.rMur()[CONDUCTOR] = 1.0/globalStorage.mur()[CONDUCTOR];
+        globalStorage.rMur().rmap(CONDUCTOR);
     }

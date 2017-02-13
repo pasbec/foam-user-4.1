@@ -156,6 +156,31 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_mur::create() const
 }
 
 
+void Foam::eddyCurrentApp::Manager::Storage::Item_rMur::create() const
+{
+    set
+    (
+        regionVolScalarField::LinkOrNew
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh()
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimless,
+                1
+            ),
+            calculatedFvPatchScalarField::typeName
+        )
+    );
+}
+
+
 void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create() const
 {
     IOobject IOo
@@ -702,6 +727,7 @@ void Foam::eddyCurrentApp::Manager::Storage::create() const
 {
     item_sigma().enable();
     item_mur().enable();
+    item_rMur().enable();
 
     item_A0Re().setState(settings().biotSavart);
     item_A0Im().setState(settings().biotSavart);

@@ -12,7 +12,17 @@
                 << endl;
         }
 
+// TODO: Use relaxation?
+        globalStorage.VReGrad()[DEFAULT].storePrevIter();
+        globalStorage.VImGrad()[DEFAULT].storePrevIter();
+
         // Update gradient of V
         globalStorage.VReGrad().rmap(CONDUCTOR);
         globalStorage.VImGrad().rmap(CONDUCTOR);
+
+// TODO: Use relaxation?
+        const scalar VReGradRf = globalMesh[DEFAULT].solutionDict().fieldRelaxationFactor(globalStorage.VReGrad()[DEFAULT].name());
+        const scalar VImGradRf = globalMesh[DEFAULT].solutionDict().fieldRelaxationFactor(globalStorage.VImGrad()[DEFAULT].name());
+        globalStorage.VReGrad()[DEFAULT].relax(VReGradRf);
+        globalStorage.VImGrad()[DEFAULT].relax(VImGradRf);
     }

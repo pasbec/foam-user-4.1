@@ -1,14 +1,15 @@
 
     {
+
+        // Init
+#       include "AVInit.H"
+        
         if (Control::debug)
         {
             Info<< Control::typeName << " | AVLoop.H : "
                 << "Commencing EDDYCURRENT A-V loop."
                 << endl;
         }
-
-        // Init
-#       include "AVInit.H"
 
         // AV loop
         while (control.loop())
@@ -26,6 +27,8 @@
 #               include "AVLoop_VEqn.H"
 
 #               include "AVLoop_VGradUpdate.H"
+
+// #               include "AVLoop_GEqn.H"
             }
         }
     }

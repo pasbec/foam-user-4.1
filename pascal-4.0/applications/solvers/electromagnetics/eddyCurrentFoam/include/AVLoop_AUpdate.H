@@ -12,26 +12,24 @@
         }
 
 // TODO: Use relaxation?
-//         volVectorField& ARe = globalStorage.ARe()[CONDUCTOR];
-//         volVectorField& AIm = globalStorage.AIm()[CONDUCTOR];
-
-// TODO: Use relaxation?
-//         ARe.storePrevIter();
-//         AIm.storePrevIter();
+        globalStorage.ARe()[CONDUCTOR].storePrevIter();
+        globalStorage.ARe()[CONDUCTOR].storePrevIter();
 
         // Update A
-//         globalStorage.ARe().mapExtrapolate(CONDUCTOR);
-//         globalStorage.AIm().mapExtrapolate(CONDUCTOR);
         globalStorage.ARe().mapInterpolate(CONDUCTOR);
         globalStorage.AIm().mapInterpolate(CONDUCTOR);
 
 // TODO: Use relaxation?
-//         ARe.relax(0.5);
-//         AIm.relax(0.5);
+        const scalar AReRf = globalMesh[DEFAULT].solutionDict().fieldRelaxationFactor(globalStorage.ARe()[DEFAULT].name());
+        const scalar AImRf = globalMesh[DEFAULT].solutionDict().fieldRelaxationFactor(globalStorage.AIm()[DEFAULT].name());
+        globalStorage.ARe()[CONDUCTOR].relax(AReRf);
+        globalStorage.ARe()[CONDUCTOR].relax(AImRf);
 
         // Update rate of change of flux of A
         if (control.meshIs3D())
         {
+// TEST
+// TODO: Interpolation with rMur?
             storage.ddtARePhi() =  omega0*(fvc::interpolate(globalStorage.ARe()[CONDUCTOR]) & mesh.Sf());
             storage.ddtAImPhi() = -omega0*(fvc::interpolate(globalStorage.AIm()[CONDUCTOR]) & mesh.Sf());
 

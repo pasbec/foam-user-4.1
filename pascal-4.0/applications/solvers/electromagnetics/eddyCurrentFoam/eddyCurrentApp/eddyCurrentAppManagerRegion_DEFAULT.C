@@ -33,6 +33,60 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_gradAReNPhi::create() const
+{
+    set
+    (
+        new surfaceVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_gradAImNPhi::create() const
+{
+    set
+    (
+        new surfaceVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
+
 void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_f0::create() const
 {
     set
@@ -126,15 +180,61 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create()
 }
 
 
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_GRe::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_GIm::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create() const
 {
+    item_gradAReNPhi().enable();
+    item_gradAImNPhi().enable();
+
     item_f0().enable();
     item_omega0().enable();
 
     item_j0Re().setState(!globalSettings().biotSavart);
     item_j0Im().setState(!globalSettings().biotSavart);
+
+    item_GRe().enable();
+    item_GIm().enable();
 }
 
 

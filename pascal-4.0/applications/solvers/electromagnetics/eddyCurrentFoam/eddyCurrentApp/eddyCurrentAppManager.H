@@ -99,8 +99,11 @@ public:
             //- Electrical conductivity
             SM_GLOBALITEM_ADD(regionVolScalarField, sigma);
 
-            //- Magnetic permeability
+            //- Relaive magnetic permeability
             SM_GLOBALITEM_ADD(regionVolScalarField, mur);
+
+            //- Reciprocal relative magnetic permeability
+            SM_GLOBALITEM_ADD(regionVolScalarField, rMur);
 
             //- Source vector potential
             SM_GLOBALITEM_ADD(regionVolVectorField, A0Re);
@@ -139,15 +142,23 @@ public:
 
             SM_REGIONSTORAGE_NEW();
 
+                //- TODO
+                SM_REGIONITEM_ADD(surfaceVectorField, gradAReNPhi);
+                SM_REGIONITEM_ADD(surfaceVectorField, gradAImNPhi);
+
                 //- Harmonic field frequency
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, f0);
 
                 //- Angular harmonic field frequency
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, omega0);
 
-                // Source current density
+                //- Source current density
                 SM_REGIONITEM_ADD(volVectorField, j0Re);
                 SM_REGIONITEM_ADD(volVectorField, j0Im);
+
+                //- Electric scalar potential
+                SM_REGIONITEM_ADD(volScalarField, GRe);
+                SM_REGIONITEM_ADD(volScalarField, GIm);
 
             SM_REGIONSTORAGE_ADD();
 
