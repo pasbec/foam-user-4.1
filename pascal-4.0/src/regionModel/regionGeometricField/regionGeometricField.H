@@ -282,14 +282,6 @@ public:
 //                 notImplemented(type() + "::mapBoundaryField()");
 //             };
 
-//- TODO: Boundary field copy from internal field
-//- TODO: Parallel?
-            void copyInternalBoundaryField(label regionI) const
-            ;
-//             {
-//                 notImplemented(type() + "::copyInternalBoundaryField()");
-//             };
-
 //- TODO: Boundary field interpolation
 //- TODO: Parallel?
             void interpolateBoundaryField(label regionI) const
@@ -356,35 +348,6 @@ public:
             void rmap(const word& regionName) const
             {
                 rmap(regions()[regionName]);
-            };
-
-        // Mapping with patch internal values
-
-            //- Map/Interpolate field from default region to all non-default regions
-            void mapCopyInternal() const
-            {
-                forAll(mesh().regionNames(), regionI)
-                {
-                    word regionNameI = mesh().regionName(regionI);
-
-                    if (regionNameI != polyMesh::defaultRegion)
-                    {
-                        mapCopyInternal(regionI);
-                    }
-                }
-            };
-
-            //- Map/Interpolate field from default region to non-default region
-            void mapCopyInternal(label regionI) const
-            {
-                map(regionI);
-                copyInternalBoundaryField(regionI);
-            };
-
-            //- Map/Interpolate field from default region to non-default region
-            void mapCopyInternal(const word& regionName) const
-            {
-                mapCopyInternal(regions()[regionName]);
             };
 
         // Mapping with patch interpolation

@@ -51,9 +51,9 @@ namespace physicalConstant
         4.0 * mathematicalConstant::pi * 1e-07
     );
 
-    dimensionedScalar rMu0
+    dimensionedScalar nu0
     (
-        "rMu0",
+        "nu0",
         1.0/mu0
     );
 }

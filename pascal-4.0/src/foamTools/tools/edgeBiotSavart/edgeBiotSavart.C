@@ -319,7 +319,8 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
 
 Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
 (
-    complexPart part
+    complexPart part,
+    bool skipInternal
 ) const
 {
     tmp<volVectorField> tA
@@ -358,65 +359,12 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
         }
     }
 
-    A.internalField() = internalA(part);
+    if (!skipInternal)
+    {
+        A.internalField() = internalA(part);
+    }
 
     return tA;
-}
-
-
-void Foam::edgeBiotSavart::A
-(
-    volVectorField& vf,
-    complexPart part
-) const
-{
-    tmp<volVectorField> tA
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                vf.name(),
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedVector
-            (
-                word(),
-                dimVoltage*dimTime/dimLength,
-                vector::zero
-            ),
-            fixedValueFvPatchVectorField::typeName
-        )
-    );
-
-    volVectorField& A = tA();
-
-    forAll (A.boundaryField(), patchI)
-    {
-        const fvPatchVectorField& pvf = A.boundaryField()[patchI];
-
-        if (isA<fixedValueFvPatchVectorField>(pvf))
-        {
-            A.boundaryField()[patchI] == boundaryPatchA(patchI, part);
-        }
-    }
-    int nCorr = readInt(this->lookup("nNonOrthogonalCorrectors"));
-
-    for (int corr=0; corr<nCorr; corr++)
-    {
-        fvVectorMatrix AEqn(fvm::laplacian(A));
-
-        AEqn.solve();
-
-        A.correctBoundaryConditions();
-    }
-
-    vf == tA;
 }
 
 
@@ -467,7 +415,8 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
 
 Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::B
 (
-    complexPart part
+    complexPart part,
+    bool skipInternal
 ) const
 {
     tmp<volVectorField> tB
@@ -506,7 +455,10 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::B
         }
     }
 
-    B.internalField() = internalB(part);
+    if (!skipInternal)
+    {
+        B.internalField() = internalB(part);
+    }
 
     return tB;
 }

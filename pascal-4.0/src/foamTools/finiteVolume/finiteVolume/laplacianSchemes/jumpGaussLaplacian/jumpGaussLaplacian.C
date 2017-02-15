@@ -572,15 +572,21 @@ jumpGaussLaplacian<Type, GType>::fvcLaplacian
 {
     // NOTE: gammaMagSf contains harmonically interpolated gamma!
 
-    notImplemented(type() + "::fvcLaplacian(gammaf, vf)");
-
     const fvMesh& mesh = this->mesh();
+
+    tmp<fvMatrix<Type> > tfvm = fvmLaplacian(gammaf, vf);
+    fvMatrix<Type>& fvm = tfvm();
 
     tmp<volTypeField > tLaplacian
     (
-// TODO: Two-sided snGradSchemes necessary!
-        fvc::div(gammaf*this->tsnGradScheme_().snGrad(vf)*mesh.magSf())
+        fvm.A()*vf - fvm.H()
     );
+
+//     tmp<volTypeField > tLaplacian
+//     (
+// // TODO: Two-sided snGradSchemes necessary!
+//         fvc::div(gammaf*this->tsnGradScheme_().snGrad(vf)*mesh.magSf())
+//     );
 
     tLaplacian().rename("laplacian(" + gammaf.name() + ',' + vf.name() + ')');
 

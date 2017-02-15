@@ -866,38 +866,6 @@ template
 >
 void
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
-copyInternalBoundaryField
-(
-    label regionI
-) const
-{
-    GeometricFieldType& vf = operator[](regionI);
-    const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
-
-    forAll (pbm, patchI)
-    {
-        if
-        (
-            vf.boundaryField()[patchI].type()
-         == calculatedFvPatchField<Type>::typeName
-        )
-        {
-            vf.boundaryField()[patchI] ==
-                vf.boundaryField()[patchI].patchInternalField();
-        }
-    }
-
-    vf.correctBoundaryConditions();
-};
-
-
-template
-<
-    class Type, template<class> class PatchField, class GeoMesh,
-    class RegionGeoMesh
->
-void
-Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
 interpolateBoundaryField
 (
     label regionI
