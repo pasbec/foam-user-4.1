@@ -5,7 +5,7 @@
         SM_REGIONSCOPE(DEFAULT);
 
         volScalarField& sigma = globalStorage.sigma()[DEFAULT];
-        volScalarField& rMur = globalStorage.rMur()[DEFAULT];
+        volScalarField& nur = globalStorage.nur()[DEFAULT];
 
         volVectorField& ARe = globalStorage.ARe()[DEFAULT];
         volVectorField& AIm = globalStorage.AIm()[DEFAULT];
@@ -24,66 +24,16 @@
 // TEST
         {
             sigma.write();
-            rMur.write();
-
-            ARe.rename("AReOld");
-            AIm.rename("AImOld");
+            nur.write();
 
             ARe.write();
             AIm.write();
-
-            ARe.rename("ARe");
-            AIm.rename("AIm");
 
             if (globalSettings.biotSavart)
             {
                 globalStorage.A0Re()[DEFAULT].write();
                 globalStorage.A0Im()[DEFAULT].write();
             }
-
-            globalStorage.VReGrad()[DEFAULT].write();
-            globalStorage.VImGrad()[DEFAULT].write();
-        }
-
-// TEST
-        {
-            // Eddy current density
-            volVectorField jRe("jRe", omega0 * sigma * AIm);
-            volVectorField jIm("jIm", -omega0 * sigma * ARe);
-
-            if (control.meshIs3D())
-            {
-                jRe -= sigma * globalStorage.VReGrad()[DEFAULT];
-                jIm -= sigma * globalStorage.VImGrad()[DEFAULT];
-            }
-
-            if (globalSettings.biotSavart)
-            {
-                jRe += omega0 * sigma * globalStorage.A0Im()[DEFAULT];
-                jIm -= omega0 * sigma * globalStorage.A0Re()[DEFAULT];
-            }
-
-            jRe.write();
-            jIm.write();
-
-            volScalarField jReDiv = fvc::div(jRe);
-            volScalarField jImDiv = fvc::div(jIm);
-
-            Info<< Control::typeName << " | AEqn.H : "
-                << "max(mag(jReDiv)) = " << max(mag(jReDiv)).value()
-                << endl;
-            Info<< Control::typeName << " | AEqn.H : "
-                << "max(mag(jImDiv)) = " << max(mag(jImDiv)).value()
-                << endl;
-
-            jReDiv.write();
-            jImDiv.write();
-        }
-
-// TEST
-        {
-            ARe.write();
-            AIm.write();
 
             volScalarField AReDiv = fvc::div(ARe);
             volScalarField AImDiv = fvc::div(AIm);
@@ -97,26 +47,45 @@
 
             AReDiv.write();
             AImDiv.write();
+
+            globalStorage.VReGrad()[DEFAULT].write();
+            globalStorage.VImGrad()[DEFAULT].write();
+
+            volVectorField jRe("jRe", omega0 * sigma * AIm);
+            volVectorField jIm("jIm", -omega0 * sigma * ARe);
+
+            if (globalSettings.biotSavart)
+            {
+                jRe += omega0 * sigma * globalStorage.A0Im()[DEFAULT];
+                jIm -= omega0 * sigma * globalStorage.A0Re()[DEFAULT];
+            }
+
+            if (control.meshIs3D())
+            {
+                jRe -= sigma * globalStorage.VReGrad()[DEFAULT];
+                jIm -= sigma * globalStorage.VImGrad()[DEFAULT];
+            }
+
+            jRe.write();
+            jIm.write();
         }
 
-        // Interpolate reciprocal relative magnetic permeability
-        surfaceScalarField rMurf("rMurf", fvc::interpolate(rMur));
+        // Interpolate relative magnetic reluctivity
+        surfaceScalarField nurf("nurf", fvc::interpolate(nur));
 
         // Assemble base-matrices for A
-        tmp<fvVectorMatrix> tAReEqn
+        fvVectorMatrix AReEqn
         (
-          - fvm::laplacian(rMurf,ARe)
+          - fvm::laplacian(nurf,ARe)
         );
 
-        tmp<fvVectorMatrix> tAImEqn
+        fvVectorMatrix AImEqn
         (
-          - fvm::laplacian(rMurf,AIm)
+          - fvm::laplacian(nurf,AIm)
         );
 
-        fvVectorMatrix& AReEqn = tAReEqn();
-        fvVectorMatrix& AImEqn = tAImEqn();
-
-        // Add source current or source vector potential if Biot-Savart is used
+        // Add source current or source vector potential
+        // depending on wether Biot-Savart is used
         if (!globalSettings.biotSavart)
         {
             if (Control::debug)
@@ -142,7 +111,8 @@
             AImEqn += physicalConstant::mu0 * sigma * omega0 * globalStorage.A0Re()[DEFAULT];
         }
 
-        // Add explicit gradient terms of electric scalar potential V
+        // Add explicit gradient terms of the
+        // electric scalar potential V
         if (control.meshIs3D() && !globalSettings.lowFrequency)
         {
             if (Control::debug)
@@ -207,7 +177,7 @@
             AReCmpt.correctBoundaryConditions();
             AImCmpt.correctBoundaryConditions();
 
-            // Create component equations
+            // Create temporary component equations
             tmp<fvScalarMatrix> tAReCmptEqn
             (
                 new fvScalarMatrix
@@ -225,6 +195,7 @@
                 )
             );
 
+            // Get refs to component equations
             fvScalarMatrix& AReCmptEqn = tAReCmptEqn();
             fvScalarMatrix& AImCmptEqn = tAImCmptEqn();
 
@@ -240,7 +211,7 @@
             AImCmptEqn.boundaryCoeffs() = AImEqn.boundaryCoeffs().component(cmpt);
             AImCmptEqn.source() = AImEqn.source().component(cmpt);
 
-// // TEST
+// TEST
 //             AReCmptEqn.relax(AReUrf);
 //             AImCmptEqn.relax(AImUrf);
 //
@@ -322,10 +293,6 @@
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 
-        // Clear memory
-        tAReEqn.clear();
-        tAImEqn.clear();
-
 // TEST
 //         {
 //             volScalarField rAARe("rAARe", 1.0/AReEqn.A());
@@ -353,7 +320,7 @@
 //         solve(relax(AImEqn, AImUrf) == -fvc::grad(GIm));
 
 // // TEST
-//         for (int AEqnI = 0; AEqnI < 2; AEqnI++)
+//         for (int cI = 0; cI < 2; cI++)
 //         {
 //             volVectorField* APtr = NULL;
 //             fvVectorMatrix* AEqnPtr = NULL;
@@ -361,7 +328,7 @@
 //             scalar AUrf = 1.0;
 //             scalar GUrf = 1.0;
 //
-//             if (AEqnI == 0)
+//             if (cI == 0)
 //             {
 //                 APtr = &ARe;
 //                 AEqnPtr = &AReEqn;
@@ -397,7 +364,7 @@
 //             {
 //                 fvScalarMatrix GEqn
 //                 (
-//                     min(rMur) * fvm::laplacian(rAAf, G) == min(rMur) * fvc::div(phiA)
+//                     min(nur) * fvm::laplacian(rAAf, G) == min(nur) * fvc::div(phiA)
 //                 );
 //
 //                 GEqn.solve();
@@ -417,8 +384,8 @@
 //             (
 //                 fvc::reconstruct
 //                 (
-//                     AReEqn.flux()/ownerInterpolate(rMur),
-//                     AReEqn.jumpFlux()/neighbourInterpolate(rMur)
+//                     AReEqn.flux()/ownerInterpolate(nur),
+//                     AReEqn.jumpFlux()/neighbourInterpolate(nur)
 //                 )
 //             );
 //         surfaceTensorField gradAImf =
@@ -426,46 +393,46 @@
 //             (
 //                 fvc::reconstruct
 //                 (
-//                     AImEqn.flux()/ownerInterpolate(rMur),
-//                     AImEqn.jumpFlux()/neighbourInterpolate(rMur)
+//                     AImEqn.flux()/ownerInterpolate(nur),
+//                     AImEqn.jumpFlux()/neighbourInterpolate(nur)
 //                 )
 //             );
 //
-//         storage.gradAReNPhi() = -gradARef & mesh.Sf();
-//         storage.gradAImNPhi() = -gradAImf & mesh.Sf();
+//         storage.phiGradAnRe() = -gradARef & mesh.Sf();
+//         storage.phiGradAnIm() = -gradAImf & mesh.Sf();
 //
-//         storage.gradAReNPhi() -= (storage.gradAReNPhi() & mesh.Sf()) * mesh.Sf() / pow(mesh.magSf(), 2);
-//         storage.gradAImNPhi() -= (storage.gradAImNPhi() & mesh.Sf()) * mesh.Sf() / pow(mesh.magSf(), 2);
+//         storage.phiGradAnRe() -= (storage.phiGradAnRe() & mesh.Sf()) * mesh.Sf() / pow(mesh.magSf(), 2);
+//         storage.phiGradAnIm() -= (storage.phiGradAnIm() & mesh.Sf()) * mesh.Sf() / pow(mesh.magSf(), 2);
 
 // TEST
-        for (int AEqnI = 0; AEqnI < 2; AEqnI++)
-        {
-            volVectorField* APtr = NULL;
-            surfaceVectorField* gradNPhiPtr = NULL;
-
-            if (AEqnI == 0)
-            {
-                APtr = &globalStorage.ARe()[DEFAULT];
-                gradNPhiPtr = &storage.gradAReNPhi();
-            }
-            else
-            {
-                APtr = &globalStorage.AIm()[DEFAULT];
-                gradNPhiPtr = &storage.gradAImNPhi();
-            }
-
-            volVectorField& A = *APtr;
-            surfaceVectorField& gradNPhi = *gradNPhiPtr;
-
-            surfaceTensorField gradNf =
-                fvc::interpolate
-                (
-                    fvc::grad(linearInterpolate(A)),
-                    "interpolate(grad(" + A.name() + "))"
-                );
-
-            gradNPhi = -gradNf & mesh.Sf();
-
-            gradNPhi += tr(gradNf) * mesh.Sf();
-        }
+//         for (int cI = 0; cI < 2; cI++)
+//         {
+//             volVectorField* APtr = NULL;
+//             surfaceVectorField* phiGradAnPtr = NULL;
+//
+//             if (cI == 0)
+//             {
+//                 APtr = &ARe;
+//                 phiGradAnPtr = &storage.phiGradAnRe();
+//             }
+//             else
+//             {
+//                 APtr = &AIm;
+//                 phiGradAnPtr = &storage.phiGradAnIm();
+//             }
+//
+//             volVectorField& A = *APtr;
+//             surfaceVectorField& phiGradAn = *phiGradAnPtr;
+//
+//             surfaceTensorField gradAf =
+//                 fvc::interpolate
+//                 (
+//                     fvc::grad(linearInterpolate(A)),
+//                     "interpolate(grad(" + A.name() + "))"
+//                 );
+//
+//             phiGradAn = -gradAf & mesh.Sf();
+//
+//             phiGradAn += tr(gradAf) * mesh.Sf();
+//         }
     }

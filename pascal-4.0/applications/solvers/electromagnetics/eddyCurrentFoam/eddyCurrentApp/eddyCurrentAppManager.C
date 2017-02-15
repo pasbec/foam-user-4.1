@@ -156,7 +156,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_mur::create() const
 }
 
 
-void Foam::eddyCurrentApp::Manager::Storage::Item_rMur::create() const
+void Foam::eddyCurrentApp::Manager::Storage::Item_nur::create() const
 {
     set
     (
@@ -222,7 +222,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create() const
                 dimVoltage*dimTime/dimLength,
                 vector::zero
             ),
-            calculatedFvPatchVectorField::typeName,
+            fixedValueFvPatchVectorField::typeName,
             IOoOverride
         )
     );
@@ -270,7 +270,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create() const
                 dimVoltage*dimTime/dimLength,
                 vector::zero
             ),
-            calculatedFvPatchVectorField::typeName,
+            fixedValueFvPatchVectorField::typeName,
             IOoOverride
         )
     );
@@ -727,7 +727,7 @@ void Foam::eddyCurrentApp::Manager::Storage::create() const
 {
     item_sigma().enable();
     item_mur().enable();
-    item_rMur().enable();
+    item_nur().enable();
 
     item_A0Re().setState(settings().biotSavart);
     item_A0Im().setState(settings().biotSavart);

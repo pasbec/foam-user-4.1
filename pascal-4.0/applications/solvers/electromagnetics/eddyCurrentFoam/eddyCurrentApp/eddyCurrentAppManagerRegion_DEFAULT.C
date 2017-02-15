@@ -33,7 +33,7 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_gradAReNPhi::create() const
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_phiGradAnRe::create() const
 {
     set
     (
@@ -60,7 +60,7 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_gradAReNPhi::c
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_gradAImNPhi::create() const
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_phiGradAnIm::create() const
 {
     set
     (
@@ -180,52 +180,53 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create()
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_GRe::create() const
-{
-    set
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh()
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_GIm::create() const
-{
-    set
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh()
-        )
-    );
-}
+// TEST
+// void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_GRe::create() const
+// {
+//     set
+//     (
+//         new volScalarField
+//         (
+//             IOobject
+//             (
+//                 name(),
+//                 time().timeName(),
+//                 mesh(),
+//                 IOobject::MUST_READ,
+//                 IOobject::AUTO_WRITE
+//             ),
+//             mesh()
+//         )
+//     );
+// }
+//
+//
+// void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_GIm::create() const
+// {
+//     set
+//     (
+//         new volScalarField
+//         (
+//             IOobject
+//             (
+//                 name(),
+//                 time().timeName(),
+//                 mesh(),
+//                 IOobject::MUST_READ,
+//                 IOobject::AUTO_WRITE
+//             ),
+//             mesh()
+//         )
+//     );
+// }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create() const
 {
-    item_gradAReNPhi().enable();
-    item_gradAImNPhi().enable();
+    item_phiGradAnRe().enable();
+    item_phiGradAnIm().enable();
 
     item_f0().enable();
     item_omega0().enable();
@@ -233,8 +234,9 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create() const
     item_j0Re().setState(!globalSettings().biotSavart);
     item_j0Im().setState(!globalSettings().biotSavart);
 
-    item_GRe().enable();
-    item_GIm().enable();
+// TEST
+//     item_GRe().enable();
+//     item_GIm().enable();
 }
 
 

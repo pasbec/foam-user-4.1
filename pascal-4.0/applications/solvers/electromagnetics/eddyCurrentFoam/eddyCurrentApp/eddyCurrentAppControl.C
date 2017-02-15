@@ -260,13 +260,14 @@ bool Foam::eddyCurrentApp::Control::updateRelDeltaA(label movedRegionI)
                 dimLength,
                 vector::zero
             ),
-            calculatedFvPatchVectorField::typeName
+            zeroGradientFvPatchVectorField::typeName
         );
 
         C[Region::DEFAULT] = mesh_[Region::DEFAULT].C();
         C[movedRegionI] = mesh_[movedRegionI].C();
-        C.rmapInteralField(movedRegionI);
-        C.mapCopyInternal(Region::CONDUCTOR);
+        C.rmap(movedRegionI);
+        C.map(Region::CONDUCTOR);
+        C[Region::CONDUCTOR].correctBoundaryConditions();
 
         scalarField magSqrDeltaC =
             magSqr
@@ -541,7 +542,6 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
     if (tolScales_.found(name))
     {
         tolScale = tolScales_[name];
-        scaledTol = min(tolScale * tolerance, 0.1);
     }
 
     if ((corr_ == 1) && (subCorr_ == 1))
@@ -568,6 +568,9 @@ Foam::dictionary Foam::eddyCurrentApp::Control::subDict
                     const scalar residual = spd.last().maxInitialResidual();
 
                     scalar absTol = tolScale * residualControl_[fieldI].absTol;
+
+                    tolerance = min(tolerance, residualControl_[fieldI].absTol);
+                    scaledTol = min(tolScale * tolerance, 0.1);
 
                     // Residual difference from target residual
                     scalar residualDiff = residual - absTol;

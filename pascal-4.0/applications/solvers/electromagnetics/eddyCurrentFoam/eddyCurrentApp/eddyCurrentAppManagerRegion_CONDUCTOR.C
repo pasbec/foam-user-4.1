@@ -33,7 +33,61 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtARePhi::create() const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_phiGradA0nRe::create() const
+{
+    set
+    (
+        new surfaceVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_phiGradA0nIm::create() const
+{
+    set
+    (
+        new surfaceVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_phiDdtARe::create() const
 {
     set
     (
@@ -60,7 +114,7 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtARePhi::c
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_ddtAImPhi::create() const
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_phiDdtAIm::create() const
 {
     set
     (
@@ -257,8 +311,11 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emRelDeltaA:
 
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create() const
 {
-    item_ddtARePhi().setState(control().meshIs3D());
-    item_ddtAImPhi().setState(control().meshIs3D());
+    item_phiGradA0nRe().setState(globalSettings().biotSavart);
+    item_phiGradA0nIm().setState(globalSettings().biotSavart);
+
+    item_phiDdtARe().setState(control().meshIs3D());
+    item_phiDdtAIm().setState(control().meshIs3D());
 
     item_VRe().setState(control().meshIs3D());
     item_VIm().setState(control().meshIs3D());

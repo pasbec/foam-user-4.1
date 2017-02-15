@@ -99,11 +99,11 @@ public:
             //- Electrical conductivity
             SM_GLOBALITEM_ADD(regionVolScalarField, sigma);
 
-            //- Relaive magnetic permeability
+            //- Relative magnetic permeability
             SM_GLOBALITEM_ADD(regionVolScalarField, mur);
 
-            //- Reciprocal relative magnetic permeability
-            SM_GLOBALITEM_ADD(regionVolScalarField, rMur);
+            //- Relative magnetic reluctivity
+            SM_GLOBALITEM_ADD(regionVolScalarField, nur);
 
             //- Source vector potential
             SM_GLOBALITEM_ADD(regionVolVectorField, A0Re);
@@ -142,9 +142,9 @@ public:
 
             SM_REGIONSTORAGE_NEW();
 
-                //- TODO
-                SM_REGIONITEM_ADD(surfaceVectorField, gradAReNPhi);
-                SM_REGIONITEM_ADD(surfaceVectorField, gradAImNPhi);
+                //- TODO Flux of gradient of normal component of A
+                SM_REGIONITEM_ADD(surfaceVectorField, phiGradAnRe);
+                SM_REGIONITEM_ADD(surfaceVectorField, phiGradAnIm);
 
                 //- Harmonic field frequency
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, f0);
@@ -156,9 +156,10 @@ public:
                 SM_REGIONITEM_ADD(volVectorField, j0Re);
                 SM_REGIONITEM_ADD(volVectorField, j0Im);
 
-                //- Electric scalar potential
-                SM_REGIONITEM_ADD(volScalarField, GRe);
-                SM_REGIONITEM_ADD(volScalarField, GIm);
+// TEST
+//                 //- Gauge potential
+//                 SM_REGIONITEM_ADD(volScalarField, GRe);
+//                 SM_REGIONITEM_ADD(volScalarField, GIm);
 
             SM_REGIONSTORAGE_ADD();
 
@@ -174,9 +175,13 @@ public:
 
             SM_REGIONSTORAGE_NEW();
 
-                //- Flux of rate of change of A
-                SM_REGIONITEM_ADD(surfaceScalarField, ddtARePhi);
-                SM_REGIONITEM_ADD(surfaceScalarField, ddtAImPhi);
+                //- TODO Flux of gradient of normal component of A0
+                SM_REGIONITEM_ADD(surfaceVectorField, phiGradA0nRe);
+                SM_REGIONITEM_ADD(surfaceVectorField, phiGradA0nIm);
+
+                //- TODO Flux of rate of change of A
+                SM_REGIONITEM_ADD(surfaceScalarField, phiDdtARe);
+                SM_REGIONITEM_ADD(surfaceScalarField, phiDdtAIm);
 
                 //- Electric scalar potential
                 SM_REGIONITEM_ADD(volScalarField, VRe);

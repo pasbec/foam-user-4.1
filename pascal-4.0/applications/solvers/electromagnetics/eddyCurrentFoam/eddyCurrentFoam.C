@@ -75,7 +75,11 @@ int main(int argc, char *argv[])
 
     while(manager.once())
     {
+#       include "materialProperties.H"
+
 #       include "A0BiotSavart.H"
+
+#       include "AVInit.H"
 
 #       include "AVLoop.H"
 

@@ -1,150 +1,143 @@
 
-    // TODO: Remove interfaceLabel? Use alias of calculatedFvPatchField or special patchField
-
     // Solve V
     if (control.meshIs3D())
-    for (int VEqnI = 0; VEqnI < 2; VEqnI++)
-    {
     {
         SM_REGIONSCOPE(CONDUCTOR);
 
         volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];
 
-        label complexSign = 0;
-        volScalarField* VPtr = NULL;
-        volVectorField* VGradPtr = NULL;
-        volVectorField* APtr = NULL;
-        volVectorField* A0Ptr = NULL;
-        surfaceScalarField* ddtAPhiPtr = NULL;
-
-        if (VEqnI == 0)
+        for (int cI = 0; cI < 2; cI++)
         {
-            complexSign = -1;
-            VPtr = &storage.VRe();
-            VGradPtr = &globalStorage.VReGrad()[CONDUCTOR];
-            APtr = &globalStorage.AIm()[CONDUCTOR];
-            ddtAPhiPtr = &storage.ddtAImPhi();
+            label complexSign = 0;
+            volScalarField* VPtr = NULL;
+            volVectorField* VGradPtr = NULL;
+            volVectorField* APtr = NULL;
+            volVectorField* A0Ptr = NULL;
+            surfaceScalarField* phiDdtAPtr = NULL;
 
-            if (globalSettings.biotSavart)
+            if (cI == 0)
             {
-                A0Ptr = &globalStorage.A0Im()[CONDUCTOR];
-            }
-        }
-        else
-        {
-            complexSign = 1;
-            VPtr = &storage.VIm();
-            VGradPtr = &globalStorage.VImGrad()[CONDUCTOR];
-            APtr = &globalStorage.ARe()[CONDUCTOR];
-            ddtAPhiPtr = &storage.ddtARePhi();
+                complexSign = -1;
+                VPtr = &storage.VRe();
+                VGradPtr = &globalStorage.VReGrad()[CONDUCTOR];
+                APtr = &globalStorage.AIm()[CONDUCTOR];
+                phiDdtAPtr = &storage.phiDdtAIm();
 
-            if (globalSettings.biotSavart)
+                if (globalSettings.biotSavart)
+                {
+                    A0Ptr = &globalStorage.A0Im()[CONDUCTOR];
+                }
+            }
+            else
             {
-                A0Ptr = &globalStorage.A0Re()[CONDUCTOR];
-            }
-        }
+                complexSign = 1;
+                VPtr = &storage.VIm();
+                VGradPtr = &globalStorage.VImGrad()[CONDUCTOR];
+                APtr = &globalStorage.ARe()[CONDUCTOR];
+                phiDdtAPtr = &storage.phiDdtARe();
 
-        volScalarField& V = *VPtr;
-        volVectorField& VGrad = *VGradPtr;
-        volVectorField& A = *APtr;
-        surfaceScalarField& ddtAPhi = *ddtAPhiPtr;
+                if (globalSettings.biotSavart)
+                {
+                    A0Ptr = &globalStorage.A0Re()[CONDUCTOR];
+                }
+            }
+
+            volScalarField& V = *VPtr;
+            volVectorField& VGrad = *VGradPtr;
+            volVectorField& A = *APtr;
+            surfaceScalarField& phiDdtA = *phiDdtAPtr;
 
 // TODO: Use dedicated boundary condition?
-        // Update gradient boundary condition for V
-        {
-            label patchI = control.interfaceLabel();
-
-            if (isA<fixedGradientFvPatchScalarField>(V.boundaryField()[patchI]))
+// TODO: Remove interfaceLabel? Use dedicated boundary condition!
+            // Update gradient boundary condition for V
             {
-                fixedGradientFvPatchScalarField& VP =
-                    refCast<fixedGradientFvPatchScalarField>
-                    (
-                        V.boundaryField()[patchI]
-                    );
+                label patchI = control.interfaceLabel();
 
-                // Set correct gradient
-                VP.gradient() = -ddtAPhi.boundaryField()[patchI]/VP.patch().magSf();
+                if (isA<fixedGradientFvPatchScalarField>(V.boundaryField()[patchI]))
+                {
+                    fixedGradientFvPatchScalarField& VP =
+                        refCast<fixedGradientFvPatchScalarField>
+                        (
+                            V.boundaryField()[patchI]
+                        );
+
+                    // Set correct gradient
+                    VP.gradient() = -phiDdtA.boundaryField()[patchI]/VP.patch().magSf();
+                }
+
+                V.correctBoundaryConditions();
             }
 
-            V.correctBoundaryConditions();
-        }
+            surfaceScalarField sigmaf("sigmaf", fvc::interpolate(sigma));
 
-        surfaceScalarField sigmaf("sigmaf", fvc::interpolate(sigma));
-
-        // Read Laplacian scheme for discretising laplacian(sigmaf,V)
-        word laplacianSchemeV
-        (
-            mesh.schemesDict().laplacianScheme
+            // Read Laplacian scheme for discretising laplacian(sigmaf,V)
+            word laplacianSchemeV
             (
-                "laplacian(" + sigmaf.name() + "," + V.name() + ")"
-            )
-        );
+                mesh.schemesDict().laplacianScheme
+                (
+                    "laplacian(" + sigmaf.name() + "," + V.name() + ")"
+                )
+            );
 
-        // Prepare V-equation
-        fvScalarMatrix VEqn(fvm::laplacian(sigmaf, V));
+            // Prepare V-equation
+            fvScalarMatrix VEqn(fvm::laplacian(sigmaf, V));
 
-        if (laplacianSchemeV != "jumpGauss")
-        {
-            // Term from div(A)
-//             VEqn += complexSign * omega0 * sigma * fvc::div(A);
-
-            // NOTE: We do NOT use sigmaf here!
-            volVectorField sigmaGrad = fvc::grad(sigma);
-
-            // Explicit source term for V due to variable sigma
-            VEqn += complexSign * omega0 * (sigmaGrad & A);
-
-            if (globalSettings.biotSavart)
+            if (laplacianSchemeV != "jumpGauss")
             {
-                volVectorField& A0 = *A0Ptr;
+// TEST
+//                 // Term from div(A)
+//                 VEqn += complexSign * omega0 * sigma * fvc::div(A);
 
-                VEqn += complexSign * omega0 * (sigmaGrad & A0);
+                // NOTE: We do NOT use sigmaf here!
+                volVectorField sigmaGrad = fvc::grad(sigma);
+
+                // Explicit source term for V due to variable sigma
+                VEqn += complexSign * omega0 * (sigmaGrad & A);
+
+                if (globalSettings.biotSavart)
+                {
+                    volVectorField& A0 = *A0Ptr;
+
+                    VEqn += complexSign * omega0 * (sigmaGrad & A0);
+                }
+            }
+            else
+            {
+// TEST
+//                 // Term from div(A)
+//                 VEqn += complexSign * omega0 * sigma * fvc::div(A);
+            }
+
+            // Read solver for V
+            word solverV
+            (
+                mesh.solutionDict().solver(V.name()).lookup("solver")
+            );
+
+            // Solve V-equation
+            if(solverV != "deflatedPCG")
+            {
+// TODO Read reference values
+//                 VEqn.setReference(VRefCell, VRefValue);
+                VEqn.setReference(0, 0.0);
+            }
+
+            // Currently a deflated solver is necessary.
+            // Therefor the matrix needs to be kept singluar!
+            VEqn.solve(control.subDict(Region::CONDUCTOR, V.name()));
+
+            if (laplacianSchemeV != "jumpGauss")
+            {
+                VGrad = fvc::reconstruct(VEqn.flux()/sigmaf);
+            }
+            else
+            {
+                VGrad =
+                    fvc::reconstruct
+                    (
+                        VEqn.flux()/ownerInterpolate(sigma),
+                        VEqn.jumpFlux()/neighbourInterpolate(sigma)
+                    );
             }
         }
-        else
-        {
-//             // Term from div(A)
-//             VEqn += complexSign * omega0 * sigma * fvc::div(A);
-        }
-
-        // Read solver for V
-        word solverV
-        (
-            mesh.solutionDict().solver(V.name()).lookup("solver")
-        );
-
-        // Solve V-equation
-        if(solverV != "deflatedPCG")
-        {
-//             FatalErrorIn
-//             (
-//                 Control::typeName + " | VEqn.H :\n"
-//             )   << "Only the 'deflatedPCG' solver is currently supported for"
-//                 << " the solution of VRe/VIm."
-//                 << abort(FatalError);
-
-//             VEqn.setReference(VRefCell, VRefValue);
-            VEqn.setReference(0, 0.0);
-        }
-
-        // Currently a deflated solver is necessary.
-        // Therefor the matrix needs to be kept singluar!
-        VEqn.solve(control.subDict(Region::CONDUCTOR, V.name()));
-
-        if (laplacianSchemeV != "jumpGauss")
-        {
-            //VGrad = fvc::grad(V);
-            VGrad = fvc::reconstruct(VEqn.flux()/sigmaf);
-        }
-        else
-        {
-            //VGrad = fvc::grad(V);
-            VGrad =
-                fvc::reconstruct
-                (
-                    VEqn.flux()/ownerInterpolate(sigma),
-                    VEqn.jumpFlux()/neighbourInterpolate(sigma)
-                );
-        }
-    }
     }
