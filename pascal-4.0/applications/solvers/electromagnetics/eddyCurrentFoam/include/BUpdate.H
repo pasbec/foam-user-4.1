@@ -25,6 +25,6 @@
         }
 
         // Update boundary field of B
-        globalStorage.BRe().extrapolateBoundaryField(CONDUCTOR);
-        globalStorage.BIm().extrapolateBoundaryField(CONDUCTOR);
+        globalStorage.BRe().mapExtrapolateBoundaryInternalField(CONDUCTOR);
+        globalStorage.BIm().mapExtrapolateBoundaryInternalField(CONDUCTOR);
     }

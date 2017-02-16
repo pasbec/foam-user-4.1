@@ -788,7 +788,7 @@ template
 >
 void
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
-mapBoundaryField
+mapBoundaryBoundaryField
 (
     label regionI
 ) const
@@ -866,7 +866,7 @@ template
 >
 void
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
-interpolateBoundaryField
+mapInterpolateBoundaryInternalField
 (
     label regionI
 ) const

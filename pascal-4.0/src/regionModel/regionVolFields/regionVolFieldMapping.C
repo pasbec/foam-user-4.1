@@ -84,7 +84,7 @@ void                                                                          \
 Foam::regionGeometricField                                                    \
 <                                                                             \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::extrapolateBoundaryField                                                   \
+>::mapExtrapolateBoundaryInternalField                                        \
 (                                                                             \
     label regionI                                                             \
 ) const                                                                       \

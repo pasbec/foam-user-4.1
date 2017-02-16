@@ -276,26 +276,26 @@ public:
 
 //- TODO: Boundary field mapping where possible
 //- TODO: Parallel?
-            void mapBoundaryField(label regionI) const
+            void mapBoundaryBoundaryField(label regionI) const
             ;
 //             {
-//                 notImplemented(type() + "::mapBoundaryField()");
+//                 notImplemented(type() + "::mapBoundaryBoundaryField()");
 //             };
 
 //- TODO: Boundary field interpolation
 //- TODO: Parallel?
-            void interpolateBoundaryField(label regionI) const
+            void mapInterpolateBoundaryInternalField(label regionI) const
             ;
 //             {
-//                 notImplemented(type() + "::interpolateBoundaryField()");
+//                 notImplemented(type() + "::mapInterpolateBoundaryInternalField()");
 //             };
 
-            void extrapolateBoundaryField(label regionI) const
+            void mapExtrapolateBoundaryInternalField(label regionI) const
             {
-                notImplemented(type() + "::extrapolateBoundaryField()");
+                notImplemented(type() + "::mapExtrapolateBoundaryInternalField()");
             };
 
-        // Mapping with patch mapping where possible
+        // Mapping
 
             //- Map field from default region to all non-default regions
             void map() const
@@ -315,7 +315,6 @@ public:
             void map(label regionI) const
             {
                 mapInteralField(regionI);
-                mapBoundaryField(regionI);
             };
 
             //- Map field from default region to non-default region
@@ -370,7 +369,8 @@ public:
             void mapInterpolate(label regionI) const
             {
                 map(regionI);
-                interpolateBoundaryField(regionI);
+                mapBoundaryBoundaryField(regionI);
+                mapInterpolateBoundaryInternalField(regionI);
             };
 
             //- Map/Interpolate field from default region to non-default region
@@ -399,7 +399,8 @@ public:
             void mapExtrapolate(label regionI) const
             {
                 map(regionI);
-                extrapolateBoundaryField(regionI);
+                mapBoundaryBoundaryField(regionI);
+                mapExtrapolateBoundaryInternalField(regionI);
             };
 
             //- Map/Extrapolate field from default region to non-default region
