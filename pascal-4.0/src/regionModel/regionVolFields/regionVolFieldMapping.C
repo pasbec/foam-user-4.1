@@ -33,7 +33,7 @@ template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::mapInteralField                                                            \
+>::mapInternalField                                                           \
 (                                                                             \
     label regionI                                                             \
 ) const                                                                       \
@@ -58,7 +58,7 @@ template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::rmapInteralField                                                           \
+>::rmapInternalField                                                          \
 (                                                                             \
     label regionI                                                             \
 ) const                                                                       \
@@ -76,22 +76,6 @@ void regionGeometricField                                                     \
     {                                                                         \
         vf0[map[celli]] = vf[celli];                                          \
     }                                                                         \
-}                                                                             \
-                                                                              \
-                                                                              \
-template<>                                                                    \
-void                                                                          \
-Foam::regionGeometricField                                                    \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::mapExtrapolateBoundaryInternalField                                        \
-(                                                                             \
-    label regionI                                                             \
-) const                                                                       \
-{                                                                             \
-    GeometricFieldType& vf = operator[](regionI);                             \
-                                                                              \
-    fvc::extrapolate(vf);                                                     \
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

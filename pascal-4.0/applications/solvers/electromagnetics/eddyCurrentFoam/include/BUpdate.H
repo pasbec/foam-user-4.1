@@ -24,7 +24,7 @@
             globalStorage.BIm()[CONDUCTOR] += fvc::curl(globalStorage.A0Im()[CONDUCTOR]);
         }
 
-        // Update boundary field of B
-        globalStorage.BRe().mapExtrapolateBoundaryInternalField(CONDUCTOR);
-        globalStorage.BIm().mapExtrapolateBoundaryInternalField(CONDUCTOR);
+        // Extrapolate boundary field of B
+        fvc::extrapolate(globalStorage.BRe()[CONDUCTOR]);
+        fvc::extrapolate(globalStorage.BIm()[CONDUCTOR]);
     }

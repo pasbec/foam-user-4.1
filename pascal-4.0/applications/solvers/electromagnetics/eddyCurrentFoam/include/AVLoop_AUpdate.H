@@ -53,8 +53,8 @@
 //         globalStorage.ARe()[CONDUCTOR].storePrevIter();
 
         // Update A
-        globalStorage.ARe().mapInterpolate(CONDUCTOR);
-        globalStorage.AIm().mapInterpolate(CONDUCTOR);
+        globalStorage.ARe().map(CONDUCTOR);
+        globalStorage.AIm().map(CONDUCTOR);
 
 // TEST: Use relaxation?
 //         const scalar AReRf = globalMesh[DEFAULT].solutionDict().fieldRelaxationFactor(globalStorage.ARe()[DEFAULT].name());

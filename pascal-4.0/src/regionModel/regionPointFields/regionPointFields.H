@@ -55,7 +55,7 @@ template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh>          \
->::mapInteralField                                                            \
+>::mapInternalField                                                           \
 (                                                                             \
     label regionI                                                             \
 ) const;                                                                      \
@@ -65,7 +65,7 @@ template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, pointPatchField, pointMesh, regionGeoMesh<regionPointMesh>          \
->::rmapInteralField                                                           \
+>::rmapInternalField                                                          \
 (                                                                             \
     label regionI                                                             \
 ) const;

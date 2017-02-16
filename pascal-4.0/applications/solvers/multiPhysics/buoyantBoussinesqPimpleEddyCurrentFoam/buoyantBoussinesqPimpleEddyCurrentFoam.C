@@ -113,15 +113,18 @@ int main(int argc, char *argv[])
             buoyantBoussinesqPimpleAppManager.regions().region_DEFAULT().storage();
 
         ecs.F().rmap(Region::CONDUCTOR);
-        ecs.F().mapExtrapolate(Region::FLUID);
+        ecs.F().mapInternalField(Region::FLUID);
+        fvc::extrapolate(ecs.F()[Region::FLUID]);
 
         ecs.Q().rmap(Region::CONDUCTOR);
-        ecs.Q().mapExtrapolate(Region::THERMAL);
+        ecs.Q().mapInternalField(Region::THERMAL);
+        fvc::extrapolate(ecs.Q()[Region::THERMAL]);
 
         mms.rhoCp().rmap(Region::THERMAL);
         mms.rhoCp()[Region::FLUID] = bpDs.rhoRef() * bpDs.CpRef();
         mms.rhoCp().rmap(Region::FLUID);
-        mms.rhoCp().mapExtrapolate(Region::THERMAL);
+        mms.rhoCp().mapInternalField(Region::THERMAL);
+        fvc::extrapolate(mms.rhoCp()[Region::THERMAL]);
 
         mms.lambda().rmap(Region::THERMAL);
 // TODO: alphat (Boundary conditions)
@@ -129,7 +132,8 @@ int main(int argc, char *argv[])
                                     * ( bpDs.transport().nu()/bpDs.Pr()
                                       + bpDs.alphat() );
         mms.lambda().rmap(Region::FLUID);
-        mms.lambda().mapExtrapolate(Region::THERMAL);
+        mms.lambda().mapInternalField(Region::THERMAL);
+        fvc::extrapolate(mms.lambda()[Region::THERMAL]);
     }
 
     while (masterManager.run())
@@ -203,7 +207,8 @@ int main(int argc, char *argv[])
             }
 
             ecs.F().rmap(Region::CONDUCTOR);
-            ecs.F().mapExtrapolate(Region::FLUID);
+            ecs.F().mapInternalField(Region::FLUID);
+            fvc::extrapolate(ecs.F()[Region::FLUID]);
 
             if (Control::debug)
             {
@@ -213,7 +218,8 @@ int main(int argc, char *argv[])
             }
 
             ecs.Q().rmap(Region::CONDUCTOR);
-            ecs.Q().mapExtrapolate(Region::THERMAL);
+            ecs.Q().mapInternalField(Region::THERMAL);
+            fvc::extrapolate(ecs.Q()[Region::THERMAL]);
         }
 
         // Map/Extrapolate lambda
@@ -234,7 +240,8 @@ int main(int argc, char *argv[])
 //             mms.rhoCp().rmap(Region::THERMAL);
 //             mms.rhoCp()[Region::FLUID] = bpDs.rhoRef() * bpDs.CpRef();
 //             mms.rhoCp().rmap(Region::FLUID);
-//             mms.rhoCp().mapExtrapolate(Region::THERMAL);
+//             mms.rhoCp().mapInternalField(Region::THERMAL);
+//             fvc::extrapolate(mms.rhoCp()[Region::THERMAL]);
 
             mms.lambda().rmap(Region::THERMAL);
 // TODO: alphat (Boundary conditions)
@@ -242,7 +249,8 @@ int main(int argc, char *argv[])
                                         * ( bpDs.transport().nu()/bpDs.Pr()
                                           + bpDs.alphat() );
             mms.lambda().rmap(Region::FLUID);
-            mms.lambda().mapExtrapolate(Region::THERMAL);
+            mms.lambda().mapInternalField(Region::THERMAL);
+            fvc::extrapolate(mms.lambda()[Region::THERMAL]);
         }
 
 // TODO: Loop over U -> alphat -> T -> rhok -> p?
@@ -272,7 +280,7 @@ int main(int argc, char *argv[])
 // TODO: phi (Boundary conditions)
 //             surfaceScalarField& phi = mms.phi()[Region::THERMAL];
             mms.U().rmap(Region::FLUID);
-            mms.U().mapInteralField(Region::THERMAL);
+            mms.U().mapInternalField(Region::THERMAL);
             surfaceScalarField phi
             (
                 "phi",
@@ -316,7 +324,8 @@ int main(int argc, char *argv[])
             }
 
             mms.T().rmap(Region::THERMAL);
-            mms.T().mapExtrapolate(Region::FLUID);
+            mms.T().mapInternalField(Region::FLUID);
+            fvc::extrapolate(mms.T()[Region::FLUID]);
         }
 
         // Solve fluid flow

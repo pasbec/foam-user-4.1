@@ -95,7 +95,8 @@ int main(int argc, char *argv[])
             eddyCurrentAppManager.storage();
 
         ecs.F().rmap(Region::CONDUCTOR);
-        ecs.F().mapExtrapolate(Region::FLUID);
+        ecs.F().mapInternalField(Region::FLUID);
+        fvc::extrapolate(ecs.F()[Region::FLUID]);
     }
 
     while (masterManager.run())
@@ -259,7 +260,8 @@ int main(int argc, char *argv[])
             }
 
             ecs.F().rmap(Region::CONDUCTOR);
-            ecs.F().mapExtrapolate(Region::FLUID);
+            ecs.F().mapInternalField(Region::FLUID);
+            fvc::extrapolate(ecs.F()[Region::FLUID]);
         }
 
         // Solve fluid flow

@@ -788,7 +788,7 @@ template
 >
 void
 Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
-mapBoundaryBoundaryField
+mapBoundaryField
 (
     label regionI
 ) const
@@ -852,52 +852,12 @@ mapBoundaryBoundaryField
                     }
                 }
             }
-        }
-    }
-
-    vf.correctBoundaryConditions();
-};
-
-
-template
-<
-    class Type, template<class> class PatchField, class GeoMesh,
-    class RegionGeoMesh
->
-void
-Foam::regionGeometricField<Type, PatchField, GeoMesh, RegionGeoMesh>::
-mapInterpolateBoundaryInternalField
-(
-    label regionI
-) const
-{
-    label regionI0 = regions()[polyMesh::defaultRegion];
-
-    const GeometricFieldType& vf0 = operator[](regionI0);
-
-    GeometricFieldType& vf = operator[](regionI);
-
-    const polyBoundaryMesh& pbm0 = vf0.mesh().boundaryMesh();
-    const polyBoundaryMesh& pbm = vf.mesh().boundaryMesh();
-
-    forAll (pbm, patchI)
-    {
-        if
-        (
-            vf.boundaryField()[patchI].type()
-         == calculatedFvPatchField<Type>::typeName
-        )
-        {
-            const polyPatch& patch = pbm[patchI];
-
-            label patchI0 = pbm0.findPatchID(patch.name());
-
             // Patch is only present in regionI but NOT in
             // default region. Thus, all faces of this patch
             // correspond to interal faces of default region.
             // Interpolation is applied to get values for the
             // corresponding patch field.
-            if (patchI0 == -1)
+            else if (patchI0 == -1)
             {
                 const GeometricField<Type, fvsPatchField, surfaceMesh>
                     sf0 = fvc::interpolate(vf0);

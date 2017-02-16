@@ -33,7 +33,7 @@ template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvsPatchField, surfaceMesh, regionGeoMesh<regionFvMesh>             \
->::mapInteralField                                                            \
+>::mapInternalField                                                           \
 (                                                                             \
     label regionI                                                             \
 ) const                                                                       \
@@ -58,7 +58,7 @@ template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvsPatchField, surfaceMesh, regionGeoMesh<regionFvMesh>             \
->::rmapInteralField                                                           \
+>::rmapInternalField                                                          \
 (                                                                             \
     label regionI                                                             \
 ) const                                                                       \

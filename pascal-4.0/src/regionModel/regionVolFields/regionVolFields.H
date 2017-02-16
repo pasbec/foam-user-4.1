@@ -56,7 +56,7 @@ template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::mapInteralField                                                            \
+>::mapInternalField                                                           \
 (                                                                             \
     label regionI                                                             \
 ) const;                                                                      \
@@ -66,18 +66,7 @@ template<>                                                                    \
 void regionGeometricField                                                     \
 <                                                                             \
     Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::rmapInteralField                                                           \
-(                                                                             \
-    label regionI                                                             \
-) const;                                                                      \
-                                                                              \
-                                                                              \
-template<>                                                                    \
-void                                                                          \
-Foam::regionGeometricField                                                    \
-<                                                                             \
-    Type, fvPatchField, volMesh, regionGeoMesh<regionFvMesh>                  \
->::mapExtrapolateBoundaryInternalField                                        \
+>::rmapInternalField                                                          \
 (                                                                             \
     label regionI                                                             \
 ) const;

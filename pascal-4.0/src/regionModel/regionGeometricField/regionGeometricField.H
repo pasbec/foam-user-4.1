@@ -261,39 +261,26 @@ public:
         // Internal field data processing
 
             //- Internal field forward mapping
-            void mapInteralField(label regionI) const
+            void mapInternalField(label regionI) const
             {
-                notImplemented(type() + "::mapInteralField()");
+                notImplemented(type() + "::mapInternalField()");
             };
 
             //- Internal field reverse mapping
-            void rmapInteralField(label regionI) const
+            void rmapInternalField(label regionI) const
             {
-                notImplemented(type() + "::rmapInteralField()");
+                notImplemented(type() + "::rmapInternalField()");
             };
 
         // Boundary field data processing
 
-//- TODO: Boundary field mapping where possible
-//- TODO: Parallel?
-            void mapBoundaryBoundaryField(label regionI) const
+            //- Boundary field forward mapping
+// TODO
+            void mapBoundaryField(label regionI) const
             ;
 //             {
-//                 notImplemented(type() + "::mapBoundaryBoundaryField()");
+//                 notImplemented(type() + "::mapInternalField()");
 //             };
-
-//- TODO: Boundary field interpolation
-//- TODO: Parallel?
-            void mapInterpolateBoundaryInternalField(label regionI) const
-            ;
-//             {
-//                 notImplemented(type() + "::mapInterpolateBoundaryInternalField()");
-//             };
-
-            void mapExtrapolateBoundaryInternalField(label regionI) const
-            {
-                notImplemented(type() + "::mapExtrapolateBoundaryInternalField()");
-            };
 
         // Mapping
 
@@ -314,7 +301,8 @@ public:
             //- Map field from default region to non-default region
             void map(label regionI) const
             {
-                mapInteralField(regionI);
+                mapInternalField(regionI);
+                mapBoundaryField(regionI);
             };
 
             //- Map field from default region to non-default region
@@ -340,73 +328,13 @@ public:
             //- Map field from non-default region to default region
             void rmap(label regionI) const
             {
-                rmapInteralField(regionI);
+                rmapInternalField(regionI);
             };
 
             //- Map field from non-default region to default region
             void rmap(const word& regionName) const
             {
                 rmap(regions()[regionName]);
-            };
-
-        // Mapping with patch interpolation
-
-            //- Map/Interpolate field from default region to all non-default regions
-            void mapInterpolate() const
-            {
-                forAll(mesh().regionNames(), regionI)
-                {
-                    word regionNameI = mesh().regionName(regionI);
-
-                    if (regionNameI != polyMesh::defaultRegion)
-                    {
-                        mapInterpolate(regionI);
-                    }
-                }
-            };
-
-            //- Map/Interpolate field from default region to non-default region
-            void mapInterpolate(label regionI) const
-            {
-                map(regionI);
-                mapBoundaryBoundaryField(regionI);
-                mapInterpolateBoundaryInternalField(regionI);
-            };
-
-            //- Map/Interpolate field from default region to non-default region
-            void mapInterpolate(const word& regionName) const
-            {
-                mapInterpolate(regions()[regionName]);
-            };
-
-        // Mapping with patch extrapolation
-
-            //- Map/Extrapolate field from default region to all non-default regions
-            void mapExtrapolate() const
-            {
-                forAll(mesh().regionNames(), regionI)
-                {
-                    word regionNameI = mesh().regionName(regionI);
-
-                    if (regionNameI != polyMesh::defaultRegion)
-                    {
-                        mapExtrapolate(regionI);
-                    }
-                }
-            };
-
-            //- Map/Extrapolate field from default region to non-default region
-            void mapExtrapolate(label regionI) const
-            {
-                map(regionI);
-                mapBoundaryBoundaryField(regionI);
-                mapExtrapolateBoundaryInternalField(regionI);
-            };
-
-            //- Map/Extrapolate field from default region to non-default region
-            void mapExtrapolate(const word& regionName) const
-            {
-                mapExtrapolate(regions()[regionName]);
             };
 
     // Member Operators
