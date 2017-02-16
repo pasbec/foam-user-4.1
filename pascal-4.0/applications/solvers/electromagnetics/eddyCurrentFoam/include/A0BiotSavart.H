@@ -17,6 +17,7 @@
 //         eBiotSavart.writeVTK();
 
         // Calculate A0 at boundaries
+// TODO: This sets the internalField to 0! Needs to be fixed!
         globalStorage.A0Re()[CONDUCTOR] == eBiotSavart.A(edgeBiotSavart::REAL, true);
         globalStorage.A0Im()[CONDUCTOR] == eBiotSavart.A(edgeBiotSavart::IMAG, true);
     }
