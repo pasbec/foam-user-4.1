@@ -10,18 +10,18 @@
         volVectorField& ARe = globalStorage.ARe()[DEFAULT];
         volVectorField& AIm = globalStorage.AIm()[DEFAULT];
 
-// TEST
+// TEST:
 //         volScalarField& GRe = storage.GRe();
 //         volScalarField& GIm = storage.GIm();
 
-// TEST
+// TEST:
 //         // Get under-relaxation factor
 //         const scalar AReUrf = mesh.solutionDict().equationRelaxationFactor(ARe.name());
 //         const scalar AImUrf = mesh.solutionDict().equationRelaxationFactor(AIm.name());
 //         const scalar GReUrf = mesh.solutionDict().fieldRelaxationFactor(GRe.name());
 //         const scalar GImUrf = mesh.solutionDict().fieldRelaxationFactor(GIm.name());
 
-// TEST
+// TEST:
         {
             sigma.write();
             nur.write();
@@ -211,7 +211,7 @@
             AImCmptEqn.boundaryCoeffs() = AImEqn.boundaryCoeffs().component(cmpt);
             AImCmptEqn.source() = AImEqn.source().component(cmpt);
 
-// TEST
+// TEST:
 //             AReCmptEqn.relax(AReUrf);
 //             AImCmptEqn.relax(AImUrf);
 //
@@ -293,7 +293,7 @@
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
 
-// TEST
+// TEST:
 //         {
 //             volScalarField rAARe("rAARe", 1.0/AReEqn.A());
 //             volScalarField rAAIm("rAAIm", 1.0/AImEqn.A());
@@ -311,7 +311,7 @@
 //             AImEqn -= fvm::Sp(pow(physicalConstant::mu0 * sigma * omega0, 2) * rAARe, AIm);
 //         }
 
-// TEST
+// TEST:
 //         solve(AReEqn);
 //         solve(AImEqn);
 //         solve(AReEqn == -GReGrad);
@@ -319,7 +319,7 @@
 //         solve(relax(AReEqn, AReUrf) == -fvc::grad(GRe));
 //         solve(relax(AImEqn, AImUrf) == -fvc::grad(GIm));
 
-// // TEST
+// TEST:
 //         for (int cI = 0; cI < 2; cI++)
 //         {
 //             volVectorField* APtr = NULL;
@@ -355,7 +355,7 @@
 //             A.storePrevIter();
 //             G.storePrevIter();
 //
-// // TODO: 2D case? H-operator wrongly evaluates valid components!
+// // TEST/TODO: 2D case? H-operator wrongly evaluates valid components!
 //             A = rAA*AEqn.H();
 //
 //             surfaceScalarField phiA = fvc::interpolate(A) & mesh.Sf();
@@ -378,7 +378,7 @@
 //             A.correctBoundaryConditions();
 //         }
 
-// TEST
+// TEST:
 //         surfaceTensorField gradARef =
 //             linearInterpolate
 //             (
@@ -404,7 +404,7 @@
 //         storage.phiGradAnRe() -= (storage.phiGradAnRe() & mesh.Sf()) * mesh.Sf() / pow(mesh.magSf(), 2);
 //         storage.phiGradAnIm() -= (storage.phiGradAnIm() & mesh.Sf()) * mesh.Sf() / pow(mesh.magSf(), 2);
 
-// TEST
+// TEST:
 //         for (int cI = 0; cI < 2; cI++)
 //         {
 //             volVectorField* APtr = NULL;

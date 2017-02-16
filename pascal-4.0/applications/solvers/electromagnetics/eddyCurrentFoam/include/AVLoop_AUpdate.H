@@ -48,7 +48,7 @@
                 << endl;
         }
 
-// TODO: Use relaxation?
+// TEST: Use relaxation?
 //         globalStorage.ARe()[CONDUCTOR].storePrevIter();
 //         globalStorage.ARe()[CONDUCTOR].storePrevIter();
 
@@ -56,7 +56,7 @@
         globalStorage.ARe().mapInterpolate(CONDUCTOR);
         globalStorage.AIm().mapInterpolate(CONDUCTOR);
 
-// TODO: Use relaxation?
+// TEST: Use relaxation?
 //         const scalar AReRf = globalMesh[DEFAULT].solutionDict().fieldRelaxationFactor(globalStorage.ARe()[DEFAULT].name());
 //         const scalar AImRf = globalMesh[DEFAULT].solutionDict().fieldRelaxationFactor(globalStorage.AIm()[DEFAULT].name());
 //         globalStorage.ARe()[CONDUCTOR].relax(AReRf);
@@ -70,8 +70,7 @@
     {
         SM_REGIONSCOPE(CONDUCTOR);
 
-// TEST
-// TODO: Interpolation with nuf?
+// TEST/TODO: Interpolation with nuf?
         storage.phiDdtARe() =  omega0*(fvc::interpolate(globalStorage.ARe()[CONDUCTOR]) & mesh.Sf());
         storage.phiDdtAIm() = -omega0*(fvc::interpolate(globalStorage.AIm()[CONDUCTOR]) & mesh.Sf());
 

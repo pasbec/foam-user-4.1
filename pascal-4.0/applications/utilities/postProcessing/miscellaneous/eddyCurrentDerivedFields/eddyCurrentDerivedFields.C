@@ -67,9 +67,7 @@ int main(int argc, char *argv[])
 
     while(manager.once())
     {
-#       include "AVLoop_sigmaUpdate.H"
-#       include "AVLoop_AUpdate.H"
-#       include "AVLoop_VGradUpdate.H"
+#       include "AVInit.H"
 
 #       include "BUpdate.H"
 

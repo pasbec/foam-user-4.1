@@ -84,7 +84,7 @@
 
             if (laplacianSchemeV != "jumpGauss")
             {
-// TEST
+// TEST:
 //                 // Term from div(A)
 //                 VEqn += complexSign * omega0 * sigma * fvc::div(A);
 
@@ -103,7 +103,7 @@
             }
             else
             {
-// TEST
+// TEST:
 //                 // Term from div(A)
 //                 VEqn += complexSign * omega0 * sigma * fvc::div(A);
             }
@@ -117,7 +117,7 @@
             // Solve V-equation
             if(solverV != "deflatedPCG")
             {
-// TODO Read reference values
+// TODO: Read reference values
 //                 VEqn.setReference(VRefCell, VRefValue);
                 VEqn.setReference(0, 0.0);
             }
