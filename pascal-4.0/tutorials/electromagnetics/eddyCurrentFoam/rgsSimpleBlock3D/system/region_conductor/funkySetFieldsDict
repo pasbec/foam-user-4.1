@@ -18,6 +18,10 @@ materialProperties
 (
     "sigma_high=1.2e+6;"
     "sigma_low=1e+5;"
+//     "sigma_low=1.2e+6;"
+    "mur_high=1;"
+//     "mur_high=10;"
+    "mur_low=1;"
 );
 
 expressions
@@ -43,6 +47,30 @@ expressions
         variables     $materialProperties;
         condition     "set(cellSet_material_conductor) && pos().y>0";
         expression    "sigma_low";
+        keepPatches   true;
+    }
+
+    mur_reset
+    {
+        field         mur;
+        variables     $materialProperties;
+        expression    "1";
+        keepPatches   true;
+    }
+    mur_conductor_y_le_0
+    {
+        field         mur;
+        variables     $materialProperties;
+        condition     "set(cellSet_material_conductor) && pos().y<=0";
+        expression    "mur_high";
+        keepPatches   true;
+    }
+    mur_conductor_y_gt_0
+    {
+        field         mur;
+        variables     $materialProperties;
+        condition     "set(cellSet_material_conductor) && pos().y>0";
+        expression    "mur_low";
         keepPatches   true;
     }
 );

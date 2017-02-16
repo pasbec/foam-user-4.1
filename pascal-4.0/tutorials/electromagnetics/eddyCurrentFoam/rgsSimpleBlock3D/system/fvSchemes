@@ -23,32 +23,71 @@ gradSchemes
 {
     default                           none;
 
-    curl(ARe)                         leastSquares;
-    curl(AIm)                         leastSquares;
+//     curl(ARe)                         Gauss linear;
+//     curl(AIm)                         Gauss linear;
+//     curl(ARe)                         leastSquares;
+//     curl(AIm)                         leastSquares;
+    curl(ARe)                         Gauss fluxConservative "nur" "phiGradAnRe";
+    curl(AIm)                         Gauss fluxConservative "nur" "phiGradAnIm";
 
-    grad(ARe)                         Gauss linear;
-    grad(AIm)                         Gauss linear;
+//     grad(ARe)                         Gauss linear;
+//     grad(AIm)                         Gauss linear;
+    grad(ARe)                         Gauss fluxConservative "nur" "phiGradAnRe";
+    grad(AIm)                         Gauss fluxConservative "nur" "phiGradAnIm";
+
+//     grad(GRe)                         Gauss linear;
+//     grad(GIm)                         Gauss linear;
 }
 
 divSchemes
 {
     default                           none;
+
+//     div(ARe)                          Gauss linear;
+//     div(AIm)                          Gauss linear;
+    div(ARe)                          Gauss fluxConservative "nur" "phiGradAnRe";
+    div(AIm)                          Gauss fluxConservative "nur" "phiGradAnIm";
 }
 
 laplacianSchemes
 {
     default                           none;
 
-    laplacian(ARe)                    Gauss linear corrected;
-    laplacian(AIm)                    Gauss linear corrected;
+//     laplacian(ARe)                    Gauss linear corrected;
+//     laplacian(AIm)                    Gauss linear corrected;
+
+//     laplacian(nurf,ARe)               Gauss linear corrected;
+//     laplacian(nurf,AIm)               Gauss linear corrected;
+    laplacian(nurf,ARe)               jumpGauss harmonic corrected "nur" "phiGradAnRe";
+    laplacian(nurf,AIm)               jumpGauss harmonic corrected "nur" "phiGradAnIm";
+
+//     laplacian(rAARef,GRe)             Gauss linear corrected;
+//     laplacian(rAAImf,GIm)             Gauss linear corrected;
 }
 
 interpolationSchemes
 {
     default                           none;
 
+    interpolate(nur)                  harmonic;
+
+//     interpolate(ARe)                  linear;
+//     interpolate(AIm)                  linear;
+    interpolate(ARe)                  fluxConservative "nur" "phiGradAnRe";
+    interpolate(AIm)                  fluxConservative "nur" "phiGradAnIm";
+
     interpolate(grad(ARe))            linear;
     interpolate(grad(AIm))            linear;
+
+//     interpolate(rAARe)                linear;
+//     interpolate(rAAIm)                linear;
+//
+//     interpolate(grad(GRe))            linear;
+//     interpolate(grad(GIm))            linear;
+}
+
+fluxRequired
+{
 }
 
 // ************************************************************************* //

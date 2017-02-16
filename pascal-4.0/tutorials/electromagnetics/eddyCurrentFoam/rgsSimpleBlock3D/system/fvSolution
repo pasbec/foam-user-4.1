@@ -20,7 +20,7 @@ solvers
     {
         solver                   BiCGStab;
 
-        tolerance                1e-06;
+        tolerance                1e-05;
         relTol                   0.1;
 
         minIter                  0;
@@ -49,33 +49,86 @@ solvers
 //         tolerance       1e-08;
 //         relTol          0.1;
 //     }
+
+    "(GRe|GIm)"
+    {
+        solver                   deflatedPCG;
+
+        tolerance                1e-05;
+        relTol                   0.1;
+
+        minIter                  0;
+        maxIter                  300;
+
+        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
+                                      // GAMG, SymGaussSeidel, diagonal, none
+    }
+
+    "(ARe|AIm)"
+    {
+        solver                   PCG;
+
+        tolerance                1e-05;
+        relTol                   0;
+
+        minIter                  0;
+        maxIter                  300;
+
+        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
+                                      // GAMG, SymGaussSeidel, diagonal, none
+    }
 }
 
 EDDYCURRENT
 {
-    interface          "conductorSurface";
+    interface                   "conductorSurface";
 
-    nCorrectors        10;
-    nSubCorrectors     100;
+    nCorrectors                 2;
+    nSubCorrectors              100;
 
     residualControl
     {
         "(Ax|Ay|Az)"
         {
-            tolerance  1e-05;
-            relTol     1e-02;
+            tolerance           1e-05;
+            relTol              1e-02;
         }
 
         "(VRe|VIm)"
         {
-            tolerance  1e-05;
-            relTol     1e-02;
+            tolerance           1e-05;
+            relTol              1e-02;
         }
-     }
+    }
+
+    emUpdate
+    {
+        enabled                 yes;
+
+        outputTimeIndexCycle    10;
+        timeIndexCycle          2147483647;
+        timeCycle               1e+300;
+
+        relDeltaAmax            0.10;
+    }
 }
 
 relaxationFactors
 {
+    equations
+    {
+        ARe 0.7;
+        AIm 0.7;
+//         ARe 1;
+//         AIm 1;
+    }
+    fields
+    {
+        GRe 0.3;
+        GIm 0.3;
+//         GRe 1.0;
+//         GIm 1.0;
+    }
 }
 
 // ************************************************************************* //

@@ -9,39 +9,25 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      fvSolution;
+    class       volScalarField;
+    object      sigma;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 1;
+
+boundaryField
 {
-    "(A0Re|A0Im)"
+    conductorSurface
     {
-        solver                   PCG;
-
-        tolerance                1e-05;
-        relTol                   0;
-
-        minIter                  0;
-        maxIter                  300;
-
-        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
-                                      // GAMG, SymGaussSeidel, diagonal, none
+        type            zeroGradient;
     }
-
-    "(VRe|VIm)"
+    "procBoundary.*"
     {
-        solver                   deflatedPCG;
-
-        tolerance                1e-05;
-        relTol                   0.1;
-
-        minIter                  0;
-        maxIter                  300;
-
-        preconditioner           DIC; // AMG, Cholesky, DIC, DILU, FDIC,
-                                      // GAMG, SymGaussSeidel, diagonal, none
+        type            processor;
+        value           $internalField;
     }
 }
 

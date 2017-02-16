@@ -23,14 +23,18 @@ gradSchemes
 {
     default                           none;
 
-    curl(A0Re)                        leastSquares;
-    curl(A0Im)                        leastSquares;
+//     curl(A0Re)                        leastSquares;
+//     curl(A0Im)                        leastSquares;
+    curl(A0Re)                        Gauss linear;
+    curl(A0Im)                        Gauss linear;
 
     grad(A0Re)                        Gauss linear;
     grad(A0Im)                        Gauss linear;
 
-    grad(VRe)                         Gauss fluxConservative sigma ddtAImPhi;
-    grad(VIm)                         Gauss fluxConservative sigma ddtARePhi;
+//     grad(VRe)                         Gauss linear;
+//     grad(VIm)                         Gauss linear;
+    grad(VRe)                         Gauss fluxConservative "sigma" "phiDdtAIm";
+    grad(VIm)                         Gauss fluxConservative "sigma" "phiDdtARe";
 }
 
 divSchemes
@@ -42,11 +46,13 @@ laplacianSchemes
 {
     default                           none;
 
-    laplacian(A0Re)                   Gauss linear corrected;
-    laplacian(A0Im)                   Gauss linear corrected;
+//     laplacian(A0Re)                   Gauss linear corrected;
+//     laplacian(A0Im)                   Gauss linear corrected;
+    laplacian(nurf,A0Re)              jumpGauss harmonic corrected "nur" "phiGradA0nRe";
+    laplacian(nurf,A0Im)              jumpGauss harmonic corrected "nur" "phiGradA0nIm";
 
-    laplacian(sigmaf,VRe)             jumpGauss harmonic corrected sigma ddtAImPhi;
-    laplacian(sigmaf,VIm)             jumpGauss harmonic corrected sigma ddtARePhi;
+    laplacian(sigmaf,VRe)             jumpGauss harmonic corrected "sigma" "phiDdtAIm";
+    laplacian(sigmaf,VIm)             jumpGauss harmonic corrected "sigma" "phiDdtARe";
 
 }
 
@@ -54,19 +60,25 @@ interpolationSchemes
 {
     default                           none;
 
-    interpolate(A0Re)                 linear;
-    interpolate(A0Im)                 linear;
+    interpolate(sigma)                harmonic;
+    interpolate(nur)                  harmonic;
+
+//     interpolate(A0Re)                 linear;
+//     interpolate(A0Im)                 linear;
+    interpolate(A0Re)                 fluxConservative "nur" "phiGradA0nRe";
+    interpolate(A0Im)                 fluxConservative "nur" "phiGradA0nIm";
+
+// TODO
+    interpolate(ARe)                  linear;
+    interpolate(AIm)                  linear;
+//     interpolate(ARe)                  fluxConservative "nur" "phiGradAnRe";
+//     interpolate(AIm)                  fluxConservative "nur" "phiGradAnIm";
 
     interpolate(grad(A0Re))           linear;
     interpolate(grad(A0Im))           linear;
 
     interpolate(grad(VRe))            linear;
     interpolate(grad(VIm))            linear;
-
-    interpolate(ARe)                  linear;
-    interpolate(AIm)                  linear;
-
-    interpolate(sigma)                harmonic;
 }
 
 fluxRequired
