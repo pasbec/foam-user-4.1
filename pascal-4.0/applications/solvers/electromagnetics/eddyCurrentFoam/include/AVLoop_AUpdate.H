@@ -71,8 +71,49 @@
         SM_REGIONSCOPE(CONDUCTOR);
 
 // TEST/TODO: Interpolation with nuf?
-        storage.phiDdtARe() =  omega0*(fvc::interpolate(globalStorage.ARe()[CONDUCTOR]) & mesh.Sf());
-        storage.phiDdtAIm() = -omega0*(fvc::interpolate(globalStorage.AIm()[CONDUCTOR]) & mesh.Sf());
+// TEST/TODO: Better map phiGradAn from default region instead of re-calculation?
+        for (int cI = 0; cI < 2; cI++)
+        {
+            word  complexPart("");
+            label complexSign = 0;
+            volVectorField* APtr = NULL;
+            surfaceScalarField* phiDdtAPtr = NULL;
+
+            if (cI == 0)
+            {
+                complexPart = "Re";
+                complexSign = 1;
+                APtr = &globalStorage.ARe()[CONDUCTOR];
+                phiDdtAPtr = &storage.phiDdtARe();
+            }
+            else
+            {
+                complexPart = "Im";
+                complexSign = -1;
+                APtr = &globalStorage.AIm()[CONDUCTOR];
+                phiDdtAPtr = &storage.phiDdtAIm();
+            }
+
+            volVectorField& A = *APtr;
+            surfaceScalarField& phiDdtA = *phiDdtAPtr;
+
+            surfaceTensorField gradAf =
+                fvc::interpolate
+                (
+                    fvc::grad(linearInterpolate(A)),
+                    "interpolate(grad(" + A.name() + "))"
+                );
+
+            surfaceVectorField phiGradAn("phiGradAn" + complexPart, -gradAf & mesh.Sf());
+
+            phiGradAn += tr(gradAf) * mesh.Sf();
+
+            phiDdtA = complexSign * omega0 * (fvc::interpolate(A) & mesh.Sf());
+        }
+
+// TEST/TODO: Interpolation with nuf?
+//         storage.phiDdtARe() =  omega0*(fvc::interpolate(globalStorage.ARe()[CONDUCTOR]) & mesh.Sf());
+//         storage.phiDdtAIm() = -omega0*(fvc::interpolate(globalStorage.AIm()[CONDUCTOR]) & mesh.Sf());
 
         if (globalSettings.biotSavart)
         {
