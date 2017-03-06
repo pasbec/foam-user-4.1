@@ -181,6 +181,114 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_nur::create() const
 }
 
 
+void Foam::eddyCurrentApp::Manager::Storage::Item_j0Re::create() const
+{
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", false))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::DEFAULT],
+        IOo
+    );
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        IOo
+    );
+
+    set
+    (
+        regionVolVectorField::LinkOrNew
+        (
+            IOobject
+            (
+                IOo.name(),
+                IOo.instance(),
+                IOo.db()
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimCurrent/dimArea,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName,
+            IOoOverride
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Storage::Item_j0Im::create() const
+{
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", false))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
+    HashTable<IOobject> IOoOverride;
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::DEFAULT],
+        IOo
+    );
+
+    IOoOverride.set
+    (
+        mesh().regions()[Region::CONDUCTOR],
+        IOo
+    );
+
+    set
+    (
+        regionVolVectorField::LinkOrNew
+        (
+            IOobject
+            (
+                IOo.name(),
+                IOo.instance(),
+                IOo.db()
+            ),
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimCurrent/dimArea,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName,
+            IOoOverride
+        )
+    );
+}
+
+
 void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create() const
 {
     IOobject IOo
@@ -222,7 +330,9 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Re::create() const
                 dimVoltage*dimTime/dimLength,
                 vector::zero
             ),
+// TODO
             fixedValueFvPatchVectorField::typeName,
+//             calculatedFvPatchVectorField::typeName,
             IOoOverride
         )
     );
@@ -270,7 +380,9 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_A0Im::create() const
                 dimVoltage*dimTime/dimLength,
                 vector::zero
             ),
+// TODO
             fixedValueFvPatchVectorField::typeName,
+//             calculatedFvPatchVectorField::typeName,
             IOoOverride
         )
     );
@@ -728,6 +840,9 @@ void Foam::eddyCurrentApp::Manager::Storage::create() const
     item_sigma().enable();
     item_mur().enable();
     item_nur().enable();
+
+    item_j0Re().enable();
+    item_j0Im().enable();
 
     item_A0Re().setState(settings().biotSavart);
     item_A0Im().setState(settings().biotSavart);

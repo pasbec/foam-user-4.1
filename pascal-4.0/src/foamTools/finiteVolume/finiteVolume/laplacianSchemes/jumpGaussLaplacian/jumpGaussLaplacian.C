@@ -539,6 +539,7 @@ jumpGaussLaplacian<Type, GType>::fvmLaplacian
 }
 
 
+// TODO
 template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 jumpGaussLaplacian<Type, GType>::fvcLaplacian
@@ -562,6 +563,7 @@ jumpGaussLaplacian<Type, GType>::fvcLaplacian
 }
 
 
+// TODO
 template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 jumpGaussLaplacian<Type, GType>::fvcLaplacian
@@ -581,6 +583,34 @@ jumpGaussLaplacian<Type, GType>::fvcLaplacian
     (
         fvm.A()*vf - fvm.H()
     );
+
+//     tmp<volTypeField > tLaplacian
+//     (
+//         new volTypeField
+//         (
+//             IOobject
+//             (
+//                 "laplacian("+gammaf.name()+","+vf.name()+')',
+//                 vf.instance(),
+//                 mesh,
+//                 IOobject::NO_READ,
+//                 IOobject::NO_WRITE
+//             ),
+//             mesh,
+//             dimensioned<Type>
+//             (
+//                 word(),
+//                 gammaf.dimensions()*vf.dimensions()/dimArea,
+//                 pTraits<Type>::zero
+//             ),
+//             zeroGradientFvPatchField<Type>::typeName
+//         )
+//     );
+//
+//     tLaplacian().internalField() = fvm.residual()/mesh.V();
+//     tfvm.clear();
+//
+//     tLaplacian().correctBoundaryConditions();
 
 //     tmp<volTypeField > tLaplacian
 //     (

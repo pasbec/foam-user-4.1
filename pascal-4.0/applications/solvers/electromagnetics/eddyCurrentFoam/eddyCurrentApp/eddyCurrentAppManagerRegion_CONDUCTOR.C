@@ -33,6 +33,113 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jRe::create() const
+{
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", true))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
+    set
+    (
+        new volVectorField
+        (
+            IOo,
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimCurrent/dimArea,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create() const
+{
+    IOobject IOo
+    (
+        name(),
+        time().timeName(),
+        mesh(),
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (!dict().lookupOrDefault<bool>("write", true))
+    {
+        IOo.writeOpt() = IOobject::NO_WRITE;
+    }
+
+    set
+    (
+        new volVectorField
+        (
+            IOo,
+            mesh(),
+            dimensionedVector
+            (
+                word(),
+                dimCurrent/dimArea,
+                vector::zero
+            ),
+            calculatedFvPatchVectorField::typeName
+        )
+    );
+}
+
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_phiGradA0nRe::create() const
 {
     set
@@ -141,114 +248,6 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_phiDdtAIm::c
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create() const
-{
-    set
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh()
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create() const
-{
-    set
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh()
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jRe::create() const
-{
-    IOobject IOo
-    (
-        name(),
-        time().timeName(),
-        mesh(),
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    );
-
-    if (!dict().lookupOrDefault<bool>("write", true))
-    {
-        IOo.writeOpt() = IOobject::NO_WRITE;
-    }
-
-    set
-    (
-        new volVectorField
-        (
-            IOo,
-            mesh(),
-            dimensionedVector
-            (
-                word(),
-                dimCurrent/dimArea,
-                vector::zero
-            ),
-            calculatedFvPatchVectorField::typeName
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_jIm::create() const
-{
-    IOobject IOo
-    (
-        name(),
-        time().timeName(),
-        mesh(),
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    );
-
-    if (!dict().lookupOrDefault<bool>("write", true))
-    {
-        IOo.writeOpt() = IOobject::NO_WRITE;
-    }
-
-    set
-    (
-        new volVectorField
-        (
-            IOo,
-            mesh(),
-            dimensionedVector
-            (
-                word(),
-                dimCurrent/dimArea,
-                vector::zero
-            ),
-            calculatedFvPatchVectorField::typeName
-        )
-    );
-}
-
-
 #ifdef eddyCurrentAppLink_H
 
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emPrevC::create() const
@@ -311,17 +310,17 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_emRelDeltaA:
 
 void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::create() const
 {
-    item_phiGradA0nRe().setState(globalSettings().biotSavart);
-    item_phiGradA0nIm().setState(globalSettings().biotSavart);
-
-    item_phiDdtARe().setState(control().meshIs3D());
-    item_phiDdtAIm().setState(control().meshIs3D());
-
     item_VRe().setState(control().meshIs3D());
     item_VIm().setState(control().meshIs3D());
 
     item_jRe().enable();
     item_jIm().enable();
+
+    item_phiGradA0nRe().setState(globalSettings().biotSavart);
+    item_phiGradA0nIm().setState(globalSettings().biotSavart);
+
+    item_phiDdtARe().setState(control().meshIs3D());
+    item_phiDdtAIm().setState(control().meshIs3D());
 
 #ifdef eddyCurrentAppLink_H
 

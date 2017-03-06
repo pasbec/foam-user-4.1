@@ -105,6 +105,10 @@ public:
             //- Relative magnetic reluctivity
             SM_GLOBALITEM_ADD(regionVolScalarField, nur);
 
+            //- Source current density
+            SM_GLOBALITEM_ADD(regionVolVectorField, j0Re);
+            SM_GLOBALITEM_ADD(regionVolVectorField, j0Im);
+
             //- Source vector potential
             SM_GLOBALITEM_ADD(regionVolVectorField, A0Re);
             SM_GLOBALITEM_ADD(regionVolVectorField, A0Im);
@@ -142,19 +146,15 @@ public:
 
             SM_REGIONSTORAGE_NEW();
 
-                //- TODO Flux of gradient of normal component of A
-                SM_REGIONITEM_ADD(surfaceVectorField, phiGradAnRe);
-                SM_REGIONITEM_ADD(surfaceVectorField, phiGradAnIm);
-
                 //- Harmonic field frequency
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, f0);
 
                 //- Angular harmonic field frequency
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, omega0);
 
-                //- Source current density
-                SM_REGIONITEM_ADD(volVectorField, j0Re);
-                SM_REGIONITEM_ADD(volVectorField, j0Im);
+                //- TODO Flux of gradient of normal component of A
+                SM_REGIONITEM_ADD(surfaceVectorField, phiGradAnRe);
+                SM_REGIONITEM_ADD(surfaceVectorField, phiGradAnIm);
 
 // TEST
 //                 //- Gauge potential
@@ -175,14 +175,6 @@ public:
 
             SM_REGIONSTORAGE_NEW();
 
-                //- TODO Flux of gradient of normal component of A0
-                SM_REGIONITEM_ADD(surfaceVectorField, phiGradA0nRe);
-                SM_REGIONITEM_ADD(surfaceVectorField, phiGradA0nIm);
-
-                //- TODO Flux of rate of change of A
-                SM_REGIONITEM_ADD(surfaceScalarField, phiDdtARe);
-                SM_REGIONITEM_ADD(surfaceScalarField, phiDdtAIm);
-
                 //- Electric scalar potential
                 SM_REGIONITEM_ADD(volScalarField, VRe);
                 SM_REGIONITEM_ADD(volScalarField, VIm);
@@ -190,6 +182,14 @@ public:
                 //- Current density
                 SM_REGIONITEM_ADD(volVectorField, jRe);
                 SM_REGIONITEM_ADD(volVectorField, jIm);
+
+                //- TODO Flux of gradient of normal component of A0
+                SM_REGIONITEM_ADD(surfaceVectorField, phiGradA0nRe);
+                SM_REGIONITEM_ADD(surfaceVectorField, phiGradA0nIm);
+
+                //- TODO Flux of rate of change of A
+                SM_REGIONITEM_ADD(surfaceScalarField, phiDdtARe);
+                SM_REGIONITEM_ADD(surfaceScalarField, phiDdtAIm);
 
 #ifdef eddyCurrentAppLink_H
 

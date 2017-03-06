@@ -18,7 +18,9 @@ FoamFile
 //   cell           Cell-centre value assumed constant over cell
 //   cellPoint      Linear weighted interpolation using cell values
 //   cellPointFace  Mixed linear weighted / cell-face interpolation
+// interpolationScheme cell;
 interpolationScheme cellPoint;
+// interpolationScheme cellPointFace;
 
 // setFormat:
 //   raw      Raw ASCII data in columns

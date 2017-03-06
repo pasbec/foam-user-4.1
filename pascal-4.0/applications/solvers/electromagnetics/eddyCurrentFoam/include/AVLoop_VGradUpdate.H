@@ -3,8 +3,6 @@
     // from data in conductor region
     if (control.meshIs3D())
     {
-        SM_REGIONSCOPE(CONDUCTOR);
-
         if (Control::debug)
         {
             Info<< Control::typeName << " | VGradUpdate.H : "

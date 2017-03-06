@@ -23,16 +23,15 @@ gradSchemes
 {
     default                           none;
 
-//     curl(A0Re)                        leastSquares;
-//     curl(A0Im)                        leastSquares;
     curl(A0Re)                        Gauss linear;
     curl(A0Im)                        Gauss linear;
 
     grad(A0Re)                        Gauss linear;
     grad(A0Im)                        Gauss linear;
 
-//     grad(VRe)                         Gauss linear;
-//     grad(VIm)                         Gauss linear;
+    grad(AMRe)                        Gauss fluxConservative "chiNur" "phiGradAMnRe";
+    grad(AMIm)                        Gauss fluxConservative "chiNur" "phiGradAMnIm";
+
     grad(VRe)                         Gauss fluxConservative "sigma" "phiDdtAIm";
     grad(VIm)                         Gauss fluxConservative "sigma" "phiDdtARe";
 }
@@ -46,10 +45,11 @@ laplacianSchemes
 {
     default                           none;
 
-//     laplacian(A0Re)                   Gauss linear corrected;
-//     laplacian(A0Im)                   Gauss linear corrected;
-    laplacian(nurf,A0Re)              jumpGauss harmonic corrected "nur" "phiGradA0nRe";
-    laplacian(nurf,A0Im)              jumpGauss harmonic corrected "nur" "phiGradA0nIm";
+    laplacian(A0Re)                   Gauss linear corrected;
+    laplacian(A0Im)                   Gauss linear corrected;
+
+    laplacian(chiNurf,AMRe)           jumpGauss harmonic corrected "chiNur" "phiGradAMnRe";
+    laplacian(chiNurf,AMIm)           jumpGauss harmonic corrected "chiNur" "phiGradAMnIm";
 
     laplacian(sigmaf,VRe)             jumpGauss harmonic corrected "sigma" "phiDdtAIm";
     laplacian(sigmaf,VIm)             jumpGauss harmonic corrected "sigma" "phiDdtARe";
@@ -61,24 +61,27 @@ interpolationSchemes
     default                           none;
 
     interpolate(sigma)                harmonic;
-    interpolate(nur)                  harmonic;
 
-//     interpolate(A0Re)                 linear;
-//     interpolate(A0Im)                 linear;
-    interpolate(A0Re)                 fluxConservative "nur" "phiGradA0nRe";
-    interpolate(A0Im)                 fluxConservative "nur" "phiGradA0nIm";
-
-// TODO
-    interpolate(ARe)                  linear;
-    interpolate(AIm)                  linear;
-//     interpolate(ARe)                  fluxConservative "nur" "phiGradAnRe";
-//     interpolate(AIm)                  fluxConservative "nur" "phiGradAnIm";
+    interpolate(chiNur)               harmonic;
 
     interpolate(grad(A0Re))           linear;
     interpolate(grad(A0Im))           linear;
 
+    interpolate(grad(AMRe))           linear;
+    interpolate(grad(AMIm))           linear;
+
     interpolate(grad(VRe))            linear;
     interpolate(grad(VIm))            linear;
+
+    interpolate(A0Re)                 linear;
+    interpolate(A0Im)                 linear;
+
+    interpolate(ARe)                  fluxConservative "nur" "phiGradAnRe";
+    interpolate(AIm)                  fluxConservative "nur" "phiGradAnIm";
+
+// TEST/TODO: Better map phiGradAn from default region instead of re-calculation?
+    interpolate(grad(ARe))            linear;
+    interpolate(grad(AIm))            linear;
 }
 
 fluxRequired

@@ -1,8 +1,6 @@
 
     // Update sigma in default region
     {
-        SM_REGIONSCOPE(CONDUCTOR);
-
         if (Control::debug)
         {
             Info<< Control::typeName << " | sigmaUpdate.H : "
@@ -20,8 +18,6 @@
 
     // Update mur in default region
     {
-        SM_REGIONSCOPE(CONDUCTOR);
-
         if (Control::debug)
         {
             Info<< Control::typeName << " | murUpdate.H : "

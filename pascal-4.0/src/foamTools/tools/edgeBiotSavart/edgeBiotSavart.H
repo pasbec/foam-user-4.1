@@ -176,8 +176,17 @@ public:
             //  corresponding phase angle.
             tmp<volVectorField> A
             (
-                complexPart part = REAL,
-                bool skipInternal = false
+                complexPart part = REAL
+            ) const;
+
+            //- Calculate A based on Biot-Savart on bc and
+            //  laplacian solution for internal field.
+            //  Parameter part may be used to respect
+            //  corresponding phase angle.
+            void A
+            (
+                volVectorField& vf,
+                complexPart part = REAL
             ) const;
 
         // Magnetic field density
@@ -213,8 +222,7 @@ public:
             //  corresponding phase angle.
             tmp<volVectorField> B
             (
-                complexPart part = REAL,
-                bool skipInternal = false
+                complexPart part = REAL
             ) const;
 
         //- Write inductor/mesh data to vtk

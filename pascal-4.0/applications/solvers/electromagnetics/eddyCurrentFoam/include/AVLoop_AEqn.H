@@ -10,6 +10,9 @@
         volVectorField& ARe = globalStorage.ARe()[DEFAULT];
         volVectorField& AIm = globalStorage.AIm()[DEFAULT];
 
+        volVectorField& j0Re = globalStorage.j0Re()[DEFAULT];
+        volVectorField& j0Im = globalStorage.j0Im()[DEFAULT];
+
 // TEST:
 //         volScalarField& GRe = storage.GRe();
 //         volScalarField& GIm = storage.GIm();
@@ -28,6 +31,9 @@
 
             ARe.write();
             AIm.write();
+
+            j0Re.write();
+            j0Im.write();
 
             if (globalSettings.biotSavart)
             {
@@ -84,9 +90,7 @@
           - fvm::laplacian(nurf,AIm)
         );
 
-        // Add source current or source vector potential
-        // depending on wether Biot-Savart is used
-        if (!globalSettings.biotSavart)
+        // Add source current
         {
             if (Control::debug)
             {
@@ -95,10 +99,12 @@
                     << endl;
             }
 
-            AReEqn -= physicalConstant::mu0 * storage.j0Re();
-            AImEqn -= physicalConstant::mu0 * storage.j0Im();
+            AReEqn -= physicalConstant::mu0 * j0Re;
+            AImEqn -= physicalConstant::mu0 * j0Im;
         }
-        else
+
+        // Add source vector potential if Biot-Savart is used
+        if (globalSettings.biotSavart)
         {
             if (Control::debug)
             {

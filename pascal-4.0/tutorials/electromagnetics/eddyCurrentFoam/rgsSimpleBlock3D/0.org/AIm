@@ -22,10 +22,10 @@ boundaryField
 {
     infinity
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
-//         type            tangentialMagnetic;
-//         value           $internalField;
+//         type            fixedValue;
+//         value           uniform (0 0 0);
+        type            tangentialMagnetic;
+        value           $internalField;
     }
     "procBoundary.*"
     {

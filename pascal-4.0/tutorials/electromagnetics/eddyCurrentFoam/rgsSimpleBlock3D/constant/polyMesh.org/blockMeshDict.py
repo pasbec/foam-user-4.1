@@ -21,14 +21,20 @@ from foamTools.blockMeshDict import blockMeshDict
 geo_scale = 1e-3
 
 # Background mesh
-geo_x1 = -150.0
-geo_x2 =  150.0
+geo_x1 = -260.0
+geo_x2 =  260.0
+#geo_x1 = -520.0
+#geo_x2 =  520.0
 
-geo_y1 = -200.0
-geo_y2 =  200.0
+geo_y1 = -480.0
+geo_y2 =  480.0
+#geo_y1 = -960.0
+#geo_y2 =  960.0
 
-geo_z1 =  -60.0
-geo_z2 =  140.0
+geo_z1 = -120.0
+geo_z2 =  200.0
+#geo_z1 = -240.0
+#geo_z2 =  400.0
 
 n_scale = 0.1
 

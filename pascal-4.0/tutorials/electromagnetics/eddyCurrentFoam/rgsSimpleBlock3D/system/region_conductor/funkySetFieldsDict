@@ -17,11 +17,12 @@ FoamFile
 materialProperties
 (
     "sigma_high=1.2e+6;"
-    "sigma_low=1e+5;"
-//     "sigma_low=1.2e+6;"
+//     "sigma_low=1e+5;"
+    "sigma_low=1.2e+6;"
+//     "mur_high=1;"
     "mur_high=1;"
-//     "mur_high=10;"
-    "mur_low=1;"
+//     "mur_high=3;"
+    "mur_low=10;"
 );
 
 expressions
@@ -33,22 +34,46 @@ expressions
         expression    "0";
         keepPatches   true;
     }
-    sigma_conductor_y_le_0
+    sigma_conductor_x_le_0
     {
         field         sigma;
         variables     $materialProperties;
-        condition     "set(cellSet_material_conductor) && pos().y<=0";
+        condition     "set(cellSet_material_conductor) && pos().x<=0";
         expression    "sigma_high";
         keepPatches   true;
     }
-    sigma_conductor_y_gt_0
+    sigma_conductor_x_gt_0
     {
         field         sigma;
         variables     $materialProperties;
-        condition     "set(cellSet_material_conductor) && pos().y>0";
+        condition     "set(cellSet_material_conductor) && pos().x>0";
         expression    "sigma_low";
         keepPatches   true;
     }
+
+//     sigma_reset
+//     {
+//         field         sigma;
+//         variables     $materialProperties;
+//         expression    "0";
+//         keepPatches   true;
+//     }
+//     sigma_conductor_y_le_0
+//     {
+//         field         sigma;
+//         variables     $materialProperties;
+//         condition     "set(cellSet_material_conductor) && pos().y<=0";
+//         expression    "sigma_high";
+//         keepPatches   true;
+//     }
+//     sigma_conductor_y_gt_0
+//     {
+//         field         sigma;
+//         variables     $materialProperties;
+//         condition     "set(cellSet_material_conductor) && pos().y>0";
+//         expression    "sigma_low";
+//         keepPatches   true;
+//     }
 
     mur_reset
     {

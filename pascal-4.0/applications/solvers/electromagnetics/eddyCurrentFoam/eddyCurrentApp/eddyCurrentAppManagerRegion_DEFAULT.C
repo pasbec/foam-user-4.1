@@ -33,6 +33,45 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_f0::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                time(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    );
+}
+
+
+void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_omega0::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mathematicalConstant::twoPi*storage().f0()
+        )
+    );
+}
+
+
 void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_phiGradAnRe::create() const
 {
     set
@@ -87,99 +126,6 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_phiGradAnIm::c
 }
 
 
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_f0::create() const
-{
-    set
-    (
-        new uniformDimensionedScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().constant(),
-                time(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            )
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_omega0::create() const
-{
-    set
-    (
-        new uniformDimensionedScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().constant(),
-                time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mathematicalConstant::twoPi*storage().f0()
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Re::create() const
-{
-    set
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            mesh(),
-            dimensionedVector
-            (
-                word(),
-                dimCurrent/dimArea,
-                vector::zero
-            ),
-            calculatedFvPatchVectorField::typeName
-        )
-    );
-}
-
-
-void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create() const
-{
-    set
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            mesh(),
-            dimensionedVector
-            (
-                word(),
-                dimCurrent/dimArea,
-                vector::zero
-            ),
-            calculatedFvPatchVectorField::typeName
-        )
-    );
-}
-
-
 // TEST
 // void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_GRe::create() const
 // {
@@ -225,14 +171,11 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_j0Im::create()
 
 void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::create() const
 {
-    item_phiGradAnRe().enable();
-    item_phiGradAnIm().enable();
-
     item_f0().enable();
     item_omega0().enable();
 
-    item_j0Re().setState(!globalSettings().biotSavart);
-    item_j0Im().setState(!globalSettings().biotSavart);
+    item_phiGradAnRe().enable();
+    item_phiGradAnIm().enable();
 
 // TEST
 //     item_GRe().enable();

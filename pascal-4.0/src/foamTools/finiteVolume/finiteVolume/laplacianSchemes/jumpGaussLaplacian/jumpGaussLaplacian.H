@@ -179,6 +179,8 @@ public:
             }
 
             checkSchemes();
+
+// TODO: Check for min(gamma) > 0
         }
 
 
@@ -196,6 +198,8 @@ public:
             vfFluxConsScheme_(mesh, gamma_, jumpFluxPtr_)
         {
             checkSchemes();
+            
+// TODO: Check for min(gamma) > 0
         }
 
     // Destructor
@@ -226,6 +230,7 @@ public:
         );
 
         // -Laplacian calculation with surfaceField of gamma
+// TODO
         virtual tmp<volTypeField> fvcLaplacian
         (
             const surfaceGTypeField&,
@@ -233,6 +238,7 @@ public:
         );
 
         // -Laplacian calculation which interpolates gamma
+// TODO
         virtual tmp<volTypeField> fvcLaplacian
         (
             const volGTypeField&,

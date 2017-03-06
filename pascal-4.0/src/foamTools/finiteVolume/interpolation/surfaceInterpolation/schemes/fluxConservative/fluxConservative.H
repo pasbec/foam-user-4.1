@@ -145,6 +145,8 @@ public:
 
                 jumpFluxPtr_ = &jumpFlux;
             }
+            
+// TODO: Check for min(gamma) > 0
         }
 
 
@@ -176,6 +178,8 @@ public:
 
                 jumpFluxPtr_ = &jumpFlux;
             }
+
+// TODO: Check for min(gamma) > 0
         }
 
 

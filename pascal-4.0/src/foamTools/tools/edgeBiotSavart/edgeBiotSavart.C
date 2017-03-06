@@ -319,8 +319,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchA
 
 Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
 (
-    complexPart part,
-    bool skipInternal
+    complexPart part
 ) const
 {
     tmp<volVectorField> tA
@@ -359,12 +358,64 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::A
         }
     }
 
-    if (!skipInternal)
-    {
-        A.internalField() = internalA(part);
-    }
+    A.internalField() = internalA(part);
 
     return tA;
+}
+
+
+void Foam::edgeBiotSavart::A
+(
+    volVectorField& vf,
+    complexPart part
+) const
+{
+    tmp<volVectorField> tA
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                vf.name(),
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedVector
+            (
+                word(),
+                dimVoltage*dimTime/dimLength,
+                vector::zero
+            ),
+            fixedValueFvPatchVectorField::typeName
+        )
+    );
+
+    volVectorField& A = tA();
+
+    forAll (A.boundaryField(), patchI)
+    {
+        const fvPatchVectorField& pvf = A.boundaryField()[patchI];
+
+        if (isA<fixedValueFvPatchVectorField>(pvf))
+        {
+            A.boundaryField()[patchI] == boundaryPatchA(patchI, part);
+        }
+    }
+
+    int nCorr = readInt(this->lookup("nNonOrthogonalCorrectors"));
+
+    for (int corr=0; corr<nCorr; corr++)
+    {
+        fvVectorMatrix AEqn(fvm::laplacian(A));
+
+        AEqn.solve();
+    }
+
+    vf == tA;
 }
 
 
@@ -415,8 +466,7 @@ Foam::tmp<Foam::vectorField> Foam::edgeBiotSavart::boundaryPatchB
 
 Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::B
 (
-    complexPart part,
-    bool skipInternal
+    complexPart part
 ) const
 {
     tmp<volVectorField> tB
@@ -455,10 +505,7 @@ Foam::tmp<Foam::volVectorField> Foam::edgeBiotSavart::B
         }
     }
 
-    if (!skipInternal)
-    {
-        B.internalField() = internalB(part);
-    }
+    B.internalField() = internalB(part);
 
     return tB;
 }

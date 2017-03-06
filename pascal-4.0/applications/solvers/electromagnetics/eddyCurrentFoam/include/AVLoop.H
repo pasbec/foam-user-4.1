@@ -7,14 +7,6 @@
                 << endl;
         }
 
-// TODO: Residual controlled loop size
-        for (int corrI = 0; corrI < 20; corrI++)
-        {
-#           include "AVLoop_A0Eqn.H"
-
-#           include "AVLoop_A0Update.H"
-        }
-
         // AV loop
         while (control.loop())
         {

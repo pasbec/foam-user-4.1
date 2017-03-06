@@ -39,8 +39,6 @@
     // Update A in conductor region
     // from data in default region
     {
-        SM_REGIONSCOPE(CONDUCTOR);
-
         if (Control::debug)
         {
             Info<< Control::typeName << " | AUpdate.H : "
@@ -108,16 +106,16 @@
 
             phiGradAn += tr(gradAf) * mesh.Sf();
 
-            phiDdtA = complexSign * omega0 * (fvc::interpolate(A) & mesh.Sf());
+            phiDdtA = complexSign * omega0 * (mesh.Sf() & fvc::interpolate(A));
         }
 
 // TEST/TODO: Interpolation with nuf?
-//         storage.phiDdtARe() =  omega0*(fvc::interpolate(globalStorage.ARe()[CONDUCTOR]) & mesh.Sf());
-//         storage.phiDdtAIm() = -omega0*(fvc::interpolate(globalStorage.AIm()[CONDUCTOR]) & mesh.Sf());
+//         storage.phiDdtARe() =  omega0*(mesh.Sf() & fvc::interpolate(globalStorage.ARe()[CONDUCTOR]));
+//         storage.phiDdtAIm() = -omega0*(mesh.Sf() & fvc::interpolate(globalStorage.AIm()[CONDUCTOR]));
 
         if (globalSettings.biotSavart)
         {
-            storage.phiDdtARe() += omega0*(fvc::interpolate(globalStorage.A0Re()[CONDUCTOR]) & mesh.Sf());
-            storage.phiDdtAIm() -= omega0*(fvc::interpolate(globalStorage.A0Im()[CONDUCTOR]) & mesh.Sf());
+            storage.phiDdtARe() += omega0*(mesh.Sf() & fvc::interpolate(globalStorage.A0Re()[CONDUCTOR]));
+            storage.phiDdtAIm() -= omega0*(mesh.Sf() & fvc::interpolate(globalStorage.A0Im()[CONDUCTOR]));
         }
     }
