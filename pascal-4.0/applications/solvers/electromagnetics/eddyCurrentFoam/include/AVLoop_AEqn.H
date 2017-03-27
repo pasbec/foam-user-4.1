@@ -14,67 +14,56 @@
         volVectorField& j0Im = globalStorage.j0Im()[DEFAULT];
 
 // TEST:
-//         volScalarField& GRe = storage.GRe();
-//         volScalarField& GIm = storage.GIm();
-
-// TEST:
-//         // Get under-relaxation factor
-//         const scalar AReUrf = mesh.solutionDict().equationRelaxationFactor(ARe.name());
-//         const scalar AImUrf = mesh.solutionDict().equationRelaxationFactor(AIm.name());
-//         const scalar GReUrf = mesh.solutionDict().fieldRelaxationFactor(GRe.name());
-//         const scalar GImUrf = mesh.solutionDict().fieldRelaxationFactor(GIm.name());
-
-// TEST:
-        {
-            sigma.write();
-            nur.write();
-
-            ARe.write();
-            AIm.write();
-
-            j0Re.write();
-            j0Im.write();
-
-            if (globalSettings.biotSavart)
-            {
-                globalStorage.A0Re()[DEFAULT].write();
-                globalStorage.A0Im()[DEFAULT].write();
-            }
-
-            volScalarField AReDiv = fvc::div(ARe);
-            volScalarField AImDiv = fvc::div(AIm);
-
-            Info<< Control::typeName << " | AEqn.H : "
-                << "max(mag(AReDiv)) = " << max(mag(AReDiv)).value()
-                << endl;
-            Info<< Control::typeName << " | AEqn.H : "
-                << "max(mag(AImDiv)) = " << max(mag(AImDiv)).value()
-                << endl;
-
-            AReDiv.write();
-            AImDiv.write();
-
-            globalStorage.VReGrad()[DEFAULT].write();
-            globalStorage.VImGrad()[DEFAULT].write();
-
-            volVectorField jRe("jRe", omega0 * sigma * AIm);
-            volVectorField jIm("jIm", -omega0 * sigma * ARe);
-
-            if (globalSettings.biotSavart)
-            {
-                jRe += omega0 * sigma * globalStorage.A0Im()[DEFAULT];
-                jIm -= omega0 * sigma * globalStorage.A0Re()[DEFAULT];
-            }
-
-            if (control.meshIs3D())
-            {
-                jRe -= sigma * globalStorage.VReGrad()[DEFAULT];
-                jIm -= sigma * globalStorage.VImGrad()[DEFAULT];
-            }
-
-            jRe.write();
-            jIm.write();
-        }
+//         {
+//             sigma.write();
+//             nur.write();
+//
+//             ARe.write();
+//             AIm.write();
+//
+//             j0Re.write();
+//             j0Im.write();
+//
+//             if (globalSettings.biotSavart)
+//             {
+//                 globalStorage.A0Re()[DEFAULT].write();
+//                 globalStorage.A0Im()[DEFAULT].write();
+//             }
+//
+//             volScalarField AReDiv = fvc::div(ARe);
+//             volScalarField AImDiv = fvc::div(AIm);
+//
+//             Info<< Control::typeName << " | AEqn.H : "
+//                 << "max(mag(AReDiv)) = " << max(mag(AReDiv)).value()
+//                 << endl;
+//             Info<< Control::typeName << " | AEqn.H : "
+//                 << "max(mag(AImDiv)) = " << max(mag(AImDiv)).value()
+//                 << endl;
+//
+//             AReDiv.write();
+//             AImDiv.write();
+//
+//             globalStorage.VReGrad()[DEFAULT].write();
+//             globalStorage.VImGrad()[DEFAULT].write();
+//
+//             volVectorField jRe("jRe", omega0 * sigma * AIm);
+//             volVectorField jIm("jIm", -omega0 * sigma * ARe);
+//
+//             if (globalSettings.biotSavart)
+//             {
+//                 jRe += omega0 * sigma * globalStorage.A0Im()[DEFAULT];
+//                 jIm -= omega0 * sigma * globalStorage.A0Re()[DEFAULT];
+//             }
+//
+//             if (control.meshIs3D())
+//             {
+//                 jRe -= sigma * globalStorage.VReGrad()[DEFAULT];
+//                 jIm -= sigma * globalStorage.VImGrad()[DEFAULT];
+//             }
+//
+//             jRe.write();
+//             jIm.write();
+//         }
 
         // Interpolate relative magnetic reluctivity
         surfaceScalarField nurf("nurf", fvc::interpolate(nur));
@@ -131,6 +120,8 @@
             AReEqn += physicalConstant::mu0 * sigma * globalStorage.VReGrad()[DEFAULT];
             AImEqn += physicalConstant::mu0 * sigma * globalStorage.VImGrad()[DEFAULT];
         }
+
+// TODO: Which discretization scheme is used? If not jumpLaplacian, we need to add gradient terms!
 
         // Create list with boundary types
         wordList ARePatchTypes(mesh.boundary().size());
@@ -217,13 +208,6 @@
             AImCmptEqn.boundaryCoeffs() = AImEqn.boundaryCoeffs().component(cmpt);
             AImCmptEqn.source() = AImEqn.source().component(cmpt);
 
-// TEST:
-//             AReCmptEqn.relax(AReUrf);
-//             AImCmptEqn.relax(AImUrf);
-//
-//             AReCmptEqn += fvc::grad(GRe)().component(cmpt);
-//             AImCmptEqn += fvc::grad(GIm)().component(cmpt);
-
             // Create complex vector2 field
             volVector2Field ACmpt
             (
@@ -298,147 +282,4 @@
         // Correct boundary conditions
         ARe.correctBoundaryConditions();
         AIm.correctBoundaryConditions();
-
-// TEST:
-//         {
-//             volScalarField rAARe("rAARe", 1.0/AReEqn.A());
-//             volScalarField rAAIm("rAAIm", 1.0/AImEqn.A());
-//
-//             volVectorField HARe("HARe", AReEqn.H());
-//             volVectorField HAIm("HAIm", AImEqn.H());
-//
-//             AReEqn -= physicalConstant::mu0 * sigma * omega0 * rAAIm * HAIm;
-//             AImEqn += physicalConstant::mu0 * sigma * omega0 * rAARe * HARe;
-//
-//             AReEqn -= physicalConstant::mu0 * sigma * omega0 * rAAIm * fvc::grad(GIm);
-//             AImEqn += physicalConstant::mu0 * sigma * omega0 * rAARe * fvc::grad(GRe);
-//
-//             AReEqn -= fvm::Sp(pow(physicalConstant::mu0 * sigma * omega0, 2) * rAAIm, ARe);
-//             AImEqn -= fvm::Sp(pow(physicalConstant::mu0 * sigma * omega0, 2) * rAARe, AIm);
-//         }
-
-// TEST:
-//         solve(AReEqn);
-//         solve(AImEqn);
-//         solve(AReEqn == -GReGrad);
-//         solve(AImEqn == -GImGrad);
-//         solve(relax(AReEqn, AReUrf) == -fvc::grad(GRe));
-//         solve(relax(AImEqn, AImUrf) == -fvc::grad(GIm));
-
-// TEST:
-//         for (int cI = 0; cI < 2; cI++)
-//         {
-//             volVectorField* APtr = NULL;
-//             fvVectorMatrix* AEqnPtr = NULL;
-//             volScalarField* GPtr = NULL;
-//             scalar AUrf = 1.0;
-//             scalar GUrf = 1.0;
-//
-//             if (cI == 0)
-//             {
-//                 APtr = &ARe;
-//                 AEqnPtr = &AReEqn;
-//                 GPtr = &GRe;
-//                 AUrf = AReUrf;
-//                 GUrf = GReUrf;
-//             }
-//             else
-//             {
-//                 APtr = &AIm;
-//                 AEqnPtr = &AImEqn;
-//                 GPtr = &GIm;
-//                 AUrf = AImUrf;
-//                 GUrf = GImUrf;
-//             }
-//
-//             volVectorField& A = *APtr;
-//             fvVectorMatrix& AEqn = *AEqnPtr;
-//             volScalarField& G = *GPtr;
-//
-//             volScalarField rAA("rA" + A.name(), 1.0/AEqn.A());
-//             surfaceScalarField rAAf("rA" + A.name() + "f", fvc::interpolate(rAA));
-//
-//             A.storePrevIter();
-//             G.storePrevIter();
-//
-// // TEST/TODO: 2D case? H-operator wrongly evaluates valid components!
-//             A = rAA*AEqn.H();
-//
-//             surfaceScalarField phiA = fvc::interpolate(A) & mesh.Sf();
-//
-// //             for (int i = 0; i < 3; i++)
-//             {
-//                 fvScalarMatrix GEqn
-//                 (
-//                     min(nur) * fvm::laplacian(rAAf, G) == min(nur) * fvc::div(phiA)
-//                 );
-//
-//                 GEqn.solve();
-//             }
-//
-//             G.write();
-//
-//             G.relax(GUrf);
-//
-//             A = AUrf*(A - rAA*fvc::grad(G)) + (1 - AUrf)*A.prevIter();
-//             A.correctBoundaryConditions();
-//         }
-
-// TEST:
-//         surfaceTensorField gradARef =
-//             linearInterpolate
-//             (
-//                 fvc::reconstruct
-//                 (
-//                     AReEqn.flux()/ownerInterpolate(nur),
-//                     AReEqn.jumpFlux()/neighbourInterpolate(nur)
-//                 )
-//             );
-//         surfaceTensorField gradAImf =
-//             linearInterpolate
-//             (
-//                 fvc::reconstruct
-//                 (
-//                     AImEqn.flux()/ownerInterpolate(nur),
-//                     AImEqn.jumpFlux()/neighbourInterpolate(nur)
-//                 )
-//             );
-//
-//         storage.phiGradAnRe() = -gradARef & mesh.Sf();
-//         storage.phiGradAnIm() = -gradAImf & mesh.Sf();
-//
-//         storage.phiGradAnRe() -= (storage.phiGradAnRe() & mesh.Sf()) * mesh.Sf() / pow(mesh.magSf(), 2);
-//         storage.phiGradAnIm() -= (storage.phiGradAnIm() & mesh.Sf()) * mesh.Sf() / pow(mesh.magSf(), 2);
-
-// TEST:
-//         for (int cI = 0; cI < 2; cI++)
-//         {
-//             volVectorField* APtr = NULL;
-//             surfaceVectorField* phiGradAnPtr = NULL;
-//
-//             if (cI == 0)
-//             {
-//                 APtr = &ARe;
-//                 phiGradAnPtr = &storage.phiGradAnRe();
-//             }
-//             else
-//             {
-//                 APtr = &AIm;
-//                 phiGradAnPtr = &storage.phiGradAnIm();
-//             }
-//
-//             volVectorField& A = *APtr;
-//             surfaceVectorField& phiGradAn = *phiGradAnPtr;
-//
-//             surfaceTensorField gradAf =
-//                 fvc::interpolate
-//                 (
-//                     fvc::grad(linearInterpolate(A)),
-//                     "interpolate(grad(" + A.name() + "))"
-//                 );
-//
-//             phiGradAn = -gradAf & mesh.Sf();
-//
-//             phiGradAn += tr(gradAf) * mesh.Sf();
-//         }
     }

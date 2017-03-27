@@ -30,17 +30,17 @@ License
 
 template<class Type>
 Foam::tmp<Foam::surfaceScalarField>
-Foam::fluxConservative<Type>::secAlphaOneSided() const
+Foam::fluxConservative<Type>::cosAlphaOneSided() const
 {
     const fvMesh& mesh = this->mesh();
 
-    tmp<surfaceScalarField> tsecAlpha
+    tmp<surfaceScalarField> tcosAlpha
     (
         new surfaceScalarField
         (
             IOobject
             (
-                "secAlphaOneSided",
+                "cosAlphaOneSided",
                 mesh.time().timeName(),
                 mesh
             ),
@@ -48,8 +48,8 @@ Foam::fluxConservative<Type>::secAlphaOneSided() const
             dimensionedScalar(word(), dimless, 1.0)
         )
     );
-    surfaceScalarField& secAlpha = tsecAlpha();
-    scalarField& secAlphaIn = secAlpha.internalField();
+    surfaceScalarField& cosAlpha = tcosAlpha();
+    scalarField& cosAlphaIn = cosAlpha.internalField();
 
     // Mesh addressing
     const unallocLabelList& owner = mesh.owner();
@@ -65,7 +65,7 @@ Foam::fluxConservative<Type>::secAlphaOneSided() const
     const surfaceScalarField& magSf = mesh.magSf();
     const scalarField& magSfIn = magSf.internalField();
 
-    // Calculate internal secAlpha
+    // Calculate internal cosAlpha
     forAll (owner, faceI)
     {
         // Cell labels
@@ -77,10 +77,10 @@ Foam::fluxConservative<Type>::secAlphaOneSided() const
         vector DfInI = (CIn[nei] - CIn[own])
                      * deltaCoeffsIn[faceI];
 
-        secAlphaIn[faceI] = 1.0/(NfInI & DfInI);
+        cosAlphaIn[faceI] = NfInI & DfInI;
     }
 
-    // Calculate boundary secAlpha
+    // Calculate boundary cosAlpha
     forAll (mesh.boundary(), patchI)
     {
         const fvPatch& patch = mesh.boundary()[patchI];
@@ -93,7 +93,7 @@ Foam::fluxConservative<Type>::secAlphaOneSided() const
         const vectorField& SfPatch = Sf.boundaryField()[patchI];
         const vectorField& CPatch = C.boundaryField()[patchI];
 
-        scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
+        scalarField& cosAlphaPatch = cosAlpha.boundaryField()[patchI];
 
         forAll (patch, faceI)
         {
@@ -104,11 +104,11 @@ Foam::fluxConservative<Type>::secAlphaOneSided() const
             vector DfPatchI = (CPatch[faceI] - CIn[own])
                             * deltaCoeffsPatch[faceI];
 
-            secAlphaPatch[faceI] = 1.0/(NfPatchI & DfPatchI);
+            cosAlphaPatch[faceI] = NfPatchI & DfPatchI;
         }
     }
 
-    return tsecAlpha;
+    return tcosAlpha;
 }
 
 
@@ -253,9 +253,9 @@ Foam::fluxConservative<Type>::correction
     const surfaceScalarField& magSf = mesh.magSf();
     const scalarField& magSfIn = magSf.internalField();
 
-    // Secant factors for one-sided gradient.
-    const surfaceScalarField secAlpha = secAlphaOneSided()();
-    const scalarField& secAlphaIn = secAlpha.internalField();
+    // Cosinus factors for one-sided gradient.
+    const surfaceScalarField cosAlpha = cosAlphaOneSided()();
+    const scalarField& cosAlphaIn = cosAlpha.internalField();
 
     // Gamma
     const volScalarField& gamma = gamma_;
@@ -282,7 +282,7 @@ Foam::fluxConservative<Type>::correction
 
         scalar dByMagSf = 1.0/deltaCoeffsIn[faceI]/magSfIn[faceI];
 
-        corrIn[faceI] = secAlphaIn[faceI]
+        corrIn[faceI] = cosAlphaIn[faceI]
                       * gammaRelDiff * wPwN * dByMagSf
                       * jumpFluxIn[faceI];
     }
@@ -301,7 +301,7 @@ Foam::fluxConservative<Type>::correction
         const scalarField& deltaCoeffsPatch = deltaCoeffs.boundaryField()[patchI];
         const scalarField& magSfPatch = magSf.boundaryField()[patchI];
 
-        const scalarField& secAlphaPatch = secAlpha.boundaryField()[patchI];
+        const scalarField& cosAlphaPatch = cosAlpha.boundaryField()[patchI];
 
         const scalarField& gammaPatch = gamma.boundaryField()[patchI];
         const scalarField& gammafPatch = gammaf.boundaryField()[patchI];
@@ -318,7 +318,7 @@ Foam::fluxConservative<Type>::correction
 
             scalar dByMagSf = 1.0/deltaCoeffsPatch[faceI]/magSfPatch[faceI];
 
-            corrPatch[faceI] = secAlphaPatch[faceI]
+            corrPatch[faceI] = cosAlphaPatch[faceI]
                              * gammaRelDiff * wPwN * dByMagSf
                              * jumpFluxPatch[faceI];
         }

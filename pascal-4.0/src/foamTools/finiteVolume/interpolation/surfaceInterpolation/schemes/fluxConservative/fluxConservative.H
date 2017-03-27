@@ -145,7 +145,7 @@ public:
 
                 jumpFluxPtr_ = &jumpFlux;
             }
-            
+
 // TODO: Check for min(gamma) > 0
         }
 
@@ -205,8 +205,8 @@ public:
             return jumpFluxPtr_;
         }
 
-        //- Secant factors for one-sided gradient.
-        tmp<surfaceScalarField> secAlphaOneSided() const;
+        //- Cosinus factors for one-sided gradients
+        tmp<surfaceScalarField> cosAlphaOneSided() const;
 
         //- Return the interpolation weighting factors
         virtual tmp<surfaceScalarField> weights

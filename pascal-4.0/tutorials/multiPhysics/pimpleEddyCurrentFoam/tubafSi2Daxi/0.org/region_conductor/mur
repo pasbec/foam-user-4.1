@@ -9,14 +9,38 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       uniformDimensionedScalarField;
-    object      f;
+    class       volScalarField;
+    object      mur;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions    [0 0 -1 0 0 0 0];
-// value         1000.0;
-value         10000.0;
-// value         100000.0;
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 1;
+
+boundaryField
+{
+    axis
+    {
+        type            slip;
+    }
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
+    conductorSurface
+    {
+        type            zeroGradient;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
+    }
+}
 
 // ************************************************************************* //

@@ -88,6 +88,9 @@ private:
         typedef GeometricField<GType, fvPatchField, volMesh>
         volGTypeField;
 
+        //- Grad type
+        typedef typename outerProduct<vector, Type>::type gradType;
+
         //- Surface fields
         typedef GeometricField<Type, fvsPatchField, surfaceMesh>
         surfaceTypeField;
@@ -95,6 +98,10 @@ private:
         //- Volume fields
         typedef GeometricField<Type, fvPatchField, volMesh>
         volTypeField;
+
+        //- Volume grad fields
+        typedef GeometricField<gradType, fvPatchField, volMesh>
+        volGradTypeField;
 
     // Private data
 
@@ -198,7 +205,7 @@ public:
             vfFluxConsScheme_(mesh, gamma_, jumpFluxPtr_)
         {
             checkSchemes();
-            
+
 // TODO: Check for min(gamma) > 0
         }
 
