@@ -61,36 +61,47 @@ sketchCircle(s["outer"], par.geo_r2)
 
 cs = par.coil_scale/par.geo_scale
 
-cvi    = dict()
-cvo    = dict()
+if par.coil_setup == "RMF":
 
-cvi[0] = cs*np.array([-par.coil_path["x"] + par.coil_bundle["r"]/2.0,
-                      -par.coil_path["y"] + par.coil_bundle["r"]/2.0])
-cvi[1] = cs*np.array([ par.coil_path["x"] - par.coil_bundle["r"]/2.0,
-                      -par.coil_path["y"] + par.coil_bundle["r"]/2.0])
-cvi[2] = cs*np.array([ par.coil_path["x"] - par.coil_bundle["r"]/2.0,
-                       par.coil_path["y"] - par.coil_bundle["r"]/2.0])
-cvi[3] = cs*np.array([-par.coil_path["x"] + par.coil_bundle["r"]/2.0,
-                       par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+    cvi    = dict()
+    cvo    = dict()
 
-cvo[0] = cs*np.array([-par.coil_path["x"] - par.coil_bundle["r"]/2.0,
-                      -par.coil_path["y"] - par.coil_bundle["r"]/2.0])
-cvo[1] = cs*np.array([ par.coil_path["x"] + par.coil_bundle["r"]/2.0,
-                      -par.coil_path["y"] - par.coil_bundle["r"]/2.0])
-cvo[2] = cs*np.array([ par.coil_path["x"] + par.coil_bundle["r"]/2.0,
-                       par.coil_path["y"] + par.coil_bundle["r"]/2.0])
-cvo[3] = cs*np.array([-par.coil_path["x"] - par.coil_bundle["r"]/2.0,
-                       par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+    cvi[0] = cs*np.array([-par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                          -par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+    cvi[1] = cs*np.array([ par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                          -par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+    cvi[2] = cs*np.array([ par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                           par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+    cvi[3] = cs*np.array([-par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                           par.coil_path["y"] - par.coil_bundle["r"]/2.0])
 
-s["coil"] = makeSketch(d, "coil", orient="yz",
-                       base=(par.coils_origin[0] + par.coils_step,
-                             par.coils_origin[1], par.coils_origin[2]))
+    cvo[0] = cs*np.array([-par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                          -par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+    cvo[1] = cs*np.array([ par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                          -par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+    cvo[2] = cs*np.array([ par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                           par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+    cvo[3] = cs*np.array([-par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                           par.coil_path["y"] + par.coil_bundle["r"]/2.0])
 
-sketchPolyLine(s["coil"] , cvi.keys(), cvi,
-               fillet=(par.coil_path["r"] - par.coil_bundle["r"]/2.0))
+    s["coil"] = makeSketch(d, "coil", orient="yz",
+                           base=(par.coils_origin[0] + par.coils_step,
+                                 par.coils_origin[1], par.coils_origin[2]))
 
-sketchPolyLine(s["coil"] , cvo.keys(), cvo,
-               fillet=(par.coil_path["r"] + par.coil_bundle["r"]/2.0))
+    sketchPolyLine(s["coil"] , cvi.keys(), cvi,
+                   fillet=(par.coil_path["r"] - par.coil_bundle["r"]/2.0))
+
+    sketchPolyLine(s["coil"] , cvo.keys(), cvo,
+                   fillet=(par.coil_path["r"] + par.coil_bundle["r"]/2.0))
+
+elif par.coil_setup == "TMF":
+
+    s["coil"] = makeSketch(d, "coil", orient="xy",
+                           base=(par.coils_origin[0], par.coils_origin[1],
+                                 par.coils_origin[2]))
+
+    sketchCircle(s["coil"], cs*(par.coil_path["r"] - par.coil_bundle['r']/2.0))
+    sketchCircle(s["coil"], cs*(par.coil_path["r"] + par.coil_bundle['r']/2.0))
 
 # --------------------------------------------------------------------------- #
 
@@ -112,10 +123,20 @@ bo["all"] = makeFuseBody("all", [bo["above"], bo["below"]])
 
 bo["conductor"] = makeFuseBody("conductor", [bo["fluid"]])
 
-bo["coil"] = makeDoubleExtrudeBody("coil", s["coil"], cs*par.coil_bundle["z"])
+if par.coil_setup == "RMF":
 
-bo["coils"] = makePolarArrayBody("coils", bo["coil"], par.coils_n)
+    bo["coil"] = makeDoubleExtrudeBody("coil", s["coil"],
+                                       cs*par.coil_bundle["z"])
 
+    bo["coils"] = makePolarArrayBody("coils", bo["coil"], par.coils_n)
+
+elif par.coil_setup == "TMF":
+
+    bo["coil"] = makeDoubleExtrudeBody("coil", s["coil"],
+                                       cs*par.coil_bundle["z"])
+
+    bo["coils"] = makeOrthoArrayBody("coils", bo["coil"],
+                                     (0.0, 0.0, cs*par.coils_step), par.coils_n)
 
 # --------------------------------------------------------------------------- #
 

@@ -813,13 +813,13 @@ class inductorCoils(dict):
     # ----------------------------------------------------------------------- #
 
     def _makeCoilsArray(self, name, bundleDict, pathDict,
-                        current, n, step,
+                        current, n, step, reverse=False,
                         origin=np.zeros(3), axis=2, scale=1.0, **kwargs):
 
         for i in range(n):
 
             namei = name + str(i)
-            reversei = False
+            reversei = reverse
             currenti = current
             phasei = 0.0
 
@@ -831,13 +831,13 @@ class inductorCoils(dict):
                                    translate=translation, scale=scale)
 
     def _makeCoilsTMF(self, name, bundleDict, pathDict,
-                      current, n, step,
+                      current, n, step, reverse=False,
                       origin=np.zeros(3), axis=2, scale=1.0, **kwargs):
 
         for i in range(n):
 
             namei = name + str(i)
-            reversei = False
+            reversei = reverse
             currenti = current
             phasei = i*1.0/n * 360.0
 
@@ -849,13 +849,13 @@ class inductorCoils(dict):
                                    translate=translation, scale=scale)
 
     def _makeCoilsRMF(self, name, bundleDict, pathDict,
-                      current, n, step,
+                      current, n, step, reverse=False,
                       origin=np.zeros(3), axis=2, scale=1.0, **kwargs):
 
         for i in range(n):
 
             namei = name + str(i)
-            reversei = False
+            reversei = reverse
             currenti = current
             phasei = i*1.0/n * 360.0
 

@@ -57,25 +57,33 @@ mesh           = {"normal": mesh_normal}
 # --------------------------------------------------------------------------- #
 
 coil_scale      = 1e-3
+coil_setup      = "RMF"
 
-coil_bundle     = {"shape": "rectangle",
-                   "n":     10,
-                   "r":     45.0,
-                   "z":     60.0}
+# --------------------------------------------------------------------------- #
 
-coil_path       = {"shape": "racetrack",
-                   "n":     9,
-                   "r":     10.0 + coil_bundle["r"]/2.0,
-                   "x":     (100.0 + coil_bundle["r"])/2.0,
-                   "y":     (350.0 + coil_bundle["r"])/2.0}
+if coil_setup == "RMF":
 
-coils_n         = 6
-coils_step      = 285.0
-coils_origin    = [0.0, 0.0, geo_z2]
+    coil_scale      = 1e-3
 
-coils_current   = 432.0
-coils_nNonOrto  = 10
-coils_frequency = 50.0
+    coil_bundle     = {"shape": "rectangle",
+                    "n":     10,
+                    "r":     45.0,
+                    "z":     60.0}
+
+    coil_path       = {"shape": "racetrack",
+                    "n":     9,
+                    "r":     10.0 + coil_bundle["r"]/2.0,
+                    "x":     (100.0 + coil_bundle["r"])/2.0,
+                    "y":     (350.0 + coil_bundle["r"])/2.0}
+
+    coils_n         = 6
+    coils_step      = 285.0
+    coils_origin    = [0.0, 0.0, geo_z2]
+
+    coils_current   = 432.0
+    coils_reverse   = False
+    coils_nNonOrto  = 10
+    coils_frequency = 50.0
 
 # We need a current amplitude of
 #
@@ -91,6 +99,29 @@ coils_frequency = 50.0
 #
 # with Ta = sigma * omega * B^2 * (H/2)^4 / (2 * rho * nu^2)
 #
+
+# --------------------------------------------------------------------------- #
+
+elif coil_setup == "TMF":
+
+    coil_bundle     = {"shape": "rectangle",
+                    "n":     10,
+                    "r":     51.5,
+                    "z":     27.0}
+
+    coil_path       = {"shape": "loop",
+                    "n":     36,
+                    "r":     182.5 + coil_bundle['r']/2.0}
+
+    coils_n         = 6
+    #coils_step      = 47.6 + coil_bundle['z']
+    coils_step      = -(47.6 + coil_bundle['z'])
+    coils_origin    = [0.0, 0.0, geo_z2 - (coils_n-1)/2.0 * coils_step]
+
+    coils_current   = 32 * 22.0
+    coils_reverse   = False
+    coils_nNonOrto  = 10
+    coils_frequency = 50.0
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #

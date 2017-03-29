@@ -29,8 +29,13 @@ gradSchemes
     grad(A0Re)                        Gauss linear;
     grad(A0Im)                        Gauss linear;
 
-    grad(VRe)                         Gauss fluxConservative sigma ddtAImPhi;
-    grad(VIm)                         Gauss fluxConservative sigma ddtARePhi;
+    grad(AMRe)                        Gauss linear;
+    grad(AMIm)                        Gauss linear;
+
+    grad(VRe)                         Gauss linear;
+    grad(VIm)                         Gauss linear;
+
+    grad(sigma)                       Gauss linear;
 }
 
 divSchemes
@@ -45,8 +50,11 @@ laplacianSchemes
     laplacian(A0Re)                   Gauss linear corrected;
     laplacian(A0Im)                   Gauss linear corrected;
 
-    laplacian(sigmaf,VRe)             jumpGauss harmonic corrected sigma ddtAImPhi;
-    laplacian(sigmaf,VIm)             jumpGauss harmonic corrected sigma ddtARePhi;
+    laplacian(chiNurf,AMRe)           Gauss linear corrected;
+    laplacian(chiNurf,AMIm)           Gauss linear corrected;
+
+    laplacian(sigmaf,VRe)             Gauss linear corrected;
+    laplacian(sigmaf,VIm)             Gauss linear corrected;
 
 }
 
@@ -54,19 +62,28 @@ interpolationSchemes
 {
     default                           none;
 
-    interpolate(A0Re)                 linear;
-    interpolate(A0Im)                 linear;
+    interpolate(sigma)                harmonic;
+
+    interpolate(chiNur)               harmonic;
 
     interpolate(grad(A0Re))           linear;
     interpolate(grad(A0Im))           linear;
 
+    interpolate(grad(AMRe))           linear;
+    interpolate(grad(AMIm))           linear;
+
     interpolate(grad(VRe))            linear;
     interpolate(grad(VIm))            linear;
+
+    interpolate(A0Re)                 linear;
+    interpolate(A0Im)                 linear;
 
     interpolate(ARe)                  linear;
     interpolate(AIm)                  linear;
 
-    interpolate(sigma)                harmonic;
+// TEST/TODO: Better map phiGradAn from default region instead of re-calculation?
+    interpolate(grad(ARe))            linear;
+    interpolate(grad(AIm))            linear;
 }
 
 fluxRequired

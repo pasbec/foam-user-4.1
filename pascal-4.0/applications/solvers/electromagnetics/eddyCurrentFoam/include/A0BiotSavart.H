@@ -17,7 +17,7 @@
 // TODO: Put this into manager! and write only once
             // Construct Biot-Savart class
             edgeBiotSavart eBiotSavart(globalMesh[CONDUCTOR]);
-//             eBiotSavart.writeVTK();
+            eBiotSavart.writeVTK();
 
             // Calculate A0
             eBiotSavart.A(globalStorage.A0Re()[CONDUCTOR], edgeBiotSavart::REAL);
