@@ -57,7 +57,7 @@ mesh           = {"normal": mesh_normal}
 # --------------------------------------------------------------------------- #
 
 coil_scale      = 1e-3
-coil_setup      = "RMF"
+coil_setup      = "TMF"
 
 # --------------------------------------------------------------------------- #
 
@@ -114,8 +114,7 @@ elif coil_setup == "TMF":
                     "r":     182.5 + coil_bundle['r']/2.0}
 
     coils_n         = 6
-    #coils_step      = 47.6 + coil_bundle['z']
-    coils_step      = -(47.6 + coil_bundle['z'])
+    coils_step      = 47.6 + coil_bundle['z']
     coils_origin    = [0.0, 0.0, geo_z2 - (coils_n-1)/2.0 * coils_step]
 
     coils_current   = 32 * 22.0

@@ -35,23 +35,47 @@ from foamTools.ioInfo import objectIndent, objectHeader, objectFooter
 N = 40
 H0 = 0.03
 R0 = 0.03
-sigma = 3.2906e+06
-omega = 2.0*m.pi*50.0
-B0 = 0.421599e-3
-
 nr = 61
 nz = 61
 
+mu=4.0e-7*m.pi
+
+rho=6352.55
+sigma = 3.28891e+06
+eta=0.00218292
+nu=eta/rho
+omega = 2.0*m.pi*50.0
+B0 = 0.421599e-03
+
 print("N          : {}".format(N))
 print("H0, R0     : {}, {} m".format(H0, R0))
+
+print("nr, nz     : {},{}".format(nr, nz))
+
+print("rho        : {} kg/m^3".format(rho))
 print("sigma      : {} S/m".format(sigma))
+print("eta        : {} Pa s".format(eta))
+print("nu         : {} m^2/s".format(nu))
 print("omega      : {} 1/s".format(omega))
 print("B0         : {} T".format(B0))
-print("nr, nz     : {},{}".format(nr, nz))
 
 # --------------------------------------------------------------------------- #
 # --- Function definitions -------------------------------------------------- #
 # --------------------------------------------------------------------------- #
+
+# Shielding parameter
+def S():
+
+    return mu*sigma*omega*m.pow(R0,2)
+
+
+
+# Magnetic Taylor number
+def Ta():
+
+    return sigma*omega*m.pow(B0,2)*m.pow(R0,4)/(2.0*rho*m.pow(nu,2))
+
+
 
 # Roots of Bessel-fct
 l = spsp.jnp_zeros(1,N)
@@ -78,11 +102,15 @@ def f(r,z):
 # Lorentz-Force density
 def fl(r,z):
 
-    return 0.5*sigma*omega*B0*B0*R0*f(r/R0,z/R0)
+    return 0.5*sigma*omega*m.pow(B0,2)*R0*f(r/R0,z/R0)
 
 # --------------------------------------------------------------------------- #
 # --- Main program sequence ------------------------------------------------- #
 # --------------------------------------------------------------------------- #
+
+# Dimless parameters
+print("S          : {} ".format(S()))
+print("Ta         : {} ".format(Ta()))
 
 # Mesh and discretisation
 rl = np.linspace(0.0,R0,nr)
