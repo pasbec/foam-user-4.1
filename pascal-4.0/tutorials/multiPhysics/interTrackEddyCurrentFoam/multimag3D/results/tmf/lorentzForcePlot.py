@@ -235,12 +235,12 @@ markerE["inf"] = "."
 markerE["1"] = "x"
 markerE["2"] = "+"
 
-levels = [np.linspace(-4.00, 0.00,9),
-          np.linspace( 0.00, 0.00,1),
-          np.linspace( 0.00, 8.00,9)]
-#levels = [np.linspace(-0.30,-0.05,6),
-          #np.linspace( 0.20, 2.00,19),
-          #np.linspace(-0.40,-0.05,8)]
+levels = [np.array([-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5]),
+          np.array([0]),
+          np.array([1,2,3,4,5,6,7,8])]
+#levels = [np.linspace(-4.00, 0.00,9),
+          #np.linspace( 0.00, 0.00,1),
+          #np.linspace( 0.00, 8.00,9)]
 
 #colors = "black"
 
