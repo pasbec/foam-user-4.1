@@ -46,8 +46,4 @@ interpolationSchemes
     interpolate(aPhi) linear;
 }
 
-fluxRequired
-{
-}
-
 // ************************************************************************* //

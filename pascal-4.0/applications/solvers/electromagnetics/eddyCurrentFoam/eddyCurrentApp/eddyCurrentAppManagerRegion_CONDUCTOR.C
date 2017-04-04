@@ -50,6 +50,8 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VRe::create(
             mesh()
         )
     );
+
+    mesh().schemesDict().setFluxRequired(name());
 }
 
 
@@ -70,6 +72,8 @@ void Foam::eddyCurrentApp::Manager::Region_CONDUCTOR::Storage::Item_VIm::create(
             mesh()
         )
     );
+
+    mesh().schemesDict().setFluxRequired(name());
 }
 
 

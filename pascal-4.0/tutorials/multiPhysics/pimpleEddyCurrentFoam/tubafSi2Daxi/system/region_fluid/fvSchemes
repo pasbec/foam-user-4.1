@@ -93,9 +93,4 @@ interpolationSchemes
     interpolate(rhok)                     linear;
 }
 
-fluxRequired
-{
-    p;
-}
-
 // ************************************************************************* //

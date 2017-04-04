@@ -86,10 +86,4 @@ interpolationSchemes
     interpolate(grad(AIm))            linear;
 }
 
-fluxRequired
-{
-    VRe;
-    VIm;
-}
-
 // ************************************************************************* //

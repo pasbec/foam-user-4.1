@@ -46,9 +46,4 @@ interpolationSchemes
     default         linear;
 }
 
-fluxRequired
-{
-    p;
-}
-
 // ************************************************************************* //

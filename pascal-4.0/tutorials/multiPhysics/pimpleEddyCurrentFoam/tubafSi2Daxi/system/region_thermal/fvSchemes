@@ -55,9 +55,4 @@ interpolationSchemes
     interpolate(U)                        linear;
 }
 
-fluxRequired
-{
-    p;
-}
-
 // ************************************************************************* //

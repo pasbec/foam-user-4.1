@@ -69,10 +69,4 @@ interpolationSchemes
     interpolate(sigma)                harmonic;
 }
 
-fluxRequired
-{
-    VRe;
-    VIm;
-}
-
 // ************************************************************************* //

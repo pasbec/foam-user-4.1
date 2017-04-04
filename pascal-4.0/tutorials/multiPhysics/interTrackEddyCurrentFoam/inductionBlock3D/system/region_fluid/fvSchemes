@@ -99,9 +99,4 @@ interpolationSchemes
     interpolate(grad(cellMotionU))        linear;
 }
 
-fluxRequired
-{
-    p;
-}
-
 // ************************************************************************* //

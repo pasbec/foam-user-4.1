@@ -47,10 +47,4 @@ interpolationSchemes
     interpolate(grad(psi))  linear;
 }
 
-fluxRequired
-{
-    default                 no;
-    psi                     ;
-}
-
 // ************************************************************************* //

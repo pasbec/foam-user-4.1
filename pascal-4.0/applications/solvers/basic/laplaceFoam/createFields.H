@@ -132,3 +132,4 @@
     label psiRefCell = 0;
     scalar psiRefValue = 0.0;
     setRefCell(psi, mesh.solutionDict().subDict("SIMPLE"), psiRefCell, psiRefValue);
+    mesh.schemesDict().setFluxRequired(phi.name());

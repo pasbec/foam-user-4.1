@@ -92,9 +92,4 @@ interpolationSchemes
     interpolate(grad(omega))              linear;
 }
 
-fluxRequired
-{
-    p;
-}
-
 // ************************************************************************* //

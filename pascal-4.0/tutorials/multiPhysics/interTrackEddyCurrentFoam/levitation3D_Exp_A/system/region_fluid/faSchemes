@@ -47,9 +47,4 @@ interpolationSchemes
     interpolate(deltaH) linear;
 }
 
-fluxRequired
-{
-    default             none;
-}
-
 // ************************************************************************* //
