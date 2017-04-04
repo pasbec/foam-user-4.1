@@ -80,13 +80,9 @@ git config user.email 'pascal@becksteins.de'
 ```bash
 cd "$HOME/foam/foam-extend-4.0"
 #
+#git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-4.0'
 git remote add 'upstream' 'git://git.code.sf.net/p/foam-extend/foam-extend-4.0'
 git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-Mirror/foam-extend-foam-extend-4.0.git'
-git remote add 'sf' 'https://p-be@git.code.sf.net/u/p-be/foam-extend-4.0'
-git remote add 'hzdr' 'https://beckst30@redmine.hzdr.de/git/rgs.foam-extend-user-pascal'
-git remote add 'uts' 'ssh://beckst30@uts.fz-rossendorf.de/home/beckst30/foam'
-
-#git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-4.0'
 ```
 
 
@@ -103,8 +99,6 @@ cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
 sed -i "s/#\(export WM_THIRD_PARTY_USE_BISON_27=1\)/\1/g" 'etc/prefs.sh'
 # System qmake
 sed -i "/#export QT_BIN_DIR=\$QT_DIR\/bin/a export QT_BIN_DIR=$(dirname $(which qmake))" 'etc/prefs.sh'
-# Fix for flex (only Ubuntu 16.04)
-find src applications -name "*.L" -type f | xargs sed -i -e 's=\(YY\_FLEX\_SUBMINOR\_VERSION\)=YY_FLEX_MINOR_VERSION < 6 \&\& \1='
 cd -
 ```
 #### Source environment
