@@ -49,9 +49,7 @@ void Foam::eddyCurrentApp::Manager::Settings::read() const
         );
 
     lowFrequency = dict().lookupOrDefault("lowFrequency", false);
-
     biotSavart = dict().lookupOrDefault("biotSavart", false);
-
     lorentzForce = dict().lookupOrDefault("lorentzForce", true);
     magneticPressure = dict().lookupOrDefault("magneticPressure", true);
     jouleHeat = dict().lookupOrDefault("jouleHeat", true);
@@ -105,6 +103,20 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_sigma::create() const
             IOoOverride
         )
     );
+
+    // Make sure conductivity is not exactly zero
+    scalar minSigma = VSMALL;
+    if (min(get()()[Region::CONDUCTOR]).value() < minSigma)
+    {
+        get()()[Region::CONDUCTOR] +=
+            dimensionedScalar
+            (
+                word(),
+                dimCurrent/dimVoltage/dimLength,
+                minSigma
+            );
+        get()()[Region::CONDUCTOR].correctBoundaryConditions();
+    };
 }
 
 
