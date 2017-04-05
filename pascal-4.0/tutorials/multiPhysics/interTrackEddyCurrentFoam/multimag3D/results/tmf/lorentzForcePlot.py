@@ -162,7 +162,7 @@ for mesh in meshes[:-1]:
 
     E[set][mesh]    = [np.zeros(R[set][mesh].shape) for i in range(3)]
 
-    for i in range(3):
+    for i in [0, 2]:
 
         E[set][mesh][i] = abs(F[set][meshes[-1]][i] - F[set][mesh][i])
 
@@ -185,7 +185,7 @@ for mesh in meshes[:-1]:
 
     for norm in norms.keys():
 
-        for i in range(3):
+        for i in [0, 2]:
 
             N[set][norm][i][mesh] = norms[norm](F[set][meshes[-1]][i], E[set][mesh][i])
             Nmax[i] = max(Nmax[i], N[set][norm][i][mesh])
@@ -197,7 +197,7 @@ for mesh in meshes[:-1]:
 
     for norm in norms.keys():
 
-        for i in range(3):
+        for i in [0, 2]:
 
             N[set][norm][i][mesh] /= Nmax[i]
 
@@ -349,7 +349,7 @@ def fig(p, name):
                    levels=levels[2], linestyles="dotted")
 
         set = "EddyCurrentFoam_lowf"
-        mesh = "2.000"
+        mesh = "1.000"
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][2],
                        levels=levels[2], linestyles="solid")
         cl = ax.clabel(c, c.levels[0::2],
@@ -507,193 +507,147 @@ fig(plots, "ComparisonF")
 # --- Error plots ----------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-#def fig(p, name):
+def fig(p, name):
 
-    #p[name] = {"fig": plt.figure(), "axs": dict()}
-    #f = p[name]
+    p[name] = {"fig": plt.figure(), "axs": dict()}
+    f = p[name]
 
-    #fig = f["fig"]
-    #axs = f["axs"]
+    fig = f["fig"]
+    axs = f["axs"]
 
-    #def ax(f, axs, name):
+    def ax(f, axs, name):
 
-        #axs[name] = fig.add_subplot(111)
-        #ax = axs[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        #ax.set_xlim([1,5e-2])
-        #ax.set_ylim([5e-4,1])
+        ax.set_xlim([1,5e-2])
+        ax.set_ylim([5e-4,1])
 
-        #ax.set_xscale("log")
-        #ax.set_yscale("log")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
 
-        #ax.set_xlabel(labelAxisD)
-        #ax.set_ylabel(labelAxisE)
+        ax.set_xlabel(labelAxisD)
+        ax.set_ylabel(labelAxisE)
 
-        #d = np.linspace(1,1e-2,100)
-        #ax.plot(d, 1.8*d, label=labelE["O1"],
-                #marker=markerE["O1"], linestyle="dotted", color="black")
-        #ax.plot(d, 0.2*d**2.0, label=labelE["O2"],
-                #marker=markerE["O2"], linestyle="dashed", color="black")
+        d = np.linspace(1,1e-2,100)
+        ax.plot(d, 1.8*d, label=labelE["O1"],
+                marker=markerE["O1"], linestyle="dotted", color="black")
+        ax.plot(d, 0.2*d**2.0, label=labelE["O2"],
+                marker=markerE["O2"], linestyle="dashed", color="black")
 
-        #set = "EddyCurrentFoam"
+        set = "EddyCurrentFoam"
 
-        #d = np.array([ i for k, i in sorted(D[set].iteritems())])
-        #for norm in sorted(norms.keys()):
-            #n = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
-            #ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
+        d = np.array([ i for k, i in sorted(D[set].iteritems())])
+        for norm in sorted(norms.keys()):
+            n = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
+            ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-        #ax.legend(loc="lower left")
+        ax.legend(loc="lower left")
 
-    #ax(fig, axs, "Fr")
+    ax(fig, axs, "Fr")
 
-    #fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
-#fig(plots, "ErrorFr")
+fig(plots, "ErrorFr")
 
 
 
-#def fig(p, name):
+def fig(p, name):
 
-    #p[name] = {"fig": plt.figure(), "axs": dict()}
-    #f = p[name]
+    p[name] = {"fig": plt.figure(), "axs": dict()}
+    f = p[name]
 
-    #fig = f["fig"]
-    #axs = f["axs"]
+    fig = f["fig"]
+    axs = f["axs"]
 
-    #def ax(f, axs, name):
+    def ax(f, axs, name):
 
-        #axs[name] = fig.add_subplot(111)
-        #ax = axs[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        #ax.set_xlim([1,5e-2])
-        #ax.set_ylim([5e-4,1])
+        ax.set_xlim([1,5e-2])
+        ax.set_ylim([5e-4,1])
 
-        #ax.set_xscale("log")
-        #ax.set_yscale("log")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
 
-        #ax.set_xlabel(labelAxisD)
-        #ax.set_ylabel(labelAxisE)
+        ax.set_xlabel(labelAxisD)
+        ax.set_ylabel(labelAxisE)
 
-        #d = np.linspace(1,1e-2,100)
-        #ax.plot(d, 1.8*d, label=labelE["O1"],
-                #marker=markerE["O1"], linestyle="dotted", color="black")
-        #ax.plot(d, 0.2*d**2.0, label=labelE["O2"],
-                #marker=markerE["O2"], linestyle="dashed", color="black")
+        d = np.linspace(1,1e-2,100)
+        ax.plot(d, 1.8*d, label=labelE["O1"],
+                marker=markerE["O1"], linestyle="dotted", color="black")
+        ax.plot(d, 0.2*d**2.0, label=labelE["O2"],
+                marker=markerE["O2"], linestyle="dashed", color="black")
 
-        #set = "EddyCurrentFoam"
+        set = "EddyCurrentFoam"
 
-        #d = np.array([ i for k, i in sorted(D[set].iteritems())])
-        #for norm in sorted(norms.keys()):
-            #n = np.array([ i for k, i in sorted(N[set][norm][1].iteritems())])
-            #ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
+        d = np.array([ i for k, i in sorted(D[set].iteritems())])
+        for norm in sorted(norms.keys()):
+            n = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
+            ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-        #ax.legend(loc="lower left")
+        ax.legend(loc="lower left")
 
-    #ax(fig, axs, "Fa")
+    ax(fig, axs, "Fz")
 
-    #fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
-#fig(plots, "ErrorFa")
+fig(plots, "ErrorFz")
 
 
 
-#def fig(p, name):
+def fig(p, name):
 
-    #p[name] = {"fig": plt.figure(), "axs": dict()}
-    #f = p[name]
+    p[name] = {"fig": plt.figure(), "axs": dict()}
+    f = p[name]
 
-    #fig = f["fig"]
-    #axs = f["axs"]
+    fig = f["fig"]
+    axs = f["axs"]
 
-    #def ax(f, axs, name):
+    def ax(f, axs, name):
 
-        #axs[name] = fig.add_subplot(111)
-        #ax = axs[name]
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
 
-        #ax.set_xlim([1,5e-2])
-        #ax.set_ylim([5e-4,1])
+        ax.set_xlim([1,5e-2])
+        ax.set_ylim([5e-4,1])
 
-        #ax.set_xscale("log")
-        #ax.set_yscale("log")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
 
-        #ax.set_xlabel(labelAxisD)
-        #ax.set_ylabel(labelAxisE)
+        ax.set_xlabel(labelAxisD)
+        ax.set_ylabel(labelAxisE)
 
-        #d = np.linspace(1,1e-2,100)
-        #ax.plot(d, 1.8*d, label=labelE["O1"],
-                #marker=markerE["O1"], linestyle="dotted", color="black")
-        #ax.plot(d, 0.2*d**2.0, label=labelE["O2"],
-                #marker=markerE["O2"], linestyle="dashed", color="black")
+        d = np.linspace(1,1e-2,100)
+        ax.plot(d, 1.8*d, label=labelE["O1"],
+                marker=markerE["O1"], linestyle="dotted", color="black")
+        ax.plot(d, 0.2*d**2.0, label=labelE["O2"],
+                marker=markerE["O2"], linestyle="dashed", color="black")
 
-        #set = "EddyCurrentFoam"
+        set = "EddyCurrentFoam"
 
-        #d = np.array([ i for k, i in sorted(D[set].iteritems())])
-        #for norm in sorted(norms.keys()):
-            #n = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
-            #ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
+        d = np.array([ i for k, i in sorted(D[set].iteritems())])
+        magnMax = 0.0
+        magn = dict()
+        for norm in sorted(norms.keys()):
+            n0 = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
+            n2 = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
+            magn[norm] = (n0**2 + n2**2)**0.5
+            for m in magn[norm]:
+                magnMax = max(magnMax, m)
 
-        #ax.legend(loc="lower left")
+        for norm in sorted(norms.keys()):
+            n = magn[norm]/magnMax
+            ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
 
-    #ax(fig, axs, "Fz")
+        ax.legend(loc="lower left")
 
-    #fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
+    ax(fig, axs, "F")
 
-#fig(plots, "ErrorFz")
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
-
-
-#def fig(p, name):
-
-    #p[name] = {"fig": plt.figure(), "axs": dict()}
-    #f = p[name]
-
-    #fig = f["fig"]
-    #axs = f["axs"]
-
-    #def ax(f, axs, name):
-
-        #axs[name] = fig.add_subplot(111)
-        #ax = axs[name]
-
-        #ax.set_xlim([1,5e-2])
-        #ax.set_ylim([5e-4,1])
-
-        #ax.set_xscale("log")
-        #ax.set_yscale("log")
-
-        #ax.set_xlabel(labelAxisD)
-        #ax.set_ylabel(labelAxisE)
-
-        #d = np.linspace(1,1e-2,100)
-        #ax.plot(d, 1.8*d, label=labelE["O1"],
-                #marker=markerE["O1"], linestyle="dotted", color="black")
-        #ax.plot(d, 0.2*d**2.0, label=labelE["O2"],
-                #marker=markerE["O2"], linestyle="dashed", color="black")
-
-        #set = "EddyCurrentFoam"
-
-        #d = np.array([ i for k, i in sorted(D[set].iteritems())])
-        #magnMax = 0.0
-        #magn = dict()
-        #for norm in sorted(norms.keys()):
-            #n0 = np.array([ i for k, i in sorted(N[set][norm][0].iteritems())])
-            #n1 = np.array([ i for k, i in sorted(N[set][norm][1].iteritems())])
-            #n2 = np.array([ i for k, i in sorted(N[set][norm][2].iteritems())])
-            #magn[norm] = (n0**2 + n1**2 + n2**2)**0.5
-            #for m in magn[norm]:
-                #magnMax = max(magnMax, m)
-
-        #for norm in sorted(norms.keys()):
-            #n = magn[norm]/magnMax
-            #ax.plot(d, n, label=labelE[norm], marker=markerE[norm])
-
-        #ax.legend(loc="lower left")
-
-    #ax(fig, axs, "F")
-
-    #fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
-
-#fig(plots, "ErrorF")
+fig(plots, "ErrorF")
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

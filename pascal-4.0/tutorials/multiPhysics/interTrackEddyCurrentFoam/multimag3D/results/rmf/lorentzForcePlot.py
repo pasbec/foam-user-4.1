@@ -434,7 +434,7 @@ def fig(p, name):
                    levels=levels[1], linestyles="dotted")
 
         set = "EddyCurrentFoam_lowf"
-        mesh = "2.000"
+        mesh = "1.000"
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][1],
                        levels=levels[1], linestyles="solid")
         cl = ax.clabel(c, c.levels[0::2],
