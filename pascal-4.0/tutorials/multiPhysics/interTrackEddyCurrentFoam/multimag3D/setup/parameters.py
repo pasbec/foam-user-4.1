@@ -66,15 +66,15 @@ if coil_setup == "RMF":
     coil_scale      = 1e-3
 
     coil_bundle     = {"shape": "rectangle",
-                    "n":     10,
-                    "r":     45.0,
-                    "z":     60.0}
+                       "n":     10,
+                       "r":     45.0,
+                       "z":     60.0}
 
     coil_path       = {"shape": "racetrack",
-                    "n":     9,
-                    "r":     10.0 + coil_bundle["r"]/2.0,
-                    "x":     (100.0 + coil_bundle["r"])/2.0,
-                    "y":     (350.0 + coil_bundle["r"])/2.0}
+                       "n":     9,
+                       "r":     10.0 + coil_bundle["r"]/2.0,
+                       "x":     (100.0 + coil_bundle["r"])/2.0,
+                       "y":     (350.0 + coil_bundle["r"])/2.0}
 
     coils_n         = 6
     coils_period    = 6
@@ -107,13 +107,13 @@ elif coil_setup == "TMF":
 
     #coil_bundle     = {"shape": "rectangle",
     coil_bundle     = {"shape": "point",
-                    "n":     10,
-                    "r":     51.5,
-                    "z":     27.0}
+                       "n":     10,
+                       "r":     51.5,
+                       "z":     27.0}
 
     coil_path       = {"shape": "loop",
-                    "n":     36,
-                    "r":     182.5 + coil_bundle['r']/2.0}
+                       "n":     36,
+                       "r":     182.5 + coil_bundle['r']/2.0}
 
     coils_n         = 6
     coils_period    = 6
