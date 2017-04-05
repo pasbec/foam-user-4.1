@@ -832,14 +832,14 @@ class inductorCoils(dict):
 
     def _makeCoilsTMF(self, name, bundleDict, pathDict,
                       current, n, step, reverse=False,
-                      origin=np.zeros(3), axis=2, scale=1.0, **kwargs):
+                      origin=np.zeros(3), axis=2, scale=1.0, period=6, **kwargs):
 
         for i in range(n):
 
             namei = name + str(i)
             reversei = reverse
             currenti = current
-            phasei = i*1.0/n * 360.0
+            phasei = i*1.0/period * 360.0
 
             translation = np.array(origin).copy()
             translation[axis] += i*step

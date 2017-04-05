@@ -452,6 +452,9 @@ fig(plots, "LowFrequencyFa")
 # --- Contour plots --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
+Opera3D_ref = "fine"
+EddyCurrentFoam_ref = "1.000"
+
 def fig(p, name):
 
     p[name] = {"fig": plt.figure(), "axs": dict()}
@@ -474,12 +477,12 @@ def fig(p, name):
         ax.set_aspect("equal")
 
         set = "Opera3D"
-        mesh = "fine"
+        mesh = Opera3D_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][0],
                        levels=levels[0], linestyles="dashed")
 
         set = "EddyCurrentFoam"
-        mesh = "1.000"
+        mesh = EddyCurrentFoam_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][0],
                        levels=levels[0], linestyles="solid")
         cl = ax.clabel(c, c.levels[0::2],
@@ -521,12 +524,12 @@ def fig(p, name):
                    levels=levels[1], linestyles="dotted")
 
         set = "Opera3D"
-        mesh = "fine"
+        mesh = Opera3D_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][1],
                        levels=levels[1], linestyles="dashed")
 
         set = "EddyCurrentFoam"
-        mesh = "1.000"
+        mesh = EddyCurrentFoam_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][1],
                        levels=levels[1], linestyles="solid")
         cl = ax.clabel(c, c.levels[0::2],
@@ -564,12 +567,12 @@ def fig(p, name):
         ax.set_aspect("equal")
 
         set = "Opera3D"
-        mesh = "fine"
+        mesh = Opera3D_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][2],
                        levels=levels[2], linestyles="dashed")
 
         set = "EddyCurrentFoam"
-        mesh = "1.000"
+        mesh = EddyCurrentFoam_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][2],
                        levels=levels[2], linestyles="solid")
         cl = ax.clabel(c, c.levels[0::2],
@@ -607,13 +610,13 @@ def fig(p, name):
         ax.set_aspect("equal")
 
         set = "Opera3D"
-        mesh = "fine"
+        mesh = Opera3D_ref
         magF = (F[set][mesh][0]**2 + F[set][mesh][1]**2 + F[set][mesh][2]**2)**0.5
         c = ax.contour(R[set][mesh], Z[set][mesh], magF,
                        levels=levels[1], linestyles="dashed")
 
         set = "EddyCurrentFoam"
-        mesh = "1.000"
+        mesh = EddyCurrentFoam_ref
         magF = (F[set][mesh][0]**2 + F[set][mesh][1]**2 + F[set][mesh][2]**2)**0.5
         c = ax.contour(R[set][mesh], Z[set][mesh], magF,
                        levels=levels[1], linestyles="solid")

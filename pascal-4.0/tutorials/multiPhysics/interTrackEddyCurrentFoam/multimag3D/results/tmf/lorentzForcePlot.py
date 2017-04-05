@@ -105,8 +105,7 @@ E[set] = dict()
 D[set] = dict()
 N[set] = dict()
 
-#meshes = ["coarse", "fine"]
-meshes = ["fine"]
+meshes = ["coarse", "fine"]
 
 # Read data
 for mesh in meshes:
@@ -136,8 +135,7 @@ E[set] = dict()
 D[set] = dict()
 N[set] = dict()
 
-#meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000", "1.500", "2.000", "2.500"]
-meshes = ["1.000"]
+meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000", "1.500", "2.000", "2.500"]
 
 # Read data
 for mesh in meshes:
@@ -202,6 +200,44 @@ for mesh in meshes[:-1]:
         for i in range(3):
 
             N[set][norm][i][mesh] /= Nmax[i]
+
+# --------------------------------------------------------------------------- #
+
+set = "EddyCurrentFoam_lowf"
+
+# Init dictionaries as we are using meshes
+data[set] = dict()
+
+R[set] = dict()
+Z[set] = dict()
+
+F[set] = dict()
+
+E[set] = dict()
+D[set] = dict()
+N[set] = dict()
+
+meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000", "1.500", "2.000"]
+
+# Read data
+for mesh in meshes:
+
+    data[set][mesh] = np.genfromtxt(__dir__+"/"+baseName+set+"_"+mesh+".dat", comments="#")
+
+    R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
+    Z[set][mesh]    = data[set][mesh][:,2].reshape(nr,nz)
+
+    F[set][mesh]    = [np.zeros(R[set][mesh].shape) for i in range(3)]
+    F[set][mesh][0] = data[set][mesh][:,3].reshape(nr,nz)
+    F[set][mesh][1] = data[set][mesh][:,4].reshape(nr,nz)
+    F[set][mesh][2] = data[set][mesh][:,5].reshape(nr,nz)
+
+    # Scale to mm
+    R[set][mesh]    = 1000.0 * (R[set][mesh])
+    Z[set][mesh]    = 1000.0 * (Z[set][mesh] - 0.03)
+
+    # Flip y-axis
+    F[set][mesh][1] = -F[set][mesh][1]
 
 # --------------------------------------------------------------------------- #
 # --- Plot settings --------------------------------------------------------- #
@@ -277,7 +313,7 @@ def fig(p, name):
         cl = ax.clabel(c, c.levels[0::2],
                        inline=True, fmt="%g", fontsize=fontsize)
 
-    ax(fig, axs, "Fa")
+    ax(fig, axs, "Fz")
 
     fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
@@ -285,50 +321,6 @@ fig(plots, "Analytical")
 
 # --------------------------------------------------------------------------- #
 # --- Low frequency approximation ------------------------------------------- #
-# --------------------------------------------------------------------------- #
-
-#def fig(p, name):
-
-    #p[name] = {"fig": plt.figure(), "axs": dict()}
-    #f = p[name]
-
-    #fig = f["fig"]
-    #axs = f["axs"]
-
-    #def ax(f, axs, name):
-
-        #axs[name] = fig.add_subplot(111)
-        #ax = axs[name]
-
-        #ax.set_xlim([0,30])
-        #ax.set_ylim([0,30])
-
-        #ax.set_xlabel(labelAxisR)
-        #ax.set_ylabel(labelAxisZ)
-
-        #ax.set_aspect("equal")
-
-        #set = "Analytical"
-        #ax.contour(R[set], Z[set], F[set][1],
-                   #levels=levels[1], linestyles="dotted")
-
-        #set = "EddyCurrentFoam_lowf"
-        #mesh = "2.000"
-        #c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][1],
-                       #levels=levels[1], linestyles="solid")
-        #cl = ax.clabel(c, c.levels[0::2],
-                       #inline=True, fmt="%g", fontsize=fontsize)
-
-        #[l.set_bbox(dict(facecolor="white", edgecolor="none", pad=2)) for l in cl]
-
-    #ax(fig, axs, "Fa")
-
-    #fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
-
-#fig(plots, "LowFrequencyFa")
-
-# --------------------------------------------------------------------------- #
-# --- Contour plots --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 def fig(p, name):
@@ -352,13 +344,60 @@ def fig(p, name):
 
         ax.set_aspect("equal")
 
+        set = "Analytical"
+        ax.contour(R[set], Z[set], F[set][2],
+                   levels=levels[2], linestyles="dotted")
+
+        set = "EddyCurrentFoam_lowf"
+        mesh = "2.000"
+        c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][2],
+                       levels=levels[2], linestyles="solid")
+        cl = ax.clabel(c, c.levels[0::2],
+                       inline=True, fmt="%g", fontsize=fontsize)
+
+        [l.set_bbox(dict(facecolor="white", edgecolor="none", pad=2)) for l in cl]
+
+    ax(fig, axs, "Fz")
+
+    fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
+
+fig(plots, "LowFrequencyFz")
+
+# --------------------------------------------------------------------------- #
+# --- Contour plots --------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+Opera3D_ref = "fine"
+EddyCurrentFoam_ref = "1.000"
+
+def fig(p, name):
+
+    p[name] = {"fig": plt.figure(), "axs": dict()}
+    f = p[name]
+
+    fig = f["fig"]
+    axs = f["axs"]
+
+    def ax(f, axs, name):
+
+        axs[name] = fig.add_subplot(111)
+        ax = axs[name]
+
+        ax.set_xlim([0,30])
+        ax.set_ylim([-30,30])
+
+        ax.set_xlabel(labelAxisR)
+        ax.set_ylabel(labelAxisZ)
+
+        ax.set_aspect("equal")
+
         set = "Opera3D"
-        mesh = "fine"
+        mesh = Opera3D_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][0],
                        levels=levels[0], linestyles="dashed")
 
         set = "EddyCurrentFoam"
-        mesh = "1.000"
+        mesh = EddyCurrentFoam_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][0],
                        levels=levels[0], linestyles="solid")
         cl = ax.clabel(c, c.levels[0::2],
@@ -400,12 +439,12 @@ def fig(p, name):
                    levels=levels[2], linestyles="dotted")
 
         set = "Opera3D"
-        mesh = "fine"
+        mesh = Opera3D_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][2],
                        levels=levels[2], linestyles="dashed")
 
         set = "EddyCurrentFoam"
-        mesh = "1.000"
+        mesh = EddyCurrentFoam_ref
         c = ax.contour(R[set][mesh], Z[set][mesh], F[set][mesh][2],
                        levels=levels[2], linestyles="solid")
         cl = ax.clabel(c, c.levels[0::2],
@@ -443,13 +482,13 @@ def fig(p, name):
         ax.set_aspect("equal")
 
         set = "Opera3D"
-        mesh = "fine"
+        mesh = Opera3D_ref
         magF = (F[set][mesh][0]**2 + F[set][mesh][1]**2 + F[set][mesh][2]**2)**0.5
         c = ax.contour(R[set][mesh], Z[set][mesh], magF,
                        levels=levels[2], linestyles="dashed")
 
         set = "EddyCurrentFoam"
-        mesh = "1.000"
+        mesh = EddyCurrentFoam_ref
         magF = (F[set][mesh][0]**2 + F[set][mesh][1]**2 + F[set][mesh][2]**2)**0.5
         c = ax.contour(R[set][mesh], Z[set][mesh], magF,
                        levels=levels[2], linestyles="solid")

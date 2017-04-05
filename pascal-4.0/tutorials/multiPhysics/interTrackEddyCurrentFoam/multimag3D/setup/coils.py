@@ -40,7 +40,7 @@ import parameters as par
 coils = inductorCoils(par.coil_setup, "coil", par.coil_bundle, par.coil_path,
                       par.coils_current, par.coils_n, par.coils_step,
                       reverse=par.coils_reverse, origin=par.coils_origin,
-                      axis=2, scale=par.coil_scale)
+                      axis=2, scale=par.coil_scale, period=par.coils_period)
 
 # --------------------------------------------------------------------------- #
 # --- Main ------------------------------------------------------------------ #

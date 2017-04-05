@@ -77,6 +77,7 @@ if coil_setup == "RMF":
                     "y":     (350.0 + coil_bundle["r"])/2.0}
 
     coils_n         = 6
+    coils_period    = 6
     coils_step      = 285.0
     coils_origin    = [0.0, 0.0, geo_z2]
 
@@ -104,7 +105,8 @@ if coil_setup == "RMF":
 
 elif coil_setup == "TMF":
 
-    coil_bundle     = {"shape": "rectangle",
+    #coil_bundle     = {"shape": "rectangle",
+    coil_bundle     = {"shape": "point",
                     "n":     10,
                     "r":     51.5,
                     "z":     27.0}
@@ -114,6 +116,7 @@ elif coil_setup == "TMF":
                     "r":     182.5 + coil_bundle['r']/2.0}
 
     coils_n         = 6
+    coils_period    = 6
     coils_step      = 47.6 + coil_bundle['z']
     coils_origin    = [0.0, 0.0, geo_z2 - (coils_n-1)/2.0 * coils_step]
 
