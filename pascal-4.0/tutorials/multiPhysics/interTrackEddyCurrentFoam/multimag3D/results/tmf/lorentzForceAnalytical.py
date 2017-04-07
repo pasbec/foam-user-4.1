@@ -45,8 +45,8 @@ eta=0.00218292
 nu=eta/rho
 omega = 2.0*m.pi*50.0
 #B0 = 1.988e-03
-B0 = 1.99984e-03
-#B0 = 2.04e-03
+#B0 = 1.99984e-03
+B0 = 2.032e-03
 
 print("k          : {} 1/m".format(k))
 print("H0, R0     : {}, {} m".format(H0, R0))

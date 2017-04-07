@@ -36,8 +36,13 @@ import plotTools.hzdr as hzdr
 nr = 61
 nz = 121
 
-fontsize   = 14
+fontsize   = 16
 fontfamily = "serif"
+
+sizeCompX = 18.0
+sizeCompY = 9.0
+sizeErrX = 8.0
+sizeErrY = 6.0
 
 print("nr, nz     : {},{}".format(nr, nz))
 print("fontsize   : {}".format(fontsize))
@@ -243,7 +248,7 @@ for mesh in meshes:
 # --- Plot settings --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-latex.latexify(fontsize=fontsize, fontfamily=fontfamily)
+latex.latexify(fontsize=fontsize, fontfamily=fontfamily, locale="de_DE.utf8")
 
 hzdr.colors()
 
@@ -313,8 +318,12 @@ def fig(p, name):
         cl = ax.clabel(c, c.levels[0::2],
                        inline=True, fmt="%g", fontsize=fontsize)
 
+        [l.set_bbox(dict(facecolor="white", edgecolor="none", pad=2)) for l in cl]
+        [l.set_text('{:n}'.format(float(l.get_text()))) for l in cl]
+
     ax(fig, axs, "Fz")
 
+    fig.set_size_inches(sizeCompX, sizeCompY)
     fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "Analytical")
@@ -356,9 +365,11 @@ def fig(p, name):
                        inline=True, fmt="%g", fontsize=fontsize)
 
         [l.set_bbox(dict(facecolor="white", edgecolor="none", pad=2)) for l in cl]
+        [l.set_text('{:n}'.format(float(l.get_text()))) for l in cl]
 
     ax(fig, axs, "Fz")
 
+    fig.set_size_inches(sizeCompX, sizeCompY)
     fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "LowFrequencyFz")
@@ -404,9 +415,11 @@ def fig(p, name):
                        inline=True, fmt="%g", fontsize=fontsize)
 
         [l.set_bbox(dict(facecolor="white", edgecolor="none", pad=2)) for l in cl]
+        [l.set_text('{:n}'.format(float(l.get_text()))) for l in cl]
 
     ax(fig, axs,"Fr")
 
+    fig.set_size_inches(sizeCompX, sizeCompY)
     fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ComparisonFr")
@@ -451,9 +464,11 @@ def fig(p, name):
                        inline=True, fmt="%g", fontsize=fontsize)
 
         [l.set_bbox(dict(facecolor="white", edgecolor="none", pad=2)) for l in cl]
+        [l.set_text('{:n}'.format(float(l.get_text()))) for l in cl]
 
     ax(fig, axs, "Fz")
 
+    fig.set_size_inches(sizeCompX, sizeCompY)
     fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ComparisonFz")
@@ -496,9 +511,11 @@ def fig(p, name):
                        inline=True, fmt="%g", fontsize=fontsize)
 
         [l.set_bbox(dict(facecolor="white", edgecolor="none", pad=2)) for l in cl]
+        [l.set_text('{:n}'.format(float(l.get_text()))) for l in cl]
 
     ax(fig, axs, "F")
 
+    fig.set_size_inches(sizeCompX, sizeCompY)
     fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ComparisonF")
@@ -546,6 +563,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fr")
 
+    fig.set_size_inches(sizeErrX, sizeErrY)
     fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ErrorFr")
@@ -591,6 +609,7 @@ def fig(p, name):
 
     ax(fig, axs, "Fz")
 
+    fig.set_size_inches(sizeErrX, sizeErrY)
     fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ErrorFz")
@@ -645,6 +664,7 @@ def fig(p, name):
 
     ax(fig, axs, "F")
 
+    fig.set_size_inches(sizeErrX, sizeErrY)
     fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
 
 fig(plots, "ErrorF")
