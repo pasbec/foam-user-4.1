@@ -257,13 +257,13 @@ labelAxisZ = r"$z ~ [\mathrm{mm}]$"
 
 labelAxisE = r"$\mathrm{log}(\|\mathcal{E}\|/\|\mathcal{E}\|_{\mathrm{max}})$"
 labelAxisD = r"$\mathrm{log}(\triangle / \triangle_{\mathrm{max}})$"
-labelAxisS = r"$\mathrm{log}(R_\mathrm{\infty}/R)$"
+labelAxisS = r"$\mathrm{log}(R_\mathrm{\infty}/R_J)$"
 
 labelE = dict()
 labelE["O1"] = r"$\mathcal{O}(\triangle /\triangle_{\mathrm{max}})$"
 labelE["O2"] = r"$\mathcal{O}((\triangle / \triangle_{\mathrm{max}})^2)$"
-labelE["Os3"] = r"$\mathcal{O}((R_\mathrm{\infty}/R)^{-3})$"
-labelE["OsConst"] = r"$R_\mathrm{\infty}/R = \mathrm{const.}$"
+labelE["Os3"] = r"$\mathcal{O}((R_\mathrm{\infty}/R_J)^{-3})$"
+labelE["OsConst"] = r"$R_\mathrm{\infty}/R_J = \mathrm{const.}$"
 labelE["inf"] = r"$\|\mathcal{E}\|_{\infty}/\|\mathcal{E}\|_{\mathrm{max}}$"
 labelE["1"] = r"$\|\mathcal{E}\|_{1}/\|\mathcal{E}\|_{\mathrm{max}}$"
 labelE["2"] = r"$\|\mathcal{E}\|_{2}/\|\mathcal{E}\|_{\mathrm{max}}$"
