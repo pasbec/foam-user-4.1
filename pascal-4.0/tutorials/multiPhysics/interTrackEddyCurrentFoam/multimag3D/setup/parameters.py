@@ -63,8 +63,6 @@ coil_setup      = "TMF"
 
 if coil_setup == "RMF":
 
-    coil_scale      = 1e-3
-
     coil_bundle     = {"shape": "rectangle",
                        "n":     10,
                        "r":     45.0,

@@ -28,49 +28,70 @@ import numpy as np
 # --- Geometry -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-geo_scale      = 1e-3
+geo_scale       = 1e-3
 
-geo_angle      = 45.0
-geo_alpha      = geo_angle/180.0 * m.pi
+geo_angle       = 45.0
+geo_alpha       = geo_angle/180.0 * m.pi
 
-geo_X          = dict()
-geo_X["C"]     = 35.0
+geo_X           = dict()
+geo_X["C"]      = 35.0
 
-geo_Y          = dict()
-geo_Y["C"]     = 75.0
-geo_Y["C"]     = 75.0
+geo_Y           = dict()
+geo_Y["C"]      = 75.0
+geo_Y["C"]      = 75.0
 
-geo_Z          = dict()
-geo_Z["C"]     = 20.0
+geo_Z           = dict()
+geo_Z["C"]      = 20.0
 
-geo_Y["shift"] = geo_Z["C"]/2.0 * m.tan(geo_alpha)
+geo_Y["shift"]  = geo_Z["C"]/2.0 * m.tan(geo_alpha)
 
 # --------------------------------------------------------------------------- #
 # --- Mesh ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-mesh_scale     = 1.0
-mesh_space     = 4.0
+mesh_scale      = 1.0
+mesh_space      = 4.0
 
-mesh_normal    = -1
+mesh_normal     = -1
 
-mesh_X         = dict()
-mesh_X["inf"]  = mesh_space * geo_X["C"]
+mesh_X          = dict()
+mesh_X["inf"]   = mesh_space * geo_X["C"]
 
-mesh_Y         = dict()
-mesh_Y["inf"]  = mesh_space * geo_Y["C"]
+mesh_Y          = dict()
+mesh_Y["inf"]   = mesh_space * geo_Y["C"]
 
-mesh_Z         = dict()
-mesh_Z["inf+"] = mesh_space * geo_Z["C"]/2.0 + geo_Z["C"]
-mesh_Z["inf-"] = mesh_space * geo_Z["C"]/2.0
+mesh_Z          = dict()
+mesh_Z["inf+"]  = mesh_space * geo_Z["C"]/2.0 + geo_Z["C"]
+mesh_Z["inf-"]  = mesh_space * geo_Z["C"]/2.0
 
-mesh           = {"normal": mesh_normal}
+mesh            = {"normal": mesh_normal}
 
 # --------------------------------------------------------------------------- #
 # --- Coils ----------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 coil_scale      = 1e-3
+
+# --------------------------------------------------------------------------- #
+
+coil_bundle     = {"shape": "rectangle",
+                    "n":     10,
+                    "r":     5.0,
+                    "z":     5.0}
+
+coil_path       = {"shape": "racetrack",
+                    "n":     12,
+                    "r":     8.0,
+                    "x":     65.0,
+                    "y":     120.0}
+
+coils_n         = 3
+coils_step      = 13.0
+coils_origin    = [0.0, 0.0, 9.0]
+
+coils_current   = 1000.0
+coils_nNonOrto  = 10
+coils_frequency = 10000.0
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #
