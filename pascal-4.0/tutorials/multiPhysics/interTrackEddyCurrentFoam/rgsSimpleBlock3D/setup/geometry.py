@@ -116,8 +116,6 @@ bo["conductor"] = makeFuseBody("conductor", [bo["conductor0"],
 
 bo["fluid"] = makeFuseBody("fluid", [bo["conductor"]])
 
-bo["free"] = makeCutBody("free", bo["all"], bo["conductor"])
-
 bo["buffer"] = makeCutBody("buffer", bo["above"], bo["fluid"])
 
 #bo["coils"] = makeOrthoArrayBody("coils", bo["coil"],
