@@ -21,6 +21,9 @@ for d in $directions; do
 
 done
 
+# Renumber mesh
+renumberMesh || exit 1
+
 # Move new polyMesh files to storage folder
 mesh0Folder='0/polyMesh'
 meshFolder='constant/polyMesh'

@@ -1192,7 +1192,9 @@ class blocks(object):
 
     def copyShiftVerticeLabels(self, shift, blockLabels, verticeLebelShift):
 
-        if not (isinstance(shift, int) and isinstance(verticeLebelShift, int)):
+        if not (isinstance(shift, int)
+                and (isinstance(verticeLebelShift, int)
+                     or isinstance(verticeLebelShift, list))):
 
             raise KeyError()
 
@@ -1208,6 +1210,11 @@ class blocks(object):
 
         if not isinstance(blockLabels, list): raise KeyError()
 
+        if isinstance(verticeLebelShift, int):
+            verticeLebelShift = [ verticeLebelShift for l in range(8)]
+
+        if not isinstance(verticeLebelShift, list): raise KeyError()
+
         for blockLabel in blockLabels:
 
             label = blockLabel + shift
@@ -1215,8 +1222,12 @@ class blocks(object):
             originVerticeLables = \
                 self.blockVerticeLabels[self.labelIndex[blockLabel]]
 
-            shiftedVerticeLables = \
-                [ originVerticeLables[l] + verticeLebelShift for l in range(8)]
+            shiftedVerticeLables = list(originVerticeLables)
+
+            for l in range(8):
+
+                shiftedVerticeLables[l] = \
+                    originVerticeLables[l] + verticeLebelShift[l]
 
 # TODO: How to COPY those values? The below are references...
             originDistribution = self.distributions[blockLabel]

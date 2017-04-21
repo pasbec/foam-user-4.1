@@ -58,19 +58,19 @@ geo_R["solid"] =  geo_Z[3] / m.tan(geo_alpha)             # Solid wall contact r
 # --------------------------------------------------------------------------- #
 
 mesh_scale     = 1.0
-mesh_space     = 1.0
+mesh_space     = 4.0
 
 mesh_normal    = 1
 mesh_thickness = 10.0
 mesh_angle     =  5.0
 
 mesh_R         = dict()
-mesh_R["axis"] = 1.0                                      # Axis patch radius
-mesh_R["inf"]  = 4.0 * mesh_space * geo_R[2]              # Infinity patch radius
+mesh_R["axis"] = 1.0                                # Axis patch radius
+mesh_R["inf"]  = mesh_space * geo_R[2]              # Infinity patch radius
 
 mesh_Z         = dict()
 mesh_Z["C"]    = geo_Z[0] + 0.5*(geo_Z[7] - geo_Z[0])
-mesh_Z["inf"]  = 4.0 * mesh_space * (geo_Z[6] - geo_Z[3]) # Infinity patch radius
+mesh_Z["inf"]  = mesh_space * (geo_Z[6] - geo_Z[3]) # Infinity patch radius
 
 mesh_R["inf"]  = max(mesh_R["inf"], mesh_Z["inf"])
 mesh_Z["inf"]  = max(mesh_Z["inf"], mesh_R["inf"])

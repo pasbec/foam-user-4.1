@@ -105,9 +105,9 @@ v[ 46] = vrz(v[29][0], v[40][1])
 
 # --------------------------------------------------------------------------- #
 
-# Copy vertice dict its containing vertices
+# Copy vertice dict and its containing vertices
 V = v.copy()
-for i in range(len(V)): V[i] = v[i].copy()
+for i in V: V[i] = v[i].copy()
 
 # Axis point shift based on inner point p
 def dv0z(v, p): r = par.mesh_R["axis"]; return np.array([r, r*(p[1]-v[1])/p[0]])
@@ -125,7 +125,7 @@ V[46] += dv0z(V[46], V[45])
 
 # --------------------------------------------------------------------------- #
 
-for i in range(len(V)): d.vertices.set(i, V[i])
+for i in V: d.vertices.set(i, V[i])
 
 # --------------------------------------------------------------------------- #
 # --- Blocks ---------------------------------------------------------------- #
@@ -172,21 +172,21 @@ d.blocks.set( 33, [ 29, 28, 45, 46], zone="free_external")
 
 def n(l): s = 0.1; return int(m.ceil(abs(s*par.mesh_scale*l)))
 
-nr                 = dict()
-nr["free_side"]   = n(v[35][0] - v[34][0])
-nr["vessel"]       = n(v[42][0] - v[43][0])
-nr["heater_side"]  = n(v[41][0] - v[42][0])
-nr["heater_width"] = n(v[19][0] - v[18][0])
-nr["fluid_width0"] = n(v[10][0] - v[11][0])
-nr["fluid_width1"] = n(v[9][0] - v[10][0])
-nr["fluid_width2"] = n(v[8][0] - v[9][0])
+nr                  = dict()
+nr["free_side"]     = n(v[35][0] - v[34][0])
+nr["vessel"]        = n(v[42][0] - v[43][0])
+nr["heater_side"]   = n(v[41][0] - v[42][0])
+nr["heater_width"]  = n(v[19][0] - v[18][0])
+nr["fluid_width0"]  = n(v[10][0] - v[11][0])
+nr["fluid_width1"]  = n(v[9][0] - v[10][0])
+nr["fluid_width2"]  = n(v[8][0] - v[9][0])
 
-nz                   = dict()
+nz                  = dict()
 nz["free_top"]      = n(v[40][1] - v[39][1])
 nz["free_bottom"]   = n(v[36][1] - v[35][1])
 nz["free_internal"] = n(v[29][1] - v[11][1])
-nz["heater_bottom"]  = n(v[37][1] - v[36][1])
-nz["fluid_height"]   = n(v[11][1] - v[6][1])
+nz["heater_bottom"] = n(v[37][1] - v[36][1])
+nz["fluid_height"]  = n(v[11][1] - v[6][1])
 
 d.blocks.distribution.set( 24, "x", nr["free_side"])
 d.blocks.distribution.set( 30, "x", nr["vessel"])

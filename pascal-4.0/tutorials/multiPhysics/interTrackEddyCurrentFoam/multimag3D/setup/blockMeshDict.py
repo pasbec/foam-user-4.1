@@ -79,6 +79,8 @@ d.vertices.set(  7, [     par.geo_r2,              0,     par.geo_z0])
 d.vertices.set(  8, [   a*par.geo_r2,   a*par.geo_r2,     par.geo_z0])
 d.vertices.set(  9, [            0.0,     par.geo_r2,     par.geo_z0])
 
+# --------------------------------------------------------------------------- #
+
 baseVertices = [ i for i in range(len(d.vertices.labels)) ]
 
 d.vertices.copyTranslate( 10, baseVertices, [0.0, 0.0, par.geo_z1-par.geo_z0])
@@ -96,6 +98,8 @@ d.blocks.set(  2, [  3,  2,  5,  6, 13, 12, 15, 16], zone="core")
 
 d.blocks.set(  3, [  4,  7,  8,  5, 14, 17, 18, 15], zone="annulus")
 d.blocks.set(  4, [  6,  5,  8,  9, 16, 15, 18, 19], zone="annulus")
+
+# --------------------------------------------------------------------------- #
 
 baseBlocks = [ i for i in range(len(d.blocks.labels)) ]
 

@@ -28,27 +28,41 @@ import numpy as np
 # --- Geometry -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-geo_scale  = 1e-3
-geo_space  = 4.0
+geo_scale      = 1e-3
 
-geo_r0     =   15.0
-geo_r1     =   30.0
-geo_r2     =   30.0 * geo_space
+geo_angle      = 45.0
+geo_alpha      = geo_angle/180.0 * m.pi
 
-geo_z0     =  -30.0 * geo_space + 30.0
-geo_z1     =    0.0
-geo_z2     =   30.0
-geo_z3     =   60.0
-geo_z4     =   30.0 * geo_space + 30.0
+geo_X          = dict()
+geo_X["C"]     = 35.0
+
+geo_Y          = dict()
+geo_Y["C"]     = 75.0
+geo_Y["C"]     = 75.0
+
+geo_Z          = dict()
+geo_Z["C"]     = 20.0
+
+geo_Y["shift"] = geo_Z["C"]/2.0 * m.tan(geo_alpha)
 
 # --------------------------------------------------------------------------- #
 # --- Mesh ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-mesh_scale =    1.0 * 2e-1
+mesh_scale     = 1.0
+mesh_space     = 4.0
 
 mesh_normal    = -1
-mesh_f     =    1.2
+
+mesh_X         = dict()
+mesh_X["inf"]  = mesh_space * geo_X["C"]
+
+mesh_Y         = dict()
+mesh_Y["inf"]  = mesh_space * geo_Y["C"]
+
+mesh_Z         = dict()
+mesh_Z["inf+"] = mesh_space * geo_Z["C"] + geo_Z["C"]
+mesh_Z["inf-"] = mesh_space * geo_Z["C"]
 
 mesh           = {"normal": mesh_normal}
 
@@ -57,73 +71,6 @@ mesh           = {"normal": mesh_normal}
 # --------------------------------------------------------------------------- #
 
 coil_scale      = 1e-3
-coil_setup      = "TMF"
-
-# --------------------------------------------------------------------------- #
-
-if coil_setup == "RMF":
-
-    coil_scale      = 1e-3
-
-    coil_bundle     = {"shape": "rectangle",
-                       "n":     10,
-                       "r":     45.0,
-                       "z":     60.0}
-
-    coil_path       = {"shape": "racetrack",
-                       "n":     9,
-                       "r":     10.0 + coil_bundle["r"]/2.0,
-                       "x":     (100.0 + coil_bundle["r"])/2.0,
-                       "y":     (350.0 + coil_bundle["r"])/2.0}
-
-    coils_n         = 6
-    coils_period    = 6
-    coils_step      = 285.0
-    coils_origin    = [0.0, 0.0, geo_z2]
-
-    coils_current   = 432.0
-    coils_reverse   = False
-    coils_nNonOrto  = 10
-    coils_frequency = 50.0
-
-# We need a current amplitude of
-#
-# I = 431.6 A                      (with long coils path-x*10000, we have 415.2)
-#
-# for achieving
-#
-# B = sqrt(Bx^2 + By^2 + Bz^2) = sqrt(BRe^2 + BIm^2)/sqrt(2) = 0.4216e-3 T
-#
-# at centroid of cylinder for
-#
-# Ta = 10^5
-#
-# with Ta = sigma * omega * B^2 * (H/2)^4 / (2 * rho * nu^2)
-#
-
-# --------------------------------------------------------------------------- #
-
-elif coil_setup == "TMF":
-
-    #coil_bundle     = {"shape": "rectangle",
-    coil_bundle     = {"shape": "point",
-                       "n":     10,
-                       "r":     51.5,
-                       "z":     27.0}
-
-    coil_path       = {"shape": "loop",
-                       "n":     36,
-                       "r":     182.5 + coil_bundle['r']/2.0}
-
-    coils_n         = 6
-    coils_period    = 6
-    coils_step      = 47.6 + coil_bundle['z']
-    coils_origin    = [0.0, 0.0, geo_z2 - (coils_n-1)/2.0 * coils_step]
-
-    coils_current   = 32 * 22.0
-    coils_reverse   = False
-    coils_nNonOrto  = 10
-    coils_frequency = 50.0
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #
