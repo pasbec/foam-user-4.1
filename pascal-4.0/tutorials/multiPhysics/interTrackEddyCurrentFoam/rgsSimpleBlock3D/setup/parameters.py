@@ -61,8 +61,8 @@ mesh_Y         = dict()
 mesh_Y["inf"]  = mesh_space * geo_Y["C"]
 
 mesh_Z         = dict()
-mesh_Z["inf+"] = mesh_space * geo_Z["C"] + geo_Z["C"]
-mesh_Z["inf-"] = mesh_space * geo_Z["C"]
+mesh_Z["inf+"] = mesh_space * geo_Z["C"]/2.0 + geo_Z["C"]
+mesh_Z["inf-"] = mesh_space * geo_Z["C"]/2.0
 
 mesh           = {"normal": mesh_normal}
 
