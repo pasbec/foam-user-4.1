@@ -215,7 +215,53 @@ def pathRaceTrack(pathDict, bundleDict, filamentI, edgeStart=0):
 
 
 
-path = {"loop": pathLoop, "racetrack": pathRaceTrack}
+def pathRectangle(pathDict, bundleDict, filamentI, edgeStart=0):
+    """
+
+    pathDict-Keys
+    ----------
+    x : float, Coil size in x-direction
+    y : float, Coil size in y-direction
+    """
+
+    if not "x" in pathDict:
+
+        raise KeyError("Coil width (x) is missing.")
+
+    if not "y" in pathDict:
+
+        raise KeyError("Coil height (y) is missing.")
+
+    if pathDict["x"] <= 0.0 or pathDict["y"] <= 0.0:
+
+        raise ValueError("Coil sizes (x/y) must be positive.")
+
+    f = bundle[bundleDict["shape"]](bundleDict, filamentI)
+
+    points = list()
+
+    x = pathDict["x"]
+    y = pathDict["y"]
+    z = f[1]
+    s = [[1, 1], [-1, 1], [-1, -1], [1, -1]]
+
+    for c in range(len(s)):
+
+        p = np.zeros(3)
+
+        p[0] = s[c][0]*x
+        p[1] = s[c][1]*y
+        p[2] = z
+
+        points.append(p)
+
+    edges = edgeLoopFromPoints(points, edgeStart)
+
+    return points, edges
+
+
+
+path = {"loop": pathLoop, "racetrack": pathRaceTrack, "rectangle": pathRectangle}
 
 
 
