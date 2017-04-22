@@ -74,7 +74,8 @@ coil_scale      = 1e-3
 
 # --------------------------------------------------------------------------- #
 
-coil_bundle     = {"shape": "rectangle",
+#coil_bundle     = {"shape": "rectangle",
+coil_bundle     = {"shape": "point",
                     "n":     10,
                     "r":     5.0,
                     "z":     5.0}

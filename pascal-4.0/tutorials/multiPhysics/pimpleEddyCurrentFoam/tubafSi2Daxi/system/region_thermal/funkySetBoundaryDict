@@ -38,7 +38,7 @@ temperature_gradient
         {
             target        value;
             patchName     "solidWall";
-            expression    "50.0*(pos().z-0.022)";
+            expression    "1000.0*(pos().z-0.022)";
         }
     );
 }

@@ -75,10 +75,26 @@ expressions
         keepPatches   true;
     }
 
-    temperature_gradient
+//     temperature_gradient
+//     {
+//         field         T;
+//         expression    "50.0*(pos().z-0.022)";
+//         keepPatches   true;
+//     }
+
+    temperature_gradient_liquid
     {
         field         T;
+        condition     "pos().z>=0.022";
         expression    "50.0*(pos().z-0.022)";
+        keepPatches   true;
+    }
+
+    temperature_gradient_solid
+    {
+        field         T;
+        condition     "pos().z<=0.022";
+        expression    "1000.0*(pos().z-0.022)";
         keepPatches   true;
     }
 );

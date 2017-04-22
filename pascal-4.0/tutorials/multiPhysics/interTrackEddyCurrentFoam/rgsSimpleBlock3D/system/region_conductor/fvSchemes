@@ -32,10 +32,8 @@ gradSchemes
     grad(AMRe)                        Gauss linear;
     grad(AMIm)                        Gauss linear;
 
-    grad(VRe)                         Gauss linear;
-    grad(VIm)                         Gauss linear;
-
-    grad(sigma)                       Gauss linear;
+    grad(VRe)                         Gauss fluxConservative "sigma" "phiDdtAIm";
+    grad(VIm)                         Gauss fluxConservative "sigma" "phiDdtARe";
 }
 
 divSchemes
@@ -53,8 +51,8 @@ laplacianSchemes
     laplacian(chiNurf,AMRe)           Gauss linear corrected;
     laplacian(chiNurf,AMIm)           Gauss linear corrected;
 
-    laplacian(sigmaf,VRe)             Gauss linear corrected;
-    laplacian(sigmaf,VIm)             Gauss linear corrected;
+    laplacian(sigmaf,VRe)             jumpGauss harmonic corrected "sigma" "phiDdtAIm";
+    laplacian(sigmaf,VIm)             jumpGauss harmonic corrected "sigma" "phiDdtARe";
 
 }
 

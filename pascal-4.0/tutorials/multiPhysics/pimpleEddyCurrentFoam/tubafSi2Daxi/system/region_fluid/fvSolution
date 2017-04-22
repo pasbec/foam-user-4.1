@@ -53,7 +53,7 @@ solvers
 
 PIMPLE
 {
-    nOuterCorrectors            15;
+    nOuterCorrectors            3;
     nCorrectors                 2;
     nNonOrthogonalCorrectors    2;
     pRefPoint (0.04 0.0 0.04);
