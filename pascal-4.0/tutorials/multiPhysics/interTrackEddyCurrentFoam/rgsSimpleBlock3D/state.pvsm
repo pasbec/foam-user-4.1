@@ -19329,70 +19329,70 @@
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="13577" servers="1">
       <Property name="FileNameInfo" id="13577.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh/coil0.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh/coil0.vtk"/>
       </Property>
       <Property name="FileNames" id="13577.FileNames" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh/coil0.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh/coil0.vtk"/>
         <Domain name="files" id="13577.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="13577.TimestepValues"/>
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="13974" servers="1">
       <Property name="FileNameInfo" id="13974.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh.org/coil0_vectorplot.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh.org/coil0_vectorplot.vtk"/>
       </Property>
       <Property name="FileNames" id="13974.FileNames" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh.org/coil0_vectorplot.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh.org/coil0_vectorplot.vtk"/>
         <Domain name="files" id="13974.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="13974.TimestepValues"/>
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="13601" servers="1">
       <Property name="FileNameInfo" id="13601.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh/coil1.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh/coil1.vtk"/>
       </Property>
       <Property name="FileNames" id="13601.FileNames" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh/coil1.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh/coil1.vtk"/>
         <Domain name="files" id="13601.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="13601.TimestepValues"/>
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="13998" servers="1">
       <Property name="FileNameInfo" id="13998.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh.org/coil1_vectorplot.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh.org/coil1_vectorplot.vtk"/>
       </Property>
       <Property name="FileNames" id="13998.FileNames" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh.org/coil1_vectorplot.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh.org/coil1_vectorplot.vtk"/>
         <Domain name="files" id="13998.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="13998.TimestepValues"/>
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="13625" servers="1">
       <Property name="FileNameInfo" id="13625.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh/coil2.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh/coil2.vtk"/>
       </Property>
       <Property name="FileNames" id="13625.FileNames" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh/coil2.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh/coil2.vtk"/>
         <Domain name="files" id="13625.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="13625.TimestepValues"/>
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="14022" servers="1">
       <Property name="FileNameInfo" id="14022.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh.org/coil2_vectorplot.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh.org/coil2_vectorplot.vtk"/>
       </Property>
       <Property name="FileNames" id="14022.FileNames" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/featureEdgeMesh.org/coil2_vectorplot.vtk"/>
+        <Element index="0" value="./constant/featureEdgeMesh.org/coil2_vectorplot.vtk"/>
         <Domain name="files" id="14022.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="14022.TimestepValues"/>
     </Proxy>
     <Proxy group="sources" type="stlreader" id="12030" servers="1">
       <Property name="FileNameInfo" id="12030.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/triSurface/geometry_body_coils.stl"/>
+        <Element index="0" value="./constant/triSurface/geometry_body_coils.stl"/>
       </Property>
       <Property name="FileNames" id="12030.FileNames" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/constant/triSurface/geometry_body_coils.stl"/>
+        <Element index="0" value="./constant/triSurface/geometry_body_coils.stl"/>
         <Domain name="files" id="12030.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="12030.TimestepValues"/>
@@ -19599,7 +19599,7 @@
         <Domain name="bool" id="8453.DecomposePolyhedra.bool"/>
       </Property>
       <Property name="FileName" id="8453.FileName" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/rgsSimpleBlock3D.foam"/>
+        <Element index="0" value="./rgsSimpleBlock3D.foam"/>
         <Domain name="files" id="8453.FileName.files"/>
       </Property>
       <Property name="LagrangianArrayInfo" id="8453.LagrangianArrayInfo"/>
@@ -19871,7 +19871,7 @@
         <Domain name="bool" id="11867.DecomposePolyhedra.bool"/>
       </Property>
       <Property name="FileName" id="11867.FileName" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/rgsSimpleBlock3D.foam"/>
+        <Element index="0" value="./rgsSimpleBlock3D.foam"/>
         <Domain name="files" id="11867.FileName.files"/>
       </Property>
       <Property name="LagrangianArrayInfo" id="11867.LagrangianArrayInfo"/>
@@ -20163,7 +20163,7 @@
         <Domain name="bool" id="14847.DecomposePolyhedra.bool"/>
       </Property>
       <Property name="FileName" id="14847.FileName" number_of_elements="1">
-        <Element index="0" value="/data/beckst30/foam/pascal-4.0/run/tutorials/multiPhysics/interTrackEddyCurrentFoam/rgsSimpleBlock3D/rgsSimpleBlock3D.foam"/>
+        <Element index="0" value="./rgsSimpleBlock3D.foam"/>
         <Domain name="files" id="14847.FileName.files"/>
       </Property>
       <Property name="LagrangianArrayInfo" id="14847.LagrangianArrayInfo"/>
