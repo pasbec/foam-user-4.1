@@ -30,7 +30,7 @@ import numpy as np
 
 geo_scale       = 1e-3
 
-geo_angle       = 45.0
+geo_angle       = 0.0
 geo_alpha       = geo_angle/180.0 * m.pi
 
 geo_X           = dict()
@@ -76,10 +76,11 @@ coil_scale      = 1e-3
 
 #coil_bundle     = {"shape": "rectangle",
 coil_bundle     = {"shape": "point",
-                    "n":     10,
+                    "n":     4,
                     "r":     5.0,
                     "z":     5.0}
 
+#coil_path       = {"shape": "rectangle",
 coil_path       = {"shape": "racetrack",
                     "n":     12,
                     "r":     8.0,
