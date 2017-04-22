@@ -97,6 +97,39 @@ for k in v.keys():
 
 #sketchPolyLine(s["coil"], cv.keys(), cv)
 
+cs = par.coil_scale/par.geo_scale
+
+cvi    = dict()
+cvo    = dict()
+
+cvi[0] = cs*np.array([-par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                      -par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+cvi[1] = cs*np.array([ par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                      -par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+cvi[2] = cs*np.array([ par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                       par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+cvi[3] = cs*np.array([-par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                       par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+
+cvo[0] = cs*np.array([-par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                      -par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+cvo[1] = cs*np.array([ par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                      -par.coil_path["y"] - par.coil_bundle["r"]/2.0])
+cvo[2] = cs*np.array([ par.coil_path["x"] + par.coil_bundle["r"]/2.0,
+                       par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+cvo[3] = cs*np.array([-par.coil_path["x"] - par.coil_bundle["r"]/2.0,
+                       par.coil_path["y"] + par.coil_bundle["r"]/2.0])
+
+s["coil"] = makeSketch(d, "coil", orient="xy",
+                       base=(par.coils_origin[0], par.coils_origin[1],
+                             par.coils_origin[2]))
+
+sketchPolyLine(s["coil"] , cvi.keys(), cvi,
+               fillet=(par.coil_path["r"] - par.coil_bundle["r"]/2.0))
+
+sketchPolyLine(s["coil"] , cvo.keys(), cvo,
+               fillet=(par.coil_path["r"] + par.coil_bundle["r"]/2.0))
+
 # --------------------------------------------------------------------------- #
 
 d.recompute()
@@ -109,7 +142,7 @@ bo = dict()
 
 for k in s.keys():
 
-    bo[k] = makeDoubleExtrudeBody(k, s[k], 2.0 * t[k])
+    if k is not "coil": bo[k] = makeDoubleExtrudeBody(k, s[k], 2.0 * t[k])
 
 bo["conductor"] = makeFuseBody("conductor", [bo["conductor0"],
                                              bo["conductor1"]])
@@ -118,8 +151,11 @@ bo["fluid"] = makeFuseBody("fluid", [bo["conductor"]])
 
 bo["buffer"] = makeCutBody("buffer", bo["above"], bo["fluid"])
 
-#bo["coils"] = makeOrthoArrayBody("coils", bo["coil"],
-                                 #(0.0, 0.0, cs*par.coils_step), par.coils_n)
+bo["coil"] = makeDoubleExtrudeBody("coil", s["coil"],
+                                   cs*par.coil_bundle["z"])
+
+bo["coils"] = makeOrthoArrayBody("coils", bo["coil"],
+                                 (0.0, 0.0, cs*par.coils_step), par.coils_n)
 
 # --------------------------------------------------------------------------- #
 
