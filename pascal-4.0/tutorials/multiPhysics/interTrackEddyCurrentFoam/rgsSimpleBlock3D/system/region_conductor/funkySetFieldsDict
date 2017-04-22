@@ -16,14 +16,10 @@ FoamFile
 
 materialProperties
 (
-    "sigma_siliconLiquid=1.2e+6;"    // Conductivity of liquid silicon in [S/m]
-    "sigma_siliconSolid=8.3e+4;"     // Conductivity of solid silicon in [S/m]
-    "sigma_graphite=1.25e+5;"        // Conductivity of graphite in [S/m]
-    "sigma_stainlessSteel=1.43e+6;"  // Conductivity of stainless steel in [S/m]
-    "sigma_woodsMetal=1.0e+6;"       // Conductivity of woods metal in [S/m]
-    "sigma_copper=5.8e+7;"           // Conductivity of copper in [S/m]
-    "sigma_GaInSi=3.3e+6;"           // Conductivity of GaInSi in [S/m] at 25°C
-    "sigma_GaInSi_20=3.28891e+06;"   // Conductivity of GaInSi in [S/m] at 20°C
+    "sigma_high=1.2e+6;"
+    "sigma_low=1e+5;"
+    "mur_high=10;"
+    "mur_low=1;"
 );
 
 expressions
@@ -35,12 +31,40 @@ expressions
         expression    "0";
         keepPatches   true;
     }
-    sigma_conductor
+
+    sigma_conductor0
     {
         field         sigma;
         variables     $materialProperties;
-        condition     "set(cellSet_material_liquidMetal)";
-        expression    "sigma_GaInSi_20";
+        condition     "set(cellSet_material_conductor0)";
+        expression    "sigma_low";
+        keepPatches   true;
+    }
+
+    sigma_conductor1
+    {
+        field         sigma;
+        variables     $materialProperties;
+        condition     "set(cellSet_material_conductor1)";
+        expression    "sigma_high";
+        keepPatches   true;
+    }
+
+    mur_conductor0
+    {
+        field         sigma;
+        variables     $materialProperties;
+        condition     "set(cellSet_material_conductor0)";
+        expression    "mur_low";
+        keepPatches   true;
+    }
+
+    mur_conductor1
+    {
+        field         sigma;
+        variables     $materialProperties;
+        condition     "set(cellSet_material_conductor1)";
+        expression    "mur_low";
         keepPatches   true;
     }
 );

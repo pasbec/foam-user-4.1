@@ -99,7 +99,8 @@ def main():
 
     if ssb.group("Materials"):
 
-        ssb.cellSet("material_liquidMetal", "setToTopo", add=["body_fluid"])
+        ssb.cellSet("material_conductor0", "setToTopo", add=["body_conductor0"])
+        ssb.cellSet("material_conductor1", "setToTopo", add=["body_conductor1"])
 
     ssb.quit()
 
