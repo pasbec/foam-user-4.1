@@ -24,6 +24,9 @@ cp -r 'constant/polyMesh.org/blockMeshDict.py' 'constant/polyMesh/'
 # Run blockMesh
 blockMesh || exit 1
 
+# Renumber mesh
+renumberMesh -overwrite || exit 1
+
 # Extract surface features
 surfaceFeatureExtract || exit 1
 
@@ -53,3 +56,6 @@ mv 'constant/polyMesh/boundary' \
 
 # Remove polyMesh
 rm -rf 'constant/polyMesh'
+
+# Copy mesh to constant
+cp -r "constant/polyMesh.org" "constant/polyMesh"

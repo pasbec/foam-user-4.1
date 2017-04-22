@@ -60,6 +60,9 @@ rm -rf 'constant/cellLevel' \
 # Remove empty patches
 createPatch -overwrite || exit 1
 
+# Renumber mesh
+renumberMesh -overwrite || exit 1
+
 # Move new polyMesh files to storage folder
 mv 'constant/polyMesh/boundary' \
    'constant/polyMesh/faces' \
@@ -71,3 +74,7 @@ mv 'constant/polyMesh/boundary' \
 # Remove polyMesh
 rm -rf '0/polyMesh'
 rm -rf 'constant/polyMesh'
+
+# Copy mesh to constant
+cp -r "constant/polyMesh.org" "constant/polyMesh"
+

@@ -40,7 +40,7 @@ cp 'system/changeDictionaryDict.default' 'system/changeDictionaryDict'
 makeWedgeMesh || exit 1
 
 # Renumber mesh
-renumberMesh || exit 1
+renumberMesh -overwrite || exit 1
 
 # Move new polyMesh files to storage folder
 mesh0Folder='0/polyMesh'
@@ -76,3 +76,6 @@ rm -rf "$mesh0Folder"
 if [[ -e '0' ]]; then
     [[ -z "$(ls -A '0' 2> /dev/null)" ]] && rmdir '0'
 fi
+
+# Copy mesh to constant
+cp -r "$meshBakFolder" "$meshFolder"

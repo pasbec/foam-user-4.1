@@ -76,6 +76,9 @@ if [[ ! -e 'state.prepared' || $flagForce -eq 1 ]]; then
     # Restore polymesh folder from org backup
     restorePolyMeshOrg
 
+    # Renumber mesh
+    renumberMesh -overwrite || exit 1
+
     # Create 2D mesh
     runApplication \
         extrudeMesh || exit 1

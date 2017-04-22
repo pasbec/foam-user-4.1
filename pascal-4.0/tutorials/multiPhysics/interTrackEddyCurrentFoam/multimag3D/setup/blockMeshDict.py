@@ -35,33 +35,6 @@ import parameters as par
 a = 2.0**(-0.5)
 f = par.mesh_f
 
-lr0 = par.geo_r0
-lr1 = par.geo_r1 - par.geo_r0
-lr2 = par.geo_r2 - par.geo_r1
-
-lz0 = par.geo_z1-par.geo_z0
-lz1 = par.geo_z2-par.geo_z1
-lz2 = par.geo_z3-par.geo_z2
-lz3 = par.geo_z4-par.geo_z3
-
-nr0 = int(m.ceil(par.mesh_scale*lr0*4))
-nr1 = int(m.ceil(par.mesh_scale*lr1*5))
-#nr2 = int(m.ceil(par.mesh_scale*lr2*2))
-
-#nz0 = int(m.ceil(par.mesh_scale*lz0*2))
-nz1 = int(m.ceil(par.mesh_scale*lz1*5))
-nz2 = int(m.ceil(par.mesh_scale*lz2*5))
-#nz3 = int(m.ceil(par.mesh_scale*lz3*2))
-
-e1 = 0.5
-e2ds = expansion_de_e(nr1, e1, lr1)
-e2de = 9.0*e2ds*lr2/90.0
-e2 = e2de/e2ds
-nr2 = expansion_n_ds(e2, e2ds, lr2)
-
-nz0 = nr2
-nz3 = nr2
-
 d = blockMeshDict(mesh=par.mesh)
 
 # --------------------------------------------------------------------------- #
@@ -106,6 +79,37 @@ baseBlocks = [ i for i in range(len(d.blocks.labels)) ]
 d.blocks.copyShiftVerticeLabels(  10, baseBlocks,  10)
 d.blocks.copyShiftVerticeLabels(  20, baseBlocks,  20)
 d.blocks.copyShiftVerticeLabels(  30, baseBlocks,  30)
+
+# --------------------------------------------------------------------------- #
+# --- Expansion ------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+lr0 = par.geo_r0
+lr1 = par.geo_r1 - par.geo_r0
+lr2 = par.geo_r2 - par.geo_r1
+
+lz0 = par.geo_z1-par.geo_z0
+lz1 = par.geo_z2-par.geo_z1
+lz2 = par.geo_z3-par.geo_z2
+lz3 = par.geo_z4-par.geo_z3
+
+nr0 = int(m.ceil(par.mesh_scale*lr0*4))
+nr1 = int(m.ceil(par.mesh_scale*lr1*5))
+#nr2 = int(m.ceil(par.mesh_scale*lr2*2))
+
+#nz0 = int(m.ceil(par.mesh_scale*lz0*2))
+nz1 = int(m.ceil(par.mesh_scale*lz1*5))
+nz2 = int(m.ceil(par.mesh_scale*lz2*5))
+#nz3 = int(m.ceil(par.mesh_scale*lz3*2))
+
+e1 = 0.5
+e2ds = expansion_de_e(nr1, e1, lr1)
+e2de = 9.0*e2ds*lr2/90.0
+e2 = e2de/e2ds
+nr2 = expansion_n_ds(e2, e2ds, lr2)
+
+nz0 = nr2
+nz3 = nr2
 
 # --------------------------------------------------------------------------- #
 # --- Distribution ---------------------------------------------------------- #

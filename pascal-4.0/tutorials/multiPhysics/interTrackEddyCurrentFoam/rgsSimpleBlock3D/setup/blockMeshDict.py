@@ -24,7 +24,7 @@ sys.path.append(os.environ["FOAM_USER_TOOLS"] + "/" + "python")
 import math as m
 import numpy as np
 
-from foamTools.blockMeshDict import expansion_de_e, expansion_n_ds, blockMeshDict
+from foamTools.blockMeshDict import expansion_n_ds, blockMeshDict
 
 # --------------------------------------------------------------------------- #
 # --- Parameters ------------------------------------------------------------ #
@@ -40,7 +40,7 @@ d = blockMeshDict(mesh=par.mesh)
 
 def vxy0(x, y): return np.array([x, y, 0.0])
 
-v      = dict()
+v     = dict()
 
 v[ 0] = vxy0(0.0, par.mesh_Y["inf"])
 v[ 1] = vxy0(0.0, par.geo_Y["C"])
@@ -116,41 +116,79 @@ d.blocks.copyShiftVerticeLabels( 8, baseBlocks, [ 30, 30, 30, 30,-15,-15,-15,-15
 d.blocks.copyShiftVerticeLabels(16, baseBlocks, [ 15, 15, 15, 15, 30, 30, 30, 30])
 
 # --------------------------------------------------------------------------- #
-# --- Distribution ---------------------------------------------------------- #
+# --- Expansion ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def n(l): s = 0.1; return int(m.ceil(abs(s*par.mesh_scale*l)))
+ex                 = dict()
+ex["free"]         = 4.0
+
+ey                 = dict()
+ey["free_y+"]      = ex["free"]/(v[10][0] - v[5][0]) * (v[0][1] - v[1][1])
+ey["free_y-"]      = ex["free"]/(v[10][0] - v[5][0]) * (v[3][1] - v[4][1])
+
+ez                 = dict()
+ez["free_bottom"]  = ex["free"]/(v[10][0] - v[5][0]) * (v[0][2] - v[30][2])
+ez["free_top"]     = ex["free"]/(v[10][0] - v[5][0]) * (v[45][2] - v[15][2])
+
+# --------------------------------------------------------------------------- #
+
+def n(l): s = 0.2; return int(m.ceil(abs(s*par.mesh_scale*l)))
 
 nx                 = dict()
 nx["conductor"]    = n(v[5][0] - v[0][0])
-nx["free"]         = n(v[10][0] - v[5][0])
-
-d.blocks.distribution.set ( 0, "y", nx["conductor"])
-d.blocks.distribution.set ( 4, "y", nx["free"])
+nx["free"]         = expansion_n_ds(ex["free"],
+                                    (v[5][0] - v[0][0])/nx["conductor"],
+                                    v[10][0] - v[5][0])
 
 ny                 = dict()
-ny["free_y+"]      = n(v[0][1] - v[1][1])
+ny["free_y+"]      = expansion_n_ds(ey["free_y+"],
+                                    (v[5][0] - v[0][0])/nx["conductor"],
+                                    v[0][1] - v[1][1])
 ny["conductor_y+"] = n(v[1][1] - 0.0)
 ny["conductor_y-"] = n(0.0 - v[3][1])
-ny["free_y-"]      = n(v[3][1] - v[4][1])
-
-d.blocks.distribution.set ( 0, "x", ny["free_y+"])
-d.blocks.distribution.set ( 1, "x", ny["conductor_y+"])
-d.blocks.distribution.set ( 2, "x", ny["conductor_y-"])
-d.blocks.distribution.set ( 3, "x", ny["free_y-"])
+ny["free_y-"]      = expansion_n_ds(ey["free_y-"],
+                                    (v[5][0] - v[0][0])/nx["conductor"],
+                                    v[3][1] - v[4][1])
 
 nz                 = dict()
 nz["conductor"]    = n(v[15][2] - v[0][2])
-nz["free_bottom"]  = n(v[0][2] - v[30][2])
-nz["free_top"]     = n(v[45][2] - v[15][2])
+nz["free_bottom"]  = expansion_n_ds(ez["free_bottom"],
+                                    (v[5][0] - v[0][0])/nx["conductor"],
+                                    v[0][2] - v[30][2])
+nz["free_top"]     = expansion_n_ds(ez["free_top"],
+                                    (v[5][0] - v[0][0])/nx["conductor"],
+                                    v[45][2] - v[15][2])
 
-d.blocks.distribution.set ( 0, "z", nz["conductor"])
-d.blocks.distribution.set(  8, "z", nz["free_bottom"])
-d.blocks.distribution.set( 16, "z", nz["free_top"])
+print(ex, ey, ez)
+print(nx, ny, nz)
+
+# --------------------------------------------------------------------------- #
+# --- Distribution ---------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+
+d.blocks.distribution.set( 0, "y", nx["conductor"])
+d.blocks.distribution.set( 4, "y", nx["free"])
+
+d.blocks.distribution.set( 0, "x", ny["free_y+"])
+d.blocks.distribution.set( 1, "x", ny["conductor_y+"])
+d.blocks.distribution.set( 2, "x", ny["conductor_y-"])
+d.blocks.distribution.set( 3, "x", ny["free_y-"])
+
+d.blocks.distribution.set( 0, "z", nz["conductor"])
+d.blocks.distribution.set( 8, "z", nz["free_bottom"])
+d.blocks.distribution.set(16, "z", nz["free_top"])
 
 # --------------------------------------------------------------------------- #
 # --- Grading --------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
+
+d.blocks.grading.set( 4, "y", ex["free"])
+
+d.blocks.grading.set( 0, "x", 1.0/ey["free_y+"])
+d.blocks.grading.set( 3, "x", ey["free_y+"])
+
+d.blocks.grading.set( 8, "z", 1.0/ez["free_bottom"])
+d.blocks.grading.set(16, "z", ez["free_bottom"])
 
 # --------------------------------------------------------------------------- #
 # --- Boundary -------------------------------------------------------------- #

@@ -52,7 +52,7 @@ expressions
 
     mur_conductor0
     {
-        field         sigma;
+        field         mur;
         variables     $materialProperties;
         condition     "set(cellSet_material_conductor0)";
         expression    "mur_low";
@@ -61,7 +61,7 @@ expressions
 
     mur_conductor1
     {
-        field         sigma;
+        field         mur;
         variables     $materialProperties;
         condition     "set(cellSet_material_conductor1)";
         expression    "mur_low";

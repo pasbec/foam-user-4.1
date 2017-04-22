@@ -14,6 +14,9 @@ cp -r 'constant/polyMesh.org/blockMeshDict.py' 'constant/polyMesh/'
 # Run blockMesh
 blockMesh || exit 1
 
+# Renumber mesh
+renumberMesh -overwrite || exit 1
+
 # Mirror mesh in all directions
 directions="x y z"
 for d in $directions; do
@@ -37,3 +40,6 @@ mv "$meshFolder/boundary" \
 
 # Remove polyMesh
 rm -rf "$meshFolder"
+
+# Copy mesh to constant
+cp -r "constant/polyMesh.org" "constant/polyMesh"

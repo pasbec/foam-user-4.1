@@ -47,6 +47,29 @@ def expansion_n_ds_root(e, ds, n, l=None):
 
 def expansion_n_ds(e, ds, l=None, tol=1e-16, maxiter=100):
 
+    """
+    Return distribution size from expansion ratio and start interval
+
+    Length:               l
+    Distribution size:    n
+    Expansion ratio:      e  = de/ds
+    Expansion factor:     f  = e^(1/n-1)
+    Normalized interval:  di = (1 - f^i)/(1 - f^n)
+    Norm. first interval: ds = (1 - f^1)/(1 - f^n)
+    Norm. last interval:  de = (1 - f^(n-1))/(1 - f^n)
+    Interval:             li = di * l
+
+    Args:
+        e: Expansion ratio
+        ds: Start interval
+        l: Length
+        tol: Target residual for root search
+        maxiter: Maxium iteration count for root search
+
+    Returns:
+        Distribution size
+    """
+
     ls = ds
 
     if l: ls /= l
@@ -70,6 +93,29 @@ def expansion_f_ds_root(n, ds, f, l=None):
 
 
 def expansion_f_ds(n, ds, l=None, tol=1e-16, maxiter=100):
+
+    """
+    Return expansion factor from distribution size and start interval
+
+    Length:               l
+    Distribution size:    n
+    Expansion ratio:      e  = de/ds
+    Expansion factor:     f  = e^(1/n-1)
+    Normalized interval:  di = (1 - f^i)/(1 - f^n)
+    Norm. first interval: ds = (1 - f^1)/(1 - f^n)
+    Norm. last interval:  de = (1 - f^(n-1))/(1 - f^n)
+    Interval:             li = di * l
+
+    Args:
+        n: Distribution size
+        ds: Start interval
+        l: Length
+        tol: Target residual for root search
+        maxiter: Maxium iteration count for root search
+
+    Returns:
+        Expansion factor
+    """
 
     if isinstance(n, int) and n > 1:
 
@@ -96,6 +142,26 @@ def expansion_f_ds(n, ds, l=None, tol=1e-16, maxiter=100):
 
 def expansion_f_e(n, e):
 
+    """
+    Return expansion factor from distribution size and expansion ratio
+
+    Length:               l
+    Distribution size:    n
+    Expansion ratio:      e  = de/ds
+    Expansion factor:     f  = e^(1/n-1)
+    Normalized interval:  di = (1 - f^i)/(1 - f^n)
+    Norm. first interval: ds = (1 - f^1)/(1 - f^n)
+    Norm. last interval:  de = (1 - f^(n-1))/(1 - f^n)
+    Interval:             li = di * l
+
+    Args:
+        n: Distribution size
+        e: Expansion ratio
+
+    Returns:
+        Expansion factor
+    """
+
     if isinstance(n, int) and n > 1:
 
         return pow(e, 1.0/(n - 1))
@@ -111,6 +177,26 @@ def expansion_f_e(n, e):
 
 
 def expansion_e_ds(n, ds, l=None):
+
+    """
+    Return expansion ratio from distribution size and start interval
+
+    Length:               l
+    Distribution size:    n
+    Expansion ratio:      e  = de/ds
+    Expansion factor:     f  = e^(1/n-1)
+    Normalized interval:  di = (1 - f^i)/(1 - f^n)
+    Norm. first interval: ds = (1 - f^1)/(1 - f^n)
+    Norm. last interval:  de = (1 - f^(n-1))/(1 - f^n)
+    Interval:             li = di * l
+
+    Args:
+        n: Distribution size
+        ds: Starrt interval
+
+    Returns:
+        Expansion ratio
+    """
 
     if isinstance(n, int) and n > 1:
 
@@ -134,6 +220,26 @@ def expansion_e_ds(n, ds, l=None):
 
 def expansion_e_f(n, f):
 
+    """
+    Return expansion ratio from distribution size and expansion factor
+
+    Length:               l
+    Distribution size:    n
+    Expansion ratio:      e  = de/ds
+    Expansion factor:     f  = e^(1/n-1)
+    Normalized interval:  di = (1 - f^i)/(1 - f^n)
+    Norm. first interval: ds = (1 - f^1)/(1 - f^n)
+    Norm. last interval:  de = (1 - f^(n-1))/(1 - f^n)
+    Interval:             li = di * l
+
+    Args:
+        n: Distribution size
+        f: Expansion factor
+
+    Returns:
+        Expansion ratio
+    """
+
     if isinstance(n, int) and n > 1:
 
         return pow(f, n - 1)
@@ -149,6 +255,27 @@ def expansion_e_f(n, f):
 
 
 def expansion_ds_e(n, e, l=None):
+
+    """
+    Return start interval from distribution size and expansion ratio
+
+    Length:               l
+    Distribution size:    n
+    Expansion ratio:      e  = de/ds
+    Expansion factor:     f  = e^(1/n-1)
+    Normalized interval:  di = (1 - f^i)/(1 - f^n)
+    Norm. first interval: ds = (1 - f^1)/(1 - f^n)
+    Norm. last interval:  de = (1 - f^(n-1))/(1 - f^n)
+    Interval:             li = di * l
+
+    Args:
+        n: Distribution size
+        e: Expansion ratio
+        l: Length
+
+    Returns:
+        Start interval
+    """
 
     if isinstance(n, int) and n > 1:
 
@@ -174,6 +301,27 @@ def expansion_ds_e(n, e, l=None):
 
 def expansion_de_e(n, e, l=None):
 
+    """
+    Return end interval from distribution size and expansion ratio
+
+    Length:               l
+    Distribution size:    n
+    Expansion ratio:      e  = de/ds
+    Expansion factor:     f  = e^(1/n-1)
+    Normalized interval:  di = (1 - f^i)/(1 - f^n)
+    Norm. first interval: ds = (1 - f^1)/(1 - f^n)
+    Norm. last interval:  de = (1 - f^(n-1))/(1 - f^n)
+    Interval:             li = di * l
+
+    Args:
+        n: Distribution size
+        e: Expansion ratio
+        l: Length
+
+    Returns:
+        End interval
+    """
+
     if isinstance(n, int) and n > 1:
 
         f = expansion_f_e(n, e)
@@ -197,6 +345,27 @@ def expansion_de_e(n, e, l=None):
 
 
 def expansion(n, e, l=None):
+
+    """
+    Return all intervals from distribution size and expansion ratio
+
+    Length:               l
+    Distribution size:    n
+    Expansion ratio:      e  = de/ds
+    Expansion factor:     f  = e^(1/n-1)
+    Normalized interval:  di = (1 - f^i)/(1 - f^n)
+    Norm. first interval: ds = (1 - f^1)/(1 - f^n)
+    Norm. last interval:  de = (1 - f^(n-1))/(1 - f^n)
+    Interval:             li = di * l
+
+    Args:
+        n: Distribution size
+        e: Expansion ratio
+        l: Length
+
+    Returns:
+        All intervals from ds to de
+    """
 
     if isinstance(n, int) and n > 0:
 
