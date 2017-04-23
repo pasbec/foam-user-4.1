@@ -139,40 +139,50 @@ def fig(p, name):
         axs[name] = fig.add_subplot(111)
         ax = axs[name]
 
-        opData = data["Opera3D"]["ortho"]["1.000"]["10000"]["y2"]
-        ofData = data["eddyCurrentFoam"]["ortho"]["1.000"]["10000"]["y2"]
+        ax.minorticks_on()
 
-        # TODO Factor of 2??????
+        ax.set_xlim([-75,75])
+        #ax.set_ylim([0,30])
 
-        #[10^6 A/m^-2]
-        ax.plot(opData["y"], opData["jIm_x"], color="hzdr-blue", linestyle="--")
-        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jIm_x"], color="hzdr-blue",
-                label=r"${\boldsymbol{j}_x}_{\,\scriptstyle\mathfrak{Im}}$")
+        #ax.set_xlabel(labelAxisR)
+        #ax.set_ylabel(labelAxisZ)
 
-        #[10^6 A/m^-2]
-        ax.plot(opData["y"], opData["jIm_y"], color="hzdr-purple", linestyle="--")
-        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jIm_y"], color="hzdr-purple",
-                label=r"${\boldsymbol{j}_y}_{\,\scriptstyle\mathfrak{Im}}$")
+        #ax.set_aspect("equal")
 
-        #[10^6 A/m^-2]
-        ax.plot(opData["y"], opData["jIm_z"], color="hzdr-red", linestyle="--")
-        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jIm_z"], color="hzdr-red",
-                label=r"${\boldsymbol{j}_z}_{\,\scriptstyle\mathfrak{Im}}$")
+        opData = data["Opera3D"]["ortho"]["1.000"]["1000"]["y2"]
+        ofData = data["eddyCurrentFoam"]["ortho"]["1.000"]["1000"]["y2"]
 
-        #[10^6 A/m^-2]
-        ax.plot(opData["y"], opData["jRe_x"], color="hzdr-orange", linestyle="--")
-        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jRe_x"], color="hzdr-orange",
-                label=r"${\boldsymbol{j}_x}_{\,\scriptstyle\mathfrak{Re}}$")
+        complexNames = ["Re", "Im"]
+        dirNames = ["x", "y", "z"]
 
-        #[10^6 A/m^-2]
-        ax.plot(opData["y"], opData["jRe_y"], color="hzdr-yellow", linestyle="--")
-        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jRe_y"], color="hzdr-yellow",
-                label=r"${\boldsymbol{j}_y}_{\,\scriptstyle\mathfrak{Re}}$")
+        colors = dict()
 
-        #[10^6 A/m^-2]
-        ax.plot(opData["y"], opData["jRe_z"], color="hzdr-green", linestyle="--")
-        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jRe_z"], color="hzdr-green",
-                label=r"${\boldsymbol{j}_z}_{\,\scriptstyle\mathfrak{Re}}$")
+        colors["Re"] = ["hzdr-orange", "hzdr-yellow", "hzdr-green"]
+        colors["Im"] = ["hzdr-blue", "hzdr-purple", "hzdr-red"]
+
+        markers = dict()
+
+        markers["Re"] = ["o", "v", "^"]
+        markers["Im"] = ["s", "d", "*"]
+
+        # j in [10^6 A/m^-2]
+        for c in complexNames:
+
+            for i, d in enumerate(dirNames):
+
+                var = "j" + c + "_" + d
+                color = colors[c][i]
+                marker = markers[c][i]
+                label = r"${\boldsymbol{j}_" + d + r"}_{\,\scriptstyle\mathfrak{" + c + r"}}$"
+
+                ax.plot(opData["y"], opData[var], color=color, linestyle="--")
+
+                ax.plot(1e+3*ofData["y"], 1e-6*ofData[var], color=color, linestyle="-",
+                        marker=marker, markevery=5, markersize=5,
+                        markeredgecolor=color, markerfacecolor=color,
+                        label=label)
+
+        ax.legend(bbox_to_anchor=(0.0, 1.1, 1.0, .1), loc="upper center", ncol=3, mode="expand", borderaxespad=0.)
 
         #[10^-2 T]
         #ax.plot(opData["y"], 1e+2*opData["BRe_y"], label="Opera3D")
@@ -182,15 +192,7 @@ def fig(p, name):
         #ax.plot(opData["y"], 1e+2*opData["F_y"], label="Opera3D")
         #ax.plot(1e+3*ofData["y"], 1e-4*ofData["F_y"], label="eddyCurrentFoam")
 
-        ax.legend()
-
-        #ax.set_xlim([0,30])
-        #ax.set_ylim([0,30])
-
-        #ax.set_xlabel(labelAxisR)
-        #ax.set_ylabel(labelAxisZ)
-
-        #ax.set_aspect("equal")
+        ax.legend(bbox_to_anchor=(0.0, 1.1, 1.0, .1), loc="upper center", ncol=3, mode="expand", borderaxespad=0.)
 
         #set = "Analytical"
         #c = ax.contour(R[set], Z[set], F[set][1],
