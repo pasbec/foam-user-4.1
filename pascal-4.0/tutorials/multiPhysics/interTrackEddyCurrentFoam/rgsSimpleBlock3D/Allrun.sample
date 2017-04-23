@@ -2,7 +2,7 @@
 
 if [[ -z "$1" ]]; then
 
-    echo 'Results name missing. Use $1!'
+    echo 'Case name missing. Use $1!'
     exit 1
 
 fi
@@ -14,20 +14,27 @@ if [[ -z "$2" ]]; then
 
 fi
 
+if [[ -z "$2" ]]; then
+
+    echo 'Frequnency name missing. Use $3!'
+    exit 1
+
+fi
+
 rm -rf 'sets'
 
 sample -region 'region_conductor'
 
-resultsDir="results/$1"
+resultsDir="results"
 timeDir='sets/region_conductor/0.0001'
 
 lines="x1 y1 y2 z1"
 
 for l in $lines; do
 
-    fileName="$resultsDir/data_eddyCurrentFoam_${2}_line_${l}.dat"
+    fileName="$resultsDir/data_eddyCurrentFoam_${1}_m${2}_f${3}_line_${l}.dat"
 
-    header="# s"
+    header="# ${l::-1}"
     header="$header jRe_x jRe_y jRe_z"
     header="$header jIm_x jIm_y jIm_z"
     header="$header BRe_x BRe_y BRe_z"
@@ -35,7 +42,7 @@ for l in $lines; do
     header="$header F_x F_y F_z"
     header="$header VReGrad_x VReGrad_y VReGrad_z"
     header="$header VImGrad_x VImGrad_y VImGrad_z"
-    header="$header s2"
+    header="$header s"
     header="$header VRe"
     header="$header VIm"
     header="$header sigma"

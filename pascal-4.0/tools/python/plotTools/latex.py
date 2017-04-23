@@ -60,7 +60,7 @@ def latexify(
 
     mpl.rcParams["text.usetex"] = True
     mpl.rcParams["text.latex.unicode"] = True
-    #mpl.rcParams["text.latex.preamble"] = ["\usepackage{gensymb}"]
+    mpl.rcParams["text.latex.preamble"] = ["\\usepackage{amsmath,amssymb,amsthm,amsfonts}"]
 
     if fontfamily is not None:
 

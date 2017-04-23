@@ -39,9 +39,6 @@ nz = 61
 fontsize   = 16
 fontfamily = "serif"
 
-dataBaseName = "data"
-plotBaseName = "plot"
-
 # --------------------------------------------------------------------------- #
 # --- Functions ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -61,28 +58,59 @@ names = dict()
 
 # --------------------------------------------------------------------------- #
 
+def readdata(set):
+
+    cases = ["ortho", "nonortho"]
+    meshes = ["1.000"]
+    lines = ["x1", "y1", "y2", "z1"]
+    frequencies = ["1kHz", "10kHz", "100kHz"]
+
+    setData = dict()
+    setNames = dict()
+
+    for case in cases:
+
+        setData[case] = dict()
+        setNames[case] = dict()
+
+        for mesh in meshes:
+
+            setData[case][mesh] = dict()
+            setNames[case][mesh] = dict()
+
+            for freq in frequencies:
+
+                setData[case][mesh][freq] = dict()
+                setNames[case][mesh][freq] = dict()
+
+                for line in lines:
+
+                    fileName = __dir__ + "/data_" + set \
+                             + "_" + case + "_m" + mesh \
+                             + "_f" + freq + "_line_" + line + ".dat"
+
+                    if os.path.isfile(fileName):
+
+                        print("Reading file: " + fileName)
+
+                        setData[case][mesh][freq][line] = \
+                            np.genfromtxt(fileName, comments='#', names=True)
+                        setNames[case][mesh][freq][line] = \
+                            setData[case][mesh][freq][line].dtype.names
+
+    return setData, setNames
+
+# --------------------------------------------------------------------------- #
+
+set = "Opera3D"
+
+data[set], names[set] = readdata(set)
+
+# --------------------------------------------------------------------------- #
+
 set = "eddyCurrentFoam"
 
-data[set] = dict()
-names[set] = dict()
-
-meshes = ["1.000"]
-lines = ["x1", "y1", "y2", "z1"]
-
-# Read data
-for mesh in meshes:
-
-    data[set][mesh] = dict()
-    names[set][mesh] = dict()
-
-    for line in lines:
-
-        fileName = __dir__ + "/" + dataBaseName + "_" + set \
-                 + "_" + mesh + "_line_" + line + ".dat"
-
-        data[set][mesh][line] = np.genfromtxt(fileName, comments='#',
-                                              names=True, excludelist=["s2"])
-        names[set][mesh][line] = data[set][mesh][line].dtype.names
+data[set], names[set] = readdata(set)
 
 # --------------------------------------------------------------------------- #
 # --- Plot settings --------------------------------------------------------- #
@@ -111,9 +139,50 @@ def fig(p, name):
         axs[name] = fig.add_subplot(111)
         ax = axs[name]
 
-        ax.plot(data["eddyCurrentFoam"]["1.000"]["y2"]["s"],
-                data["eddyCurrentFoam"]["1.000"]["y2"]["VRe"],
-                label="VRe")
+        opData = data["Opera3D"]["ortho"]["1.000"]["1kHz"]["y2"]
+        ofData = data["eddyCurrentFoam"]["ortho"]["1.000"]["1kHz"]["y2"]
+
+        # TODO Factor of 2??????
+
+        #[10^6 A/m^-2]
+        ax.plot(opData["y"], opData["jIm_x"]/m.sqrt(2), color="hzdr-blue", linestyle="--")
+        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jIm_x"], color="hzdr-blue",
+                label=r"${\boldsymbol{j}_x}_{\,\scriptstyle\mathfrak{Im}}$")
+
+        #[10^6 A/m^-2]
+        ax.plot(opData["y"], opData["jIm_y"]/m.sqrt(2), color="hzdr-purple", linestyle="--")
+        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jIm_y"], color="hzdr-purple",
+                label=r"${\boldsymbol{j}_y}_{\,\scriptstyle\mathfrak{Im}}$")
+
+        #[10^6 A/m^-2]
+        ax.plot(opData["y"], opData["jIm_z"]/m.sqrt(2), color="hzdr-red", linestyle="--")
+        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jIm_z"], color="hzdr-red",
+                label=r"${\boldsymbol{j}_z}_{\,\scriptstyle\mathfrak{Im}}$")
+
+        #[10^6 A/m^-2]
+        ax.plot(opData["y"], opData["jRe_x"]/m.sqrt(2), color="hzdr-orange", linestyle="--")
+        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jRe_x"], color="hzdr-orange",
+                label=r"${\boldsymbol{j}_x}_{\,\scriptstyle\mathfrak{Re}}$")
+
+        #[10^6 A/m^-2]
+        ax.plot(opData["y"], opData["jRe_y"]/m.sqrt(2), color="hzdr-yellow", linestyle="--")
+        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jRe_y"], color="hzdr-yellow",
+                label=r"${\boldsymbol{j}_y}_{\,\scriptstyle\mathfrak{Re}}$")
+
+        #[10^6 A/m^-2]
+        ax.plot(opData["y"], opData["jRe_z"]/m.sqrt(2), color="hzdr-green", linestyle="--")
+        ax.plot(1e+3*ofData["y"], 1e-6*ofData["jRe_z"], color="hzdr-green",
+                label=r"${\boldsymbol{j}_z}_{\,\scriptstyle\mathfrak{Re}}$")
+
+        #[10^-2 T]
+        #ax.plot(opData["y"], 1e+2*opData["BRe_y"]/m.sqrt(2), label="Opera3D")
+        #ax.plot(1e+3*ofData["y"], 1e+2*ofData["BRe_y"], label="eddyCurrentFoam")
+
+        ##[10^4 N/m^3]
+        #ax.plot(opData["y"], 1e+2*opData["F_y"]/2.0, label="Opera3D")
+        #ax.plot(1e+3*ofData["y"], 1e-4*ofData["F_y"], label="eddyCurrentFoam")
+
+        ax.legend()
 
         #ax.set_xlim([0,30])
         #ax.set_ylim([0,30])
@@ -135,7 +204,7 @@ def fig(p, name):
     ax(fig, axs, "test")
 
     #fig.set_size_inches(sizeCompX, sizeCompY)
-    #fig.savefig(__dir__+"/"+plotBaseName+name+".pdf", bbox_inches="tight")
+    #fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
     fig.savefig(__dir__+ "/" + name + ".pdf", bbox_inches="tight")
 
 fig(plots, "test")
