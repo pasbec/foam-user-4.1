@@ -55,7 +55,7 @@ norms = {"inf": norm_inf, "1": norm_1, "2": norm_2}
 
 data = dict()
 names = dict()
-scale = dict()
+scales = dict()
 
 # --------------------------------------------------------------------------- #
 
@@ -107,13 +107,25 @@ set = "Opera3D"
 
 data[set], names[set] = readdata(set)
 
-scale[set] = dict()
-scale[set]["x"] = 1e-3
-scale[set]["y"] = 1e-3
-scale[set]["z"] = 1e-3
-scale[set]["j"] = 1e+6
-scale[set]["B"] = 1.0
-scale[set]["F"] = 1e+6
+scales[set] = dict()
+scales[set]["x"] = 1e-3
+scales[set]["y"] = 1e-3
+scales[set]["z"] = 1e-3
+scales[set]["jRe_x"] = 1e+6
+scales[set]["jRe_y"] = 1e+6
+scales[set]["jRe_z"] = 1e+6
+scales[set]["jIm_x"] = 1e+6
+scales[set]["jIm_y"] = 1e+6
+scales[set]["jIm_z"] = 1e+6
+scales[set]["BRe_x"] = 1.0
+scales[set]["BRe_y"] = 1.0
+scales[set]["BRe_z"] = 1.0
+scales[set]["BIm_x"] = 1.0
+scales[set]["BIm_y"] = 1.0
+scales[set]["BIm_z"] = 1.0
+scales[set]["F_x"] = 1e+6
+scales[set]["F_y"] = 1e+6
+scales[set]["F_z"] = 1e+6
 
 # --------------------------------------------------------------------------- #
 
@@ -121,13 +133,26 @@ set = "eddyCurrentFoam"
 
 data[set], names[set] = readdata(set)
 
-scale[set] = dict()
-scale[set]["x"] = 1.0
-scale[set]["y"] = 1.0
-scale[set]["z"] = 1.0
-scale[set]["j"] = 1.0
-scale[set]["B"] = 1.0
-scale[set]["F"] = 1.0
+scales[set] = dict()
+scales[set]["x"] = 1.0
+scales[set]["y"] = 1.0
+scales[set]["z"] = 1.0
+scales[set]["jRe_x"] = 1.0
+scales[set]["jRe_y"] = 1.0
+scales[set]["jRe_z"] = 1.0
+scales[set]["jIm_x"] = 1.0
+scales[set]["jIm_y"] = 1.0
+scales[set]["jIm_z"] = 1.0
+scales[set]["BRe_x"] = 1.0
+scales[set]["BRe_y"] = 1.0
+scales[set]["BRe_z"] = 1.0
+scales[set]["BIm_x"] = 1.0
+scales[set]["BIm_y"] = 1.0
+scales[set]["BIm_z"] = 1.0
+scales[set]["F_x"] = 1.0
+scales[set]["F_y"] = 1.0
+scales[set]["F_z"] = 1.0
+# VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z VRe VIm sigma mur
 
 # --------------------------------------------------------------------------- #
 # --- Plot settings --------------------------------------------------------- #
@@ -137,16 +162,76 @@ latex.latexify(fontsize=fontsize, fontfamily=fontfamily, locale="de_DE.utf8")
 
 hzdr.colors()
 
+alabels = dict()
+alabels["x"] = r"$x ~ [\mathrm{mm}]$"
+alabels["y"] = r"$y ~ [\mathrm{mm}]$"
+alabels["z"] = r"$z ~ [\mathrm{mm}]$"
+
+labels = dict()
+labels["jRe_x"] = r"${j_x}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["jRe_y"] = r"${j_y}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["jRe_z"] = r"${j_z}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["jIm_x"] = r"${j_x}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["jIm_y"] = r"${j_y}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["jIm_z"] = r"${j_z}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["BRe_x"] = r"${B_x}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["BRe_y"] = r"${B_y}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["BRe_z"] = r"${B_z}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["BIm_x"] = r"${B_x}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["BIm_y"] = r"${B_y}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["BIm_z"] = r"${B_z}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["F_x"] = r"$\left<{F_x}\right>_{t}$"
+labels["F_y"] = r"$\left<{F_y}\right>_{t}$"
+labels["F_z"] = r"$\left<{F_z}\right>_{t}$"
+# VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z VRe VIm sigma mur
+
+colors = dict()
+colors["jRe_x"] = "hzdr-orange"
+colors["jRe_y"] = "hzdr-yellow"
+colors["jRe_z"] = "hzdr-green"
+colors["jIm_x"] = "hzdr-blue"
+colors["jIm_y"] = "hzdr-purple"
+colors["jIm_z"] = "hzdr-red"
+colors["BRe_x"] = "hzdr-orange"
+colors["BRe_y"] = "hzdr-yellow"
+colors["BRe_z"] = "hzdr-green"
+colors["BIm_x"] = "hzdr-blue"
+colors["BIm_y"] = "hzdr-purple"
+colors["BIm_z"] = "hzdr-red"
+colors["F_x"] = "hzdr-orange"
+colors["F_y"] = "hzdr-yellow"
+colors["F_z"] = "hzdr-green"
+# VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z VRe VIm sigma mur
+
+markers = dict()
+
+markers["jRe_x"] = "o"
+markers["jRe_y"] = "v"
+markers["jRe_z"] = "^"
+markers["jIm_x"] = "s"
+markers["jIm_y"] = "d"
+markers["jIm_z"] = "*"
+markers["BRe_x"] = "o"
+markers["BRe_y"] = "v"
+markers["BRe_z"] = "^"
+markers["BIm_x"] = "s"
+markers["BIm_y"] = "d"
+markers["BIm_z"] = "*"
+markers["F_x"] = "o"
+markers["F_y"] = "v"
+markers["F_z"] = "^"
+# VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z VRe VIm sigma mur
+
 plots = dict()
 
 # --------------------------------------------------------------------------- #
 # --- Test ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-def fig(p, case, opmesh, ofmesh, freq, line, field, scaleX=1.0, scaleY=1.0):
+def fig(p, case, opmesh, ofmesh, freq, line, name, fields, scaleX=1.0, scaleY=1.0):
 
     name = "plot_" + case + "_opm" + opmesh + "_ofm" + ofmesh + "_f" \
-         + freq + "_line_" + line + "_" + field
+         + freq + "_line_" + line + "_" + name
 
     p[name] = {"fig": plt.figure(), "axs": dict()}
     f = p[name]
@@ -164,61 +249,41 @@ def fig(p, case, opmesh, ofmesh, freq, line, field, scaleX=1.0, scaleY=1.0):
         ax.set_xlim([-75,75])
         #ax.set_ylim([0,30])
 
-        ax.set_xlabel(r"$y ~ [\mathrm{mm}]$")
+        ax.set_xlabel(alabels[line[:-1]])
         #ax.set_ylabel(labelAxisZ)
 
         #ax.set_aspect("equal")
 
-        opData = data["Opera3D"][case][opmesh][freq]["y2"]
-        ofData = data["eddyCurrentFoam"][case][ofmesh][freq]["y2"]
+        opData = data["Opera3D"][case][opmesh][freq][line]
+        ofData = data["eddyCurrentFoam"][case][ofmesh][freq][line]
 
-        complexNames = ["Re", "Im"]
-        dirNames = ["x", "y", "z"]
+        opsx = scales["Opera3D"][line[:-1]]
+        ofsx = scales["eddyCurrentFoam"][line[:-1]]
 
-        colors = dict()
+        for field in fields:
 
-        colors["Re"] = ["hzdr-orange", "hzdr-yellow", "hzdr-green"]
-        colors["Im"] = ["hzdr-blue", "hzdr-purple", "hzdr-red"]
+            opsy = scales["Opera3D"][field]
+            ofsy = scales["eddyCurrentFoam"][field]
 
-        markers = dict()
+            color = colors[field]
+            marker = markers[field]
+            label = labels[field]
 
-        markers["Re"] = ["o", "v", "^"]
-        markers["Im"] = ["s", "d", "*"]
+            ax.plot(opsx*scaleX*opData[line[:-1]], opsy*scaleY*opData[field],
+                    color=color, linestyle="--")
 
-        opsx = scale["Opera3D"]["y"]
-        opsy = scale["Opera3D"][field]
-        ofsx = scale["eddyCurrentFoam"]["y"]
-        ofsy = scale["eddyCurrentFoam"][field]
+            ax.plot(ofsx*scaleX*ofData[line[:-1]], ofsy*scaleY*ofData[field],
+                    color=color, linestyle="-",
+                    marker=marker, markevery=5, markersize=5,
+                    markeredgecolor=color, markerfacecolor=color,
+                    label=label)
 
-        for c in complexNames:
+        legendCols  = 3
+        legendShift = 0.035 * (len(fields)/legendCols -1)
 
-            for i, d in enumerate(dirNames):
-
-                var = field + c + "_" + d
-                color = colors[c][i]
-                marker = markers[c][i]
-                label = r"${\boldsymbol{" + field + "}_" \
-                      + d + r"}_{\,\scriptstyle\mathfrak{" + c + r"}}$"
-
-                ax.plot(opsx*scaleX*opData["y"], opsy*scaleY*opData[var],
-                        color=color, linestyle="--")
-
-                ax.plot(ofsx*scaleX*ofData["y"], ofsy*scaleY*ofData[var],
-                        color=color, linestyle="-",
-                        marker=marker, markevery=5, markersize=5,
-                        markeredgecolor=color, markerfacecolor=color,
-                        label=label)
-
-        ax.legend(bbox_to_anchor=(0.0, 1.1, 1.0, .1), loc="upper center",
-                  ncol=3, mode="expand", borderaxespad=0.)
-
-        #[10^-2 T]
-        #ax.plot(opData["y"], 1e+2*opData["BRe_y"], label="Opera3D")
-        #ax.plot(1e+3*ofData["y"], 1e+2*ofData["BRe_y"], label="eddyCurrentFoam")
-
-        ##[10^4 N/m^3]
-        #ax.plot(opData["y"], 1e+2*opData["F_y"], label="Opera3D")
-        #ax.plot(1e+3*ofData["y"], 1e-4*ofData["F_y"], label="eddyCurrentFoam")
+        ax.legend(bbox_to_anchor=(0.0, 1.05+legendShift, 1.0, 0.05+legendShift),
+                  loc="upper center", ncol=legendCols,
+                  mode="expand", borderaxespad=0.)
 
     ax(fig, axs)
 
@@ -226,10 +291,16 @@ def fig(p, case, opmesh, ofmesh, freq, line, field, scaleX=1.0, scaleY=1.0):
     fig.savefig(__dir__ + "/" + name + ".pdf", bbox_inches="tight")
 
 fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
     scaleX=1e+3, scaleY=1e-6)
 
 fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "B",
-    scaleX=1e+3, scaleY=1.0)
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
