@@ -55,6 +55,7 @@ norms = {"inf": norm_inf, "1": norm_1, "2": norm_2}
 
 data = dict()
 names = dict()
+scale = dict()
 
 # --------------------------------------------------------------------------- #
 
@@ -106,11 +107,27 @@ set = "Opera3D"
 
 data[set], names[set] = readdata(set)
 
+scale[set] = dict()
+scale[set]["x"] = 1e-3
+scale[set]["y"] = 1e-3
+scale[set]["z"] = 1e-3
+scale[set]["j"] = 1e+6
+scale[set]["B"] = 1.0
+scale[set]["F"] = 1e+6
+
 # --------------------------------------------------------------------------- #
 
 set = "eddyCurrentFoam"
 
 data[set], names[set] = readdata(set)
+
+scale[set] = dict()
+scale[set]["x"] = 1.0
+scale[set]["y"] = 1.0
+scale[set]["z"] = 1.0
+scale[set]["j"] = 1.0
+scale[set]["B"] = 1.0
+scale[set]["F"] = 1.0
 
 # --------------------------------------------------------------------------- #
 # --- Plot settings --------------------------------------------------------- #
@@ -126,7 +143,10 @@ plots = dict()
 # --- Test ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-def fig(p, name):
+def fig(p, case, opmesh, ofmesh, freq, line, field, scaleX=1.0, scaleY=1.0):
+
+    name = "plot_" + case + "_opm" + opmesh + "_ofm" + ofmesh + "_f" \
+         + freq + "_line_" + line + "_" + field
 
     p[name] = {"fig": plt.figure(), "axs": dict()}
     f = p[name]
@@ -134,7 +154,7 @@ def fig(p, name):
     fig = f["fig"]
     axs = f["axs"]
 
-    def ax(f, axs, name):
+    def ax(f, axs, name="default"):
 
         axs[name] = fig.add_subplot(111)
         ax = axs[name]
@@ -144,13 +164,13 @@ def fig(p, name):
         ax.set_xlim([-75,75])
         #ax.set_ylim([0,30])
 
-        #ax.set_xlabel(labelAxisR)
+        ax.set_xlabel(r"$y ~ [\mathrm{mm}]$")
         #ax.set_ylabel(labelAxisZ)
 
         #ax.set_aspect("equal")
 
-        opData = data["Opera3D"]["ortho"]["1.000"]["1000"]["y2"]
-        ofData = data["eddyCurrentFoam"]["ortho"]["1.000"]["1000"]["y2"]
+        opData = data["Opera3D"][case][opmesh][freq]["y2"]
+        ofData = data["eddyCurrentFoam"][case][ofmesh][freq]["y2"]
 
         complexNames = ["Re", "Im"]
         dirNames = ["x", "y", "z"]
@@ -165,24 +185,32 @@ def fig(p, name):
         markers["Re"] = ["o", "v", "^"]
         markers["Im"] = ["s", "d", "*"]
 
-        # j in [10^6 A/m^-2]
+        opsx = scale["Opera3D"]["y"]
+        opsy = scale["Opera3D"][field]
+        ofsx = scale["eddyCurrentFoam"]["y"]
+        ofsy = scale["eddyCurrentFoam"][field]
+
         for c in complexNames:
 
             for i, d in enumerate(dirNames):
 
-                var = "j" + c + "_" + d
+                var = field + c + "_" + d
                 color = colors[c][i]
                 marker = markers[c][i]
-                label = r"${\boldsymbol{j}_" + d + r"}_{\,\scriptstyle\mathfrak{" + c + r"}}$"
+                label = r"${\boldsymbol{" + field + "}_" \
+                      + d + r"}_{\,\scriptstyle\mathfrak{" + c + r"}}$"
 
-                ax.plot(opData["y"], opData[var], color=color, linestyle="--")
+                ax.plot(opsx*scaleX*opData["y"], opsy*scaleY*opData[var],
+                        color=color, linestyle="--")
 
-                ax.plot(1e+3*ofData["y"], 1e-6*ofData[var], color=color, linestyle="-",
+                ax.plot(ofsx*scaleX*ofData["y"], ofsy*scaleY*ofData[var],
+                        color=color, linestyle="-",
                         marker=marker, markevery=5, markersize=5,
                         markeredgecolor=color, markerfacecolor=color,
                         label=label)
 
-        ax.legend(bbox_to_anchor=(0.0, 1.1, 1.0, .1), loc="upper center", ncol=3, mode="expand", borderaxespad=0.)
+        ax.legend(bbox_to_anchor=(0.0, 1.1, 1.0, .1), loc="upper center",
+                  ncol=3, mode="expand", borderaxespad=0.)
 
         #[10^-2 T]
         #ax.plot(opData["y"], 1e+2*opData["BRe_y"], label="Opera3D")
@@ -192,24 +220,16 @@ def fig(p, name):
         #ax.plot(opData["y"], 1e+2*opData["F_y"], label="Opera3D")
         #ax.plot(1e+3*ofData["y"], 1e-4*ofData["F_y"], label="eddyCurrentFoam")
 
-        ax.legend(bbox_to_anchor=(0.0, 1.1, 1.0, .1), loc="upper center", ncol=3, mode="expand", borderaxespad=0.)
-
-        #set = "Analytical"
-        #c = ax.contour(R[set], Z[set], F[set][1],
-                       #levels=levels[1])
-        #cl = ax.clabel(c, c.levels[0::2],
-                       #inline=True, fmt="%g", fontsize=fontsize)
-
-        #[l.set_bbox(dict(facecolor="white", edgecolor="none", pad=2)) for l in cl]
-        #[l.set_text('{:n}'.format(float(l.get_text()))) for l in cl]
-
-    ax(fig, axs, "test")
+    ax(fig, axs)
 
     #fig.set_size_inches(sizeCompX, sizeCompY)
-    #fig.savefig(__dir__+"/"+baseName+name+".pdf", bbox_inches="tight")
-    fig.savefig(__dir__+ "/" + name + ".pdf", bbox_inches="tight")
+    fig.savefig(__dir__ + "/" + name + ".pdf", bbox_inches="tight")
 
-fig(plots, "test")
+fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "j",
+    scaleX=1e+3, scaleY=1e-6)
+
+fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "B",
+    scaleX=1e+3, scaleY=1.0)
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
