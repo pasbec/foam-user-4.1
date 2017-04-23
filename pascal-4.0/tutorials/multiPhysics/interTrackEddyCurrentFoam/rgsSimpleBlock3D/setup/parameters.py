@@ -91,7 +91,7 @@ coils_n         = 3
 coils_step      = 13.0
 coils_origin    = [0.0, 0.0, 9.0]
 
-coils_current   = 1000.0
+coils_current   = 1000.0 * m.sqrt(2)
 coils_nNonOrto  = 10
 coils_frequency = 10000.0
 

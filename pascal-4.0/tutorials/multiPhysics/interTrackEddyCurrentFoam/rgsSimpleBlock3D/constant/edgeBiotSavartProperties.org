@@ -22,8 +22,8 @@ inductors
     {
         file       "coil0.eMesh";
         reverse    false;
-        current    27.7777777778;
-        filaments  36;
+        current    1414.21356237;
+        filaments  1;
         phase      0.0;
     }
     
@@ -31,8 +31,8 @@ inductors
     {
         file       "coil1.eMesh";
         reverse    false;
-        current    27.7777777778;
-        filaments  36;
+        current    1414.21356237;
+        filaments  1;
         phase      0.0;
     }
     
@@ -40,8 +40,8 @@ inductors
     {
         file       "coil2.eMesh";
         reverse    false;
-        current    27.7777777778;
-        filaments  36;
+        current    1414.21356237;
+        filaments  1;
         phase      0.0;
     }
 }
