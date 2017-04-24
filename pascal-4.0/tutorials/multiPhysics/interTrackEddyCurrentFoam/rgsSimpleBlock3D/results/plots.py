@@ -62,7 +62,7 @@ scales = dict()
 def readdata(set):
 
     cases = ["ortho", "nonortho"]
-    meshes = ["1.000"]
+    meshes = ["1.000", "1.500"]
     lines = ["x1", "y1", "y2", "z1"]
     frequencies = ["1000", "10000", "100000"]
 
