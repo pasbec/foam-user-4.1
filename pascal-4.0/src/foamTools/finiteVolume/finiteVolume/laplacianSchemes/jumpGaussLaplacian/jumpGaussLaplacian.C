@@ -180,10 +180,6 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
     const surfaceScalarField& magSf = mesh.magSf();
     const scalarField& magSfIn = magSf.internalField();
 
-    // Cosinus factors for one-sided gradient
-    const surfaceScalarField cosAlpha = vfFluxConsScheme_.cosAlphaOneSided()();
-    const scalarField& cosAlphaIn = cosAlpha.internalField();
-
     // Gamma
     const volGTypeField& gamma = gamma_;
     const Field<GType>& gammaIn = gamma.internalField();
@@ -209,13 +205,11 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
         scalar gammaOwn = mag(gammaIn[own]);
         scalar gammaNei = mag(gammaIn[nei]);
 
-        jumpOwnFluxIn[faceI] = cosAlphaIn[faceI]
-                             * gammaMagSfIn[faceI]/magSfIn[faceI]
+        jumpOwnFluxIn[faceI] = gammaMagSfIn[faceI]/magSfIn[faceI]
                              * (1.0 - gammaOwn/gammaNei) * wP
                              * jumpFluxIn[faceI];
 
-        jumpNeiFluxIn[faceI] = cosAlphaIn[faceI]
-                             * gammaMagSfIn[faceI]/magSfIn[faceI]
+        jumpNeiFluxIn[faceI] = gammaMagSfIn[faceI]/magSfIn[faceI]
                              * (1.0 - gammaNei/gammaOwn) * wN
                              * jumpFluxIn[faceI];
     }
@@ -234,8 +228,6 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
         const scalarField& weightsPatch = weights.boundaryField()[patchI];
         const scalarField& magSfPatch = magSf.boundaryField()[patchI];
 
-        const scalarField& cosAlphaPatch = cosAlpha.boundaryField()[patchI];
-
         const Field<GType>& gammaPatch = gamma.boundaryField()[patchI];
         const Field<Type>& jumpFluxPatch = jumpFlux.boundaryField()[patchI];
 
@@ -253,8 +245,7 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
             scalar gammaOwn = mag(gammaIn[own]);
             scalar gammaNei = mag(gammaPatch[faceI]);
 
-            jumpOwnFluxPatch[faceI] = cosAlphaPatch[faceI]
-                                    * gammaMagSfPatch[faceI]/magSfPatch[faceI]
+            jumpOwnFluxPatch[faceI] = gammaMagSfPatch[faceI]/magSfPatch[faceI]
                                     * (1.0 - gammaOwn/gammaNei) * wP
                                     * jumpFluxPatch[faceI];
         }
@@ -289,13 +280,13 @@ void jumpGaussLaplacian<Type, GType>::addSnGradsCorrection
 
     const fvMesh& mesh = this->mesh();
 
-    tmp<surfaceTypeField > tfaceOwnFluxCorr
+    tmp<surfaceTypeField > tfaceFluxCorr
     (
         new surfaceTypeField
         (
             IOobject
             (
-                "faceOwnFluxCorr("+vf.name()+')',
+                "faceFluxCorr("+vf.name()+')',
                 vf.instance(),
                 mesh,
                 IOobject::NO_READ,
@@ -310,137 +301,34 @@ void jumpGaussLaplacian<Type, GType>::addSnGradsCorrection
             )
         )
     );
-    surfaceTypeField& faceOwnFluxCorr = tfaceOwnFluxCorr();
-    Field<Type>& faceOwnFluxCorrIn = faceOwnFluxCorr.internalField();
-
-    tmp<surfaceTypeField> tfaceNeiFluxCorr
-    (
-        new surfaceTypeField
-        (
-            IOobject
-            (
-                "faceNeiFluxCorr("+vf.name()+')',
-                vf.instance(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensioned<Type>
-            (
-                word(),
-                gammaMagSf.dimensions()*vf.dimensions()/dimLength,
-                pTraits<Type>::zero
-            )
-        )
-    );
-    surfaceTypeField& faceNeiFluxCorr = tfaceNeiFluxCorr();
-    Field<Type>& faceNeiFluxCorrIn = faceNeiFluxCorr.internalField();
+    surfaceTypeField& faceFluxCorr = tfaceFluxCorr();
 
     if (!mesh.orthogonal())
     {
-        // Mesh addressing
-        const unallocLabelList& owner = mesh.owner();
-        const unallocLabelList& neighbour = mesh.neighbour();
-
         // Mesh and basic surface interpolation data
-        const surfaceVectorField& Sf = mesh.Sf();
         const surfaceScalarField& magSf = mesh.magSf();
-        const scalarField& magSfIn = magSf.internalField();
-        const surfaceVectorField& Kf = mesh.correctionVectors();
 
-        // Face-normal vectors
-        tmp<surfaceVectorField> tNf = Sf/magSf;
-
-        // Face-normal part of non-orthogonal correction vector
-        const surfaceVectorField KfNf = tNf()*(tNf() & Kf);
-        const vectorField& KfNfIn = KfNf.internalField();
-
-        tNf.clear();
-
-        // Gamma
+        // Linear! interpolated gamma
         const volGTypeField& gamma = gamma_;
-        const Field<GType>& gammaIn = gamma.internalField();
+        tmp<surfaceGTypeField> gammaf = linearInterpolate(gamma);
 
-        // Non-orthogonal correction in tangential direction
-        tmp<surfaceScalarField> tcorrDir =
-            Kf/(mag(Kf) + VSMALL) & (Kf - KfNf)/(mag(Kf - KfNf) + VSMALL);
-        tmp<surfaceTypeField> tcorr =
-            tcorrDir * this->tsnGradScheme_().correction(vf);
-        const Field<Type>& corrIn = tcorr().internalField();
+        // TODO: Correction vectors are assumed to be parallel to the face!
+        //       From Foam::surfaceInterpolation::makeDeltaCoeffs() this
+        //       mostly true for not-too-bad meshes!
+//         tmp<surfaceTypeField> tsf = linearInterpolate(vf);
+//         tmp<volGradTypeField> tvfGrad = fvc::grad(tsf);
+//         tvfGrad().rename("grad(" + vf.name() + ")");
+//         tmp<surfaceTypeField> tcorr =
+//             mesh.correctionVectors() & linearInterpolate(tvfGrad);
+        tmp<surfaceTypeField> tcorr = this->tsnGradScheme_().correction(vf);
 
-        // Face-tangential part of the gradient shows no jump discontinuity
-        forAll(owner, faceI)
-        {
-            // Cell labels
-            label own = owner[faceI];
-            label nei = neighbour[faceI];
-
-
-            faceOwnFluxCorrIn[faceI] += gammaIn[own] * magSfIn[faceI]
-                                      * corrIn[faceI];
-
-            faceNeiFluxCorrIn[faceI] += gammaIn[nei] * magSfIn[faceI]
-                                      * corrIn[faceI];
-        }
-
-        tcorr.clear();
-
-        // Explicit gradient of vf based on flux-conservative interpolation
-        tmp<surfaceTypeField> tsf = vfFluxConsScheme_.interpolate(vf);
-        tmp<volGradTypeField> tvfGrad = fvc::grad(tsf);
-        const volGradTypeField& vfGrad = tvfGrad();
-
-        // Face-normal part of the gradient shows a jump discontinuity such
-        // that each side needs to be corrected based on cell gradient
-        forAll(owner, faceI)
-        {
-            // Cell labels
-            label own = owner[faceI];
-            label nei = neighbour[faceI];
-
-            faceOwnFluxCorrIn[faceI] += gammaIn[own] * magSfIn[faceI]
-                                      * (KfNfIn[faceI] & vfGrad[own]);
-
-            faceNeiFluxCorrIn[faceI] += gammaIn[nei] * magSfIn[faceI]
-                                      * (KfNfIn[faceI] & vfGrad[nei]);
-        }
-
-// TODO: Correction vectors are zero at boundaries anyway.
-//       This seems to be uncessary!
-        forAll (mesh.boundary(), patchI)
-        {
-            const fvPatch& patch = mesh.boundary()[patchI];
-
-            if (patch.coupled())
-            {
-                Field<Type>& faceOwnFluxCorrPatch =
-                    faceOwnFluxCorr.boundaryField()[patchI];
-
-                const unallocLabelList& faceCells = patch.patch().faceCells();
-
-                const scalarField& magSfPatch = magSf.boundaryField()[patchI];
-
-                const vectorField& KfNfPatch = KfNf.boundaryField()[patchI];
-
-                forAll (patch, faceI)
-                {
-                    const label own = faceCells[faceI];
-
-                    faceOwnFluxCorrPatch[faceI] += gammaIn[own] * magSfPatch[faceI]
-                                                 * (KfNfPatch[faceI] & vfGrad[own]);
-                }
-            }
-        }
-
-        tvfGrad.clear();
+        faceFluxCorr = gammaf * magSf * tcorr;
 
         // Add correction to source
         fvm.source() -=
             mesh.V()*fvc::surfaceIntegrate<Type>
             (
-                faceOwnFluxCorr,
-                faceNeiFluxCorr
+                faceFluxCorr
             )().internalField();
 
         // Store face flux corrections if required
@@ -448,23 +336,23 @@ void jumpGaussLaplacian<Type, GType>::addSnGradsCorrection
         {
             if (!fvm.faceFluxCorrectionPtr())
             {
-                fvm.faceFluxCorrectionPtr() = tfaceOwnFluxCorr.ptr();
+                fvm.faceFluxCorrectionPtr() = tfaceFluxCorr.ptr();
             }
             else
             {
-                *fvm.faceFluxCorrectionPtr() += faceOwnFluxCorr;
-                tfaceOwnFluxCorr.clear();
+                *fvm.faceFluxCorrectionPtr() += faceFluxCorr;
             }
 
             if (!fvm.jumpFaceFluxCorrectionPtr())
             {
-                fvm.jumpFaceFluxCorrectionPtr() = tfaceNeiFluxCorr.ptr();
+                fvm.jumpFaceFluxCorrectionPtr() = tfaceFluxCorr.ptr();
             }
             else
             {
-                *fvm.jumpFaceFluxCorrectionPtr() += faceNeiFluxCorr;
-                tfaceNeiFluxCorr.clear();
+                *fvm.jumpFaceFluxCorrectionPtr() += faceFluxCorr;
             }
+
+            tfaceFluxCorr.clear();
         }
     }
 }

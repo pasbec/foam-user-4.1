@@ -228,7 +228,8 @@ plots = dict()
 # --- Test ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-def fig(p, case, opmesh, ofmesh, freq, line, name, fields, scaleX=1.0, scaleY=1.0):
+def fig(p, case, opmesh, ofmesh, freq, line, name, fields,
+        scaleX=1.0, scaleY=1.0):
 
     name = "plot_" + case + "_opm" + opmesh + "_ofm" + ofmesh + "_f" \
          + freq + "_line_" + line + "_" + name
@@ -299,6 +300,18 @@ fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "B",
     scaleX=1e+3, scaleY=1e+2)
 
 fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
+
+fig(plots, "nonortho", "1.000", "1.000", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+    scaleX=1e+3, scaleY=1e-6)
+
+fig(plots, "nonortho", "1.000", "1.000", "1000", "y2", "B",
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig(plots, "nonortho", "1.000", "1.000", "1000", "y2", "F",
     ["F_x", "F_y", "F_z"],
     scaleX=1e+3, scaleY=1e-4)
 

@@ -62,7 +62,7 @@ interpolationSchemes
 
     interpolate(sigma)                harmonic;
 
-    interpolate(chiNur)               harmonic;
+    interpolate(chiNur)               linear;
 
     interpolate(grad(A0Re))           linear;
     interpolate(grad(A0Im))           linear;
