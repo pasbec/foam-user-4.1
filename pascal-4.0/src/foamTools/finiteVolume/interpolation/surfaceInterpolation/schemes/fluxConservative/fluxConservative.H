@@ -205,8 +205,14 @@ public:
             return jumpFluxPtr_;
         }
 
+        //- Return real deltaCoeffs (not any relaxed version!)
+        tmp<surfaceScalarField> deltaCoeffs() const;
+
+        //- Return real corrVecs (not any relaxed version!)
+        tmp<surfaceVectorField> correctionVectors() const;
+
         //- Cosinus factors for one-sided gradients
-        tmp<surfaceScalarField> cosAlphaOneSided() const;
+        tmp<surfaceScalarField> cosAlpha() const;
 
         //- Return the interpolation weighting factors
         virtual tmp<surfaceScalarField> weights

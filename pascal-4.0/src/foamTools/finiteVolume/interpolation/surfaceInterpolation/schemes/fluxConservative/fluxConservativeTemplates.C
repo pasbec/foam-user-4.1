@@ -30,7 +30,163 @@ License
 
 template<class Type>
 Foam::tmp<Foam::surfaceScalarField>
-Foam::fluxConservative<Type>::cosAlphaOneSided() const
+Foam::fluxConservative<Type>::deltaCoeffs() const
+{
+    const fvMesh& mesh = this->mesh();
+
+    tmp<surfaceScalarField> tdeltaCoeffs
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                "deltaCoeffs",
+                mesh.time().timeName(),
+                mesh
+            ),
+            mesh,
+            dimensionedScalar(word(), dimless/dimLength, 0.0)
+        )
+    );
+    surfaceScalarField& deltaCoeffs = tdeltaCoeffs();
+    scalarField& deltaCoeffsIn = deltaCoeffs.internalField();
+
+    // Mesh addressing
+    const unallocLabelList& owner = mesh.owner();
+    const unallocLabelList& neighbour = mesh.neighbour();
+
+    // Mesh and basic surface interpolation data
+    const volVectorField& C = mesh.C();
+    const vectorField& CIn = C.internalField();
+
+    // Calculate internal deltaCoeffs
+    forAll (owner, faceI)
+    {
+        // Cell labels
+        label own = owner[faceI];
+        label nei = neighbour[faceI];
+
+        vector delta = CIn[nei] - CIn[own];
+
+        deltaCoeffsIn[faceI] = 1.0/mag(delta);
+    }
+
+    // Calculate boundary deltaCoeffs
+    forAll (mesh.boundary(), patchI)
+    {
+        const fvPatch& patch = mesh.boundary()[patchI];
+
+        const unallocLabelList& faceCells = patch.patch().faceCells();
+
+        const vectorField& CPatch = C.boundaryField()[patchI];
+
+        scalarField& deltaCoeffsPatch = deltaCoeffs.boundaryField()[patchI];
+
+        forAll (patch, faceI)
+        {
+            const label own = faceCells[faceI];
+
+            vector deltaPatch = CPatch[faceI] - CIn[own];
+
+            deltaCoeffsPatch[faceI] = 1.0/mag(deltaPatch);
+        }
+    }
+
+    return tdeltaCoeffs;
+}
+
+template<class Type>
+Foam::tmp<Foam::surfaceVectorField>
+Foam::fluxConservative<Type>::correctionVectors() const
+{
+    const fvMesh& mesh = this->mesh();
+
+    tmp<surfaceVectorField> tcorrVecs
+    (
+        new surfaceVectorField
+        (
+            IOobject
+            (
+                "corrVecsOneSided",
+                mesh.time().timeName(),
+                mesh
+            ),
+            mesh,
+            dimensionedVector(word(), dimless, vector::zero)
+        )
+    );
+    surfaceVectorField& corrVecs = tcorrVecs();
+    vectorField& corrVecsIn = corrVecs.internalField();
+
+    // Mesh addressing
+    const unallocLabelList& owner = mesh.owner();
+    const unallocLabelList& neighbour = mesh.neighbour();
+
+    // Mesh and basic surface interpolation data
+    const volVectorField& C = mesh.C();
+    const vectorField& CIn = C.internalField();
+    const surfaceVectorField& Sf = mesh.Sf();
+    const vectorField& SfIn = Sf.internalField();
+    const surfaceScalarField& magSf = mesh.magSf();
+    const scalarField& magSfIn = magSf.internalField();
+
+    // Real delta coefficients
+    tmp<surfaceScalarField> tdeltaCoeffs = this->deltaCoeffs();
+    const surfaceScalarField& deltaCoeffs = tdeltaCoeffs();
+    const scalarField& deltaCoeffsIn = deltaCoeffs.internalField();
+
+    // Calculate internal corrVecs
+    forAll (owner, faceI)
+    {
+        // Cell labels
+        label own = owner[faceI];
+        label nei = neighbour[faceI];
+
+        vector NfInI = SfIn[faceI]/magSfIn[faceI];
+
+        vector DfInI = (CIn[nei] - CIn[own])
+                     * deltaCoeffsIn[faceI];
+
+        corrVecsIn[faceI] = pos(NfInI & DfInI) * (NfInI - DfInI);
+    }
+
+    // Calculate boundary corrVecs
+    forAll (mesh.boundary(), patchI)
+    {
+        const fvPatch& patch = mesh.boundary()[patchI];
+
+        if (patch.coupled())
+        {
+            const unallocLabelList& faceCells = patch.patch().faceCells();
+
+            const scalarField& deltaCoeffsPatch =
+                deltaCoeffs.boundaryField()[patchI];
+            const vectorField& CPatch = C.boundaryField()[patchI];
+            const scalarField& magSfPatch = magSf.boundaryField()[patchI];
+            const vectorField& SfPatch = Sf.boundaryField()[patchI];
+
+            vectorField& corrVecsPatch = corrVecs.boundaryField()[patchI];
+
+            forAll (patch, faceI)
+            {
+                const label own = faceCells[faceI];
+
+                vector NfPatchI = SfPatch[faceI]/magSfPatch[faceI];
+
+                vector DfPatchI = (CPatch[faceI] - CIn[own])
+                                * deltaCoeffsPatch[faceI];
+
+                corrVecsPatch[faceI] = NfPatchI - DfPatchI;
+            }
+        }
+    }
+
+    return tcorrVecs;
+}
+
+template<class Type>
+Foam::tmp<Foam::surfaceScalarField>
+Foam::fluxConservative<Type>::cosAlpha() const
 {
     const fvMesh& mesh = this->mesh();
 
@@ -40,11 +196,11 @@ Foam::fluxConservative<Type>::cosAlphaOneSided() const
         (
             IOobject
             (
-                "cosAlphaOneSided",
+                "cosAlpha",
                 mesh.time().timeName(),
                 mesh
             ),
-            mesh ,
+            mesh,
             dimensionedScalar(word(), dimless, 1.0)
         )
     );
@@ -58,12 +214,15 @@ Foam::fluxConservative<Type>::cosAlphaOneSided() const
     // Mesh and basic surface interpolation data
     const volVectorField& C = mesh.C();
     const vectorField& CIn = C.internalField();
-    const surfaceScalarField& deltaCoeffs = mesh.deltaCoeffs();
-    const scalarField& deltaCoeffsIn = deltaCoeffs.internalField();
     const surfaceVectorField& Sf = mesh.Sf();
     const vectorField& SfIn = Sf.internalField();
     const surfaceScalarField& magSf = mesh.magSf();
     const scalarField& magSfIn = magSf.internalField();
+
+    // Real delta coefficients
+    tmp<surfaceScalarField> tdeltaCoeffs = this->deltaCoeffs();
+    const surfaceScalarField& deltaCoeffs = tdeltaCoeffs();
+    const scalarField& deltaCoeffsIn = deltaCoeffs.internalField();
 
     // Calculate internal cosAlpha
     forAll (owner, faceI)
@@ -89,9 +248,9 @@ Foam::fluxConservative<Type>::cosAlphaOneSided() const
 
         const scalarField& deltaCoeffsPatch =
             deltaCoeffs.boundaryField()[patchI];
+        const vectorField& CPatch = C.boundaryField()[patchI];
         const scalarField& magSfPatch = magSf.boundaryField()[patchI];
         const vectorField& SfPatch = Sf.boundaryField()[patchI];
-        const vectorField& CPatch = C.boundaryField()[patchI];
 
         scalarField& cosAlphaPatch = cosAlpha.boundaryField()[patchI];
 
@@ -248,13 +407,17 @@ Foam::fluxConservative<Type>::correction
     // Mesh and basic surface interpolation data
     const surfaceScalarField& weights = mesh.weights();
     const scalarField& weightsIn = weights.internalField();
-    const surfaceScalarField& deltaCoeffs = mesh.deltaCoeffs();
-    const scalarField& deltaCoeffsIn = deltaCoeffs.internalField();
     const surfaceScalarField& magSf = mesh.magSf();
     const scalarField& magSfIn = magSf.internalField();
 
-    // Cosinus factors for one-sided gradient.
-    const surfaceScalarField cosAlpha = cosAlphaOneSided()();
+    // Real delta coefficients
+    tmp<surfaceScalarField> tdeltaCoeffs = this->deltaCoeffs();
+    const surfaceScalarField& deltaCoeffs = tdeltaCoeffs();
+    const scalarField& deltaCoeffsIn = deltaCoeffs.internalField();
+
+    // Cosinus factors for one-sided gradient
+    tmp<surfaceScalarField> tcosAlpha = this->cosAlpha();
+    const surfaceScalarField& cosAlpha = tcosAlpha();
     const scalarField& cosAlphaIn = cosAlpha.internalField();
 
     // Gamma
