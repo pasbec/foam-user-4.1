@@ -62,7 +62,7 @@ scales = dict()
 def readdata(set):
 
     cases = ["ortho", "nonortho"]
-    meshes = ["1.000", "1.500"]
+    meshes = ["1.000", "1.500", "2.000", "2.500", "3.000"]
     lines = ["x1", "y1", "y2", "z1"]
     frequencies = ["1000", "10000", "100000"]
 
@@ -312,6 +312,42 @@ fig(plots, "nonortho", "1.000", "1.000", "1000", "y2", "B",
     scaleX=1e+3, scaleY=1e+2)
 
 fig(plots, "nonortho", "1.000", "1.000", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
+
+fig(plots, "nonortho", "1.000", "1.500", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+    scaleX=1e+3, scaleY=1e-6)
+
+fig(plots, "nonortho", "1.000", "1.500", "1000", "y2", "B",
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig(plots, "nonortho", "1.000", "1.500", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
+
+fig(plots, "nonortho", "1.000", "2.000", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+    scaleX=1e+3, scaleY=1e-6)
+
+fig(plots, "nonortho", "1.000", "2.000", "1000", "y2", "B",
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig(plots, "nonortho", "1.000", "2.000", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
+
+fig(plots, "nonortho", "1.000", "2.500", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+    scaleX=1e+3, scaleY=1e-6)
+
+fig(plots, "nonortho", "1.000", "2.500", "1000", "y2", "B",
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig(plots, "nonortho", "1.000", "2.500", "1000", "y2", "F",
     ["F_x", "F_y", "F_z"],
     scaleX=1e+3, scaleY=1e-4)
 
