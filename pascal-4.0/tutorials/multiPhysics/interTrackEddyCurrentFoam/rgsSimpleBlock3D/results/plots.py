@@ -62,7 +62,7 @@ scales = dict()
 def readdata(set):
 
     cases = ["ortho", "nonortho"]
-    meshes = ["1.000", "1.500", "2.000", "2.500", "3.000"]
+    meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000", "1.500", "2.000", "2.500", "3.000"]
     lines = ["x1", "y1", "y2", "z1"]
     frequencies = ["1000", "10000", "100000"]
 
@@ -222,38 +222,28 @@ markers["F_y"] = "v"
 markers["F_z"] = "^"
 # VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z VRe VIm sigma mur
 
-plots = dict()
-
 # --------------------------------------------------------------------------- #
 # --- Test ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-def fig(p, case, opmesh, ofmesh, freq, line, name, fields,
+def fig(case, opmesh, ofmesh, freq, line, name, fields,
         scaleX=1.0, scaleY=1.0):
 
-    name = "plot_" + case + "_opm" + opmesh + "_ofm" + ofmesh + "_f" \
-         + freq + "_line_" + line + "_" + name
+    fig = plt.figure()
 
-    p[name] = {"fig": plt.figure(), "axs": dict()}
-    f = p[name]
+    def plot():
 
-    fig = f["fig"]
-    axs = f["axs"]
+        axs = fig.add_subplot(111)
 
-    def ax(f, axs, name="default"):
+        axs.minorticks_on()
 
-        axs[name] = fig.add_subplot(111)
-        ax = axs[name]
+        axs.set_xlim([-75,75])
+        #axs.set_ylim([0,30])
 
-        ax.minorticks_on()
+        axs.set_xlabel(alabels[line[:-1]])
+        #axs.set_ylabel(labelAxisZ)
 
-        ax.set_xlim([-75,75])
-        #ax.set_ylim([0,30])
-
-        ax.set_xlabel(alabels[line[:-1]])
-        #ax.set_ylabel(labelAxisZ)
-
-        #ax.set_aspect("equal")
+        #axs.set_aspect("equal")
 
         opData = data["Opera3D"][case][opmesh][freq][line]
         ofData = data["eddyCurrentFoam"][case][ofmesh][freq][line]
@@ -270,84 +260,149 @@ def fig(p, case, opmesh, ofmesh, freq, line, name, fields,
             marker = markers[field]
             label = labels[field]
 
-            ax.plot(opsx*scaleX*opData[line[:-1]], opsy*scaleY*opData[field],
-                    color=color, linestyle="--")
+            axs.plot(opsx*scaleX*opData[line[:-1]], opsy*scaleY*opData[field],
+                     color=color, linestyle="--")
 
-            ax.plot(ofsx*scaleX*ofData[line[:-1]], ofsy*scaleY*ofData[field],
-                    color=color, linestyle="-",
-                    marker=marker, markevery=5, markersize=5,
-                    markeredgecolor=color, markerfacecolor=color,
-                    label=label)
+            axs.plot(ofsx*scaleX*ofData[line[:-1]], ofsy*scaleY*ofData[field],
+                     color=color, linestyle="-",
+                     marker=marker, markevery=5, markersize=5,
+                     markeredgecolor=color, markerfacecolor=color,
+                     label=label)
 
         legendCols  = 3
         legendShift = 0.035 * (len(fields)/legendCols -1)
 
-        ax.legend(bbox_to_anchor=(0.0, 1.05+legendShift, 1.0, 0.05+legendShift),
+        axs.legend(bbox_to_anchor=(0.0, 1.05+legendShift, 1.0, 0.05+legendShift),
                   loc="upper center", ncol=legendCols,
                   mode="expand", borderaxespad=0.)
 
-    ax(fig, axs)
+    plot()
+
+    name = "plot_" + case + "_opm" + opmesh + "_ofm" + ofmesh + "_f" \
+         + freq + "_line_" + line + "_" + name
 
     #fig.set_size_inches(sizeCompX, sizeCompY)
     fig.savefig(__dir__ + "/" + name + ".pdf", bbox_inches="tight")
 
-fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "j",
+    plt.close(fig)
+
+fig("ortho", "1.000", "1.000", "1000", "y2", "j",
     ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
     scaleX=1e+3, scaleY=1e-6)
 
-fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "B",
+fig("ortho", "1.000", "1.000", "1000", "y2", "B",
     ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
     scaleX=1e+3, scaleY=1e+2)
 
-fig(plots, "ortho", "1.000", "1.000", "1000", "y2", "F",
+fig("ortho", "1.000", "1.000", "1000", "y2", "F",
     ["F_x", "F_y", "F_z"],
     scaleX=1e+3, scaleY=1e-4)
 
-fig(plots, "nonortho", "1.000", "1.000", "1000", "y2", "j",
+fig("nonortho", "1.000", "0.125", "1000", "y2", "j",
     ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
     scaleX=1e+3, scaleY=1e-6)
 
-fig(plots, "nonortho", "1.000", "1.000", "1000", "y2", "B",
+fig("nonortho", "1.000", "0.125", "1000", "y2", "B",
     ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
     scaleX=1e+3, scaleY=1e+2)
 
-fig(plots, "nonortho", "1.000", "1.000", "1000", "y2", "F",
+fig("nonortho", "1.000", "0.125", "1000", "y2", "F",
     ["F_x", "F_y", "F_z"],
     scaleX=1e+3, scaleY=1e-4)
 
-fig(plots, "nonortho", "1.000", "1.500", "1000", "y2", "j",
+fig("nonortho", "1.000", "0.250", "1000", "y2", "j",
     ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
     scaleX=1e+3, scaleY=1e-6)
 
-fig(plots, "nonortho", "1.000", "1.500", "1000", "y2", "B",
+fig("nonortho", "1.000", "0.250", "1000", "y2", "B",
     ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
     scaleX=1e+3, scaleY=1e+2)
 
-fig(plots, "nonortho", "1.000", "1.500", "1000", "y2", "F",
+fig("nonortho", "1.000", "0.250", "1000", "y2", "F",
     ["F_x", "F_y", "F_z"],
     scaleX=1e+3, scaleY=1e-4)
 
-fig(plots, "nonortho", "1.000", "2.000", "1000", "y2", "j",
+fig("nonortho", "1.000", "0.375", "1000", "y2", "j",
     ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
     scaleX=1e+3, scaleY=1e-6)
 
-fig(plots, "nonortho", "1.000", "2.000", "1000", "y2", "B",
+fig("nonortho", "1.000", "0.375", "1000", "y2", "B",
     ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
     scaleX=1e+3, scaleY=1e+2)
 
-fig(plots, "nonortho", "1.000", "2.000", "1000", "y2", "F",
+fig("nonortho", "1.000", "0.375", "1000", "y2", "F",
     ["F_x", "F_y", "F_z"],
     scaleX=1e+3, scaleY=1e-4)
 
-fig(plots, "nonortho", "1.000", "2.500", "1000", "y2", "j",
+fig("nonortho", "1.000", "0.500", "1000", "y2", "j",
     ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
     scaleX=1e+3, scaleY=1e-6)
 
-fig(plots, "nonortho", "1.000", "2.500", "1000", "y2", "B",
+fig("nonortho", "1.000", "0.500", "1000", "y2", "B",
     ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
     scaleX=1e+3, scaleY=1e+2)
 
-fig(plots, "nonortho", "1.000", "2.500", "1000", "y2", "F",
+fig("nonortho", "1.000", "0.500", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
+
+fig("nonortho", "1.000", "0.750", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+    scaleX=1e+3, scaleY=1e-6)
+
+fig("nonortho", "1.000", "0.750", "1000", "y2", "B",
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig("nonortho", "1.000", "0.750", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
+
+fig("nonortho", "1.000", "1.000", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+    scaleX=1e+3, scaleY=1e-6)
+
+fig("nonortho", "1.000", "1.000", "1000", "y2", "B",
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig("nonortho", "1.000", "1.000", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
+
+fig("nonortho", "1.000", "1.500", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+    scaleX=1e+3, scaleY=1e-6)
+
+fig("nonortho", "1.000", "1.500", "1000", "y2", "B",
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig("nonortho", "1.000", "1.500", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
+
+fig("nonortho", "1.000", "2.000", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+    scaleX=1e+3, scaleY=1e-6)
+
+fig("nonortho", "1.000", "2.000", "1000", "y2", "B",
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig("nonortho", "1.000", "2.000", "1000", "y2", "F",
+    ["F_x", "F_y", "F_z"],
+    scaleX=1e+3, scaleY=1e-4)
+
+fig("nonortho", "1.000", "2.500", "1000", "y2", "j",
+    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+    scaleX=1e+3, scaleY=1e-6)
+
+fig("nonortho", "1.000", "2.500", "1000", "y2", "B",
+    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+    scaleX=1e+3, scaleY=1e+2)
+
+fig("nonortho", "1.000", "2.500", "1000", "y2", "F",
     ["F_x", "F_y", "F_z"],
     scaleX=1e+3, scaleY=1e-4)
 
