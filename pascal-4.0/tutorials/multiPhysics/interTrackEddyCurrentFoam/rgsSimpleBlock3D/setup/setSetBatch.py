@@ -79,8 +79,12 @@ def main():
 
         ssb.cellSet("region_fluid", "setToTopo",
                     add=["body_fluid"])
+
+        #ssb.cellSet("region_buffer", "setToTopo",
+                    #add=["body_buffer"])
         ssb.cellSet("region_buffer", "setToTopo",
-                    add=["body_buffer"])
+                    add=["body_above"],
+                    delete=["body_fluid"])
 
         ssb.cellSet("region_conductor", "setToTopo",
                     add=["body_fluid"])
