@@ -62,7 +62,8 @@ scales = dict()
 def readdata(set):
 
     cases = ["ortho", "nonortho"]
-    meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000", "1.500", "2.000", "2.500", "3.000"]
+    meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000",
+              "1.500", "2.000", "2.500"]
     lines = ["x1", "y1", "y2", "z1"]
     frequencies = ["1000", "10000", "100000"]
 
@@ -152,7 +153,16 @@ scales[set]["BIm_z"] = 1.0
 scales[set]["F_x"] = 1.0
 scales[set]["F_y"] = 1.0
 scales[set]["F_z"] = 1.0
-# VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z VRe VIm sigma mur
+scales[set]["VReGrad_x"] = 1.0
+scales[set]["VReGrad_y"] = 1.0
+scales[set]["VReGrad_z"] = 1.0
+scales[set]["VImGrad_x"] = 1.0
+scales[set]["VImGrad_y"] = 1.0
+scales[set]["VImGrad_z"] = 1.0
+scales[set]["VRe"] = 1.0
+scales[set]["VIm"] = 1.0
+scales[set]["sigma"] = 1.0
+scales[set]["mur"] = 1.0
 
 # --------------------------------------------------------------------------- #
 # --- Plot settings --------------------------------------------------------- #
@@ -183,7 +193,16 @@ labels["BIm_z"] = r"${B_z}_{\,\scriptstyle\mathfrak{Im}}$"
 labels["F_x"] = r"$\left<{F_x}\right>_{t}$"
 labels["F_y"] = r"$\left<{F_y}\right>_{t}$"
 labels["F_z"] = r"$\left<{F_z}\right>_{t}$"
-# VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z VRe VIm sigma mur
+labels["VReGrad_x"] = r"${\nabla \phi_x}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["VReGrad_y"] = r"${\nabla \phi_y}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["VReGrad_z"] = r"${\nabla \phi_z}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["VImGrad_x"] = r"${\nabla \phi_x}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["VImGrad_y"] = r"${\nabla \phi_y}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["VImGrad_z"] = r"${\nabla \phi_z}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["VRe"] = r"${\phi}_{\,\scriptstyle\mathfrak{Re}}$"
+labels["VIm"] = r"${\phi}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["sigma"] = r"${\sigma}$"
+labels["mur"] = r"${\mu_\mathrm{r}}$"
 
 colors = dict()
 colors["jRe_x"] = "hzdr-orange"
@@ -199,9 +218,18 @@ colors["BIm_x"] = "hzdr-blue"
 colors["BIm_y"] = "hzdr-purple"
 colors["BIm_z"] = "hzdr-red"
 colors["F_x"] = "hzdr-orange"
-colors["F_y"] = "hzdr-yellow"
+colors["F_y"] = "hzdr-blue"
 colors["F_z"] = "hzdr-green"
-# VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z VRe VIm sigma mur
+colors["VReGrad_x"] = "hzdr-orange"
+colors["VReGrad_y"] = "hzdr-yellow"
+colors["VReGrad_z"] = "hzdr-green"
+colors["VImGrad_x"] = "hzdr-blue"
+colors["VImGrad_y"] = "hzdr-purple"
+colors["VImGrad_z"] = "hzdr-red"
+colors["VRe"] = "hzdr-orange"
+colors["VIm"] = "hzdr-blue"
+colors["sigma"] = "hzdr-blue"
+colors["mur"] = "hzdr-blue"
 
 markers = dict()
 
@@ -220,16 +248,27 @@ markers["BIm_z"] = "*"
 markers["F_x"] = "o"
 markers["F_y"] = "v"
 markers["F_z"] = "^"
-# VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z VRe VIm sigma mur
+markers["VReGrad_x"] = "o"
+markers["VReGrad_y"] = "v"
+markers["VReGrad_z"] = "^"
+markers["VImGrad_x"] = "s"
+markers["VImGrad_y"] = "d"
+markers["VImGrad_z"] = "*"
+markers["VRe"] = "o"
+markers["VIm"] = "s"
+markers["sigma"] = "o"
+markers["mur"] = "o"
 
 # --------------------------------------------------------------------------- #
 # --- Test ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-def fig(case, opmesh, ofmesh, freq, line, name, fields,
-        scaleX=1.0, scaleY=1.0):
+def fig(case, ofmesh, freq, line, name, fields, op=True,
+        scaleX=1.0, scaleY=1.0, shiftLegend=0.0):
 
     fig = plt.figure()
+
+    opmesh = "1.000"
 
     def plot():
 
@@ -245,23 +284,28 @@ def fig(case, opmesh, ofmesh, freq, line, name, fields,
 
         #axs.set_aspect("equal")
 
-        opData = data["Opera3D"][case][opmesh][freq][line]
-        ofData = data["eddyCurrentFoam"][case][ofmesh][freq][line]
+        if op:
 
-        opsx = scales["Opera3D"][line[:-1]]
+            opsx = scales["Opera3D"][line[:-1]]
+            opData = data["Opera3D"][case][opmesh][freq][line]
+
+        ofData = data["eddyCurrentFoam"][case][ofmesh][freq][line]
         ofsx = scales["eddyCurrentFoam"][line[:-1]]
 
         for field in fields:
-
-            opsy = scales["Opera3D"][field]
-            ofsy = scales["eddyCurrentFoam"][field]
 
             color = colors[field]
             marker = markers[field]
             label = labels[field]
 
-            axs.plot(opsx*scaleX*opData[line[:-1]], opsy*scaleY*opData[field],
-                     color=color, linestyle="--")
+            if op:
+
+                opsy = scales["Opera3D"][field]
+
+                axs.plot(opsx*scaleX*opData[line[:-1]], opsy*scaleY*opData[field],
+                        color=color, linestyle="--")
+
+            ofsy = scales["eddyCurrentFoam"][field]
 
             axs.plot(ofsx*scaleX*ofData[line[:-1]], ofsy*scaleY*ofData[field],
                      color=color, linestyle="-",
@@ -270,141 +314,87 @@ def fig(case, opmesh, ofmesh, freq, line, name, fields,
                      label=label)
 
         legendCols  = 3
-        legendShift = 0.035 * (len(fields)/legendCols -1)
+        legendPos = shiftLegend + 0.035 * (len(fields)/legendCols - 1)
 
-        axs.legend(bbox_to_anchor=(0.0, 1.05+legendShift, 1.0, 0.05+legendShift),
-                  loc="upper center", ncol=legendCols,
-                  mode="expand", borderaxespad=0.)
+        axs.legend(bbox_to_anchor=(0.0, 1.05+legendPos, 1.0, 0.05+legendPos),
+                   loc="upper center", ncol=legendCols,
+                   mode="expand", borderaxespad=0.)
 
     plot()
 
-    name = "plot_" + case + "_opm" + opmesh + "_ofm" + ofmesh + "_f" \
-         + freq + "_line_" + line + "_" + name
+    fileName = "plot_" + case
+
+    if op: fileName += "_opm" + opmesh
+
+    fileName += "_ofm" + ofmesh + "_f" + freq + "_line_" + line + "_" + name
 
     #fig.set_size_inches(sizeCompX, sizeCompY)
-    fig.savefig(__dir__ + "/" + name + ".pdf", bbox_inches="tight")
+    fig.savefig(__dir__ + "/" + fileName + ".pdf", bbox_inches="tight")
 
     plt.close(fig)
 
-fig("ortho", "1.000", "1.000", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
+for mesh in ["1.000"]:
 
-fig("ortho", "1.000", "1.000", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
+    fig("ortho", mesh, "1000", "y2", "j",
+        ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+        scaleX=1e+3, scaleY=1e-6)
 
-fig("ortho", "1.000", "1.000", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
+    fig("ortho", mesh, "1000", "y2", "B",
+        ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+        scaleX=1e+3, scaleY=1e+2)
 
-fig("nonortho", "1.000", "0.125", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
+    fig("ortho", mesh, "1000", "y2", "F",
+        ["F_x", "F_y", "F_z"],
+        scaleX=1e+3, scaleY=1e-4)
 
-fig("nonortho", "1.000", "0.125", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
+    fig("ortho", mesh, "1000", "y2", "V",
+        ["VRe", "VIm"], op=False,
+        scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-fig("nonortho", "1.000", "0.125", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
+    fig("ortho", mesh, "1000", "y2", "VGrad",
+        ["VReGrad_x", "VReGrad_y", "VReGrad_z",
+         "VImGrad_x", "VImGrad_y", "VImGrad_z"], op=False,
+        scaleX=1e+3, scaleY=11.0)
 
-fig("nonortho", "1.000", "0.250", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
+    fig("ortho", mesh, "1000", "y2", "sigma",
+        ["sigma"], op=False,
+        scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-fig("nonortho", "1.000", "0.250", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
+    fig("ortho", mesh, "1000", "y2", "mur",
+        ["mur"], op=False,
+        scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-fig("nonortho", "1.000", "0.250", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
+#for mesh in meshes:
+for mesh in ["1.000"]:
 
-fig("nonortho", "1.000", "0.375", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
+    fig("nonortho", mesh, "1000", "y2", "j",
+        ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+        scaleX=1e+3, scaleY=1e-6)
 
-fig("nonortho", "1.000", "0.375", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
+    fig("nonortho", mesh, "1000", "y2", "B",
+        ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
+        scaleX=1e+3, scaleY=1e+2)
 
-fig("nonortho", "1.000", "0.375", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
+    fig("nonortho", mesh, "1000", "y2", "F",
+        ["F_x", "F_y", "F_z"],
+        scaleX=1e+3, scaleY=1e-4)
 
-fig("nonortho", "1.000", "0.500", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
+    fig("nonortho", mesh, "1000", "y2", "V",
+        ["VRe", "VIm"], op=False,
+        scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-fig("nonortho", "1.000", "0.500", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
+    fig("nonortho", mesh, "1000", "y2", "VGrad",
+        ["VReGrad_x", "VReGrad_y", "VReGrad_z",
+         "VImGrad_x", "VImGrad_y", "VImGrad_z"], op=False,
+        scaleX=1e+3, scaleY=11.0)
 
-fig("nonortho", "1.000", "0.500", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
+    fig("nonortho", mesh, "1000", "y2", "sigma",
+        ["sigma"], op=False,
+        scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-fig("nonortho", "1.000", "0.750", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
-
-fig("nonortho", "1.000", "0.750", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
-
-fig("nonortho", "1.000", "0.750", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
-
-fig("nonortho", "1.000", "1.000", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
-
-fig("nonortho", "1.000", "1.000", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
-
-fig("nonortho", "1.000", "1.000", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
-
-fig("nonortho", "1.000", "1.500", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
-
-fig("nonortho", "1.000", "1.500", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
-
-fig("nonortho", "1.000", "1.500", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
-
-fig("nonortho", "1.000", "2.000", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
-
-fig("nonortho", "1.000", "2.000", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
-
-fig("nonortho", "1.000", "2.000", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
-
-fig("nonortho", "1.000", "2.500", "1000", "y2", "j",
-    ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-    scaleX=1e+3, scaleY=1e-6)
-
-fig("nonortho", "1.000", "2.500", "1000", "y2", "B",
-    ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-    scaleX=1e+3, scaleY=1e+2)
-
-fig("nonortho", "1.000", "2.500", "1000", "y2", "F",
-    ["F_x", "F_y", "F_z"],
-    scaleX=1e+3, scaleY=1e-4)
+    fig("nonortho", mesh, "1000", "y2", "mur",
+        ["mur"], op=False,
+        scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
