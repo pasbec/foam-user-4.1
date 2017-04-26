@@ -139,7 +139,7 @@ def readData(set, cases, frequencies, lines, meshes):
 
                                     if not meshStored:
 
-                                        errNormMeshes.insert(0, mesh)
+                                        errNormMeshes.insert(0, float(mesh))
                                         meshStored=True
 
     return setData, setFields, setMeshErr, setErrNorms, setErrNormMeshes
