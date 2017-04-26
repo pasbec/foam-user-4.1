@@ -50,63 +50,88 @@ def norm_2(r, e): return (np.sum(e**2) / np.sum(r**2))**0.5
 norms = {"inf": norm_inf, "1": norm_1, "2": norm_2}
 
 # --------------------------------------------------------------------------- #
-# --- Data ------------------------------------------------------------------ #
-# --------------------------------------------------------------------------- #
 
-data = dict()
-names = dict()
-scales = dict()
-
-# --------------------------------------------------------------------------- #
-
-def readData(set):
-
-    cases = ["ortho", "nonortho"]
-    meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000",
-              "1.500", "2.000", "2.500"]
-    lines = ["x1", "y1", "y2", "z1"]
-    frequencies = ["1000", "10000", "100000"]
+def readData(set, cases, frequencies, lines, meshes):
 
     setData = dict()
-    setNames = dict()
+    setFields = dict()
+    setMeshErr = dict()
 
     for case in cases:
 
         setData[case] = dict()
-        setNames[case] = dict()
+        setFields[case] = dict()
+        setMeshErr[case] = dict()
 
-        for mesh in meshes:
+        for freq in frequencies:
 
-            setData[case][mesh] = dict()
-            setNames[case][mesh] = dict()
+            setData[case][freq] = dict()
+            setFields[case][freq] = dict()
+            setMeshErr[case][freq] = dict()
 
-            for freq in frequencies:
+            for line in lines:
 
-                setData[case][mesh][freq] = dict()
-                setNames[case][mesh][freq] = dict()
+                setData[case][freq][line] = dict()
+                setFields[case][freq][line] = dict()
+                setMeshErr[case][freq][line] = dict()
 
-                for line in lines:
+                meshRef = False
+
+                for mesh in reversed(sorted(meshes)):
 
                     fileName = __dir__ + "/data_" + set \
-                             + "_" + case + "_m" + mesh \
-                             + "_f" + freq + "_line_" + line + ".dat"
+                             + "_" + case + "_f" + freq + "_line_" + line \
+                             + "_m" + mesh + ".dat"
+
+                    print(fileName)
 
                     if os.path.isfile(fileName):
 
+                        if not meshRef: meshRef = mesh
+
                         print("Reading file: " + fileName)
 
-                        setData[case][mesh][freq][line] = \
+                        setData[case][freq][line][mesh] = \
                             np.genfromtxt(fileName, comments='#', names=True)
-                        setNames[case][mesh][freq][line] = \
-                            setData[case][mesh][freq][line].dtype.names
 
-    return setData, setNames
+                        data = setData[case][freq][line][mesh]
+                        dataRef = setData[case][freq][line][meshRef]
+
+                        setFields[case][freq][line][mesh] = \
+                            data.dtype.names
+
+                        setMeshErr[case][freq][line][mesh] = \
+                            np.zeros(data.shape, data.dtype)
+
+                        for field in setFields[case][freq][line][mesh]:
+
+                            setMeshErr[case][freq][line][mesh][field] = \
+                                np.abs(data[field] - dataRef[field])
+
+    return setData, setFields, setMeshErr
+
+# --------------------------------------------------------------------------- #
+# --- Data ------------------------------------------------------------------ #
+# --------------------------------------------------------------------------- #
+
+cases = ["ortho", "nonortho"]
+frequencies = ["1000", "10000", "100000"]
+lines = ["x1", "y1", "y2", "z1"]
+meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000",
+          "1.500", "2.000", "2.500"]
+
+# --------------------------------------------------------------------------- #
+
+data = dict()
+fields = dict()
+error = dict()
+scales = dict()
 
 # --------------------------------------------------------------------------- #
 
 set = "Opera3D"
 
-data[set], names[set] = readData(set)
+data[set], fields[set], error[set] = readData(set, cases, frequencies, lines, meshes)
 
 scales[set] = dict()
 scales[set]["x"] = 1e-3
@@ -132,7 +157,7 @@ scales[set]["F_z"] = 1e+6
 
 set = "eddyCurrentFoam"
 
-data[set], names[set] = readData(set)
+data[set], fields[set], error[set] = readData(set, cases, frequencies, lines, meshes)
 
 scales[set] = dict()
 scales[set]["x"] = 1.0
@@ -263,7 +288,7 @@ markers["mur"] = "o"
 # --- Test ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-def fig(case, ofmesh, freq, line, name, fields, op=True,
+def fig(case, freq, line, mesh, name, fields, op=True,
         scaleX=1.0, scaleY=1.0, shiftLegend=0.0):
 
     fig = plt.figure()
@@ -287,9 +312,9 @@ def fig(case, ofmesh, freq, line, name, fields, op=True,
         if op:
 
             opsx = scales["Opera3D"][line[:-1]]
-            opData = data["Opera3D"][case][opmesh][freq][line]
+            opData = data["Opera3D"][case][freq][line][opmesh]
 
-        ofData = data["eddyCurrentFoam"][case][ofmesh][freq][line]
+        ofData = data["eddyCurrentFoam"][case][freq][line][mesh]
         ofsx = scales["eddyCurrentFoam"][line[:-1]]
 
         for field in fields:
@@ -322,11 +347,11 @@ def fig(case, ofmesh, freq, line, name, fields, op=True,
 
     plot()
 
-    fileName = "plot_" + case
+    fileName = "plot_" + case + "_f" + freq + "_line_" + line + "_m" + mesh
 
-    if op: fileName += "_opm" + opmesh
+    if op: fileName += "-op" + opmesh
 
-    fileName += "_ofm" + ofmesh + "_f" + freq + "_line_" + line + "_" + name
+    fileName += "_" + name
 
     #fig.set_size_inches(sizeCompX, sizeCompY)
     fig.savefig(__dir__ + "/" + fileName + ".pdf", bbox_inches="tight")
@@ -335,64 +360,64 @@ def fig(case, ofmesh, freq, line, name, fields, op=True,
 
 for mesh in ["1.000"]:
 
-    fig("ortho", mesh, "1000", "y2", "j",
+    fig("ortho", "1000", "y2", mesh, "j",
         ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
         scaleX=1e+3, scaleY=1e-6)
 
-    fig("ortho", mesh, "1000", "y2", "B",
+    fig("ortho", "1000", "y2", mesh, "B",
         ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
         scaleX=1e+3, scaleY=1e+2)
 
-    fig("ortho", mesh, "1000", "y2", "F",
+    fig("ortho", "1000", "y2", mesh, "F",
         ["F_x", "F_y", "F_z"],
         scaleX=1e+3, scaleY=1e-4)
 
-    fig("ortho", mesh, "1000", "y2", "V",
+    fig("ortho", "1000", "y2", mesh, "V",
         ["VRe", "VIm"], op=False,
         scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-    fig("ortho", mesh, "1000", "y2", "VGrad",
+    fig("ortho", "1000", "y2", mesh, "VGrad",
         ["VReGrad_x", "VReGrad_y", "VReGrad_z",
          "VImGrad_x", "VImGrad_y", "VImGrad_z"], op=False,
         scaleX=1e+3, scaleY=11.0)
 
-    fig("ortho", mesh, "1000", "y2", "sigma",
+    fig("ortho", "1000", "y2", mesh, "sigma",
         ["sigma"], op=False,
         scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-    fig("ortho", mesh, "1000", "y2", "mur",
+    fig("ortho", "1000", "y2", mesh, "mur",
         ["mur"], op=False,
         scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
 #for mesh in meshes:
 for mesh in ["1.000"]:
 
-    fig("nonortho", mesh, "1000", "y2", "j",
+    fig("nonortho", "1000", "y2", mesh, "j",
         ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
         scaleX=1e+3, scaleY=1e-6)
 
-    fig("nonortho", mesh, "1000", "y2", "B",
+    fig("nonortho", "1000", "y2", mesh, "B",
         ["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
         scaleX=1e+3, scaleY=1e+2)
 
-    fig("nonortho", mesh, "1000", "y2", "F",
+    fig("nonortho", "1000", "y2", mesh, "F",
         ["F_x", "F_y", "F_z"],
         scaleX=1e+3, scaleY=1e-4)
 
-    fig("nonortho", mesh, "1000", "y2", "V",
+    fig("nonortho", "1000", "y2", mesh, "V",
         ["VRe", "VIm"], op=False,
         scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-    fig("nonortho", mesh, "1000", "y2", "VGrad",
+    fig("nonortho", "1000", "y2", mesh, "VGrad",
         ["VReGrad_x", "VReGrad_y", "VReGrad_z",
          "VImGrad_x", "VImGrad_y", "VImGrad_z"], op=False,
         scaleX=1e+3, scaleY=11.0)
 
-    fig("nonortho", mesh, "1000", "y2", "sigma",
+    fig("nonortho", "1000", "y2", mesh, "sigma",
         ["sigma"], op=False,
         scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-    fig("nonortho", mesh, "1000", "y2", "mur",
+    fig("nonortho", "1000", "y2", mesh, "mur",
         ["mur"], op=False,
         scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
