@@ -55,7 +55,6 @@ norms = {"inf": norm_inf, "1": norm_1, "2": norm_2}
 def readData(set, cases, frequencies, lines, meshes):
 
     setData = dict()
-    setFields = dict()
     setMeshErr = dict()
     setErrNorms = dict()
     setErrNormMeshes = dict()
@@ -63,7 +62,6 @@ def readData(set, cases, frequencies, lines, meshes):
     for case in cases:
 
         setData[case] = dict()
-        setFields[case] = dict()
         setMeshErr[case] = dict()
         setErrNorms[case] = dict()
         setErrNormMeshes[case] = dict()
@@ -71,7 +69,6 @@ def readData(set, cases, frequencies, lines, meshes):
         for freq in frequencies:
 
             setData[case][freq] = dict()
-            setFields[case][freq] = dict()
             setMeshErr[case][freq] = dict()
             setErrNorms[case][freq] = dict()
             setErrNormMeshes[case][freq] = dict()
@@ -79,7 +76,6 @@ def readData(set, cases, frequencies, lines, meshes):
             for line in lines:
 
                 setData[case][freq][line] = dict()
-                setFields[case][freq][line] = dict()
                 setMeshErr[case][freq][line] = dict()
                 setErrNorms[case][freq][line] = dict()
                 setErrNormMeshes[case][freq][line] = dict()
@@ -104,14 +100,13 @@ def readData(set, cases, frequencies, lines, meshes):
                         data = setData[case][freq][line][mesh]
                         dataRef = setData[case][freq][line][meshRef]
 
-                        setFields[case][freq][line][mesh] = \
-                            data.dtype.names
+                        fields = data.dtype.names
 
                         setMeshErr[case][freq][line][mesh] = \
                             np.zeros(data.shape, data.dtype)
 
 
-                        for field in setFields[case][freq][line][mesh]:
+                        for field in fields:
 
                             setMeshErr[case][freq][line][mesh][field] = \
                                 np.abs(data[field] - dataRef[field])
@@ -143,7 +138,7 @@ def readData(set, cases, frequencies, lines, meshes):
                                         errNormMeshes.insert(0, 1.0/float(mesh))
                                         meshStored=True
 
-    return setData, setFields, setMeshErr, setErrNorms, setErrNormMeshes
+    return setData, setMeshErr, setErrNorms, setErrNormMeshes
 
 # --------------------------------------------------------------------------- #
 # --- Data ------------------------------------------------------------------ #
@@ -153,12 +148,19 @@ cases = ["ortho", "nonortho"]
 frequencies = ["1000", "10000", "100000"]
 lines = ["x1", "y1", "y2", "z1"]
 meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000",
-          "1.500", "2.000", "2.500"]
+          "1.500", "2.000", "2.500", "3.000"]
+fields = ["jRe_x", "jRe_y", "jRe_z",
+          "jIm_x", "jIm_y", "jIm_z",
+          "BRe_x", "BRe_y", "BRe_z",
+          "BIm_x", "BIm_y", "BIm_z",
+          "F_x", "F_y", "F_z",
+          "VRe", "VIm",
+          "VReGrad_x", "VReGrad_y", "VReGrad_z",
+          "VImGrad_x", "VImGrad_y", "VImGrad_z"]
 
 # --------------------------------------------------------------------------- #
 
 data = dict()
-fields = dict()
 error = dict()
 errNorms = dict()
 errNormMeshes = dict()
@@ -168,7 +170,7 @@ scales = dict()
 
 set = "Opera3D"
 
-data[set], fields[set], error[set], errNorms[set], errNormMeshes[set] = \
+data[set], error[set], errNorms[set], errNormMeshes[set] = \
     readData(set, cases, frequencies, lines, meshes)
 
 scales[set] = dict()
@@ -195,7 +197,7 @@ scales[set]["F_z"] = 1e+6
 
 set = "eddyCurrentFoam"
 
-data[set], fields[set], error[set], errNorms[set], errNormMeshes[set] = \
+data[set], error[set], errNorms[set], errNormMeshes[set] = \
     readData(set, cases, frequencies, lines, meshes)
 
 scales[set] = dict()
@@ -240,6 +242,8 @@ alabels = dict()
 alabels["x"] = r"$x ~ / ~ \mathrm{mm}$"
 alabels["y"] = r"$y ~ / ~ \mathrm{mm}$"
 alabels["z"] = r"$z ~ / ~ \mathrm{mm}$"
+alabels["error-norm"] = r"$\mathrm{log}(\|\mathcal{E}\|/\|\mathcal{E}\|_{\mathrm{max}})$"
+alabels["mesh-size"] = r"$\mathrm{log}(\triangle / \triangle_{\mathrm{max}})$"
 
 labels = dict()
 labels["jRe_x"] = r"${j_x}_{\,\scriptstyle\mathfrak{Re}}$"
@@ -301,6 +305,10 @@ colors["VIm"] = "hzdr-blue"
 colors["sigma"] = "hzdr-blue"
 colors["mur"] = "hzdr-blue"
 
+colors["norm-inf"] = "hzdr-green"
+colors["norm-1"] = "hzdr-blue"
+colors["norm-2"] = "hzdr-orange"
+
 markers = dict()
 
 markers["jRe_x"] = "o"
@@ -329,18 +337,22 @@ markers["VIm"] = "s"
 markers["sigma"] = "o"
 markers["mur"] = "o"
 
+markers["norm-inf"] = "."
+markers["norm-1"] = "x"
+markers["norm-2"] = "+"
+
 # --------------------------------------------------------------------------- #
 # --- Test ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-def fig(case, freq, line, mesh, name, fields, op=True,
+def figCompare(case, freq, line, mesh, flds, name=None, op=True,
         scaleX=1.0, scaleY=1.0, shiftLegend=0.0):
 
     fig = plt.figure()
 
     opmesh = "1.000"
 
-    def plot():
+    def plot(op):
 
         axs = fig.add_subplot(111)
 
@@ -362,119 +374,92 @@ def fig(case, freq, line, mesh, name, fields, op=True,
         ofData = data["eddyCurrentFoam"][case][freq][line][mesh]
         ofsx = scales["eddyCurrentFoam"][line[:-1]]
 
-        for field in fields:
+        for fld in flds:
 
-            color = colors[field]
-            marker = markers[field]
-            label = labels[field]
+            color = colors[fld]
+            marker = markers[fld]
+            label = labels[fld]
 
             if op:
 
-                opsy = scales["Opera3D"][field]
+                opsy = scales["Opera3D"][fld]
 
                 axs.plot(opsx*scaleX*opData[line[:-1]],
-                         opsy*scaleY*opData[field],
+                         opsy*scaleY*opData[fld],
                          color=color, linestyle="--")
 
-            ofsy = scales["eddyCurrentFoam"][field]
+            ofsy = scales["eddyCurrentFoam"][fld]
 
             axs.plot(ofsx*scaleX*ofData[line[:-1]],
-                     ofsy*scaleY*ofData[field],
+                     ofsy*scaleY*ofData[fld],
                      color=color, linestyle="-",
                      marker=marker, markevery=5, markersize=5,
                      markeredgecolor=color, markerfacecolor=color,
                      label=label)
 
         legendCols  = 3
-        legendPos = shiftLegend + 0.035 * (len(fields)/legendCols - 1)
+        legendPos = shiftLegend + 0.035 * (len(flds)/legendCols - 1)
 
         axs.legend(bbox_to_anchor=(0.0, 1.05+legendPos, 1.0, 0.05+legendPos),
                    loc="upper center", ncol=legendCols,
                    mode="expand", borderaxespad=0.)
 
-    plot()
+    plot(op)
 
-    fileName = "plot_" + case + "_f" + freq + "_line_" + line + "_m" + mesh
+    fileName = "plot_compare_" + case + "_f" + freq + "_line_" + line \
+             + "_m" + mesh
 
     if op: fileName += "-op" + opmesh
 
-    fileName += "_" + name
+    if name: fileName += "_" + name
 
     #fig.set_size_inches(sizeCompX, sizeCompY)
     fig.savefig(__dir__ + "/" + fileName + ".pdf", bbox_inches="tight")
 
     plt.close(fig)
 
-#for mesh in ["1.000"]:
+#for case in ["nonortho"]:
 
-    #fig("ortho", "1000", "y2", mesh, "j",
-        #["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-        #scaleX=1e+3, scaleY=1e-6)
+    #for mesh in ["3.000"]:
 
-    #fig("ortho", "1000", "y2", mesh, "B",
-        #["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-        #scaleX=1e+3, scaleY=1e+2)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["jRe_x", "jRe_y", "jRe_z",
+                    #"jIm_x", "jIm_y", "jIm_z"], "j",
+                   #scaleX=1e+3, scaleY=1e-6)
 
-    #fig("ortho", "1000", "y2", mesh, "F",
-        #["F_x", "F_y", "F_z"],
-        #scaleX=1e+3, scaleY=1e-4)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["BRe_x", "BRe_y", "BRe_z",
+                    #"BIm_x", "BIm_y", "BIm_z"], "B",
+                   #scaleX=1e+3, scaleY=1e+2)
 
-    #fig("ortho", "1000", "y2", mesh, "V",
-        #["VRe", "VIm"], op=False,
-        #scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["F_x", "F_y", "F_z"], "F",
+                   #scaleX=1e+3, scaleY=1e-4)
 
-    #fig("ortho", "1000", "y2", mesh, "VGrad",
-        #["VReGrad_x", "VReGrad_y", "VReGrad_z",
-         #"VImGrad_x", "VImGrad_y", "VImGrad_z"], op=False,
-        #scaleX=1e+3, scaleY=11.0)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["VRe", "VIm"], "V", op=False,
+                   #scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-    #fig("ortho", "1000", "y2", mesh, "sigma",
-        #["sigma"], op=False,
-        #scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["VReGrad_x", "VReGrad_y", "VReGrad_z",
+                    #"VImGrad_x", "VImGrad_y", "VImGrad_z"], "VGrad", op=False,
+                   #scaleX=1e+3, scaleY=11.0)
 
-    #fig("ortho", "1000", "y2", mesh, "mur",
-        #["mur"], op=False,
-        #scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["sigma"], "sigma", op=False,
+                   #scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-#for mesh in ["1.000"]:
-
-    #fig("nonortho", "1000", "y2", mesh, "j",
-        #["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-        #scaleX=1e+3, scaleY=1e-6)
-
-    #fig("nonortho", "1000", "y2", mesh, "B",
-        #["BRe_x", "BRe_y", "BRe_z", "BIm_x", "BIm_y", "BIm_z"],
-        #scaleX=1e+3, scaleY=1e+2)
-
-    #fig("nonortho", "1000", "y2", mesh, "F",
-        #["F_x", "F_y", "F_z"],
-        #scaleX=1e+3, scaleY=1e-4)
-
-    #fig("nonortho", "1000", "y2", mesh, "V",
-        #["VRe", "VIm"], op=False,
-        #scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
-
-    #fig("nonortho", "1000", "y2", mesh, "VGrad",
-        #["VReGrad_x", "VReGrad_y", "VReGrad_z",
-         #"VImGrad_x", "VImGrad_y", "VImGrad_z"], op=False,
-        #scaleX=1e+3, scaleY=11.0)
-
-    #fig("nonortho", "1000", "y2", mesh, "sigma",
-        #["sigma"], op=False,
-        #scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
-
-    #fig("nonortho", "1000", "y2", mesh, "mur",
-        #["mur"], op=False,
-        #scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["mur"], "mur", op=False,
+                   #scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
 # --------------------------------------------------------------------------- #
 
-def test(case, freq, line, mesh, fields,
-        scaleX=1.0, scaleY=1.0, shiftLegend=0.0):
+def figError(case, freq, line, flds=None, name=None):
 
     fig = plt.figure()
 
-    def plot():
+    def plot(flds):
 
         axs = fig.add_subplot(111)
 
@@ -486,54 +471,73 @@ def test(case, freq, line, mesh, fields,
         axs.set_xscale("log")
         axs.set_yscale("log")
 
+        axs.set_xlabel(alabels["mesh-size"])
+        axs.set_ylabel(alabels["error-norm"])
+
         d = np.linspace(1,1e-2,100)
         axs.plot(d, 1.8*d,
                  color="black", linestyle="dotted",
-                 labels["error-O1"])
+                 label=labels["error-O1"])
         axs.plot(d, 0.2*d**2.0,
                  color="black", linestyle="dashed",
-                 labels["error-O2"])
+                 label=labels["error-O2"])
 
-        meshes = errNormMeshes["eddyCurrentFoam"][case][freq][line]
-        norms = errNorms["eddyCurrentFoam"][case][freq][line]
+        errMeshes = errNormMeshes["eddyCurrentFoam"][case][freq][line]
+        errorNorms = errNorms["eddyCurrentFoam"][case][freq][line]
 
-        norm = "2"
+        if not flds: flds = fields
 
-        xmean = np.zeros(np.array(meshes[fields[0]]).shape)
-        ymean = np.zeros(np.array(norms[fields[0]][norm]).shape)
+        for norm in norms:
 
-        for field in fields:
+            xmean = np.zeros(np.array(errMeshes[flds[0]]).shape)
+            ymean = np.zeros(np.array(errorNorms[flds[0]][norm]).shape)
 
-            m = meshes[field]
-            n = norms[field][norm]
+            for fld in flds:
 
-            x = m/np.max(m)
-            y = n/np.max(n)
+                m = errMeshes[fld]
+                e = errorNorms[fld][norm]
 
-            xmean += x
-            ymean += y
+                xmean += m/np.max(m)
+                ymean += e/np.max(e)
 
-            axs.plot(x, y)
+                #x = m/np.max(m)
+                #y = e/np.max(e)
 
-        xmean /= len(fields)
-        ymean /= len(fields)
+                #axs.plot(x, y)
 
-        axs.plot(xmean, ymean, color="black")
+            xmean /= len(flds)
+            ymean /= len(flds)
+
+            axs.plot(xmean, ymean,
+                     color=colors["norm-"+norm],
+                     marker=markers["norm-"+norm],
+                     label=labels["norm-"+norm])
 
         axs.legend(loc="lower left")
 
-    plot()
+    plot(flds)
 
-    fileName = "test"
+    fileName = "plot_error_" + case + "_f" + freq + "_line_" + line
+
+    if name: fileName += "_" + name
 
     #fig.set_size_inches(sizeCompX, sizeCompY)
     fig.savefig(__dir__ + "/" + fileName + ".pdf", bbox_inches="tight")
 
     plt.close(fig)
 
-test("nonortho", "1000", "y2", "1.000",
-     ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
-     scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
+figError("nonortho", "1000", "y2")
+
+figError("nonortho", "1000", "y2",
+         ["jRe_x", "jRe_y", "jRe_z",
+          "jIm_x", "jIm_y", "jIm_z"], "j")
+
+figError("nonortho", "1000", "y2",
+         ["BRe_x", "BRe_y", "BRe_z",
+          "BIm_x", "BIm_y", "BIm_z"], "B")
+
+figError("nonortho", "1000", "y2",
+         ["F_x", "F_y", "F_z"], "F")
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
