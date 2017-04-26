@@ -59,7 +59,7 @@ scales = dict()
 
 # --------------------------------------------------------------------------- #
 
-def readdata(set):
+def readData(set):
 
     cases = ["ortho", "nonortho"]
     meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000",
@@ -106,7 +106,7 @@ def readdata(set):
 
 set = "Opera3D"
 
-data[set], names[set] = readdata(set)
+data[set], names[set] = readData(set)
 
 scales[set] = dict()
 scales[set]["x"] = 1e-3
@@ -132,7 +132,7 @@ scales[set]["F_z"] = 1e+6
 
 set = "eddyCurrentFoam"
 
-data[set], names[set] = readdata(set)
+data[set], names[set] = readData(set)
 
 scales[set] = dict()
 scales[set]["x"] = 1.0
