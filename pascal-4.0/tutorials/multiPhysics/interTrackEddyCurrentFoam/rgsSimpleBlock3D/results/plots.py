@@ -37,7 +37,8 @@ nr = 61
 nz = 61
 
 fontsize   = 16
-fontfamily = "serif"
+
+print("fontsize   : {}".format(fontsize))
 
 # --------------------------------------------------------------------------- #
 # --- Functions ------------------------------------------------------------- #
@@ -139,7 +140,7 @@ def readData(set, cases, frequencies, lines, meshes):
 
                                     if not meshStored:
 
-                                        errNormMeshes.insert(0, float(mesh))
+                                        errNormMeshes.insert(0, 1.0/float(mesh))
                                         meshStored=True
 
     return setData, setFields, setMeshErr, setErrNorms, setErrNormMeshes
@@ -231,14 +232,14 @@ scales[set]["mur"] = 1.0
 # --- Plot settings --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-latex.latexify(fontsize=fontsize, fontfamily=fontfamily, locale="de_DE.utf8")
+latex.latexify(fontsize=fontsize, locale="de_DE.utf8")
 
 hzdr.colors()
 
 alabels = dict()
-alabels["x"] = r"$x ~ [\mathrm{mm}]$"
-alabels["y"] = r"$y ~ [\mathrm{mm}]$"
-alabels["z"] = r"$z ~ [\mathrm{mm}]$"
+alabels["x"] = r"$x ~ / ~ \mathrm{mm}$"
+alabels["y"] = r"$y ~ / ~ \mathrm{mm}$"
+alabels["z"] = r"$z ~ / ~ \mathrm{mm}$"
 
 labels = dict()
 labels["jRe_x"] = r"${j_x}_{\,\scriptstyle\mathfrak{Re}}$"
@@ -266,6 +267,12 @@ labels["VRe"] = r"${\phi}_{\,\scriptstyle\mathfrak{Re}}$"
 labels["VIm"] = r"${\phi}_{\,\scriptstyle\mathfrak{Im}}$"
 labels["sigma"] = r"${\sigma}$"
 labels["mur"] = r"${\mu_\mathrm{r}}$"
+
+labels["error-O1"] = r"$\mathcal{O}(\triangle /\triangle_{\mathrm{max}})$"
+labels["error-O2"] = r"$\mathcal{O}((\triangle / \triangle_{\mathrm{max}})^2)$"
+labels["norm-inf"] = r"$\|\mathcal{E}\|_{\infty}/\|\mathcal{E}\|_{\mathrm{max}}$"
+labels["norm-1"] = r"$\|\mathcal{E}\|_{1}/\|\mathcal{E}\|_{\mathrm{max}}$"
+labels["norm-2"] = r"$\|\mathcal{E}\|_{2}/\|\mathcal{E}\|_{\mathrm{max}}$"
 
 colors = dict()
 colors["jRe_x"] = "hzdr-orange"
@@ -462,7 +469,7 @@ def fig(case, freq, line, mesh, name, fields, op=True,
 
 # --------------------------------------------------------------------------- #
 
-def test(case, freq, line, mesh, field,
+def test(case, freq, line, mesh, fields,
         scaleX=1.0, scaleY=1.0, shiftLegend=0.0):
 
     fig = plt.figure()
@@ -473,15 +480,47 @@ def test(case, freq, line, mesh, field,
 
         axs.minorticks_on()
 
+        axs.set_xlim([1,5e-2])
+        axs.set_ylim([5e-4,1])
+
         axs.set_xscale("log")
         axs.set_yscale("log")
 
-        data = errNorms["eddyCurrentFoam"][case][freq][line][field]["1"]
-        print(data)
-        meshes = errNormMeshes["eddyCurrentFoam"][case][freq][line][field]
-        print(meshes)
+        d = np.linspace(1,1e-2,100)
+        axs.plot(d, 1.8*d,
+                 color="black", linestyle="dotted",
+                 labels["error-O1"])
+        axs.plot(d, 0.2*d**2.0,
+                 color="black", linestyle="dashed",
+                 labels["error-O2"])
 
-        axs.plot(data, meshes)
+        meshes = errNormMeshes["eddyCurrentFoam"][case][freq][line]
+        norms = errNorms["eddyCurrentFoam"][case][freq][line]
+
+        norm = "2"
+
+        xmean = np.zeros(np.array(meshes[fields[0]]).shape)
+        ymean = np.zeros(np.array(norms[fields[0]][norm]).shape)
+
+        for field in fields:
+
+            m = meshes[field]
+            n = norms[field][norm]
+
+            x = m/np.max(m)
+            y = n/np.max(n)
+
+            xmean += x
+            ymean += y
+
+            axs.plot(x, y)
+
+        xmean /= len(fields)
+        ymean /= len(fields)
+
+        axs.plot(xmean, ymean, color="black")
+
+        axs.legend(loc="lower left")
 
     plot()
 
@@ -492,8 +531,9 @@ def test(case, freq, line, mesh, field,
 
     plt.close(fig)
 
-test("nonortho", "1000", "y2", "1.000", "F_y",
-    scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
+test("nonortho", "1000", "y2", "1.000",
+     ["jRe_x", "jRe_y", "jRe_z", "jIm_x", "jIm_y", "jIm_z"],
+     scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

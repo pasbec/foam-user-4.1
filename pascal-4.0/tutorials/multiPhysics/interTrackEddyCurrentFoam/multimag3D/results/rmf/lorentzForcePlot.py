@@ -37,7 +37,6 @@ nr = 61
 nz = 61
 
 fontsize   = 16
-fontfamily = "serif"
 
 sizeCompX = 6.0
 sizeCompY = 6.0
@@ -46,7 +45,6 @@ sizeErrY = 6.0
 
 print("nr, nz     : {},{}".format(nr, nz))
 print("fontsize   : {}".format(fontsize))
-print("fontfamily : {}".format(fontfamily))
 
 baseName = "lorentzForce"
 
@@ -333,12 +331,12 @@ for mesh in meshes:
 # --- Plot settings --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-latex.latexify(fontsize=fontsize, fontfamily=fontfamily, locale="de_DE.utf8")
+latex.latexify(fontsize=fontsize, locale="de_DE.utf8")
 
 hzdr.colors()
 
-labelAxisR = r"$r ~ [\mathrm{mm}]$"
-labelAxisZ = r"$z ~ [\mathrm{mm}]$"
+labelAxisR = r"$r ~ / ~ \mathrm{mm}$"
+labelAxisZ = r"$z ~ / ~ \mathrm{mm}$"
 
 labelAxisE = r"$\mathrm{log}(\|\mathcal{E}\|/\|\mathcal{E}\|_{\mathrm{max}})$"
 labelAxisD = r"$\mathrm{log}(\triangle / \triangle_{\mathrm{max}})$"
