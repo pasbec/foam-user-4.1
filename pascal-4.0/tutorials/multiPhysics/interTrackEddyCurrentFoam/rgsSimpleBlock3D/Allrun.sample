@@ -32,7 +32,7 @@ lines="x1 y1 y2 z1"
 
 for l in $lines; do
 
-    fileName="$resultsDir/data_eddyCurrentFoam_${1}_m${2}_f${3}_line_${l}.dat"
+    fileName="$resultsDir/data_eddyCurrentFoam_${1}_f${3}_line_${l}_m${2}.dat"
 
     header="# ${l::-1}"
     header="$header jRe_x jRe_y jRe_z"

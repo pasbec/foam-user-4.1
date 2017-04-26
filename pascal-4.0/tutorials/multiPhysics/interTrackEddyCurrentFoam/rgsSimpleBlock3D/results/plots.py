@@ -429,7 +429,6 @@ def fig(case, freq, line, mesh, name, fields, op=True,
         #["mur"], op=False,
         #scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-##for mesh in meshes:
 #for mesh in ["1.000"]:
 
     #fig("nonortho", "1000", "y2", mesh, "j",
@@ -482,7 +481,7 @@ def test(case, freq, line, mesh, field,
         meshes = errNormMeshes["eddyCurrentFoam"][case][freq][line][field]
         print(meshes)
 
-        axs.plot(data)
+        axs.plot(data, meshes)
 
     plot()
 
