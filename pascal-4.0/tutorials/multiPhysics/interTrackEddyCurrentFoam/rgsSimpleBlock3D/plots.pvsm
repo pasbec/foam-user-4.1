@@ -23545,10 +23545,10 @@
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="3999" servers="1">
       <Property name="FileNameInfo" id="3999.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh/coil0.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh/coil0.vtk"/>
       </Property>
       <Property name="FileNames" id="3999.FileNames" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh/coil0.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh/coil0.vtk"/>
         <Domain name="files" id="3999.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="3999.TimestepValues"/>
@@ -23565,20 +23565,20 @@
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="4065" servers="1">
       <Property name="FileNameInfo" id="4065.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh.org/coil0_vectorplot.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh.org/coil0_vectorplot.vtk"/>
       </Property>
       <Property name="FileNames" id="4065.FileNames" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh.org/coil0_vectorplot.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh.org/coil0_vectorplot.vtk"/>
         <Domain name="files" id="4065.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="4065.TimestepValues"/>
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="4021" servers="1">
       <Property name="FileNameInfo" id="4021.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh/coil1.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh/coil1.vtk"/>
       </Property>
       <Property name="FileNames" id="4021.FileNames" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh/coil1.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh/coil1.vtk"/>
         <Domain name="files" id="4021.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="4021.TimestepValues"/>
@@ -23595,20 +23595,20 @@
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="4087" servers="1">
       <Property name="FileNameInfo" id="4087.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh.org/coil1_vectorplot.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh.org/coil1_vectorplot.vtk"/>
       </Property>
       <Property name="FileNames" id="4087.FileNames" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh.org/coil1_vectorplot.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh.org/coil1_vectorplot.vtk"/>
         <Domain name="files" id="4087.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="4087.TimestepValues"/>
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="4043" servers="1">
       <Property name="FileNameInfo" id="4043.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh/coil2.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh/coil2.vtk"/>
       </Property>
       <Property name="FileNames" id="4043.FileNames" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh/coil2.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh/coil2.vtk"/>
         <Domain name="files" id="4043.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="4043.TimestepValues"/>
@@ -23625,20 +23625,20 @@
     </Proxy>
     <Proxy group="sources" type="LegacyVTKFileReader" id="4109" servers="1">
       <Property name="FileNameInfo" id="4109.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh.org/coil2_vectorplot.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh.org/coil2_vectorplot.vtk"/>
       </Property>
       <Property name="FileNames" id="4109.FileNames" number_of_elements="1">
-        <Element index="0" value="./constant/featureEdgeMesh.org/coil2_vectorplot.vtk"/>
+        <Element index="0" value="constant/featureEdgeMesh.org/coil2_vectorplot.vtk"/>
         <Domain name="files" id="4109.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="4109.TimestepValues"/>
     </Proxy>
     <Proxy group="sources" type="stlreader" id="3977" servers="1">
       <Property name="FileNameInfo" id="3977.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="./constant/triSurface/geometry_body_coils.stl"/>
+        <Element index="0" value="constant/triSurface/geometry_body_coils.stl"/>
       </Property>
       <Property name="FileNames" id="3977.FileNames" number_of_elements="1">
-        <Element index="0" value="./constant/triSurface/geometry_body_coils.stl"/>
+        <Element index="0" value="constant/triSurface/geometry_body_coils.stl"/>
         <Domain name="files" id="3977.FileNames.files"/>
       </Property>
       <Property name="TimestepValues" id="3977.TimestepValues"/>
