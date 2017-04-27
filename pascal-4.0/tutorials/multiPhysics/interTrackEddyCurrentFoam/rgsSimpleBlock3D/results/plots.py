@@ -418,9 +418,9 @@ def figCompare(case, freq, line, mesh, flds, name=None, op=True,
 
     plt.close(fig)
 
-#for case in ["nonortho"]:
+#for case in ["ortho", "nonortho"]:
 
-    #for mesh in ["3.000"]:
+    #for mesh in ["1.000"]:
 
         #figCompare(case, "1000", "y2", mesh,
                    #["jRe_x", "jRe_y", "jRe_z",
@@ -526,18 +526,20 @@ def figError(case, freq, line, flds=None, name=None):
 
     plt.close(fig)
 
-figError("nonortho", "1000", "y2")
+for case in ["ortho", "nonortho"]:
 
-figError("nonortho", "1000", "y2",
-         ["jRe_x", "jRe_y", "jRe_z",
-          "jIm_x", "jIm_y", "jIm_z"], "j")
+    figError(case, "1000", "y2")
 
-figError("nonortho", "1000", "y2",
-         ["BRe_x", "BRe_y", "BRe_z",
-          "BIm_x", "BIm_y", "BIm_z"], "B")
+    figError(case, "1000", "y2",
+             ["jRe_x", "jRe_y", "jRe_z",
+             "jIm_x", "jIm_y", "jIm_z"], "j")
 
-figError("nonortho", "1000", "y2",
-         ["F_x", "F_y", "F_z"], "F")
+    figError(case, "1000", "y2",
+             ["BRe_x", "BRe_y", "BRe_z",
+             "BIm_x", "BIm_y", "BIm_z"], "B")
+
+    figError(case, "1000", "y2",
+             ["F_x", "F_y", "F_z"], "F")
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
