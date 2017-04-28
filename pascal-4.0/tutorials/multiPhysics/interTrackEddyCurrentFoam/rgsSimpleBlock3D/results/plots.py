@@ -410,7 +410,7 @@ def figCompare(case, freq, line, mesh, flds, name=None, op=True,
             axs.plot(ofsx*scaleX*ofData[line[:-1]],
                      ofsy*scaleY*ofData[fld],
                      color=color, linestyle="-",
-                     marker=marker, markevery=5, markersize=5,
+                     marker=marker, markevery=5, markersize=4,
                      markeredgecolor=color, markerfacecolor=color,
                      label=label)
 
