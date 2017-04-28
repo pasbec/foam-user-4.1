@@ -34,6 +34,7 @@ import plotTools.hzdr as hzdr
 # --------------------------------------------------------------------------- #
 
 fontsize = 16
+fontfamily = "serif" # only for clabels
 locale="de_DE.utf8"
 preamble = ["\\usepackage[utf8x]{inputenc}",
             "\\usepackage[T1]{fontenc}",
@@ -42,7 +43,8 @@ preamble = ["\\usepackage[utf8x]{inputenc}",
             "\\usepackage{newtxtext,newtxmath}",
             "\\usepackage[locale=" + locale[3:5] + "]{siunitx}"]
 
-latex.pdflatexify(fontsize=fontsize, locale=locale, preamble=preamble)
+latex.pdflatexify(fontsize=fontsize, fontfamily=fontfamily,
+                  locale=locale, preamble=preamble)
 
 hzdr.colors()
 

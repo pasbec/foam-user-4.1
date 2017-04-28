@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 
 def pdflatexify(
         fig_width=None, fig_height=None, dpi=None,
-        fontsize=None, locale=None, preamble=None
+        fontsize=None, fontfamily=None, locale=None, preamble=None
     ):
     """Set up matplotlib"s RC params for LaTeX plotting.
     Call this before plotting a figure.
@@ -71,7 +71,7 @@ def pdflatexify(
     mpl.rcParams["axes.formatter.use_locale"] = True
 
     # Adjust font sizes
-    if fontsize is not None:
+    if fontsize:
 
         rc_font_sizes = {
             "font.size": fontsize,
@@ -83,6 +83,11 @@ def pdflatexify(
         }
 
         mpl.rcParams.update(rc_font_sizes)
+
+    # Adjust font family (important for clabels!!!
+    if fontfamily:
+
+        mpl.rcParams["font.family"] = fontfamily
 
     # Adjust pdflatex settings
     if not preamble:
