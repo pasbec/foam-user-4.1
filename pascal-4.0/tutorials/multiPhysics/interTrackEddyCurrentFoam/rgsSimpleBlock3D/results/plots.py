@@ -473,7 +473,7 @@ for case in ["ortho", "nonortho"]:
                    ["mur"], "mur", op=False,
                    scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-for case in ["ortho"]:
+for case in ["ortho", "nonortho"]:
 
     for mesh in ["2.000"]:
 
