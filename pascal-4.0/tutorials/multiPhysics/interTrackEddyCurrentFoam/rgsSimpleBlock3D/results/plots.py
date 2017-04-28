@@ -38,7 +38,7 @@ locale="de_DE.utf8"
 preamble = ["\\usepackage[utf8x]{inputenc}",
             "\\usepackage[T1]{fontenc}",
             "\\usepackage{amsmath,amssymb,amsthm,amsfonts,mathrsfs}",
-            "\\usepackage{mathtools,stmaryrd}",
+            "\\usepackage{mathtools}",
             "\\usepackage{newtxtext,newtxmath}",
             "\\usepackage[locale=" + locale[3:5] + "]{siunitx}"]
 
