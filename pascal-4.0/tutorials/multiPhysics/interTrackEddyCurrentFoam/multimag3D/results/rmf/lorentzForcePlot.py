@@ -40,7 +40,7 @@ print("nr, nz     : {},{}".format(nr, nz))
 
 # --------------------------------------------------------------------------- #
 
-fontsize = 16
+fontsize = 11
 fontfamily = "serif" # only for clabels
 locale="de_DE.utf8"
 preamble = ["\\usepackage[utf8x]{inputenc}",
@@ -57,10 +57,13 @@ hzdr.colors()
 
 # --------------------------------------------------------------------------- #
 
-sizeCompX = 6.0
-sizeCompY = 6.0
-sizeErrX = 8.0
-sizeErrY = 6.0
+textWidth = (210-25-25)/25.4
+
+sizeCompX = 0.49 * textWidth
+sizeCompY = sizeCompX
+
+sizeErrX = 0.69 * textWidth
+sizeErrY = 0.75 * sizeErrX
 
 baseName = "lorentzForce"
 
@@ -367,8 +370,8 @@ for mesh in meshes:
 # --- Plot settings --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-labelAxisR = r"$r ~ / ~ \mathrm{mm}$"
-labelAxisZ = r"$z ~ / ~ \mathrm{mm}$"
+labelAxisR = r"$r ~ / \si{\mm}$"
+labelAxisZ = r"$z ~ / \si{\mm}$"
 
 labelAxisE = r"$\mathrm{log}(\|\mathcal{E}\|/\|\mathcal{E}\|_{\mathrm{max}})$"
 labelAxisD = r"$\mathrm{log}(\triangle / \triangle_{\mathrm{max}})$"
@@ -906,10 +909,10 @@ def fig(p, name):
 
             c = 10.0**(n/3.0)
 
-            if n==1: y = 5e-4
-            if n==2: y = 5e-5
-            if n==3: y = 5e-2
-            if n==4: y = 5e-3
+            if n==1: y = 2e-2
+            if n==2: y = 2e-3
+            if n==3: y = 2e-4
+            if n==4: y = 2e-5
 
             if n==1:
                 ax.plot((c, c), (1e-5, 1), label=labelE["OsConst"],
@@ -970,10 +973,10 @@ def fig(p, name):
 
             c = 10.0**(n/3.0)
 
-            if n==1: y = 5e-4
-            if n==2: y = 5e-5
-            if n==3: y = 5e-2
-            if n==4: y = 5e-3
+            if n==1: y = 2e-2
+            if n==2: y = 2e-3
+            if n==3: y = 2e-4
+            if n==4: y = 2e-5
 
             if n==1:
                 ax.plot((c, c), (1e-5, 1), label=labelE["OsConst"],
@@ -1034,10 +1037,10 @@ def fig(p, name):
 
             c = 10.0**(n/3.0)
 
-            if n==1: y = 5e-4
-            if n==2: y = 5e-5
-            if n==3: y = 5e-2
-            if n==4: y = 5e-3
+            if n==1: y = 2e-2
+            if n==2: y = 2e-3
+            if n==3: y = 2e-4
+            if n==4: y = 2e-5
 
             if n==1:
                 ax.plot((c, c), (1e-5, 1), label=labelE["OsConst"],
@@ -1098,10 +1101,10 @@ def fig(p, name):
 
             c = 10.0**(n/3.0)
 
-            if n==1: y = 5e-4
-            if n==2: y = 5e-5
-            if n==3: y = 5e-2
-            if n==4: y = 5e-3
+            if n==1: y = 2e-2
+            if n==2: y = 2e-3
+            if n==3: y = 2e-4
+            if n==4: y = 2e-5
 
             if n==1:
                 ax.plot((c, c), (1e-5, 1), label=labelE["OsConst"],

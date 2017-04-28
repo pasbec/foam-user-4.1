@@ -66,8 +66,6 @@ def pdflatexify(
         localeSet = lc.getlocale()
         locale = localeSet[0] + "." + localeSet[1]
 
-    print(locale)
-
     mpl.rcParams["axes.formatter.use_locale"] = True
 
     # Adjust font sizes

@@ -40,7 +40,7 @@ print("nr, nz     : {},{}".format(nr, nz))
 
 # --------------------------------------------------------------------------- #
 
-fontsize = 16
+fontsize = 11
 fontfamily = "serif" # only for clabels
 locale="de_DE.utf8"
 preamble = ["\\usepackage[utf8x]{inputenc}",
@@ -57,10 +57,13 @@ hzdr.colors()
 
 # --------------------------------------------------------------------------- #
 
-sizeCompX = 6.0
-sizeCompY = 6.0
-sizeErrX = 8.0
-sizeErrY = 6.0
+textWidth = (210-25-25)/25.4
+
+sizeCompX = 0.49 * textWidth
+sizeCompY = 2.0 * sizeCompX
+
+sizeErrX = 0.69 * textWidth
+sizeErrY = 0.75 * sizeErrX
 
 baseName = "lorentzForce"
 
@@ -278,8 +281,8 @@ for mesh in meshes:
 # --- Plot settings --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-labelAxisR = r"$r ~ / ~ \mathrm{mm}$"
-labelAxisZ = r"$z ~ / ~ \mathrm{mm}$"
+labelAxisR = r"$r ~ / \si{\mm}$"
+labelAxisZ = r"$z ~ / \si{\mm}$"
 
 labelAxisE = r"$\mathrm{log}(\|\mathcal{E}\|/\|\mathcal{E}\|_{\mathrm{max}})$"
 labelAxisD = r"$\mathrm{log}(\triangle / \triangle_{\mathrm{max}})$"

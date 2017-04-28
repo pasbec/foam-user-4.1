@@ -33,7 +33,7 @@ import plotTools.hzdr as hzdr
 # --- Parameters ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-fontsize = 16
+fontsize = 11
 fontfamily = "serif" # only for clabels
 locale="de_DE.utf8"
 preamble = ["\\usepackage[utf8x]{inputenc}",
@@ -50,10 +50,13 @@ hzdr.colors()
 
 # --------------------------------------------------------------------------- #
 
-sizeCompX = 8.0
-sizeCompY = 6.0
-sizeErrX = 8.0
-sizeErrY = 6.0
+textWidth = (210-25-25)/25.4
+
+sizeCompX = 0.8 * textWidth
+sizeCompY = 0.75 * sizeCompX
+
+sizeErrX = 0.69 * textWidth
+sizeErrY = 0.75 * sizeErrX
 
 # --------------------------------------------------------------------------- #
 # --- Functions ------------------------------------------------------------- #
@@ -250,34 +253,37 @@ scales[set]["mur"] = 1.0
 # --------------------------------------------------------------------------- #
 
 alabels = dict()
-alabels["x"] = r"$x ~ / ~ \mathrm{mm}$"
-alabels["y"] = r"$y ~ / ~ \mathrm{mm}$"
-alabels["z"] = r"$z ~ / ~ \mathrm{mm}$"
+alabels["x"] = r"$x ~ / \si{\mm}$"
+alabels["y"] = r"$y ~ / \si{\mm}$"
+alabels["z"] = r"$z ~ / \si{\mm}$"
+alabels["j"] = r"${\boldsymbol{j}}_{\,{\scriptstyle\mathfrak{Re}},\,{\scriptstyle\mathfrak{Im}}} \cdot \boldsymbol{e}_i ~ / \SI{1e+6}{\A\per\m\squared}$"
+alabels["B"] = r"${\boldsymbol{B}}_{\,{\scriptstyle\mathfrak{Re}},\,{\scriptstyle\mathfrak{Im}}} \cdot \boldsymbol{e}_i ~ / \SI{1e-2}{\tesla}$"
+alabels["F"] = r"$\left<\boldsymbol{f}\right>_{t} \cdot \boldsymbol{e}_i ~ / \SI{1e+4}{\newton\per\m\cubed}$"
 alabels["error-norm"] = r"$\mathrm{log}(\|\mathcal{E}\|/\|\mathcal{E}\|_{\mathrm{max}})$"
 alabels["mesh-size"] = r"$\mathrm{log}(\triangle / \triangle_{\mathrm{max}})$"
 
 labels = dict()
-labels["jRe_x"] = r"${j_x}_{\,\scriptstyle\mathfrak{Re}}$"
-labels["jRe_y"] = r"${j_y}_{\,\scriptstyle\mathfrak{Re}}$"
-labels["jRe_z"] = r"${j_z}_{\,\scriptstyle\mathfrak{Re}}$"
-labels["jIm_x"] = r"${j_x}_{\,\scriptstyle\mathfrak{Im}}$"
-labels["jIm_y"] = r"${j_y}_{\,\scriptstyle\mathfrak{Im}}$"
-labels["jIm_z"] = r"${j_z}_{\,\scriptstyle\mathfrak{Im}}$"
-labels["BRe_x"] = r"${B_x}_{\,\scriptstyle\mathfrak{Re}}$"
-labels["BRe_y"] = r"${B_y}_{\,\scriptstyle\mathfrak{Re}}$"
-labels["BRe_z"] = r"${B_z}_{\,\scriptstyle\mathfrak{Re}}$"
-labels["BIm_x"] = r"${B_x}_{\,\scriptstyle\mathfrak{Im}}$"
-labels["BIm_y"] = r"${B_y}_{\,\scriptstyle\mathfrak{Im}}$"
-labels["BIm_z"] = r"${B_z}_{\,\scriptstyle\mathfrak{Im}}$"
-labels["F_x"] = r"$\left<{F_x}\right>_{t}$"
-labels["F_y"] = r"$\left<{F_y}\right>_{t}$"
-labels["F_z"] = r"$\left<{F_z}\right>_{t}$"
-labels["VReGrad_x"] = r"${\nabla \phi_x}_{\,\scriptstyle\mathfrak{Re}}$"
-labels["VReGrad_y"] = r"${\nabla \phi_y}_{\,\scriptstyle\mathfrak{Re}}$"
-labels["VReGrad_z"] = r"${\nabla \phi_z}_{\,\scriptstyle\mathfrak{Re}}$"
-labels["VImGrad_x"] = r"${\nabla \phi_x}_{\,\scriptstyle\mathfrak{Im}}$"
-labels["VImGrad_y"] = r"${\nabla \phi_y}_{\,\scriptstyle\mathfrak{Im}}$"
-labels["VImGrad_z"] = r"${\nabla \phi_z}_{\,\scriptstyle\mathfrak{Im}}$"
+labels["jRe_x"] = r"${\boldsymbol{j}}_{\,\scriptstyle\mathfrak{Re}} \cdot \boldsymbol{e}_x$"
+labels["jRe_y"] = r"${\boldsymbol{j}}_{\,\scriptstyle\mathfrak{Re}} \cdot \boldsymbol{e}_y$"
+labels["jRe_z"] = r"${\boldsymbol{j}}_{\,\scriptstyle\mathfrak{Re}} \cdot \boldsymbol{e}_z$"
+labels["jIm_x"] = r"${\boldsymbol{j}}_{\,\scriptstyle\mathfrak{Im}} \cdot \boldsymbol{e}_x$"
+labels["jIm_y"] = r"${\boldsymbol{j}}_{\,\scriptstyle\mathfrak{Im}} \cdot \boldsymbol{e}_y$"
+labels["jIm_z"] = r"${\boldsymbol{j}}_{\,\scriptstyle\mathfrak{Im}} \cdot \boldsymbol{e}_z$"
+labels["BRe_x"] = r"${\boldsymbol{B}}_{\,\scriptstyle\mathfrak{Re}} \cdot \boldsymbol{e}_x$"
+labels["BRe_y"] = r"${\boldsymbol{B}}_{\,\scriptstyle\mathfrak{Re}} \cdot \boldsymbol{e}_y$"
+labels["BRe_z"] = r"${\boldsymbol{B}}_{\,\scriptstyle\mathfrak{Re}} \cdot \boldsymbol{e}_z$"
+labels["BIm_x"] = r"${\boldsymbol{B}}_{\,\scriptstyle\mathfrak{Im}} \cdot \boldsymbol{e}_x$"
+labels["BIm_y"] = r"${\boldsymbol{B}}_{\,\scriptstyle\mathfrak{Im}} \cdot \boldsymbol{e}_y$"
+labels["BIm_z"] = r"${\boldsymbol{B}}_{\,\scriptstyle\mathfrak{Im}} \cdot \boldsymbol{e}_z$"
+labels["F_x"] = r"$\left<{\boldsymbol{f}}\right>_{t} \cdot \boldsymbol{e}_x$"
+labels["F_y"] = r"$\left<{\boldsymbol{f}}\right>_{t} \cdot \boldsymbol{e}_y$"
+labels["F_z"] = r"$\left<{\boldsymbol{f}}\right>_{t} \cdot \boldsymbol{e}_z$"
+labels["VReGrad_x"] = r"${\nabla \phi}_{\,\scriptstyle\mathfrak{Re}} \cdot \boldsymbol{e}_x$"
+labels["VReGrad_y"] = r"${\nabla \phi}_{\,\scriptstyle\mathfrak{Re}} \cdot \boldsymbol{e}_y$"
+labels["VReGrad_z"] = r"${\nabla \phi}_{\,\scriptstyle\mathfrak{Re}} \cdot \boldsymbol{e}_z$"
+labels["VImGrad_x"] = r"${\nabla \phi}_{\,\scriptstyle\mathfrak{Im}} \cdot \boldsymbol{e}_x$"
+labels["VImGrad_y"] = r"${\nabla \phi}_{\,\scriptstyle\mathfrak{Im}} \cdot \boldsymbol{e}_y$"
+labels["VImGrad_z"] = r"${\nabla \phi}_{\,\scriptstyle\mathfrak{Im}} \cdot \boldsymbol{e}_z$"
 labels["VRe"] = r"${\phi}_{\,\scriptstyle\mathfrak{Re}}$"
 labels["VIm"] = r"${\phi}_{\,\scriptstyle\mathfrak{Im}}$"
 labels["sigma"] = r"${\sigma}$"
@@ -370,12 +376,12 @@ def figCompare(case, freq, line, mesh, flds, name=None, op=True,
         axs.minorticks_on()
 
         axs.set_xlim([-75,75])
-        #axs.set_ylim([0,30])
 
         axs.set_xlabel(alabels[line[:-1]])
-        #axs.set_ylabel(labelAxisZ)
 
-        #axs.set_aspect("equal")
+        if name:
+
+            if name in alabels: axs.set_ylabel(alabels[name])
 
         if op:
 
