@@ -33,12 +33,25 @@ import plotTools.hzdr as hzdr
 # --- Parameters ------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-nr = 61
-nz = 61
+fontsize = 16
+locale="de_DE.utf8"
+preamble = ["\\usepackage[utf8x]{inputenc}",
+            "\\usepackage[T1]{fontenc}",
+            "\\usepackage{amsmath,amssymb,amsthm,amsfonts,mathrsfs}",
+            "\\usepackage{mathtools,stmaryrd}",
+            "\\usepackage{newtxtext,newtxmath}",
+            "\\usepackage[locale=" + locale[3:5] + "]{siunitx}"]
 
-fontsize   = 16
+latex.pdflatexify(fontsize=fontsize, locale=locale, preamble=preamble)
 
-print("fontsize   : {}".format(fontsize))
+hzdr.colors()
+
+# --------------------------------------------------------------------------- #
+
+sizeCompX = 8.0
+sizeCompY = 6.0
+sizeErrX = 8.0
+sizeErrY = 6.0
 
 # --------------------------------------------------------------------------- #
 # --- Functions ------------------------------------------------------------- #
@@ -234,10 +247,6 @@ scales[set]["mur"] = 1.0
 # --- Plot settings --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-latex.latexify(fontsize=fontsize, locale="de_DE.utf8")
-
-hzdr.colors()
-
 alabels = dict()
 alabels["x"] = r"$x ~ / ~ \mathrm{mm}$"
 alabels["y"] = r"$y ~ / ~ \mathrm{mm}$"
@@ -400,58 +409,61 @@ def figCompare(case, freq, line, mesh, flds, name=None, op=True,
         legendCols  = 3
         legendPos = shiftLegend + 0.035 * (len(flds)/legendCols - 1)
 
-        axs.legend(bbox_to_anchor=(0.0, 1.05+legendPos, 1.0, 0.05+legendPos),
-                   loc="upper center", ncol=legendCols,
-                   mode="expand", borderaxespad=0.)
+        lgd = axs.legend(bbox_to_anchor=(0.0, 1.05+legendPos, 1.0, 0.05+legendPos),
+                         loc="upper center", ncol=legendCols,
+                         mode="expand", borderaxespad=0.)
 
-    plot(op)
+        art = []
+        art.append(lgd)
 
-    fileName = "plot_compare_" + case + "_f" + freq + "_line_" + line \
-             + "_m" + mesh
+        return art
 
+    art = plot(op)
+
+    fileName = "plot_compare_" + case + "_f" + freq + "_line_" + line + "_m" + mesh
     if op: fileName += "-op" + opmesh
-
     if name: fileName += "_" + name
 
-    #fig.set_size_inches(sizeCompX, sizeCompY)
-    fig.savefig(__dir__ + "/" + fileName + ".pdf", bbox_inches="tight")
+    fig.set_size_inches(sizeCompX, sizeCompY)
+    fig.savefig(__dir__ + "/" + fileName + ".pdf",
+                additional_artists=art, bbox_inches="tight")
 
     plt.close(fig)
 
-#for case in ["ortho", "nonortho"]:
+for case in ["ortho", "nonortho"]:
 
-    #for mesh in ["1.000"]:
+    for mesh in ["1.000"]:
 
-        #figCompare(case, "1000", "y2", mesh,
-                   #["jRe_x", "jRe_y", "jRe_z",
-                    #"jIm_x", "jIm_y", "jIm_z"], "j",
-                   #scaleX=1e+3, scaleY=1e-6)
+        figCompare(case, "1000", "y2", mesh,
+                   ["jRe_x", "jRe_y", "jRe_z",
+                    "jIm_x", "jIm_y", "jIm_z"], "j",
+                   scaleX=1e+3, scaleY=1e-6)
 
-        #figCompare(case, "1000", "y2", mesh,
-                   #["BRe_x", "BRe_y", "BRe_z",
-                    #"BIm_x", "BIm_y", "BIm_z"], "B",
-                   #scaleX=1e+3, scaleY=1e+2)
+        figCompare(case, "1000", "y2", mesh,
+                   ["BRe_x", "BRe_y", "BRe_z",
+                    "BIm_x", "BIm_y", "BIm_z"], "B",
+                   scaleX=1e+3, scaleY=1e+2)
 
-        #figCompare(case, "1000", "y2", mesh,
-                   #["F_x", "F_y", "F_z"], "F",
-                   #scaleX=1e+3, scaleY=1e-4)
+        figCompare(case, "1000", "y2", mesh,
+                   ["F_x", "F_y", "F_z"], "F",
+                   scaleX=1e+3, scaleY=1e-4)
 
-        #figCompare(case, "1000", "y2", mesh,
-                   #["VRe", "VIm"], "V", op=False,
-                   #scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
+        figCompare(case, "1000", "y2", mesh,
+                   ["VRe", "VIm"], "V", op=False,
+                   scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-        #figCompare(case, "1000", "y2", mesh,
-                   #["VReGrad_x", "VReGrad_y", "VReGrad_z",
-                    #"VImGrad_x", "VImGrad_y", "VImGrad_z"], "VGrad", op=False,
-                   #scaleX=1e+3, scaleY=11.0)
+        figCompare(case, "1000", "y2", mesh,
+                   ["VReGrad_x", "VReGrad_y", "VReGrad_z",
+                    "VImGrad_x", "VImGrad_y", "VImGrad_z"], "VGrad", op=False,
+                   scaleX=1e+3, scaleY=11.0)
 
-        #figCompare(case, "1000", "y2", mesh,
-                   #["sigma"], "sigma", op=False,
-                   #scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
+        figCompare(case, "1000", "y2", mesh,
+                   ["sigma"], "sigma", op=False,
+                   scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-        #figCompare(case, "1000", "y2", mesh,
-                   #["mur"], "mur", op=False,
-                   #scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
+        figCompare(case, "1000", "y2", mesh,
+                   ["mur"], "mur", op=False,
+                   scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
 # --------------------------------------------------------------------------- #
 
@@ -518,10 +530,9 @@ def figError(case, freq, line, flds=None, name=None):
     plot(flds)
 
     fileName = "plot_error_" + case + "_f" + freq + "_line_" + line
-
     if name: fileName += "_" + name
 
-    #fig.set_size_inches(sizeCompX, sizeCompY)
+    fig.set_size_inches(sizeErrX, sizeErrY)
     fig.savefig(__dir__ + "/" + fileName + ".pdf", bbox_inches="tight")
 
     plt.close(fig)

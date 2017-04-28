@@ -20,15 +20,17 @@ __head__ = os.path.splitext(__base__)[0]
 
 import locale as lc
 import matplotlib as mpl
+from matplotlib.backends.backend_pgf import FigureCanvasPgf
+mpl.backend_bases.register_backend("pdf", FigureCanvasPgf)
 import matplotlib.pyplot as plt
 
 # --------------------------------------------------------------------------- #
 # --- Function -------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def latexify(
+def pdflatexify(
         fig_width=None, fig_height=None, dpi=None,
-        fontsize=None, fontfamily=None, locale=None
+        fontsize=None, locale=None, preamble=None
     ):
     """Set up matplotlib"s RC params for LaTeX plotting.
     Call this before plotting a figure.
@@ -45,46 +47,66 @@ def latexify(
     inch = 25.4
 
     ## Adjust size and dpi
-    if fig_width is not None or fig_height is not None:
+    if fig_width and fig_height:
 
         mpl.rcParams["figure.figsize"] = [fig_width,fig_height]
 
-    if dpi is not None:
+    if dpi:
 
         mpl.rcParams["figure.dpi"] = dpi
         mpl.rcParams["savefig.dpi"] = dpi
 
-    # Adjust settings
-
-    mpl.rcParams["backend"] = "ps"
-
-    mpl.rcParams["text.usetex"] = True
-    mpl.rcParams["text.latex.unicode"] = True
-    mpl.rcParams["text.latex.preamble"] = ["\\usepackage{amsmath,amssymb,amsthm,amsfonts}"]
-
-    if fontfamily is not None:
-
-        mpl.rcParams["font.family"] = fontfamily
-
-    if fontsize is not None:
-
-        mpl.rcParams["font.size"] = fontsize
-
-        mpl.rcParams["axes.labelsize"] = fontsize
-        mpl.rcParams["axes.titlesize"] = fontsize
-
-        mpl.rcParams["legend.fontsize"] = fontsize
-
-        mpl.rcParams["xtick.labelsize"] = fontsize
-        mpl.rcParams["ytick.labelsize"] = fontsize
-
     # Adjust locale
-    if locale is not None:
+    if locale:
 
         lc.setlocale(lc.LC_ALL, locale)
-        mpl.rcParams['axes.formatter.use_locale'] = True
 
-    # Adjust savefig?
+    else:
+
+        localeSet = lc.getlocale()
+        locale = localeSet[0] + "." + localeSet[1]
+
+    print(locale)
+
+    mpl.rcParams["axes.formatter.use_locale"] = True
+
+    # Adjust font sizes
+    if fontsize is not None:
+
+        rc_font_sizes = {
+            "font.size": fontsize,
+            "axes.labelsize": fontsize,
+            "axes.titlesize": fontsize,
+            "legend.fontsize": fontsize,
+            "xtick.labelsize": fontsize,
+            "ytick.labelsize": fontsize
+        }
+
+        mpl.rcParams.update(rc_font_sizes)
+
+    # Adjust pdflatex settings
+    if not preamble:
+
+        preamble = [
+            "\\usepackage[utf8x]{inputenc}",
+            "\\usepackage[T1]{fontenc}",
+            "\\usepackage{amsmath,amssymb,amsthm,amsfonts,mathrsfs}",
+            "\\usepackage{mathtools,stmaryrd}",
+            "\\usepackage[locale=" + locale[3:5] + "]{siunitx}"]
+
+    rc_pgf_with_pdflatex = {
+        "backend": "pgf",
+        "font.serif": [],
+        "font.sans-serif": [],
+        "font.monospace": [],
+        "text.usetex": True,
+        "text.latex.unicode": True,
+        "pgf.texsystem": "pdflatex",
+        "pgf.rcfonts": False,
+        "pgf.preamble": preamble
+    }
+
+    mpl.rcParams.update(rc_pgf_with_pdflatex)
 
 
 # --------------------------------------------------------------------------- #

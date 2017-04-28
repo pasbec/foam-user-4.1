@@ -36,15 +36,29 @@ import plotTools.hzdr as hzdr
 nr = 61
 nz = 61
 
-fontsize   = 16
+print("nr, nz     : {},{}".format(nr, nz))
+
+# --------------------------------------------------------------------------- #
+
+fontsize = 16
+locale="de_DE.utf8"
+preamble = ["\\usepackage[utf8x]{inputenc}",
+            "\\usepackage[T1]{fontenc}",
+            "\\usepackage{amsmath,amssymb,amsthm,amsfonts,mathrsfs}",
+            "\\usepackage{mathtools,stmaryrd}",
+            "\\usepackage{newtxtext,newtxmath}",
+            "\\usepackage[locale=" + locale[3:5] + "]{siunitx}"]
+
+latex.pdflatexify(fontsize=fontsize, locale=locale, preamble=preamble)
+
+hzdr.colors()
+
+# --------------------------------------------------------------------------- #
 
 sizeCompX = 6.0
 sizeCompY = 6.0
 sizeErrX = 8.0
 sizeErrY = 6.0
-
-print("nr, nz     : {},{}".format(nr, nz))
-print("fontsize   : {}".format(fontsize))
 
 baseName = "lorentzForce"
 
@@ -80,7 +94,11 @@ set = "Analytical"
 # Read data
 if True:
 
-    data[set] = np.genfromtxt(__dir__+"/"+baseName+set+".dat", comments="#")
+    fileName = __dir__+"/"+baseName+set+".dat"
+
+    print("Reading file: " + fileName)
+
+    data[set] = np.genfromtxt(fileName, comments="#")
 
     R[set]    = data[set][:,0].reshape(nr,nz)
     Z[set]    = data[set][:,1].reshape(nr,nz)
@@ -113,7 +131,11 @@ meshes = ["coarse", "fine"]
 # Read data
 for mesh in meshes:
 
-    data[set][mesh] = np.genfromtxt(__dir__+"/"+baseName+set+"_"+mesh+".dat", comments="#")
+    fileName = __dir__+"/"+baseName+set+"_"+mesh+".dat"
+
+    print("Reading file: " + fileName)
+
+    data[set][mesh] = np.genfromtxt(fileName, comments="#")
 
     R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
     Z[set][mesh]    = data[set][mesh][:,1].reshape(nr,nz)
@@ -144,7 +166,11 @@ meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000", "1.500", "2.000"
 # Read data
 for mesh in meshes:
 
-    data[set][mesh] = np.genfromtxt(__dir__+"/"+baseName+set+"_"+mesh+".dat", comments="#")
+    fileName = __dir__+"/"+baseName+set+"_"+mesh+".dat"
+
+    print("Reading file: " + fileName)
+
+    data[set][mesh] = np.genfromtxt(fileName, comments="#")
 
     R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
     Z[set][mesh]    = data[set][mesh][:,2].reshape(nr,nz)
@@ -226,7 +252,11 @@ meshes = ["00.300", "00.375", "00.500", "00.750", "01.000", "02.000", "04.000", 
 # Read data
 for mesh in meshes:
 
-    data[set][mesh] = np.genfromtxt(__dir__+"/"+baseName+set+"_"+mesh+".dat", comments="#")
+    fileName = __dir__+"/"+baseName+set+"_"+mesh+".dat"
+
+    print("Reading file: " + fileName)
+
+    data[set][mesh] = np.genfromtxt(fileName, comments="#")
 
     R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
     Z[set][mesh]    = data[set][mesh][:,2].reshape(nr,nz)
@@ -310,7 +340,11 @@ meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000", "1.500", "2.000"
 # Read data
 for mesh in meshes:
 
-    data[set][mesh] = np.genfromtxt(__dir__+"/"+baseName+set+"_"+mesh+".dat", comments="#")
+    fileName = __dir__+"/"+baseName+set+"_"+mesh+".dat"
+
+    print("Reading file: " + fileName)
+
+    data[set][mesh] = np.genfromtxt(fileName, comments="#")
 
     R[set][mesh]    = data[set][mesh][:,0].reshape(nr,nz)
     Z[set][mesh]    = data[set][mesh][:,2].reshape(nr,nz)
@@ -330,10 +364,6 @@ for mesh in meshes:
 # --------------------------------------------------------------------------- #
 # --- Plot settings --------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
-
-latex.latexify(fontsize=fontsize, locale="de_DE.utf8")
-
-hzdr.colors()
 
 labelAxisR = r"$r ~ / ~ \mathrm{mm}$"
 labelAxisZ = r"$z ~ / ~ \mathrm{mm}$"
