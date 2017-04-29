@@ -162,7 +162,7 @@ def readData(set, cases, frequencies, lines, meshes):
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-cases = ["ortho", "nonortho"]
+cases = ["ortho", "nonortho", "ortho-mur"]
 frequencies = ["1000", "10000", "100000"]
 lines = ["x1", "y1", "y2", "z1"]
 meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000",
@@ -473,38 +473,38 @@ for case in ["ortho", "nonortho"]:
                    ["mur"], "mur", op=False,
                    scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-for case in ["ortho", "nonortho"]:
+for case in ["ortho-mur"]:
 
-    for mesh in ["2.000"]:
+    for mesh in ["3.000"]:
 
-        figCompare(case, "10000", "y2", mesh,
+        figCompare(case, "1000", "y2", mesh,
                    ["jRe_x", "jRe_y", "jRe_z",
                     "jIm_x", "jIm_y", "jIm_z"], "j",
                    scaleX=1e+3, scaleY=1e-6)
 
-        figCompare(case, "10000", "y2", mesh,
+        figCompare(case, "1000", "y2", mesh,
                    ["BRe_x", "BRe_y", "BRe_z",
                     "BIm_x", "BIm_y", "BIm_z"], "B",
                    scaleX=1e+3, scaleY=1e+2)
 
-        figCompare(case, "10000", "y2", mesh,
+        figCompare(case, "1000", "y2", mesh,
                    ["F_x", "F_y", "F_z"], "F",
                    scaleX=1e+3, scaleY=1e-4)
 
-        figCompare(case, "10000", "y2", mesh,
+        figCompare(case, "1000", "y2", mesh,
                    ["VRe", "VIm"], "V", op=False,
                    scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-        figCompare(case, "10000", "y2", mesh,
+        figCompare(case, "1000", "y2", mesh,
                    ["VReGrad_x", "VReGrad_y", "VReGrad_z",
                     "VImGrad_x", "VImGrad_y", "VImGrad_z"], "VGrad", op=False,
                    scaleX=1e+3, scaleY=11.0)
 
-        figCompare(case, "10000", "y2", mesh,
+        figCompare(case, "1000", "y2", mesh,
                    ["sigma"], "sigma", op=False,
                    scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-        figCompare(case, "10000", "y2", mesh,
+        figCompare(case, "1000", "y2", mesh,
                    ["mur"], "mur", op=False,
                    scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 

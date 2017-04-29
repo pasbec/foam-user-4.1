@@ -37,7 +37,8 @@ expressions
         field         sigma;
         variables     $materialProperties;
         condition     "set(cellSet_material_conductor0)";
-        expression    "sigma_low";
+//         expression    "sigma_low";
+        expression    "sigma_high";
         keepPatches   true;
     }
 
@@ -55,7 +56,8 @@ expressions
         field         mur;
         variables     $materialProperties;
         condition     "set(cellSet_material_conductor0)";
-        expression    "mur_low";
+//         expression    "mur_low";
+        expression    "mur_high";
         keepPatches   true;
     }
 
