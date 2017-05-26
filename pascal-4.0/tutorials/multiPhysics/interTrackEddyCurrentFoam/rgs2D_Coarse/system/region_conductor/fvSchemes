@@ -29,10 +29,6 @@ gradSchemes
     grad(A0Re)                        Gauss linear;
     grad(A0Im)                        Gauss linear;
 
-    grad(VRe)                         Gauss fluxConservative sigma ddtAImPhi;
-    grad(VIm)                         Gauss fluxConservative sigma ddtARePhi;
-}
-
 divSchemes
 {
     default                           none;
@@ -45,9 +41,6 @@ laplacianSchemes
     laplacian(A0Re)                   Gauss linear corrected;
     laplacian(A0Im)                   Gauss linear corrected;
 
-    laplacian(sigmaf,VRe)             jumpGauss harmonic corrected sigma ddtAImPhi;
-    laplacian(sigmaf,VIm)             jumpGauss harmonic corrected sigma ddtARePhi;
-
 }
 
 interpolationSchemes
@@ -59,14 +52,6 @@ interpolationSchemes
 
     interpolate(grad(A0Re))           linear;
     interpolate(grad(A0Im))           linear;
-
-    interpolate(grad(VRe))            linear;
-    interpolate(grad(VIm))            linear;
-
-    interpolate(ARe)                  linear;
-    interpolate(AIm)                  linear;
-
-    interpolate(sigma)                harmonic;
 }
 
 // ************************************************************************* //

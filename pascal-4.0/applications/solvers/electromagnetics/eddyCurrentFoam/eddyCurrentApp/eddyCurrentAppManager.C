@@ -204,7 +204,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_j0Re::create() const
         IOobject::AUTO_WRITE
     );
 
-    if (!dict().lookupOrDefault<bool>("write", false))
+    if (!dict().lookupOrDefault<bool>("write", true))
     {
         IOo.writeOpt() = IOobject::NO_WRITE;
     }
