@@ -16,17 +16,6 @@ FoamFile
 
 solvers
 {
-    Up
-    {
-        solver          BiCGStab;
-        preconditioner  Cholesky;
-        tolerance       1e-08;
-        relTol          1e-02;
-
-        minIter         0;
-        maxIter         500;
-    }
-
     pFinal
     {
         solver          PCG;
@@ -47,6 +36,26 @@ solvers
 
     U { $UFinal; }
 //     U { $UFinal; relTol 1e-02; }
+
+    cellMotionU
+//     {
+//         solver                   PCG;
+//         tolerance                1e-09;
+//         relTol                   1e-03;
+//         preconditioner           DIC;
+//     }
+    {
+        solver                   GAMG;
+        tolerance                1e-09;
+        relTol                   1e-03;
+        smoother                 DICGaussSeidel;
+        nPreSweeps               0;
+        nPostSweeps              2;
+        cacheAgglomeration       on;
+        agglomerator             faceAreaPair;
+        nCellsInCoarsestLevel    200;
+        mergeLevels              1;
+    }
 }
 
 INTERTRACK

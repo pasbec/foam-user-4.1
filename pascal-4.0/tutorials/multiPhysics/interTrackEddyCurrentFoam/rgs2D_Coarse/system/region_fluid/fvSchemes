@@ -56,8 +56,7 @@ divSchemes
     div(phi,omega)                        Gauss Gamma 0.5;
     div(phi,nuTilda)                      Gauss Gamma 0.5;
 
-    // Up
-    div(U)                                Gauss linear;
+    div(cellMotionSigma)                  Gauss linear;
 }
 
 laplacianSchemes

@@ -29,6 +29,8 @@ gradSchemes
 divSchemes
 {
     default                               none;
+
+    div(cellMotionSigma)                  Gauss linear;
 }
 
 laplacianSchemes
