@@ -30,7 +30,7 @@ import numpy as np
 
 geo_scale       = 1e-3
 
-geo_angle       = 0.0
+geo_angle       = 45.0
 geo_alpha       = geo_angle/180.0 * m.pi
 
 geo_X           = dict()

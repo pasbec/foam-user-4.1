@@ -32,6 +32,8 @@ nTrackedSurfaceCorrectors                    1;
 
 interfaceDeformationLimit                    0.2;
 
+total0Update                                 yes;
+
 useSubMesh                                   yes;
 
 correctVolume                                yes;

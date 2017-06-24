@@ -59,6 +59,10 @@
             chiNur.internalField() =
                 1.0 - globalStorage.nur()[CONDUCTOR].internalField() + SMALL;
 
+            // Correct boundary conditions
+            // NOTE: Important for parallel runs
+            chiNur.correctBoundaryConditions();
+
             surfaceScalarField chiNurf("chiNurf", fvc::interpolate(chiNur));
 
             // Calculate flux of gradient of normal component of A0
@@ -95,7 +99,11 @@
                         "interpolate(grad(" + AM.name() + "))"
                     );
 
-                surfaceVectorField phiGradAMn("phiGradAMn" + complexPart, -gradAMf & mesh.Sf());
+                surfaceVectorField phiGradAMn
+                (
+                    "phiGradAMn" + complexPart,
+                    -gradAMf & mesh.Sf()
+                );
 
                 phiGradAMn += tr(gradAMf) * mesh.Sf();
 

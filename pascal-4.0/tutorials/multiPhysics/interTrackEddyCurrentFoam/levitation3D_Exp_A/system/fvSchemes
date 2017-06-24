@@ -23,11 +23,11 @@ gradSchemes
 {
     default                           none;
 
-    curl(ARe)                         leastSquares;
-    curl(AIm)                         leastSquares;
+    curl(ARe)                         Gauss skewCorrected linear;
+    curl(AIm)                         Gauss skewCorrected linear;
 
-    grad(ARe)                         Gauss linear;
-    grad(AIm)                         Gauss linear;
+    grad(ARe)                         Gauss skewCorrected linear;
+    grad(AIm)                         Gauss skewCorrected linear;
 }
 
 divSchemes
@@ -47,8 +47,8 @@ interpolationSchemes
 {
     default                           none;
 
-    interpolate(grad(ARe))            linear;
-    interpolate(grad(AIm))            linear;
+    interpolate(grad(ARe))            skewCorrected linear;
+    interpolate(grad(AIm))            skewCorrected linear;
 }
 
 // ************************************************************************* //

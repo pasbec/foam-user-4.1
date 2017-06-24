@@ -18,27 +18,31 @@ FoamFile
 
 preserveFaceSets        (faceSet_regions);
 
+// balanceCellSets
+// (
+//     cellSet_region_fluid_faSubMesh
+//     cellSet_region_fluid
+//     cellSet_region_conductor
+// //     cellSet_region_buffer
+// );
+
 method                  metis;
 
 metisCoeffs
 {
 //     method              recursive; // k-way
 
-    regionBalancing     yes;
-
-    regionCellSets
+    balanceCellSets
     (
-        cellSet_region_fluid
         cellSet_region_fluid_faSubMesh
+        cellSet_region_fluid
         cellSet_region_buffer
-        cellSet_region_static
         cellSet_region_conductor
-        cellSet_region_space
     );
 
-    regionWeightFactors (10.0);
+    cellSetWeightFactors (10.0);
 
-    imbalanceTolerances (1.03);
+//     imbalanceTolerances (1.03);
 }
 
 // ************************************************************************* //

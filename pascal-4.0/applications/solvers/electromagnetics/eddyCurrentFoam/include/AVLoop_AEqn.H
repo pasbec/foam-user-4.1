@@ -13,58 +13,6 @@
         volVectorField& j0Re = globalStorage.j0Re()[DEFAULT];
         volVectorField& j0Im = globalStorage.j0Im()[DEFAULT];
 
-// TEST:
-//         {
-//             sigma.write();
-//             nur.write();
-//
-//             ARe.write();
-//             AIm.write();
-//
-//             j0Re.write();
-//             j0Im.write();
-//
-//             if (globalSettings.biotSavart)
-//             {
-//                 globalStorage.A0Re()[DEFAULT].write();
-//                 globalStorage.A0Im()[DEFAULT].write();
-//             }
-//
-//             volScalarField AReDiv = fvc::div(ARe);
-//             volScalarField AImDiv = fvc::div(AIm);
-//
-//             Info<< Control::typeName << " | AEqn.H : "
-//                 << "max(mag(AReDiv)) = " << max(mag(AReDiv)).value()
-//                 << endl;
-//             Info<< Control::typeName << " | AEqn.H : "
-//                 << "max(mag(AImDiv)) = " << max(mag(AImDiv)).value()
-//                 << endl;
-//
-//             AReDiv.write();
-//             AImDiv.write();
-//
-//             globalStorage.VReGrad()[DEFAULT].write();
-//             globalStorage.VImGrad()[DEFAULT].write();
-//
-//             volVectorField jRe("jRe", omega0 * sigma * AIm);
-//             volVectorField jIm("jIm", -omega0 * sigma * ARe);
-//
-//             if (globalSettings.biotSavart)
-//             {
-//                 jRe += omega0 * sigma * globalStorage.A0Im()[DEFAULT];
-//                 jIm -= omega0 * sigma * globalStorage.A0Re()[DEFAULT];
-//             }
-//
-//             if (control.meshIs3D())
-//             {
-//                 jRe -= sigma * globalStorage.VReGrad()[DEFAULT];
-//                 jIm -= sigma * globalStorage.VImGrad()[DEFAULT];
-//             }
-//
-//             jRe.write();
-//             jIm.write();
-//         }
-
         // Interpolate relative magnetic reluctivity
         surfaceScalarField nurf("nurf", fvc::interpolate(nur));
 

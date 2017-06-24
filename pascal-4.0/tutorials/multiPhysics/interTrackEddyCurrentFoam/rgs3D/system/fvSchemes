@@ -23,11 +23,11 @@ gradSchemes
 {
     default                           none;
 
-    curl(ARe)                         leastSquares;
-    curl(AIm)                         leastSquares;
+    curl(ARe)                         Gauss skewCorrected fluxConservative "nur" "phiGradAnRe";
+    curl(AIm)                         Gauss skewCorrected fluxConservative "nur" "phiGradAnIm";
 
-    grad(ARe)                         Gauss linear;
-    grad(AIm)                         Gauss linear;
+    grad(ARe)                         Gauss skewCorrected fluxConservative "nur" "phiGradAnRe";
+    grad(AIm)                         Gauss skewCorrected fluxConservative "nur" "phiGradAnIm";
 }
 
 divSchemes
@@ -39,16 +39,21 @@ laplacianSchemes
 {
     default                           none;
 
-    laplacian(ARe)                    Gauss linear corrected;
-    laplacian(AIm)                    Gauss linear corrected;
+    laplacian(nurf,ARe)               jumpGauss harmonic corrected "nur" "phiGradAnRe";
+    laplacian(nurf,AIm)               jumpGauss harmonic corrected "nur" "phiGradAnIm";
 }
 
 interpolationSchemes
 {
     default                           none;
 
-    interpolate(grad(ARe))            linear;
-    interpolate(grad(AIm))            linear;
+    interpolate(nur)                  harmonic;
+
+    interpolate(ARe)                  skewCorrected fluxConservative "nur" "phiGradAnRe";
+    interpolate(AIm)                  skewCorrected fluxConservative "nur" "phiGradAnIm";
+
+    interpolate(grad(ARe))            skewCorrected linear;
+    interpolate(grad(AIm))            skewCorrected linear;
 }
 
 // ************************************************************************* //

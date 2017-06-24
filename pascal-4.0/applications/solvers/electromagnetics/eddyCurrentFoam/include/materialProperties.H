@@ -8,7 +8,7 @@
                 << endl;
         }
 
-        // Correct boundary conditions of sigma
+        // Correct boundary conditions
         // NOTE: Important for parallel runs
         globalStorage.sigma()[CONDUCTOR].correctBoundaryConditions();
 
@@ -25,15 +25,21 @@
                 << endl;
         }
 
-        // Correct boundary conditions of mur
+        // Correct boundary conditions
         // NOTE: Important for parallel runs
         globalStorage.mur()[CONDUCTOR].correctBoundaryConditions();
 
         // Update mur
         globalStorage.mur().rmap(CONDUCTOR);
 
-        // Update nur
+        // Calculate nur
         globalStorage.nur()[CONDUCTOR] = 1.0/globalStorage.mur()[CONDUCTOR];
+
+        // Correct boundary conditions
+        // NOTE: Important for parallel runs
+        globalStorage.nur()[CONDUCTOR].correctBoundaryConditions();
+
+        // Update nur
         globalStorage.nur().rmap(CONDUCTOR);
     }
 

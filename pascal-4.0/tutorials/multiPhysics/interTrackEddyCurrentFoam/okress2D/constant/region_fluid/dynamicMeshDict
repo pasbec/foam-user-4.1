@@ -20,35 +20,47 @@ twoDMotion                  no;
 
 // ************************************************************************* //
 
-solver                      velocityLaplacian;
-
-// diffusivity                 uniform;
+// solver                      velocityLaplacian;
+// // solver                      refVelocityLaplacian;
+// // solver                      velocityPseudoSolid;
+// // solver                      refVelocityPseudoSolid;
+//
+// // diffusivity                 uniform;
 // diffusivity                 inverseDistance 1(trackedSurface);
-diffusivity                 quadratic inversePointDistance 1(trackedSurface);
-
-frozenDiffusion             no;
+// // diffusivity                 inverseDistance 2(trackedSurface axis);
+// // diffusivity                 quadratic inverseDistance 1(trackedSurface);
+// // diffusivity                 quadratic inverseDistance 2(trackedSurface axis);
+// // diffusivity                 inverseVolume;
+// // diffusivity                 inverseDelta;
+//
+// // leastSquaresVolPoint        yes;
+//
+// nNonOrthogonalCorrectors    6;
 
 // ************************************************************************* //
 
-// solver                      laplace;
-// // solver                      pseudoSolid;
-//
-// // diffusivity                 uniform;
-// diffusivity                 linear;
-// // diffusivity                 quadratic;
-// distancePatches             1(trackedSurface);
-//
-// // diffusivity                 deformationEnergy;
-// // diffusivity                 distortionEnergy;
-// // diffusivityExponent         10;
-//
-// frozenDiffusion             yes;
-//
-// pseudoSolid
-// {
-//     poissonsRatio           0.3;
-//     nCorrectors             3;
-//     convergenceTolerance    1e-9;
-// };
+solver                      laplace;
+// solver                      pseudoSolid;
+
+// diffusivity                 uniform;
+diffusivity                 linear;
+// diffusivity                 quadratic;
+distancePatches             1(trackedSurface);
+// distancePatches             2(trackedSurface axis);
+
+// diffusivity                 deformationEnergy;
+// diffusivity                 distortionEnergy;
+// diffusivityExponent         10;
+
+// ************************************************************************* //
+
+frozenDiffusion             yes;
+
+pseudoSolid
+{
+    poissonsRatio           0.3;
+    nCorrectors             3;
+    convergenceTolerance    1e-9;
+};
 
 // ************************************************************************* //

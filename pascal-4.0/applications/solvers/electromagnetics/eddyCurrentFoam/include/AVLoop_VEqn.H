@@ -84,10 +84,6 @@
 
             if (laplacianSchemeV != "jumpGauss")
             {
-// TEST:
-//                 // Term from div(A)
-//                 VEqn += complexSign * omega0 * sigma * fvc::div(A);
-
                 // NOTE: We do NOT use sigmaf here!
                 volVectorField sigmaGrad = fvc::grad(sigma);
 
@@ -100,12 +96,6 @@
 
                     VEqn += complexSign * omega0 * (sigmaGrad & A0);
                 }
-            }
-            else
-            {
-// TEST:
-//                 // Term from div(A)
-//                 VEqn += complexSign * omega0 * sigma * fvc::div(A);
             }
 
             // Read solver for V

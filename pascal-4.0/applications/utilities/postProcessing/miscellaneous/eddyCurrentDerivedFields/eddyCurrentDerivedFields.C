@@ -73,8 +73,17 @@ int main(int argc, char *argv[])
 
 #       include "derivedFields.H"
 
+        globalStorage.ARe()[CONDUCTOR].write();
+        globalStorage.AIm()[CONDUCTOR].write();
+
         globalStorage.BRe()[CONDUCTOR].write();
         globalStorage.BIm()[CONDUCTOR].write();
+
+        globalStorage.VReGrad()[CONDUCTOR].write();
+        globalStorage.VImGrad()[CONDUCTOR].write();
+
+        manager.regions().region_CONDUCTOR().storage().jRe().write();
+        manager.regions().region_CONDUCTOR().storage().jIm().write();
 
         globalStorage.F()[CONDUCTOR].write();
         globalStorage.pB()[CONDUCTOR].write();

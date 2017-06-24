@@ -23,14 +23,14 @@ gradSchemes
 {
     default                           none;
 
-    curl(A0Re)                        leastSquares;
-    curl(A0Im)                        leastSquares;
+    curl(A0Re)                        Gauss skewCorrected linear;
+    curl(A0Im)                        Gauss skewCorrected linear;
 
-    grad(A0Re)                        Gauss linear;
-    grad(A0Im)                        Gauss linear;
+    grad(A0Re)                        Gauss skewCorrected linear;
+    grad(A0Im)                        Gauss skewCorrected linear;
 
-    grad(VRe)                         Gauss fluxConservative sigma ddtAImPhi;
-    grad(VIm)                         Gauss fluxConservative sigma ddtARePhi;
+    grad(VRe)                         Gauss skewCorrected fluxConservative sigma ddtAImPhi;
+    grad(VIm)                         Gauss skewCorrected fluxConservative sigma ddtARePhi;
 }
 
 divSchemes
@@ -45,8 +45,8 @@ laplacianSchemes
     laplacian(A0Re)                   Gauss linear corrected;
     laplacian(A0Im)                   Gauss linear corrected;
 
-    laplacian(sigmaf,VRe)             jumpGauss sigma ddtAImPhi;
-    laplacian(sigmaf,VIm)             jumpGauss sigma ddtARePhi;
+    laplacian(sigmaf,VRe)             jumpGauss harmonic sigma ddtAImPhi;
+    laplacian(sigmaf,VIm)             jumpGauss harmonic sigma ddtARePhi;
 
 }
 
@@ -54,19 +54,19 @@ interpolationSchemes
 {
     default                           none;
 
-    interpolate(A0Re)                 linear;
-    interpolate(A0Im)                 linear;
-
-    interpolate(grad(A0Re))           linear;
-    interpolate(grad(A0Im))           linear;
-
-    interpolate(grad(VRe))            linear;
-    interpolate(grad(VIm))            linear;
-
-    interpolate(ARe)                  linear;
-    interpolate(AIm)                  linear;
-
     interpolate(sigma)                harmonic;
+
+    interpolate(A0Re)                 skewCorrected linear;
+    interpolate(A0Im)                 skewCorrected linear;
+
+    interpolate(grad(A0Re))           skewCorrected linear;
+    interpolate(grad(A0Im))           skewCorrected linear;
+
+    interpolate(grad(VRe))            skewCorrected linear;
+    interpolate(grad(VIm))            skewCorrected linear;
+
+    interpolate(ARe)                  skewCorrected linear;
+    interpolate(AIm)                  skewCorrected linear;
 }
 
 // ************************************************************************* //

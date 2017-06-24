@@ -23,19 +23,19 @@ gradSchemes
 {
     default                           none;
 
-    curl(A0Re)                        leastSquares;
-    curl(A0Im)                        leastSquares;
-
-    grad(A0Re)                        Gauss linear;
-    grad(A0Im)                        Gauss linear;
-
-    grad(AMRe)                        Gauss linear;
-    grad(AMIm)                        Gauss linear;
-
-    grad(VRe)                         Gauss linear;
-    grad(VIm)                         Gauss linear;
-
     grad(sigma)                       Gauss linear;
+
+    curl(A0Re)                        Gauss skewCorrected linear;
+    curl(A0Im)                        Gauss skewCorrected linear;
+
+    grad(A0Re)                        Gauss skewCorrected linear;
+    grad(A0Im)                        Gauss skewCorrected linear;
+
+    grad(AMRe)                        Gauss skewCorrected linear;
+    grad(AMIm)                        Gauss skewCorrected linear;
+
+    grad(VRe)                         Gauss skewCorrected linear;
+    grad(VIm)                         Gauss skewCorrected linear;
 }
 
 divSchemes
@@ -62,28 +62,28 @@ interpolationSchemes
 {
     default                           none;
 
-    interpolate(sigma)                harmonic;
-
     interpolate(chiNur)               harmonic;
 
-    interpolate(grad(A0Re))           linear;
-    interpolate(grad(A0Im))           linear;
+    interpolate(sigma)                harmonic;
 
-    interpolate(grad(AMRe))           linear;
-    interpolate(grad(AMIm))           linear;
+    interpolate(grad(A0Re))           skewCorrected linear;
+    interpolate(grad(A0Im))           skewCorrected linear;
 
-    interpolate(grad(VRe))            linear;
-    interpolate(grad(VIm))            linear;
+    interpolate(grad(AMRe))           skewCorrected linear;
+    interpolate(grad(AMIm))           skewCorrected linear;
 
-    interpolate(A0Re)                 linear;
-    interpolate(A0Im)                 linear;
+    interpolate(grad(VRe))            skewCorrected linear;
+    interpolate(grad(VIm))            skewCorrected linear;
 
-    interpolate(ARe)                  linear;
-    interpolate(AIm)                  linear;
+    interpolate(A0Re)                 skewCorrected linear;
+    interpolate(A0Im)                 skewCorrected linear;
+
+    interpolate(ARe)                  skewCorrected linear;
+    interpolate(AIm)                  skewCorrected linear;
 
 // TEST/TODO: Better map phiGradAn from default region instead of re-calculation?
-    interpolate(grad(ARe))            linear;
-    interpolate(grad(AIm))            linear;
+    interpolate(grad(ARe))            skewCorrected linear;
+    interpolate(grad(AIm))            skewCorrected linear;
 }
 
 // ************************************************************************* //

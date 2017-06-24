@@ -68,6 +68,7 @@ fe40 ()
     if [ -e "$FE40_FOAM_ETC" ] && [ -d "$FE40_FOAM_ETC" ]; then
 
         # Clear old environment
+        echo "Clear old environment"
         feClear
 
         # Restore basic environment variables
@@ -80,25 +81,27 @@ fe40 ()
         env_set 'WM_COMPILE_OPTION' "${1:-'Opt'}"
 
         # Load new environment
+        echo "Load new environment"
         feLoad
 
         # Add bin directory to PATH
+        echo "Add bin directory to PATH"
         env_prepend 'PATH' "$WM_PROJECT_USER_DIR/bin"
 
         # TODO: Add python tools to PYTHONPATH
+        echo "Add python tools to PYTHONPATH"
         env_prepend 'PYTHONPATH' "$WM_PROJECT_USER_DIR/tools/python"
 
         # TODO: Add paraview library to PYTHONPATH
+        echo "Add paraview library to PYTHONPATH"
         env_prepend 'PYTHONPATH' "$(echo $PARAVIEW_INCLUDE_DIR | sed 's/include/lib/')/site-packages"
         env_prepend 'PYTHONPATH' "$(echo $PARAVIEW_INCLUDE_DIR | sed 's/include/lib/')"
 
         # TODO: Add freecad library to PYTHONPATH
+        echo "Add freecad library to PYTHONPATH"
         freecadBin="$(which freecad)"
-        if [ ! -z "$freecadBin" ]; then
-
+        [ ! -z "$freecadBin" ] && \
             env_prepend 'PYTHONPATH' "${freecadBin%'/bin/freecad'}/lib/freecad/lib"
-
-        fi
 
         case "$HOSTNAME" in
 

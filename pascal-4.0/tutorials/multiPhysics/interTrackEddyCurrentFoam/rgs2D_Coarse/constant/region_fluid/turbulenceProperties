@@ -21,7 +21,7 @@ simulationType    RASModel;
 init
 {
     refU          0.1;
-    refI          0.1;
+    refI          0.01;
     refL          0.02; // melt height
 }
 

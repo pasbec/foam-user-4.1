@@ -29,6 +29,9 @@ gradSchemes
 divSchemes
 {
     default                               none;
+
+    div(cellMotionU)                      Gauss linear;
+    div(cellMotionSigma)                  Gauss linear;
 }
 
 laplacianSchemes
@@ -43,6 +46,7 @@ interpolationSchemes
     default                               none;
 
     interpolate(y)                        linear;
+    interpolate(V)                        linear;
     interpolate(grad(cellMotionU))        linear;
 }
 

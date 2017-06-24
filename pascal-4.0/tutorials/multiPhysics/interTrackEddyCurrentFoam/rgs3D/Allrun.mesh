@@ -21,6 +21,7 @@ cp -r 'constant/polyMesh.org/blockMeshDict.py' 'constant/polyMesh/'
 
 # Create blockMeshDict
 ./constant/polyMesh/blockMeshDict.py
+mv 'blockMeshDict' 'constant/polyMesh'
 
 # Run blockMesh
 blockMesh || exit 1

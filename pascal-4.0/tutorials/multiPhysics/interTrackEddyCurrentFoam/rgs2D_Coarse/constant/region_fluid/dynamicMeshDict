@@ -21,28 +21,43 @@ twoDMotion                  yes;
 // ************************************************************************* //
 
 // solver                      velocityLaplacian;
-//
-// // diffusivity                 uniform;
-// // diffusivity                 inverseDistance 1(trackedSurface);
+// solver                      refVelocityLaplacian;
+solver                      velocityPseudoSolid;
+// solver                      refVelocityPseudoSolid;
+
+// diffusivity                 uniform;
+// diffusivity                 inverseDistance 1(trackedSurface);
+diffusivity                 inverseDistance 3(trackedSurface fixedWall movingWall);
 // diffusivity                 quadratic inversePointDistance 1(trackedSurface);
-//
-// frozenDiffusion             yes;
+// diffusivity                 inverseVolume;
+
+// leastSquaresVolPoint        yes;
+
+nNonOrthogonalCorrectors    6;
 
 // ************************************************************************* //
 
-solver                      laplace;
-// solver                      pseudoSolid;
+// solver                      laplace;
+// // solver                      pseudoSolid;
+//
+// // diffusivity                 uniform;
+// // diffusivity                 patchEnhanced;
+// diffusivity                 linear;
+// // diffusivity                 quadratic;
+// // diffusivity                 exponential;
+// distancePatches             1(trackedSurface);
+// // distancePatches             2(trackedSurface movingWall);
+//
+// // diffusivity                 deformationEnergy;
+// // diffusivity                 distortionEnergy;
+// // diffusivity                 volume;
+// // diffusivity                 volumeDelta;
+// // diffusivity                 magMotionU;
+// // diffusivityExponent         0.5;
 
-// diffusivity                 uniform;
-diffusivity                 linear;
-// diffusivity                 quadratic;
-distancePatches             1(trackedSurface);
+// ************************************************************************* //
 
-// diffusivity                 deformationEnergy;
-// diffusivity                 distortionEnergy;
-// diffusivityExponent         10;
-
-frozenDiffusion             yes;
+frozenDiffusion             no;
 
 pseudoSolid
 {

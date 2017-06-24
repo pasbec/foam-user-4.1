@@ -23,10 +23,14 @@ twoDMotion                  no;
 // solver                      velocityLaplacian;
 //
 // // diffusivity                 uniform;
-// // diffusivity                 inverseDistance 1(trackedSurface);
-// diffusivity                 quadratic inversePointDistance 1(trackedSurface);
+// diffusivity                 inverseDistance 1(trackedSurface);
+// // diffusivity                 quadratic inversePointDistance 1(trackedSurface);
 //
 // frozenDiffusion             yes;
+//
+// // leastSquaresVolPoint        yes;
+//
+// // nNonOrthogonalCorrectors    6;
 
 // ************************************************************************* //
 
@@ -34,8 +38,8 @@ solver                      laplace;
 // solver                      pseudoSolid;
 
 // diffusivity                 uniform;
-diffusivity                 linear;
-// diffusivity                 quadratic;
+// diffusivity                 linear;
+diffusivity                 quadratic;
 distancePatches             1(trackedSurface);
 
 // diffusivity                 deformationEnergy;

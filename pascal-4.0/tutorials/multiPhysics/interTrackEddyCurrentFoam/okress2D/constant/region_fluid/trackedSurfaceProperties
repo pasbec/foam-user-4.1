@@ -29,8 +29,8 @@ pointNormalsCorrectionPatches                0();
 
 nTrackedSurfaceCorrectors                    1;
 
-// interfaceDeformationLimit                    0.2;
-interfaceDeformationLimit                    0.0;
+interfaceDeformationLimit                    0.2;
+// interfaceDeformationLimit                    0.0;
 
 // total0Update                                 yes;
 
