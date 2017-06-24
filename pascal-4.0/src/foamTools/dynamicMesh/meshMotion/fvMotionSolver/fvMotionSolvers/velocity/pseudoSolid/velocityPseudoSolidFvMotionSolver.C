@@ -180,12 +180,28 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
         Info << "Correction: " << ++iCorr << endl;
 
         surfaceScalarField muf = diffusivityPtr_->operator()()();
-        surfaceScalarField lambdaf(word(), muf*(2*nu_/(1 - 2*nu_)));
+        surfaceScalarField mutf = muf;
+        surfaceScalarField lambdaf(word(), mutf*(2*nu_/(1 - 2*nu_)));
+
+        scalar bs = 0.1;
+        const unallocLabelList& owner = fvMesh_.owner();
+        forAll(owner, faceI)
+        {
+            mutf[faceI] *= bs;
+            lambdaf[faceI] *= bs;
+        }
 
         volScalarField mu
         (
             "mu",
             fvc::average(muf)
+          / dimensionedScalar(word(), muf.dimensions(), 1.0)
+        );
+
+        volScalarField mut
+        (
+            "mut",
+            fvc::average(mutf)
           / dimensionedScalar(word(), muf.dimensions(), 1.0)
         );
 
@@ -203,12 +219,12 @@ void Foam::velocityPseudoSolidFvMotionSolver::solve()
         (
             fvm::laplacian
             (
-                2*mu + lambda, U,
+                mu + (mut + lambda), U,
                 "laplacian(diffusivity,cellMotionU)"
             )
           + fvc::div
             (
-                mu*gradU.T() + lambda*(I*tr(gradU)) - (mu + lambda)*gradU,
+                mut*gradU.T() + lambda*(I*tr(gradU)) - (mut + lambda)*gradU,
                 "div(cellMotionSigma)"
             )
         );

@@ -78,7 +78,7 @@ EDDYCURRENT
         enabled                 yes;
         enabled                 yes;
 
-        outputTimeIndexCycle    10;
+        outputTimeIndexCycle    1;
         timeIndexCycle          2147483647;
         timeCycle               1e+300;
 

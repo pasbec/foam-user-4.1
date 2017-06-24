@@ -21,41 +21,35 @@ twoDMotion                  yes;
 // ************************************************************************* //
 
 // solver                      velocityLaplacian;
-// solver                      refVelocityLaplacian;
 solver                      velocityPseudoSolid;
-// solver                      refVelocityPseudoSolid;
 
 // diffusivity                 uniform;
 // diffusivity                 inverseDistance 1(trackedSurface);
-diffusivity                 inversePointDistance 3(trackedSurface fixedWall fixedMesh);
+diffusivity                 inverseDistance 3(trackedSurface fixedWall fixedMesh);
 // diffusivity                 quadratic inversePointDistance 1(trackedSurface);
-// diffusivity                 inverseVolume;
-
-// leastSquaresVolPoint        yes;
-
-nNonOrthogonalCorrectors    6;
+//
+// frozenDiffusion             yes;
 
 // ************************************************************************* //
 
 // solver                      laplace;
-// // solver                      pseudoSolid;
-//
-// // diffusivity                 uniform;
-// // diffusivity                 linear;
+// solver                      pseudoSolid;
+
+// diffusivity                 uniform;
+// diffusivity                 linear;
 // diffusivity                 quadratic;
 // distancePatches             1(trackedSurface);
-//
-// // diffusivity                 deformationEnergy;
-// // diffusivity                 distortionEnergy;
-// // diffusivityExponent         10;
 
-// ************************************************************************* //
+// diffusivity                 deformationEnergy;
+// diffusivity                 distortionEnergy;
+// diffusivityExponent         10;
 
-frozenDiffusion             no;
+frozenDiffusion             yes;
 
 pseudoSolid
 {
-    poissonsRatio           0.3;
+//     poissonsRatio           0.3;
+    poissonsRatio           0;
     nCorrectors             3;
     convergenceTolerance    1e-9;
 };

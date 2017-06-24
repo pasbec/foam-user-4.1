@@ -21,47 +21,35 @@ twoDMotion                  yes;
 // ************************************************************************* //
 
 // solver                      velocityLaplacian;
-// solver                      refVelocityLaplacian;
 solver                      velocityPseudoSolid;
-// solver                      refVelocityPseudoSolid;
 
 // diffusivity                 uniform;
 // diffusivity                 inverseDistance 1(trackedSurface);
 diffusivity                 inverseDistance 3(trackedSurface fixedWall movingWall);
 // diffusivity                 quadratic inversePointDistance 1(trackedSurface);
-// diffusivity                 inverseVolume;
-
-// leastSquaresVolPoint        yes;
-
-nNonOrthogonalCorrectors    6;
+//
+// frozenDiffusion             yes;
 
 // ************************************************************************* //
 
 // solver                      laplace;
-// // solver                      pseudoSolid;
-//
-// // diffusivity                 uniform;
-// // diffusivity                 patchEnhanced;
+// solver                      pseudoSolid;
+
+// diffusivity                 uniform;
 // diffusivity                 linear;
-// // diffusivity                 quadratic;
-// // diffusivity                 exponential;
+// diffusivity                 quadratic;
 // distancePatches             1(trackedSurface);
-// // distancePatches             2(trackedSurface movingWall);
-//
-// // diffusivity                 deformationEnergy;
-// // diffusivity                 distortionEnergy;
-// // diffusivity                 volume;
-// // diffusivity                 volumeDelta;
-// // diffusivity                 magMotionU;
-// // diffusivityExponent         0.5;
 
-// ************************************************************************* //
+// diffusivity                 deformationEnergy;
+// diffusivity                 distortionEnergy;
+// diffusivityExponent         10;
 
-frozenDiffusion             no;
+frozenDiffusion             yes;
 
 pseudoSolid
 {
-    poissonsRatio           0.3;
+//     poissonsRatio           0.3;
+    poissonsRatio           0;
     nCorrectors             3;
     convergenceTolerance    1e-9;
 };
