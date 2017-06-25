@@ -20,7 +20,7 @@ solvers
     {
         solver                   deflatedPCG;
 
-        tolerance                1e-08;
+        tolerance                1e-05;
         relTol                   0.1;
 
         minIter                  0;

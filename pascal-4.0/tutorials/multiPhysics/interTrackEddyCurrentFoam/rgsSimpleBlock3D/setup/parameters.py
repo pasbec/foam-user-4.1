@@ -30,7 +30,7 @@ import numpy as np
 
 geo_scale       = 1e-3
 
-geo_angle       = 0.0
+geo_angle       = 45.0
 geo_alpha       = geo_angle/180.0 * m.pi
 
 geo_X           = dict()
@@ -49,7 +49,7 @@ geo_Y["shift"]  = geo_Z["C"]/2.0 * m.tan(geo_alpha)
 # --- Mesh ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-mesh_scale      = 1.0
+mesh_scale      = 3.0
 mesh_space      = 4.0
 
 mesh_normal     = -1

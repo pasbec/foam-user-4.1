@@ -18,7 +18,7 @@ materialProperties
 (
     "sigma_high=1.2e+6;"
     "sigma_low=1e+5;"
-    "mur_high=10;"
+    "mur_high=4.5;"
     "mur_low=1;"
 );
 
