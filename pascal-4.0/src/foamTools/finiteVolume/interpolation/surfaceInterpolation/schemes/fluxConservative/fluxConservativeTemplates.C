@@ -456,34 +456,38 @@ Foam::fluxConservative<Type>::correction
     {
         const fvPatch& patch = mesh.boundary()[patchI];
 
-        Field<Type>& corrPatch = corr.boundaryField()[patchI];
-
-        const unallocLabelList& faceCells = patch.patch().faceCells();
-
-        const scalarField& weightsPatch = weights.boundaryField()[patchI];
-        const scalarField& deltaCoeffsPatch = deltaCoeffs.boundaryField()[patchI];
-        const scalarField& magSfPatch = magSf.boundaryField()[patchI];
-
-        const scalarField& cosAlphaPatch = cosAlpha.boundaryField()[patchI];
-
-        const scalarField& gammaPatch = gamma.boundaryField()[patchI];
-        const scalarField& gammafPatch = gammaf.boundaryField()[patchI];
-        const Field<Type>& jumpFluxPatch = jumpFlux.boundaryField()[patchI];
-
-        forAll (patch, faceI)
+        // Coupled patches
+        if (patch.coupled())
         {
-            const label own = faceCells[faceI];
+            Field<Type>& corrPatch = corr.boundaryField()[patchI];
 
-            scalar gammaRelDiff =
-                (gammaPatch[faceI] - gammaIn[own])/gammafPatch[faceI];
+            const unallocLabelList& faceCells = patch.patch().faceCells();
 
-            scalar wPwN = weightsPatch[faceI] * (1 - weightsPatch[faceI]);
+            const scalarField& weightsPatch = weights.boundaryField()[patchI];
+            const scalarField& deltaCoeffsPatch = deltaCoeffs.boundaryField()[patchI];
+            const scalarField& magSfPatch = magSf.boundaryField()[patchI];
 
-            scalar dByMagSf = 1.0/deltaCoeffsPatch[faceI]/magSfPatch[faceI];
+            const scalarField& cosAlphaPatch = cosAlpha.boundaryField()[patchI];
 
-            corrPatch[faceI] = cosAlphaPatch[faceI]
-                             * gammaRelDiff * wPwN * dByMagSf
-                             * jumpFluxPatch[faceI];
+            const scalarField& gammaPatch = gamma.boundaryField()[patchI];
+            const scalarField& gammafPatch = gammaf.boundaryField()[patchI];
+            const Field<Type>& jumpFluxPatch = jumpFlux.boundaryField()[patchI];
+
+            forAll (patch, faceI)
+            {
+                const label own = faceCells[faceI];
+
+                scalar gammaRelDiff =
+                    (gammaPatch[faceI] - gammaIn[own])/gammafPatch[faceI];
+
+                scalar wPwN = weightsPatch[faceI] * (1 - weightsPatch[faceI]);
+
+                scalar dByMagSf = 1.0/deltaCoeffsPatch[faceI]/magSfPatch[faceI];
+
+                corrPatch[faceI] = cosAlphaPatch[faceI]
+                                 * gammaRelDiff * wPwN * dByMagSf
+                                 * jumpFluxPatch[faceI];
+            }
         }
     }
 

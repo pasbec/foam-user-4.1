@@ -189,6 +189,7 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
     const Field<Type>& jumpFluxIn = jumpFlux.internalField();
 
     // Source contributions from jump flux
+    // HINT: cos(alpha) does not appear here, as deltaCoeffs are under-relaxed!
     forAll(owner, faceI)
     {
         // Cell labels
@@ -215,39 +216,73 @@ jumpGaussLaplacian<Type, GType>::addJumpFlux
     }
 
     // Boundary contributions from jump flux
-    // (Contribution will be zero if grad(gamma)*n == 0)
+    // HINT: cos(alpha) does not appear here, as deltaCoeffs are under-relaxed!
     forAll (mesh.boundary(), patchI)
     {
         const fvPatch& patch = mesh.boundary()[patchI];
 
-        const scalarField& gammaMagSfPatch = gammaMagSf.boundaryField()[patchI];
-        Field<Type>& jumpOwnFluxPatch = jumpOwnFlux.boundaryField()[patchI];
-
-        const unallocLabelList& faceCells = patch.patch().faceCells();
-
-        const scalarField& weightsPatch = weights.boundaryField()[patchI];
-        const scalarField& magSfPatch = magSf.boundaryField()[patchI];
-
-        const Field<GType>& gammaPatch = gamma.boundaryField()[patchI];
-        const Field<Type>& jumpFluxPatch = jumpFlux.boundaryField()[patchI];
-
-        forAll (patch, faceI)
+        // Coupled patches
+        if (patch.coupled())
         {
-            // Cell label
-            const label own = faceCells[faceI];
+            const scalarField& gammaMagSfPatch = gammaMagSf.boundaryField()[patchI];
+            Field<Type>& jumpOwnFluxPatch = jumpOwnFlux.boundaryField()[patchI];
 
-            // Interpolation weights
-            scalar wP = weightsPatch[faceI];
+            const unallocLabelList& faceCells = patch.patch().faceCells();
 
-            // Cell gamma
-            // NOTE: The 'mag' is currently only a workaround to avoid
-            //       template specializations for different types
-            scalar gammaOwn = mag(gammaIn[own]);
-            scalar gammaNei = mag(gammaPatch[faceI]);
+            const scalarField& weightsPatch = weights.boundaryField()[patchI];
+            const scalarField& magSfPatch = magSf.boundaryField()[patchI];
 
-            jumpOwnFluxPatch[faceI] = gammaMagSfPatch[faceI]/magSfPatch[faceI]
-                                    * (1.0 - gammaOwn/gammaNei) * wP
-                                    * jumpFluxPatch[faceI];
+            const Field<GType>& gammaPatch = gamma.boundaryField()[patchI];
+            const Field<Type>& jumpFluxPatch = jumpFlux.boundaryField()[patchI];
+
+            forAll (patch, faceI)
+            {
+                // Cell label
+                const label own = faceCells[faceI];
+
+                // Interpolation weights
+                scalar wP = weightsPatch[faceI];
+
+                // Cell gamma
+                // NOTE: The 'mag' is currently only a workaround to avoid
+                //       template specializations for different types
+                scalar gammaOwn = mag(gammaIn[own]);
+                scalar gammaNei = mag(gammaPatch[faceI]);
+
+                jumpOwnFluxPatch[faceI] = gammaMagSfPatch[faceI]/magSfPatch[faceI]
+                                        * (1.0 - gammaOwn/gammaNei) * wP
+                                        * jumpFluxPatch[faceI];
+            }
+        }
+        else
+        {
+// TEST TODO TEST
+// (Contribution will be zero if grad(gamma)*n == 0)
+            const scalarField& gammaMagSfPatch = gammaMagSf.boundaryField()[patchI];
+            Field<Type>& jumpOwnFluxPatch = jumpOwnFlux.boundaryField()[patchI];
+
+            const unallocLabelList& faceCells = patch.patch().faceCells();
+
+            const scalarField& magSfPatch = magSf.boundaryField()[patchI];
+
+            const Field<GType>& gammaPatch = gamma.boundaryField()[patchI];
+            const Field<Type>& jumpFluxPatch = jumpFlux.boundaryField()[patchI];
+
+            forAll (patch, faceI)
+            {
+                // Cell label
+                const label own = faceCells[faceI];
+
+                // Cell gamma
+                // NOTE: The 'mag' is currently only a workaround to avoid
+                //       template specializations for different types
+                scalar gammaOwn = mag(gammaIn[own]);
+                scalar gammaNei = mag(gammaPatch[faceI]);
+
+                jumpOwnFluxPatch[faceI] = gammaMagSfPatch[faceI]/magSfPatch[faceI]
+                                        * (1.0 - gammaOwn/gammaNei) * 0.5
+                                        * jumpFluxPatch[faceI];
+            }
         }
     }
 
@@ -303,6 +338,7 @@ void jumpGaussLaplacian<Type, GType>::addSnGradsCorrection
     );
     surfaceTypeField& faceFluxCorr = tfaceFluxCorr();
 
+    // HINT: Tangenial correction, as deltaCoeffs are under-relaxed!
     if (!mesh.orthogonal())
     {
         // Mesh and basic surface interpolation data
@@ -368,7 +404,7 @@ jumpGaussLaplacian<Type, GType>::fvmLaplacian
     const volTypeField& vf
 )
 {
-    // NOTE: gammaMagSf contains harmonically interpolated gamma!
+    // NOTE: gammaf contains harmonically interpolated gamma!
 
     const fvMesh& mesh = this->mesh();
 
@@ -443,9 +479,9 @@ jumpGaussLaplacian<Type, GType>::fvcLaplacian
     const volTypeField& vf
 )
 {
-    // NOTE: gammaMagSf contains harmonically interpolated gamma!
+    // NOTE: gammaf contains harmonically interpolated gamma!
 
-// TODO: This is currently a workaround as we cannot use vfc::div
+// TODO: This is currently a workaround as we cannot use fvc::div
 //     const fvMesh& mesh = this->mesh();
 
     tmp<fvMatrix<Type> > tfvm = fvmLaplacian(gammaf, vf);
