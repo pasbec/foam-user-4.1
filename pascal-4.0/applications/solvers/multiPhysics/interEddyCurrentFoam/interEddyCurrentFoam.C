@@ -100,6 +100,8 @@ int main(int argc, char *argv[])
         uniformDimensionedScalarField& omega0 = storage.omega0();
 
         {
+#           include "materialProperties.H"
+
 #           include "AVInit.H"
 
 #           include "BUpdate.H"
@@ -164,6 +166,8 @@ int main(int argc, char *argv[])
             uniformDimensionedScalarField& omega0 = storage.omega0();
 
             {
+#               include "materialProperties.H"
+
 #               include "A0BiotSavart.H"
 
 #               include "AVLoop.H"
@@ -210,6 +214,23 @@ int main(int argc, char *argv[])
             SM_REGIONSCOPE(DEFAULT);
 
 #           include "alphaUpLoop.H"
+        }
+
+        // Update sigma in conductor region
+        {
+            using namespace interEddyCurrentApp;
+            using namespace interEddyCurrentApp::Region;
+
+            Manager& manager = masterManager;
+
+            SM_MANAGERSCOPE();
+
+            eddyCurrentApp::Manager::Storage& ecs =
+                eddyCurrentAppManager.storage();
+
+            ecs.sigma().rmap(Region::FLUID);
+            ecs.sigma().mapInternalField(Region::CONDUCTOR);
+            ecs.sigma()[Region::CONDUCTOR].correctBoundaryConditions();
         }
     }
 

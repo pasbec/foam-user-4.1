@@ -87,6 +87,8 @@ int main(int argc, char *argv[])
         uniformDimensionedScalarField& omega0 = storage.omega0();
 
         {
+#           include "materialProperties.H"
+
 #           include "AVInit.H"
 
 #           include "BUpdate.H"
@@ -175,6 +177,8 @@ int main(int argc, char *argv[])
             uniformDimensionedScalarField& omega0 = storage.omega0();
 
             {
+#               include "materialProperties.H"
+
 #               include "A0BiotSavart.H"
 
 #               include "AVLoop.H"

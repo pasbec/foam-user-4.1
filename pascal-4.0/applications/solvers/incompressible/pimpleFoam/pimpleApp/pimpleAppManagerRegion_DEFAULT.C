@@ -182,8 +182,7 @@ void Foam::pimpleApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
             dimensionedScalar
             (
                 transportProperties.lookup("rho")
-            ),
-            calculatedFvPatchScalarField::typeName
+            )
         )
     );
 }

@@ -1,6 +1,4 @@
 
-#   include "materialProperties.H"
-
 #   include "AVLoop_AUpdate.H"
 
 // TEST: Store gradient of V?

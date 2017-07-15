@@ -67,6 +67,8 @@ int main(int argc, char *argv[])
 
     while(manager.once())
     {
+#       include "materialProperties.H"
+
 #       include "AVInit.H"
 
 #       include "BUpdate.H"
