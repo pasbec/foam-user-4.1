@@ -91,6 +91,9 @@ public:
                 //- Volume force switch
                 SM_SETTINGS_MEMBER_ADD(Switch, volumeForce);
 
+                //- Electrical conductivity switch
+                SM_SETTINGS_MEMBER_ADD(Switch, electricalConuctivity);
+
                 //- Use fixed flux-pressure to correct pressure p at
                 //  fixedGradient patches
                 SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
@@ -131,6 +134,9 @@ public:
 
                 //- Interface model
                 SM_REGIONITEM_ADD(interfaceProperties, interface);
+
+                //- Electrical conductivity
+                SM_REGIONITEM_ADD(volScalarField, sigma);
 
             SM_REGIONSTORAGE_ADD();
 

@@ -188,6 +188,10 @@ void Foam::interEddyCurrentApp::Manager::read() const
     interAppManager().regions().region_DEFAULT().
         settings().volumeForce = true;
 
+    // Make sure sigma is enabled
+    interAppManager().regions().region_DEFAULT().
+        settings().electricalConuctivity = true;
+
     settings().checkRead();
     regions().checkRead();
 }

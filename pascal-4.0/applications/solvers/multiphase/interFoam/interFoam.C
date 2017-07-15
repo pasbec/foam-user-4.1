@@ -33,6 +33,8 @@ Author
 
 #include "interApp.H"
 
+// TODO: Read sigma values only once
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])

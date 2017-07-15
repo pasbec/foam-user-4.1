@@ -30,6 +30,7 @@ License
 void Foam::interApp::Manager::Region_DEFAULT::Settings::read() const
 {
     volumeForce = dict().lookupOrDefault("volumeForce", false);
+    electricalConuctivity = dict().lookupOrDefault("electricalConuctivity", false);
     snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
 }
 
@@ -262,6 +263,33 @@ void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_interface::create() 
     );
 }
 
+
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_sigma::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimCurrent/dimVoltage/dimLength,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName
+        )
+    );
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::interApp::Manager::Region_DEFAULT::Storage::create() const
@@ -285,6 +313,8 @@ void Foam::interApp::Manager::Region_DEFAULT::Storage::create() const
 
     item_turbulence().enable();
     item_interface().enable();
+
+    item_sigma().setState(settings().electricalConuctivity);
 }
 
 

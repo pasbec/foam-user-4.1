@@ -58,8 +58,35 @@ int main(int argc, char *argv[])
     masterManager.read();
     masterManager.init();
 
-    masterManager.read();
-    masterManager.init();
+    // Init interApp
+    {
+        using namespace interApp;
+        using namespace interApp::Region;
+
+        Manager& manager = interAppManager;
+
+        SM_MANAGERSCOPE();
+        SM_REGIONSCOPE(DEFAULT);
+
+#       include "calcSigma.H"
+    }
+
+    // Init interEddyCurrentApp (1)
+    {
+        using namespace interEddyCurrentApp;
+        using namespace interEddyCurrentApp::Region;
+
+        Manager& manager = masterManager;
+
+        SM_MANAGERSCOPE();
+
+        eddyCurrentApp::Manager::Storage& ecs =
+            eddyCurrentAppManager.storage();
+
+        ecs.sigma().rmap(Region::FLUID);
+        ecs.sigma().mapInternalField(Region::CONDUCTOR);
+        ecs.sigma()[Region::CONDUCTOR].correctBoundaryConditions();
+    }
 
     // Init eddyCurrentApp
     {
@@ -81,7 +108,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Init interEddyCurrentApp
+    // Init interEddyCurrentApp (2)
     {
         using namespace interEddyCurrentApp;
         using namespace interEddyCurrentApp::Region;
