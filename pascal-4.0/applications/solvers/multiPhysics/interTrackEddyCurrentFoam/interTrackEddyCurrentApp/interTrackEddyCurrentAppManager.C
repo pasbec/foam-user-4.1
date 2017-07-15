@@ -84,7 +84,7 @@ Foam::interTrackEddyCurrentApp::Manager::Manager
         {
             FatalErrorIn
             (
-                "Foam::eddyCurrentApp::Manager::Manager(...) : "
+                "Foam::interTrackEddyCurrentApp::Manager::Manager(...) : "
             )
                 << "Region mesh is already initialized. This Manager "
                 << "needs to initialize the region mesh by itself. "

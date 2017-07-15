@@ -23,48 +23,48 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pimpleEddyCurrentAppManager.H"
+#include "interEddyCurrentAppManager.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::pimpleEddyCurrentApp::Manager, 0);
+defineTypeNameAndDebug(Foam::interEddyCurrentApp::Manager, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::pimpleEddyCurrentApp::Manager::Settings::read() const
+void Foam::interEddyCurrentApp::Manager::Settings::read() const
 {
-    pimpleEddyCurrentApp::Manager::debug =
+    interEddyCurrentApp::Manager::debug =
         dict().lookupOrDefault
         (
             "debug",
-            pimpleEddyCurrentApp::Manager::debug()
+            interEddyCurrentApp::Manager::debug()
         );
 
-    pimpleEddyCurrentApp::Control::debug =
+    interEddyCurrentApp::Control::debug =
         dict().lookupOrDefault
         (
             "debug",
-            pimpleEddyCurrentApp::Control::debug()
+            interEddyCurrentApp::Control::debug()
         );
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::pimpleEddyCurrentApp::Manager::Storage::create() const
+void Foam::interEddyCurrentApp::Manager::Storage::create() const
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::pimpleEddyCurrentApp::Manager::Regions::create() const
+void Foam::interEddyCurrentApp::Manager::Regions::create() const
 {}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pimpleEddyCurrentApp::Manager::Manager
+Foam::interEddyCurrentApp::Manager::Manager
 (
     const argList& args,
     Time& time,
@@ -84,7 +84,7 @@ Foam::pimpleEddyCurrentApp::Manager::Manager
         {
             FatalErrorIn
             (
-                "Foam::pimpleEddyCurrentApp::Manager::Manager(...) : "
+                "Foam::interEddyCurrentApp::Manager::Manager(...) : "
             )
                 << "Region mesh is already initialized. This Manager "
                 << "needs to initialize the region mesh by itself. "
@@ -123,20 +123,20 @@ Foam::pimpleEddyCurrentApp::Manager::Manager
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pimpleEddyCurrentApp::Manager::~Manager()
+Foam::interEddyCurrentApp::Manager::~Manager()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::pimpleApp::Manager&
-Foam::pimpleEddyCurrentApp::Manager::pimpleAppManager() const
+Foam::interApp::Manager&
+Foam::interEddyCurrentApp::Manager::interAppManager() const
 {
-    if (pimpleAppManager_.empty())
+    if (interAppManager_.empty())
     {
-        pimpleAppManager_.set
+        interAppManager_.set
         (
-            new pimpleApp::Manager
+            new interApp::Manager
             (
                 this->args(),
                 this->time(),
@@ -146,11 +146,11 @@ Foam::pimpleEddyCurrentApp::Manager::pimpleAppManager() const
         );
     }
 
-    return pimpleAppManager_();
+    return interAppManager_();
 }
 
 Foam::eddyCurrentApp::Manager&
-Foam::pimpleEddyCurrentApp::Manager::eddyCurrentAppManager() const
+Foam::interEddyCurrentApp::Manager::eddyCurrentAppManager() const
 {
     if (eddyCurrentAppManager_.empty())
     {
@@ -170,22 +170,22 @@ Foam::pimpleEddyCurrentApp::Manager::eddyCurrentAppManager() const
 }
 
 
-bool Foam::pimpleEddyCurrentApp::Manager::setCoNum
+bool Foam::interEddyCurrentApp::Manager::setCoNum
 (
     scalar& CourantNumber
 ) const
 {
-    return pimpleAppManager().setCoNum(CourantNumber);
+    return interAppManager().setCoNum(CourantNumber);
 }
 
 
-void Foam::pimpleEddyCurrentApp::Manager::read() const
+void Foam::interEddyCurrentApp::Manager::read() const
 {
-    pimpleAppManager().read();
+    interAppManager().read();
     eddyCurrentAppManager().read();
 
     // Make sure volume force is enabled
-    pimpleAppManager().regions().region_DEFAULT().
+    interAppManager().regions().region_DEFAULT().
         settings().volumeForce = true;
 
     settings().checkRead();
@@ -193,9 +193,9 @@ void Foam::pimpleEddyCurrentApp::Manager::read() const
 }
 
 
-void Foam::pimpleEddyCurrentApp::Manager::init() const
+void Foam::interEddyCurrentApp::Manager::init() const
 {
-    pimpleAppManager().init();
+    interAppManager().init();
     eddyCurrentAppManager().init();
 
     storage().checkInit();
@@ -203,23 +203,23 @@ void Foam::pimpleEddyCurrentApp::Manager::init() const
 }
 
 
-void Foam::pimpleEddyCurrentApp::Manager::next() const
+void Foam::interEddyCurrentApp::Manager::next() const
 {
-    pimpleAppManager().next();
+    interAppManager().next();
     eddyCurrentAppManager().next();
 }
 
 
-void Foam::pimpleEddyCurrentApp::Manager::write() const
+void Foam::interEddyCurrentApp::Manager::write() const
 {
-    pimpleAppManager().write();
+    interAppManager().write();
     eddyCurrentAppManager().write();
 }
 
 
-void Foam::pimpleEddyCurrentApp::Manager::finalize() const
+void Foam::interEddyCurrentApp::Manager::finalize() const
 {
-    pimpleAppManager().finalize();
+    interAppManager().finalize();
     eddyCurrentAppManager().finalize();
 }
 

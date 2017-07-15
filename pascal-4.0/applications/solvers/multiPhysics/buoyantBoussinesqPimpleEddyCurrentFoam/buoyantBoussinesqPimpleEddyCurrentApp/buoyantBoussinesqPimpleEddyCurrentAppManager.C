@@ -286,7 +286,7 @@ Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Manager
         {
             FatalErrorIn
             (
-                "Foam::eddyCurrentApp::Manager::Manager(...) : "
+                "Foam::buoyantBoussinesqPimpleEddyCurrentApp::Manager::Manager(...) : "
             )
                 << "Region mesh is already initialized. This Manager "
                 << "needs to initialize the region mesh by itself. "

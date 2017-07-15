@@ -1,3 +1,4 @@
+
 ../../../../.wm_project_dir/src/finiteVolume/lnInclude
 
 ../../../../.wm_project_dir/src/transportModels
@@ -9,8 +10,14 @@
 ../../../../src/foamTools/lnInclude
 ../../../../src/regionModel/lnInclude
 
+../../electromagnetics/eddyCurrentFoam/eddyCurrentApp
+../../electromagnetics/eddyCurrentFoam/include
+
 ../../incompressible/pimpleFoam/pimpleApp
 
-./interApp
+../../multiphase/interFoam/interApp
+../../multiphase/interFoam/include
+
+./interEddyCurrentApp
 
 ./include
