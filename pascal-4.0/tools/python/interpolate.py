@@ -192,7 +192,7 @@ parser.add_argument("-z", "--zero", metavar="ZERO", type=float, default=1e-20, h
 # Interpolation optional arguments
 parser.add_argument("-Pp", "-p", "--InterpolateExpontent", metavar="P_EXPONENT", type=int, default=3, help="Interpolation: Weighting exponent (default: 3)")
 parser.add_argument("-Pn", "-n", "--InterpolatePoints", metavar="P_POINTS", type=int, default=8, help="Interpolation: Number of interpolation points (default: 8)")
-parser.add_argument("-Pr", "-r", "--InterpolateRadius", metavar="P_RADIUS", type=float, default=numpy.inf, help="Interpolation: Search radius for interpolation points (default: "inf")")
+parser.add_argument("-Pr", "-r", "--InterpolateRadius", metavar="P_RADIUS", type=float, default=numpy.inf, help="Interpolation: Search radius for interpolation points (default: \"inf\")")
 
 # Smoothing optional arguments
 parser.add_argument("-S", "--Smooth", action="store_true", help="Smoothing: Switch (default: false)")
