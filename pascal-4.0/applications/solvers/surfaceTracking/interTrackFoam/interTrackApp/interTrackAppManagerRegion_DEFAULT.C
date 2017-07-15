@@ -141,7 +141,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_rho::create() c
                 dimDensity,
                 0
             ),
-            zeroGradientFvPatchScalarField::typeName
+            calculatedFvPatchScalarField::typeName
         )
     );
 }

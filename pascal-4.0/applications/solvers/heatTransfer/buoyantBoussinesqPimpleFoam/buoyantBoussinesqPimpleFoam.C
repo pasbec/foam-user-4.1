@@ -74,9 +74,6 @@ int main(int argc, char *argv[])
     while (manager.run())
     {
 #       include "UTpLoop.H"
-
-// TODO: Continuity errors
-// #       include "volContinuity.H"
     }
 
     return(0);

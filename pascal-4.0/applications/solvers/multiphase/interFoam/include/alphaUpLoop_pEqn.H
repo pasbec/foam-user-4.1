@@ -8,10 +8,14 @@
         surfaceScalarField phiU
         (
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, U, phi)
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
 
-        phi = phiU;
+        phi = phiU +
+            (
+                fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
+              - (g & mesh.Cf())*fvc::snGrad(rho)
+            )*rAUf*mesh.magSf();
 
         if (storage.item_F().enabled())
         {
@@ -22,7 +26,7 @@
                     << endl;
             }
 
-            phi += rAUf*(fvc::interpolate(storage.F())/storage.rho() & mesh.Sf());
+            phi += rAUf*(fvc::interpolate(storage.F()) & mesh.Sf());
         }
 
         // Manually correct the boundary conditions for the pressure at walls
@@ -83,7 +87,7 @@
                             const vectorField& Fp =
                                 storage.F().boundaryField()[patchI];
 
-                            pp.gradient() = (Fp/storage.rho().value() & Sfp)/magSfp;
+                            pp.gradient() = (Fp & Sfp)/magSfp;
                         }
                         else
                         {
@@ -135,14 +139,13 @@
 
         p.correctBoundaryConditions();
 
+        // Non-orthogonal pressure corrector loop
         while (control.correctNonOrthogonal())
         {
             fvScalarMatrix pEqn
             (
                 fvm::laplacian(rAUf, p) == fvc::div(phi)
             );
-
-            pEqn.setReference(control.pRefCell(), control.pRefValue());
 
             pEqn.solve(mesh.solutionDict().solver(p.select(control.finalInnerIter())));
 
@@ -170,3 +173,4 @@
 // TODO: Continuity errors
 // #       include "continuityErrs.H"
     }
+

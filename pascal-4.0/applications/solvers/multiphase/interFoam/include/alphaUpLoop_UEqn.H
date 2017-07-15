@@ -6,13 +6,6 @@
       + fvc::interpolate(rho*turbulence.nut())
     );
 
-// TODO: Two fluids: Is this ok?
-    surfaceScalarField rhoPhi
-    (
-        "rho*phi",
-        fvc::interpolate(rho)*phi
-    );
-
     fvVectorMatrix UEqn
     (
         fvm::ddt(rho, U)
@@ -32,7 +25,11 @@
             (
                 UEqn == fvc::reconstruct
                 (
-                  - (fvc::snGrad(p)*mesh.magSf())
+                    (
+                        fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
+                      - (g & mesh.Cf())*fvc::snGrad(rho)
+                      - fvc::snGrad(p)
+                    )*mesh.magSf()
                   + (fvc::interpolate(storage.F()) & mesh.Sf())
                 )
             );
@@ -43,7 +40,11 @@
             (
                 UEqn == fvc::reconstruct
                 (
-                  - (fvc::snGrad(p)*mesh.magSf())
+                    (
+                        fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
+                      - (g & mesh.Cf())*fvc::snGrad(rho)
+                      - fvc::snGrad(p)
+                    )*mesh.magSf()
                 )
             );
         }

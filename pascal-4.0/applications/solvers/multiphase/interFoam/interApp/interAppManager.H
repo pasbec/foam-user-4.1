@@ -117,6 +117,9 @@ public:
                 //- Density
                 SM_REGIONITEM_ADD(volScalarField, rho);
 
+                //- Mass flux
+                SM_REGIONITEM_ADD(surfaceScalarField, rhoPhi);
+
                 //- Fluid indicator
                 SM_REGIONITEM_ADD(volScalarField, alpha1);
 

@@ -141,7 +141,34 @@ void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
                 dimDensity,
                 0
             ),
-            zeroGradientFvPatchScalarField::typeName
+            calculatedFvPatchScalarField::typeName
+        )
+    );
+}
+
+
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_rhoPhi::create() const
+{
+    set
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                "rho*phi",
+                time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedScalar
+            (
+                word(),
+                dimMass/dimTime,
+                0
+            ),
+            calculatedFvPatchScalarField::typeName
         )
     );
 }
@@ -244,6 +271,7 @@ void Foam::interApp::Manager::Region_DEFAULT::Storage::create() const
     item_U().enable();
     item_phi().enable();
     item_rho().enable();
+    item_rhoPhi().enable();
     item_F().setState(settings().volumeForce);
 
     item_alpha1().enable();
@@ -251,6 +279,9 @@ void Foam::interApp::Manager::Region_DEFAULT::Storage::create() const
 
     rho() = transport().rho();
     rho().correctBoundaryConditions();
+
+    rhoPhi() = fvc::interpolate(rho()) * phi();
+    rhoPhi().correctBoundaryConditions();
 
     item_turbulence().enable();
     item_interface().enable();

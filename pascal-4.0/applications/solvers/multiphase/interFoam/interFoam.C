@@ -54,8 +54,15 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// TODO: Correct phi with pcorr?
+// #   include "correctPhi.H"
+
+// TODO: Continuity errors
+// #   include "initContinuityErrs.H"
+
     while (manager.run())
     {
+#       include "alphaUpLoop.H"
     }
 
     return(0);

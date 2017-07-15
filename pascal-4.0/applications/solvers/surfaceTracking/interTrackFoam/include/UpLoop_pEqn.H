@@ -126,16 +126,19 @@
                 }
                 else
                 {
-                    WarningIn(Control::typeName + " | pEqn.H")
-                        << "The pressure boundary condition for "
-                        << "wall-patch named '"
-                        << mesh.boundary()[patchI].name() << "' is '"
-                        << p.boundaryField()[patchI].type() << "',"
-                        << endl << "    "
-                        << "It should be of type 'fixedGradient' "
-                        << "or 'fixedFluxPressure' "
-                        << "to correctly represent the gradient dp/dn."
-                        << endl;
+                    if (storage.item_F().enabled())
+                    {
+                        WarningIn(Control::typeName + " | pEqn.H")
+                            << "The pressure boundary condition for "
+                            << "wall-patch named '"
+                            << mesh.boundary()[patchI].name() << "' is '"
+                            << p.boundaryField()[patchI].type() << "',"
+                            << endl << "    "
+                            << "It should be of type 'fixedGradient' "
+                            << "or 'fixedFluxPressure' "
+                            << "to correctly represent the gradient dp/dn."
+                            << endl;
+                    }
                 }
             }
         }
