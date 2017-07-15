@@ -23,11 +23,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interTrackAppManager.H"
+#include "interAppManager.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
+void Foam::interApp::Manager::Region_DEFAULT::Settings::read() const
 {
     volumeForce = dict().lookupOrDefault("volumeForce", false);
     snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
@@ -36,7 +36,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_g::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_g::create() const
 {
     set
     (
@@ -55,7 +55,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_g::create() con
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_p::create() const
 {
     set
     (
@@ -78,7 +78,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p::create() con
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_U::create() const
 {
     set
     (
@@ -98,7 +98,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U::create() con
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_phi::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_phi::create() const
 {
     set
     (
@@ -120,7 +120,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_phi::create() c
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_rho::create() const
 {
     set
     (
@@ -147,7 +147,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_rho::create() c
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_F::create() const
 {
     set
     (
@@ -174,7 +174,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_F::create() con
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_fluidIndicator::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_alpha1::create() const
 {
     set
     (
@@ -194,7 +194,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_fluidIndicator:
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_transport::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_transport::create() const
 {
     set
     (
@@ -202,13 +202,13 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_transport::crea
         (
             storage().U(),
             storage().phi(),
-            storage().fluidIndicator().name()
+            storage().alpha1().name()
         )
     );
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_turbulence::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_turbulence::create() const
 {
     set
     (
@@ -222,31 +222,22 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_turbulence::cre
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_interface::create() const
 {
-// TODO: Add more constructors and simplify
-//       Make it use real rho and mu fields!
     set
     (
-        new trackedSurface
+        new interfaceProperties
         (
-            storage().mesh(),
-            storage().rho(),
+            storage().alpha1(),
             storage().U(),
-            storage().p(),
-            storage().phi(),
-            NULL,
-            storage().item_g().getPtr(),
-            storage().item_transport().getPtr(),
-            storage().item_turbulence().getPtr(),
-            NULL
+            storage().transport()
         )
     );
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
+void Foam::interApp::Manager::Region_DEFAULT::Storage::create() const
 {
     item_g().enable();
     item_p().enable();
@@ -255,7 +246,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
     item_rho().enable();
     item_F().setState(settings().volumeForce);
 
-    item_fluidIndicator().enable();
+    item_alpha1().enable();
     item_transport().enable();
 
     rho() = transport().rho();

@@ -21,109 +21,48 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+InNamespace
+    Foam::interApp
+
 Description
     ...
-
-SourceFiles
-    pimpleEddyCurrentAppControlI.H
-    pimpleEddyCurrentAppControl.C
 
 Author
     Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pimpleEddyCurrentAppControl_H
-#define pimpleEddyCurrentAppControl_H
-
-#include "pimpleEddyCurrentAppInclude.H"
-
-#include "solutionControl.H"
-#include "solverPerformanceData.H"
+#ifndef interAppRegion_H
+#define interAppRegion_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-namespace pimpleEddyCurrentApp
+namespace interApp
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class pimpleEddyCurrentApp::Control Declaration
+                     Namespace interApp::Region Declaration
 \*---------------------------------------------------------------------------*/
 
-class Control
-:
-    public solutionControl
+namespace Region
 {
-private:
-
-    // Private member functions
-
-        //- Disallow default bitwise copy construct
-        Control(const Control&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const Control&);
-
-
-protected:
-
-    // Protected data
-
-        //- Mesh
-        const regionFvMesh& mesh_;
-
-    // Protected Member Functions
-
-        //- Return true if an electromagnetic update is not necessary
-        virtual bool criteriaSatisfied();
-
-
-public:
-
-    //- Run-time type information
-    TypeName("pimpleEddyCurrentApp::Control");
-
-
-    // Constructors
-
-        //- Construct from mesh and the name of control sub-dictionary
-        Control
-        (
-            regionFvMesh& mesh,
-            const word& dictName="MULTIPHYSICS"
-        );
-
-
-    //- Destructor
-    virtual ~Control();
-
-
-    // Member Functions
-
-        // Evolution
-
-            //- Main control loop
-            virtual bool loop();
-};
+    enum Labels
+    {
+        DEFAULT
+    };
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pimpleEddyCurrentApp
-
+} // End namespace interApp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "pimpleEddyCurrentAppControl.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -1,20 +1,25 @@
 
-    tmp<volScalarField> tmuEff(new volScalarField(mu));
+    surfaceScalarField muEff
+    (
+        "muEff",
+        transport.muf()
+      + fvc::interpolate(rho*turbulence.nut())
+    );
 
-    tmuEff() += rho*turbulence.nut();
-    tmuEff().rename("muEff");
-    tmuEff().correctBoundaryConditions();
+    surfaceScalarField rhoPhi
+    (
+        "rho*phi",
+        fvc::interpolate(rho)*phi
+    );
 
     fvVectorMatrix UEqn
     (
         fvm::ddt(rho, U)
-      + fvm::div(fvc::interpolate(rho)*phi, U, "div(phi,U)")
-      - fvm::laplacian(tmuEff(), U)
-      - fvc::div(tmuEff()*dev(fvc::grad(U)().T()))
-//       - (fvc::grad(U) & fvc::grad(tmuEff()))
+      + fvm::div(rhoPhi, U)
+      - fvm::laplacian(muEff, U)
+      - (fvc::grad(U) & fvc::grad(muEff))
+    //- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
     );
-
-    tmuEff.clear();
 
     UEqn.relax();
 

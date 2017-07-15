@@ -62,7 +62,7 @@ solvers
 //     U { $UFinal; relTol 1e-02; }
 }
 
-INTERTRACK
+PIMPLE
 {
     nOuterCorrectors            15;
     nCorrectors                 1;

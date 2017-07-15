@@ -52,7 +52,7 @@ solvers
     }
 }
 
-INTERTRACK
+PIMPLE
 {
     nOuterCorrectors            50;
     nCorrectors                 1;

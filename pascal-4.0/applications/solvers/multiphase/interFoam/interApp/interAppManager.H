@@ -22,24 +22,24 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interTrackApp::Manager
+    Foam::interApp::Manager
 
 Description
     ...
 
 SourceFiles
-    interTrackAppManager.C
-    interTrackAppManagerRegion_DEFAULT.C
+    interAppManager.C
+    interAppManagerRegion_DEFAULT.C
 
 Author
     Pascal Beckstein
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interTrackAppManager_H
-#define interTrackAppManager_H
+#ifndef interAppManager_H
+#define interAppManager_H
 
-#include "interTrackAppInclude.H"
+#include "interAppInclude.H"
 #include "pimpleAppControl.H"
 
 #include "solverManagers.H"
@@ -49,16 +49,16 @@ Author
 namespace Foam
 {
 
-namespace interTrackApp
+namespace interApp
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class interTrackApp::Manager Declaration
+                   Class interApp::Manager Declaration
 \*---------------------------------------------------------------------------*/
 
 class Manager
 :
-    public dynamicFvSolverManager
+    public fvSolverManager
 {
 public:
 
@@ -74,6 +74,7 @@ public:
 
 
         SM_GLOBALSETTINGS_NEW();
+
         SM_GLOBALSETTINGS_ADD();
 
 
@@ -117,7 +118,7 @@ public:
                 SM_REGIONITEM_ADD(volScalarField, rho);
 
                 //- Fluid indicator
-                SM_REGIONITEM_ADD(volScalarField, fluidIndicator);
+                SM_REGIONITEM_ADD(volScalarField, alpha1);
 
                 //- Transport model
                 SM_REGIONITEM_ADD(twoPhaseMixture, transport);
@@ -126,7 +127,7 @@ public:
                 SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
 
                 //- Interface model
-                SM_REGIONITEM_ADD(trackedSurface, interface);
+                SM_REGIONITEM_ADD(interfaceProperties, interface);
 
             SM_REGIONSTORAGE_ADD();
 
@@ -154,7 +155,7 @@ private:
 public:
 
     // Runtime type information
-    TypeName("interTrackApp::Manager");
+    TypeName("interApp::Manager");
 
     // Constructor
 
@@ -162,7 +163,7 @@ public:
         (
             const argList& args,
             Time& time,
-            dynamicFvMesh& mesh,
+            fvMesh& mesh,
             bool master = true
         );
 
@@ -190,7 +191,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace interTrackApp
+} // End namespace interApp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -199,8 +200,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interTrackAppManager.C"
-#   include "interTrackAppManagerRegion_DEFAULT.C"
+#   include "interAppManager.C"
+#   include "interAppManagerRegion_DEFAULT.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

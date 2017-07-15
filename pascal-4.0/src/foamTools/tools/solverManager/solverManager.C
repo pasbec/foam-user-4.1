@@ -178,7 +178,7 @@ Foam::solverManager<MESH>::solverManager
             IOobject
             (
                 "solverProperties",
-                time_.constant(),
+                time_.system(),
                 time_.db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE

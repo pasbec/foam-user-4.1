@@ -4,20 +4,20 @@
         if (Control::debug)
         {
             Info<< Control::typeName << " | UpLoop.H : "
-                << "Commencing INTERTRACK U-p loop."
+                << "Commencing PIMPLE U-p loop."
                 << endl;
         }
 
-        // --- INTERTRACK corrector loop
+        // --- PIMPLE corrector loop
         while (control.loop())
         {
             volScalarField& p = storage.p();
             volVectorField& U = storage.U();
             surfaceScalarField& phi = storage.phi();
             const volScalarField& rho = storage.rho();
-            const volScalarField& mu = storage.mu();
-            trackedSurface& interface = storage.interface();
+            twoPhaseMixture& transport = storage.transport();
             incompressible::turbulenceModel& turbulence = storage.turbulence();
+            trackedSurface& interface = storage.interface();
 
             interface.updateBoundaryConditions(); // abs phi
 

@@ -93,7 +93,7 @@ public:
         Control
         (
             regionFvMesh& mesh,
-            const word& dictName="INTERTRACKEDDYCURRENT"
+            const word& dictName="MULTIPHYSICS"
         );
 
 
