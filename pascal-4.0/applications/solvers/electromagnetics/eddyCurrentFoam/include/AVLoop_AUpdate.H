@@ -1,6 +1,7 @@
 
     // Update flux of gradient of normal component of A
     // in default region
+    if (control.meshIs3D())
     {
         SM_REGIONSCOPE(DEFAULT);
 

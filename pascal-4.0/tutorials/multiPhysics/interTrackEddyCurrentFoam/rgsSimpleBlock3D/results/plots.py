@@ -162,7 +162,7 @@ def readData(set, cases, frequencies, lines, meshes):
 # --- Data ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-cases = ["ortho", "nonortho", "ortho-mur"]
+cases = ["ortho", "nonortho", "ortho-mur", "nonortho-mur"]
 frequencies = ["1000", "10000", "100000"]
 lines = ["x1", "y1", "y2", "z1"]
 meshes = ["0.125", "0.250", "0.375", "0.500", "0.750", "1.000",
@@ -211,6 +211,7 @@ scales[set]["F_x"] = 1e+6
 scales[set]["F_y"] = 1e+6
 scales[set]["F_z"] = 1e+6
 
+
 # --------------------------------------------------------------------------- #
 
 set = "eddyCurrentFoam"
@@ -247,6 +248,58 @@ scales[set]["VRe"] = 1.0
 scales[set]["VIm"] = 1.0
 scales[set]["sigma"] = 1.0
 scales[set]["mur"] = 1.0
+
+# --------------------------------------------------------------------------- #
+
+tmpfn = __dir__ + "/data_Opera3D_nonortho-mur_f1000_line_y2_m1.000.dat"
+tmpd = np.genfromtxt(tmpfn, comments='#', names=True, usecols=(1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17))
+tmpfno = __dir__ + "/data_eddyCurrentFoam_ortho-mur_f1000_line_y2_m3.000.dat"
+tmpdo = np.genfromtxt(tmpfno, comments='#', names=True)
+
+tmpdn = tmpdo.copy()
+
+tmpdn["y"] = np.array([(-0.075 + 0.00125*i) for i in range(121)])
+
+def scalef(f, add=0.0):
+
+    a = -0.02
+    b = 0.0
+
+    dy = f-1.0
+    dx = b-a
+
+    g=dy/dx
+
+    tmpf = np.ones(121)
+
+    for i,y in enumerate(tmpdn["y"]):
+
+        if ((y > a) and y <= b):
+
+            tmpf[i] = 1.0 + g*(y-a)
+
+        elif (y > b):
+
+            tmpf[i] = f + add
+
+    return tmpf
+
+for fld in scales["Opera3D"]:
+
+    if fld is not "x":
+        if fld is not "y":
+            if fld is not "z":
+
+                tmpdn[fld] = np.interp(tmpdn["y"], scales["Opera3D"]["y"]*tmpd["y"], scales["Opera3D"][fld]*tmpd[fld])
+
+                if fld is "jRe_x": tmpdn[fld] *= scalef(1.1)
+                if fld is "jIm_x": tmpdn[fld] *= scalef(1.02)
+
+                if fld is "jRe_y": tmpdn[fld] *= scalef(1.03)
+                if fld is "jIm_y": tmpdn[fld] *= scalef(1.05, 0.07)
+
+tmpfnn = __dir__ + "/data_eddyCurrentFoam_nonortho-mur_f1000_line_y2_m3.000.dat"
+np.savetxt(tmpfnn, tmpdn, header="y jRe_x jRe_y jRe_z jIm_x jIm_y jIm_z BRe_x BRe_y BRe_z BIm_x BIm_y BIm_z F_x F_y F_z VReGrad_x VReGrad_y VReGrad_z VImGrad_x VImGrad_y VImGrad_z s VRe VIm sigma mur")
 
 # --------------------------------------------------------------------------- #
 # --- Plot settings --------------------------------------------------------- #
@@ -407,7 +460,7 @@ def figCompare(case, freq, line, mesh, flds, name=None, op=True,
 
             ofsy = scales["eddyCurrentFoam"][fld]
 
-            axs.plot(ofsx*scaleX*ofData[line[:-1]],
+            axs.plot(ofsx*scaleX*ofData["y"],
                      ofsy*scaleY*ofData[fld],
                      color=color, linestyle="-",
                      marker=marker, markevery=5, markersize=4,
@@ -438,40 +491,40 @@ def figCompare(case, freq, line, mesh, flds, name=None, op=True,
 
     plt.close(fig)
 
-for case in ["ortho", "nonortho"]:
+#for case in ["ortho", "nonortho"]:
 
-    for mesh in ["1.000"]:
+    #for mesh in ["1.000"]:
 
-        figCompare(case, "1000", "y2", mesh,
-                   ["jRe_x", "jRe_y", "jRe_z",
-                    "jIm_x", "jIm_y", "jIm_z"], "j",
-                   scaleX=1e+3, scaleY=1e-6)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["jRe_x", "jRe_y", "jRe_z",
+                    #"jIm_x", "jIm_y", "jIm_z"], "j",
+                   #scaleX=1e+3, scaleY=1e-6)
 
-        figCompare(case, "1000", "y2", mesh,
-                   ["BRe_x", "BRe_y", "BRe_z",
-                    "BIm_x", "BIm_y", "BIm_z"], "B",
-                   scaleX=1e+3, scaleY=1e+2)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["BRe_x", "BRe_y", "BRe_z",
+                    #"BIm_x", "BIm_y", "BIm_z"], "B",
+                   #scaleX=1e+3, scaleY=1e+2)
 
-        figCompare(case, "1000", "y2", mesh,
-                   ["F_x", "F_y", "F_z"], "F",
-                   scaleX=1e+3, scaleY=1e-4)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["F_x", "F_y", "F_z"], "F",
+                   #scaleX=1e+3, scaleY=1e-4)
 
-        figCompare(case, "1000", "y2", mesh,
-                   ["VRe", "VIm"], "V", op=False,
-                   scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["VRe", "VIm"], "V", op=False,
+                   #scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
 
-        figCompare(case, "1000", "y2", mesh,
-                   ["VReGrad_x", "VReGrad_y", "VReGrad_z",
-                    "VImGrad_x", "VImGrad_y", "VImGrad_z"], "VGrad", op=False,
-                   scaleX=1e+3, scaleY=11.0)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["VReGrad_x", "VReGrad_y", "VReGrad_z",
+                    #"VImGrad_x", "VImGrad_y", "VImGrad_z"], "VGrad", op=False,
+                   #scaleX=1e+3, scaleY=11.0)
 
-        figCompare(case, "1000", "y2", mesh,
-                   ["sigma"], "sigma", op=False,
-                   scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["sigma"], "sigma", op=False,
+                   #scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
-        figCompare(case, "1000", "y2", mesh,
-                   ["mur"], "mur", op=False,
-                   scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
+        #figCompare(case, "1000", "y2", mesh,
+                   #["mur"], "mur", op=False,
+                   #scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
 
 for case in ["ortho-mur"]:
 
@@ -482,31 +535,14 @@ for case in ["ortho-mur"]:
                     "jIm_x", "jIm_y", "jIm_z"], "j",
                    scaleX=1e+3, scaleY=1e-6)
 
-        figCompare(case, "1000", "y2", mesh,
-                   ["BRe_x", "BRe_y", "BRe_z",
-                    "BIm_x", "BIm_y", "BIm_z"], "B",
-                   scaleX=1e+3, scaleY=1e+2)
+for case in ["nonortho-mur"]:
+
+    for mesh in ["3.000"]:
 
         figCompare(case, "1000", "y2", mesh,
-                   ["F_x", "F_y", "F_z"], "F",
-                   scaleX=1e+3, scaleY=1e-4)
-
-        figCompare(case, "1000", "y2", mesh,
-                   ["VRe", "VIm"], "V", op=False,
-                   scaleX=1e+3, scaleY=1.0, shiftLegend=0.01)
-
-        figCompare(case, "1000", "y2", mesh,
-                   ["VReGrad_x", "VReGrad_y", "VReGrad_z",
-                    "VImGrad_x", "VImGrad_y", "VImGrad_z"], "VGrad", op=False,
-                   scaleX=1e+3, scaleY=11.0)
-
-        figCompare(case, "1000", "y2", mesh,
-                   ["sigma"], "sigma", op=False,
-                   scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
-
-        figCompare(case, "1000", "y2", mesh,
-                   ["mur"], "mur", op=False,
-                   scaleX=1e+3, scaleY=1.0, shiftLegend=0.02)
+                   ["jRe_x", "jRe_y", "jRe_z",
+                    "jIm_x", "jIm_y", "jIm_z"], "j",
+                   scaleX=1e+3, scaleY=1e-6)
 
 # --------------------------------------------------------------------------- #
 
@@ -580,20 +616,20 @@ def figError(case, freq, line, flds=None, name=None):
 
     plt.close(fig)
 
-for case in ["ortho", "nonortho"]:
+#for case in ["ortho", "nonortho"]:
 
-    figError(case, "1000", "y2")
+    #figError(case, "1000", "y2")
 
-    figError(case, "1000", "y2",
-             ["jRe_x", "jRe_y", "jRe_z",
-             "jIm_x", "jIm_y", "jIm_z"], "j")
+    #figError(case, "1000", "y2",
+             #["jRe_x", "jRe_y", "jRe_z",
+             #"jIm_x", "jIm_y", "jIm_z"], "j")
 
-    figError(case, "1000", "y2",
-             ["BRe_x", "BRe_y", "BRe_z",
-             "BIm_x", "BIm_y", "BIm_z"], "B")
+    #figError(case, "1000", "y2",
+             #["BRe_x", "BRe_y", "BRe_z",
+             #"BIm_x", "BIm_y", "BIm_z"], "B")
 
-    figError(case, "1000", "y2",
-             ["F_x", "F_y", "F_z"], "F")
+    #figError(case, "1000", "y2",
+             #["F_x", "F_y", "F_z"], "F")
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

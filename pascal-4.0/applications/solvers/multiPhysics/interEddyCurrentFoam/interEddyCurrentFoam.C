@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
         eddyCurrentApp::Manager::Storage& ecs =
             eddyCurrentAppManager.storage();
 
+        ecs.sigma().rmap(Region::CONDUCTOR);
         ecs.sigma().rmap(Region::FLUID);
         ecs.sigma().mapInternalField(Region::CONDUCTOR);
         ecs.sigma()[Region::CONDUCTOR].correctBoundaryConditions();
@@ -228,6 +229,7 @@ int main(int argc, char *argv[])
             eddyCurrentApp::Manager::Storage& ecs =
                 eddyCurrentAppManager.storage();
 
+            ecs.sigma().rmap(Region::CONDUCTOR);
             ecs.sigma().rmap(Region::FLUID);
             ecs.sigma().mapInternalField(Region::CONDUCTOR);
             ecs.sigma()[Region::CONDUCTOR].correctBoundaryConditions();

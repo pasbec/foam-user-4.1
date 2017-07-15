@@ -1,4 +1,5 @@
 
+// TODO: To save memory, it might be better not to store these fields
     // Derived fields in conductor region
     {
         if (Control::debug)

@@ -1,4 +1,5 @@
 
+// TODO: To save memory, it might be better not to store this field
     // Calculate B
     {
         if (Control::debug)

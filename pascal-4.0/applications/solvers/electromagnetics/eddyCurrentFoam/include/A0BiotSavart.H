@@ -39,6 +39,7 @@
         }
 
         // Calculate effective source current for magnetization
+        if (control.meshIs3D())
         {
             SM_REGIONSCOPE(CONDUCTOR);
 
@@ -122,19 +123,19 @@
 
                 AM.rename(A0name);
             }
-        }
 
-        // Update j0 in default region
-        {
-            if (Control::debug)
+            // Update j0 in default region
             {
-                Info<< Control::typeName << " | A0BiotSavart.H : "
-                    << "Update j0 in default region."
-                    << endl;
-            }
+                if (Control::debug)
+                {
+                    Info<< Control::typeName << " | A0BiotSavart.H : "
+                        << "Update j0 in default region."
+                        << endl;
+                }
 
-            // Update j0
-            globalStorage.j0Re().rmap(CONDUCTOR);
-            globalStorage.j0Im().rmap(CONDUCTOR);
+                // Update j0
+                globalStorage.j0Re().rmap(CONDUCTOR);
+                globalStorage.j0Im().rmap(CONDUCTOR);
+            }
         }
     }
