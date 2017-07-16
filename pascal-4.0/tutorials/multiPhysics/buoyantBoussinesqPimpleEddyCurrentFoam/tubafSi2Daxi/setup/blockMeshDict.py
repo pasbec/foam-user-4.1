@@ -51,7 +51,7 @@ def vwg(al, wl=None):
 
 v      = dict()
 
-v[  0] = v0z(0.0)
+v[  0] = v0z(par.geo_Z[2])
 v[  6] = v0z(par.geo_Z["solid"])
 v[  3] = vwg([v[0], v[6]])                    # Centroid of solid axis height
 v[  4] = vrz(par.geo_R["solid"], v[6][1])

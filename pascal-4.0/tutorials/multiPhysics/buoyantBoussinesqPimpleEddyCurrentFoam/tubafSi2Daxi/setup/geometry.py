@@ -51,7 +51,7 @@ d = FreeCAD.activeDocument()
 
 v = dict()
 
-v["all"]  = [30, 35, 40, 46]
+v["all"]    = [30, 35, 40, 46]
 v["solid"]  = [0, 3, 6, 5, 4, 1]
 v["fluid"]  = [6, 11, 10, 9, 8, 7, 4, 5]
 v["vessel"] = [12, 0, 1, 4, 7, 8, 16, 15, 14, 13]
@@ -183,7 +183,7 @@ def main():
 
     exportObj = bodyObj + bo2D.values() + bo3D.values() + shellObj
 
-    #Export body abnd shell meshes
+    #Export body and shell meshes
     exportMeshes(exportObj, par.dir_triSurface, __head__, scale=par.geo_scale)
 
     # Save document

@@ -31,27 +31,16 @@ import numpy as np
 geo_scale      = 1e-3
 
 geo_R          = dict()
-geo_R[0]       =  53.0
-geo_R[1]       =  62.0
-geo_R[2]       =  70.0
+geo_R[0]       =  85.0
+geo_R[1]       = geo_R[0] + 1.0
+geo_R[2]       = geo_R[1] + 14.0
+geo_R[3]       = geo_R[2] + 15.0
 
 geo_Z          = dict()
-geo_Z[0]       = -34.0
-geo_Z[1]       =  -8.0
-geo_Z[2]       =   0.0
-geo_Z[3]       =  22.0
-geo_Z[4]       =  27.095
-geo_Z[5]       =  30.0
-geo_Z[6]       =  70.0
-geo_Z[7]       = 142.0
-
-geo_alpha      = m.atan(geo_Z[5]/geo_R[0])                # Cone angle (rad)
-
-geo_magG       = (geo_Z[2] - geo_Z[1]) * m.cos(geo_alpha) # Non-conducting gap size
-geo_G          = geo_magG * np.array([m.sin(geo_alpha), -m.cos(geo_alpha)])
-
-geo_Z["solid"] =  geo_Z[3]                                # Solid height
-geo_R["solid"] =  geo_Z[3] / m.tan(geo_alpha)             # Solid wall contact radius
+geo_Z[0]       =  -1.0
+geo_Z[1]       =   0.0
+geo_Z[2]       = 235.0
+geo_Z[3]       = 383.0
 
 # --------------------------------------------------------------------------- #
 # --- Mesh ------------------------------------------------------------------ #
@@ -65,12 +54,15 @@ mesh_thickness = 10.0
 mesh_angle     =  5.0
 
 mesh_R         = dict()
-mesh_R["axis"] = 1.0                                # Axis patch radius
-mesh_R["inf"]  = mesh_space * geo_R[2]              # Infinity patch radius
+mesh_R["axis"] = 0.0                                # Axis patch radius
+mesh_R["inf"]  = mesh_space * geo_R[1]              # Infinity patch radius
+#mesh_R["inf"]  = mesh_space * geo_R[3]              # Infinity patch radius (j0)
 
 mesh_Z         = dict()
-mesh_Z["C"]    = geo_Z[0] + 0.5*(geo_Z[7] - geo_Z[0])
-mesh_Z["inf"]  = mesh_space * (geo_Z[6] - geo_Z[3]) # Infinity patch radius
+mesh_Z["C"]    = geo_Z[0] + 0.5*(geo_Z[3] - geo_Z[0])
+mesh_Z["inf+"] = mesh_space * abs(geo_Z[3] - mesh_Z["C"]) # Infinity patch radius +
+mesh_Z["inf-"] = mesh_space * abs(geo_Z[0] - mesh_Z["C"]) # Infinity patch radius -
+mesh_Z["inf"]  = max(mesh_Z["inf+"], mesh_Z["inf-"])      # Infinity patch radius
 
 mesh_R["inf"]  = max(mesh_R["inf"], mesh_Z["inf"])
 mesh_Z["inf"]  = max(mesh_Z["inf"], mesh_R["inf"])
@@ -85,22 +77,23 @@ mesh           = {"normal": mesh_normal,
 
 coil_scale      = 1e-3
 
-coil_bundle     = {"shape": "rectangle",
+coil_bundle     = {"shape": "point",
+#coil_bundle     = {"shape": "rectangle",
                    "n":     10,
-                   "r":     10.0,
-                   "z":     8.0}
+                   "r":     0.5*(geo_R[3] - geo_R[2]),
+                   "z":     18.0}
 
 coil_path       = {"shape": "loop",
                    "n":     36,
-                   "r":     100.0 + coil_bundle["r"]/2.0}
+                   "r":     geo_R[2] + coil_bundle["r"]/2.0}
 
-coils_n         = 10
-coils_step      = 14.9
-coils_origin    = [0.0, 0.0, 3.0 + coil_bundle["z"]/2.0]
+coils_n         = 12
+coils_step      = 1.0 + coil_bundle["z"]
+coils_origin    = [0.0, 0.0, geo_Z[1] + coil_bundle["z"]/2.0]
 
-coils_current   = m.sqrt(2.0) * 260.0
+coils_current   = m.sqrt(2.0) * 2460.0
 coils_nNonOrto  = 10
-coils_frequency = 6300.0
+coils_frequency = 330.0
 
 # --------------------------------------------------------------------------- #
 # --- Directories ----------------------------------------------------------- #

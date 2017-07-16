@@ -51,13 +51,11 @@ d = FreeCAD.activeDocument()
 
 v = dict()
 
-v["all"]  = [30, 35, 40, 46]
-v["solid"]  = [0, 3, 6, 5, 4, 1]
-v["fluid"]  = [6, 11, 10, 9, 8, 7, 4, 5]
-v["vessel"] = [12, 0, 1, 4, 7, 8, 16, 15, 14, 13]
-v["heater"] = [17, 12, 13, 14, 15, 16, 25, 24, 23, 22, 21, 20, 19, 18]
-v["free"]   = [11, 29, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33,
-               32, 31, 30, 17, 18, 19, 20, 21, 22, 23, 24, 25, 16, 8, 9, 10]
+v["all"]    = [0, 5, 35, 30]
+v["fluid"]  = [12, 13, 25, 24]
+v["vessel"] = [6, 8, 26, 25, 13, 12]
+v["coila"]  = [15, 16, 22, 21]
+v["free"]   = [0, 5, 35, 30, 24, 26, 8, 6]
 
 s = dict()
 
@@ -100,11 +98,7 @@ for k in s.keys():
 
     bo[k] = makeDoubleRevolveBody(k, s[k], angle=par.mesh_angle)
 
-bo["conductor"] = makeFuseBody("conductor", [bo["solid"],
-                                             bo["fluid"],
-                                             bo["heater"]])
-
-bo["thermal"] = makeFuseBody("thermal", [bo["solid"], bo["fluid"]])
+bo["conductor"] = makeFuseBody("conductor", [bo["fluid"],  bo["vessel"]])
 
 bo["coils"] = makeOrthoArrayBody("coils", bo["coil"],
                                  (0.0, 0.0, cs*par.coils_step), par.coils_n)
@@ -117,11 +111,7 @@ for k in s.keys():
 
     bo2D[k] = makeDoubleExtrudeBody(k + "_2D", s[k], par.mesh_thickness)
 
-bo2D["conductor"] = makeFuseBody("conductor_2D", [bo2D["solid"],
-                                                  bo2D["fluid"],
-                                                  bo2D["heater"]])
-
-bo2D["thermal"] = makeFuseBody("thermal_2D", [bo2D["solid"], bo2D["fluid"]])
+bo2D["conductor"] = makeFuseBody("conductor_2D", [bo2D["fluid"], bo2D["vessel"]])
 
 bo2D["coils"] = makeOrthoArrayBody("coils_2D", bo2D["coil"],
                                    (0.0, 0.0, cs*par.coils_step), par.coils_n)
@@ -134,11 +124,7 @@ for k in s.keys():
 
     bo3D[k] = makeRevolveBody(k + "_3D", s[k])
 
-bo3D["conductor"] = makeFuseBody("conductor_3D", [bo3D["solid"],
-                                                  bo3D["fluid"],
-                                                  bo3D["heater"]])
-
-bo3D["thermal"] = makeFuseBody("thermal_3D", [bo3D["solid"], bo3D["fluid"]])
+bo3D["conductor"] = makeFuseBody("conductor_3D", [bo3D["fluid"], bo3D["vessel"]])
 
 bo3D["coils"] = makeOrthoArrayBody("coils_3D", bo3D["coil"],
                                    (0.0, 0.0, cs*par.coils_step), par.coils_n)
@@ -156,11 +142,9 @@ shd = dict()
 shd["front"] = (bo["all"], [4])
 shd["back"] = (bo["all"], [7])
 shd["infinity"] = (bo["all"], [1, 2, 3, 5, 6, 8])
-shd["topWall"] = (bo["fluid"], [1, 2, 3, 5, 6, 12])
-shd["sideWall"] = (bo["fluid"], [11, 16])
-shd["cornerWall"] = (bo["fluid"], [10, 15])
-shd["bottomWall"] = (bo["fluid"], [8, 9, 13, 14])
-shd["solidWall"] = (bo["solid"], [6, 8, 9, 10])
+shd["atmosphere"] = (bo["fluid"], [6, 8])
+shd["sideWall"] = (bo["fluid"], [2, 5])
+shd["bottomWall"] = (bo["fluid"], [1, 3])
 
 sh = dict()
 
@@ -183,7 +167,7 @@ def main():
 
     exportObj = bodyObj + bo2D.values() + bo3D.values() + shellObj
 
-    #Export body abnd shell meshes
+    #Export body and shell meshes
     exportMeshes(exportObj, par.dir_triSurface, __head__, scale=par.geo_scale)
 
     # Save document

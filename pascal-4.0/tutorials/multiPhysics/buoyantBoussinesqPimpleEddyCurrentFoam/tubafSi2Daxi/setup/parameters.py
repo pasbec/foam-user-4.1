@@ -70,7 +70,9 @@ mesh_R["inf"]  = mesh_space * geo_R[2]              # Infinity patch radius
 
 mesh_Z         = dict()
 mesh_Z["C"]    = geo_Z[0] + 0.5*(geo_Z[7] - geo_Z[0])
-mesh_Z["inf"]  = mesh_space * (geo_Z[6] - geo_Z[3]) # Infinity patch radius
+mesh_Z["inf+"] = mesh_space * abs(geo_Z[7] - mesh_Z["C"]) # Infinity patch radius +
+mesh_Z["inf-"] = mesh_space * abs(geo_Z[0] - mesh_Z["C"]) # Infinity patch radius -
+mesh_Z["inf"]  = max(mesh_Z["inf+"], mesh_Z["inf-"])      # Infinity patch radius
 
 mesh_R["inf"]  = max(mesh_R["inf"], mesh_Z["inf"])
 mesh_Z["inf"]  = max(mesh_Z["inf"], mesh_R["inf"])
