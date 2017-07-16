@@ -16,7 +16,7 @@ FoamFile
 
 // ************************* SIMLUTAITON TIMES ***************************** //
 
-application         pimpleEddyCurrentFoam;
+application         buoyantBoussinesqPimpleEddyCurrentFoam;
 
 startFrom           latestTime;
 
