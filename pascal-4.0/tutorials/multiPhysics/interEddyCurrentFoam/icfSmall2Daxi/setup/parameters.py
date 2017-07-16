@@ -54,7 +54,7 @@ mesh_thickness = 10.0
 mesh_angle     =  5.0
 
 mesh_R         = dict()
-mesh_R["axis"] = 0.0                                # Axis patch radius
+mesh_R["axis"] = 1.0                                # Axis patch radius
 mesh_R["inf"]  = mesh_space * geo_R[1]              # Infinity patch radius
 #mesh_R["inf"]  = mesh_space * geo_R[3]              # Infinity patch radius (j0)
 

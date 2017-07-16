@@ -152,41 +152,35 @@ d.blocks.set( 24, [ 28, 29, 35, 34], zone="free_external")
 # --- Expansion ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-#def n(l): s = 0.1; return int(m.ceil(abs(s*par.mesh_scale*l)))
+def n(l): s = 0.1; return int(m.ceil(abs(s*par.mesh_scale*l)))
 
-#nr                  = dict()
-#nr["free_side"]     = n(v[35][0] - v[34][0])
-#nr["vessel"]        = n(v[42][0] - v[43][0])
-#nr["heater_side"]   = n(v[41][0] - v[42][0])
-#nr["heater_width"]  = n(v[19][0] - v[18][0])
-#nr["fluid_width0"]  = n(v[10][0] - v[11][0])
-#nr["fluid_width1"]  = n(v[9][0] - v[10][0])
-#nr["fluid_width2"]  = n(v[8][0] - v[9][0])
+nr                  = dict()
+nr["free_side"]     = n(v[35][0] - v[34][0])
+nr["coila"]         = n(v[34][0] - v[33][0])
+nr["free_gap"]      = n(v[33][0] - v[32][0])
+nr["vessel"]        = n(v[32][0] - v[31][0])
+nr["fluid"]         = n(v[31][0] - v[30][0])
 
-#nz                  = dict()
-#nz["free_top"]      = n(v[40][1] - v[39][1])
-#nz["free_bottom"]   = n(v[36][1] - v[35][1])
-#nz["free_internal"] = n(v[29][1] - v[11][1])
-#nz["heater_bottom"] = n(v[37][1] - v[36][1])
-#nz["fluid_height"]  = n(v[11][1] - v[6][1])
+nz                  = dict()
+nz["free_top"]      = n(v[30][1] - v[24][1])
+nz["fluid_air"]     = n(v[24][1] - v[18][1])
+nz["fluid_melt"]    = n(v[18][1] - v[12][1])
+nz["free_bottom"]   = n(v[0][1] - v[6][1])
 
 # --------------------------------------------------------------------------- #
 # --- Distribution ---------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-#d.blocks.distribution.set( 24, "x", nr["free_side"])
-#d.blocks.distribution.set( 30, "x", nr["vessel"])
-#d.blocks.distribution.set( 29, "x", nr["heater_side"])
-#d.blocks.distribution.set( 11, "x", nr["heater_width"])
-#d.blocks.distribution.set(  5, "x", nr["fluid_width0"])
-#d.blocks.distribution.set(  4, "x", nr["fluid_width1"])
-#d.blocks.distribution.set(  3, "x", nr["fluid_width2"])
+d.blocks.distribution.set( 24, "x", nr["free_side"])
+d.blocks.distribution.set( 23, "x", nr["coila"])
+d.blocks.distribution.set( 22, "x", nr["free_gap"])
+d.blocks.distribution.set( 21, "x", nr["vessel"])
+d.blocks.distribution.set( 20, "x", nr["fluid"])
 
-#d.blocks.distribution.set( 33, "y", nz["free_top"])
-#d.blocks.distribution.set( 20, "y", nz["free_bottom"])
-#d.blocks.distribution.set( 19, "y", nz["free_internal"])
-#d.blocks.distribution.set( 10, "y", nz["heater_bottom"])
-#d.blocks.distribution.set(  5, "y", nz["fluid_height"])
+d.blocks.distribution.set( 20, "y", nz["free_top"])
+d.blocks.distribution.set( 15, "y", nz["fluid_air"])
+d.blocks.distribution.set( 10, "y", nz["fluid_melt"])
+d.blocks.distribution.set(  0, "y", nz["free_bottom"])
 
 # --------------------------------------------------------------------------- #
 # --- Grading --------------------------------------------------------------- #

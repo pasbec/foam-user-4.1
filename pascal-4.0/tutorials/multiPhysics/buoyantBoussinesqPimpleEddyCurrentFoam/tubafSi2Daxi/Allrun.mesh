@@ -40,7 +40,7 @@ cp 'system/changeDictionaryDict.default' 'system/changeDictionaryDict'
 makeWedgeMesh || exit 1
 
 # Remove axis patch
-collapseEdges -overwrite || exit 1
+# collapseEdges -overwrite || exit 1
 
 # Renumber mesh
 renumberMesh -overwrite || exit 1
