@@ -33,6 +33,10 @@ Author
 
 #include "buoyantBoussinesqPimpleEddyCurrentApp.H"
 
+// TODO: Fix emUpdate!
+
+// TODO: Make biot-savart only once but properly!
+
 // TODO: Do not write U/phi
 
 // TODO: Rename to bbqPimpleThermalEddyCurrentFoam
@@ -141,11 +145,12 @@ int main(int argc, char *argv[])
     while (masterManager.run())
     {
         // Check for magnetic update
-        Switch emUpdate =
-            eddyCurrentAppManager.control().needsUpdate
-            (
-                buoyantBoussinesqPimpleEddyCurrentApp::Region::FLUID
-            );
+        Switch emUpdate(true);
+//         Switch emUpdate =
+//             eddyCurrentAppManager.control().needsUpdate
+//             (
+//                 interEddyCurrentApp::Region::FLUID
+//             );
 
         if (emUpdate)
         {

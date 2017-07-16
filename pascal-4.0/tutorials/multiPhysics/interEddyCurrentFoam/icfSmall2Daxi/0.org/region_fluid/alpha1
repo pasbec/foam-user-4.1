@@ -38,7 +38,11 @@ boundaryField
         inletValue      uniform 0;
         value           uniform 0;
     }
-    ".*Wall"
+    sideWall
+    {
+        type            zeroGradient;
+    }
+    bottomWall
     {
         type            zeroGradient;
     }

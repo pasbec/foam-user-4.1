@@ -35,10 +35,18 @@ boundaryField
     atmosphere
     {
         type            inletOutlet;
-        inletValue      $internalField;
+//         inletValue      $internalField;
+//         value           $internalField;
+// TODO: Values?
+        inletValue      uniform 0.1;
+        value           uniform 0.1;
+    }
+    sideWall
+    {
+        type            epsilonWallFunction;
         value           $internalField;
     }
-    ".*Wall"
+    bottomWall
     {
         type            epsilonWallFunction;
         value           $internalField;

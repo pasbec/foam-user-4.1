@@ -37,7 +37,12 @@ boundaryField
         type            calculated;
         value           $internalField;
     }
-    ".*Wall"
+    sideWall
+    {
+        type            nuSgsWallFunction;
+        value           $internalField;
+    }
+    bottomWall
     {
         type            nuSgsWallFunction;
         value           $internalField;

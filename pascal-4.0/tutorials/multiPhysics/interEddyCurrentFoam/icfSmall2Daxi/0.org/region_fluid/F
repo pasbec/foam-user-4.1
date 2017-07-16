@@ -37,7 +37,12 @@ boundaryField
         type            calculated;
         value           $internalField;
     }
-    ".*Wall"
+    sideWall
+    {
+        type            calculated;
+        value           $internalField;
+    }
+    bottomWall
     {
         type            calculated;
         value           $internalField;

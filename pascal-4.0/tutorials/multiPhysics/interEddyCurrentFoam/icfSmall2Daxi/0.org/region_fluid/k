@@ -37,8 +37,16 @@ boundaryField
         type            inletOutlet;
         inletValue      $internalField;
         value           $internalField;
+// TODO: Values?
+        inletValue      uniform 0.1;
+        value           uniform 0.1;
     }
-    ".*Wall"
+    sideWall
+    {
+        type            kqRWallFunction;
+        value           $internalField;
+    }
+    bottomWall
     {
         type            kqRWallFunction;
         value           $internalField;

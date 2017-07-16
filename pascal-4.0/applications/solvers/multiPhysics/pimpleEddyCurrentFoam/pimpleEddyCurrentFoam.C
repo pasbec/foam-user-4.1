@@ -33,6 +33,10 @@ Author
 
 #include "pimpleEddyCurrentApp.H"
 
+// TODO: Fix emUpdate!
+
+// TODO: Make biot-savart only once but properly!
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -72,6 +76,8 @@ int main(int argc, char *argv[])
         {
 #           include "materialProperties.H"
 
+#           include "A0BiotSavart.H"
+
 #           include "AVInit.H"
 
 #           include "BUpdate.H"
@@ -100,11 +106,12 @@ int main(int argc, char *argv[])
     while (masterManager.run())
     {
         // Check for magnetic update
-        Switch emUpdate =
-            eddyCurrentAppManager.control().needsUpdate
-            (
-                pimpleEddyCurrentApp::Region::FLUID
-            );
+        Switch emUpdate(true);
+//         Switch emUpdate =
+//             eddyCurrentAppManager.control().needsUpdate
+//             (
+//                 interEddyCurrentApp::Region::FLUID
+//             );
 
         if (emUpdate)
         {
@@ -137,8 +144,6 @@ int main(int argc, char *argv[])
 
             {
 #               include "materialProperties.H"
-
-#               include "A0BiotSavart.H"
 
 #               include "AVLoop.H"
 

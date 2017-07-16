@@ -37,7 +37,17 @@ boundaryField
         type            calculated;
         value           $internalField;
     }
-    ".*Wall"
+    sideWall
+    {
+        type            nutWallFunction;
+//         type            nutUWallFunction;
+//         type            nutkWallFunction;
+//         type            nutkRoughWallFunction;
+//         type            nutURoughWallFunction;
+//         type            nutUSpaldingWallFunction;
+        value           $internalField;
+    }
+    bottomWall
     {
         type            nutWallFunction;
 //         type            nutUWallFunction;

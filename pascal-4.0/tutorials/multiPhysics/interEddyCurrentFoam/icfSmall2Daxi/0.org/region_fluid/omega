@@ -35,10 +35,21 @@ boundaryField
     atmosphere
     {
         type            inletOutlet;
+// TODO: Values?
         inletValue      $internalField;
         value           $internalField;
     }
     ".*Wall"
+    {
+        type            omegaWallFunction;
+        value           $internalField;
+    }
+    sideWall
+    {
+        type            omegaWallFunction;
+        value           $internalField;
+    }
+    bottomWall
     {
         type            omegaWallFunction;
         value           $internalField;

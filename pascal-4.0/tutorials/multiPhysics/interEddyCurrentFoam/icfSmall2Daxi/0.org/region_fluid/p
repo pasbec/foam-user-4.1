@@ -43,7 +43,12 @@ boundaryField
         gamma           1;
         value           uniform 0;
     }
-    ".*Wall"
+    sideWall
+    {
+        type            fixedFluxPressure;
+        rAU             rAU;
+    }
+    bottomWall
     {
         type            fixedFluxPressure;
         rAU             rAU;

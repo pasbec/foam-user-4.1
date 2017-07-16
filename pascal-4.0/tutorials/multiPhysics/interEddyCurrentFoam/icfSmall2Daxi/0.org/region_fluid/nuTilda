@@ -39,7 +39,12 @@ boundaryField
         inletValue      $internalField;
         value           $internalField;
     }
-    ".*Wall"
+    sideWall
+    {
+        type            fixedValue;
+        value           uniform 0;
+    }
+    bottomWall
     {
         type            fixedValue;
         value           uniform 0;

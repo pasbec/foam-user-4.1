@@ -2,6 +2,13 @@
 // TODO: Read only once
     if (storage.item_sigma().enabled())
     {
+        if (Control::debug)
+        {
+            Info<< Control::typeName << " | calcSigma.H : "
+                << "Calculate elctrical conductivity"
+                << endl;
+        }
+
         word phase1Name(storage.transport().phase1Name());
         word phase2Name(storage.transport().phase2Name());
 
