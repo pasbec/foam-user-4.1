@@ -81,13 +81,10 @@ def main():
                     add=["body_fluid"])
 
         ssb.cellSet("region_conductor", "setToTopo",
-                    add=["body_fluid", "body_solid", "body_heater"])
-
-        ssb.cellSet("region_thermal", "setToTopo",
-                    add=["body_fluid", "body_solid"])
+                    add=["body_fluid", "body_vessel"])
 
         ssb.faceSet("regions", "cellBoundaryToTopo",
-                    add=["region_fluid", "region_conductor", "region_thermal"],
+                    add=["region_fluid", "region_conductor"],
                     delete=["all"])
 
     if ssb.group("Patches"):
@@ -96,17 +93,14 @@ def main():
         ssb.faceSet("patch_back", "setToTopo", add=["shell_back"])
         ssb.faceSet("patch_infinity", "setToTopo", add=["shell_infinity"])
 
-        ssb.faceSet("patch_topWall", "setToTopo", add=["shell_topWall"])
+        ssb.faceSet("patch_atmosphere", "setToTopo", add=["shell_atmosphere"])
         ssb.faceSet("patch_sideWall", "setToTopo", add=["shell_sideWall"])
-        ssb.faceSet("patch_cornerWall", "setToTopo", add=["shell_cornerWall"])
         ssb.faceSet("patch_bottomWall", "setToTopo", add=["shell_bottomWall"])
-        ssb.faceSet("patch_solidWall", "setToTopo", add=["shell_solidWall"])
 
     if ssb.group("Materials"):
 
-        ssb.cellSet("material_siliconLiquid", "setToTopo", add=["body_fluid"])
-        ssb.cellSet("material_siliconSolid", "setToTopo", add=["body_solid"])
-        ssb.cellSet("material_graphite", "setToTopo", add=["body_heater"])
+        ssb.cellSet("material_woodsandair", "setToTopo", add=["body_fluid"])
+        ssb.cellSet("material_steel", "setToTopo", add=["body_vessel"])
 
     ssb.quit()
 
