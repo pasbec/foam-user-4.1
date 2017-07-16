@@ -16,8 +16,12 @@ FoamFile
 
 inside      (1e-2 0.0 0.0);
 
-finer       4;
-fine        3;
+// finer       4;
+// fine        3;
+// coarse      2;
+// coarser     1;
+finer       2;
+fine        2;
 coarse      2;
 coarser     1;
 
@@ -59,14 +63,14 @@ geometry
     {
         type    searchableBox;
         min     ( 0.00000 -1.00000 -0.1000);
-        max     ( 0.14000  1.00000  0.1000);
+        max     ( 0.14000  1.00000  0.4830);
     }
 
     space_refine_coarser
     {
         type    searchableBox;
         min     ( 0.00000 -1.00000 -0.2000);
-        max     ( 0.18000  1.00000  0.2000);
+        max     ( 0.20000  1.00000  0.5830);
     }
 };
 
@@ -76,7 +80,7 @@ castellatedMeshControls
     maxLocalCells 100000;
     maxGlobalCells 2000000;
     minRefinementCells 0;
-    nCellsBetweenLevels 1;
+    nCellsBetweenLevels 2;
 
     features
     (
@@ -102,10 +106,11 @@ castellatedMeshControls
             mode inside;
             levels ((1e-15 $finer));
         }
+
         body_vessel
         {
             mode inside;
-            levels ((1e-15 $fine));
+            levels ((1e-15 $coarser));
         }
 
         space_refine_coarse

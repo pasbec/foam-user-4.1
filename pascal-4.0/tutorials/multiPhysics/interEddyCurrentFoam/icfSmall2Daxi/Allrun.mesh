@@ -23,6 +23,13 @@ rm -rf 'constant/cellLevel' \
         'constant/polyMesh/level0Edge' \
         > /dev/null 2>&1
 
+# Remove all sets and zones
+# WARNING: This is IMPORTANT!
+rm "constant/polyMesh/sets/"* > /dev/null 2>&1
+rm "constant/polyMesh/cellZones" > /dev/null 2>&1
+rm "constant/polyMesh/faceZones" > /dev/null 2>&1
+rm "constant/polyMesh/pointZones" > /dev/null 2>&1
+
 # Remove empty patches
 cp 'system/createPatchDict.mesh' 'system/createPatchDict'
 createPatch -overwrite || exit 1
@@ -38,9 +45,9 @@ cp 'system/changeDictionaryDict.default' 'system/changeDictionaryDict'
 
 # Convert 2D mesh into wedge
 makeWedgeMesh || exit 1
-exit 1
-# Remove axis patch
-# collapseEdges -overwrite || exit 1
+
+# Collapse edges
+collapseEdges -overwrite 1e-30 0 || exit 1
 
 # Renumber mesh
 renumberMesh -overwrite || exit 1
