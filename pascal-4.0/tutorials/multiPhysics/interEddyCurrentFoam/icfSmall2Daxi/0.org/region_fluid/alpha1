@@ -3,40 +3,51 @@
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
 |  \\    /   O peration     | Version:     4.0                                |
 |   \\  /    A nd           | Web:         http://www.foam-extend.org         |
-|    \\/     M anipulation  | For copyright notice see file Copyright         |
+|    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      fvSchemes;
+    class       volScalarField;
+    object      alpha1;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
 {
-    default             none;
+    axis
+    {
+        type            slip;
+    }
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
+    atmosphere
+    {
+        type            inletOutlet;
+        inletValue      uniform 0;
+        value           uniform 0;
+    }
+    ".*Wall"
+    {
+        type            zeroGradient;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
+    }
 }
 
-gradSchemes
-{
-    default             Gauss linear;
-}
-
-divSchemes
-{
-    default             none;
-}
-
-laplacianSchemes
-{
-    default             Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default             linear;
-}
 
 // ************************************************************************* //

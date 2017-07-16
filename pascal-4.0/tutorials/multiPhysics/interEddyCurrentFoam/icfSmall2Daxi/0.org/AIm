@@ -9,34 +9,42 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      fvSchemes;
+    class       volVectorField;
+    object      AIm;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
-{
-    default             none;
-}
+dimensions      [1 1 -2 0 0 -1 0];
 
-gradSchemes
-{
-    default             Gauss linear;
-}
+internalField   uniform (0 0 0);
 
-divSchemes
+boundaryField
 {
-    default             none;
-}
-
-laplacianSchemes
-{
-    default             Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default             linear;
+    axis
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
+    infinity
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+//         type            tangentialMagnetic;
+//         value           $internalField;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
+    }
 }
 
 // ************************************************************************* //

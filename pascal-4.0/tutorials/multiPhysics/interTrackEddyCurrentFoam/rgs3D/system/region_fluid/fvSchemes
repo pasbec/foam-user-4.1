@@ -45,7 +45,7 @@ divSchemes
 {
     default                               none;
 
-    div(rhoPhi,U)                         Gauss GammaVDC 0.5;
+    div(rho*phi,U)                        Gauss GammaVDC 0.5;
     div((mu*dev(grad(U).T())))            Gauss linear;
     div((muEff*dev(grad(U).T())))         Gauss linear;
 

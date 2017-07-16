@@ -43,7 +43,7 @@ divSchemes
 {
     default                               none;
 
-    div(rhoPhi,U)                         Gauss linear;
+    div(rho*phi,U)                        Gauss linear;
     div((mu*dev(grad(U).T())))            Gauss linear;
     div((muEff*dev(grad(U).T())))         Gauss linear;
     div((nuEff*dev(T(grad(U)))))          Gauss linear;

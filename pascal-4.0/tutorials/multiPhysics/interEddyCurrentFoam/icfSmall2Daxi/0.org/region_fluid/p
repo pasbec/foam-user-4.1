@@ -9,34 +9,50 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      fvSchemes;
+    class       volScalarField;
+    object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
-{
-    default             none;
-}
+dimensions      [1 -1 -2 0 0 0 0];
 
-gradSchemes
-{
-    default             Gauss linear;
-}
+internalField   uniform 0;
 
-divSchemes
+boundaryField
 {
-    default             none;
-}
-
-laplacianSchemes
-{
-    default             Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default             linear;
+    axis
+    {
+        type            slip;
+    }
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
+    atmosphere
+    {
+        type            totalPressure;
+        p0              uniform 0;
+        U               U;
+        phi             phi;
+        rho             rho;
+        psi             none;
+        gamma           1;
+        value           uniform 0;
+    }
+    ".*Wall"
+    {
+        type            fixedFluxPressure;
+        rAU             rAU;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
+    }
 }
 
 // ************************************************************************* //

@@ -10,33 +10,55 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      fvSchemes;
+    object      solverProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
+regions
 {
-    default             none;
+    CONDUCTOR               region_conductor;
+    FLUID                   region_fluid;
 }
 
-gradSchemes
+settings
 {
-    default             Gauss linear;
+    biotSavart              true;
+    lorentzForce            true;
+    magneticPressure        true;
+    jouleHeat               true;
+
+    region_fluid
+    {
+        volumeForce         true;
+        electricalConuctivity true;
+        snGradpFromFlux     true;
+    }
 }
 
-divSchemes
+storage
 {
-    default             none;
-}
-
-laplacianSchemes
-{
-    default             Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default             linear;
+//     "(BRe|BIm)"
+//     {
+//         write               false;
+//     }
+//
+//     "F"
+//     {
+//         write               false;
+//     }
+//
+//     "Q"
+//     {
+//         write               false;
+//     }
+//
+//     region_conductor
+//     {
+//         "(jRe|jIm)"
+//         {
+//             write           false;
+//         }
+//     }
 }
 
 // ************************************************************************* //
