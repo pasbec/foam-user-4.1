@@ -44,7 +44,15 @@ boundaryField
     }
     sideWall
     {
-        type            zeroGradient;
+//         type            zeroGradient;
+        type            constantAlphaContactAngle;
+        theta0          90;
+        value           $internalField;
+//        type            dynamicAlphaContactAngle;
+//         theta0          90;
+//         uTheta          1.0;
+//         thetaA          90;
+//         thetaR          90;
     }
     bottomWall
     {

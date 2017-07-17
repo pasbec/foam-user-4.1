@@ -17,6 +17,7 @@ FoamFile
 ddtSchemes
 {
     default             Euler;
+//     default             backward;
 }
 
 gradSchemes
@@ -29,16 +30,22 @@ divSchemes
     default             Gauss linear;
 
     div(rho*phi,U)      Gauss upwind phi;
+//     div(rho*phi,U)      Gauss Gamma 0.5;
 
     div(phi,k)          Gauss upwind phi;
     div(phi,epsilon)    Gauss upwind phi;
     div(phi,omega)      Gauss upwind phi;
     div(phi,nuTilda)    Gauss upwind phi;
+//     div(phi,k)          Gauss Gamma 0.5;
+//     div(phi,epsilon)    Gauss Gamma 0.5;
+//     div(phi,omega)      Gauss Gamma 0.5;
+//     div(phi,nuTilda)    Gauss Gamma 0.5;
+
 
     div(phi,alpha)      Gauss vanLeer01;
+//     div(phi,alpha)      Gauss Gamma01 0.5;
 //     div(phirb,alpha)    Gauss interfaceCompression;
     div(phirb,alpha)    Gauss linear;
-
 }
 
 laplacianSchemes

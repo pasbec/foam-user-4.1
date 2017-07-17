@@ -65,10 +65,12 @@ PIMPLE
     nAlphaCorr                  1;
     nAlphaSubCycles             4;
 
-    pRefPoint (0.04 0.0 0.04);
-    pRefValue 0;
+    pRefPoint                   (0.04 0.0 0.04);
+    pRefValue                   0;
 
-    momentumPredictor yes;
+    momentumPredictor           yes;
+
+//     turbOnFinalIterOnly         no;
 
     residualControl
     {
