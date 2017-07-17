@@ -10,36 +10,34 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      fvSchemes;
+    object      funkySetFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
-{
-    default             none;
-}
+expressions
+(
+    alpha1_reset
+    {
+        field         alpha1;
+        expression    "0";
+        keepPatches   true;
+    }
 
-gradSchemes
-{
-    default             Gauss linear;
+    alpha1_air
+    {
+        field         alpha1;
+        expression    "0";
+        condition     "set(cellSet_material_woodsandair)";
+        keepPatches   true;
+    }
 
-    curl(ARe)           Gauss skewCorrected linear;
-    curl(AIm)           Gauss skewCorrected linear;
-}
-
-divSchemes
-{
-    default             none;
-}
-
-laplacianSchemes
-{
-    default             Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default             linear;
-}
+    alpha1_woodsmetal
+    {
+        field         alpha1;
+        expression    "1";
+        condition     "set(cellSet_material_woodsandair) && pos().z < 0.235";
+        keepPatches   true;
+    }
+);
 
 // ************************************************************************* //

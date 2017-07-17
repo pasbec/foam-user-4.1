@@ -16,7 +16,7 @@ FoamFile
 
 dimensions      [0 0 -1 0 0 0 0];
 
-internalField   uniform 0;
+internalField   uniform 0.72043816;
 
 boundaryField
 {
@@ -32,17 +32,18 @@ boundaryField
     {
         type            wedge;
     }
+//     atmosphere
+//     {
+//         type            inletOutlet;
+// //        inletValue      $internalField;
+// //        value           $internalField;
+// // TODO: Values?
+//         inletValue      0.72043816;
+//         value           0.72043816;
+//     }
     atmosphere
     {
-        type            inletOutlet;
-// TODO: Values?
-        inletValue      $internalField;
-        value           $internalField;
-    }
-    ".*Wall"
-    {
-        type            omegaWallFunction;
-        value           $internalField;
+        type            slip;
     }
     sideWall
     {

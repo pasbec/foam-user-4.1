@@ -32,16 +32,25 @@ boundaryField
     {
         type            wedge;
     }
+//     atmosphere
+//     {
+//         type            totalPressure;
+//         p0              uniform 0;
+//         U               U;
+//         phi             phi;
+//         rho             rho;
+//         psi             none;
+//         gamma           1;
+//         value           uniform 0;
+//     }
+//     atmosphere
+//     {
+//         type            fixedValue;
+//         value           uniform 0;
+//     }
     atmosphere
     {
-        type            totalPressure;
-        p0              uniform 0;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           1;
-        value           uniform 0;
+        type            slip;
     }
     sideWall
     {

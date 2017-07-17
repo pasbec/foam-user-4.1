@@ -22,6 +22,12 @@ ddtSchemes
 gradSchemes
 {
     default             Gauss linear;
+
+    curl(A0Re)          Gauss skewCorrected linear;
+    curl(A0Im)          Gauss skewCorrected linear;
+
+    curl(ARe)           Gauss skewCorrected linear;
+    curl(AIm)           Gauss skewCorrected linear;
 }
 
 divSchemes

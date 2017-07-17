@@ -22,12 +22,13 @@ ddtSchemes
 gradSchemes
 {
     default             Gauss linear;
-    grad(alpha1)        Gauss linear;
 }
 
 divSchemes
 {
     default             Gauss linear;
+
+    div(rho*phi,U)      Gauss upwind phi;
 
     div(phi,k)          Gauss upwind phi;
     div(phi,epsilon)    Gauss upwind phi;
@@ -35,7 +36,9 @@ divSchemes
     div(phi,nuTilda)    Gauss upwind phi;
 
     div(phi,alpha)      Gauss vanLeer01;
-    div(phirb,alpha)    Gauss interfaceCompression;
+//     div(phirb,alpha)    Gauss interfaceCompression;
+    div(phirb,alpha)    Gauss linear;
+
 }
 
 laplacianSchemes

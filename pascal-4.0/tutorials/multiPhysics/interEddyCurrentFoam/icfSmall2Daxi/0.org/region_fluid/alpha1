@@ -32,11 +32,15 @@ boundaryField
     {
         type            wedge;
     }
+//     atmosphere
+//     {
+//         type            inletOutlet;
+//         inletValue      uniform 0;
+//         value           uniform 0;
+//     }
     atmosphere
     {
-        type            inletOutlet;
-        inletValue      uniform 0;
-        value           uniform 0;
+        type            slip;
     }
     sideWall
     {

@@ -32,10 +32,20 @@ boundaryField
     {
         type            wedge;
     }
+//     atmosphere
+//     {
+//         type            pressureInletOutletVelocity;
+//         value           uniform (0 0 0);
+//     }
+//     atmosphere
+//     {
+//         type            inletOutlet;
+//         inletValue      uniform (0 0 0);
+//         value           $internalField;
+//     }
     atmosphere
     {
-        type            pressureInletOutletVelocity;
-        value           uniform (0 0 0);
+        type            slip;
     }
     sideWall
     {
