@@ -134,10 +134,25 @@ int main(int argc, char *argv[])
         fvc::extrapolate(ecs.F()[Region::FLUID]);
     }
 
+// TODO: TEST
+    const volScalarField& alpha1 =
+        interAppManager.regions().region_DEFAULT().storage().alpha1();
+    volScalarField alpha1_old(alpha1);
+    Switch emUpdateFirst(true);
+
     while (masterManager.run())
     {
+// TODO: TEST
         // Check for magnetic update
-        Switch emUpdate(true);
+        Switch emUpdate(false);
+        if ((max(mag(alpha1_old - alpha1)).value() > 0.5) || emUpdateFirst)
+        {
+            emUpdateFirst = false;
+            emUpdate = true;
+
+            alpha1_old = alpha1;
+        }
+//         Switch emUpdate(true);
 //         Switch emUpdate =
 //             eddyCurrentAppManager.control().needsUpdate
 //             (
