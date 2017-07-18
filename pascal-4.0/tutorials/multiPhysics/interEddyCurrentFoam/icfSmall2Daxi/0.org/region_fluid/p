@@ -54,11 +54,15 @@ boundaryField
     }
     sideWall
     {
+//         type            fixedGradient;
+//         gradient        uniform 0;
         type            fixedFluxPressure;
         rAU             rAU;
     }
     bottomWall
     {
+//         type            fixedGradient;
+//         gradient        uniform 0;
         type            fixedFluxPressure;
         rAU             rAU;
     }

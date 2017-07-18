@@ -80,17 +80,20 @@ coil_scale      = 1e-3
 coil_bundle     = {"shape": "point",
 #coil_bundle     = {"shape": "rectangle",
                    "n":     10,
-                   "r":     0.5*(geo_R[3] - geo_R[2]),
-                   "z":     18.0}
+                   "r":     (geo_R[3] - geo_R[2]),
+                   "z":     15.0}
 
 coil_path       = {"shape": "loop",
                    "n":     36,
                    "r":     geo_R[2] + coil_bundle["r"]/2.0}
 
 coils_n         = 12
-coils_step      = 1.0 + coil_bundle["z"]
+coils_step      = 5.0 + coil_bundle["z"]
 coils_origin    = [0.0, 0.0, geo_Z[1] + coil_bundle["z"]/2.0]
 
+#coils_current   = m.sqrt(2.0) * 1750.0
+#coils_current   = m.sqrt(2.0) * 2020.0
+#coils_current   = m.sqrt(2.0) * 2260.0
 coils_current   = m.sqrt(2.0) * 2460.0
 coils_nNonOrto  = 10
 coils_frequency = 330.0

@@ -48,11 +48,11 @@ boundaryField
         type            constantAlphaContactAngle;
         theta0          90;
         value           $internalField;
-//        type            dynamicAlphaContactAngle;
+//         type            dynamicAlphaContactAngle;
 //         theta0          90;
 //         uTheta          1.0;
-//         thetaA          90;
-//         thetaR          90;
+//         thetaA          120;
+//         thetaR          60;
     }
     bottomWall
     {

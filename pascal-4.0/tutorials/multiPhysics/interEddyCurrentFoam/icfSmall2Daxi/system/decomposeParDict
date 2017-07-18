@@ -22,6 +22,20 @@ method                  metis;
 
 metisCoeffs
 {
+//     method              recursive; // k-way
+
+    regionBalancing     yes;
+
+    regionCellSets
+    (
+        cellSet_region_fluid
+        cellSet_region_conductor
+        cellSet_region_space
+    );
+
+    regionWeightFactors (10.0);
+
+//     imbalanceTolerances (1.003);
 }
 
 // ************************************************************************* //

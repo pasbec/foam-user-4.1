@@ -35,7 +35,7 @@ import parameters as par
 import geometry
 
 maxLength = 60
-tol = 2e-4
+tol = 1e-4
 
 # --------------------------------------------------------------------------- #
 # --- Main ------------------------------------------------------------------ #
@@ -83,9 +83,12 @@ def main():
         ssb.cellSet("region_conductor", "setToTopo",
                     add=["body_fluid", "body_vessel"])
 
+        ssb.cellSet("region_space", "setToTopo",
+                    add=["body_fluid", "body_vessel"])
+
         ssb.faceSet("regions", "cellBoundaryToTopo",
-                    add=["region_fluid", "region_conductor"],
-                    delete=["all"])
+                    add=["all"],
+                    delete=["region_fluid", "region_conductor", "region_space"])
 
     if ssb.group("Patches"):
 
