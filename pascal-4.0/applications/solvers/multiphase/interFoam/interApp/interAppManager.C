@@ -127,6 +127,14 @@ void Foam::interApp::Manager::write() const
     Region_DEFAULT::Storage& storage = regions().region_DEFAULT().storage();
 
 // TODO: Remove after debug
+
+    storage.rho().write();
+
+    if (regions().region_DEFAULT().settings().electricalConuctivity)
+    {
+        storage.sigma().write();
+    };
+
     storage.interface().K().write();
 
     volVectorField fs
@@ -140,11 +148,6 @@ void Foam::interApp::Manager::write() const
          )
     );
     fs.write();
-
-    if (regions().region_DEFAULT().settings().electricalConuctivity)
-    {
-        storage.sigma().write();
-    };
 }
 
 
