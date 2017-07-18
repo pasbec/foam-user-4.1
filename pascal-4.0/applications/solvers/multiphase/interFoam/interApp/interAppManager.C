@@ -121,7 +121,31 @@ void Foam::interApp::Manager::next() const
 
 
 void Foam::interApp::Manager::write() const
-{}
+{
+    const fvMesh& mesh = this->mesh();
+
+    Region_DEFAULT::Storage& storage = regions().region_DEFAULT().storage();
+
+// TODO: Remove after debug
+    storage.interface().K().write();
+
+    volVectorField fs
+    (
+        "FS",
+        fvc::reconstruct
+        (
+            fvc::interpolate(storage.interface().sigmaK())
+          * fvc::snGrad(storage.alpha1())
+          * mesh.magSf()
+         )
+    );
+    fs.write();
+
+    if (regions().region_DEFAULT().settings().electricalConuctivity)
+    {
+        storage.sigma().write();
+    };
+}
 
 
 void Foam::interApp::Manager::finalize() const
