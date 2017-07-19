@@ -24,7 +24,7 @@
 
         MULES::explicitSolve(alpha1, phi, phiAlpha, 1, 0);
 
-// // // TODO: Test
+        // Cut compression
         dictionary& pisoDict = mesh.solutionDict().subDict("PISO");
         if(pisoDict.lookupOrDefault("cutCompression", false))
         {
@@ -33,48 +33,75 @@
                 + dimensionedScalar(word(), magGradAlpha.dimensions(), VSMALL);
 
             scalar cAlphaCut = pisoDict.lookupOrDefault("cAlphaCut", 0.0);
-            scalar cAlphaCutRelErr = pisoDict.lookupOrDefault("cAlphaCutRelErr", 1e-4);
+            scalar cAlphaCutRelErr =
+                pisoDict.lookupOrDefault("cAlphaCutRelErr", 1e-4);
+            scalar cAlphaCutPatchEnhance =
+                pisoDict.lookupOrDefault("cAlphaCutPatchEnhance", 1.0);
 
-Info<< "DEBUG | cAlpha = " << interface.cAlpha() << endl;
-Info<< "DEBUG | cAlphaCut = " << cAlphaCut << endl;
-Info<< "DEBUG | cAlphaCutRelErr = " << cAlphaCutRelErr << endl;
+            volScalarField cAlphaCutField(cAlphaCut*(1.0-magGradAlpha));
 
-            scalar scaleCut = cAlphaCut;
+            // Symmetrically scale alpha and cut it
+            volScalarField newAlpha1
+            (
+                "newAlpha1",
+                (1.0 + cAlphaCutField)*2.0*(alpha1 - 0.5)
+            );
 
-            volScalarField scaleCutAlpha1("scaleCutAlpha1", (1.0 + scaleCut*(1.0-magGradAlpha))*2.0*(alpha1 - 0.5));
-            scaleCutAlpha1 = 0.5*min(max(scaleCutAlpha1, scalar(-1)), scalar(1)) + 0.5;
-            scaleCutAlpha1.correctBoundaryConditions();
-            dimensionedScalar scaleCutAlpha1Vfrac = scaleCutAlpha1.weightedAverage(mesh.V());
-            dimensionedScalar relErrScaleCutAlpha1Vfrac = (scaleCutAlpha1Vfrac-alpha1Vfrac)/alpha1Vfrac;
-// scaleCutAlpha1.write();
-
-Info<< "DEBUG | scaleCutAlpha1Vfrac.value() = " << scaleCutAlpha1Vfrac.value() << endl;
-Info<< "DEBUG | relErrScaleCutAlpha1Vfrac.value() = " << relErrScaleCutAlpha1Vfrac.value() << endl;
-
-            volScalarField shiftCutAlpha1("shiftCutAlpha1", scaleCutAlpha1);
-
-            if (mag(relErrScaleCutAlpha1Vfrac).value() > cAlphaCutRelErr)
+            const fvBoundaryMesh& boundary = mesh.boundary();
+            forAll(boundary, patchi)
             {
-                scalar  shiftCut = cAlphaCut;
-
-                shiftCutAlpha1 *= (1.0 + shiftCut*(1.0-magGradAlpha));
-
-                if (relErrScaleCutAlpha1Vfrac.value() > 0.0)
+                if (isA<wallFvPatch>(boundary[patchi]))
                 {
-                    shiftCutAlpha1 -= shiftCut*(1.0-magGradAlpha);
+                    const fvPatch& patch = boundary[patchi];
+                    const labelList& faceCells = patch.faceCells();
+
+                    forAll(faceCells, facei)
+                    {
+                        label celli = faceCells[facei];
+
+                        scalar cAlphaPatchCut =
+                            cAlphaCutPatchEnhance*cAlphaCutField[celli];
+
+                        newAlpha1[celli] =
+                            (1.0 + cAlphaPatchCut)*2.0*(alpha1[celli] - 0.5);
+                    }
                 }
-
-                shiftCutAlpha1 = min(max(shiftCutAlpha1, scalar(0)), scalar(1));
-                shiftCutAlpha1.correctBoundaryConditions();
-                dimensionedScalar shiftCutAlpha1Vfrac = shiftCutAlpha1.weightedAverage(mesh.V());
-                dimensionedScalar relErrShiftCutAlpha1Vfrac = (shiftCutAlpha1Vfrac-alpha1Vfrac)/alpha1Vfrac;
-// shiftCutAlpha1.write();
-
-Info<< "DEBUG | shiftCutAlpha1Vfrac.value() = " << shiftCutAlpha1Vfrac.value() << endl;
-Info<< "DEBUG | relErrShiftCutAlpha1Vfrac.value() = " << relErrShiftCutAlpha1Vfrac.value() << endl;
             }
 
-            alpha1 = shiftCutAlpha1;
+            // Cur new alpha
+            newAlpha1 = 0.5*min(max(newAlpha1, scalar(-1)), scalar(1)) + 0.5;
+            newAlpha1.correctBoundaryConditions();
+
+            // Calculate error in volume fraction of phase1
+            dimensionedScalar newAlpha1Vfrac =
+                newAlpha1.weightedAverage(mesh.V());
+            dimensionedScalar relErrNewAlpha1Vfrac =
+                (newAlpha1Vfrac-alpha1Vfrac)/alpha1Vfrac;
+Info<< "DEBUG | newAlpha1Vfrac.value() = " << newAlpha1Vfrac.value() << endl;
+Info<< "DEBUG | relErrNewAlpha1Vfrac.value() = " << relErrNewAlpha1Vfrac.value() << endl;
+// newAlpha1.write();
+
+            // Correct volume fraction of phase1
+            if (mag(relErrNewAlpha1Vfrac).value() > cAlphaCutRelErr)
+            {
+                newAlpha1 *= (1.0 + cAlphaCutField);
+
+                if (relErrNewAlpha1Vfrac.value() > 0.0)
+                {
+                    newAlpha1 -= cAlphaCutField;
+                }
+
+                newAlpha1 = min(max(newAlpha1, scalar(0)), scalar(1));
+                newAlpha1.correctBoundaryConditions();
+
+                newAlpha1Vfrac = newAlpha1.weightedAverage(mesh.V());
+                relErrNewAlpha1Vfrac = (newAlpha1Vfrac-alpha1Vfrac)/alpha1Vfrac;
+Info<< "DEBUG | newAlpha1Vfrac.value() = " << newAlpha1Vfrac.value() << endl;
+Info<< "DEBUG | relErrNewAlpha1Vfrac.value() = " << relErrNewAlpha1Vfrac.value() << endl;
+// newAlpha1.write();
+            }
+
+            alpha1 = newAlpha1;
             alpha1.correctBoundaryConditions();
         }
 

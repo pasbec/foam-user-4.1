@@ -58,6 +58,7 @@ PISO
     cutCompression              yes;
     cAlphaCut                   0.002;
     cAlphaCutRelErr             1e-4;
+    cAlphaCutPatchEnhance       5.0;
 }
 
 PIMPLE
