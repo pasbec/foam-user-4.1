@@ -77,8 +77,8 @@ mesh           = {"normal": mesh_normal,
 
 coil_scale      = 1e-3
 
-coil_bundle     = {"shape": "point",
-#coil_bundle     = {"shape": "rectangle",
+#coil_bundle     = {"shape": "point",
+coil_bundle     = {"shape": "rectangle",
                    "n":     10,
                    "r":     (geo_R[3] - geo_R[2]),
                    "z":     15.0}

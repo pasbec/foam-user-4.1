@@ -53,10 +53,11 @@ solvers
 
 PISO
 {
-//     cAlpha                      3;
-//     cAlpha                      2;
-    cAlpha                      1;
-//     cAlpha                      0;
+    cAlpha                      0;
+
+    cutCompression              yes;
+    cAlphaCut                   0.002;
+    cAlphaCutRelErr             1e-4;
 }
 
 PIMPLE

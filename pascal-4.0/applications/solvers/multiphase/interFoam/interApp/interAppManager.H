@@ -126,6 +126,9 @@ public:
                 //- Fluid indicator
                 SM_REGIONITEM_ADD(volScalarField, alpha1);
 
+                //- Total volume fraction of phase1
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, alpha1Vfrac);
+
                 //- Transport model
                 SM_REGIONITEM_ADD(twoPhaseMixture, transport);
 

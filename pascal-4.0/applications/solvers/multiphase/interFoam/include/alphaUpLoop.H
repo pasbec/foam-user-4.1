@@ -21,6 +21,7 @@
             incompressible::turbulenceModel& turbulence = storage.turbulence();
             interfaceProperties& interface = storage.interface();
             volScalarField& alpha1 = storage.alpha1();
+            uniformDimensionedScalarField& alpha1Vfrac = storage.alpha1Vfrac();
 
 #           include "alphaUpLoop_subCycle.H"
 

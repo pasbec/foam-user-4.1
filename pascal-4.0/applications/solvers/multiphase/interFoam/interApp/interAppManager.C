@@ -128,6 +128,13 @@ void Foam::interApp::Manager::write() const
 
 // TODO: Remove after debug
 
+    volVectorField gradAlpha("gradAlpha", fvc::grad(storage.alpha1()));
+    gradAlpha.write();
+
+    volScalarField magGradAlpha("magGradAlpha", mag(gradAlpha));
+    magGradAlpha /= max(magGradAlpha) + dimensionedScalar(word(), magGradAlpha.dimensions(), VSMALL);
+    magGradAlpha.write();
+
     storage.rho().write();
 
     if (regions().region_DEFAULT().settings().electricalConuctivity)

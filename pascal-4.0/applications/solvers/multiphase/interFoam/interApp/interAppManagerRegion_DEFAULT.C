@@ -221,6 +221,25 @@ void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_alpha1::create() con
     );
 }
 
+void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_alpha1Vfrac::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                mesh(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            storage().alpha1().weightedAverage(mesh().V())
+        )
+    );
+}
+
 
 void Foam::interApp::Manager::Region_DEFAULT::Storage::Item_transport::create() const
 {
@@ -303,6 +322,7 @@ void Foam::interApp::Manager::Region_DEFAULT::Storage::create() const
     item_F().setState(settings().volumeForce);
 
     item_alpha1().enable();
+    item_alpha1Vfrac().enable();
     item_transport().enable();
 
     rho() = transport().rho();
