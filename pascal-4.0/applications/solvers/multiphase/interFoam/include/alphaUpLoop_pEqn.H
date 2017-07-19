@@ -171,24 +171,29 @@
         U.correctBoundaryConditions();
 
 // TODO: Test
-const unallocLabelList& owner = mesh.owner();
-const unallocLabelList& neighbour = mesh.neighbour();
+        // Stop phase2 completely
+        dictionary& pisoDict = mesh.solutionDict().subDict("PISO");
+        if(pisoDict.lookupOrDefault("phase1Only", false))
+        {
+            scalar phase1Cut = pisoDict.lookupOrDefault("phase1Cut", 0.01);
 
-volScalarField limitedAlpha1 = min(max(storage.alpha1(), scalar(0)), scalar(1));
+            const unallocLabelList& owner = mesh.owner();
+            const unallocLabelList& neighbour = mesh.neighbour();
 
-// Calculate internal correction
-forAll (owner, facei)
-{
-    label own = owner[facei];
-    label nei = neighbour[facei];
+            // Calculate internal correction
+            forAll (owner, facei)
+            {
+                label own = owner[facei];
+                label nei = neighbour[facei];
 
-    if(limitedAlpha1[own] < 0.01 && limitedAlpha1[nei] < 0.01)
-    {
-        U[own] = vector::zero;
-        phi[facei] = scalar(0);
-    }
-}
-U.correctBoundaryConditions();
+                if(alpha1[own] < phase1Cut && alpha1[nei] < phase1Cut)
+                {
+                    U[own] = vector::zero;
+                    phi[facei] = scalar(0);
+                }
+            }
+            U.correctBoundaryConditions();
+        }
 
 // TODO: Continuity errors
 // #       include "continuityErrs.H"

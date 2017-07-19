@@ -25,6 +25,8 @@
         MULES::explicitSolve(alpha1, phi, phiAlpha, 1, 0);
 
         // Cut compression
+// TODO: Compression should depend on time step size
+// TODO: How to fix phi after changing aplha?
         dictionary& pisoDict = mesh.solutionDict().subDict("PISO");
         if(pisoDict.lookupOrDefault("cutCompression", false))
         {
@@ -40,13 +42,14 @@
 
             volScalarField cAlphaCutField(cAlphaCut*(1.0-magGradAlpha));
 
-            // Symmetrically scale alpha and cut it
+            // Shift and symmetrically scale up alpha
             volScalarField newAlpha1
             (
                 "newAlpha1",
                 (1.0 + cAlphaCutField)*2.0*(alpha1 - 0.5)
             );
 
+            // Patch enhanced cut compression
             const fvBoundaryMesh& boundary = mesh.boundary();
             forAll(boundary, patchi)
             {
@@ -68,7 +71,7 @@
                 }
             }
 
-            // Cur new alpha
+            // Cut new alpha
             newAlpha1 = 0.5*min(max(newAlpha1, scalar(-1)), scalar(1)) + 0.5;
             newAlpha1.correctBoundaryConditions();
 
@@ -77,9 +80,6 @@
                 newAlpha1.weightedAverage(mesh.V());
             dimensionedScalar relErrNewAlpha1Vfrac =
                 (newAlpha1Vfrac-alpha1Vfrac)/alpha1Vfrac;
-Info<< "DEBUG | newAlpha1Vfrac.value() = " << newAlpha1Vfrac.value() << endl;
-Info<< "DEBUG | relErrNewAlpha1Vfrac.value() = " << relErrNewAlpha1Vfrac.value() << endl;
-// newAlpha1.write();
 
             // Correct volume fraction of phase1
             if (mag(relErrNewAlpha1Vfrac).value() > cAlphaCutRelErr)
@@ -95,14 +95,24 @@ Info<< "DEBUG | relErrNewAlpha1Vfrac.value() = " << relErrNewAlpha1Vfrac.value()
                 newAlpha1.correctBoundaryConditions();
 
                 newAlpha1Vfrac = newAlpha1.weightedAverage(mesh.V());
-                relErrNewAlpha1Vfrac = (newAlpha1Vfrac-alpha1Vfrac)/alpha1Vfrac;
-Info<< "DEBUG | newAlpha1Vfrac.value() = " << newAlpha1Vfrac.value() << endl;
-Info<< "DEBUG | relErrNewAlpha1Vfrac.value() = " << relErrNewAlpha1Vfrac.value() << endl;
-// newAlpha1.write();
             }
 
             alpha1 = newAlpha1;
             alpha1.correctBoundaryConditions();
+
+            surfaceScalarField phiAlpha =
+                fvc::flux
+                (
+                    phi,
+                    alpha1,
+                    alphaScheme
+                )
+              + fvc::flux
+                (
+                    -fvc::flux(-phir, scalar(1) - alpha1, alpharScheme),
+                    alpha1,
+                    alpharScheme
+                );
         }
 
         rhoPhi = phiAlpha*(transport.rho1() - transport.rho2()) + phi*transport.rho2();

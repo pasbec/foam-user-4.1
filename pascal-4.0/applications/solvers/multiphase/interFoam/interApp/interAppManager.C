@@ -132,8 +132,14 @@ void Foam::interApp::Manager::write() const
     gradAlpha.write();
 
     volScalarField magGradAlpha("magGradAlpha", mag(gradAlpha));
-    magGradAlpha /= max(magGradAlpha) + dimensionedScalar(word(), magGradAlpha.dimensions(), VSMALL);
+    magGradAlpha /= max(magGradAlpha)
+        + dimensionedScalar(word(), magGradAlpha.dimensions(), VSMALL);
     magGradAlpha.write();
+
+    volScalarField UGradAlpha("UGradAlpha", mag(gradAlpha & storage.U()));
+    UGradAlpha /= max(UGradAlpha)
+        + dimensionedScalar(word(), UGradAlpha.dimensions(), VSMALL);
+    UGradAlpha.write();
 
     storage.rho().write();
 
@@ -144,7 +150,7 @@ void Foam::interApp::Manager::write() const
 
     storage.interface().K().write();
 
-    volVectorField fs
+    volVectorField surfaceTensionForce
     (
         "FS",
         fvc::reconstruct
@@ -154,7 +160,7 @@ void Foam::interApp::Manager::write() const
           * mesh.magSf()
          )
     );
-    fs.write();
+    surfaceTensionForce.write();
 }
 
 

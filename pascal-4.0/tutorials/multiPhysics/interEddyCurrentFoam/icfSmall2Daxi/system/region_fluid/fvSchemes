@@ -16,9 +16,9 @@ FoamFile
 
 ddtSchemes
 {
-//     default             Euler;
+    default             Euler;
 //     default             CrankNicolson 0;
-    default             CrankNicolson 0.5;
+//     default             CrankNicolson 0.5;
 //     default             CrankNicolson 1;
 //     default             backward;
 }
@@ -32,8 +32,8 @@ divSchemes
 {
     default             Gauss linear;
 
-//     div(rho*phi,U)      Gauss upwind phi;
-    div(rho*phi,U)      Gauss limitedLinearV 1
+    div(rho*phi,U)      Gauss upwind phi;
+//     div(rho*phi,U)      Gauss limitedLinearV 1
 //     div(rho*phi,U)      Gauss GammaVDC 0.5;
 //     div(rho*phi,U)      Gauss linear;
 
