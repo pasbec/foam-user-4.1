@@ -33,7 +33,6 @@ deltaT              0.00000001;
 adjustTimeStep      yes;
 
 maxCo               0.1;
-// maxCo               0.5;
 
 maxDeltaT           0.001;
 

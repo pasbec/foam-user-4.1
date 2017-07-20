@@ -127,7 +127,7 @@ void Foam::eddyCurrentApp::Manager::Storage::Item_mur::create() const
         name(),
         time().timeName(),
         mesh(),
-        IOobject::MUST_READ,
+        IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     );
 

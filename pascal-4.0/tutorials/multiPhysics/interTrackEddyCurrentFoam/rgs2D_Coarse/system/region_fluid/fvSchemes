@@ -86,6 +86,10 @@ interpolationSchemes
     interpolate(rAU)                      linear;
     interpolate(HbyA)                     linear;
     interpolate(F)                        linear;
+    interpolate(nu1)                      linear;
+    interpolate(nu2)                      linear;
+    interpolate(fluidIndicator)           linear;
+    interpolate((rho*nut))                linear;
 
     interpolate(grad(U))                  linear;
     interpolate(grad(p))                  linear;

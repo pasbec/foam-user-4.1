@@ -93,6 +93,8 @@ int main(int argc, char *argv[])
         {
 #           include "materialProperties.H"
 
+#           include "A0BiotSavart.H"
+
 #           include "AVInit.H"
 
 #           include "BUpdate.H"
@@ -183,8 +185,6 @@ int main(int argc, char *argv[])
 
             {
 #               include "materialProperties.H"
-
-#               include "A0BiotSavart.H"
 
 #               include "AVLoop.H"
 

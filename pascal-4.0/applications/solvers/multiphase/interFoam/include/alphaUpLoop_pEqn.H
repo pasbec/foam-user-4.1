@@ -190,6 +190,7 @@
                 {
                     U[own] = vector::zero;
                     phi[facei] = scalar(0);
+                    rhoPhi[facei] = scalar(0);
                 }
             }
             U.correctBoundaryConditions();
