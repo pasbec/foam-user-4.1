@@ -140,17 +140,28 @@ int main(int argc, char *argv[])
     volScalarField alpha1_old(alpha1);
     Switch emUpdateFirst(true);
 
+    dictionary& pisoDict = interAppManager.regions().region_DEFAULT().mesh().solutionDict().subDict("PISO");
+    Switch emUpdateAlpha = pisoDict.lookupOrDefault("emUpdateAlpha", false);
+    scalar emUpdateAlphaChange = pisoDict.lookupOrDefault("emUpdateAlphaChange", 0.5);
+
     while (masterManager.run())
     {
 // TODO: TEST
         // Check for magnetic update
         Switch emUpdate(false);
-        if ((max(mag(alpha1_old - alpha1)).value() > 0.5) || emUpdateFirst)
+        if (emUpdateAlpha)
         {
-            emUpdateFirst = false;
-            emUpdate = true;
+            if ((max(mag(alpha1_old - alpha1)).value() > emUpdateAlphaChange) || emUpdateFirst)
+            {
+                emUpdateFirst = false;
+                emUpdate = true;
 
-            alpha1_old = alpha1;
+                alpha1_old = alpha1;
+            }
+        }
+        else
+        {
+            emUpdate = true;
         }
 //         Switch emUpdate(true);
 //         Switch emUpdate =

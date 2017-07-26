@@ -44,8 +44,8 @@ phase2
 
 // sigma                 sigma [ 1 0 -2 0 0 0 0 ] 0.73312; // SiLiquid
 // sigma                 sigma [ 1 0 -2 0 0 0 0 ] 0.58684; // GaInSi
-sigma                 sigma [ 1 0 -2 0 0 0 0 ] 0.42;     // Woods metal Spitans(2010)
-// sigma                 sigma [ 1 0 -2 0 0 0 0 ] 1.0;     // Woods metal???
+// sigma                 sigma [ 1 0 -2 0 0 0 0 ] 0.42;     // Woods metal Spitans(2010)
+sigma                 sigma [ 1 0 -2 0 0 0 0 ] 1.0;     // Woods metal Vencels(2017)
 
 // ************************************************************************* //
 

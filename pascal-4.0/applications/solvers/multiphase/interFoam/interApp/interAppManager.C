@@ -136,10 +136,25 @@ void Foam::interApp::Manager::write() const
         + dimensionedScalar(word(), magGradAlpha.dimensions(), VSMALL);
     magGradAlpha.write();
 
+    volScalarField magSqrGradAlpha("magSqrGradAlpha", magSqr(gradAlpha));
+    magSqrGradAlpha /= max(magSqrGradAlpha)
+        + dimensionedScalar(word(), magSqrGradAlpha.dimensions(), VSMALL);
+    magSqrGradAlpha.write();
+
     volScalarField UGradAlpha("UGradAlpha", mag(gradAlpha & storage.U()));
     UGradAlpha /= max(UGradAlpha)
         + dimensionedScalar(word(), UGradAlpha.dimensions(), VSMALL);
     UGradAlpha.write();
+
+//     volScalarField cutFct("cutFct", 1.0-magSqrGradAlpha);
+    volScalarField cutFct("cutFct", 1.0-pow(magSqrGradAlpha, 2));
+//     volScalarField cutFct("cutFct", 1.0-pow(magSqrGradAlpha, 4));
+    cutFct /= max(cutFct)
+        + dimensionedScalar(word(), cutFct.dimensions(), VSMALL);
+    cutFct.write();
+
+    volScalarField cutFctAverage("cutFctAverage", fvc::average(fvc::interpolate(cutFct)));
+    cutFctAverage.write();
 
     storage.rho().write();
 

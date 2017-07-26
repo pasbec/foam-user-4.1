@@ -46,7 +46,7 @@ geo_Z[3]       = 383.0
 # --- Mesh ------------------------------------------------------------------ #
 # --------------------------------------------------------------------------- #
 
-mesh_scale     = 1.0
+mesh_scale     = 2.0
 mesh_space     = 4.0
 
 mesh_normal    = 1
@@ -77,15 +77,16 @@ mesh           = {"normal": mesh_normal,
 
 coil_scale      = 1e-3
 
-#coil_bundle     = {"shape": "point",
-coil_bundle     = {"shape": "rectangle",
+coil_bundle     = {"shape": "point",
+#coil_bundle     = {"shape": "rectangle",
                    "n":     10,
                    "r":     (geo_R[3] - geo_R[2]),
                    "z":     15.0}
 
 coil_path       = {"shape": "loop",
                    "n":     36,
-                   "r":     geo_R[2] + coil_bundle["r"]/2.0}
+                   "r":     geo_R[2]}
+                   #"r":     geo_R[2] + coil_bundle["r"]/2.0}
 
 coils_n         = 12
 coils_step      = 5.0 + coil_bundle["z"]

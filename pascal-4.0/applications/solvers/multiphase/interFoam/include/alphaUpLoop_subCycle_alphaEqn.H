@@ -39,9 +39,17 @@
     dictionary& pisoDict = mesh.solutionDict().subDict("PISO");
     if(pisoDict.lookupOrDefault("cutCompression", false))
     {
-        volScalarField magGradAlpha("magGradAlpha", mag(fvc::grad(alpha1)));
-        magGradAlpha /= max(magGradAlpha)
-            + dimensionedScalar(word(), magGradAlpha.dimensions(), VSMALL);
+        volScalarField magSqrGradAlpha("magSqrGradAlpha", magSqr(fvc::grad(alpha1)));
+        magSqrGradAlpha /= max(magSqrGradAlpha)
+            + dimensionedScalar(word(), magSqrGradAlpha.dimensions(), VSMALL);
+
+//         volScalarField cutFct("cutFct", 1.0-magSqrGradAlpha);
+        volScalarField cutFct("cutFct", 1.0-pow(magSqrGradAlpha, 2));
+//         volScalarField cutFct("cutFct", 1.0-pow(magSqrGradAlpha, 4));
+        cutFct /= max(cutFct)
+            + dimensionedScalar(word(), cutFct.dimensions(), VSMALL);
+
+        volScalarField cutFctAverage("cutFctAverage", fvc::average(fvc::interpolate(cutFct)));
 
         scalar cAlphaCut = pisoDict.lookupOrDefault("cAlphaCut", 0.0);
         scalar cAlphaCutRelErr =
@@ -49,7 +57,7 @@
         scalar cAlphaCutPatchEnhance =
             pisoDict.lookupOrDefault("cAlphaCutPatchEnhance", 1.0);
 
-        volScalarField cAlphaCutField(cAlphaCut*(1.0-magGradAlpha));
+        volScalarField cAlphaCutField(cAlphaCut*cutFctAverage);
 
         // Shift and symmetrically scale up alpha
         volScalarField newAlpha1

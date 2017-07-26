@@ -176,6 +176,7 @@
         if(pisoDict.lookupOrDefault("phase1Only", false))
         {
             scalar phase1Cut = pisoDict.lookupOrDefault("phase1Cut", 0.01);
+            scalar phase1CutOff = pisoDict.lookupOrDefault("phase1CutOff", 0.1*phase1Cut);
 
             const unallocLabelList& owner = mesh.owner();
             const unallocLabelList& neighbour = mesh.neighbour();
@@ -191,6 +192,13 @@
                     U[own] = vector::zero;
                     phi[facei] = scalar(0);
                     rhoPhi[facei] = scalar(0);
+                }
+            }
+            forAll(mesh.C(), celli)
+            {
+                if(alpha1[celli] < phase1CutOff)
+                {
+                    U[celli] = vector::zero;
                 }
             }
             U.correctBoundaryConditions();
