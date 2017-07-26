@@ -75,18 +75,12 @@ functions
     freeSurface
     {
         type                   surfaces;
-        functionObjectLibs
-        (
-            "libsampling.so"
-        );
+        functionObjectLibs     ("libsampling.so");
         outputControl          outputTime;
         outputInterval         1;
         surfaceFormat          raw;
         region                 region_fluid;
-        fields
-        (
-            alpha1
-        );
+        fields                 (alpha1);
         surfaces
         (
             freeSurface
@@ -94,8 +88,8 @@ functions
                 type           isoSurfaceCell;
                 isoField       alpha1;
                 isoValue       0.5;
-                interpolate    false;
-                regularise     false;
+                interpolate    yes;
+                regularise     yes;
             }
         );
         interpolationScheme    cell;
