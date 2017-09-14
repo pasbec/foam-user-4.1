@@ -52,7 +52,7 @@ solvers
 
 PISO
 {
-    cAlpha                      5;
+    cAlpha                      6;
 
 //     cutCompression              yes;
 //     cAlphaCut                   0.001;
@@ -60,8 +60,8 @@ PISO
 //     cAlphaCutPatchEnhance       2.0;
 
     phase1Only                  yes;
-    phase1Cut                   0.25;
-    phase1CutOff                0.25;
+    phase1Cut                   0.01;
+    phase1CutOff                0.01;
 
     emUpdateAlpha               yes;
     emUpdateAlphaChange         0.5;

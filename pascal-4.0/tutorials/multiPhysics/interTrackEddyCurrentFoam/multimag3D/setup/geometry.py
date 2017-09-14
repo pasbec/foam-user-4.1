@@ -113,9 +113,9 @@ d.recompute()
 
 bo = dict()
 
-bo["fluid"] = makeExtrudeBody("fluid", s["inner"], par.geo_z3)
-bo["above"] = makeExtrudeBody("above", s["outer"], par.geo_z4)
-bo["below"] = makeExtrudeBody("below", s["outer"], par.geo_z0)
+bo["fluid"] = makeExtrudeBody("fluid", s["inner"], par.geo_z3-par.geo_z1)
+bo["above"] = makeExtrudeBody("above", s["outer"], par.geo_z4-par.geo_z1)
+bo["below"] = makeExtrudeBody("below", s["outer"], par.geo_z0-par.geo_z1)
 
 bo["buffer"] = makeCutBody("buffer", bo["above"], bo["fluid"])
 

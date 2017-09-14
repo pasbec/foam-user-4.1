@@ -85,14 +85,16 @@ coil_bundle     = {"shape": "point",
 
 coil_path       = {"shape": "loop",
                    "n":     36,
-                   "r":     geo_R[2]}
                    #"r":     geo_R[2] + coil_bundle["r"]/2.0}
+                   "r":     geo_R[2]}
 
 coils_n         = 12
 coils_step      = 5.0 + coil_bundle["z"]
+#coils_step      = 5.0 + coil_bundle["z"] -1.363636
 coils_origin    = [0.0, 0.0, geo_Z[1] + coil_bundle["z"]/2.0]
+#coils_origin    = [0.0, 0.0, geo_Z[1] + coil_bundle["z"]]
 
-#coils_current   = m.sqrt(2.0) * 1750.0
+#coils_current   = m.sqrt(2.0) * 1750.0 (fL ~ 2.9e+5)
 #coils_current   = m.sqrt(2.0) * 2020.0
 #coils_current   = m.sqrt(2.0) * 2260.0
 coils_current   = m.sqrt(2.0) * 2460.0

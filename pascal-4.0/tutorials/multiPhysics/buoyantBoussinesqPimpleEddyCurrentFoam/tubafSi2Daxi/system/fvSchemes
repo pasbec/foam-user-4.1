@@ -16,39 +16,30 @@ FoamFile
 
 ddtSchemes
 {
-    default                           none;
+    default             none;
 }
 
 gradSchemes
 {
-    default                           none;
+    default             Gauss linear;
 
-    curl(ARe)                         Gauss skewCorrected linear;
-    curl(AIm)                         Gauss skewCorrected linear;
-
-    grad(ARe)                         Gauss skewCorrected linear;
-    grad(AIm)                         Gauss skewCorrected linear;
+    curl(ARe)           Gauss skewCorrected linear;
+    curl(AIm)           Gauss skewCorrected linear;
 }
 
 divSchemes
 {
-    default                           none;
+    default             none;
 }
 
 laplacianSchemes
 {
-    default                           none;
-
-    laplacian(ARe)                    Gauss linear corrected;
-    laplacian(AIm)                    Gauss linear corrected;
+    default             Gauss linear corrected;
 }
 
 interpolationSchemes
 {
-    default                           none;
-
-    interpolate(grad(ARe))            skewCorrected linear;
-    interpolate(grad(AIm))            skewCorrected linear;
+    default             linear;
 }
 
 // ************************************************************************* //
