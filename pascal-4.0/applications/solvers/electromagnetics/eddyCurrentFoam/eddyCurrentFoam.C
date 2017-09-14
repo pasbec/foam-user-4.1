@@ -53,7 +53,8 @@ int main(int argc, char *argv[])
 {
     using namespace Foam;
 
-    argList::validOptions.insert("overwrite", "");
+    // Add time selector options for frequencies
+    argList::validOptions.insert("freq", "scalarList");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -68,13 +69,29 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    scalarList freqList;
+    globalSettings.freqOpt =
+        args.optionReadIfPresent<scalarList>("freq", freqList);
+
     manager.read();
     manager.init();
 
+    uniformDimensionedScalarField& f0 = storage.f0();
     uniformDimensionedScalarField& omega0 = storage.omega0();
 
-    while(manager.once())
+    // Store single value of constant f0 in freqList if no option is given
+    if (!globalSettings.freqOpt)
     {
+        freqList.setSize(1);
+        freqList[0] = f0.value();
+    }
+
+    while(manager.selected(freqList))
+    {
+        // Use time value as frequency value
+        f0 = dimensionedScalar(word(), f0.dimensions(), runTime.time().value());
+        omega0 = mathematicalConstant::twoPi * f0;
+
 #       include "materialProperties.H"
 
 #       include "A0BiotSavart.H"

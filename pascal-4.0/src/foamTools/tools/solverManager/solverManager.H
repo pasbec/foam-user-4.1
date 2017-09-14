@@ -396,6 +396,9 @@ public:
             //- Main time once wrapper
             bool once() const;
 
+            //- Main time selected wrapper
+            bool selected(const scalarList& selectedTimes) const;
+
             //- Main time loop wrapper
             bool loop() const;
 

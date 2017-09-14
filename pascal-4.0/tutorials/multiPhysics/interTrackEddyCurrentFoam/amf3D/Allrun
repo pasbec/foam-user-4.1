@@ -1,17 +1,18 @@
 #!/bin/bash
 
-flagClean=0; flagPrepare=0; flagDecompose=0; flagReset=0; flagReconstruct=0; flagRun=0; flagForce=0
+flagClean=0; flagPrepare=0; flagDecompose=0; flagReset=0; flagReconstruct=0; flagReconstructAll=0; flagRun=0; flagForce=0
 
 flagRenumberMesh=0
 
 while [[ $# -gt 0 ]]; do
-    if   [[ $1 == 'clean' ]];       then flagClean=1
-    elif [[ $1 == 'prepare' ]];     then flagPrepare=1
-    elif [[ $1 == 'decompose' ]];   then flagDecompose=1
-    elif [[ $1 == 'reset' ]];       then flagReset=1
-    elif [[ $1 == 'reconstruct' ]]; then flagReconstruct=1
-    elif [[ $1 == 'start' ]];       then flagRun=1
-    elif [[ $1 == 'force' ]];       then flagForce=1
+    if   [[ $1 == 'clean' ]];          then flagClean=1
+    elif [[ $1 == 'prepare' ]];        then flagPrepare=1
+    elif [[ $1 == 'decompose' ]];      then flagDecompose=1
+    elif [[ $1 == 'reset' ]];          then flagReset=1
+    elif [[ $1 == 'reconstruct' ]];    then flagReconstruct=1
+    elif [[ $1 == 'reconstructall' ]]; then flagReconstructAll=1
+    elif [[ $1 == 'start' ]];          then flagRun=1
+    elif [[ $1 == 'force' ]];          then flagForce=1
     else
       echo "Unsupported flag: '$1'"
     fi
@@ -341,15 +342,39 @@ if [[ -e 'state.decomposed' || $flagForce -eq 1 ]]; then
 
     fi
 
-    # Reconstruct mesh
+    # Reconstruct
     runApplication \
         reconstructPar -latestTime || exit 1
 
-    # Reconstruct mesh
+    # Reconstruct
     # for regions
     for region in $regionlistExt; do
         runApplication -r "$region" \
             reconstructPar -latestTime -region $region || exit 1
+    done
+else
+    echo "Case not decomposed! Not reconstructing!"
+fi
+fi
+
+if [[ $flagReconstructAll -eq 1 ]]; then
+if [[ -e 'state.decomposed' || $flagForce -eq 1 ]]; then
+
+    if [[ $flagForce -eq 1 ]]; then
+
+        rm 'log.reconstructPar'* >& /dev/null
+
+    fi
+
+    # Reconstruct
+    runApplication \
+        reconstructPar || exit 1
+
+    # Reconstruct
+    # for regions
+    for region in $regionlistExt; do
+        runApplication -r "$region" \
+            reconstructPar -region $region || exit 1
     done
 else
     echo "Case not decomposed! Not reconstructing!"

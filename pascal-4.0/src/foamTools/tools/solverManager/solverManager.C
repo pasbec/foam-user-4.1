@@ -289,6 +289,77 @@ bool Foam::solverManager<MESH>::once() const
 
 
 template <class MESH>
+bool Foam::solverManager<MESH>::selected
+(
+    const scalarList& selectedTimes
+) const
+{
+    errorIfNotMaster();
+
+    Time& runTime = const_cast<Time&>(time());
+
+    // Use once without given selction
+    if (selectedTimes.size() == 0)
+    {
+        return once();
+    }
+
+    if (prePhase())
+    {
+        read();
+        init();
+
+        messages().newLine();
+        messages().startTimeLoop();
+        messages().newLine();
+
+        prePhase() = false;
+    }
+    else
+    {
+        next();
+
+        time().writeNow();
+
+        write();
+
+        messages().executionTime();
+        messages().newLine();
+    }
+
+    if (runTime.timeIndex()-runTime.startTimeIndex() < selectedTimes.size())
+    {
+        propertiesDict_.readIfModified();
+
+        read();
+
+        runTime++;
+
+        label tIndex = runTime.timeIndex() - runTime.startTimeIndex();
+
+        runTime.setTime
+        (
+            selectedTimes[tIndex-1],
+            runTime.timeIndex()
+        );
+
+        messages().timeIs();
+        messages().newLine();
+
+        return true;
+    }
+    else
+    {
+        finalize();
+
+        messages().end();
+
+        return false;
+    }
+}
+
+
+template <class MESH>
 bool Foam::solverManager<MESH>::loop() const
 {
     errorIfNotMaster();
@@ -319,15 +390,14 @@ bool Foam::solverManager<MESH>::loop() const
 
         messages().executionTime();
         messages().newLine();
-    }
 
-// TODO: Read should go to old time!
-    if (runTime.loop())
-    {
         propertiesDict_.readIfModified();
 
         read();
+    }
 
+    if (runTime.loop())
+    {
         messages().timeIs();
         messages().newLine();
 

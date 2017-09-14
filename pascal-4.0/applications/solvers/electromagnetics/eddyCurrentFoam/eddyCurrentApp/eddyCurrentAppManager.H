@@ -76,6 +76,9 @@ public:
 
         SM_GLOBALSETTINGS_NEW();
 
+            //- Switch to set wether a frequency option is used
+            SM_SETTINGS_MEMBER_ADD(Switch, freqOpt);
+
             //- Switch to set wether low-frequency is used
             SM_SETTINGS_MEMBER_ADD(Switch, lowFrequency);
 

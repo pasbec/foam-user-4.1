@@ -35,20 +35,46 @@ void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Settings::read() const
 
 void Foam::eddyCurrentApp::Manager::Region_DEFAULT::Storage::Item_f0::create() const
 {
-    set
-    (
-        new uniformDimensionedScalarField
+    if (globalSettings().freqOpt)
+    {
+        set
         (
-            IOobject
+            new uniformDimensionedScalarField
             (
-                name(),
-                time().constant(),
-                time(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject
+                (
+                    name(),
+                    time().timeName(),
+                    mesh(),
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                dimensionedScalar
+                (
+                    word(),
+                    dimless/dimTime,
+                    0.0
+                )
             )
-        )
-    );
+        );
+    }
+    else
+    {
+        set
+        (
+            new uniformDimensionedScalarField
+            (
+                IOobject
+                (
+                    name(),
+                    time().constant(),
+                    mesh(),
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            )
+        );
+    }
 }
 
 
