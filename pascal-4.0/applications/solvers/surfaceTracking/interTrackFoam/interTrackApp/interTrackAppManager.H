@@ -94,6 +94,9 @@ public:
                 //  fixedGradient patches
                 SM_SETTINGS_MEMBER_ADD(Switch, snGradpFromFlux);
 
+                //- Conentration transport switch
+                SM_SETTINGS_MEMBER_ADD(Switch, cTransport);
+
             SM_REGIONSETTINGS_ADD();
 
             SM_REGIONSTORAGE_NEW();
@@ -124,6 +127,12 @@ public:
 
                 //- Turbulence model
                 SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
+
+                //- Concentration diffusivity
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, Dc);
+
+                //- Concentration
+                SM_REGIONITEM_ADD(volScalarField, c);
 
                 //- Interface model
                 SM_REGIONITEM_ADD(trackedSurface, interface);

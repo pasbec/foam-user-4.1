@@ -814,33 +814,54 @@ void trackedSurface::makeSurfaceTension() const
     areaScalarField& surfaceTension = *surfaceTensionPtr_;
 
 
-    if (!cleanInterface())
-    {
-        surfaceTension =
-            cleanInterfaceSurfTension()
-          + surfactant().surfactR()*
-            surfactant().surfactT()*
-            surfactant().surfactSaturatedConc()*
-            log(1.0 - surfactantConcentration()/
-            surfactant().surfactSaturatedConc());
-    }
+//     if (!cleanInterface())
+//     {
+//         surfaceTension =
+//             cleanInterfaceSurfTension()
+//           + surfactant().surfactR()*
+//             surfactant().surfactT()*
+//             surfactant().surfactSaturatedConc()*
+//             log(1.0 - surfactantConcentration()/
+//             surfactant().surfactSaturatedConc());
+//     }
+//
+//
+//     if (TPtr_)
+//     {
+//         dimensionedScalar thermalCoeff
+//         (
+//             this->lookup("thermalCoeff")
+//         );
+//
+//         dimensionedScalar refTemperature
+//         (
+//             this->lookup("refTemperature")
+//         );
+//
+//         surfaceTension =
+//             cleanInterfaceSurfTension()
+//           + thermalCoeff*(temperature() - refTemperature);
+//     }
 
-
-    if (TPtr_)
+    if (cPtr_)
     {
-        dimensionedScalar thermalCoeff
+        dimensionedScalar cCoeff
         (
-            this->lookup("thermalCoeff")
+            this->lookup("cCoeff")
         );
 
-        dimensionedScalar refTemperature
+        dimensionedScalar refConcentration
         (
-            this->lookup("refTemperature")
+            this->lookup("refConcentration")
         );
 
-        surfaceTension =
-            cleanInterfaceSurfTension()
-          + thermalCoeff*(temperature() - refTemperature);
+        cleanInterfaceSurfTension();
+        concentration();
+
+
+//         surfaceTension =
+//             cleanInterfaceSurfTension()
+//           + cCoeff*(concentration() - refConcentration);
     }
 }
 
@@ -996,7 +1017,7 @@ void trackedSurface::makeMuEffFluidBval() const
 }
 
 
-void trackedSurface::makeContactAngle()
+void trackedSurface::makeContactAngle() const
 {
     if (debug)
     {
@@ -1010,7 +1031,7 @@ void trackedSurface::makeContactAngle()
     // if the pointer is already set
     if (contactAnglePtr_)
     {
-        FatalErrorIn("trackedSurface::makeTemperature()")
+        FatalErrorIn("trackedSurface::makeContactAngle()")
             << "Contact angle field already exists."
             << abort(FatalError);
     }
@@ -1089,6 +1110,40 @@ void trackedSurface::makeTemperature() const
         IOobject
         (
             "Ts",
+            DB().timeName(),
+            mesh(),
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        aMesh()
+    );
+}
+
+
+void trackedSurface::makeConcentration() const
+{
+    if (debug)
+    {
+        Info << "trackedSurface::makeConcentration() : "
+            << "Making surface concentration field."
+            << endl;
+    }
+
+
+    // It is an error to attempt to recalculate
+    // if the pointer is already set
+    if (concentrationPtr_)
+    {
+        FatalErrorIn("trackedSurface::makeConcentration()")
+            << "Surface concentration field already exists."
+            << abort(FatalError);
+    }
+
+    concentrationPtr_ = new areaScalarField
+    (
+        IOobject
+        (
+            "cs",
             DB().timeName(),
             mesh(),
             IOobject::MUST_READ,
@@ -1468,7 +1523,7 @@ const edgeScalarField& trackedSurface::contactAngle() const
 {
     if (!contactAnglePtr_)
     {
-        makeTemperature();
+        makeContactAngle();
     }
 
     return *contactAnglePtr_;
@@ -1493,6 +1548,27 @@ const areaScalarField& trackedSurface::temperature() const
     }
 
     return *temperaturePtr_;
+}
+
+
+areaScalarField& trackedSurface::concentration()
+{
+    if (!concentrationPtr_)
+    {
+        makeConcentration();
+    }
+
+    return *concentrationPtr_;
+}
+
+const areaScalarField& trackedSurface::concentration() const
+{
+    if (!concentrationPtr_)
+    {
+        makeConcentration();
+    }
+
+    return *concentrationPtr_;
 }
 
 const areaVectorField& trackedSurface::surfaceTensionForce() const

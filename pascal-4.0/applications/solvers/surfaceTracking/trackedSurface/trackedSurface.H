@@ -97,6 +97,9 @@ class trackedSurface
         //- Pointer to temperature field
         volScalarField* TPtr_;
 
+        //- Pointer to concentration field
+        volScalarField* cPtr_;
+
         //- Pointer to gravitational acceleration
         const uniformDimensionedVectorField* gPtr_;
 
@@ -176,6 +179,10 @@ class trackedSurface
 
          //- Number of surface correctors
         label nTrackedSurfCorr_;
+
+// TEST: Fixed interface
+        //- Fixed interface
+        Switch fixedInterface_;
 
 // TEST: Sub-mesh
         //- Use sub-mesh
@@ -292,6 +299,9 @@ class trackedSurface
         //- Surface temperature
         mutable areaScalarField* temperaturePtr_;
 
+        //- Surface concentration
+        mutable areaScalarField* concentrationPtr_;
+
         //- Surface tension force
         mutable areaVectorField* surfaceTensionForcePtr_;
 
@@ -328,8 +338,9 @@ class trackedSurface
             void makeFluidIndicator();
             void makeMuEffFluidAval() const;
             void makeMuEffFluidBval() const;
-            void makeContactAngle();
+            void makeContactAngle() const;
             void makeTemperature() const;
+            void makeConcentration() const;
             void makeSurfaceTensionForce() const;
             void makeNGradUn() const;
 
@@ -473,6 +484,7 @@ public:
             volScalarField& Pb,
             surfaceScalarField& phi,
             volScalarField* TbPtr = NULL,
+            volScalarField* cbPtr = NULL,
             const uniformDimensionedVectorField* gPtr = NULL,
             const twoPhaseMixture* transportPtr = NULL,
             const incompressible::turbulenceModel* turbulencePtr = NULL,
@@ -562,6 +574,18 @@ public:
             const volScalarField& T() const
             {
                 return *TPtr_;
+            }
+
+            //- Return reference to concentration field
+            volScalarField& c()
+            {
+                return *cPtr_;
+            }
+
+            //- Return reference to concentration field
+            const volScalarField& c() const
+            {
+                return *cPtr_;
             }
 
             //- Return reference to transport model
@@ -684,7 +708,7 @@ public:
         // Marangoni stress
         bool MarangoniStress() const
         {
-            return (!cleanInterface_ || TPtr_);
+            return (!cleanInterface_ || TPtr_ || cPtr_);
         }
 
         //- Return reference to interpolator from surface side A to
@@ -801,6 +825,12 @@ public:
         //- Return reference to interface temperature
         const areaScalarField& temperature() const;
 
+        //- Return reference to interface concentration
+        areaScalarField& concentration();
+
+        //- Return reference to interface concentration
+        const areaScalarField& concentration() const;
+
         //- Return reference to surface tension force
         const areaVectorField& surfaceTensionForce() const;
 
@@ -831,14 +861,11 @@ public:
         //- Update surface boundary conditions
         void updateBoundaryConditions();
 
+        //- Update contact angle
+        void updateContactAngle();
+
         //- Correct effective kinematic viscosity on surface
         void updateMuEff();
-
-        //- Correct surface velocity
-        void updateVelocity();
-
-        //- Correct surface pressure
-        void updatePressure();
 
         //- Update surface flux
         void updateSurfaceFlux();
@@ -846,11 +873,17 @@ public:
         //- Update surface surfactant concentration
         void updateSurfactantConcentration();
 
-        //- Update contact angle
-        void updateContactAngle();
-
         //- Update surface temperature
         void updateTemperature();
+
+        //- Update surface concentration
+        void updateConcentration();
+
+        //- Correct surface velocity
+        void updateVelocity();
+
+        //- Correct surface pressure
+        void updatePressure();
 
         //- Correct normal derivative of normal velocity
         void updateNGradUn();

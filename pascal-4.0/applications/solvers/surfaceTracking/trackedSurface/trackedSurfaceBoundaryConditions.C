@@ -90,10 +90,61 @@ void trackedSurface::updateBoundaryConditions()
     {
         updateContactAngle();
         updateMuEff();
-        updateTemperature();
-        updateVelocity();
         updateSurfactantConcentration();
+        updateTemperature();
+        updateConcentration();
+        updateVelocity();
         updatePressure();
+    }
+}
+
+
+void trackedSurface::updateContactAngle()
+{
+    // Correct contact angle acording to
+    // current face normals
+
+    if (freeContactAngle_)
+    {
+        forAll (aMesh().boundary(), patchI)
+        {
+            label ngbPolyPatchID =
+                aMesh().boundary()[patchI].ngbPolyPatchIndex();
+
+            if (ngbPolyPatchID != -1)
+            {
+                if
+                (
+                    isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
+                )
+                {
+                    // Calculate contact angle
+                    scalarField& contactAngle =
+                        contactAnglePtr_->boundaryField()[patchI];
+
+                    const vectorField& nA =
+                        aMesh().faceAreaNormals().internalField();
+
+                    const vectorField ngbNA =
+                        aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
+
+                    const unallocLabelList& edgeFaces =
+                        aMesh().boundary()[patchI].edgeFaces();
+
+                    forAll (edgeFaces, edgeI)
+                    {
+                        label faceI = edgeFaces[edgeI];
+
+                        vector nAI = nA[faceI];
+                        vector ngbNAI = ngbNA[edgeI];
+
+                        contactAngle[edgeI] =
+                            180.0/M_PI
+                            * acos(-ngbNAI&nAI/mag(ngbNAI)/mag(nAI));
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -112,6 +163,337 @@ void trackedSurface::updateMuEff()
             muEffFluidBval() =
                 nuEff.boundaryField()[bPatchID()] * rhoFluidB().value();
         }
+    }
+}
+
+
+void trackedSurface::updateSurfaceFlux()
+{
+    Phis() = fac::interpolate(Us()) & aMesh().Le();
+}
+
+
+void trackedSurface::updateSurfactantConcentration()
+{
+    if (!cleanInterface())
+    {
+        if (debug)
+        {
+            Info << "trackedSurface::updateSurfactantConcentration() : "
+                << "Correct surfactant concentration."
+                << endl;
+        }
+
+        updateSurfaceFlux();
+
+        // Crate and solve the surfactant transport equation
+        faScalarMatrix CsEqn
+        (
+            fam::ddt(surfactantConcentration())
+          + fam::div(Phis(), surfactantConcentration())
+          - fam::laplacian
+            (
+                surfactant().surfactDiffusion(),
+                surfactantConcentration()
+            )
+        );
+
+
+        if (surfactant().soluble())
+        {
+            const scalarField& C =
+                mesh().boundary()[aPatchID()]
+               .lookupPatchField<volScalarField, scalar>("C");
+
+            areaScalarField Cb
+            (
+                IOobject
+                (
+                    "Cb",
+                    DB().timeName(),
+                    mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                aMesh(),
+                dimensioned<scalar>("Cb", dimMoles/dimVolume, 0),
+                zeroGradientFaPatchScalarField::typeName
+            );
+
+            Cb.internalField() = C;
+            Cb.correctBoundaryConditions();
+
+            CsEqn +=
+                fam::Sp
+                (
+                    surfactant().surfactAdsorptionCoeff()*Cb
+                  + surfactant().surfactAdsorptionCoeff()
+                   *surfactant().surfactDesorptionCoeff(),
+                    surfactantConcentration()
+                )
+              - surfactant().surfactAdsorptionCoeff()
+               *Cb*surfactant().surfactSaturatedConc();
+        }
+
+        CsEqn.solve();
+
+        if (debug)
+        {
+            Info << "trackedSurface::updateSurfactantConcentration() : "
+                << "Correct surface tension."
+                << endl;
+        }
+
+        surfaceTension() =
+            cleanInterfaceSurfTension()
+          + surfactant().surfactR()
+           *surfactant().surfactT()
+           *surfactant().surfactSaturatedConc()
+           *log(1.0 - surfactantConcentration()
+           /surfactant().surfactSaturatedConc());
+
+        if (neg(min(surfaceTension().internalField())))
+        {
+            FatalErrorIn("trackedSurface::correctSurfactantConcentration()")
+                << "Surface tension is negative."
+                    << abort(FatalError);
+        }
+
+        deleteDemandDrivenData(surfaceTensionForcePtr_);
+    }
+}
+
+
+void trackedSurface::updateTemperature()
+{
+    if (TPtr_)
+    {
+        if (twoFluids())
+        {
+            // Update fixedValue boundary condition on patch B
+
+            if
+            (
+                T().boundaryField()[bPatchID()].type()
+             == fixedValueFvPatchField<scalar>::typeName
+            )
+            {
+                T().boundaryField()[bPatchID()] ==
+                    interpolatorAB().faceInterpolate
+                    (
+                        T().boundaryField()[aPatchID()]
+                    );
+            }
+            else
+            {
+                FatalErrorIn("trackedSurface::updateTemperature()")
+                    << "Bounary condition on " << T().name()
+                    <<  " for trackedSurfaceShadow patch is "
+                    << T().boundaryField()[bPatchID()].type()
+                    << ", instead of "
+                    << fixedValueFvPatchField<scalar>::typeName
+                    << abort(FatalError);
+            }
+
+
+            // Update fixedGradient boundary condition on patch A
+
+            scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
+
+            scalarField TPB = interpolatorBA().faceInterpolate
+            (
+                T().boundaryField()[bPatchID()].patchInternalField()
+            );
+
+            const scalarField& TFs =
+                T().boundaryField()[aPatchID()];
+
+            scalarField nGradT = kFluidB().value()*(TPB - TFs)*DnA;
+            nGradT /= kFluidA().value() + VSMALL;
+
+            if
+            (
+                T().boundaryField()[aPatchID()].type()
+             == fixedGradientFvPatchField<scalar>::typeName
+            )
+            {
+                fixedGradientFvPatchField<scalar>& aT =
+                    refCast<fixedGradientFvPatchField<scalar> >
+                    (
+                        T().boundaryField()[aPatchID()]
+                    );
+
+                aT.gradient() = nGradT;
+            }
+            else
+            {
+                FatalErrorIn("trackedSurface::updateTemperature()")
+                    << "Bounary condition on " << T().name()
+                    <<  " for trackedSurface patch is "
+                    << T().boundaryField()[aPatchID()].type()
+                    << ", instead of "
+                    << fixedGradientFvPatchField<scalar>::typeName
+                    << abort(FatalError);
+            }
+        }
+        else
+        {
+            if
+            (
+                T().boundaryField()[aPatchID()].type()
+             != zeroGradientFvPatchField<scalar>::typeName
+            )
+            {
+                FatalErrorIn("trackedSurface::updateTemperature()")
+                    << "Bounary condition on " << T().name()
+                    <<  " for trackedSurface patch is "
+                    << T().boundaryField()[aPatchID()].type()
+                    << ", instead of "
+                    << zeroGradientFvPatchField<scalar>::typeName
+                    << abort(FatalError);
+            }
+        }
+
+
+        // Update surface tension
+
+        temperature().internalField() =
+            T().boundaryField()[aPatchID()];
+        temperature().correctBoundaryConditions();
+
+        // Correct surface tension
+        dimensionedScalar thermalCoeff
+        (
+            this->lookup("thermalCoeff")
+        );
+
+        dimensionedScalar refTemperature
+        (
+            this->lookup("refTemperature")
+        );
+
+        surfaceTension() =
+            cleanInterfaceSurfTension()
+          + thermalCoeff*(temperature() - refTemperature);
+
+        deleteDemandDrivenData(surfaceTensionForcePtr_);
+    }
+}
+
+
+void trackedSurface::updateConcentration()
+{
+    if (cPtr_)
+    {
+        if (twoFluids())
+        {
+            // Update fixedValue boundary condition on patch B
+
+            if
+            (
+                c().boundaryField()[bPatchID()].type()
+             == fixedValueFvPatchField<scalar>::typeName
+            )
+            {
+                c().boundaryField()[bPatchID()] ==
+                    interpolatorAB().faceInterpolate
+                    (
+                        c().boundaryField()[aPatchID()]
+                    );
+            }
+            else
+            {
+                FatalErrorIn("trackedSurface::updateConcentration()")
+                    << "Bounary condition on " << c().name()
+                    <<  " for trackedSurfaceShadow patch is "
+                    << c().boundaryField()[bPatchID()].type()
+                    << ", instead of "
+                    << fixedValueFvPatchField<scalar>::typeName
+                    << abort(FatalError);
+            }
+
+
+            // Update fixedGradient boundary condition on patch A
+
+            scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
+
+            scalarField cPB = interpolatorBA().faceInterpolate
+            (
+                c().boundaryField()[bPatchID()].patchInternalField()
+            );
+
+            const scalarField& cFs =
+                c().boundaryField()[aPatchID()];
+
+            scalarField nGradT = kFluidB().value()*(cPB - cFs)*DnA;
+            nGradT /= kFluidA().value() + VSMALL;
+
+            if
+            (
+                c().boundaryField()[aPatchID()].type()
+             == fixedGradientFvPatchField<scalar>::typeName
+            )
+            {
+                fixedGradientFvPatchField<scalar>& ac =
+                    refCast<fixedGradientFvPatchField<scalar> >
+                    (
+                        c().boundaryField()[aPatchID()]
+                    );
+
+                ac.gradient() = nGradT;
+            }
+            else
+            {
+                FatalErrorIn("trackedSurface::updateConcentration()")
+                    << "Bounary condition on " << c().name()
+                    <<  " for trackedSurface patch is "
+                    << c().boundaryField()[aPatchID()].type()
+                    << ", instead of "
+                    << fixedGradientFvPatchField<scalar>::typeName
+                    << abort(FatalError);
+            }
+        }
+        else
+        {
+            if
+            (
+                c().boundaryField()[aPatchID()].type()
+             != zeroGradientFvPatchField<scalar>::typeName
+            )
+            {
+                FatalErrorIn("trackedSurface::updateConcentration()")
+                    << "Bounary condition on " << c().name()
+                    <<  " for trackedSurface patch is "
+                    << c().boundaryField()[aPatchID()].type()
+                    << ", instead of "
+                    << zeroGradientFvPatchField<scalar>::typeName
+                    << abort(FatalError);
+            }
+        }
+
+
+        // Update surface tension
+
+        concentration().internalField() =
+            c().boundaryField()[aPatchID()];
+        concentration().correctBoundaryConditions();
+
+        // Correct surface tension
+        dimensionedScalar cCoeff
+        (
+            this->lookup("cCoeff")
+        );
+
+        dimensionedScalar refConcentration
+        (
+            this->lookup("refConcentration")
+        );
+
+        surfaceTension() =
+            cleanInterfaceSurfTension()
+          + cCoeff*(concentration() - refConcentration);
+
+        deleteDemandDrivenData(surfaceTensionForcePtr_);
     }
 }
 
@@ -323,26 +705,30 @@ void trackedSurface::updateVelocity()
     {
         const vectorField& nA = aMesh().faceAreaNormals().internalField();
 
-// TEST: Use velocity to correct interface normal velocity
-        vectorField UPA =
-            U().boundaryField()[aPatchID()].patchInternalField();
+        vectorField UnFs =
+            nA*phi_.boundaryField()[aPatchID()]
+           /mesh().boundary()[aPatchID()].magSf();
 
-        if
-        (
-            U().boundaryField()[aPatchID()].type()
-         == fixedGradientCorrectedFvPatchField<vector>::typeName
-        )
-        {
-            fixedGradientCorrectedFvPatchField<vector>& aU =
-                refCast<fixedGradientCorrectedFvPatchField<vector> >
-                (
-                    U().boundaryField()[aPatchID()]
-                );
-
-            UPA += aU.corrVecGrad();
-        }
-
-        vectorField UnFs = nA*(nA & UPA);
+// // TEST: Use velocity to correct interface normal velocity
+//         vectorField UPA =
+//             U().boundaryField()[aPatchID()].patchInternalField();
+//
+//         if
+//         (
+//             U().boundaryField()[aPatchID()].type()
+//          == fixedGradientCorrectedFvPatchField<vector>::typeName
+//         )
+//         {
+//             fixedGradientCorrectedFvPatchField<vector>& aU =
+//                 refCast<fixedGradientCorrectedFvPatchField<vector> >
+//                 (
+//                     U().boundaryField()[aPatchID()]
+//                 );
+//
+//             UPA += aU.corrVecGrad();
+//         }
+//
+//         vectorField UnFs = nA*(nA & UPA);
 
 // TEST: Use mesh phi to update normal component of Us
 //         vectorField UnFs =
@@ -627,270 +1013,6 @@ void trackedSurface::updatePressure()
                    *(g_.value()&(mesh().C().boundaryField()[patchI] - R0));
             }
         }
-    }
-}
-
-
-void trackedSurface::updateSurfaceFlux()
-{
-    Phis() = fac::interpolate(Us()) & aMesh().Le();
-}
-
-
-void trackedSurface::updateSurfactantConcentration()
-{
-    if (!cleanInterface())
-    {
-        if (debug)
-        {
-            Info << "trackedSurface::updateSurfactantConcentration() : "
-                << "Correct surfactant concentration."
-                << endl;
-        }
-
-        updateSurfaceFlux();
-
-        // Crate and solve the surfactanta transport equation
-        faScalarMatrix CsEqn
-        (
-            fam::ddt(surfactantConcentration())
-          + fam::div(Phis(), surfactantConcentration())
-          - fam::laplacian
-            (
-                surfactant().surfactDiffusion(),
-                surfactantConcentration()
-            )
-        );
-
-
-        if (surfactant().soluble())
-        {
-            const scalarField& C =
-                mesh().boundary()[aPatchID()]
-               .lookupPatchField<volScalarField, scalar>("C");
-
-            areaScalarField Cb
-            (
-                IOobject
-                (
-                    "Cb",
-                    DB().timeName(),
-                    mesh(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                aMesh(),
-                dimensioned<scalar>("Cb", dimMoles/dimVolume, 0),
-                zeroGradientFaPatchScalarField::typeName
-            );
-
-            Cb.internalField() = C;
-            Cb.correctBoundaryConditions();
-
-            CsEqn +=
-                fam::Sp
-                (
-                    surfactant().surfactAdsorptionCoeff()*Cb
-                  + surfactant().surfactAdsorptionCoeff()
-                   *surfactant().surfactDesorptionCoeff(),
-                    surfactantConcentration()
-                )
-              - surfactant().surfactAdsorptionCoeff()
-               *Cb*surfactant().surfactSaturatedConc();
-        }
-
-        CsEqn.solve();
-
-        if (debug)
-        {
-            Info << "trackedSurface::updateSurfactantConcentration() : "
-                << "Correct surface tension."
-                << endl;
-        }
-
-        surfaceTension() =
-            cleanInterfaceSurfTension()
-          + surfactant().surfactR()
-           *surfactant().surfactT()
-           *surfactant().surfactSaturatedConc()
-           *log(1.0 - surfactantConcentration()
-           /surfactant().surfactSaturatedConc());
-
-        if (neg(min(surfaceTension().internalField())))
-        {
-            FatalErrorIn("trackedSurface::correctSurfactantConcentration()")
-                << "Surface tension is negative."
-                    << abort(FatalError);
-        }
-
-        deleteDemandDrivenData(surfaceTensionForcePtr_);
-    }
-}
-
-
-void trackedSurface::updateContactAngle()
-{
-    // Correct contact angle acording to
-    // current face normals
-
-    if (freeContactAngle_)
-    {
-        forAll (aMesh().boundary(), patchI)
-        {
-            label ngbPolyPatchID =
-                aMesh().boundary()[patchI].ngbPolyPatchIndex();
-
-            if (ngbPolyPatchID != -1)
-            {
-                if
-                (
-                    isA<wallFvPatch>(mesh().boundary()[ngbPolyPatchID])
-                )
-                {
-                    // Calculate contact angle
-                    scalarField& contactAngle =
-                        contactAnglePtr_->boundaryField()[patchI];
-
-                    const vectorField& nA =
-                        aMesh().faceAreaNormals().internalField();
-
-                    const vectorField ngbNA =
-                        aMesh().boundary()[patchI].ngbPolyPatchFaceNormals();
-
-                    const unallocLabelList& edgeFaces =
-                        aMesh().boundary()[patchI].edgeFaces();
-
-                    forAll (edgeFaces, edgeI)
-                    {
-                        label faceI = edgeFaces[edgeI];
-
-                        vector nAI = nA[faceI];
-                        vector ngbNAI = ngbNA[edgeI];
-
-                        contactAngle[edgeI] =
-                            180.0/M_PI
-                            * acos(-ngbNAI&nAI/mag(ngbNAI)/mag(nAI));
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-void trackedSurface::updateTemperature()
-{
-    if (TPtr_)
-    {
-        if (twoFluids())
-        {
-            // Update fixedValue boundary condition on patch B
-
-            if
-            (
-                T().boundaryField()[bPatchID()].type()
-             == fixedValueFvPatchField<scalar>::typeName
-            )
-            {
-                T().boundaryField()[bPatchID()] ==
-                    interpolatorAB().faceInterpolate
-                    (
-                        T().boundaryField()[aPatchID()]
-                    );
-            }
-            else
-            {
-                FatalErrorIn("trackedSurface::updateTemperature()")
-                    << "Bounary condition on " << T().name()
-                    <<  " for trackedSurfaceShadow patch is "
-                    << T().boundaryField()[bPatchID()].type()
-                    << ", instead "
-                    << fixedValueFvPatchField<scalar>::typeName
-                    << abort(FatalError);
-            }
-
-
-            // Update fixedGradient boundary condition on patch A
-
-            scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
-
-            scalarField TPB = interpolatorBA().faceInterpolate
-            (
-                T().boundaryField()[bPatchID()].patchInternalField()
-            );
-
-            const scalarField& TFs =
-                T().boundaryField()[aPatchID()];
-
-            scalarField nGradT = kFluidB().value()*(TPB - TFs)*DnA;
-            nGradT /= kFluidA().value() + VSMALL;
-
-            if
-            (
-                T().boundaryField()[aPatchID()].type()
-             == fixedGradientFvPatchField<scalar>::typeName
-            )
-            {
-                fixedGradientFvPatchField<scalar>& aT =
-                    refCast<fixedGradientFvPatchField<scalar> >
-                    (
-                        T().boundaryField()[aPatchID()]
-                    );
-
-                aT.gradient() = nGradT;
-            }
-            else
-            {
-                FatalErrorIn("trackedSurface::updateTemperature()")
-                    << "Bounary condition on " << T().name()
-                    <<  " for trackedSurface patch is "
-                    << T().boundaryField()[aPatchID()].type()
-                    << ", instead "
-                    << fixedGradientFvPatchField<scalar>::typeName
-                    << abort(FatalError);
-            }
-        }
-        else
-        {
-            if
-            (
-                T().boundaryField()[aPatchID()].type()
-             != zeroGradientFvPatchField<scalar>::typeName
-            )
-            {
-                FatalErrorIn("trackedSurface::updateTemperature()")
-                    << "Bounary condition on " << T().name()
-                    <<  " for trackedSurface patch is "
-                    << T().boundaryField()[aPatchID()].type()
-                    << ", instead "
-                    << zeroGradientFvPatchField<scalar>::typeName
-                    << abort(FatalError);
-            }
-        }
-
-
-        // Update surface tension
-
-        temperature().internalField() =
-            T().boundaryField()[aPatchID()];
-        temperature().correctBoundaryConditions();
-
-        // Correct surface tension
-        dimensionedScalar thermalCoeff
-        (
-            this->lookup("thermalCoeff")
-        );
-
-        dimensionedScalar refTemperature
-        (
-            this->lookup("refTemperature")
-        );
-
-        surfaceTension() =
-            cleanInterfaceSurfTension()
-          + thermalCoeff*(temperature() - refTemperature);
-
-        deleteDemandDrivenData(surfaceTensionForcePtr_);
     }
 }
 

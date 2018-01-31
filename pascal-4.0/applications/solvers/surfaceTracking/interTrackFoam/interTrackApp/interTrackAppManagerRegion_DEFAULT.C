@@ -31,6 +31,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
 {
     volumeForce = dict().lookupOrDefault("volumeForce", false);
     snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
+    cTransport = dict().lookupOrDefault("cTransport", false);
 }
 
 
@@ -222,6 +223,45 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_turbulence::cre
 }
 
 
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Dc::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                time(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    );
+}
+
+
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_c::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()
+        )
+    );
+}
+
+
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::create() const
 {
 // TODO: Add more constructors and simplify
@@ -236,6 +276,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::crea
             storage().p(),
             storage().phi(),
             NULL,
+            storage().item_c().getPtr(),
             storage().item_g().getPtr(),
             storage().item_transport().getPtr(),
             storage().item_turbulence().getPtr(),
@@ -262,6 +303,10 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
     rho().correctBoundaryConditions();
 
     item_turbulence().enable();
+
+    item_Dc().setState(settings().cTransport);
+    item_c().setState(settings().cTransport);
+
     item_interface().enable();
 }
 

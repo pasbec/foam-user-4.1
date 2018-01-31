@@ -37,6 +37,8 @@
                 turbulence.correct();
             }
 
+#           include "UpLoop_cEqn.H"
+
             // Make the fluxes absolute
             fvc::makeAbsolute(phi, U);
 

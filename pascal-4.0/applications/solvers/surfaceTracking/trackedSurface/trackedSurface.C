@@ -91,6 +91,7 @@ void trackedSurface::clearOut()
     deleteDemandDrivenData(muEffFluidBvalPtr_);
     deleteDemandDrivenData(contactAnglePtr_);
     deleteDemandDrivenData(temperaturePtr_);
+    deleteDemandDrivenData(concentrationPtr_);
     deleteDemandDrivenData(surfaceTensionForcePtr_);
     deleteDemandDrivenData(nGradUnPtr_);
 }
@@ -997,6 +998,7 @@ trackedSurface::trackedSurface
     volScalarField& Pb,
     surfaceScalarField& sfPhi,
     volScalarField* TbPtr,
+    volScalarField* cbPtr,
     const uniformDimensionedVectorField* gPtr,
     const twoPhaseMixture* transportPtr,
     const incompressible::turbulenceModel* turbulencePtr,
@@ -1025,24 +1027,18 @@ trackedSurface::trackedSurface
     p_(Pb),
     phi_(sfPhi),
     TPtr_(TbPtr),
+    cPtr_(cbPtr),
     gPtr_(gPtr),
     transportPtr_(transportPtr),
     turbulencePtr_(turbulencePtr),
     p0Ptr_(p0Ptr),
     curTimeIndex_(m.time().timeIndex()),
     meshMoved_(false),
-    twoFluids_
-    (
+    twoFluids_(
         this->lookup("twoFluids")
     ),
-    normalMotionDir_
-    (
-        this->lookup("normalMotionDir")
-    ),
-    motionDir_
-    (
-        vector::zero
-    ),
+    normalMotionDir_(true),
+    motionDir_(vector::zero),
     cleanInterface_
     (
         this->lookup("cleanInterface")
@@ -1059,18 +1055,11 @@ trackedSurface::trackedSurface
     CpFluidB_(word(), dimSpecificHeatCapacity, 0.0),
     g_(word(), dimLength/pow(dimTime,2), vector::zero),
     cleanInterfaceSurfTension_(word(), dimMass/pow(dimTime,2), 0),
-    fixedTrackedSurfacePatches_
-    (
-        this->lookup("fixed" + Prefix_ + "Patches")
-    ),
-    pointNormalsCorrectionPatches_
-    (
-        this->lookup("pointNormalsCorrectionPatches")
-    ),
-    nTrackedSurfCorr_
-    (
-        readInt(this->lookup("n" + Prefix_ + "Correctors"))
-    ),
+    fixedTrackedSurfacePatches_(wordList(0)),
+    pointNormalsCorrectionPatches_(wordList(0)),
+    nTrackedSurfCorr_(1),
+// TEST: Fixed interface
+    fixedInterface_(false),
 // TEST: Sub-mesh
     useSubMesh_(false),
     correctVolume_(false),
@@ -1118,6 +1107,22 @@ trackedSurface::trackedSurface
         Info << "Surface prefix is: " << prefix_ << endl;
     }
 
+    if (Switch(this->lookupOrDefault("fixedInterface", false)))
+    {
+        fixedInterface_ = true;
+        freeContactAngle_ = true;
+    }
+    else
+    {
+        normalMotionDir_ = Switch(this->lookup("normalMotionDir"));
+
+        fixedTrackedSurfacePatches_ =
+            wordList(this->lookup("fixed" + Prefix_ + "Patches"));
+
+        pointNormalsCorrectionPatches_ =
+            wordList(this->lookup("pointNormalsCorrectionPatches"));
+    }
+
     // Init properties
     initProperties();
 
@@ -1155,20 +1160,50 @@ trackedSurface::trackedSurface
 
     initMotionPointMask();
 
-    // Check Marangoni effect
-    if (TPtr_ && !cleanInterface_)
+    if (MarangoniStress())
     {
-        FatalErrorIn("trackedSurface::trackedSurface(...) : ")
-            << "Marangoni effect due to both "
-                << "surfactant concentration gradient "
-                << "and temperature gradient is not implemented"
-                << abort(FatalError);
-    }
+// TODO: Check with cPtr_
+        // Check for multiple Marangoni effects
+        if (!cleanInterface_ && TPtr_)
+        {
+            FatalErrorIn("trackedSurface::trackedSurface(...) : ")
+                << "Marangoni effect due to both "
+                    << "surfactant concentration gradient "
+                    << "and temperature gradient is not implemented"
+                    << abort(FatalError);
+        }
 
-    // Make surface temperature field
-    if (TPtr_)
-    {
-        makeTemperature();
+        // Check for multiple Marangoni effects
+        if (!cleanInterface_ && cPtr_)
+        {
+            FatalErrorIn("trackedSurface::trackedSurface(...) : ")
+                << "Marangoni effect due to both "
+                    << "surfactant concentration gradient "
+                    << "and concentration gradient is not implemented"
+                    << abort(FatalError);
+        }
+
+        // Make surfactant
+        if (!cleanInterface_)
+        {
+            Info << "Surfactant-driven Marangoni effect enabled" << endl;
+            surfactant();
+            surfactantConcentration();
+        }
+
+        // Make surface temperature field
+        if (TPtr_)
+        {
+            Info << "Temperature-driven Marangoni effect enabled" << endl;
+            temperature();
+        }
+
+        // Make surface concentration field
+        if (cPtr_)
+        {
+            Info << "Concentration-driven Marangoni effect enabled" << endl;
+            concentration();
+        }
     }
 
     // Init total displacement
@@ -1281,6 +1316,18 @@ void trackedSurface::updateProperties()
         g_ = dimensionedVector(this->lookup("g"));
     }
 
+    // Read correctors count
+    if (this->found("n" + Prefix_ + "Correctors"))
+    {
+        nTrackedSurfCorr_ = readInt(this->lookup("n" + Prefix_ + "Correctors"));
+    };
+
+    // Check if fixed Mesh switch is set
+    if (this->found("fixedInterface"))
+    {
+        fixedInterface_ = Switch(this->lookup("fixedInterface"));
+    };
+
     // Check if sub-mesh switch is set
     if (this->found("useSubMesh"))
     {
@@ -1312,9 +1359,16 @@ void trackedSurface::updateProperties()
     };
 
     // Check if freeContactAngle switch is set
-    if (this->found("freeContactAngle"))
+    if (fixedInterface_)
     {
-        freeContactAngle_ = Switch(this->lookup("freeContactAngle"));
+        freeContactAngle_ = true;
+    }
+    else
+    {
+        if (this->found("freeContactAngle"))
+        {
+            freeContactAngle_ = Switch(this->lookup("freeContactAngle"));
+        }
     }
 
     // Check if correctPointNormals switch is set
@@ -1371,7 +1425,7 @@ void trackedSurface::updateProperties()
 
 bool trackedSurface::updateMesh()
 {
-    if (totalDisplacementPtr_)
+    if (!fixedInterface_ && totalDisplacementPtr_)
     {
         scalar minCellThickness =
             2*gMin(1.0/mesh().boundary()[aPatchID()].deltaCoeffs());
@@ -1387,13 +1441,13 @@ bool trackedSurface::updateMesh()
                 << endl;
         }
 
-        // Move whole mesh only if interface deformation limit is exceeded
+        // Move mesh only if interface deformation limit is exceeded
         if (maxInterfaceDeformation > interfaceDeformationLimit_)
         {
             if (debug)
             {
                 Info << "trackedSurface::updateMesh() : "
-                    << "Moving whole mesh."
+                    << "Moving mesh."
                     << endl;
             }
 
@@ -1409,7 +1463,7 @@ bool trackedSurface::updateMesh()
         if (debug)
         {
             Info << "trackedSurface::updateMesh() : "
-                << "Skipping whole mesh movement."
+                << "Skipping mesh movement."
                 << endl;
         }
 
@@ -1429,16 +1483,30 @@ void trackedSurface::updatePoints()
 {
     scalarField& interfacePhi = phi().boundaryField()[aPatchID()];
 
-    correctInterfacePhi(interfacePhi);
-
-    for
-    (
-        int trackedSurfCorr=0;
-        trackedSurfCorr<nTrackedSurfCorr_;
-        trackedSurfCorr++
-    )
+    if (fixedInterface_)
     {
-        movePoints(interfacePhi);
+        interfacePhi = scalarField(interfacePhi.size(), 0.0);
+
+        if (debug)
+        {
+            Info << "trackedSurface::updatePoints() : "
+                << "Skipping point update."
+                << endl;
+        }
+    }
+    else
+    {
+        correctInterfacePhi(interfacePhi);
+
+        for
+        (
+            int trackedSurfCorr=0;
+            trackedSurfCorr<nTrackedSurfCorr_;
+            trackedSurfCorr++
+        )
+        {
+            movePoints(interfacePhi);
+        }
     }
 }
 
