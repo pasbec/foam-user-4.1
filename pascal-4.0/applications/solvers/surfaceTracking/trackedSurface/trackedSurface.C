@@ -1099,6 +1099,7 @@ trackedSurface::trackedSurface
     muEffFluidBvalPtr_(NULL),
     contactAnglePtr_(NULL),
     temperaturePtr_(NULL),
+    concentrationPtr_(NULL),
     surfaceTensionForcePtr_(NULL),
     nGradUnPtr_(NULL)
 {

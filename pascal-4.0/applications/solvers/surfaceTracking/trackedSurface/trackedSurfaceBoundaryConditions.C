@@ -971,6 +971,7 @@ void trackedSurface::updatePressure()
             {
                 const vectorField& nA =
                     aMesh().faceAreaNormals().internalField();
+
                 const vectorField& totSurfTensionForce = surfaceTensionForce();
 
                 scalarField surfTensionK = (nA&totSurfTensionForce);

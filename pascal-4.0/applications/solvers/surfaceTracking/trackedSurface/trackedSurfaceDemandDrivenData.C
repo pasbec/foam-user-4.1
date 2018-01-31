@@ -814,34 +814,34 @@ void trackedSurface::makeSurfaceTension() const
     areaScalarField& surfaceTension = *surfaceTensionPtr_;
 
 
-//     if (!cleanInterface())
-//     {
-//         surfaceTension =
-//             cleanInterfaceSurfTension()
-//           + surfactant().surfactR()*
-//             surfactant().surfactT()*
-//             surfactant().surfactSaturatedConc()*
-//             log(1.0 - surfactantConcentration()/
-//             surfactant().surfactSaturatedConc());
-//     }
-//
-//
-//     if (TPtr_)
-//     {
-//         dimensionedScalar thermalCoeff
-//         (
-//             this->lookup("thermalCoeff")
-//         );
-//
-//         dimensionedScalar refTemperature
-//         (
-//             this->lookup("refTemperature")
-//         );
-//
-//         surfaceTension =
-//             cleanInterfaceSurfTension()
-//           + thermalCoeff*(temperature() - refTemperature);
-//     }
+    if (!cleanInterface())
+    {
+        surfaceTension =
+            cleanInterfaceSurfTension()
+          + surfactant().surfactR()*
+            surfactant().surfactT()*
+            surfactant().surfactSaturatedConc()*
+            log(1.0 - surfactantConcentration()/
+            surfactant().surfactSaturatedConc());
+    }
+
+
+    if (TPtr_)
+    {
+        dimensionedScalar thermalCoeff
+        (
+            this->lookup("thermalCoeff")
+        );
+
+        dimensionedScalar refTemperature
+        (
+            this->lookup("refTemperature")
+        );
+
+        surfaceTension =
+            cleanInterfaceSurfTension()
+          + thermalCoeff*(temperature() - refTemperature);
+    }
 
     if (cPtr_)
     {
@@ -855,13 +855,9 @@ void trackedSurface::makeSurfaceTension() const
             this->lookup("refConcentration")
         );
 
-        cleanInterfaceSurfTension();
-        concentration();
-
-
-//         surfaceTension =
-//             cleanInterfaceSurfTension()
-//           + cCoeff*(concentration() - refConcentration);
+        surfaceTension =
+            cleanInterfaceSurfTension()
+          + cCoeff*(concentration() - refConcentration);
     }
 }
 
