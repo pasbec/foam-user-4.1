@@ -25,13 +25,15 @@ License
 
 #include "trackedSurface.H"
 
-#include "wallFvPatch.H"
-
 #include "fixedGradientFvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
 
 #include "fixedGradientCorrectedFvPatchFields.H"
 #include "fixedValueCorrectedFvPatchFields.H"
+
+#include "zeroGradientFvPatchFields.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
+#include "directionMixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -216,7 +218,7 @@ void trackedSurface::updateSurfactantConcentration()
                     IOobject::NO_WRITE
                 ),
                 aMesh(),
-                dimensioned<scalar>("Cb", dimMoles/dimVolume, 0),
+                dimensionedScalar("Cb", dimMoles/dimVolume, 0),
                 zeroGradientFaPatchScalarField::typeName
             );
 
@@ -275,7 +277,7 @@ void trackedSurface::updateTemperature()
             if
             (
                 T().boundaryField()[bPatchID()].type()
-             == fixedValueFvPatchField<scalar>::typeName
+             == fixedValueFvPatchScalarField::typeName
             )
             {
                 T().boundaryField()[bPatchID()] ==
@@ -291,7 +293,7 @@ void trackedSurface::updateTemperature()
                     <<  " for trackedSurfaceShadow patch is "
                     << T().boundaryField()[bPatchID()].type()
                     << ", instead of "
-                    << fixedValueFvPatchField<scalar>::typeName
+                    << fixedValueFvPatchScalarField::typeName
                     << abort(FatalError);
             }
 
@@ -314,11 +316,11 @@ void trackedSurface::updateTemperature()
             if
             (
                 T().boundaryField()[aPatchID()].type()
-             == fixedGradientFvPatchField<scalar>::typeName
+             == fixedGradientFvPatchScalarField::typeName
             )
             {
-                fixedGradientFvPatchField<scalar>& aT =
-                    refCast<fixedGradientFvPatchField<scalar> >
+                fixedGradientFvPatchScalarField& aT =
+                    refCast<fixedGradientFvPatchScalarField >
                     (
                         T().boundaryField()[aPatchID()]
                     );
@@ -332,7 +334,7 @@ void trackedSurface::updateTemperature()
                     <<  " for trackedSurface patch is "
                     << T().boundaryField()[aPatchID()].type()
                     << ", instead of "
-                    << fixedGradientFvPatchField<scalar>::typeName
+                    << fixedGradientFvPatchScalarField::typeName
                     << abort(FatalError);
             }
         }
@@ -341,7 +343,7 @@ void trackedSurface::updateTemperature()
             if
             (
                 T().boundaryField()[aPatchID()].type()
-             != zeroGradientFvPatchField<scalar>::typeName
+             != zeroGradientFvPatchScalarField::typeName
             )
             {
                 FatalErrorIn("trackedSurface::updateTemperature()")
@@ -349,7 +351,7 @@ void trackedSurface::updateTemperature()
                     <<  " for trackedSurface patch is "
                     << T().boundaryField()[aPatchID()].type()
                     << ", instead of "
-                    << zeroGradientFvPatchField<scalar>::typeName
+                    << zeroGradientFvPatchScalarField::typeName
                     << abort(FatalError);
             }
         }
@@ -392,7 +394,7 @@ void trackedSurface::updateConcentration()
             if
             (
                 c().boundaryField()[bPatchID()].type()
-             == fixedValueFvPatchField<scalar>::typeName
+             == fixedValueFvPatchScalarField::typeName
             )
             {
                 c().boundaryField()[bPatchID()] ==
@@ -408,7 +410,7 @@ void trackedSurface::updateConcentration()
                     <<  " for trackedSurfaceShadow patch is "
                     << c().boundaryField()[bPatchID()].type()
                     << ", instead of "
-                    << fixedValueFvPatchField<scalar>::typeName
+                    << fixedValueFvPatchScalarField::typeName
                     << abort(FatalError);
             }
 
@@ -431,11 +433,11 @@ void trackedSurface::updateConcentration()
             if
             (
                 c().boundaryField()[aPatchID()].type()
-             == fixedGradientFvPatchField<scalar>::typeName
+             == fixedGradientFvPatchScalarField::typeName
             )
             {
-                fixedGradientFvPatchField<scalar>& ac =
-                    refCast<fixedGradientFvPatchField<scalar> >
+                fixedGradientFvPatchScalarField& ac =
+                    refCast<fixedGradientFvPatchScalarField >
                     (
                         c().boundaryField()[aPatchID()]
                     );
@@ -449,7 +451,7 @@ void trackedSurface::updateConcentration()
                     <<  " for trackedSurface patch is "
                     << c().boundaryField()[aPatchID()].type()
                     << ", instead of "
-                    << fixedGradientFvPatchField<scalar>::typeName
+                    << fixedGradientFvPatchScalarField::typeName
                     << abort(FatalError);
             }
         }
@@ -458,7 +460,7 @@ void trackedSurface::updateConcentration()
             if
             (
                 c().boundaryField()[aPatchID()].type()
-             != zeroGradientFvPatchField<scalar>::typeName
+             != zeroGradientFvPatchScalarField::typeName
             )
             {
                 FatalErrorIn("trackedSurface::updateConcentration()")
@@ -466,7 +468,7 @@ void trackedSurface::updateConcentration()
                     <<  " for trackedSurface patch is "
                     << c().boundaryField()[aPatchID()].type()
                     << ", instead of "
-                    << zeroGradientFvPatchField<scalar>::typeName
+                    << zeroGradientFvPatchScalarField::typeName
                     << abort(FatalError);
             }
         }
@@ -520,11 +522,11 @@ void trackedSurface::updateVelocity()
         if
         (
             U().boundaryField()[aPatchID()].type()
-         == fixedGradientCorrectedFvPatchField<vector>::typeName
+         == fixedGradientCorrectedFvPatchVectorField::typeName
         )
         {
-            fixedGradientCorrectedFvPatchField<vector>& aU =
-                refCast<fixedGradientCorrectedFvPatchField<vector> >
+            fixedGradientCorrectedFvPatchVectorField& aU =
+                refCast<fixedGradientCorrectedFvPatchVectorField >
                 (
                     U().boundaryField()[aPatchID()]
                 );
@@ -543,11 +545,11 @@ void trackedSurface::updateVelocity()
         if
         (
             U().boundaryField()[bPatchID()].type()
-         == fixedValueCorrectedFvPatchField<vector>::typeName
+         == fixedValueCorrectedFvPatchVectorField::typeName
         )
         {
-            fixedValueCorrectedFvPatchField<vector>& bU =
-                refCast<fixedValueCorrectedFvPatchField<vector> >
+            fixedValueCorrectedFvPatchVectorField& bU =
+                refCast<fixedValueCorrectedFvPatchVectorField >
                 (
                     U().boundaryField()[bPatchID()]
                 );
@@ -629,11 +631,11 @@ void trackedSurface::updateVelocity()
         if
         (
             p().boundaryField()[bPatchID()].type()
-         == fixedGradientFvPatchField<scalar>::typeName
+         == fixedGradientFvPatchScalarField::typeName
         )
         {
-            fixedGradientFvPatchField<scalar>& pB =
-                refCast<fixedGradientFvPatchField<scalar> >
+            fixedGradientFvPatchScalarField& pB =
+                refCast<fixedGradientFvPatchScalarField >
                 (
                     p().boundaryField()[bPatchID()]
                 );
@@ -663,11 +665,11 @@ void trackedSurface::updateVelocity()
         if
         (
             U().boundaryField()[aPatchID()].type()
-         == fixedGradientCorrectedFvPatchField<vector>::typeName
+         == fixedGradientCorrectedFvPatchVectorField::typeName
         )
         {
-            fixedGradientCorrectedFvPatchField<vector>& aU =
-                refCast<fixedGradientCorrectedFvPatchField<vector> >
+            fixedGradientCorrectedFvPatchVectorField& aU =
+                refCast<fixedGradientCorrectedFvPatchVectorField >
                 (
                     U().boundaryField()[aPatchID()]
                 );
@@ -677,11 +679,11 @@ void trackedSurface::updateVelocity()
         else if
         (
             U().boundaryField()[aPatchID()].type()
-         == fixedGradientFvPatchField<vector>::typeName
+         == fixedGradientFvPatchVectorField::typeName
         )
         {
-            fixedGradientFvPatchField<vector>& aU =
-                refCast<fixedGradientFvPatchField<vector> >
+            fixedGradientFvPatchVectorField& aU =
+                refCast<fixedGradientFvPatchVectorField >
                 (
                     U().boundaryField()[aPatchID()]
                 );
@@ -694,10 +696,10 @@ void trackedSurface::updateVelocity()
                 << "Bounary condition on " << U().name()
                     <<  " for trackedSurface patch is "
                     << U().boundaryField()[aPatchID()].type()
-                    << ", instead "
-                    << fixedGradientCorrectedFvPatchField<vector>::typeName
+                    << ", instead of "
+                    << fixedGradientCorrectedFvPatchVectorField::typeName
                     << " or "
-                    << fixedGradientFvPatchField<vector>::typeName
+                    << fixedGradientFvPatchVectorField::typeName
                     << abort(FatalError);
         }
     }
@@ -716,11 +718,11 @@ void trackedSurface::updateVelocity()
 //         if
 //         (
 //             U().boundaryField()[aPatchID()].type()
-//          == fixedGradientCorrectedFvPatchField<vector>::typeName
+//          == fixedGradientCorrectedFvPatchVectorField::typeName
 //         )
 //         {
-//             fixedGradientCorrectedFvPatchField<vector>& aU =
-//                 refCast<fixedGradientCorrectedFvPatchField<vector> >
+//             fixedGradientCorrectedFvPatchVectorField& aU =
+//                 refCast<fixedGradientCorrectedFvPatchVectorField >
 //                 (
 //                     U().boundaryField()[aPatchID()]
 //                 );
@@ -799,45 +801,77 @@ void trackedSurface::updateVelocity()
           + nA*nGradUn()
           - (fac::grad(Us())().internalField()&nA);
 
-        if
-        (
-            U().boundaryField()[aPatchID()].type()
-         == fixedGradientCorrectedFvPatchField<vector>::typeName
-        )
+        if (fixedInterface_)
         {
-            fixedGradientCorrectedFvPatchField<vector>& aU =
-                refCast<fixedGradientCorrectedFvPatchField<vector> >
-                (
-                    U().boundaryField()[aPatchID()]
-                );
+            if
+            (
+               U().boundaryField()[aPatchID()].type()
+            == directionMixedFvPatchVectorField::typeName
+            )
+            {
+                directionMixedFvPatchVectorField& aU =
+                    refCast<directionMixedFvPatchVectorField >
+                    (
+                        U().boundaryField()[aPatchID()]
+                    );
 
-            aU.gradient() = nGradU;
-        }
-        else if
-        (
-            U().boundaryField()[aPatchID()].type()
-         == fixedGradientFvPatchField<vector>::typeName
-        )
-        {
-            fixedGradientFvPatchField<vector>& aU =
-                refCast<fixedGradientFvPatchField<vector> >
-                (
-                    U().boundaryField()[aPatchID()]
-                );
-
-            aU.gradient() = nGradU;
+                aU.refValue() = vector::zero;
+                aU.refGrad() = nGradU;
+                aU.valueFraction() = symm(nA*nA);
+            }
+            else
+            {
+                FatalErrorIn("trackedSurface::updateVelocity()")
+                    << "Bounary condition on " << U().name()
+                        <<  " for trackedSurface patch is "
+                        << U().boundaryField()[aPatchID()].type()
+                        << ", instead of "
+                        << directionMixedFvPatchVectorField::typeName
+                        << abort(FatalError);
+            }
         }
         else
         {
-            FatalErrorIn("trackedSurface::updateVelocity()")
-                << "Bounary condition on " << U().name()
-                    <<  " for trackedSurface patch is "
-                    << U().boundaryField()[aPatchID()].type()
-                    << ", instead "
-                    << fixedGradientCorrectedFvPatchField<vector>::typeName
-                    << " or "
-                    << fixedGradientFvPatchField<vector>::typeName
-                    << abort(FatalError);
+            if
+            (
+                U().boundaryField()[aPatchID()].type()
+            == fixedGradientCorrectedFvPatchVectorField::typeName
+            )
+            {
+                fixedGradientCorrectedFvPatchVectorField& aU =
+                    refCast<fixedGradientCorrectedFvPatchVectorField >
+                    (
+                        U().boundaryField()[aPatchID()]
+                    );
+
+                aU.gradient() = nGradU;
+            }
+            else if
+            (
+                U().boundaryField()[aPatchID()].type()
+            == fixedGradientFvPatchVectorField::typeName
+            )
+            {
+                fixedGradientFvPatchVectorField& aU =
+                    refCast<fixedGradientFvPatchVectorField >
+                    (
+                        U().boundaryField()[aPatchID()]
+                    );
+
+                aU.gradient() = nGradU;
+            }
+            else
+            {
+                FatalErrorIn("trackedSurface::updateVelocity()")
+                    << "Bounary condition on " << U().name()
+                        <<  " for trackedSurface patch is "
+                        << U().boundaryField()[aPatchID()].type()
+                        << ", instead of "
+                        << fixedGradientCorrectedFvPatchVectorField::typeName
+                        << " or "
+                        << fixedGradientFvPatchVectorField::typeName
+                        << abort(FatalError);
+            }
         }
     }
 }
@@ -896,8 +930,8 @@ void trackedSurface::updatePressure()
         }
 
 
-//         fixedGradientFvPatchField<vector>& aU =
-//             refCast<fixedGradientFvPatchField<vector> >
+//         fixedGradientFvPatchVectorField& aU =
+//             refCast<fixedGradientFvPatchVectorField >
 //             (
 //                 U().boundaryField()[aPatchID()]
 //             );
@@ -930,67 +964,116 @@ void trackedSurface::updatePressure()
     }
     else
     {
-        vector R0 = vector::zero;
-
-        scalarField pA =
-          - rhoFluidA().value()*
+        if (fixedInterface_)
+        {
+            if
             (
-                g_.value()
-              & (
-                    mesh().C().boundaryField()[aPatchID()]
-                  - R0
+               !(
+                    p().boundaryField()[aPatchID()].type()
+                 == fixedFluxPressureFvPatchScalarField::typeName
+                 || p().boundaryField()[aPatchID()].type()
+                 == zeroGradientFvPatchScalarField::typeName
                 )
-            );
-
-        const scalarField& K = curvature().internalField();
-
-        if (debug)
-        {
-            Info << "trackedSurface::updatePressure() : "
-                << "Surface curvature: min = " << gMin(K)
-                << ", max = " << gMax(K)
-                << ", average = " << gAverage(K)
-                << endl;
-        }
-
-        if (!MarangoniStress())
-        {
-//             pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
-            pA -= cleanInterfaceSurfTension().value()*K;
+            )
+            {
+                FatalErrorIn("trackedSurface::updatePressure()")
+                    << "Bounary condition on " << p().name()
+                        <<  " for trackedSurface patch is "
+                        << p().boundaryField()[aPatchID()].type()
+                        << ", instead of "
+                        << fixedFluxPressureFvPatchScalarField::typeName
+                        << " or "
+                        << zeroGradientFvPatchScalarField::typeName
+                        << abort(FatalError);
+            }
         }
         else
         {
-            if (correctCurvature_)
-            {
-                scalarField surfTensionK =
-                    surfaceTension().internalField()*K;
+            vector R0 = vector::zero;
 
-                pA -= surfTensionK;
+            scalarField pA =
+            - rhoFluidA().value()*
+                (
+                    g_.value()
+                & (
+                        mesh().C().boundaryField()[aPatchID()]
+                    - R0
+                    )
+                );
+
+            const scalarField& K = curvature().internalField();
+
+            if (debug)
+            {
+                Info << "trackedSurface::updatePressure() : "
+                    << "Surface curvature: min = " << gMin(K)
+                    << ", max = " << gMax(K)
+                    << ", average = " << gAverage(K)
+                    << endl;
+            }
+
+            if (!MarangoniStress())
+            {
+//                 pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
+                pA -= cleanInterfaceSurfTension().value()*K;
             }
             else
             {
-                const vectorField& nA =
-                    aMesh().faceAreaNormals().internalField();
+                if (correctCurvature_)
+                {
+                    scalarField surfTensionK =
+                        surfaceTension().internalField()*K;
 
-                const vectorField& totSurfTensionForce = surfaceTensionForce();
+                    pA -= surfTensionK;
+                }
+                else
+                {
+                    const vectorField& nA =
+                        aMesh().faceAreaNormals().internalField();
 
-                scalarField surfTensionK = (nA&totSurfTensionForce);
+                    const vectorField& totSurfTensionForce = surfaceTensionForce();
 
-                pA -= surfTensionK;
+                    scalarField surfTensionK = (nA&totSurfTensionForce);
+
+                    pA -= surfTensionK;
+                }
+            }
+
+//             scalarField divUs = -nGradUn();
+
+            pA += 2.0*muEffFluidAval()*nGradUn();
+//             pA -= 2.0*muEffFluidAval()*fac::div(Us())().internalField();
+
+            if (p0Ptr_)
+            {
+                pA += p0().boundaryField()[aPatchID()];
+            }
+
+            if
+            (
+               p().boundaryField()[aPatchID()].type()
+            == fixedValueFvPatchScalarField::typeName
+            )
+            {
+                fixedValueFvPatchScalarField& ap =
+                    refCast<fixedValueFvPatchScalarField >
+                    (
+                        p().boundaryField()[aPatchID()]
+                    );
+
+                ap == pA;
+            }
+            else
+            {
+                FatalErrorIn("trackedSurface::updatePressure()")
+                    << "Bounary condition on " << p().name()
+                        <<  " for trackedSurface patch is "
+                        << p().boundaryField()[aPatchID()].type()
+                        << ", instead of "
+                        << fixedValueFvPatchScalarField::typeName
+                        << abort(FatalError);
             }
         }
-
-//         scalarField divUs = -nGradUn();
-
-        pA += 2.0*muEffFluidAval()*nGradUn();
-//         pA -= 2.0*muEffFluidAval()*fac::div(Us())().internalField();
-
-        if (p0Ptr_)
-        {
-            pA += p0().boundaryField()[aPatchID()];
-        }
-
-        p().boundaryField()[aPatchID()] == pA;
     }
 
 

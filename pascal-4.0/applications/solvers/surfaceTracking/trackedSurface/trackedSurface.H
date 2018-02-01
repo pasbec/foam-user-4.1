@@ -46,7 +46,14 @@ Authors
 
 #include "IOdictionary.H"
 #include "fvCFD.H"
+#include "wallFvPatch.H"
 #include "faCFD.H"
+#include "emptyFaPatch.H"
+#include "wedgeFaPatch.H"
+#include "wedgeFaPatchFields.H"
+#include "slipFaPatchFields.H"
+#include "fixedValueFaPatchFields.H"
+#include "zeroGradientFaPatchFields.H"
 #include "faSubMesh.H"
 #include "IOpatchToPatchInterpolation.H"
 #include "dynamicFvMesh.H"
@@ -709,6 +716,12 @@ public:
         bool MarangoniStress() const
         {
             return (!cleanInterface_ || TPtr_ || cPtr_);
+        }
+
+        //- Is the interface fixed?
+        bool fixedInterface() const
+        {
+            return fixedInterface_;
         }
 
         //- Return reference to interpolator from surface side A to

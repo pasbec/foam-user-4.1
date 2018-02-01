@@ -25,10 +25,6 @@ License
 
 #include "trackedSurface.H"
 
-#include "wallFvPatch.H"
-
-#include "wedgeFaPatch.H"
-
 #include "coordinateSystem.H"
 #include "scalarMatrices.H"
 

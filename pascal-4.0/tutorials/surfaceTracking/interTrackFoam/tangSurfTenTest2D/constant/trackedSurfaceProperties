@@ -14,9 +14,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoFluids no;
 fixedInterface yes;
-cleanInterface yes;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // twoFluids no;
 //
@@ -28,8 +28,8 @@ cleanInterface yes;
 //
 // fixedTrackedSurfacePatches 0();
 //
-// // pointNormalsCorrectionPatches   2(side frontAndBack); // no contactAngle given
-// pointNormalsCorrectionPatches   1(frontAndBack);              // contactAngle given
+// pointNormalsCorrectionPatches   2(side frontAndBack); // no contactAngle given
+// // pointNormalsCorrectionPatches   1(frontAndBack);              // contactAngle given
 //
 // nTrackedSurfaceCorrectors 1;
 //
@@ -49,7 +49,9 @@ cleanInterface yes;
 // //
 // // fvcNGradUn          yes;
 
-cCoeff           cCoeff           [ 1 0 -2 0 0 0 0 ] -1e-2;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+cCoeff           cCoeff           [ 1 0 -2 0 0 0 0 ] -5e-2;
 refConcentration refConcentration [ 0 0  0 0 0 0 0 ] 0.5;
 
 // ************************************************************************* //

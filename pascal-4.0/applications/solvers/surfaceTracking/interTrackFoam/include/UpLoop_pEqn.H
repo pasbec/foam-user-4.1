@@ -156,6 +156,10 @@
 // TODO: Two fluids: Pressure equation reference
 // #           include "setReference.H"
 //             pEqn.setReference(pRefCell, pRefValue);
+            if (!interface.twoFluids())
+            {
+                pEqn.setReference(control.pRefCell(), control.pRefValue());
+            }
 
             pEqn.solve(mesh.solutionDict().solver(p.select(control.finalInnerIter())));
 

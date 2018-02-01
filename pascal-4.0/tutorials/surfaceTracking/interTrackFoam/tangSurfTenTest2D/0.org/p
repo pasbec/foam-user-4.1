@@ -22,8 +22,10 @@ boundaryField
 {
     trackedSurface
     {
-        type            fixedValue;
-        value           uniform 0;
+//         type            fixedValue;
+//         value           uniform 0;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     bottom
     {

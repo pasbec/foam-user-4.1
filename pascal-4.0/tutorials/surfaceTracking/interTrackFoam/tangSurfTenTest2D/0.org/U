@@ -22,8 +22,13 @@ boundaryField
 {
     trackedSurface
     {
-        type            fixedGradient;
-        gradient        uniform (0 0 0);
+//         type            fixedGradient;
+//         gradient        uniform (0 0 0);
+        type            directionMixed;
+        refValue        uniform (0 0 0);
+        refGradient     uniform (0 0 0);
+        valueFraction   uniform (0 0 0 0 0 0);
+        value           uniform (0 0 0);
     }
     bottom
     {

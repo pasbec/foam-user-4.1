@@ -25,11 +25,6 @@ License
 
 #include "trackedSurface.H"
 
-#include "wallFvPatch.H"
-
-#include "emptyFaPatch.H"
-#include "wedgeFaPatch.H"
-
 #include "EulerDdtScheme.H"
 #include "CrankNicolsonDdtScheme.H"
 #include "backwardDdtScheme.H"
@@ -1034,15 +1029,10 @@ trackedSurface::trackedSurface
     p0Ptr_(p0Ptr),
     curTimeIndex_(m.time().timeIndex()),
     meshMoved_(false),
-    twoFluids_(
-        this->lookup("twoFluids")
-    ),
+    twoFluids_(false),
     normalMotionDir_(true),
     motionDir_(vector::zero),
-    cleanInterface_
-    (
-        this->lookup("cleanInterface")
-    ),
+    cleanInterface_(true),
     aPatchID_(-1),
     bPatchID_(-1),
     muFluidA_(word(), dimMass/dimLength/dimTime, 0),
@@ -1111,10 +1101,18 @@ trackedSurface::trackedSurface
     if (Switch(this->lookupOrDefault("fixedInterface", false)))
     {
         fixedInterface_ = true;
+
+        twoFluids_ = false;
+        normalMotionDir_ = true;
+        fixedTrackedSurfacePatches_ = wordList(0);
+        pointNormalsCorrectionPatches_ = wordList(0);
         freeContactAngle_ = true;
+
     }
     else
     {
+        twoFluids_ = Switch(this->lookup("twoFluids"));
+
         normalMotionDir_ = Switch(this->lookup("normalMotionDir"));
 
         fixedTrackedSurfacePatches_ =
@@ -1317,17 +1315,13 @@ void trackedSurface::updateProperties()
         g_ = dimensionedVector(this->lookup("g"));
     }
 
-    // Read correctors count
-    if (this->found("n" + Prefix_ + "Correctors"))
-    {
-        nTrackedSurfCorr_ = readInt(this->lookup("n" + Prefix_ + "Correctors"));
-    };
+    // Read surfactant setting
+    cleanInterface_ =
+        Switch(this->lookupOrDefault("cleanInterface", true));
 
-    // Check if fixed Mesh switch is set
-    if (this->found("fixedInterface"))
-    {
-        fixedInterface_ = Switch(this->lookup("fixedInterface"));
-    };
+    // Read correctors count
+    nTrackedSurfCorr_ =
+        int(this->lookupOrDefault("n" + Prefix_ + "Correctors", 1));
 
     // Check if sub-mesh switch is set
     if (this->found("useSubMesh"))

@@ -25,12 +25,6 @@ License
 
 #include "trackedSurface.H"
 
-#include "wallFvPatch.H"
-
-#include "wedgeFaPatchFields.H"
-#include "slipFaPatchFields.H"
-#include "fixedValueFaPatchFields.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -670,7 +664,7 @@ void trackedSurface::makeUs() const
             IOobject::NO_WRITE
         ),
         aMesh(),
-        dimensioned<vector>("Us", dimVelocity, vector::zero),
+        dimensionedVector("Us", dimVelocity, vector::zero),
         patchFieldTypes
     );
 
