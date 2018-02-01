@@ -25,14 +25,25 @@ boundaryField
         type            fixedValue;
         value           uniform (0 0 0);
     }
-    bottom
+//     top
+//     {
+//         type            fixedValue;
+//         value           uniform (0 0 0);
+//     }
+//     bottom
+//     {
+//         type            fixedValue;
+//         value           uniform (0 0 0);
+//     }
+    side_x
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
-    side
+    side_y
     {
-        type            slip;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
     frontAndBack
     {

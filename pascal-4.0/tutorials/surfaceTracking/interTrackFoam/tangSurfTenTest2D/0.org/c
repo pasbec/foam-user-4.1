@@ -24,15 +24,23 @@ boundaryField
     {
         type            zeroGradient;
     }
-    bottom
+//     top
+//     {
+//         type            fixedValue;
+//         value           uniform 1;
+//     }
+//     bottom
+//     {
+//         type            fixedValue;
+//         value           uniform 0;
+//     }
+    side_x
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            zeroGradient;
     }
-    side
+    side_y
     {
-        type            fixedValue;
-        value           uniform 1;
+        type            zeroGradient;
     }
     frontAndBack
     {

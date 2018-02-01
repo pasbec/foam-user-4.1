@@ -9,41 +9,48 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      fluidIndicator;
+    class       dictionary;
+    object      mirrorMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+/* A plane can be defined in different ways
+ * 1. planeEquation
+ *     planeType    planeEquation;
+ *     planeEquationDict
+ *     {
+ *        a  1.0;
+ *        b  2.0;
+ *        c  3.0;
+ *        d  0.0;
+ *     }
+ *
+ * 2. embeddedPoints
+ *     planeType    planeEquation;
+ *     planeEquationDict
+ *     {
+ *        point1  (0 1 0);
+ *        point2  (1 0 0);
+ *        point3  (0 0 1);
+ *     }
+ *
+ * 3. pointAndNormal
+ *     planeType           pointAndNormal;
+ *     pointAndNormalDict
+ *     {
+ *        basePoint       (0 0 0);
+ *        normalVector    (0 1 0);
+ *     }
+ */
 
-internalField   uniform 1;
+planeType           pointAndNormal;
 
-boundaryField
+pointAndNormalDict
 {
-    trackedSurface
-    {
-        type            zeroGradient;
-    }
-//     top
-//     {
-//         type            zeroGradient;
-//     }
-//     bottom
-//     {
-//         type            zeroGradient;
-//     }
-    side_x
-    {
-        type            zeroGradient;
-    }
-    side_y
-    {
-        type            zeroGradient;
-    }
-    frontAndBack
-    {
-        type            empty;
-    }
+    basePoint       (0 0 0);
+    normalVector    (1 0 0);
 }
+
+planeTolerance      1e-6;
 
 // ************************************************************************* //

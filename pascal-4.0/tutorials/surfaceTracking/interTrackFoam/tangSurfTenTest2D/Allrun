@@ -48,6 +48,20 @@ if [[ $1 != 'clean' ]]; then
     # Restore faMesh from org backup
     cp -r 'constant/faMesh.org/'* 'constant/faMesh' > /dev/null 2>&1
 
+    # Mirror mesh in x,y directions
+    directions="x y"
+    for d in $directions; do
+
+        cp "system/mirrorMeshDict.$d" \
+            'system/mirrorMeshDict'
+
+        runApplication -l "log.mirrorMesh.$d" mirrorMesh || exit 1
+
+    done
+
+    rm -rf 'constant/polyMesh'
+    mv '0/polyMesh' 'constant'
+
     # CheckMesh
     runApplication checkMesh || exit 1
 
@@ -57,8 +71,11 @@ if [[ $1 != 'clean' ]]; then
     # Copy all data from 0.org to initial time folder
     cp -r 0.org/* 0 || exit 1
 
+    # Set fields
+    runApplication funkySetFields -time 0
+
     # Create fa sub mesh
-    runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'
+#     runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'
 
     # Start solver
     #runApplication $application

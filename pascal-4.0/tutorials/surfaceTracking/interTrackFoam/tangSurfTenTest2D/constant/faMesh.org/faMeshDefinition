@@ -18,13 +18,6 @@ polyMeshPatches               1(trackedSurface);
 
 boundary
 {
-    side
-    {
-        type                  patch;
-        ownerPolyPatch        trackedSurface;
-        neighbourPolyPatch    side;
-    }
-
     frontAndBack
     {
         type                  empty;

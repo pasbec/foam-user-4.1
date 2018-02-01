@@ -9,41 +9,30 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      fluidIndicator;
+    class       dictionary;
+    object      funkySetFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+conc_data
+();
 
-internalField   uniform 1;
+expressions
+(
+    conc_reset
+    {
+        field         c;
+        expression    "0";
+        keepPatches   true;
+    }
 
-boundaryField
-{
-    trackedSurface
+    conc_left_0
     {
-        type            zeroGradient;
+        field         c;
+        variables     $conc_data;
+        expression    "1.0 + (pos().y-0.004)/0.008";
     }
-//     top
-//     {
-//         type            zeroGradient;
-//     }
-//     bottom
-//     {
-//         type            zeroGradient;
-//     }
-    side_x
-    {
-        type            zeroGradient;
-    }
-    side_y
-    {
-        type            zeroGradient;
-    }
-    frontAndBack
-    {
-        type            empty;
-    }
-}
+);
 
 // ************************************************************************* //
+
