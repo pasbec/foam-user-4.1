@@ -62,6 +62,12 @@ if [[ $1 != 'clean' ]]; then
     rm -rf 'constant/polyMesh'
     mv '0/polyMesh' 'constant'
 
+    # Create new topoSets
+    runApplication setSet -noVTK -batch 'system/setSetBatch' || exit 1
+
+    # Create new patches
+    runApplication createPatch -overwrite || exit 1
+
     # CheckMesh
     runApplication checkMesh || exit 1
 

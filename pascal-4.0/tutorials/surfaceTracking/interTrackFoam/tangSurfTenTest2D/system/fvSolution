@@ -57,7 +57,7 @@ PIMPLE
 //     nOuterCorrectors            1;
     nOuterCorrectors            50;
     nCorrectors                 1;
-    nNonOrthogonalCorrectors    5;
+    nNonOrthogonalCorrectors    2;
     pRefPoint (0.002 0 0);
     pRefValue 0;
 
@@ -67,7 +67,7 @@ PIMPLE
     {
         Up
         {
-                tolerance  1e-05;
+                tolerance  1e-03;
                 relTol     1e-02;
         }
 
@@ -78,7 +78,7 @@ PIMPLE
 //         }
         p
         {
-                tolerance  1e-05;
+                tolerance  1e-03;
                 relTol     1e-02;
         }
      }

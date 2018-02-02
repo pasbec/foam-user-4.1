@@ -9,46 +9,65 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       tetPointVectorField;
-    object      motionU;
+    class       dictionary;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions          [0 1 -1 0 0 0 0];
+matchTolerance 1e-12;
 
-internalField       uniform (0 0 0);
+pointSync true;
 
-boundaryField
-{
-    trackedSurface
+patchInfo
+(
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        name             left;
+        constructFrom    set;
+        set              left;
+
+        dictionary
+        {
+            type         wall;
+        }
     }
-    left
+
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        name             right;
+        constructFrom    set;
+        set              right;
+
+        dictionary
+        {
+            type         wall;
+        }
     }
-    right
+
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        name             top;
+        constructFrom    set;
+        set              top;
+
+        dictionary
+        {
+            type         wall;
+        }
     }
-    top
+
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        name             bottom;
+        constructFrom    set;
+        set              bottom;
+
+        dictionary
+        {
+            type         wall;
+        }
     }
-    bottom
-    {
-        type            fixedValue;
-        value           uniform (0 0 0);
-    }
-    frontAndBack
-    {
-        type            empty;
-    }
-}
+);
+
+// OpenFOAM syntax
+patches
+(
+);
 
 // ************************************************************************* //

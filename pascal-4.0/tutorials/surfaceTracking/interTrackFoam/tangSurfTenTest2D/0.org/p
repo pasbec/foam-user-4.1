@@ -27,22 +27,22 @@ boundaryField
         type            fixedFluxPressure;
         rAU             rAU;
     }
-//     top
-//     {
-//         type            fixedFluxPressure;
-//         rAU             rAU;
-//     }
-//     bottom
-//     {
-//         type            fixedFluxPressure;
-//         rAU             rAU;
-//     }
-    side_x
+    left
     {
         type            fixedFluxPressure;
         rAU             rAU;
     }
-    side_y
+    right
+    {
+        type            fixedFluxPressure;
+        rAU             rAU;
+    }
+    top
+    {
+        type            fixedFluxPressure;
+        rAU             rAU;
+    }
+    bottom
     {
         type            fixedFluxPressure;
         rAU             rAU;

@@ -133,7 +133,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_rho::create() c
                 time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::AUTO_WRITE
             ),
             mesh(),
             dimensionedScalar

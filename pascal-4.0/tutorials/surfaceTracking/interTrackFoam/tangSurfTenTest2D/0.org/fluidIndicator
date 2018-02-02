@@ -24,19 +24,19 @@ boundaryField
     {
         type            zeroGradient;
     }
-//     top
-//     {
-//         type            zeroGradient;
-//     }
-//     bottom
-//     {
-//         type            zeroGradient;
-//     }
-    side_x
+    left
     {
         type            zeroGradient;
     }
-    side_y
+    right
+    {
+        type            zeroGradient;
+    }
+    top
+    {
+        type            zeroGradient;
+    }
+    bottom
     {
         type            zeroGradient;
     }

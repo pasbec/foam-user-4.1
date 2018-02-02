@@ -25,22 +25,22 @@ boundaryField
         type            fixedValue;
         value           uniform (0 0 0);
     }
-//     top
-//     {
-//         type            fixedValue;
-//         value           uniform (0 0 0);
-//     }
-//     bottom
-//     {
-//         type            fixedValue;
-//         value           uniform (0 0 0);
-//     }
-    side_x
+    left
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
-    side_y
+    right
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+    top
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+    bottom
     {
         type            fixedValue;
         value           uniform (0 0 0);
