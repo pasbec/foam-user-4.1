@@ -480,20 +480,15 @@ void trackedSurface::updateConcentration()
             c().boundaryField()[aPatchID()];
         concentration().correctBoundaryConditions();
 
-        // Correct surface tension
-        dimensionedScalar cCoeff
-        (
-            this->lookup("cCoeff")
-        );
+        const dictionary& concentrationDict =
+            transport().subDict("concentration");
 
-        dimensionedScalar refConcentration
-        (
-            this->lookup("refConcentration")
-        );
+        dimensionedScalar betaSigma(concentrationDict.lookup("betaSigma"));
+        dimensionedScalar cRefSigma(concentrationDict.lookup("cRefSigma"));
 
         surfaceTension() =
             cleanInterfaceSurfTension()
-          + cCoeff*(concentration() - refConcentration);
+          + betaSigma*(concentration() - cRefSigma);
 
         deleteDemandDrivenData(surfaceTensionForcePtr_);
     }

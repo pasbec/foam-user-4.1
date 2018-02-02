@@ -14,6 +14,8 @@
 
         phi = phiU;
 
+        phi -= rAUf*gxf*fvc::snGrad(rho)*mesh.magSf();
+
         if (storage.item_F().enabled())
         {
             if (Control::debug)

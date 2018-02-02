@@ -1480,7 +1480,7 @@ void trackedSurface::updatePoints()
 
     if (fixedInterface_)
     {
-        interfacePhi = scalarField(interfacePhi.size(), 0.0);
+//         interfacePhi = scalarField(interfacePhi.size(), 0.0);
 
         if (debug)
         {

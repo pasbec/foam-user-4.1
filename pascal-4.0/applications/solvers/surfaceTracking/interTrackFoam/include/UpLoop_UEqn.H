@@ -1,8 +1,20 @@
 
+    volScalarField mu
+    (
+        "mu",
+        rho*turbulence.nu()
+    );
+
+    surfaceScalarField muf
+    (
+        "muf",
+        fvc::interpolate(mu)
+    );
+
     surfaceScalarField muEff
     (
         "muEff",
-        transport.muf()
+        muf
       + fvc::interpolate(rho*turbulence.nut())
     );
 
@@ -22,6 +34,26 @@
     //- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
     );
 
+// // TODO: Hele-Shaw Poisson drag force
+//     // Hele-Shaw Poisson drag force
+//     if (true)
+//     {
+//         dimensionedScalar HSPDw
+//         (
+//             "HSPDw",
+//             dimLength,
+//             0.001
+//         );
+//
+//         dimensionedScalar HSPDc
+//         (
+//             "HSPDc",
+//             3.0/pow(HSPDw, 2)
+//         );
+//
+//         UEqn += fvm::SuSp(HSPDc*mu, U);
+//     }
+
     UEqn.relax();
 
     if (control.momentumPredictor())
@@ -32,7 +64,10 @@
             (
                 UEqn == fvc::reconstruct
                 (
-                  - (fvc::snGrad(p)*mesh.magSf())
+                    (
+                      - gxf*fvc::snGrad(rho)
+                      - fvc::snGrad(p)
+                    )*mesh.magSf()
                   + (fvc::interpolate(storage.F()) & mesh.Sf())
                 )
             );
@@ -43,7 +78,10 @@
             (
                 UEqn == fvc::reconstruct
                 (
-                  - (fvc::snGrad(p)*mesh.magSf())
+                    (
+                      - gxf*fvc::snGrad(rho)
+                      - fvc::snGrad(p)
+                    )*mesh.magSf()
                 )
             );
         }

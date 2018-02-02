@@ -16,9 +16,9 @@ FoamFile
 
 ddtSchemes
 {
-    ddt(rho,U) backward;
-    ddt(U) backward;
-    ddt(c) backward;
+    ddt(rho,U) Euler;
+    ddt(U) Euler;
+    ddt(c) Euler;
 }
 
 gradSchemes
@@ -29,10 +29,10 @@ gradSchemes
 divSchemes
 {
     defalut none;
-    div(rho*phi,U) Gauss Gamma 0.5;
+    div(rho*phi,U) Gauss linearUpwind phi;
     div((mu*dev(grad(U).T()))) Gauss linear;
     div((muEff*dev(grad(U).T()))) Gauss linear;
-    div(phi,c) Gauss Gamma 0.5;
+    div(phi,c) Gauss linearUpwind phi;
 }
 
 laplacianSchemes
