@@ -33,6 +33,7 @@ License
 
 #include "zeroGradientFvPatchFields.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
+#include "mixedFvPatchFields.H"
 #include "directionMixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -855,6 +856,38 @@ void trackedSurface::updateVelocity()
 
                 aU.gradient() = nGradU;
             }
+            else if
+            (
+               U().boundaryField()[aPatchID()].type()
+            == mixedFvPatchVectorField::typeName
+            )
+            {
+                mixedFvPatchVectorField& aU =
+                    refCast<mixedFvPatchVectorField >
+                    (
+                        U().boundaryField()[aPatchID()]
+                    );
+
+                aU.refValue() = vector::zero;
+                aU.refGrad() = nGradU;
+                aU.valueFraction() = 0;
+            }
+            else if
+            (
+               U().boundaryField()[aPatchID()].type()
+            == directionMixedFvPatchVectorField::typeName
+            )
+            {
+                directionMixedFvPatchVectorField& aU =
+                    refCast<directionMixedFvPatchVectorField >
+                    (
+                        U().boundaryField()[aPatchID()]
+                    );
+
+                aU.refValue() = vector::zero;
+                aU.refGrad() = nGradU;
+                aU.valueFraction() = symmTensor::zero;
+            }
             else
             {
                 FatalErrorIn("trackedSurface::updateVelocity()")
@@ -863,8 +896,12 @@ void trackedSurface::updateVelocity()
                         << U().boundaryField()[aPatchID()].type()
                         << ", instead of "
                         << fixedGradientCorrectedFvPatchVectorField::typeName
-                        << " or "
+                        << ", "
                         << fixedGradientFvPatchVectorField::typeName
+                        << " or "
+                        << mixedFvPatchVectorField::typeName
+                        << " or "
+                        << directionMixedFvPatchVectorField::typeName
                         << abort(FatalError);
             }
         }

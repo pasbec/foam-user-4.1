@@ -81,10 +81,10 @@ if [[ $1 != 'clean' ]]; then
     runApplication funkySetFields -time 0
 
     # Create fa sub mesh
-#     runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'
+    runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'
 
     # Start solver
-    #runApplication $application
+#     runApplication $application
 
 fi
 

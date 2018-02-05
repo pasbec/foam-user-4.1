@@ -31,13 +31,13 @@ FoamFile
     }
     side_y
     {
-        type            wall;
+        type            patch;
         nFaces          9;
         startFace       2627;
     }
     side_x
     {
-        type            wall;
+        type            patch;
         nFaces          9;
         startFace       2636;
     }
