@@ -22,7 +22,7 @@ startTime           0;
 
 stopAt              endTime;
 
-endTime             1800.0;
+endTime             3600.0;
 
 deltaT              0.0001;
 
@@ -40,27 +40,13 @@ writeInterval       0.1;
 
 cycleWrite          0;
 
-writeFormat         ascii;
-
-writeCompression    compressed;
+writeFormat         binary;
 
 timeFormat          general;
 
 timePrecision       6;
 
 runTimeModifiable   yes;
-
-//functions
-//(
-//   history
-//   {
-//       type sloshingHistory;
-//       functionObjectLibs
-//       (
-//         "libsloshingHistory.so"
-//       );
-//   }
-//);
 
 functions
 {
@@ -73,6 +59,12 @@ functions
             "libsimpleFunctionObjects.so"
         );
 
+        enabled         true;
+
+        outputControl   outputTime; // BUG?
+//         outputControl   timeStep;
+//         outputInterval  1;
+
         verbose true;
 
         patches
@@ -84,8 +76,6 @@ functions
         (
             c
         );
-
-        factor 1;
     }
 }
 
