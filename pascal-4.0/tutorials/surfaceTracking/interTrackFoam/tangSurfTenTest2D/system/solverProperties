@@ -16,12 +16,15 @@ FoamFile
 
 settings
 {
+//     debug 10;
+
     region0
     {
         volumeForce         false;
         snGradpFromFlux     true;
 
         cTransport          true;
+        heleShawPoissonDrag true;
     }
 }
 

@@ -28,9 +28,9 @@ deltaT              0.0001;
 
 adjustTimeStep      yes;
 
-maxCo               100000;
+maxCo               1;
 
-maxDeltaT           0.001;
+maxDeltaT           0.1;
 
 writeControl        adjustableRunTime;
 // writeControl        timeStep;
@@ -61,6 +61,33 @@ runTimeModifiable   yes;
 //       );
 //   }
 //);
+
+functions
+{
+    meanConcentration
+    {
+        type patchAverage;
+
+        functionObjectLibs
+        (
+            "libsimpleFunctionObjects.so"
+        );
+
+        verbose true;
+
+        patches
+        (
+            trackedSurface
+        );
+
+        fields
+        (
+            c
+        );
+
+        factor 1;
+    }
+}
 
 // ************************************************************************* //
 

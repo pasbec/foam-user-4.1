@@ -97,6 +97,9 @@ public:
                 //- Conentration transport switch
                 SM_SETTINGS_MEMBER_ADD(Switch, cTransport);
 
+                //- Hele-Shaw drag
+                SM_SETTINGS_MEMBER_ADD(Switch, heleShawPoissonDrag);
+
             SM_REGIONSETTINGS_ADD();
 
             SM_REGIONSTORAGE_NEW();
@@ -128,14 +131,17 @@ public:
                 //- Turbulence model
                 SM_REGIONITEM_ADD(incompressible::turbulenceModel, turbulence);
 
+                //- Interface model
+                SM_REGIONITEM_ADD(trackedSurface, interface);
+
                 //- Concentration diffusivity
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, Dc);
 
                 //- Concentration
                 SM_REGIONITEM_ADD(volScalarField, c);
 
-                //- Interface model
-                SM_REGIONITEM_ADD(trackedSurface, interface);
+                //- Hele Shaw gap width
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, heleShawGapWidth);
 
             SM_REGIONSTORAGE_ADD();
 

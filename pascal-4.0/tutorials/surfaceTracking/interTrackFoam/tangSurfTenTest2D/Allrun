@@ -42,11 +42,11 @@ if [[ $1 != 'clean' ]]; then
     # Recreate initial time folder
     mkdir 0 || exit 1
 
-    # Restore polymesh from org backup
-    cp -r 'constant/polyMesh.org/'* 'constant/polyMesh' > /dev/null 2>&1
+    # Convert mesh from gmsh to foam
+    runApplication gmshToFoam 'mesh.msh' || exit 1
 
-    # Restore faMesh from org backup
-    cp -r 'constant/faMesh.org/'* 'constant/faMesh' > /dev/null 2>&1
+    # Scale mesh
+    transformPoints -scale '(0.001 0.001 0.001)' > /dev/null || exit 1
 
     # Mirror mesh in x,y directions
     directions="x y"
@@ -71,6 +71,9 @@ if [[ $1 != 'clean' ]]; then
     # CheckMesh
     runApplication checkMesh || exit 1
 
+    # Restore faMesh from org backup
+    cp -r 'constant/faMesh.org/'* 'constant/faMesh' > /dev/null 2>&1
+
     # Create faMesh
     runApplication makeFaMesh || exit 1
 
@@ -82,6 +85,10 @@ if [[ $1 != 'clean' ]]; then
 
     # Create fa sub mesh
     runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'
+
+    case="drop"
+    cp "constant/Dc.$case" 'constant/Dc'
+    cp "constant/transportProperties.$case" 'constant/transportProperties'
 
     # Start solver
 #     runApplication $application

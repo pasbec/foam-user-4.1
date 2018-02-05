@@ -32,6 +32,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
     volumeForce = dict().lookupOrDefault("volumeForce", false);
     snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
     cTransport = dict().lookupOrDefault("cTransport", false);
+    heleShawPoissonDrag = dict().lookupOrDefault("heleShawPoissonDrag", false);
 }
 
 
@@ -223,6 +224,30 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_turbulence::cre
 }
 
 
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::create() const
+{
+// TODO: Add more constructors and simplify
+//       Make it use real rho and mu fields!
+    set
+    (
+        new trackedSurface
+        (
+            storage().mesh(),
+            storage().rho(),
+            storage().U(),
+            storage().p(),
+            storage().phi(),
+            NULL,
+            storage().item_c().getPtr(),
+            storage().item_g().getPtr(),
+            storage().item_transport().getPtr(),
+            storage().item_turbulence().getPtr(),
+            NULL
+        )
+    );
+}
+
+
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Dc::create() const
 {
     set
@@ -262,28 +287,24 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_c::create() con
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_interface::create() const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_heleShawGapWidth::create() const
 {
-// TODO: Add more constructors and simplify
-//       Make it use real rho and mu fields!
     set
     (
-        new trackedSurface
+        new uniformDimensionedScalarField
         (
-            storage().mesh(),
-            storage().rho(),
-            storage().U(),
-            storage().p(),
-            storage().phi(),
-            NULL,
-            storage().item_c().getPtr(),
-            storage().item_g().getPtr(),
-            storage().item_transport().getPtr(),
-            storage().item_turbulence().getPtr(),
-            NULL
+            IOobject
+            (
+                name(),
+                time().constant(),
+                time(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
         )
     );
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -306,6 +327,8 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
 
     item_Dc().setState(settings().cTransport);
     item_c().setState(settings().cTransport);
+
+    item_heleShawGapWidth().setState(settings().heleShawPoissonDrag);
 
     item_interface().enable();
 }

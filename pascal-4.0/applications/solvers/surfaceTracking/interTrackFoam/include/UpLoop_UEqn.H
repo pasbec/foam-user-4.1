@@ -34,25 +34,20 @@
     //- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
     );
 
-// // TODO: Hele-Shaw Poisson drag force
-//     // Hele-Shaw Poisson drag force
-//     if (true)
-//     {
-//         dimensionedScalar HSPDw
-//         (
-//             "HSPDw",
-//             dimLength,
-//             0.001
-//         );
-//
-//         dimensionedScalar HSPDc
-//         (
-//             "HSPDc",
-//             3.0/pow(HSPDw, 2)
-//         );
-//
-//         UEqn += fvm::SuSp(HSPDc*mu, U);
-//     }
+    // Hele-Shaw Poisson drag force
+    if (storage.item_heleShawGapWidth().enabled())
+    {
+        if (Control::debug)
+        {
+            Info<< Control::typeName << " | UEqn.H : "
+                << "Adding Hele-Shaw Poisson drag term to UEqn."
+                << endl;
+        }
+
+        uniformDimensionedScalarField& HSGW = storage.heleShawGapWidth();
+
+        UEqn += fvm::SuSp(3.0/pow(HSGW, 2)*mu, U);
+    }
 
     UEqn.relax();
 

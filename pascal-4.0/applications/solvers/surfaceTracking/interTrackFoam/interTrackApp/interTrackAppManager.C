@@ -123,12 +123,15 @@ bool Foam::interTrackApp::Manager::setCoNum(scalar& CourantNumber) const
 // TODO: Use const
         trackedSurface& interface = storage.interface();
 
-        scalar interfaceCoNum = interface.maxCourantNumber();
+        if (!interface.fixedInterface())
+        {
+            scalar interfaceCoNum = interface.maxCourantNumber();
 
-        Info << "Surface Courant Number max: "
-            << interface.maxCourantNumber() << endl;
+            Info << "Surface Courant Number max: "
+                << interface.maxCourantNumber() << endl;
 
-        CourantNumber = max(CourantNumber, interfaceCoNum);
+            CourantNumber = max(CourantNumber, interfaceCoNum);
+        }
     }
 
     tphi.clear();

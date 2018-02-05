@@ -21,6 +21,18 @@ pointSync true;
 patchInfo
 (
     {
+        name             trackedSurface;
+        constructFrom    patches;
+
+        patches          (inner);
+
+        dictionary
+        {
+            type         patch;
+        }
+    }
+
+    {
         name             left;
         constructFrom    set;
         set              left;
@@ -61,6 +73,18 @@ patchInfo
         dictionary
         {
             type         wall;
+        }
+    }
+
+    {
+        name             frontAndBack;
+        constructFrom    patches;
+
+        patches          (empty_z);
+
+        dictionary
+        {
+            type         empty;
         }
     }
 );

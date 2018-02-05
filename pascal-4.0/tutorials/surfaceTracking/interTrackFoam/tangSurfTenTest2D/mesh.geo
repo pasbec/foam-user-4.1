@@ -1,4 +1,4 @@
-ps = 1;
+ps = 1.5;
 
 d = 0.1;
 dByTwo = d/2;
@@ -27,20 +27,20 @@ Extrude {0, 0, d} {
 
 Physical Volume("fluid") = {1};
 
-Physical Surface("trackedSurface") = {33};
+Physical Surface("inner") = {33};
 Physical Surface("side_x") = {25};
 Physical Surface("side_y") = {21};
 Physical Surface("symm_x") = {17};
 Physical Surface("symm_y") = {29};
-Physical Surface("frontAndBack") = {7, 34};
+Physical Surface("empty_z") = {7, 34};
 
-size = 0.025;
+size = 0.02;
 
 arc_size = 0.25;
 arc_n = arc_size/size*1.3;
 
 inner_size = 3.85;
-inner_n = inner_size/size/4;
+inner_n = inner_size/size/5;
 inner_e = 0.92;
 
 outer_size = 4;
