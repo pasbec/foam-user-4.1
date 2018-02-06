@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sawkversion="0.4.0"
+swakversion="0.4.0"
 
 # Created/Updated file .kdev_include_paths for KDevelop
 
@@ -13,6 +13,7 @@ if [ -w "$WM_PROJECT_DIR" ]; then
     >> "$WM_PROJECT_DIR/.kdev_include_paths"
 
   swakdir="$WM_PROJECT_DIR/ThirdParty/rpmBuild/BUILD/swak4Foam-$swakversion"
+  echo $swakdir
   if [ -w "$swakdir" ]; then
     find "$swakdir" -name 'lnInclude' -print \
       >> "$WM_PROJECT_DIR/.kdev_include_paths"
