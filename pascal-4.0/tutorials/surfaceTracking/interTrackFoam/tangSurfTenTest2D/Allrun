@@ -86,8 +86,8 @@ if [[ $1 != 'clean' ]]; then
     # Create fa sub mesh
     runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'
 
-    case="drop"
-    cp "constant/Dc.$case" 'constant/Dc'
+    #case="drop"
+    case="bubble"
     cp "constant/transportProperties.$case" 'constant/transportProperties'
 
     # Start solver

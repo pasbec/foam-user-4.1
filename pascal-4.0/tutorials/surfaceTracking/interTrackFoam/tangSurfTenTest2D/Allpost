@@ -1,5 +1,5 @@
 #!/bin/bash
 
-patchAverage 'c' 'trackedSurface' | grep 'Average of c over patch trackedSurface' > 'cmean.tmp'
-cat 'cmean.tmp' | awk '{ print $8 }' | awk 'NR%1==1' > 'cmean.dat'
-foamUserToolFourierTransform 'cmean.dat' '0.1'
+# patchAverage 'c' 'trackedSurface' | grep 'Average of c over patch trackedSurface' | awk '{ print $8 }' > 'cmean.dat'
+cat 'cmean.dat' | awk '!(NR%1)' > 'cmean.tmp'
+foamUserToolFourierTransform 'cmean.tmp' '0.1'
