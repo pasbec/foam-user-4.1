@@ -50,22 +50,21 @@ runTimeModifiable   yes;
 
 functions
 {
+    functionObjectLibs
+    (
+        "libsimpleFunctionObjects.so"
+    );
+
     meanConcentration
     {
-        type patchAverage;
 
-        functionObjectLibs
-        (
-            "libsimpleFunctionObjects.so"
-        );
+        type              patchAverage;
 
-        enabled         true;
+        enabled           true;
 
-        outputControl   outputTime; // BUG?
-//         outputControl   timeStep;
-//         outputInterval  1;
+        outputControlMode outputTime;
 
-        verbose true;
+        verbose           true;
 
         patches
         (

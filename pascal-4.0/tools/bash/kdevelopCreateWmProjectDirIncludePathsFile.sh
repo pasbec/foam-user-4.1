@@ -1,15 +1,25 @@
 #!/bin/bash
 
-# Created/Updated file .kdev_include_paths in directory $WM_PROJECT_DIR/src for KDevelop
+sawkversion="0.4.0"
 
-if [ -w $WM_PROJECT_DIR ]; then
+# Created/Updated file .kdev_include_paths for KDevelop
+
+if [ -w "$WM_PROJECT_DIR" ]; then
+
   find "$WM_PROJECT_DIR/src" -name 'lnInclude' -print \
-      | tee "$WM_PROJECT_DIR/src/.kdev_include_paths" \
-      | tee "$WM_PROJECT_DIR/applications/.kdev_include_paths" \
-      > /dev/null
-  chmod go+r "$WM_PROJECT_DIR/src/.kdev_include_paths"
-  chmod go+r "$WM_PROJECT_DIR/applications/.kdev_include_paths"
-  echo "Created/Updated file .kdev_include_paths in directory $WM_PROJECT_DIR/src and $WM_PROJECT_DIR/applications."
+    > "$WM_PROJECT_DIR/.kdev_include_paths"
+
+  find "$WM_PROJECT_DIR/applications" -name 'lnInclude' -print \
+    >> "$WM_PROJECT_DIR/.kdev_include_paths"
+
+  swakdir="$WM_PROJECT_DIR/ThirdParty/rpmBuild/BUILD/swak4Foam-$swakversion"
+  if [ -w "$swakdir" ]; then
+    find "$swakdir" -name 'lnInclude' -print \
+      >> "$WM_PROJECT_DIR/.kdev_include_paths"
+  fi
+
+  chmod go+r "$WM_PROJECT_DIR/.kdev_include_paths"
+  echo "Created/Updated file .kdev_include_paths in directory $WM_PROJECT_DIR."
   exit 0
 else
   echo "You do not have write permissions for \$WM_PROJECT_DIR ($WM_PROJECT_DIR)."
