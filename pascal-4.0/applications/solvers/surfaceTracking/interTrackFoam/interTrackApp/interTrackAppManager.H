@@ -97,6 +97,9 @@ public:
                 //- Conentration transport switch
                 SM_SETTINGS_MEMBER_ADD(Switch, cTransport);
 
+                //- Diffusive flow
+                SM_SETTINGS_MEMBER_ADD(Switch, diffusiveFlow);
+
                 //- Hele-Shaw drag
                 SM_SETTINGS_MEMBER_ADD(Switch, heleShawPoissonDrag);
 

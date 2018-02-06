@@ -18,21 +18,26 @@
       + fvc::interpolate(rho*turbulence.nut())
     );
 
-// TODO: Two fluids: Is this ok?
-    surfaceScalarField rhoPhi
-    (
-        "rho*phi",
-        fvc::interpolate(rho)*phi
-    );
-
     fvVectorMatrix UEqn
     (
         fvm::ddt(rho, U)
-      + fvm::div(rhoPhi, U)
       - fvm::laplacian(muEff, U)
       - (fvc::grad(U) & fvc::grad(muEff))
     //- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
     );
+
+    if (!settings.diffusiveFlow)
+    {
+
+// TODO: Two fluids: Is this ok?
+        surfaceScalarField rhoPhi
+        (
+            "rho*phi",
+            fvc::interpolate(rho)*phi
+        );
+
+        UEqn += fvm::div(rhoPhi, U);
+    }
 
     // Hele-Shaw Poisson drag force
     if (storage.item_heleShawGapWidth().enabled())

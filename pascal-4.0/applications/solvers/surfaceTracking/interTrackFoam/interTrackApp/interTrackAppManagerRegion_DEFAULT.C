@@ -32,6 +32,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
     volumeForce = dict().lookupOrDefault("volumeForce", false);
     snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
     cTransport = dict().lookupOrDefault("cTransport", false);
+    diffusiveFlow = dict().lookupOrDefault("diffusiveFlow", false);
     heleShawPoissonDrag = dict().lookupOrDefault("heleShawPoissonDrag", false);
 }
 
