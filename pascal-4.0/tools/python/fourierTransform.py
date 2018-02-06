@@ -82,7 +82,7 @@ print("Periode            : %f s"  % (1.0/F[maxPowerID]))
 
 p.plot(F[omit:NT/2],power[omit:NT/2])
 p.axvline(F[maxPowerID],c="r")
-p.annotate("f = %g Hz, T = %g s" % (F[maxPowerID], (1.0/F[maxPowerID])), (F[maxPowerID]*1.03,power[maxPowerID]*0.95))
+p.annotate(" f = %g Hz, T = %g s" % (F[maxPowerID], (1.0/F[maxPowerID])), (F[maxPowerID]*1.03,power[maxPowerID]*0.95))
 p.xlabel("$f / Hz$")
 p.ylabel("power spectrum: |rfft(data)|")
 p.xlim(0,F[NT/2/5])
