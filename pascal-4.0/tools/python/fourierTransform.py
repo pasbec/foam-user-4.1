@@ -88,7 +88,7 @@ p.ylabel("power spectrum: |rfft(data)|")
 p.xlim(0,F[NT/2/5])
 p.grid()
 
-p.savefig(os.path.splitext(os.path.basename(filename))[0] + ".pdf")
+p.savefig(os.path.dirname(filename) + "/" + os.path.splitext(os.path.basename(filename))[0] + ".pdf")
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #

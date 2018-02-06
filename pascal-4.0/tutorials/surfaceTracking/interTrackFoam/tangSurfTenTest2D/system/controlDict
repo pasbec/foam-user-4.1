@@ -50,13 +50,12 @@ runTimeModifiable   yes;
 
 functions
 {
-    functionObjectLibs
-    (
-        "libsimpleFunctionObjects.so"
-    );
-
-    meanConcentration
+    cmean
     {
+        functionObjectLibs
+        (
+            "libsimpleFunctionObjects.so"
+        );
 
         type              patchAverage;
 
