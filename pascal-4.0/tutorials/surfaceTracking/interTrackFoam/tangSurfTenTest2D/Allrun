@@ -43,7 +43,8 @@ if [[ $1 != 'clean' ]]; then
     mkdir 0 || exit 1
 
     # Convert mesh from gmsh to foam
-    runApplication gmshToFoam 'mesh.msh' || exit 1
+    mesh="fine"
+    runApplication gmshToFoam "mesh_$mesh.msh" || exit 1
 
     # Scale mesh
     transformPoints -scale '(0.001 0.001 0.001)' > /dev/null || exit 1
