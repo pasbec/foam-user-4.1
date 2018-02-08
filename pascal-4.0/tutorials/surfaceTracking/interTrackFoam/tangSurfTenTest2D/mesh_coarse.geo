@@ -34,17 +34,17 @@ Physical Surface("symm_x") = {17};
 Physical Surface("symm_y") = {29};
 Physical Surface("empty_z") = {7, 34};
 
-size = 0.01;
+size = 0.02;
 
 arc_size = 0.25;
-arc_n = arc_size/size*2;
+arc_n = arc_size/size*1.3;
 
 inner_size = 3.85;
 inner_n = inner_size/size/5;
-inner_e = 0.95;
+inner_e = 0.92;
 
 outer_size = 4;
-outer_n = outer_size/size/14;
+outer_n = outer_size/size/16;
 outer_e = 1;
 
 Transfinite Line {6, 13} = arc_n Using Progression 1;
