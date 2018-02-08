@@ -26,7 +26,7 @@ preserveFaceSets        (faceSet_regions);
 // //     cellSet_region_buffer
 // );
 
-method                  metis;
+method                  vectorMetis;
 
 metisCoeffs
 {

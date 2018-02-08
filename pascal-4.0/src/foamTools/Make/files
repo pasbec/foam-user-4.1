@@ -1,4 +1,6 @@
 
+decompositionMethods/vectorMetisDecomp/vectorMetisDecomp.C
+
 dynamicMesh/meshMotion/fvMotionSolver/motionDiffusivity/inverseDelta/inverseDeltaDiffusivity.C
 dynamicMesh/meshMotion/fvMotionSolver/motionDiffusivity/relRefDelta/relRefDeltaDiffusivity.C
 dynamicMesh/meshMotion/fvMotionSolver/motionDiffusivity/relRefVolume/relRefVolumeDiffusivity.C
