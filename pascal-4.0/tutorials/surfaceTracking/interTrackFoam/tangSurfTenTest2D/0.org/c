@@ -26,16 +26,20 @@ boundaryField
     }
     left
     {
-        type            zeroGradient;
+//         type            zeroGradient;
+        type            fixedValue;
+        value           uniform 0;
     }
     right
     {
-        type            zeroGradient;
+//         type            zeroGradient;
+        type            fixedValue;
+        value           uniform 0;
     }
     top
     {
         type            fixedValue;
-        value           uniform 203.2; // dc/dy * L_y = 25.4 mol/l/m * 0.008 m = 203.2 mol/m^3
+        value           uniform 0;
     }
     bottom
     {

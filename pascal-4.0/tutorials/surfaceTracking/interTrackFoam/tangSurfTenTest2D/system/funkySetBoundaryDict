@@ -10,18 +10,38 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      decomposeParDict;
+    object      funkySetBoundaryDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "decomposeParDict.include"
-
-method      simple;
-
-simpleCoeffs
+conc
 {
-    n       (2 1 1);
-    delta   0.001;
+    field                 c;
+
+     // dc/dy = 25.4 mol/l/m = 25.4e+3 mol/m^4
+    expressions
+    (
+        {
+            target        value;
+            patchName     "left";
+            expression    "25.4e+3*(pos().y+0.004)";
+        }
+        {
+            target        value;
+            patchName     "right";
+            expression    "25.4e+3*(pos().y+0.004)";
+        }
+        {
+            target        value;
+            patchName     "top";
+            expression    "25.4e+3*(pos().y+0.004)";
+        }
+        {
+            target        value;
+            patchName     "bottom";
+            expression    "25.4e+3*(pos().y+0.004)";
+        }
+    );
 }
 
 // ************************************************************************* //

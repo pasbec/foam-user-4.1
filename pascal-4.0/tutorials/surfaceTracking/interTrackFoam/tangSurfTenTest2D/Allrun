@@ -43,7 +43,7 @@ if [[ $1 != 'clean' ]]; then
     mkdir 0 || exit 1
 
     # Convert mesh from gmsh to foam
-    mesh="fine"
+    mesh="coarse"
     runApplication gmshToFoam "mesh_$mesh.msh" || exit 1
 
     # Scale mesh
@@ -82,7 +82,8 @@ if [[ $1 != 'clean' ]]; then
     cp -r 0.org/* 0 || exit 1
 
     # Set fields
-    runApplication funkySetFields -time 0
+    runApplication funkySetFields -time 0 || exit 1
+    runApplication funkySetBoundaryField -time 0 || exit 1
 
     # Create fa sub mesh
     runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'

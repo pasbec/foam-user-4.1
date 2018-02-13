@@ -14,11 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-conc_data
-(
-    "dcBydy=25.4e+3;" // dc/dy = 25.4 mol/l/m = 25.4e+3 mol/m^4
-);
-
+// dc/dy = 25.4 mol/l/m = 25.4e+3 mol/m^4
 expressions
 (
     conc_reset
@@ -29,11 +25,10 @@ expressions
         keepPatches   true;
     }
 
-    conc_left_0
+    conc
     {
         field         c;
-        variables     $conc_data;
-        expression    "dcBydy*(pos().y+0.004)";
+        expression    "25.4e+3*(pos().y+0.004)";
         keepPatches   true;
     }
 );
