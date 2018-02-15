@@ -42,6 +42,12 @@ else:
     print("Missing time step width.")
     sys.exit(1)
 
+if len(sys.argv) > 3:
+    omitT = float(sys.argv[3])
+else:
+    print("Missing omit time.")
+    sys.exit(1)
+
 # --------------------------------------------------------------------------- #
 # --- Main program sequence ------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -55,8 +61,10 @@ UX = np.array(floats)
 NT = len(floats)
 NTb2 = int(NT/2)
 
-print("data average       : %g" % (UX.mean()))
-UX = UX - UX.mean()
+# mean
+UXmean = UX.mean()
+print("data average       : %g" % (UXmean))
+UX = UX - UXmean
 
 # time step DT = (tmax-tmin)/(NT-1)
 DT = deltaT
@@ -79,7 +87,7 @@ else:
    F = np.linspace(0,(NT-1)*DF/2,(NT-1)/2+1)
 
 # omit crap
-omitFreq = 1.0/200
+omitFreq = 1.0/omitT
 omitPeriode = np.float64(1.0) / omitFreq
 omit = 0
 while F[omit] < omitFreq and omit < NTb2:
@@ -115,18 +123,29 @@ print("N                  : %d" % (NT))
 print("Peak frequency, f  : %g Hz" % (maxiFreq))
 print("Periode, T         : %g s"  % (1.0/maxiFreq))
 
-p.plot(F,power)
-p.axvline(omitFreq,c="black",ls="dashed")
-p.axvline(maxiFreq,c="red",ls="solid")
-p.annotate("DT = %g\nN = %d\nf = %g Hz\nT = %g s" % (DT, NT, maxiFreq, (1.0/maxiFreq)), (1.2*maxiFreq,1.2*power[maxi]), color="red")
-p.xlabel("$f / Hz$")
-p.ylabel("power spectrum: |rfft(data)|")
+p.figure(figsize=(8,10))
+
+ax1 = p.subplot(211)
 p.title(filename)
+p.xlabel("t / s")
+p.ylabel("signal")
+p.grid()
+p.plot(DT*np.linspace(0,NT,NT), UX+UXmean)
+
+ax2 = p.subplot(212)
+p.xlabel("f / Hz")
+p.ylabel("power spectrum")
 p.xlim(0,cutFreq)
 p.ylim(0,1.5*power[maxi])
 p.grid()
+p.plot(F,power)
+p.axvline(omitFreq,c="black",ls="dashed")
+p.axvline(maxiFreq,c="red",ls="solid")
+p.annotate("N = %d, DT = %g\nf = %g Hz\nT = %g s" % (NT, DT, maxiFreq, (1.0/maxiFreq)), (1.2*maxiFreq,1.1*power[maxi]), color="red")
 
 p.savefig(os.path.dirname(filename) + "/" + os.path.splitext(os.path.basename(filename))[0] + ".pdf")
+
+#p.show()
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
