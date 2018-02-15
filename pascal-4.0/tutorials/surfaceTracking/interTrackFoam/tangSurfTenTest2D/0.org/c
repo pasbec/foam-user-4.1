@@ -26,15 +26,15 @@ boundaryField
     }
     left
     {
-//         type            zeroGradient;
-        type            fixedValue;
-        value           uniform 0;
+        type            zeroGradient;
+//         type            fixedValue;
+//         value           uniform 0;
     }
     right
     {
-//         type            zeroGradient;
-        type            fixedValue;
-        value           uniform 0;
+        type            zeroGradient;
+//         type            fixedValue;
+//         value           uniform 0;
     }
     top
     {

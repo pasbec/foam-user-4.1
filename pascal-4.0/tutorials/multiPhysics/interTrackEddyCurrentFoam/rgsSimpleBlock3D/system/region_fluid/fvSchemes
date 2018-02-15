@@ -34,6 +34,7 @@ gradSchemes
 
     grad(U)                               Gauss linear;
     grad(p)                               Gauss linear;
+    grad(rho)                             Gauss linear;
 
     grad(k)                               Gauss linear;
     grad(omega)                           Gauss linear;
@@ -80,6 +81,9 @@ interpolationSchemes
     default                               none;
 
     interpolate(rho)                      linear;
+    interpolate(grad(rho))                linear;
+    interpolate(mu)                       linear;
+    interpolate((rho*nuSgs))              linear;
     interpolate(U)                        linear;
     interpolate(rAU)                      linear;
     interpolate(HbyA)                     linear;

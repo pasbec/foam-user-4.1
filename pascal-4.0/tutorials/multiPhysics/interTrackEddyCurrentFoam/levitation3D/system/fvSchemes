@@ -39,13 +39,18 @@ laplacianSchemes
 {
     default                           none;
 
-    laplacian(ARe)                    Gauss linear corrected;
-    laplacian(AIm)                    Gauss linear corrected;
+    laplacian(nurf,ARe)               Gauss linear corrected;
+    laplacian(nurf,AIm)               Gauss linear corrected;
 }
 
 interpolationSchemes
 {
     default                           none;
+
+    interpolate(nur)                  harmonic;
+
+    interpolate(ARe)                  skewCorrected linear;
+    interpolate(AIm)                  skewCorrected linear;
 
     interpolate(grad(ARe))            skewCorrected linear;
     interpolate(grad(AIm))            skewCorrected linear;

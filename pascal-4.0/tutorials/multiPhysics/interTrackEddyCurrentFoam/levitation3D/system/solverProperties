@@ -23,6 +23,8 @@ regions
 
 settings
 {
+//     debug                   10;
+
     biotSavart              true;
     lorentzForce            true;
     magneticPressure        false;

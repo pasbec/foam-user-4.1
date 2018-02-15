@@ -2,7 +2,7 @@
     volScalarField mu
     (
         "mu",
-        rho*turbulence.nu()
+        rho*transport.nu()
     );
 
     surfaceScalarField muf

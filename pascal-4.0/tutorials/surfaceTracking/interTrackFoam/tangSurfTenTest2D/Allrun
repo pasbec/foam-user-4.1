@@ -43,7 +43,7 @@ if [[ $1 != 'clean' ]]; then
     mkdir 0 || exit 1
 
     # Convert mesh from gmsh to foam
-    mesh="coarse"
+    mesh="coarse" # fine
     runApplication gmshToFoam "mesh_$mesh.msh" || exit 1
 
     # Scale mesh
@@ -88,8 +88,7 @@ if [[ $1 != 'clean' ]]; then
     # Create fa sub mesh
     runApplication makeFaSubMesh && cp 'system/decomposeParDict.region' 'system/region0_faSubMesh/decomposeParDict'
 
-    #case="drop"
-    case="bubble"
+    case="bubble" # drop
     cp "constant/transportProperties.$case" 'constant/transportProperties'
 
     # Start solver

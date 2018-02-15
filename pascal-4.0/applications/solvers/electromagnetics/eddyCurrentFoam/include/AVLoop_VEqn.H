@@ -104,7 +104,6 @@
                 mesh.solutionDict().solver(V.name()).lookup("solver")
             );
 
-            // Solve V-equation
             if(solverV != "deflatedPCG")
             {
 // TODO: Read reference values
@@ -112,8 +111,7 @@
                 VEqn.setReference(0, 0.0);
             }
 
-            // Currently a deflated solver is necessary.
-            // Therefor the matrix needs to be kept singluar!
+            // Solve V-equation
             VEqn.solve(control.subDict(Region::CONDUCTOR, V.name()));
 
             if (laplacianSchemeV != "jumpGauss")

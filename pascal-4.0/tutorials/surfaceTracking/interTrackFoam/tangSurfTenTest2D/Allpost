@@ -3,5 +3,5 @@
 dt='0.1'
 fo='postProcessing/patchAverage_cmean/0/c'
 fodt="$fo-dt$dt.dat"
-cat "$fo" | awk '(NR>1)' | awk '!(NR%1)' | awk '{ print $2 }' > "$fodt"
+cat "$fo" | awk '(NR>200)' | awk '!(NR%1)' | awk '{ print $2 }' > "$fodt"
 foamUserToolFourierTransform "$fodt" "$dt"

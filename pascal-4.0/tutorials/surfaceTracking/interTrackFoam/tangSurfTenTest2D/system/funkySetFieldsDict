@@ -22,7 +22,6 @@ expressions
         field         c;
         expression    "0";
         keepPatches   true;
-        keepPatches   true;
     }
 
     conc

@@ -21,16 +21,16 @@ conc
      // dc/dy = 25.4 mol/l/m = 25.4e+3 mol/m^4
     expressions
     (
-        {
-            target        value;
-            patchName     "left";
-            expression    "25.4e+3*(pos().y+0.004)";
-        }
-        {
-            target        value;
-            patchName     "right";
-            expression    "25.4e+3*(pos().y+0.004)";
-        }
+//         {
+//             target        value;
+//             patchName     "left";
+//             expression    "25.4e+3*(pos().y+0.004)";
+//         }
+//         {
+//             target        value;
+//             patchName     "right";
+//             expression    "25.4e+3*(pos().y+0.004)";
+//         }
         {
             target        value;
             patchName     "top";
