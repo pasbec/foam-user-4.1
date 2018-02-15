@@ -53,39 +53,77 @@ with open(filename) as file:
 UX = np.array(floats)
 # number of data values
 NT = len(floats)
+NTb2 = int(NT/2)
 
-print("data average       : %f" % (UX.mean()))
+print("data average       : %g" % (UX.mean()))
 UX = UX - UX.mean()
 
 # time step DT = (tmax-tmin)/(NT-1)
 DT = deltaT
-print("delta_t            : ",DT)
+print("delta_t            : %g" % (DT))
 
 # smallest frequency
 DF = 1.0/((NT-1.0)*DT)
-print("smallest frequency : %f" % (DF))
+print("smallest frequency : %g" % (DF))
 
 # real fourier transform
 fft=(2.0/NT)*np.fft.rfft(UX)
+
 # power spectrum
 power=abs(fft)
-omit=3
-maxPowerID=np.argmax(power[omit:])+omit
+
+# discrete freqs
 if NT%2==0:
-   F = np.linspace(0,NT*DF/2,NT/2+1)
+   F = np.linspace(0,NT*DF/2,NTb2+1)
 else:
    F = np.linspace(0,(NT-1)*DF/2,(NT-1)/2+1)
 
-print("N                  : %d" % (NT))
-print("peak frequency     : %f Hz" % (F[maxPowerID]))
-print("Periode            : %f s"  % (1.0/F[maxPowerID]))
+# omit crap
+omitFreq = 1.0/200
+omitPeriode = np.float64(1.0) / omitFreq
+omit = 0
+while F[omit] < omitFreq and omit < NTb2:
+    omit += 1
+print("omit               : %d" % (omit))
+print("omitFreq           : %g Hz" % (omitFreq))
+print("omitPeriode        : %g s" % (omitPeriode))
 
-p.plot(F[omit:NT/2],power[omit:NT/2])
-p.axvline(F[maxPowerID],c="r")
-p.annotate(" f = %g Hz, T = %g s" % (F[maxPowerID], (1.0/F[maxPowerID])), (F[maxPowerID]*1.03,power[maxPowerID]*0.95))
+# find max
+maxi = np.argmax(power[omit:]) + omit
+maxiFreq = F[maxi]
+maxiPeriode = np.float64(1.0) / maxiFreq
+print("maxi               : %d" % (maxi))
+print("maxiFreq           : %g Hz" % (maxiFreq))
+print("maxiPeriode        : %g s" % (maxiPeriode))
+
+# cut small freqs
+cutFactor = 0.1
+cutWindow = 10
+cut = NTb2
+while power[cut-cutWindow:cut].mean() < cutFactor*power[maxi] \
+    and cut-cutWindow > maxi:
+    cut -= 1
+cutFreq = F[cut]
+cutPeriode = np.float64(1.0) / cutFreq
+print("cut                : %d" % (cut))
+print("cutFreq            : %g Hz" % (cutFreq))
+print("cutPeriode         : %g s" % (cutPeriode))
+print("cutFactor          : %g" % (cutFactor))
+print("cutWindow          : %d" % (cutWindow))
+
+print("N                  : %d" % (NT))
+print("Peak frequency, f  : %g Hz" % (maxiFreq))
+print("Periode, T         : %g s"  % (1.0/maxiFreq))
+
+p.plot(F,power)
+p.axvline(omitFreq,c="black",ls="dashed")
+p.axvline(maxiFreq,c="red",ls="solid")
+p.annotate("DT = %g\nN = %d\nf = %g Hz\nT = %g s" % (DT, NT, maxiFreq, (1.0/maxiFreq)), (1.2*maxiFreq,1.2*power[maxi]), color="red")
 p.xlabel("$f / Hz$")
 p.ylabel("power spectrum: |rfft(data)|")
-p.xlim(0,F[NT/2/5])
+p.title(filename)
+p.xlim(0,cutFreq)
+p.ylim(0,1.5*power[maxi])
 p.grid()
 
 p.savefig(os.path.dirname(filename) + "/" + os.path.splitext(os.path.basename(filename))[0] + ".pdf")
