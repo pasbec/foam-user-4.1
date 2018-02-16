@@ -42,32 +42,11 @@ if [[ $1 != 'clean' ]]; then
     # Recreate initial time folder
     mkdir 0 || exit 1
 
-    # Convert mesh from gmsh to foam
-    mesh="coarse" # fine
-    runApplication gmshToFoam "mesh_$mesh.msh" || exit 1
+    # Extract feature edges
+    runApplication surfaceFeatureEdges 'mesh.stl' 'mesh.ftr' || exit 1
 
-    # Scale mesh
-    transformPoints -scale '(0.001 0.001 0.001)' > /dev/null || exit 1
-
-    # Mirror mesh in x,y directions
-    directions="x y"
-    for d in $directions; do
-
-        cp "system/mirrorMeshDict.$d" \
-            'system/mirrorMeshDict'
-
-        runApplication -l "log.mirrorMesh.$d" mirrorMesh || exit 1
-
-    done
-
-    rm -rf 'constant/polyMesh'
-    mv '0/polyMesh' 'constant'
-
-    # Create new topoSets
-    runApplication setSet -noVTK -batch 'system/setSetBatch' || exit 1
-
-    # Create new patches
-    runApplication createPatch -overwrite || exit 1
+    # Create mesh
+    runApplication cartesianMesh || exit 1
 
     # CheckMesh
     runApplication checkMesh || exit 1

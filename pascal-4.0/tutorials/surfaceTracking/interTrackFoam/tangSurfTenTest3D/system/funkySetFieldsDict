@@ -10,27 +10,27 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      interTrackProperties;
+    object      funkySetFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
-{
-//     debug 10;
-
-    region0
+// dc/dy = 25.4 mol/l/m = 25.4e+3 mol/m^4
+expressions
+(
+    conc_reset
     {
-        volumeForce         false;
-        snGradpFromFlux     true;
-
-        cTransport          true;
-        diffusiveFlow       true;
-        heleShawPoissonDrag true;
+        field         c;
+        expression    "0";
+        keepPatches   true;
     }
-}
 
-storage
-{
-}
+    conc
+    {
+        field         c;
+        expression    "25.4e+3*(pos().y+0.004)";
+        keepPatches   true;
+    }
+);
 
 // ************************************************************************* //
+

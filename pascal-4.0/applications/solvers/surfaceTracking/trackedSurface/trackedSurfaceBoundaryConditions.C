@@ -93,6 +93,7 @@ void trackedSurface::updateBoundaryConditions()
     {
         updateContactAngle();
         updateMuEff();
+        updateSurfaceFlux();
         updateSurfactantConcentration();
         updateTemperature();
         updateConcentration();
@@ -186,8 +187,6 @@ void trackedSurface::updateSurfactantConcentration()
                 << "Correct surfactant concentration."
                 << endl;
         }
-
-        updateSurfaceFlux();
 
         // Crate and solve the surfactant transport equation
         faScalarMatrix CsEqn

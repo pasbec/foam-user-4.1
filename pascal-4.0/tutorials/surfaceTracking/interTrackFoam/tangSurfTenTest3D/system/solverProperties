@@ -25,7 +25,6 @@ settings
 
         cTransport          true;
         diffusiveFlow       true;
-        heleShawPoissonDrag true;
     }
 }
 

@@ -43,9 +43,15 @@ else:
     sys.exit(1)
 
 if len(sys.argv) > 3:
-    omitT = float(sys.argv[3])
+    omitlT = float(sys.argv[3])
 else:
-    print("Missing omit time.")
+    print("Missing omitl time.")
+    sys.exit(1)
+
+if len(sys.argv) > 4:
+    omitrT = float(sys.argv[4])
+else:
+    print("Missing omitr time.")
     sys.exit(1)
 
 # --------------------------------------------------------------------------- #
@@ -86,18 +92,28 @@ if NT%2==0:
 else:
    F = np.linspace(0,(NT-1)*DF/2,(NT-1)/2+1)
 
-# omit crap
-omitFreq = 1.0/omitT
-omitPeriode = np.float64(1.0) / omitFreq
-omit = 0
-while F[omit] < omitFreq and omit < NTb2:
-    omit += 1
-print("omit               : %d" % (omit))
-print("omitFreq           : %g Hz" % (omitFreq))
-print("omitPeriode        : %g s" % (omitPeriode))
+# omit left crap
+omitlFreq = 1.0/omitlT
+omitlPeriode = np.float64(1.0) / omitlFreq
+omitl = 0
+while F[omitl] < omitlFreq and omitl < NTb2:
+    omitl += 1
+print("omitl              : %d" % (omitl))
+print("omitlFreq          : %g Hz" % (omitlFreq))
+print("omitlPeriode       : %g s" % (omitlPeriode))
+
+# omit right crap
+omitrFreq = 1.0/omitrT
+omitrPeriode = np.float64(1.0) / omitrFreq
+omitr = 0
+while F[omitr] < omitrFreq and omitr < NTb2:
+    omitr += 1
+print("omitr              : %d" % (omitr))
+print("omitrFreq          : %g Hz" % (omitrFreq))
+print("omitrPeriode       : %g s" % (omitrPeriode))
 
 # find max
-maxi = np.argmax(power[omit:]) + omit
+maxi = np.argmax(power[omitl:omitr]) + omitl
 maxiFreq = F[maxi]
 maxiPeriode = np.float64(1.0) / maxiFreq
 print("maxi               : %d" % (maxi))
@@ -139,9 +155,10 @@ p.xlim(0,cutFreq)
 p.ylim(0,1.5*power[maxi])
 p.grid()
 p.plot(F,power)
-p.axvline(omitFreq,c="black",ls="dashed")
+p.axvline(omitlFreq,c="black",ls="dashed")
+p.axvline(omitrFreq,c="black",ls="dashed")
 p.axvline(maxiFreq,c="red",ls="solid")
-p.annotate("N = %d, DT = %g\nf = %g Hz\nT = %g s" % (NT, DT, maxiFreq, (1.0/maxiFreq)), (1.2*maxiFreq,1.1*power[maxi]), color="red")
+p.annotate("N = %d, DT = %g\nf = %g Hz\nT = %g s" % (NT, DT, maxiFreq, (1.0/maxiFreq)), (1.2*maxiFreq,1.15*power[maxi]), color="red")
 
 p.savefig(os.path.dirname(filename) + "/" + os.path.splitext(os.path.basename(filename))[0] + ".pdf")
 

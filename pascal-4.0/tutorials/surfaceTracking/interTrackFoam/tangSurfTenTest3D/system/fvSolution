@@ -35,8 +35,7 @@ solvers
         relTol          1e-02;
     }
 
-    "(U|pFinal)"
-//     pFinal
+    pFinal
     {
         solver          PCG;
         preconditioner  DIC;
@@ -44,8 +43,7 @@ solvers
         relTol          0;
     }
 
-    "(c)"
-//     "(U|c)"
+    "(U|c)"
     {
         solver          PBiCG;
         preconditioner  DILU;

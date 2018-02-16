@@ -3,34 +3,27 @@
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
 |  \\    /   O peration     | Version:     4.0                                |
 |   \\  /    A nd           | Web:         http://www.foam-extend.org         |
-|    \\/     M anipulation  | For copyright notice see file Copyright         |
+|    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      interTrackProperties;
+    note        "mesh decomposition control dictionary";
+    object      decomposeParDict;
 }
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
+numberOfSubdomains 4;
+
+method          simple;
+
+simpleCoeffs
 {
-//     debug 10;
-
-    region0
-    {
-        volumeForce         false;
-        snGradpFromFlux     true;
-
-        cTransport          true;
-        diffusiveFlow       true;
-        heleShawPoissonDrag true;
-    }
-}
-
-storage
-{
+    n           (2 2 1);
+    delta       0.001;
 }
 
 // ************************************************************************* //

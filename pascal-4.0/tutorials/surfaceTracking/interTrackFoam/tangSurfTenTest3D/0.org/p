@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 -3 0 0 1 0 0];
+dimensions      [1 -1 -2 0 0 0 0];
 
 internalField   uniform 0;
 
@@ -22,29 +22,40 @@ boundaryField
 {
     trackedSurface
     {
-        type            zeroGradient;
+//         type            fixedValue;
+//         value           uniform 0;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     left
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     right
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     top
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     bottom
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
-    frontAndBack
+    front
     {
-        type            empty;
+        type            fixedFluxPressure;
+        rAU             rAU;
+    }
+    back
+    {
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
 }
 
