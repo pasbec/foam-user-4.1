@@ -24,7 +24,7 @@ settings
         snGradpFromFlux     true;
 
         cTransport          true;
-        diffusiveFlow       true;
+//         diffusiveFlow       true;
         heleShawPoissonDrag true;
     }
 }
