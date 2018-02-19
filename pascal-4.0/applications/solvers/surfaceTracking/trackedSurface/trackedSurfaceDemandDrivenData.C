@@ -878,7 +878,7 @@ void trackedSurface::makeSurfactant() const
     surfactantPtr_ = new surfactantProperties(surfactProp);
 }
 
-// TODO: How to deal with the problem, that we need the fluidindicator
+// TODO: How to deal with the problem that we need the fluidindicator
 //       to get to the interface:
 //       fluidIndicator -> transportModel -> turbulenceModel -> interface
 void trackedSurface::makeFluidIndicator()
@@ -1162,17 +1162,22 @@ void trackedSurface::makeSurfaceTensionForce() const
     (
         IOobject
         (
-            "Fsigma",
+            "surfaceTensionForce",
             DB().timeName(),
             mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        fac::edgeIntegrate
-        (
-            fac::interpolate(surfaceTension())*
-            aMesh().Le()*aMesh().edgeLengthCorrection()
-        )
+// This is really, really bad for coarse meshes with large curvatures
+// and small tangential components. Furthermore we cannot use leastSquares
+// for gradient of surfaceTension! PB 02/18
+//         fac::edgeIntegrate
+//         (
+//             fac::interpolate(surfaceTension())*
+//             aMesh().Le()*aMesh().edgeLengthCorrection()
+//         )
+        surfaceTension()*curvature()*aMesh().faceAreaNormals()
+      + fac::grad(surfaceTension())
     );
 }
 

@@ -220,6 +220,9 @@ class trackedSurface
         //- Correct curvature for faces next to fixed points
         Switch correctCurvature_;
 
+        //- Smooth curvature
+        Switch smoothCurvature_;
+
         //- Extrapolation order for curvature correction
         label curvExtrapOrder_;
 
@@ -435,12 +438,6 @@ class trackedSurface
 
             //- Update all dependencies after point movement
             void moveUpdate();
-
-        //- Boundary calculations
-
-            //- Calculate surface tension gradient due to
-            //  concentration OR temperature field
-            tmp<areaVectorField> calcSurfaceTensionGrad();
 
         //- Point displacment calculation
 

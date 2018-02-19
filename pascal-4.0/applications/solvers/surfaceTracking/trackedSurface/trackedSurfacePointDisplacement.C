@@ -53,7 +53,7 @@ tmp<vectorField> trackedSurface::pointDisplacement(const scalarField& deltaH)
 
     if (correctCurvature_)
     {
-        // Correct controPoints next to fixed patches
+        // Correct control points next to fixed patches
         forAll (fixedTrackedSurfacePatches_, patchI)
         {
             label fixedPatchID =

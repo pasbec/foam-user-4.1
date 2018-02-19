@@ -41,50 +41,6 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-tmp<areaVectorField> trackedSurface::calcSurfaceTensionGrad()
-{
-    tmp<areaVectorField> tgrad
-    (
-        new areaVectorField
-        (
-            IOobject
-            (
-                "surfaceTensionGrad",
-                DB().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            aMesh(),
-            dimensionedVector("ZERO", dimForce/sqr(dimLength), vector::zero)
-        )
-    );
-
-    if (!cleanInterface())
-    {
-        tgrad() =
-            (-fac::grad(surfactantConcentration())*
-            surfactant().surfactR()*surfactant().surfactT()/
-            (1.0 - surfactantConcentration()/
-            surfactant().surfactSaturatedConc()))();
-    }
-
-    if (TPtr_)
-    {
-        dimensionedScalar thermalCoeff
-        (
-            this->lookup("thermalCoeff")
-        );
-
-        tgrad() = thermalCoeff*fac::grad(temperature());
-    }
-
-    return tgrad;
-}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void trackedSurface::updateBoundaryConditions()
@@ -497,11 +453,13 @@ void trackedSurface::updateConcentration()
 
 void trackedSurface::updateVelocity()
 {
+    const vectorField& nA = aMesh().faceAreaNormals().internalField();
+
     if (twoFluids())
     {
-        vectorField nA = mesh().boundary()[aPatchID()].nf();
+        vectorField nAf = mesh().boundary()[aPatchID()].nf();
 
-        vectorField nB = mesh().boundary()[bPatchID()].nf();
+        vectorField nBf = mesh().boundary()[bPatchID()].nf();
 
         scalarField DnB = interpolatorBA().faceInterpolate
         (
@@ -529,7 +487,7 @@ void trackedSurface::updateVelocity()
             UPA += aU.corrVecGrad();
         }
 
-        vectorField UtPA = UPA - nA*(nA & UPA);
+        vectorField UtPA = UPA - nAf*(nAf & UPA);
 
 
         vectorField UPB = interpolatorBA().faceInterpolate
@@ -552,28 +510,29 @@ void trackedSurface::updateVelocity()
             UPB += interpolatorBA().faceInterpolate(bU.corrVecGrad());
         }
 
-        vectorField UtPB = UPB - nA*(nA & UPB);
+        vectorField UtPB = UPB - nAf*(nAf & UPB);
 
         vectorField UtFs =
             muEffFluidAval()*DnA*UtPA
           + muEffFluidBval()*DnB*UtPB;
 
-        // Normal component
-        vectorField UnPA = nA*(nA & UPA);
-        vectorField UnPB = nA*(nA & UPB);
-
         vectorField UnFs =
-            2*muEffFluidAval()*UnPA*DnA
-          + 2*muEffFluidBval()*UnPB*DnB;
+            nA*phi().boundaryField()[aPatchID()]
+           /mesh().boundary()[aPatchID()].magSf();
 
-        UnFs /= 2*muEffFluidAval()*DnA
-          + 2*muEffFluidBval()*DnB + VSMALL;
-
+// // TEST: Use velocities to correct interface normal velocity
+//         // Normal component
+//         vectorField UnPA = nAf*(nAf & UPA);
+//         vectorField UnPB = nAf*(nAf & UPB);
+//
 //         vectorField UnFs =
-//             nA*phi().boundaryField()[aPatchID()]
-//            /mesh().boundary()[aPatchID()].magSf();
+//             2*muEffFluidAval()*UnPA*DnA
+//           + 2*muEffFluidBval()*UnPB*DnB;
+//
+//         UnFs /= 2*muEffFluidAval()*DnA
+//           + 2*muEffFluidBval()*DnB + VSMALL;
 
-        Us().internalField() += UnFs - nA*(nA&Us().internalField());
+        Us().internalField() += UnFs - nAf*(nAf&Us().internalField());
         Us().correctBoundaryConditions();
 
 //*******************************************************************
@@ -586,12 +545,7 @@ void trackedSurface::updateVelocity()
 
         if (MarangoniStress())
         {
-            const vectorField& totSurfTensionForce = surfaceTensionForce();
-
-            tangentialSurfaceTensionForce = ((I-nA*nA)&totSurfTensionForce);
-
-//             tangentialSurfaceTensionForce =
-//                 calcSurfaceTensionGrad()().internalField();
+            tangentialSurfaceTensionForce = ((I-nA*nA)&surfaceTensionForce());
         }
         else
         {
@@ -620,7 +574,7 @@ void trackedSurface::updateVelocity()
 
         U().boundaryField()[bPatchID()] ==
             interpolatorAB().faceInterpolate(UtFs)
-          + nB*fvc::meshPhi(rho(),U())().boundaryField()[bPatchID()]/
+          + nBf*fvc::meshPhi(rho(),U())().boundaryField()[bPatchID()]/
             mesh().boundary()[bPatchID()].magSf();
 
         if
@@ -638,7 +592,7 @@ void trackedSurface::updateVelocity()
             pB.gradient() =
                - rhoFluidB().value()
                 *(
-                     nB&fvc::ddt(U())().boundaryField()[bPatchID()]
+                     nBf&fvc::ddt(U())().boundaryField()[bPatchID()]
                  );
         }
 
@@ -727,15 +681,6 @@ void trackedSurface::updateVelocity()
 //
 //         vectorField UnFs = nA*(nA & UPA);
 
-// TEST: Use mesh phi to update normal component of Us
-//         vectorField UnFs =
-//             nA*fvc::meshPhi(rho(),U())().boundaryField()[aPatchID()]
-//           / mesh().boundary()[aPatchID()].magSf();
-
-//         vectorField UnFs =
-//             nA*phi().boundaryField()[aPatchID()]
-//           / mesh().boundary()[aPatchID()].magSf();
-
         // Correct normal component of surface velocity
         Us().internalField() += UnFs - nA*(nA&Us().internalField());
         Us().correctBoundaryConditions();
@@ -744,13 +689,7 @@ void trackedSurface::updateVelocity()
 
         if (MarangoniStress())
         {
-            const vectorField& totSurfTensionForce = surfaceTensionForce();
-
-            tangentialSurfaceTensionForce =
-                ((I-nA*nA)&totSurfTensionForce);
-
-//             tangentialSurfaceTensionForce =
-//                 calcSurfaceTensionGrad()().internalField();
+            tangentialSurfaceTensionForce = ((I-nA*nA)&surfaceTensionForce());
         }
         else
         {
@@ -788,8 +727,6 @@ void trackedSurface::updateVelocity()
         Us().correctBoundaryConditions();
 
         updateNGradUn();
-
-//         scalarField divUs = -nGradUn();
 
         vectorField nGradU =
             tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
@@ -910,9 +847,9 @@ void trackedSurface::updateVelocity()
 
 void trackedSurface::updatePressure()
 {
-    // Correct pressure boundary condition at the surface
+    const vectorField& nA = aMesh().faceAreaNormals().internalField();
 
-    vectorField nA = mesh().boundary()[aPatchID()].nf();
+    // Correct pressure boundary condition at the tracked surface
 
     if (twoFluids())
     {
@@ -940,40 +877,10 @@ void trackedSurface::updatePressure()
         }
         else
         {
-            if (correctCurvature_)
-            {
-                scalarField surfTensionK =
-                    surfaceTension().internalField()*K;
-
-                pA -= surfTensionK;
-            }
-            else
-            {
-                const vectorField& nA =
-                    aMesh().faceAreaNormals().internalField();
-
-                const vectorField& totSurfTensionForce = surfaceTensionForce();
-
-                scalarField surfTensionK = (nA&totSurfTensionForce);
-
-                pA -= surfTensionK;
-            }
+            pA -= nA & surfaceTensionForce();
         }
 
-
-//         fixedGradientFvPatchVectorField& aU =
-//             refCast<fixedGradientFvPatchVectorField >
-//             (
-//                 U().boundaryField()[aPatchID()]
-//             );
-
-//         pA += 2.0*(muEffFluidAval() - muEffFluidBval())
-//            *(nA&aU.gradient());
-
         pA += 2.0*(muEffFluidAval() - muEffFluidBval())*nGradUn();
-
-//         pA -= 2.0*(muEffFluidAval() - muEffFluidBval())
-//             *fac::div(Us())().internalField();
 
         vector R0 = vector::zero;
 
@@ -1050,30 +957,10 @@ void trackedSurface::updatePressure()
             }
             else
             {
-                if (correctCurvature_)
-                {
-                    scalarField surfTensionK =
-                        surfaceTension().internalField()*K;
-
-                    pA -= surfTensionK;
-                }
-                else
-                {
-                    const vectorField& nA =
-                        aMesh().faceAreaNormals().internalField();
-
-                    const vectorField& totSurfTensionForce = surfaceTensionForce();
-
-                    scalarField surfTensionK = (nA&totSurfTensionForce);
-
-                    pA -= surfTensionK;
-                }
+                pA -= nA & surfaceTensionForce();
             }
 
-//             scalarField divUs = -nGradUn();
-
             pA += 2.0*muEffFluidAval()*nGradUn();
-//             pA -= 2.0*muEffFluidAval()*fac::div(Us())().internalField();
 
             if (p0Ptr_)
             {
@@ -1198,40 +1085,7 @@ void trackedSurface::updateNGradUn()
         }
 
         nGradUn() = -fac::div(Us())().internalField();
-
-//         Us().correctBoundaryConditions();
-
-//         areaVectorField UsTmp = Us();
-
-//         vector avgUs = gAverage(UsTmp.internalField());
-//         Pout << avgUs << endl;
-//         UsTmp = dimensionedVector("avgUs", Us().dimensions(), avgUs);
-//         UsTmp.correctBoundaryConditions();
-
-//         edgeVectorField eUs = fac::interpolate(Us());
-//         eUs = dimensionedVector("avgUs", Us().dimensions(), vector(1,0,0));
-
-//         Pout << aMesh().weights().boundaryField() << endl;
-
-
-
-
-//         nGradUn() =
-//            -fac::edgeIntegrate
-//             (
-//                 aMesh().Le() & fac::interpolate(Us())
-//             )
-//           + (fac::edgeIntegrate(aMesh().Le()) & Us());
-
-//         nGradUn() *= 2;
-
-
-
-
-//           + curvature()*(aMesh().faceAreaNormals()&Us());
     }
-
-//     nGradUn() *= 0;
 }
 
 

@@ -159,20 +159,11 @@ void trackedSurface::writeA()
 
     // faceCurvaturesDivNormals
     (fac::div(aMesh().faceAreaNormals()))().write();
-
-    // surfaceTensionGrad
-    calcSurfaceTensionGrad()().write();
 }
 
 
 void trackedSurface::writeVolA()
 {
-    // faceAreaNormals
-    writeVol(aMesh().faceAreaNormals());
-
-    // faceCurvatures
-    writeVol(curvature());
-
     // Us
     writeVol(Us());
 
@@ -182,18 +173,132 @@ void trackedSurface::writeVolA()
     // fac::grad(Us())
     writeVol((fac::grad(Us()))());
 
-    // faceCurvaturesDivNormals
+    // faceAreaNormals
+    writeVol(aMesh().faceAreaNormals());
+
+    // faceCurvatures
+    writeVol(curvature());
+
+    // faceCurvaturesSmoothed
     writeVol
     (
         areaScalarField
         (
-            "faceCurvaturesDivNormals",
+            "faceCurvaturesSmoothed",
+            fac::average(curvature())
+        )
+    );
+
+    // faceCurvaturesSmoothed2
+    writeVol
+    (
+        areaScalarField
+        (
+            "faceCurvaturesSmoothed2",
+            fac::average(fac::average(curvature()))
+        )
+    );
+
+    // faceCurvaturesSmoothed3
+    writeVol
+    (
+        areaScalarField
+        (
+            "faceCurvaturesSmoothed3",
+            fac::average(fac::average(fac::average(curvature())))
+        )
+    );
+
+    // faceCurvaturesSmoothed4
+    writeVol
+    (
+        areaScalarField
+        (
+            "faceCurvaturesSmoothed5",
+            fac::average(fac::average(fac::average(fac::average(curvature()))))
+        )
+    );
+
+    // faceCurvaturesSmoothed5
+    writeVol
+    (
+        areaScalarField
+        (
+            "faceCurvaturesSmoothed5",
+            fac::average(fac::average(fac::average(fac::average(fac::average(curvature())))))
+        )
+    );
+
+    // faceCurvaturesSmoothed10
+    writeVol
+    (
+        areaScalarField
+        (
+            "faceCurvaturesSmoothed10",
+            fac::average(fac::average(fac::average(fac::average(fac::average(fac::average(fac::average(fac::average(fac::average(fac::average(curvature()))))))))))
+        )
+    );
+
+// TODO: WTF? Why is this not working as expected?
+    // faceCurvaturesFromDivOfNormals
+    writeVol
+    (
+        areaScalarField
+        (
+            "faceCurvaturesFromDivOfNormals",
             -fac::div(aMesh().faceAreaNormals())
         )
     );
 
-    // surfaceTensionGrad
-    writeVol(calcSurfaceTensionGrad()());
+    // faceCurvaturesFromSPGradOfNormals
+    writeVol
+    (
+        areaScalarField
+        (
+            "faceCurvaturesFromSPGradOfNormals",
+            -tr(fac::grad(aMesh().faceAreaNormals()))
+        )
+    );
+
+    // surfaceTension
+    writeVol(surfaceTension());
+
+    // surfaceTensionCurvatureN
+    writeVol(
+        areaVectorField(
+            "surfaceTensionCurvatureN",
+            surfaceTension()*curvature()*aMesh().faceAreaNormals()
+        )
+    );
+
+    // surfaceTension
+    writeVol(
+        areaVectorField(
+            "surfaceTensionGrad",
+            fac::grad(surfaceTension())
+        )
+    );
+
+    // surfaceTensionForce
+    writeVol(surfaceTensionForce());
+
+    const vectorField& nA = aMesh().faceAreaNormals().internalField();
+
+    // normal surfaceTensionForce
+    areaVectorField surfaceTensionForceNorm(
+        surfaceTensionForce().name() + "Norm",
+        surfaceTensionForce()
+    );
+    surfaceTensionForceNorm.internalField() = ((nA*nA)&surfaceTensionForce());
+    writeVol(surfaceTensionForceNorm);
+
+    // tangential surfaceTensionForce
+    areaVectorField surfaceTensionForceTang(
+        surfaceTensionForce().name() + "Tang",
+        surfaceTensionForce()
+    );
+    surfaceTensionForceTang.internalField() = ((I-nA*nA)&surfaceTensionForce());
+    writeVol(surfaceTensionForceTang);
 
     // H
     tmp<areaVectorField> tH

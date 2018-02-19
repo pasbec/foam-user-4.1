@@ -16,7 +16,7 @@ FoamFile
 
 ddtSchemes
 {
-    default        Euler;
+    default        CrankNicolson 0.9;
 }
 
 gradSchemes
@@ -27,8 +27,8 @@ gradSchemes
 divSchemes
 {
     defalut        Gauss linear;
-    div(rho*phi,U) Gauss upwind phi;
-    div(phi,c)     Gauss upwind phi;
+    div(rho*phi,U) Gauss linearUpwind phi;
+    div(phi,c)     Gauss linearUpwind phi;
 }
 
 laplacianSchemes

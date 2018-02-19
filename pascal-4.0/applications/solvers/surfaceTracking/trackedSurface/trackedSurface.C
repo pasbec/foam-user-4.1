@@ -977,7 +977,12 @@ void trackedSurface::moveUpdate()
 // TODO
     if (correctCurvature_)
     {
-//             correctCurvature();
+        correctCurvature();
+    }
+
+// TODO
+    if (smoothCurvature_)
+    {
         smoothCurvature();
     }
 }
@@ -1061,6 +1066,7 @@ trackedSurface::trackedSurface
     correctPointNormals_(false),
     correctDisplacement_(false),
     correctCurvature_(false),
+    smoothCurvature_(false),
     curvExtrapOrder_(0),
     fvcNGradUn_(false),
     implicitCoupling_(false),
@@ -1384,6 +1390,12 @@ void trackedSurface::updateProperties()
         correctCurvature_ = Switch(this->lookup("correctCurvature"));
     }
 
+    // Check if correctCurvature switch is set
+    if (this->found("correctCurvature"))
+    {
+        smoothCurvature_ = Switch(this->lookup("smoothCurvature"));
+    }
+
     // Check if curvExtrapOrder parameter is set
     if (this->found("curvExtrapOrder"))
     {
@@ -1480,7 +1492,7 @@ void trackedSurface::updatePoints()
 
     if (fixedInterface_)
     {
-//         interfacePhi = scalarField(interfacePhi.size(), 0.0);
+        interfacePhi = scalarField(interfacePhi.size(), 0.0);
 
         if (debug)
         {
