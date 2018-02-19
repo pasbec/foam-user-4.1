@@ -16,28 +16,27 @@ FoamFile
 
 ddtSchemes
 {
-    default        none;
+    default none;
 }
 
 gradSchemes
 {
-    default        leastSquares;
+    default leastSquares;
 }
 
 divSchemes
 {
-    default        Gauss linear;
-    div(Us)        Gauss upwind phis;
+    default Gauss linear;
 }
 
 laplacianSchemes
 {
-    default        none;
+    default none;
 }
 
 interpolationSchemes
 {
-    default        linear;
+    default linear;
 }
 
 // ************************************************************************* //

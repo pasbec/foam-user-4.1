@@ -35,7 +35,7 @@ solvers
         relTol          1e-02;
     }
 
-    pFinal
+    "(pFinal|cellMotionU)"
     {
         solver          PCG;
         preconditioner  DIC;
