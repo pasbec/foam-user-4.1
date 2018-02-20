@@ -32,6 +32,7 @@ feClear ()
     env_unsetRegex FOAM_.*
     env_removeAll 'foam'
     env_removeAll 'foam-extend'
+    env_unsetRegex PARAVIEW_.*
 
     # TODO: Remove paraview from pythonpath
     env_removeAny 'PYTHONPATH' 'ParaView'
