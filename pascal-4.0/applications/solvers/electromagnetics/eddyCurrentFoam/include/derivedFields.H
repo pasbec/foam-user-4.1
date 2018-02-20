@@ -12,7 +12,7 @@
         SM_REGIONSCOPE(CONDUCTOR);
 
         volScalarField& sigma = globalStorage.sigma()[CONDUCTOR];
-        volScalarField& nur = globalStorage.mur()[CONDUCTOR];
+        volScalarField& nur = globalStorage.nur()[CONDUCTOR];
 
         volVectorField& BRe = globalStorage.BRe()[CONDUCTOR];
         volVectorField& BIm = globalStorage.BIm()[CONDUCTOR];
