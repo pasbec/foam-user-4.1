@@ -4,16 +4,14 @@
         uniformDimensionedScalarField& Dc = storage.Dc();
         volScalarField& c = storage.c();
 
-//         while (control.correctNonOrthogonal())
-        for (int nonOrth=0; nonOrth<=3; nonOrth++)
-        {
-            fvScalarMatrix cEqn
-            (
-                fvm::ddt(c)             // Unsteady term
-              + fvm::div(phi, c)        // Convective term
-              - fvm::laplacian(Dc, c)   // Diffusive term
-            );
+        fvScalarMatrix cEqn
+        (
+            fvm::ddt(c)             // Unsteady term
+          + fvm::div(phi, c)        // Convective term
+          - fvm::laplacian(Dc, c)   // Diffusive term
+        );
 
-            cEqn.solve();
-        }
+        cEqn.relax();
+
+        cEqn.solve();
     }

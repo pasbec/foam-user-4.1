@@ -33,6 +33,8 @@ Author
 
 #include "interApp.H"
 
+// TODO: Continuity errors
+
 // TODO: Read sigma values only once
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

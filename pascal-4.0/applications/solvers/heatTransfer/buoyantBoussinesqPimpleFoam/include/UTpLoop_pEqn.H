@@ -164,12 +164,21 @@
 
             if (control.finalNonOrthogonalIter())
             {
+                // Store old phi
+                surfaceScalarField phiRel("phiRel", phi);
+
+                // Correct phi
                 phi -= pEqn.flux();
+
+                // Explicitly relax p and corresponding relaxed phi
+                p.relax();
+                phiRel -= pEqn.flux();
+
+                // Momentum corrector with relaxed phi
+                U += rAU*fvc::reconstruct((phiRel - phiU)/rAUf);
+                U.correctBoundaryConditions();
             }
         }
-
-        U += rAU*fvc::reconstruct((phi - phiU)/rAUf);
-        U.correctBoundaryConditions();
 
 // TODO: Continuity errors
 // #       include "continuityErrs.H"

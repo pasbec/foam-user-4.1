@@ -37,8 +37,6 @@ Author
 
 // TODO: Pressure naming p vs. p_rgh (gh, ghf, hRef, ...)
 
-// TODO: Relaxation of pressure?
-
 // TODO: Pressure boundary conditions (F, bouyantPressure vs. fixedFluxPressure)
 
 // TODO: Continuity errors

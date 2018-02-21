@@ -112,6 +112,7 @@ bool Foam::interTrackApp::Manager::setCoNum(scalar& CourantNumber) const
     }
 
     // Mesh Courant Number
+    if (mesh.moving())
     {
 #       include "meshCourantNo.H"
 

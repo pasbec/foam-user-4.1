@@ -33,8 +33,6 @@ Author
 
 #include "pimpleApp.H"
 
-// TODO: Relaxation of pressure?
-
 // TODO: Pressure boundary conditions (F, fixedFluxPressure)
 
 // TODO: Continuity errors
