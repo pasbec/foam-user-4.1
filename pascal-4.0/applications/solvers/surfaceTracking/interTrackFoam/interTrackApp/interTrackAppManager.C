@@ -88,27 +88,15 @@ bool Foam::interTrackApp::Manager::setCoNum(scalar& CourantNumber) const
 // TODO: Something is wrong with meshPhi
             // Make fluxes relative
             phi -= fvc::meshPhi(U);
+// // TODO: Use U to calculate phi for now. Something with meshPhi is totally wrong
+//             // Calculate phi from U
+//             phi = fvc::interpolate(storage.U()) & mesh.Sf();
+
         }
 
 #       include "CourantNo.H"
 
         CourantNumber = max(CourantNumber, CoNum);
-    }
-
-// TODO: Use U to calculate phi for now. Something with meshPhi is totally wrong
-    // Convective Courant Number?
-    {
-        if (mesh.moving())
-        {
-            const volVectorField& U = storage.U();
-
-            // Calculate phi from U
-            phi = fvc::interpolate(U) & mesh.Sf();
-        }
-
-#       include "CourantNo.H"
-
-//         CourantNumber = max(CourantNumber, CoNum);
     }
 
     // Mesh Courant Number
