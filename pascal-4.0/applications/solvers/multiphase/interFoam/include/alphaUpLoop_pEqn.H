@@ -170,7 +170,10 @@
                 phi -= pEqn.flux();
 
                 // Explicitly relax p and corresponding relaxed phi
-                p.relax();
+                if (!control.finalIter())
+                {
+                    p.relax();
+                }
                 phiRel -= pEqn.flux();
 
                 // Momentum corrector with relaxed phi
