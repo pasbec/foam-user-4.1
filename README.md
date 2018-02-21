@@ -110,9 +110,9 @@ cd "$HOME/foam/foam-extend-4.0"
 #
 # Template
 cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
-# Bison 2.7 (only Ubuntu 15.10+)
+# Bison 2.7 (only Ubuntu 15.10+, maybe not needed any more)
 #sed -i "s/#\(export WM_THIRD_PARTY_USE_BISON_27=1\)/\1/g" 'etc/prefs.sh'
-perl -pe "s{#(export WM_THIRD_PARTY_USE_BISON_27=1}{\1}" 'etc/prefs.sh'
+#perl -pe "s{#(export WM_THIRD_PARTY_USE_BISON_27=1}{\1}" 'etc/prefs.sh'
 # System qmake
 #sed -i "/#export QT_BIN_DIR=\$QT_DIR\/bin/a export QT_BIN_DIR=$(dirname $(which qmake))" 'etc/prefs.sh'
 perl -pe "s{#export QT_BIN_DIR=(\\$)QT_DIR/bin}{unset QT_THIRD_PARTY\nexport QT_BIN_DIR=$(dirname $(which qmake))}" 'etc/prefs.sh'
