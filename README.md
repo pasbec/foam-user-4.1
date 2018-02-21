@@ -14,6 +14,7 @@ sudo apt-get install git-core build-essential binutils-dev flex \
 bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
+sudo apt-get install perl
 ```
 ##### Ubuntu 13.10 <a name="ubuntu1310"></a> ([Ubuntu 12.04](#ubuntu1204))
 ##### Ubuntu 14.04 <a name="ubuntu1404"></a>
@@ -23,6 +24,7 @@ sudo apt-get install git-core build-essential binutils-dev cmake flex \
 bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
+sudo apt-get install perl
 ```
 ##### Ubuntu 15.10 <a name="ubuntu1510"></a>
 ```bash
@@ -31,8 +33,18 @@ sudo apt-get install git-core build-essential binutils-dev cmake flex \
 zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
+sudo apt-get install perl
 ```
-##### Ubuntu 16.04 <a name="ubuntu1604"></a> ([Ubuntu 15.10](#ubuntu1510))
+##### Ubuntu 16.04 <a name="ubuntu1604"></a>
+```bash
+sudo apt-get update
+sudo apt-get install git-core build-essential binutils-dev cmake flex \
+zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
+libxt-dev rpm mercurial graphviz
+sudo apt-get install qt5-default libqt5x11extras5 libqt5x11extras5-dev
+sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
+sudo apt-get install perl
+```
 
 ### Download/Clone root repository
 
@@ -81,7 +93,8 @@ git config user.email 'pascal@becksteins.de'
 cd "$HOME/foam/foam-extend-4.0"
 #
 #git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-4.0'
-git remote add 'upstream' 'git://git.code.sf.net/p/foam-extend/foam-extend-4.0'
+git remote add 'sf' 'ssh://p-be@git.code.sf.net/u/p-be/foam-extend-4.0'
+git remote add 'upstream' 'https://git.code.sf.net/p/foam-extend/foam-extend-4.0'
 git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-Mirror/foam-extend-foam-extend-4.0.git'
 ```
 
@@ -95,8 +108,8 @@ cd "$HOME/foam/foam-extend-4.0"
 #
 # Template
 cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
-# Bison 2.7 (only Ubuntu 15.10+)
-sed -i "s/#\(export WM_THIRD_PARTY_USE_BISON_27=1\)/\1/g" 'etc/prefs.sh'
+# Bison 2.7 (only Ubuntu 15.10+, maybe not needed anymore)
+#sed -i "s/#\(export WM_THIRD_PARTY_USE_BISON_27=1\)/\1/g" 'etc/prefs.sh'
 # System qmake
 sed -i "/#export QT_BIN_DIR=\$QT_DIR\/bin/a export QT_BIN_DIR=$(dirname $(which qmake))" 'etc/prefs.sh'
 cd -
