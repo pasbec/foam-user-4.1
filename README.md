@@ -41,9 +41,11 @@ sudo apt-get update
 sudo apt-get install git-core build-essential binutils-dev cmake flex \
 zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
 libxt-dev rpm mercurial graphviz
-sudo apt-get install qt5-default libqt5x11extras5 libqt5x11extras5-dev
 sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
 sudo apt-get install perl
+
+# For Paraview 5.4.1 with system qt
+sudo apt-get install qt5-default libqt5x11extras5 libqt5x11extras5-dev
 ```
 
 ### Download/Clone root repository
@@ -108,10 +110,16 @@ cd "$HOME/foam/foam-extend-4.0"
 #
 # Template
 cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
-# Bison 2.7 (only Ubuntu 15.10+, maybe not needed anymore)
+# Bison 2.7 (only Ubuntu 15.10+)
 #sed -i "s/#\(export WM_THIRD_PARTY_USE_BISON_27=1\)/\1/g" 'etc/prefs.sh'
+perl -pe "s{#(export WM_THIRD_PARTY_USE_BISON_27=1}{\1}" 'etc/prefs.sh'
 # System qmake
-sed -i "/#export QT_BIN_DIR=\$QT_DIR\/bin/a export QT_BIN_DIR=$(dirname $(which qmake))" 'etc/prefs.sh'
+#sed -i "/#export QT_BIN_DIR=\$QT_DIR\/bin/a export QT_BIN_DIR=$(dirname $(which qmake))" 'etc/prefs.sh'
+perl -pe "s{#export QT_BIN_DIR=(\\$)QT_DIR/bin}{unset QT_THIRD_PARTY\nexport QT_BIN_DIR=$(dirname $(which qmake))}" 'etc/prefs.sh'
+# Paraview 5.4.1
+perl -pe "s{#(export WM_THIRD_PARTY_USE_CMAKE_332=1)}{unset WM_THIRD_PARTY_USE_CMAKE_322\n\1}" 'etc/prefs.sh
+perl -pe "s{#(export WM_THIRD_PARTY_USE_QT_580=1)}{unset WM_THIRD_PARTY_USE_QT_486\n\1}" 'etc/prefs.sh'
+perl -pe "s{#(export WM_THIRD_PARTY_USE_PARAVIEW_541=1)}{unset WM_THIRD_PARTY_USE_PARAVIEW_440\n\1}" 'etc/prefs.sh'
 cd -
 ```
 #### Source environment
@@ -129,7 +137,8 @@ export PATH="/usr/lib/ccache:${PATH}"
 ```bash
 cd "$HOME/foam/foam-extend-4.0"
 #
-./Allwmake.firstInstall
+./Allwmake.firstInstall | tee Allwmake.firstInstall.log
+./Allwmake
 ```
 
 
@@ -149,5 +158,6 @@ fe40
 ```bash
 cd "$HOME/foam/pascal-4.0"
 #
-./Allwmake.firstInstall
+./Allwmake.firstInstall | tee Allwmake.firstInstall.log
+./Allwmake
 ```
