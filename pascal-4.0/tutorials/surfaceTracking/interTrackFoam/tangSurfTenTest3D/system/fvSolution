@@ -47,13 +47,13 @@ PIMPLE
     {
         U
         {
-                tolerance  1e-04;
-                relTol     1e-02;
+                tolerance  1e-03;
+                relTol     1e-03;
         }
         p
         {
-                tolerance  1e-04;
-                relTol     1e-02;
+                tolerance  1e-03;
+                relTol     1e-03;
         }
      }
 }
