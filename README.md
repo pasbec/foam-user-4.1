@@ -117,7 +117,7 @@ cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
 #sed -i "/#export QT_BIN_DIR=\$QT_DIR\/bin/a export QT_BIN_DIR=$(dirname $(which qmake))" 'etc/prefs.sh'
 perl -pe "s{#export QT_BIN_DIR=(\\$)QT_DIR/bin}{unset QT_THIRD_PARTY\nexport QT_BIN_DIR=$(dirname $(which qmake))}" 'etc/prefs.sh'
 # Paraview 5.4.1
-perl -pe "s{#(export WM_THIRD_PARTY_USE_CMAKE_332=1)}{unset WM_THIRD_PARTY_USE_CMAKE_322\n\1}" 'etc/prefs.sh
+perl -pe "s{#(export WM_THIRD_PARTY_USE_CMAKE_332=1)}{unset WM_THIRD_PARTY_USE_CMAKE_322\n\1}" 'etc/prefs.sh'
 perl -pe "s{#(export WM_THIRD_PARTY_USE_QT_580=1)}{unset WM_THIRD_PARTY_USE_QT_486\n\1}" 'etc/prefs.sh'
 perl -pe "s{#(export WM_THIRD_PARTY_USE_PARAVIEW_541=1)}{unset WM_THIRD_PARTY_USE_PARAVIEW_440\n\1}" 'etc/prefs.sh'
 cd -
