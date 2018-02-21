@@ -137,7 +137,7 @@ export PATH="/usr/lib/ccache:${PATH}"
 ```bash
 cd "$HOME/foam/foam-extend-4.0"
 #
-./Allwmake.firstInstall | tee Allwmake.firstInstall.log
+./Allwmake.firstInstall | tee 'Allwmake.firstInstall.log'
 ./Allwmake
 ```
 
@@ -158,6 +158,6 @@ fe40
 ```bash
 cd "$HOME/foam/pascal-4.0"
 #
-./Allwmake.firstInstall | tee Allwmake.firstInstall.log
+./Allwmake.firstInstall | tee 'Allwmake.firstInstall.log'
 ./Allwmake
 ```
