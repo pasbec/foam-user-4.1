@@ -113,10 +113,10 @@ cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
 # Bison 2.7 (only Ubuntu 15.10+, maybe not needed any more)
 #perl -i -pe "s{#(export WM_THIRD_PARTY_USE_BISON_27=1}{\1}" 'etc/prefs.sh'
 # System qt
-perl -i -pe "s{^(export export QT_THIRD_PARTY=1)}{#\1}" 'etc/prefs.sh'
+perl -i -pe "s{^(export QT_THIRD_PARTY=1)}{#\1}" 'etc/prefs.sh'
 perl -i -pe "s{(#export QT_BIN_DIR=(\\$)QT_DIR/bin)}{\1\nunset QT_THIRD_PARTY\nexport QT_BIN_DIR=$(dirname $(which qmake))}" 'etc/prefs.sh'
 # Thirparty qt
-perl -i -pe "s{#(export export QT_THIRD_PARTY=1)}{\1}" 'etc/prefs.sh'
+perl -i -pe "s{#(export QT_THIRD_PARTY=1)}{\1}" 'etc/prefs.sh'
 # Paraview 5.4.1
 perl -i -pe "s{^(export WM_THIRD_PARTY_USE_CMAKE_322=1)}{#\1}" 'etc/prefs.sh'
 perl -i -pe "s{#(export WM_THIRD_PARTY_USE_CMAKE_332=1)}{unset WM_THIRD_PARTY_USE_CMAKE_322\n\1}" 'etc/prefs.sh'
