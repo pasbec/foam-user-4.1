@@ -16,70 +16,43 @@ FoamFile
 
 solvers
 {
-    Up
-    {
-        solver          BiCGStab;
-        preconditioner  Cholesky;
-        tolerance       1e-08;
-        relTol          1e-02;
-
-        minIter         0;
-        maxIter         500;
-    }
-
-    p
+    "(p|pFinal)"
     {
         solver          PCG;
         preconditioner  DIC;
-        tolerance       1e-08;
-        relTol          1e-02;
+        tolerance       1e-06;
+        relTol          1e-03;
     }
 
-    "(U|pFinal)"
-//     pFinal
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    "(c)"
-//     "(U|c)"
+    "(U|c)"
     {
         solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          1e-02;
+        tolerance       1e-06;
+        relTol          1e-03;
     }
 }
 
 PIMPLE
 {
-    nOuterCorrectors            20;
-    nCorrectors                 1;
-    nNonOrthogonalCorrectors    2;
-    pRefPoint (0.002 0 -1e-6);
+    nOuterCorrectors            100;
+    nCorrectors                 2;
+    nNonOrthogonalCorrectors    0;
+    pRefPoint (0 0.002 -1e-6);
     pRefValue 0;
 
-    momentumPredictor no;
+    momentumPredictor yes;
 
     residualControl
     {
-        Up
+        U
         {
-                tolerance  1e-03;
+                tolerance  1e-04;
                 relTol     1e-02;
         }
-
-//         U
-//         {
-//                 tolerance  1e-08;
-//                 relTol     1e-02;
-//         }
         p
         {
-                tolerance  1e-03;
+                tolerance  1e-04;
                 relTol     1e-02;
         }
      }
@@ -87,10 +60,9 @@ PIMPLE
 
 relaxationFactors
 {
-    p        0.3;
-    pFinal   1;
-
     U        0.7;
+    p        0.3;
+    c        1.0;
 }
 
 // ************************************************************************* //

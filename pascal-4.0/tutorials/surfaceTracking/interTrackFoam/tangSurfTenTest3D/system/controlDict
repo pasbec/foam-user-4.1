@@ -35,7 +35,6 @@ maxDeltaT           0.1;
 writeControl        adjustableRunTime;
 // writeControl        timeStep;
 
-// writeInterval       0.001;
 writeInterval       0.1;
 // writeInterval       1;
 
@@ -73,6 +72,8 @@ functions
         fieldName         magU;
 
         expression        "mag(U)";
+
+        dimension         [0 1 -1 0 0 0 0];
     }
 
     trackedSurface
