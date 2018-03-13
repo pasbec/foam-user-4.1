@@ -1,4 +1,8 @@
 
+
+// TODO: Two fluids: Use fluidIndicator!
+    rho = transport.rho();
+
     if (storage.item_c().enabled())
     {
         volScalarField& c = storage.c();
@@ -10,5 +14,5 @@
         dimensionedScalar cRefRho(concentrationDict.lookup("cRefRho"));
 
 // TODO: Two fluids: Use fluidIndicator!
-        rho = transport.rho() + betaRho*(c - cRefRho);
+        rho += betaRho*(c - cRefRho);
     }

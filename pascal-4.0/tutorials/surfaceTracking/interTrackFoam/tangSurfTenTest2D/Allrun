@@ -85,7 +85,7 @@ if [[ $1 != 'clean' ]]; then
     runApplication funkySetFields -time 0 || exit 1
     runApplication funkySetBoundaryField -time 0 || exit 1
 
-    case="bubble" # drop
+    case="bubble" # drop, bubble
     cp "constant/transportProperties.$case" 'constant/transportProperties'
 
     # Start solver

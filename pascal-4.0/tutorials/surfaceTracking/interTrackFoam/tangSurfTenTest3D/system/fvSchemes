@@ -27,8 +27,8 @@ gradSchemes
 divSchemes
 {
     default        Gauss linear;
-    div(rho*phi,U) Gauss linearUpwind grad(U);
-    div(phi,c)     Gauss linearUpwind grad(U);
+    div(rho*phi,U) Gauss linearUpwind leastSquares;
+    div(phi,c)     Gauss linearUpwind leastSquares;
 }
 
 laplacianSchemes

@@ -1211,54 +1211,57 @@ trackedSurface::trackedSurface
         }
     }
 
-    // Init total displacement
-    if
-    (
-        IOobject
+    if (!fixedInterface_)
+    {
+        // Init total displacement
+        if
         (
-            "totalDisplacement",
-            DB().timeName(),
-            mesh(),
-            IOobject::MUST_READ
-        ).headerOk()
-    )
-    {
-// TODO
-        makeTotalDisplacement();
-    }
-
-// TEST: Move always from start
-    if (total0Update_)
-    {
-        points0Ptr_ = new pointField(m.allPoints());
-
-// TODO
-//        readTotal0Displacement();
-    }
-
-// TODO
-    // Init control points position
-    initControlPointsPosition();
-
-    // Clear geometry
-    aMesh().movePoints();
-
-// TEST: Sub-mesh
-    if (useSubMesh_)
-    {
-        if (debug)
+            IOobject
+            (
+                "totalDisplacement",
+                DB().timeName(),
+                mesh(),
+                IOobject::MUST_READ
+            ).headerOk()
+        )
         {
-            Info << "trackedSurface::trackedSurface(...) : "
-                << "Creating and activating triangulated sub-mesh."
-                    << endl;
+// TODO
+            makeTotalDisplacement();
         }
 
-        makeFaSubMesh();
-        aSubMesh().movePoints();
-    }
+// TEST: Move always from start
+        if (total0Update_)
+        {
+            points0Ptr_ = new pointField(m.allPoints());
 
-    // Contact angle correction
-    correctContactLinePointNormals();
+// TODO
+//             readTotal0Displacement();
+        }
+
+// TODO
+        // Init control points position
+        initControlPointsPosition();
+
+        // Clear geometry
+        aMesh().movePoints();
+
+// TEST: Sub-mesh
+        if (useSubMesh_)
+        {
+            if (debug)
+            {
+                Info << "trackedSurface::trackedSurface(...) : "
+                    << "Creating and activating triangulated sub-mesh."
+                        << endl;
+            }
+
+            makeFaSubMesh();
+            aSubMesh().movePoints();
+        }
+
+        // Contact angle correction
+        correctContactLinePointNormals();
+    }
 }
 
 
@@ -1477,10 +1480,12 @@ bool trackedSurface::updateMesh()
         meshMoved_ = false;
     }
 
+    if (!fixedInterface_)
+    {
+        resetControlPoints();
 
-    resetControlPoints();
-
-    adjustDisplacementDirections();
+        adjustDisplacementDirections();
+    }
 
     return meshMoved_;
 }

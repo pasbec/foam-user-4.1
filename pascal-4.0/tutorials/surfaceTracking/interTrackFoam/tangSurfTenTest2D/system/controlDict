@@ -24,7 +24,7 @@ stopAt              endTime;
 
 endTime             1200.0;
 
-deltaT              0.001;
+deltaT              0.01;
 
 adjustTimeStep      yes;
 
@@ -33,10 +33,8 @@ maxCo               1;
 maxDeltaT           0.1;
 
 writeControl        adjustableRunTime;
-// writeControl        timeStep;
 
 writeInterval       0.1;
-// writeInterval       1;
 
 cycleWrite          0;
 
