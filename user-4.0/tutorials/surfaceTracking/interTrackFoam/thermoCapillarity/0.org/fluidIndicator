@@ -9,28 +9,41 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      interTrackProperties;
+    class       volScalarField;
+    object      fluidIndicator;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
-{
-//     debug 10;
+dimensions      [0 0 0 0 0 0 0];
 
-    region0
+internalField   uniform 1;
+
+boundaryField
+{
+    trackedSurface
     {
-        volumeForce         false;
-        snGradpFromFlux     true;
-
-        cTransport          true;
-//         creepingFlow        true;
-        heleShawPoissonDrag true;
+        type            zeroGradient;
     }
-}
-
-storage
-{
+    right
+    {
+        type            zeroGradient;
+    }
+    top
+    {
+        type            zeroGradient;
+    }
+    bottom
+    {
+        type            zeroGradient;
+    }
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
 }
 
 // ************************************************************************* //

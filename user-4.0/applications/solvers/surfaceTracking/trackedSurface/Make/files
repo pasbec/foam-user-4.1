@@ -2,6 +2,7 @@
 trackedSurface.C
 trackedSurfaceBoundaryConditions.C
 trackedSurfaceDemandDrivenData.C
+trackedSurfaceForces.C
 trackedSurfacePointDisplacement.C
 trackedSurfaceWrite.C
 

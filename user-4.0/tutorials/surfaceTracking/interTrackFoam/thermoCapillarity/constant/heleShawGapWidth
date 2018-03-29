@@ -2,35 +2,21 @@
 | =========                 |                                                 |
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
 |  \\    /   O peration     | Version:     4.0                                |
-|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
 |    \\/     M anipulation  | For copyright notice see file Copyright         |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      interTrackProperties;
+    class       uniformDimensionedScalarField;
+    object      heleShawGapWidth;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
-{
-//     debug 10;
+dimensions    [0 1 0 0 0 0 0];
 
-    region0
-    {
-        volumeForce         false;
-        snGradpFromFlux     true;
-
-        cTransport          true;
-//         creepingFlow        true;
-        heleShawPoissonDrag true;
-    }
-}
-
-storage
-{
-}
+value         1e-3; // d = 1 mm
 
 // ************************************************************************* //
+

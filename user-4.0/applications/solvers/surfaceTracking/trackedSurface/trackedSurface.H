@@ -898,11 +898,32 @@ public:
         //- Correct normal derivative of normal velocity
         void updateNGradUn();
 
+        //- Calculate pressure force
+        vectorField pressureForce() const;
+
+        //- Calculate viscous force
+        vectorField viscousForce() const;
+
         //- Calculate total pressure force
         vector totalPressureForce() const;
 
         //- Calculate total viscous force
         vector totalViscousForce() const;
+
+        //- Calculate total normal force
+        vector totalNormalForce() const;
+
+        //- Calculate total tangential force
+        vector totalTangentialForce() const;
+
+        //- Calculate total force
+        vector totalForce() const;
+
+        //- Calculate total normal surface tension force
+        vector totalNormalSurfaceTensionForce() const;
+
+        //- Calculate total tangential surface tension force
+        vector totalTangentialSurfaceTensionForce() const;
 
         //- Calculate total surface tension force
         vector totalSurfaceTensionForce() const;

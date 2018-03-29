@@ -10,9 +10,9 @@
         const dictionary& concentrationDict =
             transport.subDict("concentration");
 
-        dimensionedScalar betaRho(concentrationDict.lookup("betaRho"));
+        dimensionedScalar ddcRho(concentrationDict.lookup("ddcRho"));
         dimensionedScalar cRefRho(concentrationDict.lookup("cRefRho"));
 
 // TODO: Two fluids: Use fluidIndicator!
-        rho += betaRho*(c - cRefRho);
+        rho += ddcRho*(c - cRefRho);
     }

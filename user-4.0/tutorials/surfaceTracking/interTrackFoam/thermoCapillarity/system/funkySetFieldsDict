@@ -10,27 +10,25 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      interTrackProperties;
+    object      funkySetFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
-{
-//     debug 10;
+vars
+(
+    "ddxc=25.4e+3/500;" // mod for test case
+);
 
-    region0
+expressions
+(
+    conc
     {
-        volumeForce         false;
-        snGradpFromFlux     true;
-
-        cTransport          true;
-//         creepingFlow        true;
-        heleShawPoissonDrag true;
+        field         c;
+        variables     $vars;
+        expression    "ddxc*(pos().y+0.004)";
+        keepPatches   true;
     }
-}
-
-storage
-{
-}
+);
 
 // ************************************************************************* //
+

@@ -9,28 +9,12 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      interTrackProperties;
+    class       uniformDimensionedVectorField;
+    object      g;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
-{
-//     debug 10;
-
-    region0
-    {
-        volumeForce         false;
-        snGradpFromFlux     true;
-
-        cTransport          true;
-//         creepingFlow        true;
-        heleShawPoissonDrag true;
-    }
-}
-
-storage
-{
-}
+dimensions    [0 1 -2 0 0 0 0];
+value         ( 0 -9.81 0 );
 
 // ************************************************************************* //

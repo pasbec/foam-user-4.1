@@ -10,27 +10,10 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      interTrackProperties;
+    object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
-{
-//     debug 10;
-
-    region0
-    {
-        volumeForce         false;
-        snGradpFromFlux     true;
-
-        cTransport          true;
-//         creepingFlow        true;
-        heleShawPoissonDrag true;
-    }
-}
-
-storage
-{
-}
+simulationType    laminar;
 
 // ************************************************************************* //

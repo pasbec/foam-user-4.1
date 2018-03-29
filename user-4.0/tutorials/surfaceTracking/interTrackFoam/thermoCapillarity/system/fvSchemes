@@ -10,27 +10,35 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      interTrackProperties;
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
+ddtSchemes
 {
-//     debug 10;
-
-    region0
-    {
-        volumeForce         false;
-        snGradpFromFlux     true;
-
-        cTransport          true;
-//         creepingFlow        true;
-        heleShawPoissonDrag true;
-    }
+    default        CrankNicolson 0.9;
 }
 
-storage
+gradSchemes
 {
+    default        leastSquares;
+}
+
+divSchemes
+{
+    default        Gauss linear;
+    div(rho*phi,U) Gauss linearUpwind leastSquares;
+    div(phi,c)     Gauss linearUpwind leastSquares;
+}
+
+laplacianSchemes
+{
+    default        Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default        linear;
 }
 
 // ************************************************************************* //

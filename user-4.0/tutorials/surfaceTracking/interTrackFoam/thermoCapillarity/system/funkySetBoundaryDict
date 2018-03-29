@@ -10,27 +10,34 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      interTrackProperties;
+    object      funkySetBoundaryDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
+conc
 {
-//     debug 10;
+    vars
+    (
+        "ddxc=25.4e+3/500;" // mod for test case
+    );
 
-    region0
-    {
-        volumeForce         false;
-        snGradpFromFlux     true;
+    field                 c;
 
-        cTransport          true;
-//         creepingFlow        true;
-        heleShawPoissonDrag true;
-    }
-}
-
-storage
-{
+    expressions
+    (
+        {
+            target        value;
+            variables     $vars;
+            patchName     "top";
+            expression    "ddxc*(pos().y+0.004)";
+        }
+        {
+            target        value;
+            variables     $vars;
+            patchName     "bottom";
+            expression    "ddxc*(pos().y+0.004)";
+        }
+    );
 }
 
 // ************************************************************************* //

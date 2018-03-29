@@ -32,7 +32,8 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Settings::read() const
     volumeForce = dict().lookupOrDefault("volumeForce", false);
     snGradpFromFlux = dict().lookupOrDefault("snGradpFromFlux", true);
     cTransport = dict().lookupOrDefault("cTransport", false);
-    diffusiveFlow = dict().lookupOrDefault("diffusiveFlow", false);
+    relToUinf = dict().lookupOrDefault("relToUinf", false);
+    creepingFlow = dict().lookupOrDefault("creepingFlow", false);
     heleShawPoissonDrag = dict().lookupOrDefault("heleShawPoissonDrag", false);
 }
 
@@ -288,6 +289,69 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_c::create() con
 }
 
 
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Uinf::create() const
+{
+    set
+    (
+        new uniformDimensionedVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    );
+}
+
+
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_finf::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            dimensionedScalar
+            (
+                word(),
+                dimForce,
+                0
+            )
+        )
+    );
+}
+
+
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_dUinfRelax::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            )
+        )
+    );
+}
+
+
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_heleShawGapWidth::create() const
 {
     set
@@ -328,6 +392,10 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
 
     item_Dc().setState(settings().cTransport);
     item_c().setState(settings().cTransport);
+
+    item_Uinf().setState(settings().relToUinf);
+    item_finf().setState(settings().relToUinf);
+    item_dUinfRelax().setState(settings().relToUinf);
 
     item_heleShawGapWidth().setState(settings().heleShawPoissonDrag);
 

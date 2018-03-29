@@ -37,7 +37,7 @@ concentration
     cRefSigma         cRefSigma [ 0 -3 0 0  1 0 0 ] 0;
 
     // rho_ref^(1) * beta_c^(1) [kg/m^3 * m^3/mol = kg/mol]
-    ddcRho            ddcRho [ 1  0 0 0 -1 0 0 ] -0.0166666; // rho_ref^(1) * beta_c^(1) = 998 kg/m^3 * -0.0167 l/mol
+    ddcRho            ddcRho [ 1  0 0 0 -1 0 0 ] 0;
     cRefRho           cRefRho [ 0 -3 0 0  1 0 0 ] 0;
 }
 

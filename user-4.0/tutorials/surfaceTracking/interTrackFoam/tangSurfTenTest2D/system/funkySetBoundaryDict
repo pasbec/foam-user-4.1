@@ -16,20 +16,26 @@ FoamFile
 
 conc
 {
+    vars
+    (
+        "ddxc=25.4e+3;" // dc/dy = 25.4 mol/l/m = 25.4e+3 mol/m^4
+    );
+
     field                 c;
 
-     // dc/dy = 25.4 mol/l/m = 25.4e+3 mol/m^4
     expressions
     (
         {
             target        value;
+            variables     $vars;
             patchName     "top";
-            expression    "25.4e+3*(pos().y+0.004)";
+            expression    "ddxc*(pos().y+0.004)";
         }
         {
             target        value;
+            variables     $vars;
             patchName     "bottom";
-            expression    "25.4e+3*(pos().y+0.004)";
+            expression    "ddxc*(pos().y+0.004)";
         }
     );
 }

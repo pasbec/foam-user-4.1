@@ -10,27 +10,26 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      interTrackProperties;
+    object      faMeshDefinition;
 }
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************** //
 
-settings
+polyMeshPatches               1(trackedSurface);
+
+boundary
 {
-//     debug 10;
-
-    region0
+    front
     {
-        volumeForce         false;
-        snGradpFromFlux     true;
-
-        cTransport          true;
-//         creepingFlow        true;
-        heleShawPoissonDrag true;
+        type                  wedge;
+        ownerPolyPatch        trackedSurface;
+        neighbourPolyPatch    front;
+    }
+    back
+    {
+        type                  wedge;
+        ownerPolyPatch        trackedSurface;
+        neighbourPolyPatch    back;
     }
 }
 
-storage
-{
-}
-
-// ************************************************************************* //
+// ************************************************************************** //

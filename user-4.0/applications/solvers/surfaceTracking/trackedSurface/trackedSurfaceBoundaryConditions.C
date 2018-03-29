@@ -439,12 +439,12 @@ void trackedSurface::updateConcentration()
         const dictionary& concentrationDict =
             transport().subDict("concentration");
 
-        dimensionedScalar betaSigma(concentrationDict.lookup("betaSigma"));
+        dimensionedScalar ddcSigma(concentrationDict.lookup("ddcSigma"));
         dimensionedScalar cRefSigma(concentrationDict.lookup("cRefSigma"));
 
         surfaceTension() =
             cleanInterfaceSurfTension()
-          + betaSigma*(concentration() - cRefSigma);
+          + ddcSigma*(concentration() - cRefSigma);
 
         deleteDemandDrivenData(surfaceTensionForcePtr_);
     }
@@ -540,27 +540,7 @@ void trackedSurface::updateVelocity()
         UtFs -= (muEffFluidAval() - muEffFluidBval())*
             (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
 
-
-        vectorField tangentialSurfaceTensionForce(nA.size(), vector::zero);
-
-        if (MarangoniStress())
-        {
-            tangentialSurfaceTensionForce = ((I-nA*nA)&surfaceTensionForce());
-        }
-        else
-        {
-//             vectorField surfaceTensionForce =
-//                 cleanInterfaceSurfTension().value()
-//                *fac::edgeIntegrate
-//                 (
-//                     aMesh().Le()*aMesh().edgeLengthCorrection()
-//                 )().internalField();
-
-//             tangentialSurfaceTensionForce =
-//                 surfaceTensionForce
-//               - cleanInterfaceSurfTension().value()
-//                *curvature().internalField()*nA;
-        }
+        vectorField tangentialSurfaceTensionForce = ((I-nA*nA)&surfaceTensionForce());
 
         UtFs += tangentialSurfaceTensionForce;
 
@@ -685,31 +665,7 @@ void trackedSurface::updateVelocity()
         Us().internalField() += UnFs - nA*(nA&Us().internalField());
         Us().correctBoundaryConditions();
 
-        vectorField tangentialSurfaceTensionForce(nA.size(), vector::zero);
-
-        if (MarangoniStress())
-        {
-            tangentialSurfaceTensionForce = ((I-nA*nA)&surfaceTensionForce());
-        }
-        else
-        {
-//             vectorField surfaceTensionForce =
-//                 cleanInterfaceSurfTension().value()
-//                *fac::edgeIntegrate
-//                 (
-//                     aMesh().Le()*aMesh().edgeLengthCorrection()
-//                 )().internalField();
-
-//             tangentialSurfaceTensionForce =
-//                 surfaceTensionForce
-//               - cleanInterfaceSurfTension().value()
-//                *curvature().internalField()*nA;
-
-//             if (muEffFluidAval() < SMALL)
-//             {
-//                 tangentialSurfaceTensionForce = vector::zero;
-//             }
-        }
+        vectorField tangentialSurfaceTensionForce = ((I-nA*nA)&surfaceTensionForce());
 
         vectorField tnGradU =
             tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
@@ -870,15 +826,7 @@ void trackedSurface::updatePressure()
                 << endl;
         }
 
-        if (!MarangoniStress())
-        {
-//             pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
-            pA -= cleanInterfaceSurfTension().value()*K;
-        }
-        else
-        {
-            pA -= nA & surfaceTensionForce();
-        }
+        pA -= nA & surfaceTensionForce();
 
         pA += 2.0*(muEffFluidAval() - muEffFluidBval())*nGradUn();
 
@@ -950,15 +898,7 @@ void trackedSurface::updatePressure()
                     << endl;
             }
 
-            if (!MarangoniStress())
-            {
-//                 pA -= cleanInterfaceSurfTension().value()*(K - gAverage(K));
-                pA -= cleanInterfaceSurfTension().value()*K;
-            }
-            else
-            {
-                pA -= nA & surfaceTensionForce();
-            }
+            pA -= nA & surfaceTensionForce();
 
             pA += 2.0*muEffFluidAval()*nGradUn();
 

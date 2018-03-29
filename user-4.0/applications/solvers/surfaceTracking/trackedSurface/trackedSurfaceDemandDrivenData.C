@@ -842,12 +842,12 @@ void trackedSurface::makeSurfaceTension() const
         const dictionary& concentrationDict =
             transport().subDict("concentration");
 
-        dimensionedScalar betaSigma(concentrationDict.lookup("betaSigma"));
+        dimensionedScalar ddcSigma(concentrationDict.lookup("ddcSigma"));
         dimensionedScalar cRefSigma(concentrationDict.lookup("cRefSigma"));
 
         surfaceTension =
             cleanInterfaceSurfTension()
-          + betaSigma*(concentration() - cRefSigma);
+          + ddcSigma*(concentration() - cRefSigma);
     }
 }
 

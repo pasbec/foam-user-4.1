@@ -54,7 +54,7 @@
                         Info<< Control::typeName << " | pEqn.H : "
                             << "Pressure at patch "
                             << mesh.boundary()[patchI].name()
-                            << "is being corrected by means of a "
+                            << " is being corrected by means of a "
                             << "'fixedFluxPressure' boundary condition. "
                             << "This is OK."
                             << endl;

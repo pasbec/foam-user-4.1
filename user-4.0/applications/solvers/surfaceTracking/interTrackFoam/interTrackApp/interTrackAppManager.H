@@ -97,8 +97,11 @@ public:
                 //- Conentration transport switch
                 SM_SETTINGS_MEMBER_ADD(Switch, cTransport);
 
-                //- Diffusive flow
-                SM_SETTINGS_MEMBER_ADD(Switch, diffusiveFlow);
+                //- Relative motion to Uinf
+                SM_SETTINGS_MEMBER_ADD(Switch, relToUinf);
+
+                //- Creeping flow
+                SM_SETTINGS_MEMBER_ADD(Switch, creepingFlow);
 
                 //- Hele-Shaw drag
                 SM_SETTINGS_MEMBER_ADD(Switch, heleShawPoissonDrag);
@@ -142,6 +145,15 @@ public:
 
                 //- Concentration
                 SM_REGIONITEM_ADD(volScalarField, c);
+
+                //-
+                SM_REGIONITEM_ADD(uniformDimensionedVectorField, Uinf);
+
+                //-
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, finf);
+
+                //-
+                SM_REGIONITEM_ADD(uniformDimensionedScalarField, dUinfRelax);
 
                 //- Hele Shaw gap width
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, heleShawGapWidth);

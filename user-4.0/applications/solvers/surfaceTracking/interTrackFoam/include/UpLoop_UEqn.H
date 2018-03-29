@@ -26,7 +26,7 @@
     //- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
     );
 
-    if (!settings.diffusiveFlow)
+    if (!settings.creepingFlow)
     {
 
 // TODO: Two fluids: Is this ok?
@@ -38,9 +38,18 @@
 
         UEqn += fvm::div(rhoPhi, U);
     }
+    else
+    {
+        if (Control::debug)
+        {
+            Info<< Control::typeName << " | UEqn.H : "
+                << "Assuming creeping flow. Skipping advective term in UEqn."
+                << endl;
+        }
+    }
 
     // Hele-Shaw Poisson drag force
-    if (storage.item_heleShawGapWidth().enabled())
+    if (settings.heleShawPoissonDrag)
     {
         if (Control::debug)
         {

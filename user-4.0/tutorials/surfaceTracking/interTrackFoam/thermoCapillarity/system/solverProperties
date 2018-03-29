@@ -24,8 +24,9 @@ settings
         snGradpFromFlux     true;
 
         cTransport          true;
+        relToUinf           true;
 //         creepingFlow        true;
-        heleShawPoissonDrag true;
+//         heleShawPoissonDrag true;
     }
 }
 

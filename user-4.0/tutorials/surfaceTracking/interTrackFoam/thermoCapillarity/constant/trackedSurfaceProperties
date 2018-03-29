@@ -10,27 +10,43 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      interTrackProperties;
+    object      trackedSurfaceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-settings
-{
-//     debug 10;
+fixedInterface yes;
 
-    region0
-    {
-        volumeForce         false;
-        snGradpFromFlux     true;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-        cTransport          true;
-//         creepingFlow        true;
-        heleShawPoissonDrag true;
-    }
-}
-
-storage
-{
-}
+// twoFluids no;
+//
+// normalMotionDir no;
+//
+// motionDir (0 0 1);
+//
+// cleanInterface yes;
+//
+// fixedTrackedSurfacePatches 0();
+//
+// pointNormalsCorrectionPatches   2(side frontAndBack); // no contactAngle given
+// // pointNormalsCorrectionPatches   1(frontAndBack);              // contactAngle given
+//
+// nTrackedSurfaceCorrectors 1;
+//
+// useSubMesh          yes;
+//
+// correctVolume       yes;
+//
+// // resetControlPoints  yes;
+//
+// // smoothing           yes;
+//
+// // freeContactAngle    yes;
+//
+// // correctPointNormals yes;
+// // correctDisplacement yes;
+// // correctCurvature    yes;
+// //
+// // fvcNGradUn          yes;
 
 // ************************************************************************* //
