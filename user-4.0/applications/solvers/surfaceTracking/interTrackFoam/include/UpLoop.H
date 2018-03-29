@@ -23,42 +23,41 @@
 
             if (settings.relToUinf)
             {
-                volScalarField mu
-                (
-                    "mu",
-                    rho*transport.nu()
-                );
-
                 vector oldUinf = storage.Uinf().value();
 
-                scalar finf =
+                storage.finf().value() =
                      (interface.totalNormalForce()
                    + interface.totalTangentialForce())
                    & oldUinf/mag(oldUinf);
 
                 scalar dUinf =
-                    storage.dUinfRelax().value() * finf
-                  / (max(mu).value() * mag(oldUinf) * runTime.deltaT().value());
+                    storage.dUinfRelax().value()
+                  * storage.finf().value()
+                  / max(rho*transport.nu()).value()
+                  / mag(oldUinf)
+                  / runTime.deltaT().value();
 
-                vector Uinf = oldUinf + dUinf*oldUinf/mag(oldUinf);
+                storage.Uinf().value() = oldUinf + dUinf*oldUinf/mag(oldUinf);
 
                 Info<< "Free stream adjustment:"
-                    << " finf = " << finf
-                    << " , Uinf = " << Uinf
+                    << " finf = " << storage.finf().value()
+                    << " , Uinf = " << storage.Uinf().value()
                     << endl;
 
-                storage.finf().value() = finf;
-                storage.Uinf().value() = Uinf;
+                if (!max(mag(U)).value() > 0)
+                {
+                    U = storage.Uinf();
+                }
 
                 forAll(U.boundaryField(), patchI)
                 {
                     if
                     (
                         U.boundaryField()[patchI].type()
-                        == fixedValueFvPatchVectorField::typeName
+                     == fixedValueFvPatchVectorField::typeName
                     )
                     {
-                        U.boundaryField()[patchI] == Uinf;
+                        U.boundaryField()[patchI] == storage.Uinf().value();
                     }
                 }
             }
