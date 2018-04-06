@@ -23,6 +23,7 @@
 
             if (settings.relToUinf)
             {
+// TODO: Real forcing!
                 vector Uinf = storage.Uinf().value();
 
                 storage.finf().value() =
@@ -38,6 +39,7 @@
 
                 // Update free-stream velocity Uinf
                 storage.Uinf().value() = Uinf + dUinf*Uinf/(mag(Uinf) + VSMALL);
+// TODO: Real forcing!
 
                 Info<< "Free-stream velocity adjustment:"
                     << " finf = " << storage.finf().value()
@@ -49,27 +51,37 @@
 
                 // Remove old counterflow velocity U0 from U
                 {
-                    U -= storage.U0();
-                    phi -= storage.phi0();
+                    // WARNING: FORCE assign boundary values!
+                    U == U - storage.U0();
+                    U.correctBoundaryConditions();
 
-                    forAll(U.boundaryField(), patchI)
+                    phi -= storage.phi0();
+                }
+
+                // Scale counterflow velocity according to new free-stream velocity
+                // and sdjust boundary conditions
+                {
+                    storage.U0() *= mag(storage.Uinf().value())/(mag(Uinf) + VSMALL);
+                    storage.phi0() *= mag(storage.Uinf().value())/(mag(Uinf) + VSMALL);
+
+                    forAll(storage.U0().boundaryField(), patchI)
                     {
                         if
                         (
-                            U.boundaryField()[patchI].type()
+                            storage.U0().boundaryField()[patchI].type()
                         == fixedValueFvPatchVectorField::typeName
                         && patchI != interface.aPatchID()
                         )
                         {
-                            U.boundaryField()[patchI] == vector::zero;
+                            storage.U0().boundaryField()[patchI] == storage.Uinf().value();
                         }
                     }
 
-                    U.correctBoundaryConditions();
+                    storage.U0().correctBoundaryConditions();
                 }
 
                 // Update counterflow velocity U0
-                int maxIter = 100;
+                int maxIter = 10;
                 scalar tolerance = 1e-3;
                 scalar residual = VGREAT;
                 for (int iter=0; iter<maxIter; iter++)
@@ -77,19 +89,6 @@
                     volScalarField& p0 = storage.p0();
                     volVectorField& U0 = storage.U0();
                     surfaceScalarField& phi0 = storage.phi0();
-
-                    forAll(U0.boundaryField(), patchI)
-                    {
-                        if
-                        (
-                            U0.boundaryField()[patchI].type()
-                        == fixedValueFvPatchVectorField::typeName
-                        && patchI != interface.aPatchID()
-                        )
-                        {
-                            U0.boundaryField()[patchI] == storage.Uinf().value();
-                        }
-                    }
 
                     volScalarField mu
                     (
@@ -160,23 +159,11 @@
 
                 // Add new counterflow velocity U0 to U
                 {
-                    U += storage.U0();
-                    phi += storage.phi0();
-
-                    forAll(U.boundaryField(), patchI)
-                    {
-                        if
-                        (
-                            U.boundaryField()[patchI].type()
-                        == fixedValueFvPatchVectorField::typeName
-                        && patchI != interface.aPatchID()
-                        )
-                        {
-                            U.boundaryField()[patchI] == storage.Uinf().value();
-                        }
-                    }
-
+                    // WARNING: FORCE assign boundary values!
+                    U == U + storage.U0();
                     U.correctBoundaryConditions();
+
+                    phi += storage.phi0();
                 }
             }
 
@@ -200,20 +187,8 @@
                 turbulence.correct();
             }
 
-            if (settings.relToUinf)
-            {
-                // Remove free-stream velocity Uinf from phi
-                phi -= storage.Uinf() & mesh.Sf();
-            }
-
 #           include "UpLoop_cEqn.H"
 #           include "UpLoop_rhoUpdate.H"
-
-            if (settings.relToUinf)
-            {
-                // Add free-stream velocity Uinf from phi
-                phi += storage.Uinf() & mesh.Sf();
-            }
 
             // Make the fluxes absolute
             fvc::makeAbsolute(phi, U);

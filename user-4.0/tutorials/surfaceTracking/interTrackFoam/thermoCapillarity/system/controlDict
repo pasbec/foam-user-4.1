@@ -127,7 +127,7 @@ functions
 
         fieldName         deltac;
 
-        expression        "c-(25.4e+3/500*(pos().y+0.004))";
+        expression        "c-(25.4e+3/500*(pos().y-0.004))";
 
         dimension         [0 -3 0 0 1 0 0];
     }

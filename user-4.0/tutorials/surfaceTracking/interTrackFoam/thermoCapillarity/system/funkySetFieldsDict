@@ -25,7 +25,7 @@ expressions
     {
         field         c;
         variables     $vars;
-        expression    "ddxc*(pos().y+0.004)";
+        expression    "ddxc*(pos().y-0.004)";
         keepPatches   true;
     }
 );

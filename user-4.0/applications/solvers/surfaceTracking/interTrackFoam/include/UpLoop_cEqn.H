@@ -6,12 +6,19 @@
 
         fvScalarMatrix cEqn
         (
-            fvm::ddt(c)             // Unsteady term
-          + fvm::div(phi, c)        // Convective term
-          - fvm::laplacian(Dc, c)   // Diffusive term
+            fvm::ddt(c)
+          + fvm::div(phi, c)
+          - fvm::laplacian(Dc, c)
         );
 
         cEqn.relax();
 
         cEqn.solve();
+
+        if (settings.relToUinf)
+        {
+            // WARNING: DO NOT TOUCH boundary values!
+            c.internalField() -= max(c).value();
+            c.correctBoundaryConditions();
+        }
     }

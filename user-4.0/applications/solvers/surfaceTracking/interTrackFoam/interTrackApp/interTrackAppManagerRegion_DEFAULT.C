@@ -370,7 +370,6 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p0::create() co
         )
     );
 
-    control().setpRefCell(get()());
     mesh().schemesDict().setFluxRequired(name());
 }
 
