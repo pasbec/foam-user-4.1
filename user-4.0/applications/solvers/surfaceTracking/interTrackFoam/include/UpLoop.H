@@ -36,9 +36,10 @@
                   / max(rho*transport.nu()).value()
                   / runTime.deltaT().value();
 
-//                 storage.Uinf().value() = Uinf + dUinf*Uinf/(mag(Uinf) + VSMALL);
+                // Update free-stream velocity Uinf
+                storage.Uinf().value() = Uinf + dUinf*Uinf/(mag(Uinf) + VSMALL);
 
-                Info<< "Free stream adjustment:"
+                Info<< "Free-stream velocity adjustment:"
                     << " finf = " << storage.finf().value()
                     << " , Uinf = " << storage.Uinf().value()
                     << " , dUinfRelax = " << storage.dUinfRelax().value()
@@ -46,7 +47,7 @@
                     << " , dUinf = " << dUinf
                     << endl;
 
-                // Remove free-stream velocity U0 from U
+                // Remove old counterflow velocity U0 from U
                 {
                     U -= storage.U0();
                     phi -= storage.phi0();
@@ -67,7 +68,7 @@
                     U.correctBoundaryConditions();
                 }
 
-                // Update free-stream velocity U0
+                // Update counterflow velocity U0
                 int maxIter = 100;
                 scalar tolerance = 1e-3;
                 scalar residual = VGREAT;
@@ -157,7 +158,7 @@
                     }
                 }
 
-                // Add new free-stream velocity to U
+                // Add new counterflow velocity U0 to U
                 {
                     U += storage.U0();
                     phi += storage.phi0();
@@ -201,6 +202,7 @@
 
             if (settings.relToUinf)
             {
+                // Remove free-stream velocity Uinf from phi
                 phi -= storage.Uinf() & mesh.Sf();
             }
 
@@ -209,6 +211,7 @@
 
             if (settings.relToUinf)
             {
+                // Remove free-stream velocity Uinf from phi
                 phi += storage.Uinf() & mesh.Sf();
             }
 
