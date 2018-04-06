@@ -23,28 +23,6 @@
 
             if (settings.relToUinf)
             {
-                volScalarField& p0 = storage.p0();
-                volVectorField& U0 = storage.U0();
-                surfaceScalarField& phi0 = storage.phi0();
-
-                volScalarField mu
-                (
-                    "mu",
-                    rho*transport.nu()
-                );
-
-                surfaceScalarField muf
-                (
-                    "muf",
-                    fvc::interpolate(mu)
-                );
-
-                surfaceScalarField rhoPhi0
-                (
-                    "rho*phi0",
-                    fvc::interpolate(rho)*phi0
-                );
-
                 vector Uinf = storage.Uinf().value();
 
                 storage.finf().value() =
@@ -70,8 +48,8 @@
 
                 // Remove free-stream velocity U0 from U
                 {
-                    U -= U0;
-                    phi -= phi0;
+                    U -= storage.U0();
+                    phi -= storage.phi0();
 
                     forAll(U.boundaryField(), patchI)
                     {
@@ -91,14 +69,13 @@
 
                 // Update free-stream velocity U0
                 int maxIter = 100;
-                scalar tolerance = 1e-6;
+                scalar tolerance = 1e-3;
                 scalar residual = VGREAT;
                 for (int iter=0; iter<maxIter; iter++)
                 {
-                    if (residual < tolerance)
-                    {
-                        break;
-                    }
+                    volScalarField& p0 = storage.p0();
+                    volVectorField& U0 = storage.U0();
+                    surfaceScalarField& phi0 = storage.phi0();
 
                     forAll(U0.boundaryField(), patchI)
                     {
@@ -113,6 +90,24 @@
                         }
                     }
 
+                    volScalarField mu
+                    (
+                        "mu",
+                        rho*transport.nu()
+                    );
+
+                    surfaceScalarField muf
+                    (
+                        "muf",
+                        fvc::interpolate(mu)
+                    );
+
+                    surfaceScalarField rhoPhi0
+                    (
+                        "rho*phi0",
+                        fvc::interpolate(rho)*phi0
+                    );
+
                     fvVectorMatrix U0Eqn
                     (
                         fvm::div(rhoPhi0, U0)
@@ -124,41 +119,48 @@
 
                     solve(U0Eqn == -fvc::grad(p0));
 
-                    volScalarField rAU("rAU", 1.0/U0Eqn.A());
-                    surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
-
-                    U0 = rAU*U0Eqn.H();
-
-                    phi0 = fvc::interpolate(U0) & mesh.Sf();
-
-                    // Non-orthogonal pressure corrector loop
-                    while (control.correctNonOrthogonal())
                     {
-                        fvScalarMatrix p0Eqn
-                        (
-                            fvm::laplacian(rAUf,p0) == fvc::div(phi0)
-                        );
+                        volScalarField rAU("rAU", 1.0/U0Eqn.A());
+                        surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
 
-                        p0Eqn.setReference(control.pRefCell(), control.pRefValue());
+                        U0 = rAU*U0Eqn.H();
 
-                        residual = p0Eqn.solve().initialResidual();
+                        phi0 = fvc::interpolate(U0) & mesh.Sf();
 
-                        if (control.finalNonOrthogonalIter())
+                        // Non-orthogonal pressure corrector loop
+                        while (control.correctNonOrthogonal())
                         {
-                            phi0 -= p0Eqn.flux();
+                            fvScalarMatrix p0Eqn
+                            (
+                                fvm::laplacian(rAUf,p0) == fvc::div(phi0)
+                            );
+
+                            p0Eqn.setReference(control.pRefCell(), control.pRefValue());
+
+                            residual = p0Eqn.solve().initialResidual();
+
+                            if (control.finalNonOrthogonalIter())
+                            {
+                                phi0 -= p0Eqn.flux();
+                            }
                         }
+
+                        p0.relax();
+
+                        U0 -= rAU*fvc::grad(p0);
+                        U0.correctBoundaryConditions();
                     }
 
-                    p0.relax();
-
-                    U0 -= rAU*fvc::grad(p0);
-                    U0.correctBoundaryConditions();
+                    if (residual < tolerance)
+                    {
+                        break;
+                    }
                 }
 
                 // Add new free-stream velocity to U
                 {
-                    U += U0;
-                    phi += phi0;
+                    U += storage.U0();
+                    phi += storage.phi0();
 
                     forAll(U.boundaryField(), patchI)
                     {
@@ -199,8 +201,7 @@
 
             if (settings.relToUinf)
             {
-                phi -= storage.phi0();
-//                 phi -= storage.Uinf() & mesh.Sf();
+                phi -= storage.Uinf() & mesh.Sf();
             }
 
 #           include "UpLoop_cEqn.H"
@@ -208,8 +209,7 @@
 
             if (settings.relToUinf)
             {
-                phi += storage.phi0();
-//                 phi += storage.Uinf() & mesh.Sf();
+                phi += storage.Uinf() & mesh.Sf();
             }
 
             // Make the fluxes absolute
