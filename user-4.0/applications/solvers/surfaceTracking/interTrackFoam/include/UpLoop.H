@@ -211,7 +211,7 @@
 
             if (settings.relToUinf)
             {
-                // Remove free-stream velocity Uinf from phi
+                // Add free-stream velocity Uinf from phi
                 phi += storage.Uinf() & mesh.Sf();
             }
 
