@@ -10,31 +10,35 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      fluidIndicator;
+    object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform 1;
+internalField   uniform 0;
 
 boundaryField
 {
     trackedSurface
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     top
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     right
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     bottom
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     front
     {
@@ -47,3 +51,4 @@ boundaryField
 }
 
 // ************************************************************************* //
+

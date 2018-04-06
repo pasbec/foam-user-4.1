@@ -301,7 +301,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Uinf::create() 
                 time().timeName(),
                 mesh(),
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::AUTO_WRITE
             )
         )
     );
@@ -345,10 +345,75 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_dUinfRelax::cre
                 time().constant(),
                 mesh(),
                 IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
+                IOobject::NO_WRITE
             )
         )
     );
+}
+
+
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p0::create() const
+{
+    set
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()
+        )
+    );
+
+    control().setpRefCell(get()());
+    mesh().schemesDict().setFluxRequired(name());
+}
+
+
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U0::create() const
+{
+    set
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh()
+        )
+    );
+}
+
+
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_phi0::create() const
+{
+    set
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            linearInterpolate(storage().U0()) & mesh().Sf()
+        )
+    );
+
+    get()->oldTime();
 }
 
 
@@ -396,6 +461,9 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
     item_Uinf().setState(settings().relToUinf);
     item_finf().setState(settings().relToUinf);
     item_dUinfRelax().setState(settings().relToUinf);
+    item_p0().setState(settings().relToUinf);
+    item_U0().setState(settings().relToUinf);
+    item_phi0().setState(settings().relToUinf);
 
     item_heleShawGapWidth().setState(settings().heleShawPoissonDrag);
 

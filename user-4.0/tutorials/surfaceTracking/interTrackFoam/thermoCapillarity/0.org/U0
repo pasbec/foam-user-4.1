@@ -9,32 +9,35 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      fluidIndicator;
+    class       volVectorField;
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform 1;
+internalField   uniform (0 0 0);
 
 boundaryField
 {
     trackedSurface
     {
-        type            zeroGradient;
+        type            slip;
     }
     top
     {
-        type            zeroGradient;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
     right
     {
-        type            zeroGradient;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
     bottom
     {
-        type            zeroGradient;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
     front
     {

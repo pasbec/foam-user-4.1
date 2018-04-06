@@ -27,49 +27,20 @@ boundaryField
         type            fixedFluxPressure;
         rAU             rAU;
     }
-    right
-    {
-        type            totalPressure;
-        p0              uniform 0;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           1;
-        value           uniform 0;
-//         type            fixedValue;
-//         value           uniform 0;
-//         type            slip;
-    }
     top
     {
-        type            totalPressure;
-        p0              uniform 0;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           1;
-        value           uniform 0;
-//         type            fixedValue;
-//         value           uniform 0;
-//         type            fixedFluxPressure;
-//         rAU             rAU;
+        type            fixedFluxPressure;
+        rAU             rAU;
+    }
+    right
+    {
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     bottom
     {
-        type            totalPressure;
-        p0              uniform 0;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           1;
-        value           uniform 0;
-//         type            fixedValue;
-//         value           uniform 0;
-//         type            fixedFluxPressure;
-//         rAU             rAU;
+        type            fixedFluxPressure;
+        rAU             rAU;
     }
     front
     {

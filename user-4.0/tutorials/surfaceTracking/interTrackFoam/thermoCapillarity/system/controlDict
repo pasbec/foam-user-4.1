@@ -48,6 +48,48 @@ runTimeModifiable   yes;
 
 functions
 {
+    compute_deltaU
+    {
+        type              expressionField;
+
+        enabled           true;
+
+        outputControl     timeStep;
+
+        outputInterval    1;
+
+        autowrite         true;
+
+        verbose           true;
+
+        fieldName         deltaU;
+
+        expression        "U-U0";
+
+        dimension         [0 1 -1 0 0 0 0];
+    }
+
+    compute_magU
+    {
+        type              expressionField;
+
+        enabled           true;
+
+        outputControl     timeStep;
+
+        outputInterval    1;
+
+        autowrite         false;
+
+        verbose           true;
+
+        fieldName         magU;
+
+        expression        "mag(U)";
+
+        dimension         [0 1 -1 0 0 0 0];
+    }
+
     compute_vorticity
     {
         type              expressionField;
@@ -62,7 +104,7 @@ functions
 
         verbose           true;
 
-        fieldName         vorticity;
+        fieldName         curlU;
 
         expression        "curl(U)";
 
@@ -88,27 +130,6 @@ functions
         expression        "c-(25.4e+3/500*(pos().y+0.004))";
 
         dimension         [0 -3 0 0 1 0 0];
-    }
-
-    compute_magU
-    {
-        type              expressionField;
-
-        enabled           true;
-
-        outputControl     timeStep;
-
-        outputInterval    1;
-
-        autowrite         false;
-
-        verbose           true;
-
-        fieldName         magU;
-
-        expression        "mag(U)";
-
-        dimension         [0 1 -1 0 0 0 0];
     }
 
     trackedSurface

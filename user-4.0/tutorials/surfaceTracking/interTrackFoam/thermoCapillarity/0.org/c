@@ -24,20 +24,20 @@ boundaryField
     {
         type            zeroGradient;
     }
-    right
-    {
-        type            zeroGradient;
-    }
     top
     {
         type            fixedValue;
         value           uniform 0;
     }
+    right
+    {
+        type            fixedGradient;
+        gradient        uniform 0;
+    }
     bottom
     {
-        type            zeroGradient;
-//         type            fixedValue;
-//         value           uniform 0;
+        type            fixedGradient;
+        gradient        uniform 0;
     }
     front
     {

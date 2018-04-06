@@ -538,7 +538,7 @@ void trackedSurface::updateVelocity()
 //*******************************************************************
 
         UtFs -= (muEffFluidAval() - muEffFluidBval())*
-            (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
+            (fac::grad(Us())().internalField()&nA);
 
         vectorField tangentialSurfaceTensionForce = ((I-nA*nA)&surfaceTensionForce());
 
@@ -634,67 +634,29 @@ void trackedSurface::updateVelocity()
     }
     else
     {
-        const vectorField& nA = aMesh().faceAreaNormals().internalField();
-
-        vectorField UnFs =
-            nA*phi_.boundaryField()[aPatchID()]
-           /mesh().boundary()[aPatchID()].magSf();
-
-// // TEST: Use velocity to correct interface normal velocity
-//         vectorField UPA =
-//             U().boundaryField()[aPatchID()].patchInternalField();
-//
-//         if
-//         (
-//             U().boundaryField()[aPatchID()].type()
-//          == fixedGradientCorrectedFvPatchVectorField::typeName
-//         )
-//         {
-//             fixedGradientCorrectedFvPatchVectorField& aU =
-//                 refCast<fixedGradientCorrectedFvPatchVectorField >
-//                 (
-//                     U().boundaryField()[aPatchID()]
-//                 );
-//
-//             UPA += aU.corrVecGrad();
-//         }
-//
-//         vectorField UnFs = nA*(nA & UPA);
-
-        // Correct normal component of surface velocity
-        Us().internalField() += UnFs - nA*(nA&Us().internalField());
-        Us().correctBoundaryConditions();
-
-        vectorField tangentialSurfaceTensionForce = ((I-nA*nA)&surfaceTensionForce());
-
-        vectorField tnGradU =
-            tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
-          - (fac::grad(Us())&aMesh().faceAreaNormals())().internalField();
-
-        vectorField UtPA =
-            U().boundaryField()[aPatchID()].patchInternalField();
-        UtPA -= nA*(nA & UtPA);
-
-        scalarField DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
-
-        vectorField UtFs = UtPA + tnGradU/DnA;
-
-        Us().internalField() = UtFs + UnFs;
-        Us().correctBoundaryConditions();
-
-        updateNGradUn();
-
-        vectorField nGradU =
-            tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
-          + nA*nGradUn()
-          - (fac::grad(Us())().internalField()&nA);
-
         if (fixedInterface_)
         {
+            vectorField tangentialSurfaceTensionForce =
+                (I-sqr(nA)) & surfaceTensionForce();
+
+            vectorField tnGradU =
+                tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL);
+
+            vectorField UPA =
+                U().boundaryField()[aPatchID()].patchInternalField();
+
+            const scalarField& DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
+
+            Us().internalField() = UPA + tnGradU/DnA;
+            Us().internalField() -= sqr(nA) & Us().internalField();
+            Us().correctBoundaryConditions();
+
+            updateNGradUn();
+
             if
             (
-               U().boundaryField()[aPatchID()].type()
-            == directionMixedFvPatchVectorField::typeName
+                U().boundaryField()[aPatchID()].type()
+             == directionMixedFvPatchVectorField::typeName
             )
             {
                 directionMixedFvPatchVectorField& aU =
@@ -704,8 +666,8 @@ void trackedSurface::updateVelocity()
                     );
 
                 aU.refValue() = vector::zero;
-                aU.refGrad() = nGradU;
-                aU.valueFraction() = symm(nA*nA);
+                aU.refGrad() = tnGradU;
+                aU.valueFraction() = sqr(nA);
             }
             else
             {
@@ -720,10 +682,63 @@ void trackedSurface::updateVelocity()
         }
         else
         {
+            vectorField UnFs =
+                nA*phi_.boundaryField()[aPatchID()]
+               /mesh().boundary()[aPatchID()].magSf();
+
+// // TEST: Use velocity to correct interface normal velocity
+//             vectorField UPA =
+//                 U().boundaryField()[aPatchID()].patchInternalField();
+//
+//             if
+//             (
+//                 U().boundaryField()[aPatchID()].type()
+//             == fixedGradientCorrectedFvPatchVectorField::typeName
+//             )
+//             {
+//                 fixedGradientCorrectedFvPatchVectorField& aU =
+//                     refCast<fixedGradientCorrectedFvPatchVectorField >
+//                     (
+//                         U().boundaryField()[aPatchID()]
+//                     );
+//
+//                 UPA += aU.corrVecGrad();
+//             }
+//
+//             vectorField UnFs = nA*(nA & UPA);
+
+            // Correct normal component of surface velocity
+            Us().internalField() += UnFs - nA*(nA&Us().internalField());
+            Us().correctBoundaryConditions();
+
+            vectorField tangentialSurfaceTensionForce = ((I-nA*nA)&surfaceTensionForce());
+
+            vectorField tnGradU =
+                tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
+              - (fac::grad(Us())().internalField()&nA);
+
+            vectorField UPA =
+                U().boundaryField()[aPatchID()].patchInternalField();
+
+            const scalarField& DnA = mesh().boundary()[aPatchID()].deltaCoeffs();
+
+            vectorField UtFs = UPA + tnGradU/DnA;
+            UtFs -= nA*(nA & UtFs);
+
+            Us().internalField() = UtFs + UnFs;
+            Us().correctBoundaryConditions();
+
+            updateNGradUn();
+
+            vectorField nGradU =
+                tangentialSurfaceTensionForce/(muEffFluidAval() + VSMALL)
+              + nA*nGradUn()
+              - (fac::grad(Us())().internalField()&nA);
+
             if
             (
                 U().boundaryField()[aPatchID()].type()
-            == fixedGradientCorrectedFvPatchVectorField::typeName
+             == fixedGradientCorrectedFvPatchVectorField::typeName
             )
             {
                 fixedGradientCorrectedFvPatchVectorField& aU =
@@ -737,7 +752,7 @@ void trackedSurface::updateVelocity()
             else if
             (
                 U().boundaryField()[aPatchID()].type()
-            == fixedGradientFvPatchVectorField::typeName
+             == fixedGradientFvPatchVectorField::typeName
             )
             {
                 fixedGradientFvPatchVectorField& aU =
@@ -750,8 +765,8 @@ void trackedSurface::updateVelocity()
             }
             else if
             (
-               U().boundaryField()[aPatchID()].type()
-            == mixedFvPatchVectorField::typeName
+                U().boundaryField()[aPatchID()].type()
+             == mixedFvPatchVectorField::typeName
             )
             {
                 mixedFvPatchVectorField& aU =
@@ -766,8 +781,8 @@ void trackedSurface::updateVelocity()
             }
             else if
             (
-               U().boundaryField()[aPatchID()].type()
-            == directionMixedFvPatchVectorField::typeName
+                U().boundaryField()[aPatchID()].type()
+             == directionMixedFvPatchVectorField::typeName
             )
             {
                 directionMixedFvPatchVectorField& aU =

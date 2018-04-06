@@ -30,25 +30,18 @@ boundaryField
         valueFraction   uniform (0 0 0 0 0 0);
         value           uniform (0 0 0);
     }
-    right
+    top
     {
-//         type            pressureInletOutletVelocity;
-//         value           uniform (0 0 0);
-//         type            slip;
         type            fixedValue;
         value           uniform (0 0 0);
     }
-    top
+    right
     {
-//         type            pressureInletOutletVelocity;
-//         value           uniform (0 0 0);
         type            fixedValue;
         value           uniform (0 0 0);
     }
     bottom
     {
-//         type            pressureInletOutletVelocity;
-//         value           uniform (0 0 0);
         type            fixedValue;
         value           uniform (0 0 0);
     }

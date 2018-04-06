@@ -50,21 +50,23 @@ vectorField trackedSurface::viscousForce() const
     const scalarField& S = aMesh().S();
     const vectorField& n = aMesh().faceAreaNormals().internalField();
 
-//     vectorField nGradU = U().boundaryField()[aPatchID()].snGrad();
+    vectorField nGradU = U().boundaryField()[aPatchID()].snGrad();
+
+    vectorField viscousForce = nGradU;
+
+    if (!fixedInterface_)
+    {
+        viscousForce -= n*nGradUn();
+        viscousForce += fac::grad(Us())().internalField()&n;
+    }
+
+    viscousForce *= S*muEffFluidAval();
+
+//     symmTensorField devReff =
+//       - rho().boundaryField()[aPatchID()]
+//       * turbulence().devReff()().boundaryField()[aPatchID()];
 //
-//     vectorField viscousForce =
-//       - muEffFluidAval()*S
-//        *(
-//             nGradU
-//           - (n*nGradUn())
-//           + (fac::grad(Us())().internalField()&n)
-//         );
-
-    symmTensorField devReff =
-      - rho().boundaryField()[aPatchID()]
-      * turbulence().devReff()().boundaryField()[aPatchID()];
-
-    vectorField viscousForce = S*(n&devReff);
+//     vectorField viscousForce = S*(n&devReff);
 
     return viscousForce;
 }
@@ -87,7 +89,7 @@ vector trackedSurface::totalNormalForce() const
 
     vectorField force = pressureForce() + viscousForce();
 
-    vectorField normalForce = ((n*n)&force);
+    vectorField normalForce = (sqr(n)&force);
 
     return gSum(normalForce);
 }
@@ -99,7 +101,7 @@ vector trackedSurface::totalTangentialForce() const
 
     vectorField force = pressureForce() + viscousForce();
 
-    vectorField tangentialForce = ((I-n*n)&force);
+    vectorField tangentialForce = ((I-sqr(n))&force);
 
     return gSum(tangentialForce);
 }
@@ -119,7 +121,7 @@ vector trackedSurface::totalNormalSurfaceTensionForce() const
     const vectorField& n = aMesh().faceAreaNormals().internalField();
 
     vectorField normalSurfaceTensionForce =
-        S*((n*n)&surfaceTensionForce());
+        S*(sqr(n)&surfaceTensionForce());
 
     return gSum(normalSurfaceTensionForce);
 }
@@ -131,7 +133,7 @@ vector trackedSurface::totalTangentialSurfaceTensionForce() const
     const vectorField& n = aMesh().faceAreaNormals().internalField();
 
     vectorField tangentialSurfaceTensionForce =
-        S*((I-n*n)&surfaceTensionForce());
+        S*((I-sqr(n))&surfaceTensionForce());
 
     return gSum(tangentialSurfaceTensionForce);
 }

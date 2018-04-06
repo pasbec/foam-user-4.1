@@ -43,13 +43,13 @@ if [[ $1 != 'clean' ]]; then
     mkdir 0 || exit 1
 
     # Convert mesh from gmsh to foam
-    mesh="coarse" # fine
+    mesh="coarse" # coarse, fine
     runApplication gmshToFoam "mesh_$mesh.msh" || exit 1
 
     # Scale mesh
     transformPoints -scale '(0.001 0.001 0.001)' > /dev/null || exit 1
 
-    # Mirror mesh in x,y directions
+    # Mirror mesh in y direction
     directions="y"
     for d in $directions; do
 
@@ -74,7 +74,7 @@ if [[ $1 != 'clean' ]]; then
     runApplication makeWedgeMesh || exit 1
 
     # Remove axis
-    runApplication collapseEdges 1e-6 5 -overwrite || exit 1
+    runApplication collapseEdges 1e-12 5 -overwrite || exit 1
 
     # Create new patches
     cp 'system/createPatchDict.2' 'system/createPatchDict'

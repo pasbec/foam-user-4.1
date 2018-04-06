@@ -28,14 +28,38 @@ conc
         {
             target        value;
             variables     $vars;
+            patchName     "right";
+            expression    "ddxc*(pos().y+0.004)";
+        }
+        {
+            target        gradient;
+            variables     $vars;
+            patchName     "right";
+            expression    "0";
+        }
+        {
+            target        value;
+            variables     $vars;
             patchName     "top";
             expression    "ddxc*(pos().y+0.004)";
+        }
+        {
+            target        gradient;
+            variables     $vars;
+            patchName     "top";
+            expression    "ddxc";
         }
         {
             target        value;
             variables     $vars;
             patchName     "bottom";
             expression    "ddxc*(pos().y+0.004)";
+        }
+        {
+            target        gradient;
+            variables     $vars;
+            patchName     "bottom";
+            expression    "-ddxc";
         }
     );
 }

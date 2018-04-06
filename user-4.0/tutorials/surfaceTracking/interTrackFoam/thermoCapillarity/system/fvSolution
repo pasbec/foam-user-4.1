@@ -16,7 +16,7 @@ FoamFile
 
 solvers
 {
-    "p"
+    "(p)"
     {
         solver          GAMG;
         tolerance       1e-08;
@@ -31,15 +31,15 @@ solvers
         mergeLevels     1;
     }
 
-//     "(pFinal|U)"
-    "pFinal"
+//     "(p0|pFinal|U0|U)"
+    "(p0|pFinal)"
     {
         $p;
         relTol          0;
     }
 
 //     "(c)"
-    "(U|c)"
+    "(U0|U|c)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -50,11 +50,14 @@ solvers
 
 PIMPLE
 {
-    nOuterCorrectors         100;
+    nOuterCorrectors         1;
+//     nOuterCorrectors         2;
     nCorrectors              2;
     nNonOrthogonalCorrectors 0;
-    pRefPoint                (0.002 0 0);
+    pRefPoint                (0.002 0.002 0);
     pRefValue                0;
+    p0RefPoint               (0.0002 0 0);
+    p0RefValue               0;
 
     momentumPredictor yes;
 //     momentumPredictor no;
@@ -79,6 +82,8 @@ relaxationFactors
     U        0.7;
     p        0.3;
     c        1.0;
+    U0       0.7;
+    p0       0.3;
 }
 
 // ************************************************************************* //

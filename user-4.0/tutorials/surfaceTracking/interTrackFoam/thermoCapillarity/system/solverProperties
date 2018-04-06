@@ -26,7 +26,6 @@ settings
         cTransport          true;
         relToUinf           true;
 //         creepingFlow        true;
-//         heleShawPoissonDrag true;
     }
 }
 

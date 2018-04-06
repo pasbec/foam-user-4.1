@@ -152,6 +152,15 @@ public:
                 //-
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, finf);
 
+                //- Pressure 0
+                SM_REGIONITEM_ADD(volScalarField, p0);
+
+                //- Velocity 0
+                SM_REGIONITEM_ADD(volVectorField, U0);
+
+                //- Face flux
+                SM_REGIONITEM_ADD(surfaceScalarField, phi0);
+
                 //-
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, dUinfRelax);
 
