@@ -4,15 +4,25 @@
 # October 2016
 # Pascal Beckstein (p.beckstein@hzdr.de)
 
-L = 4.00 * 1e-3             # [L]        = m
-R = 0.15 * 1e-3             # [R]        = m
-nu = 1e-6                   # [nu]       = m^2/s
-rho = 998.00                # [rho]      = kg/m^3
-eta = nu*rho                # [eta]      = m^2/s * kg/m^3 = kg/s/m
-#ddxT = 25.4e+3             # [ddxT]     = K/m
-ddxT = 25.4e+3/500         # [ddxT]     = K/m
-ddTSigma = 0.0274e-3        # [ddTSigma] = N/m/K
-alpha = 1.08e-9*2000        # [alpha]    = m^2/s
+import math as m
+
+wedge = 5.0
+
+L = 4.00 * 1e-3               # [L]         = m
+R = 0.15 * 1e-3               # [R]         = m
+nu = 1e-6                     # [nu]        = m^2/s
+rho = 998.00                  # [rho]       = kg/m^3
+eta = nu*rho                  # [eta]       = m^2/s * kg/m^3 = kg/s/m
+#ddxT = 25.4e+3               # [ddxT]      = K/m
+ddxT = 25.4e+3/500            # [ddxT]      = K/m
+ddTSigma = 0.0274e-3          # [ddTSigma]  = N/m/K
+alpha = 1.08e-9*2000          # [alpha]     = m^2/s
+
+V_i = 4.0/3 * m.pi * R**3     # [V_i]       = m^3
+V_i_wedge = wedge/360 * V_i   # [V_i_wedge] = m^3
+rho_i = 1.161                 # [rho_i]     = kg/m^3
+m_i = V_i * rho_i             # [m_i]       = kg
+m_i_wedge = V_i_wedge * rho_i # [m_i_wedge] = kg
 
 #
 
@@ -50,3 +60,9 @@ print("u_inf        = %g m/s = %g mm/s" % (u_inf,u_inf*1e+3))
 print("Re           = %g" % (Re))
 print("Pr           = %g" % (Pr))
 print("Mg           = %g" % (Mg))
+
+print("V_i          = %g m^3 = %g mm^3" % (V_i,V_i*1e+9))
+print("V_i_wedge    = %g m^3 = %g mm^3" % (V_i_wedge,V_i_wedge*1e+9))
+print("rho_i        = %g kg/m^3" % (rho_i))
+print("m_i          = %g kg = %g g" % (m_i,m_i*1e+3))
+print("m_i_wedge    = %g kg = %g g" % (m_i_wedge,m_i_wedge*1e+3))

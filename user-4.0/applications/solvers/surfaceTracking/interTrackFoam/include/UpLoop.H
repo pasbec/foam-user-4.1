@@ -23,33 +23,71 @@
 
             if (settings.relToUinf)
             {
-// TODO: Real forcing!
-                vector Uinf = storage.Uinf().value();
+                // Update free-stream force
+                storage.fInf().value() =
+                    interface.totalNormalForce()
+                  + interface.totalTangentialForce();
 
-                storage.finf().value() =
-                    (interface.totalNormalForce()
-                  + interface.totalTangentialForce())
-                  & Uinf/(mag(Uinf) + VSMALL);
+                // Constraint free-stream force
+                forAll(mesh.boundary(), patchI)
+                {
+                    if
+                    (
+                        mesh.boundary()[patchI].type()
+                     == wedgeFvPatch::typeName
+                    )
+                    {
+                        const wedgePolyPatch& wp =
+                            refCast<const wedgePolyPatch>
+                            (
+                                mesh.boundary()[patchI].patch()
+                            );
 
-                scalar dUinf =
-                    storage.dUinfRelax().value()
-                  * storage.finf().value()
-                  / max(rho*transport.nu()).value()
-                  / runTime.deltaT().value();
+                        vector ez = wp.axis();
+                        vector ephi = wp.centreNormal();
+                        vector er = ez ^ ephi;
 
-                // Update free-stream velocity Uinf
-                storage.Uinf().value() = Uinf + dUinf*Uinf/(mag(Uinf) + VSMALL);
-// TODO: Real forcing!
+//                         storage.fInf().value() -=
+//                             sqr(er) & storage.fInf().value();
+
+                        storage.fInf().value() -=
+                            sqr(vector(1,0,0)) & storage.fInf().value();
+                        storage.fInf().value() -=
+                            sqr(vector(0,0,1)) & storage.fInf().value();
+                    }
+                }
+
+                // Store old free-stream velocity
+                dimensionedVector Uinf(storage.Uinf());
+                if (control.firstIter())
+                {
+                    storage.Uinf_0() = storage.Uinf();
+                }
+
+                // Calculate acceleration from du = F/m * dt
+                dimensionedVector dUinf
+                (
+                    "dUinf",
+                    storage.dUinfRelax()
+                  * storage.fInf()
+                  / storage.mInf()
+                  * runTime.deltaT()
+                );
+
+                // Update free-stream velocity
+                storage.Uinf() = storage.Uinf_0() + dUinf;
 
                 Info<< "Free-stream velocity adjustment:"
-                    << " finf = " << storage.finf().value()
+                    << " fInf = " << storage.fInf().value()
                     << " , Uinf = " << storage.Uinf().value()
-                    << " , dUinfRelax = " << storage.dUinfRelax().value()
+                    << " , Uinf_0 = " << storage.Uinf_0().value()
                     << " , deltaT = " << runTime.deltaT().value()
-                    << " , dUinf = " << dUinf
+                    << " , dUinf = " << dUinf.value()
+                    << " , max(mag(U)) = " << max(mag(U)).value()
+                    << " , max(mag(U0)) = " << max(mag(storage.U0())).value()
                     << endl;
 
-                // Remove old counterflow velocity U0 from U
+                // Remove old counterflow velocity from U
                 {
                     // WARNING: FORCE assign boundary values!
                     U == U - storage.U0();
@@ -58,11 +96,10 @@
                     phi -= storage.phi0();
                 }
 
-                // Scale counterflow velocity according to new free-stream velocity
-                // and sdjust boundary conditions
+                // Adjust boundary conditions for counterflow velocity
                 {
-                    storage.U0() *= mag(storage.Uinf().value())/(mag(Uinf) + VSMALL);
-                    storage.phi0() *= mag(storage.Uinf().value())/(mag(Uinf) + VSMALL);
+//                     storage.U0() *= mag(storage.Uinf().value())/(mag(Uinf.value()) + VSMALL);
+//                     storage.phi0() *= mag(storage.Uinf().value())/(mag(Uinf.value()) + VSMALL);
 
                     forAll(storage.U0().boundaryField(), patchI)
                     {
@@ -73,18 +110,15 @@
                         && patchI != interface.aPatchID()
                         )
                         {
-                            storage.U0().boundaryField()[patchI] == storage.Uinf().value();
+                            storage.U0().boundaryField()[patchI] ==
+                                storage.Uinf().value();
                         }
                     }
 
                     storage.U0().correctBoundaryConditions();
                 }
 
-                // Update counterflow velocity U0
-                int maxIter = 10;
-                scalar tolerance = 1e-3;
-                scalar residual = VGREAT;
-                for (int iter=0; iter<maxIter; iter++)
+                // Update counterflow velocity
                 {
                     volScalarField& p0 = storage.p0();
                     volVectorField& U0 = storage.U0();
@@ -110,7 +144,8 @@
 
                     fvVectorMatrix U0Eqn
                     (
-                        fvm::div(rhoPhi0, U0)
+                        fvm::ddt(rho, U0)
+                      + fvm::div(rhoPhi0, U0)
                       - fvm::laplacian(muf, U0)
                       - (fvc::grad(U0) & fvc::grad(muf))
                     );
@@ -119,6 +154,7 @@
 
                     solve(U0Eqn == -fvc::grad(p0));
 
+                    while (control.correct())
                     {
                         volScalarField rAU("rAU", 1.0/U0Eqn.A());
                         surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
@@ -135,9 +171,13 @@
                                 fvm::laplacian(rAUf,p0) == fvc::div(phi0)
                             );
 
-                            p0Eqn.setReference(control.pRefCell(), control.pRefValue());
+                            p0Eqn.setReference
+                            (
+                                control.pRefCell(),
+                                control.pRefValue()
+                            );
 
-                            residual = p0Eqn.solve().initialResidual();
+                            p0Eqn.solve();
 
                             if (control.finalNonOrthogonalIter())
                             {
@@ -150,14 +190,9 @@
                         U0 -= rAU*fvc::grad(p0);
                         U0.correctBoundaryConditions();
                     }
-
-                    if (residual < tolerance)
-                    {
-                        break;
-                    }
                 }
 
-                // Add new counterflow velocity U0 to U
+                // Add new counterflow velocity to U
                 {
                     // WARNING: FORCE assign boundary values!
                     U == U + storage.U0();

@@ -308,11 +308,36 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Uinf::create() 
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_finf::create() const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Uinf_0::create() const
 {
     set
     (
-        new uniformDimensionedScalarField
+        new uniformDimensionedVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().timeName(),
+                mesh(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE
+            ),
+            dimensionedVector
+            (
+                word(),
+                dimVelocity,
+                vector::zero
+            )
+        )
+    );
+}
+
+
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_fInf::create() const
+{
+    set
+    (
+        new uniformDimensionedVectorField
         (
             IOobject
             (
@@ -322,11 +347,11 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_finf::create() 
                 IOobject::READ_IF_PRESENT,
                 IOobject::AUTO_WRITE
             ),
-            dimensionedScalar
+            dimensionedVector
             (
                 word(),
                 dimForce,
-                0
+                vector::zero
             )
         )
     );
@@ -334,6 +359,25 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_finf::create() 
 
 
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_dUinfRelax::create() const
+{
+    set
+    (
+        new uniformDimensionedScalarField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    );
+}
+
+
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_mInf::create() const
 {
     set
     (
@@ -458,8 +502,10 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
     item_c().setState(settings().cTransport);
 
     item_Uinf().setState(settings().relToUinf);
-    item_finf().setState(settings().relToUinf);
+    item_Uinf_0().setState(settings().relToUinf);
+    item_fInf().setState(settings().relToUinf);
     item_dUinfRelax().setState(settings().relToUinf);
+    item_mInf().setState(settings().relToUinf);
     item_p0().setState(settings().relToUinf);
     item_U0().setState(settings().relToUinf);
     item_phi0().setState(settings().relToUinf);

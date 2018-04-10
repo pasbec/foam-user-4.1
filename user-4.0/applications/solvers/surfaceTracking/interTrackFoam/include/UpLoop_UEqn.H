@@ -26,17 +26,6 @@
     //- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
     );
 
-//     if (settings.relToUinf)
-//     {
-//         surfaceScalarField rhoPhi0
-//         (
-//             "rho*phi0",
-//             fvc::interpolate(rho)*storage.phi0()
-//         );
-//
-//         UEqn -= fvm::div(rhoPhi0, U);
-//     }
-
     if (!settings.creepingFlow)
     {
 // TODO: Two fluids: Is this ok?

@@ -40,6 +40,7 @@ Author
 #include "turbulenceModel.H"
 #include "fvBlockMatrix.H"
 #include "wallFvPatch.H"
+#include "wedgeFvPatch.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
