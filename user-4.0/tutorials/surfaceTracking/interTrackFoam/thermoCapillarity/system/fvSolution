@@ -50,7 +50,7 @@ solvers
 
 PIMPLE
 {
-    nOuterCorrectors         10000;
+    nOuterCorrectors         1000;
     nCorrectors              2;
     nNonOrthogonalCorrectors 0;
     pRefPoint                (0.00000000001 -0.00399999999 0);
@@ -61,6 +61,16 @@ PIMPLE
 
     residualControl
     {
+//         U0
+//         {
+//                 tolerance  5e-05;
+//                 relTol     0;
+//         }
+//         p0
+//         {
+//                 tolerance  5e-05;
+//                 relTol     0;
+//         }
         U
         {
                 tolerance  5e-05;
@@ -68,17 +78,7 @@ PIMPLE
         }
         p
         {
-                tolerance  5e-05;
-                relTol     0;
-        }
-        U0
-        {
-                tolerance  5e-05;
-                relTol     0;
-        }
-        p0
-        {
-                tolerance  5e-05;
+                tolerance  1e-05;
                 relTol     0;
         }
      }
