@@ -156,6 +156,9 @@ public:
                 SM_REGIONITEM_ADD(uniformDimensionedVectorField, fInf);
 
                 //-
+                SM_REGIONITEM_ADD(uniformDimensionedVectorField, gradcInf);
+
+                //-
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, dUinfRelax);
 
                 //-

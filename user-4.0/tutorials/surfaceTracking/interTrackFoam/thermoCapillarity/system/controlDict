@@ -22,21 +22,24 @@ startTime           0;
 
 stopAt              endTime;
 
-endTime             20.0;
+endTime             3600.0;
 
 deltaT              1e-2;
+// deltaT              1e-8;
+
 
 adjustTimeStep      yes;
 
 maxCo               1;
 
-maxDeltaT           1e-2;
+maxDeltaT           0.1;
+// deltaT              1e-8;
 
-// writeControl        adjustableRunTime;
-writeControl        timeStep;
+writeControl        adjustableRunTime;
+// writeControl        timeStep;
 
-// writeInterval       0.1;
-writeInterval       1;
+writeInterval       0.1;
+// writeInterval       1;
 
 cycleWrite          0;
 
@@ -50,27 +53,6 @@ runTimeModifiable   yes;
 
 functions
 {
-    compute_deltaU
-    {
-        type              expressionField;
-
-        enabled           true;
-
-        outputControl     timeStep;
-
-        outputInterval    1;
-
-        autowrite         true;
-
-        verbose           true;
-
-        fieldName         deltaU;
-
-        expression        "U-U0";
-
-        dimension         [0 1 -1 0 0 0 0];
-    }
-
     compute_magU
     {
         type              expressionField;
@@ -111,27 +93,6 @@ functions
         expression        "curl(U)";
 
         dimension         [0 0 -1 0 0 0 0];
-    }
-
-    compute_deltac
-    {
-        type              expressionField;
-
-        enabled           true;
-
-        outputControl     timeStep;
-
-        outputInterval    1;
-
-        autowrite         true;
-
-        verbose           true;
-
-        fieldName         deltac;
-
-        expression        "c-(25.4e+3/500*(pos().y-0.004))";
-
-        dimension         [0 -3 0 0 1 0 0];
     }
 
     patchAverage

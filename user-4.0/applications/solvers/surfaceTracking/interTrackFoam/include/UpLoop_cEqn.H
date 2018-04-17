@@ -1,7 +1,7 @@
 
     if (storage.item_c().enabled())
     {
-        uniformDimensionedScalarField& Dc = storage.Dc();
+        const uniformDimensionedScalarField& Dc = storage.Dc();
         volScalarField& c = storage.c();
 
         fvScalarMatrix cEqn
@@ -11,14 +11,12 @@
           - fvm::laplacian(Dc, c)
         );
 
+        if (settings.relToUinf)
+        {
+            cEqn += (U-storage.Uinf()) & storage.gradcInf();
+        }
+
         cEqn.relax();
 
         cEqn.solve();
-
-        if (settings.relToUinf)
-        {
-            // WARNING: DO NOT TOUCH boundary values!
-            c.internalField() -= max(c).value();
-            c.correctBoundaryConditions();
-        }
     }

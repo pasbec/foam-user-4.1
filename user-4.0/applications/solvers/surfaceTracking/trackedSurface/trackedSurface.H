@@ -526,7 +526,7 @@ public:
 
         //- Related fields
 
-            //- Return reference to velocity field
+            //- Return reference to density field
             const volScalarField& rho() const
             {
                 return rho_;
@@ -909,6 +909,12 @@ public:
 
         //- Calculate total viscous force
         vector totalViscousForce() const;
+
+        //- Calculate normal viscous force
+        vector normalViscousForce() const;
+
+        //- Calculate tangential viscous force
+        vector tangentialViscousForce() const;
 
         //- Calculate total normal force
         vector totalNormalForce() const;

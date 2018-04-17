@@ -16,18 +16,18 @@ FoamFile
 
 vars
 (
-    "ddxc=25.4e+3/500;" // mod for test case
+//     "ddxc=25.4e+3/1;" // mod for test case
 );
 
 expressions
 (
-    conc
-    {
-        field         c;
-        variables     $vars;
-        expression    "ddxc*(pos().y-0.004)";
-        keepPatches   true;
-    }
+//     conc
+//     {
+//         field         c;
+//         variables     $vars;
+//         expression    "ddxc*(pos().y-0.004)";
+//         keepPatches   true;
+//     }
 );
 
 // ************************************************************************* //

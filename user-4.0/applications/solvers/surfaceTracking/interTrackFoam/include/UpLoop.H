@@ -24,10 +24,60 @@
             if (settings.relToUinf)
             {
                 // Update free-stream force
+// TODO: Check force calculation!
                 storage.fInf().value() =
-                    interface.totalNormalForce()
-                  + interface.totalTangentialForce();
-                storage.fInf().value() *= -1; // flip normal direction
+                    interface.totalPressureForce();
+//                 storage.fInf().value() =
+//                   - interface.totalPressureForce()
+//                   + interface.totalViscousForce();
+//                 storage.fInf().value() =
+//                     interface.totalPressureForce()
+//                   + interface.normalViscousForce()
+//                   + interface.tangentialViscousForce();
+
+                dimensionedVector Finf
+                (
+                    "Finf",
+                    dimForce,
+                    vector::zero
+                );
+
+                forAll(mesh.boundary(), patchI)
+                {
+                    if
+                    (
+                        mesh.boundary()[patchI].type()
+                     != wedgeFvPatch::typeName
+                    )
+                    {
+                        const vectorField& Sf = mesh.Sf().boundaryField()[patchI];
+
+                        const scalarField& P = p.boundaryField()[patchI];
+
+                        symmTensorField tau =
+                            (
+                                rho*turbulence.nu()
+                            * dev(twoSymm(fvc::grad(U)))
+                            )().boundaryField()[patchI];
+//                           - rho.boundaryField()[patchI]
+//                           * turbulence.devReff()().boundaryField()[patchI];
+
+                        Finf.value() += gSum(Sf & (P*I - tau));
+                    }
+                }
+
+                dimensionedVector FinfVol
+                (
+                    "Finf",
+                    fvc::domainIntegrate
+                    (
+                        fvc::div
+                        (
+                            p*I
+                          - rho*turbulence.nu()*dev(twoSymm(fvc::grad(U)))
+                        )
+                    )
+                );
 
                 // Constraint free-stream force
                 forAll(mesh.boundary(), patchI)
@@ -55,6 +105,16 @@
                             sqr(vector(1,0,0)) & storage.fInf().value();
                         storage.fInf().value() -=
                             sqr(vector(0,0,1)) & storage.fInf().value();
+
+                        Finf.value() -=
+                            sqr(vector(1,0,0)) & Finf.value();
+                        Finf.value() -=
+                            sqr(vector(0,0,1)) & Finf.value();
+
+                        FinfVol.value() -=
+                            sqr(vector(1,0,0)) & FinfVol.value();
+                        FinfVol.value() -=
+                            sqr(vector(0,0,1)) & FinfVol.value();
                     }
                 }
 
@@ -72,6 +132,14 @@
                     storage.fInf() / storage.mInf()
 
                 );
+
+//                 // Calculate acceleration from du = F/m * dt
+//                 dimensionedVector aInf
+//                 (
+//                     "aInf",
+//                     FinfVol / fvc::domainIntegrate(rho)
+//
+//                 );
 
                 // Calculate change of Uinf
                 dimensionedVector dUinf
@@ -93,6 +161,8 @@
                     << " , dUinf = " << dUinf.value()
                     << " , max(mag(U)) = " << max(mag(U)).value()
                     << " , max(mag(U0)) = " << max(mag(storage.U0())).value()
+                    << " , Finf = " << Finf.value()
+                    << " , FinfVol = " << FinfVol.value()
                     << endl;
 
                 // Adjust boundary conditions for velocity
@@ -125,8 +195,8 @@
 //
 //                 // Adjust boundary conditions for counterflow velocity
 //                 {
-// //                     storage.U0() *= mag(storage.Uinf().value())/(mag(Uinf.value()) + VSMALL);
-// //                     storage.phi0() *= mag(storage.Uinf().value())/(mag(Uinf.value()) + VSMALL);
+//                     storage.U0() *= mag(storage.Uinf().value())/(mag(Uinf.value()) + VSMALL);
+//                     storage.phi0() *= mag(storage.Uinf().value())/(mag(Uinf.value()) + VSMALL);
 //
 //                     forAll(storage.U0().boundaryField(), patchI)
 //                     {
@@ -227,9 +297,18 @@
 //
 //                     phi += storage.phi0();
 //                 }
+
+                // WARNING: WE DO NOT TOUCH boundary values!
+                storage.c() += storage.gradcInf() & mesh.C();
             }
 
             interface.updateBoundaryConditions(); // abs phi
+
+            if (settings.relToUinf)
+            {
+                // WARNING: WE DO NOT TOUCH boundary values!
+                storage.c() -= storage.gradcInf() & mesh.C();
+            }
 
             surfaceScalarField gxf("gxf", g & mesh.Cf());
 

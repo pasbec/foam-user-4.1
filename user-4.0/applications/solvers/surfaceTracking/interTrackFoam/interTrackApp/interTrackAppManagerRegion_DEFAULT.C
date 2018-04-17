@@ -358,6 +358,25 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_fInf::create() 
 }
 
 
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_gradcInf::create() const
+{
+    set
+    (
+        new uniformDimensionedVectorField
+        (
+            IOobject
+            (
+                name(),
+                time().constant(),
+                mesh(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    );
+}
+
+
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_dUinfRelax::create() const
 {
     set
@@ -504,6 +523,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
     item_Uinf().setState(settings().relToUinf);
     item_Uinf_0().setState(settings().relToUinf);
     item_fInf().setState(settings().relToUinf);
+    item_gradcInf().setState(settings().relToUinf);
     item_dUinfRelax().setState(settings().relToUinf);
     item_mInf().setState(settings().relToUinf);
     item_p0().setState(settings().relToUinf);

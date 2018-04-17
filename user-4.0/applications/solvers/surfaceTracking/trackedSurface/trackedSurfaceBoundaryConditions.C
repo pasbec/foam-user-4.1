@@ -116,12 +116,14 @@ void trackedSurface::updateMuEff()
         const volScalarField nuEff = turbulence().nuEff();
 
         muEffFluidAval() =
-            nuEff.boundaryField()[aPatchID()] * rhoFluidA().value();
+            nuEff.boundaryField()[aPatchID()]
+          * rho().boundaryField()[aPatchID()];
 
         if (twoFluids())
         {
             muEffFluidBval() =
-                nuEff.boundaryField()[bPatchID()] * rhoFluidB().value();
+                nuEff.boundaryField()[bPatchID()]
+              * rho().boundaryField()[bPatchID()];
         }
     }
 }
