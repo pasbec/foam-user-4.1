@@ -61,13 +61,11 @@ vectorField trackedSurface::viscousForce() const
     vectorField nGradU = U().boundaryField()[aPatchID()].snGrad();
 
     vectorField viscousForce = -nGradU;
-// //     vectorField viscousForce = -nGradU + n*nGradUn();
-//
-// //     if (!fixedInterface_)
-// //     {
-// //          viscousForce -= (fac::grad(Us())().internalField()&n) - n*nGradUn();
-// // //          viscousForce -= (fac::grad(Us())().internalField()&n);
-// //     }
+
+    if (!fixedInterface_)
+    {
+         viscousForce -= (fac::grad(Us())().internalField()&n) - n*nGradUn();
+    }
 
     viscousForce *= muEffFluidAval() * S;
 
