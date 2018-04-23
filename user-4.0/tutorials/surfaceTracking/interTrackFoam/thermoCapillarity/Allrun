@@ -43,7 +43,7 @@ if [[ $1 != 'clean' ]]; then
     mkdir 0 || exit 1
 
     # Convert mesh from gmsh to foam
-    mesh="coarse" # coarse, fine
+    mesh="large_fine" # coarse, fine, large_coarse, large_fine
     runApplication gmshToFoam "mesh_$mesh.msh" || exit 1
 
     # Scale mesh
@@ -64,14 +64,21 @@ if [[ $1 != 'clean' ]]; then
     mv '0/polyMesh' 'constant'
 
     # Create new topoSets
-    runApplication setSet -noVTK -batch 'system/setSetBatch' || exit 1
+    case "$mesh" in
+    "coarse"|"fine")
+        runApplication setSet -noVTK -batch 'system/setSetBatch.4mm' || exit 1
+        ;;
+    "large_coarse"|"large_fine")
+        runApplication setSet -noVTK -batch 'system/setSetBatch.8mm' || exit 1
+        ;;
+    esac
 
     # Create new patches
     cp 'system/createPatchDict.1' 'system/createPatchDict'
     runApplication -l 'log.createPatchDict.1' createPatch -overwrite || exit 1
 
     # Make wedge mesh
-    runApplication makeWedgeMesh || exit 1
+    runApplication makeWedgeMesh -angle 5 || exit 1
 
     # Remove axis
     runApplication collapseEdges 1e-12 5 -overwrite || exit 1
@@ -81,7 +88,7 @@ if [[ $1 != 'clean' ]]; then
     runApplication -l 'log.createPatchDict.2' createPatch -overwrite || exit 1
 
     # CheckMesh
-    runApplication checkMesh || exit 1
+    runApplication checkMesh -constant || exit 1
 
     # Restore faMesh from org backup
     cp -r 'constant/faMesh.org/'* 'constant/faMesh' > /dev/null 2>&1

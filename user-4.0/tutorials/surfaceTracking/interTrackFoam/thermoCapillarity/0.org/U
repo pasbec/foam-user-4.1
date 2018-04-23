@@ -34,16 +34,22 @@ boundaryField
     {
         type            fixedValue;
         value           uniform (0 0 0);
+//         type            zeroGradient;
     }
     right
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+//         type            fixedValue;
+//         value           uniform (0 0 0);
+        type            slip;
     }
     bottom
     {
         type            fixedValue;
         value           uniform (0 0 0);
+//         type            pressureInletOutletVelocity;
+//         value           uniform ( 0 0 0 );
+//         inletValue      uniform ( 0 0 0 );
+//         type            zeroGradient;
     }
     front
     {

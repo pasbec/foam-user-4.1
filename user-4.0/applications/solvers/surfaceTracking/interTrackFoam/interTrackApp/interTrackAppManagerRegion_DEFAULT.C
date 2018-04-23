@@ -308,7 +308,7 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Uinf::create() 
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_Uinf_0::create() const
+void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_UinfOld::create() const
 {
     set
     (
@@ -415,70 +415,6 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_mInf::create() 
 }
 
 
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_p0::create() const
-{
-    set
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh()
-        )
-    );
-
-    mesh().schemesDict().setFluxRequired(name());
-}
-
-
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_U0::create() const
-{
-    set
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh()
-        )
-    );
-}
-
-
-void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_phi0::create() const
-{
-    set
-    (
-        new surfaceScalarField
-        (
-            IOobject
-            (
-                name(),
-                time().timeName(),
-                mesh(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            linearInterpolate(storage().U0()) & mesh().Sf()
-        )
-    );
-
-    get()->oldTime();
-}
-
-
 void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::Item_heleShawGapWidth::create() const
 {
     set
@@ -521,14 +457,11 @@ void Foam::interTrackApp::Manager::Region_DEFAULT::Storage::create() const
     item_c().setState(settings().cTransport);
 
     item_Uinf().setState(settings().relToUinf);
-    item_Uinf_0().setState(settings().relToUinf);
+    item_UinfOld().setState(settings().relToUinf);
     item_fInf().setState(settings().relToUinf);
     item_gradcInf().setState(settings().relToUinf);
     item_dUinfRelax().setState(settings().relToUinf);
     item_mInf().setState(settings().relToUinf);
-    item_p0().setState(settings().relToUinf);
-    item_U0().setState(settings().relToUinf);
-    item_phi0().setState(settings().relToUinf);
 
     item_heleShawGapWidth().setState(settings().heleShawPoissonDrag);
 

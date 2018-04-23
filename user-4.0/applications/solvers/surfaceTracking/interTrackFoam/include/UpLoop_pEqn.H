@@ -160,7 +160,16 @@
 //             pEqn.setReference(pRefCell, pRefValue);
             if (!interface.twoFluids())
             {
-                pEqn.setReference(control.pRefCell(), control.pRefValue());
+                // Read solver for p
+                word pSolver
+                (
+                    mesh.solutionDict().solver(p.name()).lookup("solver")
+                );
+
+                if(pSolver != "deflatedPCG")
+                {
+                    pEqn.setReference(control.pRefCell(), control.pRefValue());
+                }
             }
 
             pEqn.solve(mesh.solutionDict().solver(p.select(control.finalInnerIter())));

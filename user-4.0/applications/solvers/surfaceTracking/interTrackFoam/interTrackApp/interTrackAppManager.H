@@ -150,7 +150,7 @@ public:
                 SM_REGIONITEM_ADD(uniformDimensionedVectorField, Uinf);
 
                 //-
-                SM_REGIONITEM_ADD(uniformDimensionedVectorField, Uinf_0);
+                SM_REGIONITEM_ADD(uniformDimensionedVectorField, UinfOld);
 
                 //-
                 SM_REGIONITEM_ADD(uniformDimensionedVectorField, fInf);
@@ -163,15 +163,6 @@ public:
 
                 //-
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, mInf);
-
-                //- Pressure 0
-                SM_REGIONITEM_ADD(volScalarField, p0);
-
-                //- Velocity 0
-                SM_REGIONITEM_ADD(volVectorField, U0);
-
-                //- Face flux
-                SM_REGIONITEM_ADD(surfaceScalarField, phi0);
 
                 //- Hele Shaw gap width
                 SM_REGIONITEM_ADD(uniformDimensionedScalarField, heleShawGapWidth);
