@@ -62,8 +62,8 @@ git clone --recursive 'ssh://git@git.becksteins.de:2222/pascal/foam-extend.git' 
 ```bash
 cd "$HOME/foam"
 #
-git config user.name 'Pascal Beckstein'
-git config user.email 'pascal@becksteins.de'
+git config user.name 'Max Mustermann'
+git config user.email 'max@mustermann.de'
 ```
 #### Add remote for dotfiles-repository
 ```bash
@@ -75,7 +75,7 @@ git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git'
 ```bash
 cd "$HOME/foam"
 #
-git subtree pull -P 'pascal-4.0/etc/bashrc.d' 'dotfiles' 'subtree_dot/bashrc.d' --squash
+git subtree pull -P 'user-4.0/etc/bashrc.d' 'dotfiles' 'subtree_dot/bashrc.d' --squash
 ```
 #### Update submodule foam-extend
 ```bash
@@ -87,8 +87,8 @@ git submodule update --remote 'foam-extend-4.0'
 ```bash
 cd "$HOME/foam/foam-extend-4.0"
 #
-git config user.name 'Pascal Beckstein'
-git config user.email 'pascal@becksteins.de'
+git config user.name 'Max Mustermann'
+git config user.email 'max@mustermann.de'
 ```
 #### Git repositories for submodule foam-extend (optional)
 ```bash
@@ -150,7 +150,9 @@ cd "$HOME/foam/foam-extend-4.0"
 
 #### Source environment
 ```bash
-cd "$HOME/foam/pascal-4.0"
+cd "$HOME/foam"
+ln -s 'user-4.0' "$USER-4.0"
+cd "$USER-4.0"
 #
 export FE40_FOAM_INST_DIR="$HOME/foam"
 export FE40_FOAM_ETC="$FE40_FOAM_INST_DIR/foam-extend-4.0/etc"
@@ -160,7 +162,7 @@ fe40
 ```
 #### Compilation/Installation
 ```bash
-cd "$HOME/foam/pascal-4.0"
+cd "$HOME/foam/$USER-4.0"
 #
 ./Allwmake.firstInstall | tee 'Allwmake.firstInstall.log'
 ./Allwmake
