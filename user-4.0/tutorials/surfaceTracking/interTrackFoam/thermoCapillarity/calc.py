@@ -14,6 +14,7 @@ nu = 1e-6                     # [nu]        = m^2/s
 rho = 998.00                  # [rho]       = kg/m^3
 eta = nu*rho                  # [eta]       = m^2/s * kg/m^3 = kg/s/m
 ddxT = 25.4e+3/500            # [ddxT]      = K/m
+#ddxT = 25.4e+3             # [ddxT]      = K/m
 #ddxT = 3.23e+3            # [ddxT]      = K/m
 #ddxT = 25.4e+4            # [ddxT]      = K/m
 ddTSigma = 0.0274e-3          # [ddTSigma]  = N/m/K

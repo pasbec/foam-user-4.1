@@ -35,8 +35,9 @@
 //                 storage.fInf().value() =
 //                     interface.totalForce();
 //                 storage.fInf().value() =
-//                   - interface.totalPressureForce()
-//                   + interface.totalViscousForce();
+//                   interface.totalNormalForce();
+//                 storage.fInf().value() =
+//                   interface.totalTangentialForce();
 //                 storage.fInf().value() =
 //                   interface.totalNormalForce()
 //                 - interface.totalNormalSurfaceTensionForce();
@@ -132,6 +133,12 @@
                     storage.UinfOld() = storage.Uinf();
                 }
 
+                // Init U
+                if (max(mag(U)).value() == 0)
+                {
+                    U = Uinf;
+                }
+
                 // Calculate acceleration from du = F/m * dt
                 dimensionedVector aInf
                 (
@@ -190,16 +197,98 @@
                     U.correctBoundaryConditions();
                 }
 
-                // WARNING: WE DO NOT TOUCH boundary values!
+                // Adjust c
                 storage.c() += storage.gradcInf() & mesh.C();
+
+                // Adjust boundary conditions for c
+                {
+                    forAll(storage.c().boundaryField(), patchI)
+                    {
+                        if
+                        (
+                            storage.c().boundaryField()[patchI].type()
+                         == fixedGradientFvPatchScalarField::typeName
+                         && patchI == interface.aPatchID()
+                        )
+                        {
+                            fixedGradientFvPatchScalarField& pc =
+                                refCast<fixedGradientFvPatchScalarField >
+                                (
+                                    storage.c().boundaryField()[interface.aPatchID()]
+                                );
+
+                            pc.gradient() = 0.0;
+                        }
+                        else if
+                        (
+                            storage.c().boundaryField()[patchI].type()
+                         != fixedGradientFvPatchScalarField::typeName
+                         && patchI == interface.aPatchID()
+                        )
+                        {
+                            FatalErrorIn(Control::typeName + " | UpLoop.H")
+                                << "Bounary condition on " << storage.c().name()
+                                    <<  " for trackedSurface patch is "
+                                    << storage.c().boundaryField()[interface.aPatchID()].type()
+                                    << ", instead of "
+                                    << fixedGradientFvPatchScalarField::typeName
+                                    << abort(FatalError);
+                        }
+                    }
+
+                    storage.c().correctBoundaryConditions();
+                }
             }
 
             interface.updateBoundaryConditions(); // abs phi
 
             if (settings.relToUinf)
             {
-                // WARNING: WE DO NOT TOUCH boundary values!
+                // Adjust c
                 storage.c() -= storage.gradcInf() & mesh.C();
+
+                // Adjust boundary conditions for c
+                {
+                    forAll(storage.c().boundaryField(), patchI)
+                    {
+                        if
+                        (
+                            storage.c().boundaryField()[patchI].type()
+                         == fixedGradientFvPatchScalarField::typeName
+                         && patchI == interface.aPatchID()
+                        )
+                        {
+                            fixedGradientFvPatchScalarField& pc =
+                                refCast<fixedGradientFvPatchScalarField >
+                                (
+                                    storage.c().boundaryField()[interface.aPatchID()]
+                                );
+
+                            const vectorField n =
+                                mesh.Sf().boundaryField()[patchI]
+                              / mesh.magSf().boundaryField()[patchI];
+
+                            pc.gradient() = - n & storage.gradcInf().value();
+                        }
+                        else if
+                        (
+                            storage.c().boundaryField()[patchI].type()
+                         != fixedGradientFvPatchScalarField::typeName
+                         && patchI == interface.aPatchID()
+                        )
+                        {
+                            FatalErrorIn(Control::typeName + " | UpLoop.H")
+                                << "Bounary condition on " << storage.c().name()
+                                    <<  " for trackedSurface patch is "
+                                    << storage.c().boundaryField()[interface.aPatchID()].type()
+                                    << ", instead of "
+                                    << fixedGradientFvPatchScalarField::typeName
+                                    << abort(FatalError);
+                        }
+                    }
+
+                    storage.c().correctBoundaryConditions();
+                }
             }
 
             surfaceScalarField gxf("gxf", g & mesh.Cf());

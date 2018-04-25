@@ -52,22 +52,22 @@ vectorField trackedSurface::viscousForce() const
     const scalarField& S = aMesh().S();
     const vectorField& n = aMesh().faceAreaNormals();
 
-//     symmTensorField devReff =
-//         rho().boundaryField()[aPatchID()]
-//       * turbulence().devReff()().boundaryField()[aPatchID()];
+    symmTensorField devReff =
+        rho().boundaryField()[aPatchID()]
+      * turbulence().devReff()().boundaryField()[aPatchID()];
+
+    vectorField viscousForce = S * n & devReff;
+
+//     vectorField nGradU = U().boundaryField()[aPatchID()].snGrad();
 //
-//     vectorField viscousForce = S * n & devReff;
-
-    vectorField nGradU = U().boundaryField()[aPatchID()].snGrad();
-
-    vectorField viscousForce = -nGradU;
-
-    if (!fixedInterface_)
-    {
-         viscousForce -= (fac::grad(Us())().internalField()&n) - n*nGradUn();
-    }
-
-    viscousForce *= muEffFluidAval() * S;
+//     vectorField viscousForce = -nGradU - n*nGradUn();
+//
+//     if (!fixedInterface_)
+//     {
+//          viscousForce -= (fac::grad(Us())().internalField()&n);
+//     }
+//
+//     viscousForce *= muEffFluidAval() * S;
 
     return viscousForce;
 }

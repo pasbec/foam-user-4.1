@@ -22,7 +22,9 @@ boundaryField
 {
     trackedSurface
     {
-        type            zeroGradient;
+//         type            zeroGradient;
+        type            fixedGradient;
+        gradient        uniform 0;
     }
     top
     {

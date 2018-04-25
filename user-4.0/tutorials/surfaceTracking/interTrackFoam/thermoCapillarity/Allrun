@@ -43,7 +43,7 @@ if [[ $1 != 'clean' ]]; then
     mkdir 0 || exit 1
 
     # Convert mesh from gmsh to foam
-    mesh="large_fine" # coarse, fine, large_coarse, large_fine
+    mesh="fine" # coarse, fine, large_coarse, large_fine
     runApplication gmshToFoam "mesh_$mesh.msh" || exit 1
 
     # Scale mesh

@@ -302,6 +302,8 @@ void trackedSurface::updateTemperature()
             (
                 T().boundaryField()[aPatchID()].type()
              != zeroGradientFvPatchScalarField::typeName
+             && T().boundaryField()[aPatchID()].type()
+             != fixedGradientFvPatchScalarField::typeName
             )
             {
                 FatalErrorIn("trackedSurface::updateTemperature()")
@@ -310,6 +312,8 @@ void trackedSurface::updateTemperature()
                     << T().boundaryField()[aPatchID()].type()
                     << ", instead of "
                     << zeroGradientFvPatchScalarField::typeName
+                    << " or "
+                    << fixedGradientFvPatchScalarField::typeName
                     << abort(FatalError);
             }
         }
@@ -419,6 +423,8 @@ void trackedSurface::updateConcentration()
             (
                 c().boundaryField()[aPatchID()].type()
              != zeroGradientFvPatchScalarField::typeName
+             && c().boundaryField()[aPatchID()].type()
+             != fixedGradientFvPatchScalarField::typeName
             )
             {
                 FatalErrorIn("trackedSurface::updateConcentration()")
@@ -427,6 +433,8 @@ void trackedSurface::updateConcentration()
                     << c().boundaryField()[aPatchID()].type()
                     << ", instead of "
                     << zeroGradientFvPatchScalarField::typeName
+                    << " or "
+                    << fixedGradientFvPatchScalarField::typeName
                     << abort(FatalError);
             }
         }
