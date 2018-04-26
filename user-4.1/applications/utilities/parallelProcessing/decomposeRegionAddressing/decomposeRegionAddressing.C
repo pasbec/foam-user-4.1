@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     // Set all times on processor meshes equal to decomposed mesh
     forAll (databases, procI)
     {
-        databases[procI].setTime(runTime.timeName(), runTime.timeIndex());
+        databases[procI].setTime(runTime);
     }
 
     // Read all meshes and addressing to reconstructed mesh

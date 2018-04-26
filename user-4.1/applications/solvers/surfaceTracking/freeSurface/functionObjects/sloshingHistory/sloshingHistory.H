@@ -22,7 +22,7 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    bubbleHistory
+    sloshingHistory
 
 Description
     FunctionObject reports min and max of a volScalarField
@@ -31,12 +31,12 @@ Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
 SourceFiles
-    bubbleHistory.C
+    sloshingHistory.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef bubbleHistory_H
-#define bubbleHistory_H
+#ifndef sloshingHistory_H
+#define sloshingHistory_H
 
 #include "functionObject.H"
 #include "dictionary.H"
@@ -49,10 +49,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class bubbleHistory Declaration
+                        Class sloshingHistory Declaration
 \*---------------------------------------------------------------------------*/
 
-class bubbleHistory
+class sloshingHistory
 :
     public functionObject
 {
@@ -67,35 +67,40 @@ class bubbleHistory
         //- Region name
         word regionName_;
 
-        //- Initial bubble volume
-        scalar V0_;
-
         //- Output file stream
         OFstream* historyFilePtr_;
 
+        //- Free-surface patch ID
+        label freeSurfacePatchID_;
+
+        //- Free-surface point at the left side wall
+        label leftPointID_;
+
+        //- Free-surface point at the right side wall
+        label rightPointID_;
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        bubbleHistory
+        sloshingHistory
         (
-            const bubbleHistory&
+            const sloshingHistory&
         );
 
         //- Disallow default bitwise assignment
-        void operator=(const bubbleHistory&);
+        void operator=(const sloshingHistory&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("bubbleHistory");
+    TypeName("sloshingHistory");
 
 
     // Constructors
 
         //- Construct from components
-        bubbleHistory
+        sloshingHistory
         (
             const word& name,
             const Time&,
@@ -109,10 +114,21 @@ public:
         virtual bool start();
 
         //- execute is called at each ++ or += of the time-loop
-        virtual bool execute();
+        virtual bool execute(const bool forceWrite);
+
+        //- Called when time was set at the end of the Time::operator++
+        virtual bool setTime();
 
         //- Read and set the function object if its data has changed
         virtual bool read(const dictionary& dict);
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh&)
+        {}
+
+        //- Update for changes of mesh
+        virtual void movePoints(const pointField&)
+        {}
 };
 
 
