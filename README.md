@@ -75,29 +75,29 @@ git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git'
 ```bash
 cd "$HOME/foam"
 #
-git subtree pull -P 'user-4.0/etc/bashrc.d' 'dotfiles' 'subtree_dot/bashrc.d' --squash
+git subtree pull -P 'user-4.1/etc/bashrc.d' 'dotfiles' 'subtree_dot/bashrc.d' --squash
 ```
 #### Update submodule foam-extend
 ```bash
 cd "$HOME/foam"
 #
-git submodule update --remote 'foam-extend-4.0'
+git submodule update --remote 'foam-extend-4.1'
 ```
 #### User data for submodule foam-extend (optional)
 ```bash
-cd "$HOME/foam/foam-extend-4.0"
+cd "$HOME/foam/foam-extend-4.1"
 #
 git config user.name 'Max Mustermann'
 git config user.email 'max@mustermann.de'
 ```
 #### Git repositories for submodule foam-extend (optional)
 ```bash
-cd "$HOME/foam/foam-extend-4.0"
+cd "$HOME/foam/foam-extend-4.1"
 #
-#git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-4.0'
-git remote add 'sf' 'ssh://p-be@git.code.sf.net/u/p-be/foam-extend-4.0'
-git remote add 'upstream' 'https://git.code.sf.net/p/foam-extend/foam-extend-4.0'
-git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-Mirror/foam-extend-foam-extend-4.0.git'
+#git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-4.1'
+git remote add 'sf' 'ssh://p-be@git.code.sf.net/u/p-be/foam-extend-4.1'
+git remote add 'upstream' 'https://git.code.sf.net/p/foam-extend/foam-extend-4.1'
+git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-Mirror/foam-extend-foam-extend-4.1.git'
 ```
 
 
@@ -106,7 +106,7 @@ git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-M
 
 #### Prepare preferences from template
 ```bash
-cd "$HOME/foam/foam-extend-4.0"
+cd "$HOME/foam/foam-extend-4.1"
 #
 # Template
 cp 'etc/prefs.sh-EXAMPLE' 'etc/prefs.sh'
@@ -128,7 +128,7 @@ cd -
 ```
 #### Source environment
 ```bash
-cd "$HOME/foam/foam-extend-4.0"
+cd "$HOME/foam/foam-extend-4.1"
 #
 source 'etc/bashrc'
 ```
@@ -139,7 +139,7 @@ export PATH="/usr/lib/ccache:${PATH}"
 ```
 #### Compilation/Installation
 ```bash
-cd "$HOME/foam/foam-extend-4.0"
+cd "$HOME/foam/foam-extend-4.1"
 #
 ./Allwmake.firstInstall | tee 'Allwmake.firstInstall.log'
 ./Allwmake
@@ -151,18 +151,18 @@ cd "$HOME/foam/foam-extend-4.0"
 #### Source environment
 ```bash
 cd "$HOME/foam"
-ln -s 'user-4.0' "$USER-4.0"
-cd "$USER-4.0"
+ln -s 'user-4.1' "$USER-4.1"
+cd "$USER-4.1"
 #
-export FE40_FOAM_INST_DIR="$HOME/foam"
-export FE40_FOAM_ETC="$FE40_FOAM_INST_DIR/foam-extend-4.0/etc"
-export FE40_FOAM_USER_ETC="$HOME/foam/$USER-4.0/etc"
-source "$FE40_FOAM_USER_ETC/bashrc"
-fe40
+export FE41_FOAM_INST_DIR="$HOME/foam"
+export FE41_FOAM_ETC="$FE41_FOAM_INST_DIR/foam-extend-4.1/etc"
+export FE41_FOAM_USER_ETC="$HOME/foam/$USER-4.1/etc"
+source "$FE41_FOAM_USER_ETC/bashrc"
+fe41
 ```
 #### Compilation/Installation
 ```bash
-cd "$HOME/foam/$USER-4.0"
+cd "$HOME/foam/$USER-4.1"
 #
 ./Allwmake.firstInstall | tee 'Allwmake.firstInstall.log'
 ./Allwmake
