@@ -69,6 +69,11 @@ runTimeModifiable   yes;
 //     commsType       nonBlocking;
 // }
 
+libs (
+    "libfoamTools.so"
+    "libregionModel.so"
+) ;
+
 // **************************** DEBUG SWITCHES ***************************** //
 
 // *************************** FUNCTION OBJECTS **************************** //
