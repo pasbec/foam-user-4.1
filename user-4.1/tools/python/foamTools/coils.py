@@ -887,7 +887,7 @@ class inductorCoils(dict):
 
         for i in range(n):
 
-            for j in nj:
+            for j in range(nj):
 
                 namei = name + str(i)
                 reversei = reverse
