@@ -58,26 +58,26 @@ git clone --recursive 'ssh://git@git.becksteins.de:2222/pascal/foam-extend.git' 
 
 ### Git settings (optional)
 
-#### User data
+#### User data (optional)
 ```bash
 cd "$HOME/foam"
 #
 git config user.name 'Max Mustermann'
 git config user.email 'max@mustermann.de'
 ```
-#### Add remote for dotfiles-repository
+#### Add remote for dotfiles-repository (optional)
 ```bash
 cd "$HOME/foam"
 #
 git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git'
 ```
-#### Pull changes for bashrc.d subtree in user folder from dotfiles
+#### Pull changes for bashrc.d subtree in user folder from dotfiles (optional)
 ```bash
 cd "$HOME/foam"
 #
 git subtree pull -P 'user-4.1/etc/bashrc.d' 'dotfiles' 'subtree_dot/bashrc.d' --squash
 ```
-#### Update submodule foam-extend
+#### Update submodule foam-extend (optional)
 ```bash
 cd "$HOME/foam"
 #
