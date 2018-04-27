@@ -894,6 +894,32 @@ class inductorCoils(dict):
                                    reversei, currenti, phasei,
                                    translate=translation, scale=scale)
 
+    def _makeCoilsTMFdouble(self, name, bundleDict, pathDict,
+                      current, n, step, stepdouble, reverse=False,
+                      origin=np.zeros(3), axis=2, scale=1.0, period=6, **kwargs):
+
+        for i in range(n):
+
+            for j in range(2):
+
+                namei = name + str(i)
+                reversei = reverse
+                currenti = current
+                phasei = i*1.0/period * 360.0
+
+                translation = np.array(origin).copy()
+                translation[axis] += i*step
+
+                newBundleDict = bundleDict.copy()
+
+                if j == 1:
+
+                    newBundleDict["r"] += stepdouble
+
+                self[i] = inductorCoil(namei, newBundleDict, pathDict,
+                                    reversei, currenti, phasei,
+                                    translate=translation, scale=scale)
+
     def _makeCoilsRMF(self, name, bundleDict, pathDict,
                       current, n, step, reverse=False,
                       origin=np.zeros(3), axis=2, scale=1.0, **kwargs):
@@ -933,6 +959,7 @@ class inductorCoils(dict):
 
     _makeCoils = {"ARRAY": _makeCoilsArray,
                   "TMF": _makeCoilsTMF,
+                  "TMFdouble": _makeCoilsTMFdouble,
                   "RMF": _makeCoilsRMF}
 
     # ----------------------------------------------------------------------- #
