@@ -889,7 +889,9 @@ class inductorCoils(dict):
 
             for j in range(nj):
 
-                namei = name + str(i + n*j)
+                ij = i + n*j
+
+                namei = name + str(ij)
                 reversei = reverse
                 currenti = current
                 phasei = i*1.0/period * 360.0
@@ -901,9 +903,9 @@ class inductorCoils(dict):
 
                 if j == 1: newPathDict["r"] += stepdouble
 
-                self[i] = inductorCoil(namei, bundleDict, newPathDict,
-                                    reversei, currenti, phasei,
-                                    translate=translation, scale=scale)
+                self[ij] = inductorCoil(namei, bundleDict, newPathDict,
+                                        reversei, currenti, phasei,
+                                        translate=translation, scale=scale)
 
     def _makeCoilsRMF(self, name, bundleDict, pathDict,
                       current, n, step, reverse=False,
