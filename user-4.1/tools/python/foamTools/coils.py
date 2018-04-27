@@ -889,7 +889,7 @@ class inductorCoils(dict):
 
             for j in range(nj):
 
-                namei = name + str(i*(j+1))
+                namei = name + str(i + n*j)
                 reversei = reverse
                 currenti = current
                 phasei = i*1.0/period * 360.0
