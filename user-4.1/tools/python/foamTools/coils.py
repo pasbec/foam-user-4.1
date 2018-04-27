@@ -878,29 +878,16 @@ class inductorCoils(dict):
 
     def _makeCoilsTMF(self, name, bundleDict, pathDict,
                       current, n, step, reverse=False,
-                      origin=np.zeros(3), axis=2, scale=1.0, period=6, **kwargs):
+                      origin=np.zeros(3), axis=2, scale=1.0, period=6,
+                      stepdouble=None, **kwargs):
+
+        nj = 1
+
+        if stepdouble: nj = 2
 
         for i in range(n):
 
-            namei = name + str(i)
-            reversei = reverse
-            currenti = current
-            phasei = i*1.0/period * 360.0
-
-            translation = np.array(origin).copy()
-            translation[axis] += i*step
-
-            self[i] = inductorCoil(namei, bundleDict, pathDict,
-                                   reversei, currenti, phasei,
-                                   translate=translation, scale=scale)
-
-    def _makeCoilsTMFdouble(self, name, bundleDict, pathDict,
-                      current, n, step, stepdouble, reverse=False,
-                      origin=np.zeros(3), axis=2, scale=1.0, period=6, **kwargs):
-
-        for i in range(n):
-
-            for j in range(2):
+            for j in nj:
 
                 namei = name + str(i)
                 reversei = reverse
@@ -910,13 +897,11 @@ class inductorCoils(dict):
                 translation = np.array(origin).copy()
                 translation[axis] += i*step
 
-                newBundleDict = bundleDict.copy()
+                newPathDict = pathDict.copy()
 
-                if j == 1:
+                if j == 1: newPathDict["r"] += stepdouble
 
-                    newBundleDict["r"] += stepdouble
-
-                self[i] = inductorCoil(namei, newBundleDict, pathDict,
+                self[i] = inductorCoil(namei, bundleDict, newPathDict,
                                     reversei, currenti, phasei,
                                     translate=translation, scale=scale)
 
@@ -959,7 +944,6 @@ class inductorCoils(dict):
 
     _makeCoils = {"ARRAY": _makeCoilsArray,
                   "TMF": _makeCoilsTMF,
-                  "TMFdouble": _makeCoilsTMFdouble,
                   "RMF": _makeCoilsRMF}
 
     # ----------------------------------------------------------------------- #
