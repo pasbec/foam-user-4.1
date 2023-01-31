@@ -21,9 +21,10 @@ ddtSchemes
 
 gradSchemes
 {
-    default             none;
-    grad(Us)            Gauss linear;
-    grad(magSqr(Us))    Gauss linear;
+    default              none;
+    grad(Us)             Gauss linear;
+    grad(magSqr(Us))     Gauss linear;
+    grad(surfaceTension) Gauss linear;
 }
 
 divSchemes
