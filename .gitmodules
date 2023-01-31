@@ -2,4 +2,3 @@
 	path = foam-extend-4.1
 	url = ../foam-extend-4.1
 	branch = pascal/nextRelease
-[submodule "foam-extend-4.1"]
