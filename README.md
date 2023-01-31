@@ -15,6 +15,7 @@ bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
 sudo apt-get install perl
+sudo apt-get install freecad
 ```
 ##### Ubuntu 13.10 <a name="ubuntu1310"></a> ([Ubuntu 12.04](#ubuntu1204))
 ##### Ubuntu 14.04 <a name="ubuntu1404"></a>
@@ -25,6 +26,7 @@ bison zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
 sudo apt-get install perl
+sudo apt-get install freecad
 ```
 ##### Ubuntu 15.10 <a name="ubuntu1510"></a>
 ```bash
@@ -34,6 +36,7 @@ zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
 sudo apt-get install perl
+sudo apt-get install freecad
 ```
 ##### Ubuntu 16.04 <a name="ubuntu1604"></a>
 ```bash
@@ -43,6 +46,23 @@ zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
 libxt-dev rpm mercurial graphviz
 sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
 sudo apt-get install perl
+sudo apt-get install freecad
+
+# For Paraview 5.4.1 with system qt
+sudo apt-get install qt5-default libqt5x11extras5 libqt5x11extras5-dev
+```
+##### WSL Ubuntu 16.04 <a name="ubuntu1604"></a>
+```bash
+sudo apt-get update
+sudo apt-get install git-core build-essential binutils-dev cmake flex \
+zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libiberty-dev \
+libxt-dev rpm mercurial graphviz
+sudo apt-get install openmpi-bin libopenmpi-dev python-all mayavi2
+sudo apt-get install perl
+sudo apt-get install freecad
+
+# To avoid problems
+sudo apt-get install mercurial subversion python-scipy lua5.2
 
 # For Paraview 5.4.1 with system qt
 sudo apt-get install qt5-default libqt5x11extras5 libqt5x11extras5-dev
