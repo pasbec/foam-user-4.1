@@ -66,6 +66,9 @@ sudo apt-get install mercurial subversion python-scipy lua5.2
 
 # For Paraview 5.4.1 with system qt
 sudo apt-get install qt5-default libqt5x11extras5 libqt5x11extras5-dev
+
+# Modify foam-extend-4.1/ThirdParty/AllMake.stage5 - after line 86 add:
+                hg revert --all --rev 3360
 ```
 
 ### Download/Clone root repository
