@@ -79,51 +79,6 @@ cd "$HOME"
 git clone --recursive 'ssh://git@git.becksteins.de:2222/pascal/foam-extend.git' 'foam'
 ```
 
-### Git settings (optional)
-
-#### User data (optional)
-```bash
-cd "$HOME/foam"
-#
-git config user.name 'Max Mustermann'
-git config user.email 'max@mustermann.de'
-```
-#### Add remote for dotfiles-repository (optional)
-```bash
-cd "$HOME/foam"
-#
-git remote add 'dotfiles' 'ssh://git@git.becksteins.de:2222/pascal/dotfiles.git'
-```
-#### Pull changes for bashrc.d subtree in user folder from dotfiles (optional)
-```bash
-cd "$HOME/foam"
-#
-git subtree pull -P 'user-4.1/etc/bashrc.d' 'dotfiles' 'subtree_dot/bashrc.d' --squash
-```
-#### Update submodule foam-extend (optional)
-```bash
-cd "$HOME/foam"
-#
-git submodule update --remote 'foam-extend-4.1'
-```
-#### User data for submodule foam-extend (optional)
-```bash
-cd "$HOME/foam/foam-extend-4.1"
-#
-git config user.name 'Max Mustermann'
-git config user.email 'max@mustermann.de'
-```
-#### Git repositories for submodule foam-extend (optional)
-```bash
-cd "$HOME/foam/foam-extend-4.1"
-#
-#git remote set-url 'origin' 'https://git.becksteins.de/foam-extend/foam-extend-4.1'
-git remote add 'sf' 'ssh://p-be@git.code.sf.net/u/p-be/foam-extend-4.1'
-git remote add 'upstream' 'https://git.code.sf.net/p/foam-extend/foam-extend-4.1'
-git remote add 'upstream_mirror' 'https://github.com/Unofficial-Extend-Project-Mirror/foam-extend-foam-extend-4.1.git'
-```
-
-
 ### Project part
 
 
