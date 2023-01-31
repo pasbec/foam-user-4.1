@@ -7,15 +7,18 @@ swakversion="0.4.0"
 if [ -w "$WM_PROJECT_DIR" ]; then
 
   find "$WM_PROJECT_DIR/src" -name 'lnInclude' -print \
-    > "$WM_PROJECT_DIR/.kdev_include_paths"
+     | sed "s/$WM_PROJECT_DIR/./g" \
+     > "$WM_PROJECT_DIR/.kdev_include_paths"
 
   find "$WM_PROJECT_DIR/applications" -name 'lnInclude' -print \
+     | sed "s/$WM_PROJECT_DIR/./g" \
     >> "$WM_PROJECT_DIR/.kdev_include_paths"
 
   swakdir="$WM_PROJECT_DIR/ThirdParty/rpmBuild/BUILD/swak4Foam-$swakversion"
   echo $swakdir
   if [ -w "$swakdir" ]; then
     find "$swakdir" -name 'lnInclude' -print \
+       | sed "s/$WM_PROJECT_DIR/./g" \
       >> "$WM_PROJECT_DIR/.kdev_include_paths"
   fi
 
