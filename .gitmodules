@@ -2,3 +2,5 @@
 	path = foam-extend-4.1
 	url = ssh://git@git.becksteins.de:2222/foam-extend/foam-extend-4.1.git
 	branch = pascal/nextRelease
+[submodule "foam-extend-4.1"]
+	url = ../foam-extend-4.1
